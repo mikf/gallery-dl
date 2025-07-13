@@ -214,19 +214,17 @@ class OAuthBase(Extractor):
             ("These values have", "these values", "are", "them")
         )
 
-        msg = "\nYour {} {}\n\n{}\n\n".format(
-            " and ".join("'" + n + "'" for n in names),
-            _is,
-            "\n".join(values),
-        )
+        key = " and ".join(f"'{n}'" for n in names)
+        val = "\n".join(values)
+        msg = f"\nYour {key} {_is}\n\n{val}\n\n"
 
         opt = self.oauth_config(names[0])
         if self.cache and (opt is None or opt == "cache"):
             msg += _vh + " been cached and will automatically be used.\n"
         else:
-            msg += "Put " + _va + " into your configuration file as \n"
+            msg += f"Put {_va} into your configuration file as \n"
             msg += " and\n".join(
-                "'extractor." + self.subcategory + "." + n + "'"
+                f"'extractor.{self.subcategory}.{n}'"
                 for n in names
             )
             if self.cache:
@@ -386,8 +384,8 @@ class OAuthMastodon(OAuthBase):
         data = self.request_json(url, method="POST", data=data)
 
         if "client_id" not in data or "client_secret" not in data:
-            raise exception.StopExtraction(
-                "Failed to register new application: '%s'", data)
+            raise exception.AbortExtraction(
+                f"Failed to register new application: '{data}'")
 
         data["client-id"] = data.pop("client_id")
         data["client-secret"] = data.pop("client_secret")

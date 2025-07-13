@@ -19,7 +19,6 @@ class _2chanThreadExtractor(Extractor):
     directory_fmt = ("{category}", "{board_name}", "{thread}")
     filename_fmt = "{tim}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
-    url_fmt = "https://{server}.2chan.net/{board}/src/{filename}"
     pattern = r"(?:https?://)?([\w-]+)\.2chan\.net/([^/?#]+)/res/(\d+)"
     example = "https://dec.2chan.net/12/res/12345.htm"
 
@@ -37,7 +36,8 @@ class _2chanThreadExtractor(Extractor):
             if "filename" not in post:
                 continue
             post.update(data)
-            url = self.url_fmt.format_map(post)
+            url = (f"https://{post['server']}.2chan.net"
+                   f"/{post['board']}/src/{post['filename']}")
             yield Message.Url, url, post
 
     def metadata(self, page):

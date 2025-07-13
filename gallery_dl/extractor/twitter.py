@@ -125,6 +125,7 @@ class TwitterExtractor(Extractor):
             yield Message.Directory, tdata
 
             del tdata["source_id"]
+            del tdata["sensitive_flags"]
             if "source_user" in tdata:
                 del tdata["source_user"]
 
@@ -169,7 +170,28 @@ class TwitterExtractor(Extractor):
         return files
 
     def _extract_media(self, tweet, entities, files):
+        flags_tweet = None
+
         for media in entities:
+
+            if "sensitive_media_warning" in media:
+                flags_media = media["sensitive_media_warning"]
+
+                flags = []
+                if "adult_content" in flags_media:
+                    flags.append("Nudity")
+                if "other" in flags_media:
+                    flags.append("Sensitive")
+                if "graphic_violence" in flags_media:
+                    flags.append("Violence")
+
+                if flags_tweet is None:
+                    flags_tweet = set(flags)
+                else:
+                    flags_tweet.update(flags)
+                flags_media = flags
+            else:
+                flags_media = ()
 
             if "ext_media_availability" in media:
                 ext = media["ext_media_availability"]
@@ -214,8 +236,12 @@ class TwitterExtractor(Extractor):
             file["width"] = media["original_info"].get("width", 0)
             file["height"] = media["original_info"].get("height", 0)
             file["description"] = media.get("ext_alt_text")
+            file["sensitive_flags"] = flags_media
             self._extract_media_source(file, media)
             files.append(file)
+
+        tweet["sensitive_flags"] = \
+            () if flags_tweet is None else sorted(flags_tweet)
 
     def _extract_media_source(self, dest, media):
         dest["source_id"] = 0
@@ -361,6 +387,7 @@ class TwitterExtractor(Extractor):
             "lang"          : legacy["lang"],
             "source"        : text.extr(source, ">", "<") if source else "",
             "sensitive"     : tget("possibly_sensitive"),
+            "sensitive_flags": tget("sensitive_flags"),
             "favorite_count": tget("favorite_count"),
             "quote_count"   : tget("quote_count"),
             "reply_count"   : tget("reply_count"),
@@ -698,7 +725,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
             return self.api.user_media
         if strategy == "with_replies":
             return self.api.user_tweets_and_replies
-        raise exception.StopExtraction("Invalid strategy '%s'", strategy)
+        raise exception.AbortExtraction(f"Invalid strategy '{strategy}'")
 
 
 class TwitterTweetsExtractor(TwitterExtractor):
@@ -913,8 +940,8 @@ class TwitterTweetExtractor(TwitterExtractor):
         try:
             self._assign_user(tweet["core"]["user_results"]["result"])
         except KeyError:
-            raise exception.StopExtraction(
-                "'%s'", tweet.get("reason") or "Unavailable")
+            raise exception.AbortExtraction(
+                f"'{tweet.get('reason') or 'Unavailable'}'")
 
         yield tweet
 
@@ -1226,7 +1253,7 @@ class TwitterAPI():
                 raise exception.AuthorizationError("NSFW Tweet")
             if reason == "Protected":
                 raise exception.AuthorizationError("Protected Tweet")
-            raise exception.StopExtraction("Tweet unavailable ('%s')", reason)
+            raise exception.AbortExtraction(f"Tweet unavailable ('{reason}')")
 
         return tweet
 
@@ -1607,8 +1634,8 @@ class TwitterAPI():
             except Exception:
                 pass
 
-            raise exception.StopExtraction(
-                "%s %s (%s)", response.status_code, response.reason, errors)
+            raise exception.AbortExtraction(
+                f"{response.status_code} {response.reason} ({errors})")
 
     def _pagination_legacy(self, endpoint, params):
         extr = self.extractor
@@ -1782,7 +1809,7 @@ class TwitterAPI():
                         raise exception.AuthorizationError(
                             f"{user['screen_name']}'s Tweets are protected")
 
-                raise exception.StopExtraction(
+                raise exception.AbortExtraction(
                     "Unable to retrieve Tweets from this timeline")
 
             tweets = []
@@ -1961,7 +1988,7 @@ class TwitterAPI():
     def _handle_ratelimit(self, response):
         rl = self.extractor.config("ratelimit")
         if rl == "abort":
-            raise exception.StopExtraction("Rate limit exceeded")
+            raise exception.AbortExtraction("Rate limit exceeded")
         elif rl and isinstance(rl, str) and rl.startswith("wait:"):
             until = None
             seconds = text.parse_float(rl.partition(":")[2]) or 60.0
@@ -2145,7 +2172,7 @@ def _login_impl(extr, username, password):
             raise exception.AuthenticationError(
                 "No 'auth_token' cookie received")
         else:
-            raise exception.StopExtraction("Unrecognized subtask %s", subtask)
+            raise exception.AbortExtraction(f"Unrecognized subtask {subtask}")
 
         inputs = {"subtask_id": subtask}
         inputs.update(data)

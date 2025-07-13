@@ -231,7 +231,7 @@ class PinterestBoardExtractor(PinterestExtractor):
     directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
     archive_fmt = "{board[id]}_{id}"
     pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#]+)"
-               "/(?!_saved|_created|pins/)([^/?#]+)/?$")
+               r"/(?!_saved|_created|pins/)([^/?#]+)/?(?:$|\?|#)")
     example = "https://www.pinterest.com/USER/BOARD/"
 
     def __init__(self, match):
@@ -396,9 +396,16 @@ class PinterestPinitExtractor(PinterestExtractor):
         url = (f"https://api.pinterest.com/url_shortener"
                f"/{self.groups[0]}/redirect/")
         location = self.request_location(url)
-        if not location or not PinterestPinExtractor.pattern.match(location):
+        if not location:
             raise exception.NotFoundError("pin")
-        yield Message.Queue, location, {"_extractor": PinterestPinExtractor}
+        elif PinterestPinExtractor.pattern.match(location):
+            yield Message.Queue, location, {
+                "_extractor": PinterestPinExtractor}
+        elif PinterestBoardExtractor.pattern.match(location):
+            yield Message.Queue, location, {
+                "_extractor": PinterestBoardExtractor}
+        else:
+            raise exception.NotFoundError("pin")
 
 
 class PinterestAPI():
@@ -543,7 +550,7 @@ class PinterestAPI():
             resource = self.extractor.subcategory.rpartition("-")[2]
             raise exception.NotFoundError(resource)
         self.extractor.log.debug("Server response: %s", response.text)
-        raise exception.StopExtraction("API request failed")
+        raise exception.AbortExtraction("API request failed")
 
     def _pagination(self, resource, options):
         while True:

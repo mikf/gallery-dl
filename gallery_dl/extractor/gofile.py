@@ -95,7 +95,7 @@ class GofileFolderExtractor(Extractor):
                 raise exception.NotFoundError("content")
             if response["status"] == "error-passwordRequired":
                 raise exception.AuthorizationError("Password required")
-            raise exception.StopExtraction(
-                "%s failed (Status: %s)", endpoint, response["status"])
+            raise exception.AbortExtraction(
+                f"{endpoint} failed (Status: {response['status']})")
 
         return response["data"]

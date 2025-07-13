@@ -99,7 +99,7 @@ class InstagramExtractor(Extractor):
                         if videos_dash:
                             file["_fallback"] = (url,)
                             file["_ytdl_manifest"] = "dash"
-                            url = "ytdl:dash"
+                            url = f"ytdl:{post['post_url']}{file['num']}.mp4"
                         yield Message.Url, url, file
                     if previews:
                         file["media_id"] += "p"
@@ -136,9 +136,9 @@ class InstagramExtractor(Extractor):
             else:
                 page = None
 
-            if page:
-                raise exception.StopExtraction("HTTP redirect to %s page (%s)",
-                                               page, url.partition("?")[0])
+            if page is not None:
+                raise exception.AbortExtraction(
+                    f"HTTP redirect to {page} page ({url.partition('?')[0]})")
 
         www_claim = response.headers.get("x-ig-set-www-claim")
         if www_claim is not None:
@@ -165,10 +165,15 @@ class InstagramExtractor(Extractor):
             items = post["items"]
             reel_id = str(post["id"]).rpartition(":")[2]
             expires = post.get("expiring_at")
+            if expires:
+                post_url = f"{self.root}/stories/{post['user']['username']}/"
+            else:
+                post_url = f"{self.root}/stories/highlights/{reel_id}/"
             data = {
                 "expires": text.parse_timestamp(expires),
                 "post_id": reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
+                "post_url": post_url,
             }
             if "title" in post:
                 data["highlight_title"] = post["title"]
@@ -979,7 +984,7 @@ class InstagramGraphqlAPI():
         self.user_id = api.user_id
 
     def _unsupported(self, _=None):
-        raise exception.StopExtraction("Unsupported with GraphQL API")
+        raise exception.AbortExtraction("Unsupported with GraphQL API")
 
     def highlights_tray(self, user_id):
         query_hash = "d4d88dc1500312af6f937f7b804c68c3"
@@ -1065,9 +1070,10 @@ class InstagramGraphqlAPI():
             if not info["has_next_page"]:
                 return extr._update_cursor(None)
             elif not data["edges"]:
-                s = "" if self.extractor.item.endswith("s") else "s"
-                raise exception.StopExtraction(
-                    "%s'%s posts are private", self.extractor.item, s)
+                user = self.extractor.item
+                s = "" if user.endswith("s") else "s"
+                raise exception.AbortExtraction(
+                    f"{user}'{s} posts are private")
 
             variables["after"] = extr._update_cursor(info["end_cursor"])
 

@@ -63,14 +63,14 @@ class MangareadMangaExtractor(MangareadBase, MangaExtractor):
         if 'class="error404' in page:
             raise exception.NotFoundError("manga")
         data = self.metadata(page)
-        result = []
+        results = []
         for chapter in text.extract_iter(
                 page, '<li class="wp-manga-chapter', "</li>"):
             url , pos = text.extract(chapter, '<a href="', '"')
             info, _ = text.extract(chapter, ">", "</a>", pos)
             self.parse_chapter_string(info, data)
-            result.append((url, data.copy()))
-        return result
+            results.append((url, data.copy()))
+        return results
 
     def metadata(self, page):
         extr = text.extract_from(text.extr(

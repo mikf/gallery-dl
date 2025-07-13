@@ -126,7 +126,7 @@ class DeviantartExtractor(Extractor):
                     self.group = False
                 elif group == "skip":
                     self.log.info("Skipping group '%s'", self.user)
-                    raise exception.StopExtraction()
+                    raise exception.AbortExtraction()
                 else:
                     self.subcategory = "group-" + self.subcategory
                     self.group = True
@@ -322,7 +322,7 @@ class DeviantartExtractor(Extractor):
             header = HEADER_TEMPLATE.format(
                 title=title,
                 url=url,
-                userurl="{}/{}/".format(self.root, urlname),
+                userurl=f"{self.root}/{urlname}/",
                 username=username,
                 date=deviation["date"],
             )
@@ -747,13 +747,10 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
 
         deviation["_fallback"] = (content["src"],)
         deviation["is_original"] = True
+        pl = binascii.b2a_base64(payload).rstrip(b'=\n').decode()
         content["src"] = (
-            "{}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.{}.".format(
-                url,
-                #  base64 of 'header' is precomputed as 'eyJ0eX...'
-                #  binascii.b2a_base64(header).rstrip(b"=\n").decode(),
-                binascii.b2a_base64(payload).rstrip(b"=\n").decode())
-        )
+            # base64 of 'header' is precomputed as 'eyJ0eX...'
+            f"{url}?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.{pl}.")
 
     def _extract_comments(self, target_id, target_type="deviation"):
         results = None
@@ -1166,15 +1163,15 @@ class DeviantartStatusExtractor(DeviantartExtractor):
 
     def deviations(self):
         for status in self.api.user_statuses(self.user, self.offset):
-            yield from self.status(status)
+            yield from self.process_status(status)
 
-    def status(self, status):
+    def process_status(self, status):
         for item in status.get("items") or ():  # do not trust is_share
             # shared deviations/statuses
             if "deviation" in item:
                 yield item["deviation"].copy()
             if "status" in item:
-                yield from self.status(item["status"].copy())
+                yield from self.process_status(item["status"].copy())
         # assume is_deleted == true means necessary fields are missing
         if status["is_deleted"]:
             self.log.warning(
@@ -1373,7 +1370,7 @@ class DeviantartSearchExtractor(DeviantartExtractor):
             response = self.request(url, params=params)
 
             if response.history and "/users/login" in response.url:
-                raise exception.StopExtraction("HTTP redirect to login page")
+                raise exception.AbortExtraction("HTTP redirect to login page")
             page = response.text
 
             for dev in DeviantartDeviationExtractor.pattern.findall(
@@ -1882,9 +1879,7 @@ class DeviantartOAuthAPI():
                 params["offset"] = int(params["offset"]) + len(results)
 
     def _pagination_list(self, endpoint, params, key="results"):
-        result = []
-        result.extend(self._pagination(endpoint, params, False, key=key))
-        return result
+        return list(self._pagination(endpoint, params, False, key=key))
 
     def _shared_content(self, results):
         """Return an iterable of shared deviations in 'results'"""

@@ -117,10 +117,13 @@ class BehanceGalleryExtractor(BehanceExtractor):
         """Collect gallery info dict"""
         url = f"{self.root}/gallery/{self.gallery_id}/a"
         cookies = {
-            "gki": '{"feature_project_view":false,'
-                   '"feature_discover_login_prompt":false,'
-                   '"feature_project_login_prompt":false}',
+            "gk_suid": "14118261",
+            "gki": "feature_3_in_1_checkout_test:false,hire_browse_get_quote_c"
+                   "ta_ab_test:false,feature_hire_dashboard_services_ab_test:f"
+                   "alse,feature_show_details_jobs_row_ab_test:false,feature_a"
+                   "i_freelance_project_create_flow:false,",
             "ilo0": "true",
+            "originalReferrer": "",
         }
         page = self.request(url, cookies=cookies).text
 
@@ -142,9 +145,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 raise exception.AuthorizationError()
             return ()
 
-        result = []
-        append = result.append
-
+        results = []
         for module in data["modules"]:
             mtype = module["__typename"][:-6].lower()
 
@@ -162,7 +163,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                         sizes.get("fs") or
                         sizes.get("hd") or
                         sizes.get("disp"))
-                append((size["url"], module))
+                results.append((size["url"], module))
 
             elif mtype == "video":
                 try:
@@ -174,7 +175,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                         url = "ytdl:" + url
                         module["_ytdl_manifest"] = "hls"
                         module["extension"] = "mp4"
-                    append((url, module))
+                    results.append((url, module))
                     continue
                 except Exception as exc:
                     self.log.debug("%s: %s", exc.__class__.__name__, exc)
@@ -195,7 +196,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                     self.log.debug("%s: %s", exc.__class__.__name__, exc)
                     url = "ytdl:" + renditions[-1]["url"]
 
-                append((url, module))
+                results.append((url, module))
 
             elif mtype == "mediacollection":
                 for component in module["components"]:
@@ -203,7 +204,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                         if size:
                             parts = size["url"].split("/")
                             parts[4] = "source"
-                            append(("/".join(parts), module))
+                            results.append(("/".join(parts), module))
                             break
 
             elif mtype == "embed":
@@ -211,13 +212,13 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 if embed:
                     embed = text.unescape(text.extr(embed, 'src="', '"'))
                     module["extension"] = "mp4"
-                    append(("ytdl:" + embed, module))
+                    results.append(("ytdl:" + embed, module))
 
             elif mtype == "text":
                 module["extension"] = "txt"
-                append(("text:" + module["text"], module))
+                results.append(("text:" + module["text"], module))
 
-        return result
+        return results
 
 
 class BehanceUserExtractor(BehanceExtractor):

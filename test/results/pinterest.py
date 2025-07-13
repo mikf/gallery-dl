@@ -148,6 +148,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://ru.pinterest.com/tarvenck/%D0%B0%D1%82%D0%BC%D0%BE%D1%81%D1%84%D0%B5%D1%80%D0%BD%D1%8B%D0%B5/?invite_code=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&sender=1111111111111111111",
+    "#comment" : "board URL with query string (#7805)",
+    "#class"   : pinterest.PinterestBoardExtractor,
+},
+
+{
     "#url"     : "https://www.pinterest.com/g1952849/",
     "#category": ("", "pinterest", "user"),
     "#class"   : pinterest.PinterestUserExtractor,
@@ -215,7 +221,14 @@ __tests__ = (
     "#url"     : "https://pin.it/Hvt8hgT",
     "#category": ("", "pinterest", "pinit"),
     "#class"   : pinterest.PinterestPinitExtractor,
-    "#sha1_url": "8daad8558382c68f0868bdbd17d05205184632fa",
+    "#results" : "https://www.pinterest.com/pin/858146903966145191/sent/?sender=858147041405047427&invite_code=d7494ea7610c324ffc1ef6c20c4e29c4",
+},
+
+{
+    "#url"     : "https://pin.it/72hPRLLfr",
+    "#comment" : "board redirect (#7805)",
+    "#class"   : pinterest.PinterestPinitExtractor,
+    "#pattern" : r"https://www.pinterest.ru/tarvenck/%D0%B0%D1%82%D0%BC%D0%BE%D1%81%D1%84%D0%B5%D1%80%D0%BD%D1%8B%D0%B5/\?invite_code=\w+&sender=\d+",
 },
 
 {

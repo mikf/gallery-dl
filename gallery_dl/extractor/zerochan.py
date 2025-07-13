@@ -238,7 +238,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
                 self.log.warning("HTTP redirect to %s", url)
                 if self.config("redirects"):
                     continue
-                raise exception.StopExtraction()
+                raise exception.AbortExtraction()
 
             data = response.json()
             try:

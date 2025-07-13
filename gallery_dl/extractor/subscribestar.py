@@ -65,8 +65,8 @@ class SubscribestarExtractor(Extractor):
             if response.history and (
                     "/verify_subscriber" in response.url or
                     "/age_confirmation_warning" in response.url):
-                raise exception.StopExtraction(
-                    "HTTP redirect to %s", response.url)
+                raise exception.AbortExtraction(
+                    f"HTTP redirect to {response.url}")
 
             content = response.content
             if len(content) < 250 and b">redirected<" in content:

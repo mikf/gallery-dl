@@ -59,7 +59,7 @@ class ExhentaiExtractor(Extractor):
     def login(self):
         """Login and set necessary cookies"""
         if self.LIMIT:
-            raise exception.StopExtraction("Image limit reached!")
+            raise exception.AbortExtraction("Image limit reached!")
 
         if self.cookies_check(self.cookies_names):
             return
@@ -178,7 +178,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             self.image_token = text.extr(gpage, 'hentai.org/s/', '"')
             if not self.image_token:
                 self.log.debug("Page content:\n%s", gpage)
-                raise exception.StopExtraction(
+                raise exception.AbortExtraction(
                     "Failed to extract initial image token")
             ipage = self._image_page()
         else:
@@ -186,7 +186,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             part = text.extr(ipage, 'hentai.org/g/', '"')
             if not part:
                 self.log.debug("Page content:\n%s", ipage)
-                raise exception.StopExtraction(
+                raise exception.AbortExtraction(
                     "Failed to extract gallery token")
             self.gallery_token = part.split("/")[1]
             gpage = self._gallery_page()
@@ -301,7 +301,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         data = self.request_json(self.api_url, method="POST", json=data)
         if "error" in data:
-            raise exception.StopExtraction(data["error"])
+            raise exception.AbortExtraction(data["error"])
 
         return data["gmetadata"][0]
 
@@ -326,8 +326,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 data["_fallback"] = self._fallback_1280(nl, self.image_num)
         except IndexError:
             self.log.debug("Page content:\n%s", page)
-            raise exception.StopExtraction(
-                "Unable to parse image info for '%s'", url)
+            raise exception.AbortExtraction(
+                f"Unable to parse image info for '{url}'")
 
         data["num"] = self.image_num
         data["image_token"] = self.key_start = extr('var startkey="', '";')
@@ -377,8 +377,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                         nl, request["page"], imgkey)
             except IndexError:
                 self.log.debug("Page content:\n%s", page)
-                raise exception.StopExtraction(
-                    "Unable to parse image info for '%s'", url)
+                raise exception.AbortExtraction(
+                    f"Unable to parse image info for '{url}'")
 
             data["num"] = request["page"]
             data["image_token"] = imgkey
@@ -401,7 +401,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if " requires GP" in page:
             gp = self.config("gp")
             if gp == "stop":
-                raise exception.StopExtraction("Not enough GP")
+                raise exception.AbortExtraction("Not enough GP")
             elif gp == "wait":
                 self.input("Press ENTER to continue.")
                 return response.url
@@ -463,7 +463,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         if not action or action == "stop":
             ExhentaiExtractor.LIMIT = True
-            raise exception.StopExtraction(msg)
+            raise exception.AbortExtraction(msg)
 
         self.log.warning(msg)
         if action == "wait":

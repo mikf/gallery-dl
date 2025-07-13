@@ -4,14 +4,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from gallery_dl.extractor import chzzk
+from gallery_dl.extractor import naverchzzk
 
 
 __tests__ = (
 
 {
     "#url"    : "https://chzzk.naver.com/f30b95fc9af53a75b781d7d3dd933892/community/detail/13393754",
-    "#class"  : chzzk.ChzzkCommentExtractor,
+    "#class"  : naverchzzk.NaverChzzkCommentExtractor,
     "#results": (
         "https://nng-phinf.pstatic.net/MjAyNDA3MDlfNDgg/MDAxNzIwNTMzNzg2MDUx.0K9XrEW9CCSd2b7VdQHf8RGWkHAUsqEhNnLlleA11SUg.ZLx2V3gJPZR-kzrMY3E17wbu1ZmzYjitrEKmM_ykeWkg.PNG/tftyt.png",
     ),
@@ -35,7 +35,7 @@ __tests__ = (
 
 {
     "#url"    : "https://chzzk.naver.com/f30b95fc9af53a75b781d7d3dd933892/community/detail/20273040",
-    "#class"  : chzzk.ChzzkCommentExtractor,
+    "#class"  : naverchzzk.NaverChzzkCommentExtractor,
     "#results": (
         "https://nng-phinf.pstatic.net/MjAyNTA2MTNfMTUw/MDAxNzQ5ODI1NjkyMzgx.8bsZ9moAfpuK3dqhHBxdd_CQdSuP5-MRrFgyJGDfdtEg.cs9HcI9BxBVXGUqJQhsUSGyOYvB3vj2itDB-arpvmokg.GIF/%EB%AC%BC%EC%9E%90%EB%AF%B8%EB%84%A4a.gif",
         "https://nng-phinf.pstatic.net/MjAyNTA2MTNfMTAg/MDAxNzQ5ODI1NzA2NDk4.8PHxVU-4N8UE6mnDoDRhTMYoao9p0niz08DPQEqm2pog.C4KZL_RiK-jGlfKgoXJS5LdO3BDZUuPDCSsaqttE6Jwg.GIF/%EB%AC%BC%EC%9E%90%EB%AF%B8%EB%84%A4ab.gif",
@@ -65,14 +65,14 @@ __tests__ = (
 
 {
     "#url"  : "https://chzzk.naver.com/f30b95fc9af53a75b781d7d3dd933892/community",
-    "#class": chzzk.ChzzkCommunityExtractor,
+    "#class": naverchzzk.NaverChzzkCommunityExtractor,
     "#range": "1-50",
     "#count": 50,
 },
 
 {
     "#url"    : "https://chzzk.naver.com/f30b95fc9af53a75b781d7d3dd933892/community",
-    "#class"  : chzzk.ChzzkCommunityExtractor,
+    "#class"  : naverchzzk.NaverChzzkCommunityExtractor,
     "#options": {"offset": 50},
     "#range"  : "1-50",
     "#count"  : 50,

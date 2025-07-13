@@ -676,7 +676,7 @@ def build_parser():
     selection.add_argument(
         "--download-archive",
         dest="archive", metavar="FILE", action=ConfigAction,
-        help=("Record all downloaded or skipped files in FILE and "
+        help=("Record successfully downloaded files in FILE and "
               "skip downloading any file already in it"),
     )
     selection.add_argument(

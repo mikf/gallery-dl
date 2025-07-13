@@ -22,9 +22,9 @@ class CivitaiExtractor(Extractor):
     """Base class for civitai extractors"""
     category = "civitai"
     root = "https://civitai.com"
-    directory_fmt = ("{category}", "{username|user[username]}", "images")
-    filename_fmt = "{file[id]|id|filename}.{extension}"
-    archive_fmt = "{file[uuid]|uuid}"
+    directory_fmt = ("{category}", "{user[username]}", "images")
+    filename_fmt = "{file[id]}.{extension}"
+    archive_fmt = "{file[uuid]}"
     request_interval = (0.5, 1.5)
 
     def _init(self):
@@ -64,11 +64,13 @@ class CivitaiExtractor(Extractor):
             if isinstance(metadata, str):
                 metadata = metadata.split(",")
             elif not isinstance(metadata, (list, tuple)):
-                metadata = ("generation", "version")
+                metadata = ("generation", "version", "post")
             self._meta_generation = ("generation" in metadata)
             self._meta_version = ("version" in metadata)
+            self._meta_post = ("post" in metadata)
         else:
-            self._meta_generation = self._meta_version = False
+            self._meta_generation = self._meta_version = self._meta_post = \
+                False
 
     def items(self):
         models = self.models()
@@ -107,25 +109,35 @@ class CivitaiExtractor(Extractor):
 
         images = self.images()
         if images:
-            for image in images:
+            for file in images:
+
+                data = {
+                    "file": file,
+                    "user": file.pop("user"),
+                }
 
                 if self._meta_generation:
-                    image["generation"] = \
-                        self._extract_meta_generation(image)
+                    data["generation"] = \
+                        self._extract_meta_generation(file)
                 if self._meta_version:
-                    image["model"], image["version"] = \
-                        self._extract_meta_version(image, False)
-                image["date"] = text.parse_datetime(
-                    image["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                    data["model"], data["version"] = \
+                        self._extract_meta_version(file, False)
+                    if "post" in file:
+                        data["post"] = file.pop("post")
+                if self._meta_post and "post" not in data:
+                    data["post"] = post = self._extract_meta_post(file)
+                    post.pop("user", None)
+                file["date"] = text.parse_datetime(
+                    file["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
-                url = self._url(image)
-                text.nameext_from_url(url, image)
-                if not image["extension"]:
-                    image["extension"] = (
-                        self._video_ext if image.get("type") == "video" else
+                data["url"] = url = self._url(file)
+                text.nameext_from_url(url, data)
+                if not data["extension"]:
+                    data["extension"] = (
+                        self._video_ext if file.get("type") == "video" else
                         self._image_ext)
-                yield Message.Directory, image
-                yield Message.Url, url, image
+                yield Message.Directory, data
+                yield Message.Url, url, data
             return
 
     def models(self):
@@ -194,6 +206,12 @@ class CivitaiExtractor(Extractor):
     def _extract_meta_generation(self, image):
         try:
             return self.api.image_generationdata(image["id"])
+        except Exception as exc:
+            return self.log.debug("", exc_info=exc)
+
+    def _extract_meta_post(self, image):
+        try:
+            return self.api.post(image["postId"])
         except Exception as exc:
             return self.log.debug("", exc_info=exc)
 
@@ -592,7 +610,7 @@ class CivitaiTrpcAPI():
         self.root = extractor.root + "/api/trpc/"
         self.headers = {
             "content-type"    : "application/json",
-            "x-client-version": "5.0.701",
+            "x-client-version": "5.0.882",
             "x-client-date"   : "",
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",
@@ -795,8 +813,8 @@ class CivitaiSearchAPI():
         self.extractor = extractor
         self.root = "https://search.civitai.com"
         self.headers = {
-            "Authorization": "Bearer 4c7745e54e872213201291ba1cae1aaca702941f2"
-                             "91432cf4fef22803333e487",
+            "Authorization": "Bearer ab8565e5ab8dc2d8f0d4256d204781cb63fe8b031"
+                             "eb3779cbbed38a7b5308e5c",
             "Content-Type": "application/json",
             "X-Meilisearch-Client": "Meilisearch instant-meilisearch (v0.13.5)"
                                     " ; Meilisearch JavaScript (v0.34.0)",

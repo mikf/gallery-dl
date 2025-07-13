@@ -184,7 +184,7 @@ class IdolcomplexTagExtractor(IdolcomplexExtractor):
 
         tags = self.tags.split()
         if not self.logged_in and len(tags) > 4:
-            raise exception.StopExtraction(
+            raise exception.AbortExtraction(
                 "Non-members can only search up to 4 tags at once")
         return {"search_tags": " ".join(tags)}
 

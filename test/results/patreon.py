@@ -45,6 +45,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.patreon.com/cw/anythingelse",
+    "#comment" : "Next.js 13 - /cw/ URL",
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
     "#url"     : "https://www.patreon.com/c/koveliana",
     "#class"   : patreon.PatreonCreatorExtractor,
 },
@@ -149,7 +155,7 @@ __tests__ = (
         "offers_free_membership": True,
         "offers_paid_membership": True,
         "pay_per_name": "month",
-        "pledge_url": "/checkout/Reedandweep",
+        "pledge_url": "https://www.patreon.com/checkout/Reedandweep",
         "primary_theme_color": None,
         "show_audio_post_download_links": True,
         "show_free_membership_cta": False,

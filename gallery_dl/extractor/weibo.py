@@ -46,9 +46,9 @@ class WeiboExtractor(Extractor):
 
         if response.history:
             if "login.sina.com" in response.url:
-                raise exception.StopExtraction(
-                    "HTTP redirect to login page (%s)",
-                    response.url.partition("?")[0])
+                raise exception.AbortExtraction(
+                    f"HTTP redirect to login page "
+                    f"({response.url.partition('?')[0]})")
             if "passport.weibo.com" in response.url:
                 self._sina_visitor_system(response)
                 response = Extractor.request(self, url, **kwargs)
@@ -98,16 +98,15 @@ class WeiboExtractor(Extractor):
                 yield Message.Url, file["url"], file
 
     def _extract_status(self, status, files):
-        append = files.append
-
         if "mix_media_info" in status:
             for item in status["mix_media_info"]["items"]:
                 type = item.get("type")
                 if type == "video":
                     if self.videos:
-                        append(self._extract_video(item["data"]["media_info"]))
+                        files.append(self._extract_video(
+                            item["data"]["media_info"]))
                 elif type == "pic":
-                    append(item["data"]["largest"].copy())
+                    files.append(item["data"]["largest"].copy())
                 else:
                     self.log.warning("Unknown media type '%s'", type)
             return
@@ -121,22 +120,22 @@ class WeiboExtractor(Extractor):
 
                 if pic_type == "gif" and self.gifs:
                     if self.gifs_video:
-                        append({"url": pic["video"]})
+                        files.append({"url": pic["video"]})
                     else:
-                        append(pic["largest"].copy())
+                        files.append(pic["largest"].copy())
 
                 elif pic_type == "livephoto" and self.livephoto:
-                    append(pic["largest"].copy())
-                    append({"url": pic["video"]})
+                    files.append(pic["largest"].copy())
+                    files.append({"url": pic["video"]})
 
                 else:
-                    append(pic["largest"].copy())
+                    files.append(pic["largest"].copy())
 
         if "page_info" in status:
             info = status["page_info"]
             if "media_info" in info and self.videos:
                 if info.get("type") != "5" or self.movies:
-                    append(self._extract_video(info["media_info"]))
+                    files.append(self._extract_video(info["media_info"]))
                 else:
                     self.log.debug("%s: Ignoring 'movie' video", status["id"])
 
@@ -180,8 +179,8 @@ class WeiboExtractor(Extractor):
             if not data.get("ok"):
                 self.log.debug(response.content)
                 if "since_id" not in params:  # first iteration
-                    raise exception.StopExtraction(
-                        '"%s"', data.get("msg") or "unknown error")
+                    raise exception.AbortExtraction(
+                        f'"{data.get("msg") or "unknown error"}"')
 
             data = data["data"]
             statuses = data["list"]

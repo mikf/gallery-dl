@@ -499,8 +499,8 @@ class TumblrAPI(oauth.OAuth1API):
                         continue
 
                     t = (datetime.now() + timedelta(0, float(reset))).time()
-                    raise exception.StopExtraction(
-                        "Aborting - Rate limit will reset at %s",
+                    raise exception.AbortExtraction(
+                        f"Aborting - Rate limit will reset at "
                         f"{t.hour:02}:{t.minute:02}:{t.second:02}")
 
                 # hourly rate limit
@@ -510,7 +510,7 @@ class TumblrAPI(oauth.OAuth1API):
                     self.extractor.wait(seconds=reset)
                     continue
 
-            raise exception.StopExtraction(data)
+            raise exception.AbortExtraction(data)
 
     def _pagination(self, endpoint, params,
                     blog=None, key="posts", cache=False):

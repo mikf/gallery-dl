@@ -21,6 +21,27 @@ class HitomiExtractor(Extractor):
     root = "https://hitomi.la"
     domain = "gold-usergeneratedcontent.net"
 
+    def load_nozomi(self, query, language="all", headers=None):
+        ns, _, tag = query.strip().partition(":")
+
+        if ns == "female" or ns == "male":
+            ns = "tag/"
+            tag = query
+        elif ns == "language":
+            ns = ""
+            language = tag
+            tag = "index"
+        else:
+            ns = f"{ns}/"
+
+        url = (f"https://ltn.{self.domain}/n/{ns}"
+               f"/{tag.replace('_', ' ')}-{language}.nozomi")
+        if headers is None:
+            headers = {}
+        headers["Origin"] = self.root
+        headers["Referer"] = f"{self.root}/"
+        return decode_nozomi(self.request(url, headers=headers).content)
+
 
 class HitomiGalleryExtractor(HitomiExtractor, GalleryExtractor):
     """Extractor for hitomi.la galleries"""
@@ -80,7 +101,7 @@ class HitomiGalleryExtractor(HitomiExtractor, GalleryExtractor):
         fmt = ext = self.config("format") or "webp"
         check = (fmt != "webp")
 
-        result = []
+        results = []
         for image in self.info["files"]:
             if check:
                 ext = fmt if image.get("has" + fmt) else "webp"
@@ -93,8 +114,8 @@ class HitomiGalleryExtractor(HitomiExtractor, GalleryExtractor):
             inum = int(ihash[-1] + ihash[-3:-1], 16)
             url = (f"https://{ext[0]}{gg_m.get(inum, gg_default) + 1}."
                    f"{self.domain}/{gg_b}/{inum}/{ihash}.{ext}")
-            result.append((url, idata))
-        return result
+            results.append((url, idata))
+        return results
 
 
 class HitomiTagExtractor(HitomiExtractor):
@@ -186,58 +207,46 @@ class HitomiIndexExtractor(HitomiTagExtractor):
 class HitomiSearchExtractor(HitomiExtractor):
     """Extractor for galleries from multiple tag searches on hitomi.la"""
     subcategory = "search"
-    pattern = r"(?:https?://)?hitomi\.la/search\.html\?([^/?#]+)"
+    pattern = r"(?:https?://)?hitomi\.la/search\.html\?([^#]+)"
     example = "https://hitomi.la/search.html?QUERY"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.query = match[1]
-        self.tags = text.unquote(self.query)
-
     def items(self):
+        tags = text.unquote(self.groups[0])
+
         data = {
             "_extractor": HitomiGalleryExtractor,
-            "search_tags": self.tags,
+            "search_tags": tags,
         }
-        results = [self.get_nozomi_items(tag) for tag in self.tags.split(" ")]
-        intersects = set.intersection(*results)
 
-        for gallery_id in sorted(intersects, reverse=True):
+        for gallery_id in self.gallery_ids(tags):
             gallery_url = f"{self.root}/galleries/{gallery_id}.html"
             yield Message.Queue, gallery_url, data
 
-    def get_nozomi_items(self, full_tag):
-        area, tag, language = self.get_nozomi_args(full_tag)
-        base = f"https://ltn.{self.domain}/n/"
+    def gallery_ids(self, tags):
+        result = None
+        positive = []
+        negative = []
 
-        if area:
-            nozomi_url = f"{base}{area}/{tag}-{language}.nozomi"
-        else:
-            nozomi_url = f"{base}{tag}-{language}.nozomi"
+        for tag in tags.split():
+            if tag[0] == "-":
+                negative.append(tag[1:])
+            else:
+                positive.append(tag)
 
-        headers = {
-            "Origin": self.root,
-            "Cache-Control": "max-age=0",
-            "Referer": f"{self.root}/search.html?{self.query}",
-        }
+        for tag in positive:
+            ids = self.load_nozomi(tag)
+            if result is None:
+                result = set(ids)
+            else:
+                result.intersection_update(ids)
 
-        response = self.request(nozomi_url, headers=headers)
-        return set(decode_nozomi(response.content))
+        if result is None:
+            #  result = set(self.load_nozomi("index"))
+            result = set(self.load_nozomi("language:all"))
+        for tag in negative:
+            result.difference_update(self.load_nozomi(tag))
 
-    def get_nozomi_args(self, query):
-        ns, _, tag = query.strip().partition(":")
-        area = ns
-        language = "all"
-
-        if ns == "female" or ns == "male":
-            area = "tag"
-            tag = query
-        elif ns == "language":
-            area = None
-            language = tag
-            tag = "index"
-
-        return area, tag.replace("_", " "), language
+        return sorted(result, reverse=True) if result else ()
 
 
 @memcache(maxage=1800)

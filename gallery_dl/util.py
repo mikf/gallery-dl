@@ -722,6 +722,24 @@ class CustomNone():
     __repr__ = __str__
 
 
+class Flags():
+
+    def __init__(self):
+        self.FILE = self.POST = self.CHILD = self.DOWNLOAD = None
+
+    def process(self, flag):
+        value = self.__dict__[flag]
+        self.__dict__[flag] = None
+
+        if value == "abort":
+            raise exception.AbortExtraction()
+        if value == "terminate":
+            raise exception.TerminateExtraction()
+        if value == "restart":
+            raise exception.RestartExtraction()
+        raise exception.StopExtraction()
+
+
 # v137.0 release of Firefox on 2025-04-01 has ordinal 739342
 # 735506 == 739342 - 137 * 28
 # v135.0 release of Chrome  on 2025-04-01 has ordinal 739342
@@ -737,6 +755,7 @@ re = text.re
 re_compile = text.re_compile
 
 NONE = CustomNone()
+FLAGS = Flags()
 EPOCH = datetime.datetime(1970, 1, 1)
 SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
@@ -831,10 +850,12 @@ def compile_expression_defaultdict_impl(expr, name="<expr>", globals=None):
 
 def compile_expression_tryexcept(expr, name="<expr>", globals=None):
     code_object = compile(expr, name, "eval")
+    if globals is None:
+        globals = GLOBALS
 
-    def _eval(locals=None, globals=(globals or GLOBALS), co=code_object):
+    def _eval(locals=None):
         try:
-            return eval(co, globals, locals)
+            return eval(code_object, globals, locals)
         except exception.GalleryDLException:
             raise
         except Exception:

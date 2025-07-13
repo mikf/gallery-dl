@@ -112,10 +112,10 @@ class MangadexChapterExtractor(MangadexExtractor):
             data = self._transform(chapter)
 
         if data.get("_external_url") and not data["count"]:
-            raise exception.StopExtraction(
-                "Chapter %s%s is not available on MangaDex and can instead be "
-                "read on the official publisher's website at %s.",
-                data["chapter"], data["chapter_minor"], data["_external_url"])
+            raise exception.AbortExtraction(
+                f"Chapter {data['chapter']}{data['chapter_minor']} is not "
+                f"available on MangaDex and can instead be read on the "
+                f"official publisher's website at {data['_external_url']}.")
 
         yield Message.Directory, data
 
@@ -354,10 +354,10 @@ class MangadexAPI():
                 self.extractor.wait(until=until)
                 continue
 
-            msg = ", ".join('{title}: "{detail}"'.format_map(error)
+            msg = ", ".join(f'{error["title"]}: "{error["detail"]}"'
                             for error in response.json()["errors"])
-            raise exception.StopExtraction(
-                "%s %s (%s)", response.status_code, response.reason, msg)
+            raise exception.AbortExtraction(
+                f"{response.status_code} {response.reason} ({msg})")
 
     def _pagination_chapters(self, endpoint, params=None, auth=False):
         if params is None:
@@ -384,6 +384,8 @@ class MangadexAPI():
             ratings = config("ratings")
             if ratings is None:
                 ratings = ("safe", "suggestive", "erotica", "pornographic")
+            elif isinstance(ratings, str):
+                ratings = ratings.split(",")
             params["contentRating[]"] = ratings
         params["offset"] = 0
 

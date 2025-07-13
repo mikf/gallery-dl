@@ -90,7 +90,8 @@ class SankakuExtractor(BooruExtractor):
     def _tags_extended(self, post, page):
         try:
             url = "https://chan.sankakucomplex.com/posts/" + post["id"]
-            page = self.request(url).text
+            headers = {"Referer": url}
+            page = self.request(url, headers=headers).text
         except Exception as exc:
             return self.log.warning(
                 "%s: Failed to extract extended tag categories (%s: %s)",
@@ -307,7 +308,7 @@ class SankakuAPI():
                         ("unauthorized", "invalid-token", "invalid_token")):
                     _authenticate_impl.invalidate(self.username)
                     continue
-                raise exception.StopExtraction(code)
+                raise exception.AbortExtraction(code)
             return data
 
     def _pagination(self, endpoint, params):

@@ -4,31 +4,58 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from gallery_dl.extractor import naver
+from gallery_dl.extractor import naverblog
 
 
 __tests__ = (
 {
     "#url"     : "https://blog.naver.com/rlfqjxm0/221430673006",
-    "#category": ("", "naver", "post"),
-    "#class"   : naver.NaverPostExtractor,
+    "#class"   : naverblog.NaverBlogPostExtractor,
     "#sha1_url"     : "6c694f3aced075ed5e9511f1e796d14cb26619cc",
-    "#sha1_metadata": "a6e23d19afbee86b37d6e7ad934650c379d2cb1e",
+
+    "count"      : 23,
+    "num"        : range(1, 23),
+    "extension"  : {"jpg", "png"},
+    "filename"   : str,
+    "blog"       : {
+        "id"  : "rlfqjxm0",
+        "num" : 43030507,
+        "user": "에나",
+    },
+    "post"       : {
+        "date"       : "dt:2018-12-30 23:23:00",
+        "description": "-",
+        "num"        : 221430673006,
+        "title"      : "그림",
+    },
 },
 
 {
     "#url"     : "https://blog.naver.com/PostView.nhn?blogId=rlfqjxm0&logNo=221430673006",
-    "#category": ("", "naver", "post"),
-    "#class"   : naver.NaverPostExtractor,
+    "#class"   : naverblog.NaverBlogPostExtractor,
     "#sha1_url"     : "6c694f3aced075ed5e9511f1e796d14cb26619cc",
-    "#sha1_metadata": "a6e23d19afbee86b37d6e7ad934650c379d2cb1e",
+
+    "count"      : 23,
+    "num"        : range(1, 23),
+    "extension"  : {"jpg", "png"},
+    "filename"   : str,
+    "blog"       : {
+        "id"  : "rlfqjxm0",
+        "num" : 43030507,
+        "user": "에나",
+    },
+    "post"       : {
+        "date"       : "dt:2018-12-30 23:23:00",
+        "description": "-",
+        "num"        : 221430673006,
+        "title"      : "그림",
+    },
 },
 
 {
     "#url"     : "https://blog.naver.com/PostView.nhn?blogId=rlfqjxm0&logNo=70161391809",
     "#comment" : "filenames in EUC-KR encoding (#5126)",
-    "#category": ("", "naver", "post"),
-    "#class"   : naver.NaverPostExtractor,
+    "#class"   : naverblog.NaverBlogPostExtractor,
     "#results": (
         "https://blogfiles.pstatic.net/20130305_23/ping9303_1362411028002Dpz9z_PNG/1_사본.png",
         "https://blogfiles.pstatic.net/20130305_46/rlfqjxm0_1362473322580x33zi_PNG/오마갓합작.png",
@@ -54,8 +81,7 @@ __tests__ = (
 {
     "#url"     : "https://blog.naver.com/jws790103/223239681955",
     "#comment" : "videos",
-    "#category": ("", "naver", "post"),
-    "#class"   : naver.NaverPostExtractor,
+    "#class"   : naverblog.NaverBlogPostExtractor,
     "#pattern" : (
         r"https://blogfiles.pstatic.net/MjAyMzA5MjVfMTMy/MDAxNjk1NjQ0MzI4OTE3.UxgvxTesk7Y88OWGvPMwQhbmCPp6mPA_C-5l5lJggyEg.B0DbxNEzz3DxRJtShiiBHDLzLQSCFDo_Bp6c-bcMDiog.JPEG.jws790103/20230925%EF%BC%BF080218.jpg",
         r"https://blogfiles.pstatic.net/MjAyMzA5MjVfMjAz/MDAxNjk1NjQ0MzI4OTA5.Kd4VzqHhhrgby7rCA1iPdBX6f_k2DPEBnlRdOWD-kPgg.U0C1lmlKVMZMA4hhhs69nolZwCZ4Plme4KVbNfhezhkg.JPEG.jws790103/20230925%EF%BC%BF081103.jpg",
@@ -85,8 +111,7 @@ __tests__ = (
 {
     "#url"     : "https://blog.naver.com/jws790103/223239681955",
     "#comment" : "'videos' option",
-    "#category": ("", "naver", "post"),
-    "#class"   : naver.NaverPostExtractor,
+    "#class"   : naverblog.NaverBlogPostExtractor,
     "#options" : {"videos": False},
     "#results": (
         "https://blogfiles.pstatic.net/MjAyMzA5MjVfMTMy/MDAxNjk1NjQ0MzI4OTE3.UxgvxTesk7Y88OWGvPMwQhbmCPp6mPA_C-5l5lJggyEg.B0DbxNEzz3DxRJtShiiBHDLzLQSCFDo_Bp6c-bcMDiog.JPEG.jws790103/20230925%EF%BC%BF080218.jpg",
@@ -103,32 +128,28 @@ __tests__ = (
 
 {
     "#url"     : "https://blog.naver.com/PostView.naver?blogId=rlfqjxm0&logNo=221430673006",
-    "#category": ("", "naver", "post"),
-    "#class"   : naver.NaverPostExtractor,
+    "#class"   : naverblog.NaverBlogPostExtractor,
 },
 
 {
     "#url"     : "https://blog.naver.com/gukjung",
-    "#category": ("", "naver", "blog"),
-    "#class"   : naver.NaverBlogExtractor,
-    "#pattern" : naver.NaverPostExtractor.pattern,
+    "#class"   : naverblog.NaverBlogBlogExtractor,
+    "#pattern" : naverblog.NaverBlogPostExtractor.pattern,
     "#range"   : "1-12",
     "#count"   : 12,
 },
 
 {
     "#url"     : "https://blog.naver.com/PostList.nhn?blogId=gukjung",
-    "#category": ("", "naver", "blog"),
-    "#class"   : naver.NaverBlogExtractor,
-    "#pattern" : naver.NaverPostExtractor.pattern,
+    "#class"   : naverblog.NaverBlogBlogExtractor,
+    "#pattern" : naverblog.NaverBlogPostExtractor.pattern,
     "#range"   : "1-12",
     "#count"   : 12,
 },
 
 {
     "#url"     : "https://blog.naver.com/PostList.naver?blogId=gukjung",
-    "#category": ("", "naver", "blog"),
-    "#class"   : naver.NaverBlogExtractor,
+    "#class"   : naverblog.NaverBlogBlogExtractor,
 },
 
 )

@@ -324,11 +324,12 @@ class FuraffinityUserExtractor(Dispatch, FuraffinityExtractor):
     example = "https://www.furaffinity.net/user/USER/"
 
     def items(self):
-        base = f"{self.root}/{{}}/{self.user}/"
+        base = self.root
+        user = f"{self.user}/"
         return self._dispatch_extractors((
-            (FuraffinityGalleryExtractor , base.format("gallery")),
-            (FuraffinityScrapsExtractor  , base.format("scraps")),
-            (FuraffinityFavoriteExtractor, base.format("favorites")),
+            (FuraffinityGalleryExtractor , f"{base}/gallery/{user}"),
+            (FuraffinityScrapsExtractor  , f"{base}/scraps/{user}"),
+            (FuraffinityFavoriteExtractor, f"{base}/favorites/{user}"),
         ), ("gallery",))
 
 
@@ -372,9 +373,9 @@ class FuraffinitySubmissionsExtractor(FuraffinityExtractor):
             for post_id in text.extract_iter(page, 'id="sid-', '"'):
                 yield post_id
 
-            path = (text.extr(page, '<a class="button standard more" href="', '"') or  # noqa 501
-                    text.extr(page, '<a class="more-half" href="', '"') or
-                    text.extr(page, '<a class="more" href="', '"'))
-            if not path:
+            if (pos := page.find(">Next 48</a>")) < 0 and \
+                    (pos := page.find(">&gt;&gt;&gt; Next 48 &gt;&gt;")) < 0:
                 return
+
+            path = text.rextr(page, 'href="', '"', pos)
             url = self.root + text.unescape(path)

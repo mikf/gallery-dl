@@ -11,7 +11,7 @@ import logging
 from . import version, config, option, output, extractor, job, util, exception
 
 __author__ = "Mike Fährmann"
-__copyright__ = "Copyright 2014-2023 Mike Fährmann"
+__copyright__ = "Copyright 2014-2025 Mike Fährmann"
 __license__ = "GPLv2"
 __maintainer__ = "Mike Fährmann"
 __email__ = "mike_faehrmann@web.de"
@@ -78,8 +78,7 @@ def main():
         output.configure_standard_streams()
 
         # signals
-        signals = config.get((), "signals-ignore")
-        if signals:
+        if signals := config.get((), "signals-ignore"):
             import signal
             if isinstance(signals, str):
                 signals = signals.split(",")
@@ -89,6 +88,25 @@ def main():
                     log.warning("signal '%s' is not defined", signal_name)
                 else:
                     signal.signal(signal_num, signal.SIG_IGN)
+
+        if signals := config.get((), "signals-actions"):
+            import signal
+
+            def signals_handler(event, action):
+                def handler(signal_num, frame):
+                    signal_name = signal.Signals(signal_num).name
+                    output.stderr_write(f"{signal_name} received\n")
+                    util.FLAGS.__dict__[event] = action
+                return handler
+
+            for signal_name, action in signals.items():
+                signal_num = getattr(signal, signal_name, None)
+                if signal_num is None:
+                    log.warning("signal '%s' is not defined", signal_name)
+                else:
+                    event, _, action = action.rpartition(":")
+                    signal.signal(signal_num, signals_handler(
+                        event.upper() if event else "FILE", action.lower()))
 
         # enable ANSI escape sequences on Windows
         if util.WINDOWS and config.get(("output",), "ansi", output.COLORS):
@@ -323,6 +341,14 @@ def main():
                         "coomer"       : "coomerparty",
                         "kemono"       : "kemonoparty",
                         "schalenetwork": "koharu",
+                        "naver-blog"   : "naver",
+                        "naver-chzzk"  : "chzzk",
+                        "naver-webtoon": "naverwebtoon",
+                        "pixiv-novel"  : "pixiv",
+                        "pixiv-novel:novel"   : ("pixiv", "novel"),
+                        "pixiv-novel:user"    : ("pixiv", "novel-user"),
+                        "pixiv-novel:series"  : ("pixiv", "novel-series"),
+                        "pixiv-novel:bookmark": ("pixiv", "novel-bookmark"),
                     }
                 from .extractor import common
                 common.CATEGORY_MAP = catmap
@@ -347,13 +373,11 @@ def main():
                     else:
                         input_manager.success()
 
-                except exception.StopExtraction:
-                    pass
-                except exception.TerminateExtraction:
-                    pass
                 except exception.RestartExtraction:
                     log.debug("Restarting '%s'", url)
                     continue
+                except exception.ControlException:
+                    pass
                 except exception.NoExtractorError:
                     log.error("Unsupported URL '%s'", url)
                     retval |= 64
@@ -474,16 +498,15 @@ class InputManager():
                 key, sep, value = line.partition("=")
                 if not sep:
                     raise exception.InputFileError(
-                        "Invalid KEY=VALUE pair '%s' on line %s in %s",
-                        line, n+1, path)
+                        f"Invalid KEY=VALUE pair '{line}' "
+                        f"on line {n+1} in {path}")
 
                 try:
                     value = util.json_loads(value.strip())
                 except ValueError as exc:
                     self.log.debug("%s: %s", exc.__class__.__name__, exc)
                     raise exception.InputFileError(
-                        "Unable to parse '%s' on line %s in %s",
-                        value, n+1, path)
+                        f"Unable to parse '{value}' on line {n+1} in {path}")
 
                 key = key.strip().split(".")
                 conf.append((key[:-1], key[-1], value))
