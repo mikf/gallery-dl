@@ -26,19 +26,52 @@ class IwaraExtractor(Extractor):
     def _init(self):
         self.api = IwaraAPI(self)
 
-    def extract_user_info(self, profile):
-        user = profile.get("user") or {}
-        return {
-            "id"     : user.get("id"),
-            "name"   : user.get("username"),
-            "nick"   : user.get("name").strip(),
-            "status" : user.get("status"),
-            "role"   : user.get("role"),
-            "premium": user.get("premium"),
-            "date"   : text.parse_datetime(
-                user.get("createdAt"), "%Y-%m-%dT%H:%M:%S.000Z"),
-            "description": profile.get("body"),
-        }
+    def items_image(self, images, user=None):
+        for image in images:
+            try:
+                if not (files := image.get("files")):
+                    image = self.api.image(image["id"])
+                    files = image["files"]
+
+                group_info = self.extract_media_info(image, "file", False)
+                group_info["user"] = (self.extract_user_info(image)
+                                      if user is None else user)
+            except Exception as exc:
+                self.status |= 1
+                self.log.error("Failed to process image %s (%s: %s)",
+                               image["id"], exc.__class__.__name__, exc)
+                continue
+
+            yield Message.Directory, group_info
+            for file in files:
+                file_info = self.extract_media_info(file, None)
+                file_id = file_info["file_id"]
+                url = (f"https://i.iwara.tv/image/original/"
+                       f"{file_id}/{file_id}.{file_info['extension']}")
+                yield Message.Url, url, {**file_info, **group_info}
+
+    def items_video(self, videos, user=None):
+        for video in videos:
+            try:
+                if "fileUrl" not in video:
+                    video = self.api.video(video["id"])
+                file_url = video["fileUrl"]
+                sources = self.api.source(file_url)
+                source = next((s for s in sources
+                              if s.get("name") == "Source"), None)
+                download_url = source.get('src', {}).get('download')
+
+                info = self.extract_media_info(video, "file")
+                info["user"] = (self.extract_user_info(video)
+                                if user is None else user)
+            except Exception as exc:
+                self.status |= 1
+                self.log.error("Failed to process video %s (%s: %s)",
+                               video["id"], exc.__class__.__name__, exc)
+                continue
+
+            yield Message.Directory, info
+            yield Message.Url, f"https:{download_url}", info
 
     def extract_media_info(self, item, key, include_file_info=True):
         title = t.strip() if (t := item.get("title")) else ""
@@ -70,49 +103,19 @@ class IwaraExtractor(Extractor):
                 "title": title,
             }
 
-    def get_metadata(self, user_info, media_info):
+    def extract_user_info(self, profile):
+        user = profile.get("user") or {}
         return {
-            "user": user_info,
-            **media_info
+            "id"     : user.get("id"),
+            "name"   : user.get("username"),
+            "nick"   : user.get("name").strip(),
+            "status" : user.get("status"),
+            "role"   : user.get("role"),
+            "premium": user.get("premium"),
+            "date"   : text.parse_datetime(
+                user.get("createdAt"), "%Y-%m-%dT%H:%M:%S.000Z"),
+            "description": profile.get("body"),
         }
-
-    def yield_video(self, video, user_info=None):
-        if user_info is None:
-            user_info = self.extract_user_info(video)
-        video_info = self.extract_media_info(video, "file")
-
-        if "fileUrl" not in video:
-            video = self.api.video(video["id"])
-        file_url = video["fileUrl"]
-
-        sources = self.api.source(file_url)
-        source = next((r for r in sources if r.get("name") == "Source"), None)
-        download_url = source.get('src', {}).get('download')
-
-        url = f"https:{download_url}"
-        metadata = self.get_metadata(user_info, video_info)
-        yield Message.Directory, metadata
-        yield Message.Url, url, metadata
-
-    def yield_image(self, image_group, user_info=None):
-        if user_info is None:
-            user_info = self.extract_user_info(image_group)
-
-        if not (files := image_group.get("files")):
-            image_group = self.api.image(image_group["id"])
-            files = image_group["files"]
-
-        image_group_info = self.extract_media_info(image_group, "file", False)
-        image_group_info["user"] = user_info
-        yield Message.Directory, image_group_info
-
-        for image_file in files:
-            image_file_info = self.extract_media_info(image_file, None)
-            image_info = {**image_file_info, **image_group_info}
-            file_id = image_info.get("file_id")
-            url = (f"https://i.iwara.tv/image/original/"
-                   f"{file_id}/{file_id}.{image_info['extension']}")
-            yield Message.Url, url, image_info
 
     def _user_params(self):
         user, qs = self.groups
@@ -143,8 +146,7 @@ class IwaraUserImagesExtractor(IwaraExtractor):
 
     def items(self):
         user, params = self._user_params()
-        for image in self.api.images(params):
-            yield from self.yield_image(image, user)
+        return self.items_image(self.api.images(params), user)
 
 
 class IwaraUserVideosExtractor(IwaraExtractor):
@@ -154,8 +156,7 @@ class IwaraUserVideosExtractor(IwaraExtractor):
 
     def items(self):
         user, params = self._user_params()
-        for video in self.api.videos(params):
-            yield from self.yield_video(video, user)
+        return self.items_video(self.api.videos(params), user)
 
 
 class IwaraUserPlaylistsExtractor(IwaraExtractor):
@@ -172,17 +173,6 @@ class IwaraUserPlaylistsExtractor(IwaraExtractor):
             yield Message.Queue, url, playlist
 
 
-class IwaraVideoExtractor(IwaraExtractor):
-    """Extractor for individual iwara.tv videos"""
-    subcategory = "video"
-    pattern = rf"{BASE_PATTERN}/video/([^/?#]+)"
-    example = "https://www.iwara.tv/video/ID"
-
-    def items(self):
-        video = self.api.video(self.groups[0])
-        return self.yield_video(video)
-
-
 class IwaraImageExtractor(IwaraExtractor):
     """Extractor for individual iwara.tv image pages"""
     subcategory = "image"
@@ -190,8 +180,17 @@ class IwaraImageExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/image/ID"
 
     def items(self):
-        image = self.api.image(self.groups[0])
-        return self.yield_image(image)
+        return self.items_image((self.api.image(self.groups[0]),))
+
+
+class IwaraVideoExtractor(IwaraExtractor):
+    """Extractor for individual iwara.tv videos"""
+    subcategory = "video"
+    pattern = rf"{BASE_PATTERN}/video/([^/?#]+)"
+    example = "https://www.iwara.tv/video/ID"
+
+    def items(self):
+        return self.items_video((self.api.video(self.groups[0]),))
 
 
 class IwaraPlaylistExtractor(IwaraExtractor):
@@ -201,8 +200,7 @@ class IwaraPlaylistExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/playlist/ID"
 
     def items(self):
-        for video in self.api.playlist(self.groups[0]):
-            yield from self.yield_video(video)
+        return self.items_video(self.api.playlist(self.groups[0]))
 
 
 class IwaraSearchExtractor(IwaraExtractor):
@@ -217,15 +215,12 @@ class IwaraSearchExtractor(IwaraExtractor):
         self.kwdict["search_tags"] = query = params.get("query")
 
         results = self.api.search(type, query)
+        if type == "image":
+            return self.items_image(results)
         if type == "video":
-            for video in results:
-                yield from self.yield_video(video)
-        elif type == "image":
-            for image in results:
-                yield from self.yield_image(image)
-        else:
-            raise exception.StopExtraction(
-                "Unsupported search type '%s'", type)
+            return self.items_video(results)
+
+        raise exception.AbortExtraction("Unsupported search type '%s'", type)
 
 
 class IwaraTagExtractor(IwaraExtractor):
@@ -240,12 +235,10 @@ class IwaraTagExtractor(IwaraExtractor):
         self.kwdict["search_type"] = type
         self.kwdict["search_tags"] = params.get("tags")
 
-        if type == "videos":
-            for video in self.api.videos(params):
-                yield from self.yield_video(video)
+        if type == "images":
+            return self.items_image(self.api.images(params))
         else:
-            for image in self.api.images(params):
-                yield from self.yield_image(image)
+            return self.items_video(self.api.videos(params))
 
 
 class IwaraAPI():
@@ -266,26 +259,35 @@ class IwaraAPI():
         endpoint = f"/image/{image_id}"
         return self._call(endpoint)
 
+    def video(self, video_id):
+        endpoint = f"/video/{video_id}"
+        return self._call(endpoint)
+
+    def playlist(self, playlist_id):
+        endpoint = f"/playlist/{playlist_id}"
+        return self._pagination(endpoint)
+
+    def detail(self, media):
+        endpoint = f"/{media['type']}/{media['id']}"
+        return self._call(endpoint)
+
     def images(self, params):
         endpoint = "/images"
         params.setdefault("rating", "all")
         return self._pagination(endpoint, params)
-
-    def video(self, video_id):
-        endpoint = f"/video/{video_id}"
-        return self._call(endpoint)
 
     def videos(self, params):
         endpoint = "/videos"
         params.setdefault("rating", "all")
         return self._pagination(endpoint, params)
 
-    def playlist(self, playlist_id):
-        endpoint = f"/playlist/{playlist_id}"
-        return self._pagination(endpoint)
-
     def playlists(self, params):
         endpoint = "/playlists"
+        return self._pagination(endpoint, params)
+
+    def collection(self, type, params):
+        endpoint = f"/{type}s"
+        params.setdefault("rating", "all")
         return self._pagination(endpoint, params)
 
     def search(self, type, query):
@@ -298,16 +300,9 @@ class IwaraAPI():
         endpoint = f"/profile/{username}"
         return self._call(endpoint)
 
-    def user_id(self, username):
-        return self.profile(username)["user"]["id"]
-
     def user_following(self, user_id):
         endpoint = f"/user/{user_id}/following"
         return self._pagination(endpoint)
-
-    def item(self, endpoint):
-        url = self.root + endpoint
-        return self.extractor.request_json(url, headers=self.headers)
 
     def source(self, file_url):
         base, _, query = file_url.partition("?")
@@ -345,8 +340,6 @@ class IwaraAPI():
     def _call(self, endpoint, params=None, headers=None):
         if headers is None:
             headers = self.headers
-        else:
-            headers.update(self.headers)
 
         url = self.root + endpoint
         return self.extractor.request_json(url, params=params, headers=headers)
