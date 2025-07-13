@@ -19,9 +19,9 @@ class IwaraExtractor(Extractor):
     """Base class for iwara.tv extractors"""
     category = "iwara"
     root = "https://www.iwara.tv"
-    directory_fmt = ("{category}", "{username}")
-    filename_fmt = "{id} {title} {filename}.{extension}"
-    archive_fmt = "{type} {username} {id} {filename}"
+    directory_fmt = ("{category}", "{user[name]}")
+    filename_fmt = "{date} {id} {title[:200]} {filename}.{extension}"
+    archive_fmt = "{type} {user[name]} {id} {file_id}"
 
     def _init(self):
         self.api = IwaraAPI(self)
