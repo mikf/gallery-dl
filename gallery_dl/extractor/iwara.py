@@ -7,7 +7,7 @@
 """Extractors for https://www.iwara.tv/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache, memcache
 import hashlib
 
@@ -253,7 +253,9 @@ class IwaraAPI():
             "Origin"      : extractor.root,
         }
 
-        self.authenticate()
+        self.username, self.password = extractor._get_auth_info()
+        if not self.username:
+            self.authenticate = util.noop
 
     def image(self, image_id):
         endpoint = f"/image/{image_id}"
@@ -316,32 +318,46 @@ class IwaraAPI():
         return self.extractor.request_json(file_url, headers=headers)
 
     def authenticate(self):
-        username, password = self.extractor._get_auth_info()
-        if username:
-            self.headers["Authorization"] = self._authenticate_impl(
-                username, password)
+        self.headers["Authorization"] = self._authenticate_impl(self.username)
 
-    @cache(maxage=28*86400, keyarg=1)
-    def _authenticate_impl(self, username, password):
-        self.extractor.log.info("Logging in as %s", username)
+    @cache(maxage=3600, keyarg=1)
+    def _authenticate_impl(self, username):
+        refresh_token = _refresh_token_cache(username)
+        if refresh_token is None:
+            self.extractor.log.info("Logging in as %s", username)
 
-        url = f"{self.root}/user/login"
-        json = {
-            "email"   : username,
-            "password": password
-        }
+            url = f"{self.root}/user/login"
+            json = {
+                "email"   : username,
+                "password": self.password
+            }
+            data = self.extractor.request_json(
+                url, method="POST", headers=self.headers, json=json,
+                fatal=False)
+
+            if not (refresh_token := data.get("token")):
+                self.extractor.log.debug(data)
+                raise exception.AuthenticationError(data.get("message"))
+            _refresh_token_cache.update(username, refresh_token)
+
+        self.extractor.log.info("Refreshing access token for %s", username)
+
+        url = f"{self.root}/user/token"
+        headers = {"Authorization": f"Bearer {refresh_token}", **self.headers}
         data = self.extractor.request_json(
-            url, method="POST", json=json, fatal=False)
+            url, method="POST", headers=headers, fatal=False)
 
-        if token := data.get("token"):
-            return f"Bearer {token}"
-        raise exception.AuthenticationError(data.get("message"))
+        if not (access_token := data.get("accessToken")):
+            self.extractor.log.debug(data)
+            raise exception.AuthenticationError(data.get("message"))
+        return f"Bearer {access_token}"
 
     def _call(self, endpoint, params=None, headers=None):
         if headers is None:
             headers = self.headers
 
         url = self.root + endpoint
+        self.authenticate()
         return self.extractor.request_json(url, params=params, headers=headers)
 
     def _pagination(self, endpoint, params=None):
@@ -360,3 +376,8 @@ class IwaraAPI():
             if len(results) < params["limit"]:
                 break
             params["page"] += 1
+
+
+@cache(maxage=28*86400, keyarg=0)
+def _refresh_token_cache(username):
+    return None
