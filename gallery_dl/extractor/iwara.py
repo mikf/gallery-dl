@@ -78,6 +78,15 @@ class IwaraExtractor(Extractor):
             yield Message.Directory, info
             yield Message.Url, f"https:{download_url}", info
 
+    def items_user(self, users, key):
+        base = f"{self.root}/profile/"
+        for user in users:
+            user = user[key]
+            if (username := user["username"]) is None:
+                continue
+            user["_extractor"] = IwaraUserExtractor
+            yield Message.Queue, f"{base}{username}", user
+
     def extract_media_info(self, item, key, include_file_info=True):
         title = t.strip() if (t := item.get("title")) else ""
 
@@ -176,6 +185,26 @@ class IwaraUserPlaylistsExtractor(IwaraExtractor):
             playlist["_extractor"] = IwaraPlaylistExtractor
             url = f"{base}{playlist['id']}"
             yield Message.Queue, url, playlist
+
+
+class IwaraFollowingExtractor(IwaraExtractor):
+    subcategory = "following"
+    pattern = rf"{USER_PATTERN}/following"
+    example = "https://www.iwara.tv/profile/USERNAME/following"
+
+    def items(self):
+        uid = self.api.profile(self.groups[0])["user"]["id"]
+        return self.items_user(self.api.user_following(uid), "user")
+
+
+class IwaraFollowersExtractor(IwaraExtractor):
+    subcategory = "followers"
+    pattern = rf"{USER_PATTERN}/followers"
+    example = "https://www.iwara.tv/profile/USERNAME/followers"
+
+    def items(self):
+        uid = self.api.profile(self.groups[0])["user"]["id"]
+        return self.items_user(self.api.user_followers(uid), "follower")
 
 
 class IwaraImageExtractor(IwaraExtractor):
@@ -328,6 +357,10 @@ class IwaraAPI():
 
     def user_following(self, user_id):
         endpoint = f"/user/{user_id}/following"
+        return self._pagination(endpoint)
+
+    def user_followers(self, user_id):
+        endpoint = f"/user/{user_id}/followers"
         return self._pagination(endpoint)
 
     def source(self, file_url):

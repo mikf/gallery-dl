@@ -51,6 +51,22 @@ __tests__ = (
 },
 
 {
+    "#url"          : "https://www.iwara.tv/profile/tyron82/following",
+    "#class"        : iwara.IwaraFollowingExtractor,
+    "#pattern"      : iwara.IwaraUserExtractor.pattern,
+    "#range"        : "1-100",
+    "#count"        : 100,
+},
+
+{
+    "#url"          : "https://www.iwara.tv/profile/tyron82/followers",
+    "#class"        : iwara.IwaraFollowersExtractor,
+    "#pattern"      : iwara.IwaraUserExtractor.pattern,
+    "#range"        : "1-100",
+    "#count"        : 100,
+},
+
+{
     "#url"          : "https://www.iwara.tv/playlist/01ea603a-4e70-4a36-bc28-dc717eebc2d7",
     "#category"     : ("", "iwara", "playlist"),
     "#class"        : iwara.IwaraPlaylistExtractor,
@@ -78,6 +94,18 @@ __tests__ = (
         "role"       : "user",
         "status"     : "active",
     },
+},
+
+{
+    "#url"          : "https://www.iwara.tv/favorites/videos",
+    "#class"        : iwara.IwaraFavoriteExtractor,
+    "#auth"         : True,
+},
+
+{
+    "#url"          : "https://www.iwara.tv/favorites/images",
+    "#class"        : iwara.IwaraFavoriteExtractor,
+    "#auth"         : True,
 },
 
 {
