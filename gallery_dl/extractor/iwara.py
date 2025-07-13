@@ -7,7 +7,7 @@
 """Extractors for https://www.iwara.tv/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, exception
 from ..cache import cache, memcache
 import hashlib
 
@@ -254,9 +254,7 @@ class IwaraAPI():
             "Origin"      : extractor.root,
         }
 
-        self.username, self.password = extractor._get_auth_info()
-        if not self.username:
-            self.authenticate = util.noop
+        self.authenticate()
 
     def image(self, image_id):
         endpoint = f"/image/{image_id}"
@@ -317,8 +315,10 @@ class IwaraAPI():
         return self.extractor.request_json(file_url, headers=headers)
 
     def authenticate(self):
-        self.headers["Authorization"] = self._authenticate_impl(
-            self.username, self.password)
+        username, password = self.extractor._get_auth_info()
+        if username:
+            self.headers["Authorization"] = self._authenticate_impl(
+                username, password)
 
     @cache(maxage=28*86400, keyarg=1)
     def _authenticate_impl(self, username, password):
@@ -336,12 +336,14 @@ class IwaraAPI():
             return f"Bearer {token}"
         raise exception.AuthenticationError(data.get("message"))
 
-    def _call(self, endpoint, params=None):
-        url = self.root + endpoint
+    def _call(self, endpoint, params=None, headers=None):
+        if headers is None:
+            headers = self.headers
+        else:
+            headers.update(self.headers)
 
-        self.authenticate()
-        return self.extractor.request_json(
-            url, params=params, headers=self.headers)
+        url = self.root + endpoint
+        return self.extractor.request_json(url, params=params, headers=headers)
 
     def _pagination(self, endpoint, params=None):
         if params is None:
