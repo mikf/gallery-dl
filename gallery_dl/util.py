@@ -782,6 +782,7 @@ GLOBALS = {
     "datetime" : datetime.datetime,
     "timedelta": datetime.timedelta,
     "abort"    : raises(exception.StopExtraction),
+    "error"    : raises(exception.AbortExtraction),
     "terminate": raises(exception.TerminateExtraction),
     "restart"  : raises(exception.RestartExtraction),
     "hash_sha1": sha1,
