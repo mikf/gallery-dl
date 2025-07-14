@@ -1057,8 +1057,8 @@ Description
 extractor.*.actions
 -------------------
 Type
-    * ``object`` (`pattern` -> `action(s)`)
-    * ``list`` of ``lists`` with `pattern` -> `action(s)` pairs as elements
+    * ``object`` (`pattern` -> `Action(s)`_)
+    * ``list`` of ``lists`` with `pattern` -> `Action(s)`_ pairs as elements
 Example
     .. code:: json
 
@@ -1085,50 +1085,16 @@ Example
         ]
 
 Description
-    Perform an ``action`` when logging a message matched by ``pattern``.
+    Perform an Action_ when logging a message matched by ``pattern``.
 
     ``pattern`` is parsed as severity level (``debug``, ``info``, ``warning``, ``error``, or integer value)
-    followed by an optional `Python Regular Expression <https://docs.python.org/3/library/re.html#regular-expression-syntax>`__
-    separated by a colon ``:``.
+    followed by an optional
+    `Python Regular Expression <https://docs.python.org/3/library/re.html#regular-expression-syntax>`__
+    separated by a colon ``:``
+
     Using ``*`` as `level` or leaving it empty
     matches logging messages of all levels
     (e.g. ``*:<re>`` or ``:<re>``).
-
-    ``action`` is parsed as action type
-    followed by (optional) arguments.
-
-    It is possible to specify more than one ``action`` per ``pattern``
-    by providing them as a ``list``: ``["<action1>", "<action2>", …]``
-
-    Supported Action Types:
-
-    ``status``:
-        | Modify job exit status.
-        | Expected syntax is ``<operator> <value>`` (e.g. ``= 100``).
-
-        Supported operators are
-        ``=`` (assignment),
-        ``&`` (bitwise AND),
-        ``|`` (bitwise OR),
-        ``^`` (bitwise XOR).
-    ``level``:
-        | Modify severity level of the current logging message.
-        | Can be one of ``debug``, ``info``, ``warning``, ``error`` or an integer value.
-    ``print``:
-        Write argument to stdout.
-    ``exec``:
-        Run a shell command.
-    ``abort``:
-        Stop the current extractor run.
-    ``terminate``:
-        Stop the current extractor run, including parent extractors.
-    ``restart``:
-        Restart the current extractor run.
-    ``wait``:
-        | Sleep for a given Duration_ or
-        | wait until Enter is pressed when no argument was given.
-    ``exit``:
-        Exit the program with the given argument as exit status.
 
 
 extractor.*.postprocessors
@@ -7942,6 +7908,27 @@ Description
     as signal handler for.
 
 
+signals-actions
+---------------
+Type
+    ``object`` (`signal` -> `Action(s)`_)
+Example
+    .. code:: json
+
+        {
+            "SIGINT" : "flag download = stop",
+            "SIGUSR1": [
+                "print Received SIGUSR1",
+                "exec notify.sh",
+                "exit 127"
+            ]
+        }
+Description
+    `Action(s)`_ to perform when a
+    `signal <https://docs.python.org/3/library/signal.html>`__
+    is received.
+
+
 subconfigs
 ----------
 Type
@@ -8279,6 +8266,67 @@ Description
         Store files in a ZIP archive
 
 
+Action
+------
+Type
+    ``string``
+Example
+    * ``"exit"``
+    * ``"print Hello World"``
+    * ``"raise AbortExtraction an error occured"``
+    * ``"flag file = terminate"``
+Description
+    An Action_ is parsed as `Action Type`
+    followed by (optional) arguments.
+
+    It is possible to specify more than one ``action``
+    by providing them as a ``list``: ``["<action1>", "<action2>", …]``
+
+    Supported `Action Types`:
+
+    ``status``:
+        | Modify job exit status.
+        | Expected syntax is ``<operator> <value>`` (e.g. ``= 100``).
+
+        Supported operators are
+        ``=`` (assignment),
+        ``&`` (bitwise AND),
+        ``|`` (bitwise OR),
+        ``^`` (bitwise XOR).
+    ``level``:
+        | Modify severity level of the current logging message.
+        | Can be one of ``debug``, ``info``, ``warning``, ``error`` or an integer value.
+    ``print``:
+        Write argument to stdout.
+    ``exec``:
+        Run a shell command.
+    ``abort``:
+        Stop the current extractor run.
+    ``terminate``:
+        Stop the current extractor run, including parent extractors.
+    ``restart``:
+        Restart the current extractor run.
+    ``raise``:
+        Raise an exception.
+
+        This can be an exception defined in
+        `exception.py <https://github.com/mikf/gallery-dl/blob/master/gallery_dl/exception.py>`_
+        or a
+        `built-in exception <https://docs.python.org/3/library/exceptions.html#exception-hierarchy>`_
+        (e.g. ``ZeroDivisionError``)
+    ``flag``:
+        Set a ``flag``.
+
+        | Expected syntax is ``<flag>[ = <value>]`` (e.g. ``post = stop``)
+        | ``<flag>`` can be one of ``file``, ``post``, ``child``, ``download``
+        | ``<value>`` can be one of ``stop``, ``abort``, ``terminate``, ``restart`` (default ``stop``)
+    ``wait``:
+        | Sleep for a given Duration_ or
+        | wait until Enter is pressed when no argument was given.
+    ``exit``:
+        Exit the program with the given argument as exit status.
+
+
 
 .. |ytdl| replace:: `yt-dlp`_/`youtube-dl`_
 .. |ytdl's| replace:: yt-dlp's/youtube-dl's
@@ -8311,6 +8359,7 @@ Description
 .. _deviantart.comments: `extractor.deviantart.comments`_
 .. _postprocessors: `extractor.*.postprocessors`_
 .. _download archive: `extractor.*.archive`_
+.. _Action(s): Action_
 
 .. _.netrc:             https://stackoverflow.com/tags/.netrc/info
 .. _Last-Modified:      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29

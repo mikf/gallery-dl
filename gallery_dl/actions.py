@@ -15,7 +15,7 @@ import functools
 from . import util, exception
 
 
-def parse(actionspec):
+def parse_logging(actionspec):
     if isinstance(actionspec, dict):
         actionspec = actionspec.items()
 
@@ -73,6 +73,41 @@ def parse(actionspec):
     return actions
 
 
+def parse_signals(actionspec):
+    import signal
+
+    if isinstance(actionspec, dict):
+        actionspec = actionspec.items()
+
+    for signal_name, spec in actionspec:
+        signal_num = getattr(signal, signal_name, None)
+        if signal_num is None:
+            log = logging.getLogger("gallery-dl")
+            log.warning("signal '%s' is not defined", signal_name)
+            continue
+
+        if isinstance(spec, str):
+            type, _, args = spec.partition(" ")
+            before, after = ACTIONS[type](args)
+            action = before if after is None else after
+        else:
+            actions_before = []
+            actions_after = []
+            for s in spec:
+                type, _, args = s.partition(" ")
+                before, after = ACTIONS[type](args)
+                if before is not None:
+                    actions_before.append(before)
+                if after is not None:
+                    actions_after.append(after)
+
+            actions = actions_before
+            actions.extend(actions_after)
+            action = _chain_actions(actions)
+
+        signal.signal(signal_num, signals_handler(action))
+
+
 class LoggerAdapter():
 
     def __init__(self, logger, job):
@@ -126,6 +161,12 @@ def _chain_actions(actions):
         for action in actions:
             action(args)
     return _chain
+
+
+def signals_handler(action, args={}):
+    def handler(signal_num, frame):
+        action(args)
+    return handler
 
 
 # --------------------------------------------------------------------
