@@ -3197,6 +3197,26 @@ Description
     Download video files.
 
 
+extractor.iwara.include
+-----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["user-images", "user-videos"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+
+    * ``"user-images"``
+    * ``"user-videos"``
+    * ``"user-playlists"``
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
 extractor.kemono.archives
 -------------------------
 Type

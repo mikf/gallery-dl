@@ -29,6 +29,8 @@ __tests__ = (
 
     "extension": "png",
     "type"     : "image",
+    "count"    : 1,
+    "num"      : 1,
 },
 
 {
@@ -41,6 +43,8 @@ __tests__ = (
 
     "extension": "mp4",
     "type"     : "video",
+    "count"    : 1,
+    "num"      : 1,
 },
 
 {
@@ -48,6 +52,8 @@ __tests__ = (
     "#class"        : iwara.IwaraUserPlaylistsExtractor,
     "#pattern"      : iwara.IwaraPlaylistExtractor.pattern,
     "#count"        : range(10, 20),
+
+    "type"          : "playlist",
 },
 
 {
@@ -56,6 +62,8 @@ __tests__ = (
     "#pattern"      : iwara.IwaraUserExtractor.pattern,
     "#range"        : "1-100",
     "#count"        : 100,
+
+    "type"          : "user",
 },
 
 {
@@ -64,6 +72,8 @@ __tests__ = (
     "#pattern"      : iwara.IwaraUserExtractor.pattern,
     "#range"        : "1-100",
     "#count"        : 100,
+
+    "type"          : "user",
 },
 
 {
@@ -162,7 +172,6 @@ __tests__ = (
     "height"        : None,
     "type"          : "video",
     "search_tags"   : "aether,citlali",
-    "search_type"   : "videos",
     "duration"      : range(90, 200),
 },
 
@@ -170,20 +179,12 @@ __tests__ = (
     "#url"          : "https://www.iwara.tv/images?tags=genshin_impact%2Ccitlali",
     "#category"     : ("", "iwara", "tag"),
     "#class"        : iwara.IwaraTagExtractor,
-    "#results"      : (
-        "https://i.iwara.tv/image/original/c442c69f-30fb-4fd4-8f8f-338bbc77c07d/c442c69f-30fb-4fd4-8f8f-338bbc77c07d.jpg",
-        "https://i.iwara.tv/image/original/7b53cc07-3640-4749-8c11-6da5f5a292a0/7b53cc07-3640-4749-8c11-6da5f5a292a0.jpg",
-        "https://i.iwara.tv/image/original/373cc1cb-028e-44bd-aef3-3400de4f995b/373cc1cb-028e-44bd-aef3-3400de4f995b.jpg",
-        "https://i.iwara.tv/image/original/0256b01b-8b4d-47f7-894d-2aceba6b8ab8/0256b01b-8b4d-47f7-894d-2aceba6b8ab8.jpg",
-        "https://i.iwara.tv/image/original/8541dab6-9c67-419d-8af8-2e040ae487dc/8541dab6-9c67-419d-8af8-2e040ae487dc.png",
-        "https://i.iwara.tv/image/original/8eba51de-c618-4853-964f-25f526b58398/8eba51de-c618-4853-964f-25f526b58398.webm",
-    ),
+    "#pattern"      : r"https://i.iwara.tv/image/original/[0-9a-f-]{36}/[0-9a-f-]{36}\.(jpg|png|webm)",
 
     "duration"    : None,
     "extension"   : {"jpg", "png", "webm"},
     "mime"        : {"image/jpeg", "image/png", "video/webm"},
     "search_tags" : "genshin_impact,citlali",
-    "search_type" : "images",
     "type"        : "image",
 },
 
@@ -231,6 +232,10 @@ __tests__ = (
     "extension"     : "png",
     "mime"          : "image/png",
     "type"          : "image",
+    "width"         : int,
+    "height"        : int,
+    "count"         : 13,
+    "num"           : range(1, 13),
     "date"          : "type:datetime",
     "date_updated"  : "type:datetime",
 },
