@@ -192,6 +192,24 @@ def action_flag(opts):
     return _flag, None
 
 
+def action_raise(opts):
+    name, _, arg = opts.partition(" ")
+
+    exc = getattr(exception, name, None)
+    if exc is None:
+        import builtins
+        exc = getattr(builtins, name, Exception)
+
+    if arg:
+        def _raise(args):
+            raise exc(arg)
+    else:
+        def _raise(args):
+            raise exc()
+
+    return None, _raise
+
+
 def action_abort(opts):
     return None, util.raises(exception.StopExtraction)
 
@@ -222,6 +240,7 @@ ACTIONS = {
     "flag"     : action_flag,
     "level"    : action_level,
     "print"    : action_print,
+    "raise"    : action_raise,
     "restart"  : action_restart,
     "status"   : action_status,
     "terminate": action_terminate,
