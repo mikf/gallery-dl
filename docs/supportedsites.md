@@ -622,7 +622,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Motherless</td>
     <td>https://motherless.com/</td>
-    <td>Galleries, Media Files</td>
+    <td>Galleries, Groups, Media Files</td>
     <td></td>
 </tr>
 <tr>
