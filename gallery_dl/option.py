@@ -286,6 +286,11 @@ def build_parser():
         help="Delete cached login sessions, cookies, etc. for MODULE "
              "(ALL to delete everything)",
     )
+    general.add_argument(
+        "--compat",
+        dest="category-map", nargs=0, action=ConfigConstAction, const="compat",
+        help="Restore legacy 'category' names",
+    )
 
     update = parser.add_argument_group("Update Options")
     if util.EXECUTABLE:

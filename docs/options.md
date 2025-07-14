@@ -14,6 +14,7 @@
     --user-agent UA             User-Agent request header
     --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
                                 MODULE (ALL to delete everything)
+    --compat                    Restore legacy 'category' names
 
 ## Update Options:
     -U, --update                Update to the latest version
