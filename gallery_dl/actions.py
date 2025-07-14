@@ -180,6 +180,18 @@ def action_wait(opts):
     return None, _wait
 
 
+def action_flag(opts):
+    flag, value = util.re(
+        r"(?i)(file|post|child|download)(?:\s*[= ]\s*(.+))?"
+    ).match(opts).groups()
+    flag = flag.upper()
+    value = "stop" if value is None else value.lower()
+
+    def _flag(args):
+        util.FLAGS.__dict__[flag] = value
+    return _flag, None
+
+
 def action_abort(opts):
     return None, util.raises(exception.StopExtraction)
 
@@ -207,6 +219,7 @@ ACTIONS = {
     "abort"    : action_abort,
     "exec"     : action_exec,
     "exit"     : action_exit,
+    "flag"     : action_flag,
     "level"    : action_level,
     "print"    : action_print,
     "restart"  : action_restart,
