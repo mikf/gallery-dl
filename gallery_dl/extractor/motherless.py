@@ -24,7 +24,7 @@ class MotherlessExtractor(Extractor):
     archive_fmt = "{id}"
 
     def _extract_media(self, path):
-        url = self.root + "/" + path
+        url = f"{self.root}/{path}"
         page = self.request(url).text
         extr = text.extract_from(page)
 
@@ -48,11 +48,13 @@ class MotherlessExtractor(Extractor):
             "uploader": text.unescape(extr('class="username">', "<").strip()),
         }
 
-        if path and path[0] == "G":
+        if not path:
+            pass
+        elif path[0] == "G":
             data["gallery_id"] = path[1:]
             data["gallery_title"] = self._extract_gallery_title(
                 page, data["gallery_id"])
-        elif path and path[0] == "g":
+        elif path[0] == "g":
             data["group_id"] = path[2:]
             data["group_title"] = self._extract_group_title(
                 page, data["group_id"])
@@ -70,18 +72,20 @@ class MotherlessExtractor(Extractor):
                 return
             page = self.request(text.unescape(url)).text
 
-    def _extract_data(self, page):
+    def _extract_data(self, page, category):
         extr = text.extract_from(page)
+
         gid = self.groups[-1]
-        if self.subcategory == "gallery":
+        if category == "gallery":
             title = self._extract_gallery_title(page, gid)
-        elif self.subcategory == "group":
+        else:
             title = self._extract_group_title(page, gid)
+
         return {
-            f"{self.subcategory}_id": gid,
-            f"{self.subcategory}_title": title,
+            f"{category}_id": gid,
+            f"{category}_title": title,
             "uploader": text.remove_html(extr(
-                f'class="{self.subcategory}-member-username">', "</")),
+                f'class="{category}-member-username">', "</")),
             "count": text.parse_int(
                 extr('<span class="active">', ")")
                 .rpartition("(")[2].replace(",", "")),
@@ -117,7 +121,7 @@ class MotherlessExtractor(Extractor):
         if title:
             return text.unescape(title.strip())
 
-        pos = page.find(' href="/G' + gallery_id + '"')
+        pos = page.find(f' href="/G{gallery_id}"')
         if pos >= 0:
             return text.unescape(text.extract(
                 page, ' title="', '"', pos)[0])
@@ -164,13 +168,13 @@ class MotherlessGalleryExtractor(MotherlessExtractor):
 
         if not type:
             data = {"_extractor": MotherlessGalleryExtractor}
-            yield Message.Queue, self.root + "/GI" + gid, data
-            yield Message.Queue, self.root + "/GV" + gid, data
+            yield Message.Queue, f"{self.root}/GI{gid}", data
+            yield Message.Queue, f"{self.root}/GV{gid}", data
             return
 
         url = f"{self.root}/G{type}{gid}"
         page = self.request(url).text
-        data = self._extract_data(page)
+        data = self._extract_data(page, "gallery")
 
         for num, thumb in enumerate(self._pagination(page), 1):
             file = self._parse_thumb_data(thumb)
@@ -200,13 +204,13 @@ class MotherlessGroupExtractor(MotherlessExtractor):
 
         if not type:
             data = {"_extractor": MotherlessGroupExtractor}
-            yield Message.Queue, self.root + "/gi/" + gid, data
-            yield Message.Queue, self.root + "/gv/" + gid, data
+            yield Message.Queue, f"{self.root}/gi/{gid}", data
+            yield Message.Queue, f"{self.root}/gv/{gid}", data
             return
 
         url = f"{self.root}/g{type}/{gid}"
         page = self.request(url).text
-        data = self._extract_data(page)
+        data = self._extract_data(page, "group")
 
         for num, thumb in enumerate(self._pagination(page), 1):
             file = self._parse_thumb_data(thumb)
