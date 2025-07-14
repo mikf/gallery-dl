@@ -90,23 +90,8 @@ def main():
                     signal.signal(signal_num, signal.SIG_IGN)
 
         if signals := config.get((), "signals-actions"):
-            import signal
-
-            def signals_handler(event, action):
-                def handler(signal_num, frame):
-                    signal_name = signal.Signals(signal_num).name
-                    output.stderr_write(f"{signal_name} received\n")
-                    util.FLAGS.__dict__[event] = action
-                return handler
-
-            for signal_name, action in signals.items():
-                signal_num = getattr(signal, signal_name, None)
-                if signal_num is None:
-                    log.warning("signal '%s' is not defined", signal_name)
-                else:
-                    event, _, action = action.rpartition(":")
-                    signal.signal(signal_num, signals_handler(
-                        event.upper() if event else "FILE", action.lower()))
+            from . import actions
+            actions.parse_signals(signals)
 
         # enable ANSI escape sequences on Windows
         if util.WINDOWS and config.get(("output",), "ansi", output.COLORS):
