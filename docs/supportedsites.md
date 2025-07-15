@@ -543,7 +543,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Komikcast</td>
-    <td>https://komikcast02.com/</td>
+    <td>https://komikcast.li/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
