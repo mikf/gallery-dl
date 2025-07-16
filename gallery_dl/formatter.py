@@ -28,25 +28,17 @@ def parse(format_string, default=NONE, fmt=format):
     except KeyError:
         pass
 
-    cls = StringFormatter
     if format_string and format_string[0] == "\f":
         kind, _, format_string = format_string.partition(" ")
-        kind = kind[1:]
-
-        if kind == "T":
-            cls = TemplateFormatter
-        elif kind == "TF":
-            cls = TemplateFStringFormatter
-        elif kind == "TJ":
-            cls = TemplateJinjaFormatter
-        elif kind == "E":
-            cls = ExpressionFormatter
-        elif kind == "J":
-            cls = JinjaFormatter
-        elif kind == "F":
-            cls = FStringFormatter
-        elif kind == "M":
-            cls = ModuleFormatter
+        try:
+            cls = _FORMATTERS[kind[1:]]
+        except KeyError:
+            import logging
+            logging.getLogger("formatter").error(
+                "Invalid formatter type '%s'", kind[1:])
+            cls = StringFormatter
+    else:
+        cls = StringFormatter
 
     formatter = _CACHE[key] = cls(format_string, default, fmt)
     return formatter
@@ -212,15 +204,6 @@ class ExpressionFormatter():
         self.format_map = util.compile_expression(expression)
 
 
-class ModuleFormatter():
-    """Generate text by calling an external function"""
-
-    def __init__(self, function_spec, default=NONE, fmt=None):
-        module_name, _, function_name = function_spec.rpartition(":")
-        module = util.import_file(module_name)
-        self.format_map = getattr(module, function_name)
-
-
 class FStringFormatter():
     """Generate text by evaluating an f-string literal"""
 
@@ -237,6 +220,15 @@ class JinjaFormatter():
             import jinja2
             JinjaFormatter.env = jinja2.Environment()
         self.format_map = self.env.from_string(source).render
+
+
+class ModuleFormatter():
+    """Generate text by calling an external function"""
+
+    def __init__(self, function_spec, default=NONE, fmt=None):
+        module_name, _, function_name = function_spec.rpartition(":")
+        module = util.import_file(module_name)
+        self.format_map = getattr(module, function_name)
 
 
 class TemplateFormatter(StringFormatter):
@@ -516,6 +508,18 @@ _literal = Literal()
 
 _CACHE = {}
 _SEPARATOR = "/"
+_FORMATTERS = {
+    "E" : ExpressionFormatter,
+    "F" : FStringFormatter,
+    "J" : JinjaFormatter,
+    "M" : ModuleFormatter,
+    "S" : StringFormatter,
+    "T" : TemplateFormatter,
+    "TF": TemplateFStringFormatter,
+    "FT": TemplateFStringFormatter,
+    "TJ": TemplateJinjaFormatter,
+    "JT": TemplateJinjaFormatter,
+}
 _GLOBALS = {
     "_env": lambda: os.environ,
     "_lit": lambda: _literal,
