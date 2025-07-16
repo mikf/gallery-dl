@@ -29,7 +29,7 @@ def parse(format_string, default=NONE, fmt=format):
         pass
 
     cls = StringFormatter
-    if format_string.startswith("\f"):
+    if format_string and format_string[0] == "\f":
         kind, _, format_string = format_string.partition(" ")
         kind = kind[1:]
 
@@ -37,12 +37,16 @@ def parse(format_string, default=NONE, fmt=format):
             cls = TemplateFormatter
         elif kind == "TF":
             cls = TemplateFStringFormatter
+        elif kind == "TJ":
+            cls = TemplateJinjaFormatter
         elif kind == "E":
             cls = ExpressionFormatter
-        elif kind == "M":
-            cls = ModuleFormatter
+        elif kind == "J":
+            cls = JinjaFormatter
         elif kind == "F":
             cls = FStringFormatter
+        elif kind == "M":
+            cls = ModuleFormatter
 
     formatter = _CACHE[key] = cls(format_string, default, fmt)
     return formatter
@@ -224,6 +228,17 @@ class FStringFormatter():
         self.format_map = util.compile_expression(f'f"""{fstring}"""')
 
 
+class JinjaFormatter():
+    """Generate text by evaluating a Jinja template string"""
+    env = None
+
+    def __init__(self, source, default=NONE, fmt=None):
+        if self.env is None:
+            import jinja2
+            JinjaFormatter.env = jinja2.Environment()
+        self.format_map = self.env.from_string(source).render
+
+
 class TemplateFormatter(StringFormatter):
     """Read format_string from file"""
 
@@ -240,6 +255,15 @@ class TemplateFStringFormatter(FStringFormatter):
         with open(util.expand_path(path)) as fp:
             fstring = fp.read()
         FStringFormatter.__init__(self, fstring, default, fmt)
+
+
+class TemplateJinjaFormatter(JinjaFormatter):
+    """Generate text by evaluating a Jinja template"""
+
+    def __init__(self, path, default=NONE, fmt=None):
+        with open(util.expand_path(path)) as fp:
+            source = fp.read()
+        JinjaFormatter.__init__(self, source, default, fmt)
 
 
 def parse_field_name(field_name):
