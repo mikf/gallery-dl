@@ -36,6 +36,7 @@ Optional
 - SecretStorage_: GNOME keyring passwords for ``--cookies-from-browser``
 - Psycopg_: PostgreSQL archive support
 - truststore_: Native system certificate support
+- Jinja_: Jinja template support
 
 
 Installation
@@ -476,6 +477,7 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _SecretStorage: https://pypi.org/project/SecretStorage/
 .. _Psycopg:    https://www.psycopg.org/
 .. _truststore: https://truststore.readthedocs.io/en/latest/
+.. _Jinja:      https://jinja.palletsprojects.com/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
 .. _Chocolatey: https://chocolatey.org/install

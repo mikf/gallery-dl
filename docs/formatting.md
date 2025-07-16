@@ -382,14 +382,19 @@ Starting a format string with `\f<Type> ` allows to set a different format strin
 </thead>
 <tbody>
 <tr>
+    <td align="center"><code>E</code></td>
+    <td>An arbitrary Python expression</td>
+    <td><code>\fE title.upper().replace(' ', '-')</code></td>
+</tr>
+<tr>
     <td align="center"><code>F</code></td>
     <td>An <a href="https://docs.python.org/3/tutorial/inputoutput.html#formatted-string-literals">f-string</a> literal</td>
     <td><code>\fF '{title.strip()}' by {artist.capitalize()}</code></td>
 </tr>
 <tr>
-    <td align="center"><code>E</code></td>
-    <td>An arbitrary Python expression</td>
-    <td><code>\fE title.upper().replace(' ', '-')</code></td>
+    <td align="center"><code>J</code></td>
+    <td>A <a href="https://jinja.palletsprojects.com/">Jinja</a> template</td>
+    <td><code>\fJ '{{title | trim}}' by {{artist | capitalize}}</code></td>
 </tr>
 <tr>
     <td align="center"><code>T</code></td>
@@ -400,6 +405,11 @@ Starting a format string with `\f<Type> ` allows to set a different format strin
     <td align="center"><code>TF</code></td>
     <td>Path to a template file containing an <a href="https://docs.python.org/3/tutorial/inputoutput.html#formatted-string-literals">f-string</a> literal</td>
     <td><code>\fTF ~/.templates/fstr.txt</code></td>
+</tr>
+<tr>
+    <td align="center"><code>TJ</code></td>
+    <td>Path to a template file containing a <a href="https://jinja.palletsprojects.com/">Jinja</a> template</td>
+    <td><code>\fTF ~/.templates/jinja.txt</code></td>
 </tr>
 <tr>
     <td align="center"><code>M</code></td>

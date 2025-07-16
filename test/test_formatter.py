@@ -17,6 +17,11 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import formatter, text, util  # noqa E402
 
+try:
+    import jinja2
+except ImportError:
+    jinja2 = None
+
 
 class TestFormatter(unittest.TestCase):
 
@@ -475,6 +480,35 @@ class TestFormatter(unittest.TestCase):
 
         with self.assertRaises(OSError):
             formatter.parse("\fTF /")
+
+    @unittest.skipIf(jinja2 is None, "no jinja2")
+    def test_jinja(self):
+        self._run_test("\fJ {{a}}", self.kwdict["a"])
+        self._run_test("\fJ {{name}}{{name}} {{a}}", "{}{} {}".format(
+            self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
+        self._run_test("\fJ foo-'\"{{a | upper}}\"'-bar",
+                       """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+
+    @unittest.skipIf(jinja2 is None, "no jinja2")
+    def test_template_jinja(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path1 = os.path.join(tmpdirname, "tpl1")
+            path2 = os.path.join(tmpdirname, "tpl2")
+
+            with open(path1, "w") as fp:
+                fp.write("{{a}}")
+            fmt1 = formatter.parse("\fTJ " + path1)
+
+            with open(path2, "w") as fp:
+                fp.write("foo-'\"{{a | upper}}\"'-bar")
+            fmt2 = formatter.parse("\fTJ " + path2)
+
+        self.assertEqual(fmt1.format_map(self.kwdict), self.kwdict["a"])
+        self.assertEqual(fmt2.format_map(self.kwdict),
+                         """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+
+        with self.assertRaises(OSError):
+            formatter.parse("\fTJ /")
 
     def test_module(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
