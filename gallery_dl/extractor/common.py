@@ -265,20 +265,27 @@ class Extractor():
         return self.request(url, **kwargs).headers.get("location", "")
 
     def request_json(self, url, **kwargs):
+        response = self.request(url, **kwargs)
+
         try:
-            return util.json_loads(self.request(url, **kwargs).text)
+            return util.json_loads(response.text)
         except Exception as exc:
             fatal = kwargs.get("fatal", True)
             if not fatal or fatal is ...:
-                self.log.warning("%s: %s", exc.__class__.__name__, exc)
+                if challenge := util.detect_challenge(response):
+                    self.log.warning(challenge)
+                else:
+                    self.log.warning("%s: %s", exc.__class__.__name__, exc)
                 return {}
             raise
 
     def request_xml(self, url, xmlns=True, **kwargs):
-        text = self.request(url, **kwargs).text
+        response = self.request(url, **kwargs)
 
-        if not xmlns:
-            text = text.replace(" xmlns=", " ns=")
+        if xmlns:
+            text = response.text
+        else:
+            text = response.text.replace(" xmlns=", " ns=")
 
         parser = ElementTree.XMLParser()
         try:
@@ -287,7 +294,10 @@ class Extractor():
         except Exception as exc:
             fatal = kwargs.get("fatal", True)
             if not fatal or fatal is ...:
-                self.log.warning("%s: %s", exc.__class__.__name__, exc)
+                if challenge := util.detect_challenge(response):
+                    self.log.warning(challenge)
+                else:
+                    self.log.warning("%s: %s", exc.__class__.__name__, exc)
                 return ElementTree.Element("")
             raise
 
