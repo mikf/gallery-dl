@@ -117,7 +117,7 @@ class {ccat}Base():
 
 class {ccat}ChapterExtractor({ccat}Base, ChapterExtractor):
     """Extractor for {cat} manga chapters"""
-    pattern = BASE_PATTERN + r"/PATH"
+    pattern = rf"{{BASE_PATTERN}}/PATH"
     example = ""
 
     def __init__(self, match):
@@ -149,7 +149,7 @@ class {ccat}ChapterExtractor({ccat}Base, ChapterExtractor):
 class {ccat}MangaExtractor({ccat}Base, MangaExtractor):
     """Extractor for {cat} manga"""
     chapterclass = {ccat}ChapterExtractor
-    pattern = BASE_PATTERN + r"/PATH"
+    pattern = rf"{{BASE_PATTERN}}/PATH"
     example = ""
 
     def __init__(self, match):
@@ -198,8 +198,19 @@ class {ccat}UserExtractor(Dispatch, {ccat}Extractor)
 
 
 def build_base_pattern(opts):
+    domain = opts["domain"]
+    if domain.count(".") > 1:
+        subdomain, domain, tld = domain.rsplit(".", 2)
+        domain = f"{domain}.{tld}"
+        if subdomain == "www":
+            subdomain = "(?:www\\.)?"
+        else:
+            subdomain = re.escape(subdomain + ".")
+    else:
+        subdomain = "(?:www\\.)?"
+
     return f"""\
-BASE_PATTERN = r"(?:https?://)?(?:www\\.)?{re.escape(opts["domain"])}"
+BASE_PATTERN = r"(?:https?://)?{subdomain}{re.escape(domain)}"
 """
 
 
