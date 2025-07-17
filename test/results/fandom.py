@@ -35,12 +35,10 @@ __tests__ = (
     "extension"     : "png",
     "extmetadata"   : {
         "DateTime": {
-            "hidden": "",
             "source": "mediawiki-metadata",
             "value": "2015-01-28T05:22:55Z",
         },
         "ObjectName": {
-            "hidden": "",
             "source": "mediawiki-metadata",
             "value": "Yahagi",
         },

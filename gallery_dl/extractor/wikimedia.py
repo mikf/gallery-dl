@@ -238,7 +238,7 @@ class WikimediaArticleExtractor(WikimediaExtractor):
             }
 
     def prepare(self, image):
-        WikimediaExtractor.prepare(image)
+        WikimediaExtractor.prepare(self, image)
         image["page"] = self.title
 
 
