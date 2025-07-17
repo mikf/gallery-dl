@@ -482,6 +482,7 @@ AUTH_MAP = {
     "instagram"      : _COOKIES,
     "iwara"          : "Supported",
     "kemono"         : "Supported",
+    "madokami"       : "Required",
     "mangadex"       : "Supported",
     "mangoxo"        : "Supported",
     "mastodon.social": _OAUTH,

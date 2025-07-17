@@ -106,6 +106,7 @@ modules = [
     "lofter",
     "luscious",
     "lynxchan",
+    "madokami",
     "mangadex",
     "mangafox",
     "mangahere",

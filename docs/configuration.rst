@@ -468,6 +468,7 @@ Description
     * ``inkbunny``
     * ``iwara``
     * ``kemono``
+    * ``madokami`` (R)
     * ``mangadex``
     * ``mangoxo``
     * ``newgrounds``
