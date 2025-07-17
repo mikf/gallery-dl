@@ -57,9 +57,9 @@ class Job():
 
         actions = extr.config("actions")
         if actions:
-            from .actions import LoggerAdapter, parse
+            from .actions import LoggerAdapter, parse_logging
             self._logger_adapter = LoggerAdapter
-            self._logger_actions = parse(actions)
+            self._logger_actions = parse_logging(actions)
 
         path_proxy = output.PathfmtProxy(self)
         self._logger_extra = {
