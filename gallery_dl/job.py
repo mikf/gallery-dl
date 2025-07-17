@@ -166,10 +166,14 @@ class Job():
             log.debug("", exc_info=exc)
             self.status |= exc.code
         except OSError as exc:
-            log.error("Unable to download data:  %s: %s",
-                      exc.__class__.__name__, exc)
             log.debug("", exc_info=exc)
-            self.status |= 128
+            name = exc.__class__.__name__
+            if name == "JSONDecodeError":
+                log.error("Failed to parse JSON data:  %s: %s", name, exc)
+                self.status |= 1
+            else:  # regular OSError
+                log.error("Unable to download data:  %s: %s", name, exc)
+                self.status |= 128
         except Exception as exc:
             log.error(("An unexpected error occurred: %s - %s. "
                        "Please run gallery-dl again with the --verbose flag, "
