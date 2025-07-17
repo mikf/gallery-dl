@@ -64,19 +64,23 @@ class MadokamiMangaExtractor(MadokamiExtractor):
             "complete": extr('span class="scanstatus">', "<").lower() == "yes",
         })
 
-        parse_chinfo = text.re(
-            r"(?i).+?\s+("
-            r"(?:v(?:ol)?\.?\s*(\d+)\s+)?"
-            r"(?:ch?\.?\s*(\d+)(?:-(\d+))?)"
-            r")"
-        ).match
+        search_chstr = text.re(
+            r"(?i)((?:v(?:ol)?\.?\s*(\d+))"
+            r"(?:\s+ch?\.?\s*(\d+)(?:-(\d+))?)?)").search
+        search_chstr_min = text.re(
+            r"(?i)(ch?\.?\s*(\d+)(?:-(\d+))?)").search
 
         for ch in chapters:
 
             chstr = ch["chapter_string"]
-            if match := parse_chinfo(chstr):
+            if match := search_chstr(chstr):
                 ch["chapter_string"], volume, chapter, end = match.groups()
                 ch["volume"] = text.parse_int(volume)
+                ch["chapter"] = text.parse_int(chapter)
+                ch["chapter_end"] = text.parse_int(end)
+            elif match := search_chstr_min(chstr):
+                ch["chapter_string"], chapter, end = match.groups()
+                ch["volume"] = 0
                 ch["chapter"] = text.parse_int(chapter)
                 ch["chapter_end"] = text.parse_int(end)
             else:
