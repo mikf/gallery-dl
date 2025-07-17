@@ -584,6 +584,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Madokami</td>
+    <td>https://manga.madokami.al/</td>
+    <td>Manga</td>
+    <td>Required</td>
+</tr>
+<tr>
     <td>Manga Fox</td>
     <td>https://fanfox.net/</td>
     <td>Chapters, Manga</td>
