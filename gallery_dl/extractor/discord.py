@@ -22,8 +22,6 @@ class DiscordExtractor(Extractor):
     filename_fmt = "{message_id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "{message_id}_{num}"
 
-    cdn_fmt = "https://cdn.discordapp.com/{}/{}/{}.png?size=4096"
-
     server_metadata = {}
     server_channels_metadata = {}
 
@@ -49,7 +47,10 @@ class DiscordExtractor(Extractor):
                     text_content.append(field.get("name", ""))
                     text_content.append(field.get("value", ""))
 
-                text_content.append(embed.get("footer", {}).get("text", ""))
+                try:
+                    text_content.append(embed["footer"]["text"])
+                except Exception:
+                    pass
 
         if message.get("poll"):
             text_content.append(message["poll"]["question"]["text"])
@@ -83,44 +84,50 @@ class DiscordExtractor(Extractor):
             ):
                 if message["author"].get(icon_type):
                     message_metadata["author_files"].append({
-                        "url": self.cdn_fmt.format(
-                            icon_path,
-                            message_metadata["author_id"],
-                            message["author"][icon_type]
-                        ),
+                        "url": (f"https://cdn.discordapp.com/{icon_path}/"
+                                f"{message_metadata['author_id']}/"
+                                f"{message['author'][icon_type]}.png"
+                                f"?size=4096"),
                         "filename": icon_type,
                         "extension": "png",
                     })
 
-            for attachment in message["attachments"]:
-                message_metadata["files"].append({
-                    "url": attachment["url"],
-                    "type": "attachment",
-                })
+            message_snapshots = [message]
+            message_snapshots.extend(
+                msg["message"] for msg in message.get("message_snapshots", [])
+                if msg["message"]["type"] in (0, 19, 21)
+            )
 
-            for embed in message["embeds"]:
-                if embed["type"] in self.enabled_embeds:
-                    for field in ("video", "image", "thumbnail"):
-                        if field not in embed:
-                            continue
-                        url = embed[field].get("proxy_url")
-                        if url is not None:
-                            message_metadata["files"].append({
-                                "url": url,
-                                "type": "embed",
-                            })
-                            break
+            for snapshot in message_snapshots:
+                for attachment in snapshot["attachments"]:
+                    message_metadata["files"].append({
+                        "url": attachment["url"],
+                        "type": "attachment",
+                    })
 
-            for num, file in enumerate(message_metadata["files"], start=1):
-                text.nameext_from_url(file["url"], file)
-                file["num"] = num
+                for embed in snapshot["embeds"]:
+                    if embed["type"] in self.enabled_embeds:
+                        for field in ("video", "image", "thumbnail"):
+                            if field not in embed:
+                                continue
+                            url = embed[field].get("proxy_url")
+                            if url is not None:
+                                message_metadata["files"].append({
+                                    "url": url,
+                                    "type": "embed",
+                                })
+                                break
 
-            yield Message.Directory, message_metadata
+                for num, file in enumerate(message_metadata["files"], start=1):
+                    text.nameext_from_url(file["url"], file)
+                    file["num"] = num
 
-            for file in message_metadata["files"]:
-                message_metadata_file = message_metadata.copy()
-                message_metadata_file.update(file)
-                yield Message.Url, file["url"], message_metadata_file
+                yield Message.Directory, message_metadata
+
+                for file in message_metadata["files"]:
+                    message_metadata_file = message_metadata.copy()
+                    message_metadata_file.update(file)
+                    yield Message.Url, file["url"], message_metadata_file
 
     def extract_channel_text(self, channel_id):
         for message in self.api.get_channel_messages(channel_id):
@@ -155,7 +162,7 @@ class DiscordExtractor(Extractor):
                         yield from self.extract_channel(
                             channel["channel_id"], safe=True)
             elif not safe:
-                raise exception.StopExtraction(
+                raise exception.AbortExtraction(
                     "This channel type is not supported."
                 )
         except exception.HttpError as exc:
@@ -212,11 +219,9 @@ class DiscordExtractor(Extractor):
         ):
             if server.get(icon_type):
                 self.server_metadata["server_files"].append({
-                    "url": self.cdn_fmt.format(
-                        icon_path,
-                        self.server_metadata["server_id"],
-                        server[icon_type]
-                    ),
+                    "url": (f"https://cdn.discordapp.com/{icon_path}/"
+                            f"{self.server_metadata['server_id']}/"
+                            f"{server[icon_type]}.png?size=4096"),
                     "filename": icon_type,
                     "extension": "png",
                 })
@@ -224,10 +229,12 @@ class DiscordExtractor(Extractor):
         return self.server_metadata
 
     def build_server_and_channels(self, server_id):
-        server = self.api.get_server(server_id)
-        self.parse_server(server)
+        self.parse_server(self.api.get_server(server_id))
 
-        for channel in self.api.get_server_channels(server_id):
+        for channel in sorted(
+            self.api.get_server_channels(server_id),
+            key=lambda ch: ch["type"] != 4
+        ):
             self.parse_channel(channel)
 
 
@@ -337,7 +344,7 @@ class DiscordAPI():
                 "sort_order": "desc",
                 "limit": THREADS_BATCH,
                 "offset": + offset,
-            })["threads"]
+            }).get("threads", [])
 
         return self._pagination(_method, THREADS_BATCH)
 
@@ -353,7 +360,8 @@ class DiscordAPI():
                 "limit": MESSAGES_BATCH,
                 "before": before
             })
-            before = messages[-1]["id"]
+            if messages:
+                before = messages[-1]["id"]
             return messages
 
         return self._pagination(_method, MESSAGES_BATCH)
@@ -385,8 +393,7 @@ class DiscordAPI():
                 return
             offset += len(data)
 
-    @staticmethod
-    def _raise_invalid_token():
+    def _raise_invalid_token(self):
         raise exception.AuthenticationError("""Invalid or missing token.
 Please provide a valid token following these instructions:
 

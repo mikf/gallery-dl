@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -30,7 +30,7 @@ class TsuminoBase():
     @cache(maxage=14*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
-        url = "{}/Account/Login".format(self.root)
+        url = f"{self.root}/Account/Login"
         headers = {"Referer": url}
         data = {"Username": username, "Password": password}
 
@@ -47,8 +47,8 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
     example = "https://www.tsumino.com/entry/12345"
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
-        url = "{}/entry/{}".format(self.root, self.gallery_id)
+        self.gallery_id = match[1]
+        url = f"{self.root}/entry/{self.gallery_id}"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -81,14 +81,14 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
         }
 
     def images(self, page):
-        url = "{}/Read/Index/{}?page=1".format(self.root, self.gallery_id)
-        headers = {"Referer": self.gallery_url}
+        url = f"{self.root}/Read/Index/{self.gallery_id}?page=1"
+        headers = {"Referer": self.page_url}
         response = self.request(url, headers=headers, fatal=False)
 
         if "/Auth/" in response.url:
-            raise exception.StopExtraction(
-                "Failed to get gallery JSON data. Visit '%s' in a browser "
-                "and solve the CAPTCHA to continue.", response.url)
+            raise exception.AbortExtraction(
+                f"Failed to get gallery JSON data. Visit '{response.url}' "
+                f"in a browser and solve the CAPTCHA to continue.")
 
         page = response.text
         tpl, pos = text.extract(page, 'data-cdn="', '"')
@@ -109,19 +109,19 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.query = match.group(1)
+        self.query = match[1]
 
     def items(self):
         for gallery in self.galleries():
-            url = "{}/entry/{}".format(self.root, gallery["id"])
+            url = f"{self.root}/entry/{gallery['id']}"
             gallery["_extractor"] = TsuminoGalleryExtractor
             yield Message.Queue, url, gallery
 
     def galleries(self):
         """Return all gallery results matching 'self.query'"""
-        url = "{}/Search/Operate?type=Book".format(self.root)
+        url = f"{self.root}/Search/Operate?type=Book"
         headers = {
-            "Referer": "{}/".format(self.root),
+            "Referer": f"{self.root}/",
             "X-Requested-With": "XMLHttpRequest",
         }
         data = {
@@ -137,8 +137,8 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
         data.update(self._parse(self.query))
 
         while True:
-            info = self.request(
-                url, method="POST", headers=headers, data=data).json()
+            info = self.request_json(
+                url, method="POST", headers=headers, data=data)
 
             for gallery in info["data"]:
                 yield gallery["entry"]
@@ -155,11 +155,10 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
                 return self._parse_simple(query)
             return self._parse_jsurl(query)
         except Exception as exc:
-            raise exception.StopExtraction(
-                "Invalid search query '%s' (%s)", query, exc)
+            raise exception.AbortExtraction(
+                f"Invalid search query '{query}' ({exc})")
 
-    @staticmethod
-    def _parse_simple(query):
+    def _parse_simple(self, query):
         """Parse search query with format '?<key>=value>'"""
         key, _, value = query.partition("=")
         tag_types = {
@@ -179,8 +178,7 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
             "Tags[0][Exclude]": "false",
         }
 
-    @staticmethod
-    def _parse_jsurl(data):
+    def _parse_jsurl(self, data):
         """Parse search query in JSURL format
 
         Nested lists and dicts are handled in a special way to deal
@@ -196,9 +194,8 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
             nonlocal i
 
             if data[i] != expected:
-                error = "bad JSURL syntax: expected '{}', got {}".format(
-                    expected, data[i])
-                raise ValueError(error)
+                raise ValueError(
+                    f"bad JSURL syntax: expected '{expected}', got {data[i]}")
             i += 1
 
         def decode():
@@ -295,11 +292,11 @@ class TsuminoSearchExtractor(TsuminoBase, Extractor):
         def expand(key, value):
             if isinstance(value, list):
                 for index, cvalue in enumerate(value):
-                    ckey = "{}[{}]".format(key, index)
+                    ckey = f"{key}[{index}]"
                     yield from expand(ckey, cvalue)
             elif isinstance(value, dict):
                 for ckey, cvalue in value.items():
-                    ckey = "{}[{}]".format(key, ckey)
+                    ckey = f"{key}[{ckey}]"
                     yield from expand(ckey, cvalue)
             else:
                 yield key, value

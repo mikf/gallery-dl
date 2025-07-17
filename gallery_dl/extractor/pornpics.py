@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -47,8 +47,8 @@ class PornpicsExtractor(Extractor):
         }
 
         while True:
-            galleries = self.request(
-                url, params=params, headers=headers).json()
+            galleries = self.request_json(
+                url, params=params, headers=headers)
             yield from galleries
 
             if len(galleries) < limit:
@@ -62,7 +62,7 @@ class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
     example = "https://www.pornpics.com/galleries/TITLE-12345/"
 
     def __init__(self, match):
-        url = "{}/galleries/{}/".format(self.root, match.group(1))
+        url = f"{self.root}/galleries/{match[1]}/"
         GalleryExtractor.__init__(self, match, url)
 
     items = GalleryExtractor.items
@@ -98,7 +98,7 @@ class PornpicsTagExtractor(PornpicsExtractor):
     example = "https://www.pornpics.com/tags/TAGS/"
 
     def galleries(self):
-        url = "{}/tags/{}/".format(self.root, self.groups[0])
+        url = f"{self.root}/tags/{self.groups[0]}/"
         return self._pagination(url)
 
 

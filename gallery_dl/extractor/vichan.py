@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -38,21 +38,18 @@ class VichanThreadExtractor(VichanExtractor):
     pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
     example = "https://8kun.top/a/res/12345.html"
 
-    def __init__(self, match):
-        VichanExtractor.__init__(self, match)
-        index = match.lastindex
-        self.board = match.group(index-1)
-        self.thread = match.group(index)
-
     def items(self):
-        url = "{}/{}/res/{}.json".format(self.root, self.board, self.thread)
-        posts = self.request(url).json()["posts"]
+        board = self.groups[-2]
+        thread = self.groups[-1]
+        url = f"{self.root}/{board}/res/{thread}.json"
+        posts = self.request_json(url)["posts"]
+
         title = posts[0].get("sub") or text.remove_html(posts[0]["com"])
         process = (self._process_8kun if self.category == "8kun" else
                    self._process)
         data = {
-            "board" : self.board,
-            "thread": self.thread,
+            "board" : board,
+            "thread": thread,
             "title" : text.unescape(title)[:50],
             "num"   : 0,
         }
@@ -68,25 +65,25 @@ class VichanThreadExtractor(VichanExtractor):
 
     def _process(self, post, data):
         post.update(data)
-        post["extension"] = post["ext"][1:]
-        post["url"] = "{}/{}/src/{}{}".format(
-            self.root, post["board"], post["tim"], post["ext"])
-        return Message.Url, post["url"], post
+        ext = post["ext"]
+        post["extension"] = ext[1:]
+        post["url"] = url = \
+            f"{self.root}/{post['board']}/src/{post['tim']}{ext}"
+        return Message.Url, url, post
 
-    @staticmethod
-    def _process_8kun(post, data):
+    def _process_8kun(self, post, data):
         post.update(data)
-        post["extension"] = post["ext"][1:]
-
+        ext = post["ext"]
         tim = post["tim"]
-        if len(tim) > 16:
-            post["url"] = "https://media.128ducks.com/file_store/{}{}".format(
-                tim, post["ext"])
-        else:
-            post["url"] = "https://media.128ducks.com/{}/src/{}{}".format(
-                post["board"], tim, post["ext"])
 
-        return Message.Url, post["url"], post
+        if len(tim) > 16:
+            url = f"https://media.128ducks.com/file_store/{tim}{ext}"
+        else:
+            url = f"https://media.128ducks.com/{post['board']}/src/{tim}{ext}"
+
+        post["url"] = url
+        post["extension"] = ext[1:]
+        return Message.Url, url, post
 
 
 class VichanBoardExtractor(VichanExtractor):
@@ -95,18 +92,14 @@ class VichanBoardExtractor(VichanExtractor):
     pattern = BASE_PATTERN + r"/([^/?#]+)(?:/index|/catalog|/\d+|/?$)"
     example = "https://8kun.top/a/"
 
-    def __init__(self, match):
-        VichanExtractor.__init__(self, match)
-        self.board = match.group(match.lastindex)
-
     def items(self):
-        url = "{}/{}/threads.json".format(self.root, self.board)
-        threads = self.request(url).json()
+        board = self.groups[-1]
+        url = f"{self.root}/{board}/threads.json"
+        threads = self.request_json(url)
 
         for page in threads:
             for thread in page["threads"]:
-                url = "{}/{}/res/{}.html".format(
-                    self.root, self.board, thread["no"])
+                url = f"{self.root}/{board}/res/{thread['no']}.html"
                 thread["page"] = page["page"]
                 thread["_extractor"] = VichanThreadExtractor
                 yield Message.Queue, url, thread

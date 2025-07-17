@@ -105,7 +105,7 @@ class PexelsImageExtractor(PexelsExtractor):
     example = "https://www.pexels.com/photo/SLUG-12345/"
 
     def posts(self):
-        url = "{}/photo/{}/".format(self.root, self.groups[0])
+        url = f"{self.root}/photo/{self.groups[0]}/"
         page = self.request(url).text
         return (self._extract_nextdata(page)["props"]["pageProps"]["medium"],)
 
@@ -132,7 +132,7 @@ class PexelsAPI():
         }
 
     def collections_media(self, collection_id):
-        endpoint = "/v3/collections/{}/media".format(collection_id)
+        endpoint = f"/v3/collections/{collection_id}/media"
         params = {
             "page"    : "1",
             "per_page": "24",
@@ -153,7 +153,7 @@ class PexelsAPI():
         return self._pagination(endpoint, params)
 
     def users_media_recent(self, user_id):
-        endpoint = "/v3/users/{}/media/recent".format(user_id)
+        endpoint = f"/v3/users/{user_id}/media/recent"
         params = {
             "page"    : "1",
             "per_page": "24",
@@ -175,7 +175,7 @@ class PexelsAPI():
 
             else:
                 self.extractor.log.debug(response.text)
-                raise exception.StopExtraction("API request failed")
+                raise exception.AbortExtraction("API request failed")
 
     def _pagination(self, endpoint, params):
         while True:

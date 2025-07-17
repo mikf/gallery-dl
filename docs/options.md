@@ -14,6 +14,7 @@
     --user-agent UA             User-Agent request header
     --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
                                 MODULE (ALL to delete everything)
+    --compat                    Restore legacy 'category' names
 
 ## Update Options:
     -U, --update                Update to the latest version
@@ -49,10 +50,16 @@
                                 values for the given URLs
     -e, --error-file FILE       Add input URLs which returned an error to FILE
     -N, --print [EVENT:]FORMAT  Write FORMAT during EVENT (default 'prepare')
-                                to standard output. Examples: 'id' or
-                                'post:{md5[:8]}'
+                                to standard output instead of downloading
+                                files. Can be used multiple times. Examples:
+                                'id' or 'post:{md5[:8]}'
+    --Print [EVENT:]FORMAT      Like --print, but downloads files as well
     --print-to-file [EVENT:]FORMAT FILE
-                                Append FORMAT during EVENT to FILE
+                                Append FORMAT during EVENT to FILE instead of
+                                downloading files. Can be used multiple times
+    --Print-to-file [EVENT:]FORMAT FILE
+                                Like --print-to-file, but downloads files as
+                                well
     --list-modules              Print a list of available extractor modules
     --list-extractors [CATEGORIES]
                                 Print a list of extractor classes with
@@ -77,7 +84,8 @@
     --no-check-certificate      Disable HTTPS certificate validation
 
 ## Downloader Options:
-    -r, --limit-rate RATE       Maximum download rate (e.g. 500k or 2.5M)
+    -r, --limit-rate RATE       Maximum download rate (e.g. 500k, 2.5M, or
+                                800k-2M)
     --chunk-size SIZE           Size of in-memory data chunks (default: 32k)
     --sleep SECONDS             Number of seconds to wait before each download.
                                 This can be either a constant value or a range
@@ -126,7 +134,7 @@
                                 500k or 2.5M)
     --filesize-max SIZE         Do not download files larger than SIZE (e.g.
                                 500k or 2.5M)
-    --download-archive FILE     Record all downloaded or skipped files in FILE
+    --download-archive FILE     Record successfully downloaded files in FILE
                                 and skip downloading any file already in it
     --range RANGE               Index range(s) specifying which files to
                                 download. These can be either a constant value,

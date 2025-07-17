@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -63,7 +63,7 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
                     file["filename"] = file["name"] + "-" + fid
             elif "id" in file:
                 file["name"] = file["filename"]
-                file["filename"] = "{}-{}".format(file["name"], file["id"])
+                file["filename"] = f"{file['name']}-{file['id']}"
             else:
                 file["name"], sep, file["id"] = \
                     file["filename"].rpartition("-")
@@ -71,8 +71,8 @@ class LolisafeAlbumExtractor(LolisafeExtractor):
             yield Message.Url, url, file
 
     def fetch_album(self, album_id):
-        url = "{}/api/album/get/{}".format(self.root, album_id)
-        data = self.request(url).json()
+        url = f"{self.root}/api/album/get/{album_id}"
+        data = self.request_json(url)
 
         return data["files"], {
             "album_id"  : self.album_id,

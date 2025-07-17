@@ -28,10 +28,20 @@ __tests__ = (
     "#comment" : "broken thebarchive .webm URLs (#5116)",
     "#category": ("foolfuuka", "archivedmoe", "thread"),
     "#class"   : foolfuuka.FoolfuukaThreadExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://thebarchive.com/b/full_image/1705625299234839.gif",
         "https://thebarchive.com/b/full_image/1705625431133806.web",
         "https://thebarchive.com/b/full_image/1705626190307840.web",
+    ),
+},
+
+{
+    "#url"     : "https://archived.moe/a/thread/279540316/",
+    "#comment" : "filename/timestamp fixup for redirect URL (#7652)",
+    "#category": ("foolfuuka", "archivedmoe", "thread"),
+    "#class"   : foolfuuka.FoolfuukaThreadExtractor,
+    "#results" : (
+        "http://desuarchive.org/a/full_image/1749537017533.jpg",
     ),
 },
 

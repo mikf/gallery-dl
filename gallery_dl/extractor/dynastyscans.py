@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor, Extractor, Message
 from .. import text, util
-import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?dynasty-scans\.com"
 
@@ -21,7 +20,7 @@ class DynastyscansBase():
     root = "https://dynasty-scans.com"
 
     def _parse_image_page(self, image_id):
-        url = "{}/images/{}".format(self.root, image_id)
+        url = f"{self.root}/images/{image_id}"
         extr = text.extract_from(self.request(url).text)
 
         date = extr("class='create_at'>", "</span>")
@@ -47,20 +46,19 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        match = re.match(
-            (r"(?:<a[^>]*>)?([^<]+)(?:</a>)?"  # manga name
-             r"(?: ch(\d+)([^:<]*))?"  # chapter info
-             r"(?:: (.+))?"),  # title
-            extr("<h3 id='chapter-title'><b>", "</b>"),
-        )
+        match = util.re(
+            r"(?:<a[^>]*>)?([^<]+)(?:</a>)?"  # manga name
+            r"(?: ch(\d+)([^:<]*))?"  # chapter info
+            r"(?:: (.+))?"  # title
+        ).match(extr("<h3 id='chapter-title'><b>", "</b>"))
         author = extr(" by ", "</a>")
         group = extr('"icon-print"></i> ', '</span>')
 
         return {
-            "manga"   : text.unescape(match.group(1)),
-            "chapter" : text.parse_int(match.group(2)),
-            "chapter_minor": match.group(3) or "",
-            "title"   : text.unescape(match.group(4) or ""),
+            "manga"   : text.unescape(match[1]),
+            "chapter" : text.parse_int(match[2]),
+            "chapter_minor": match[3] or "",
+            "title"   : text.unescape(match[4] or ""),
             "author"  : text.remove_html(author),
             "group"   : (text.remove_html(group) or
                          text.extr(group, ' alt="', '"')),
@@ -104,7 +102,7 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.query = match.group(1) or ""
+        self.query = match[1] or ""
 
     def items(self):
         yield Message.Directory, {}
@@ -133,3 +131,43 @@ class DynastyscansImageExtractor(DynastyscansSearchExtractor):
 
     def images(self):
         return (self.query,)
+
+
+class DynastyscansAnthologyExtractor(DynastyscansSearchExtractor):
+    """Extractor for dynasty-scans anthologies"""
+    subcategory = "anthology"
+    pattern = BASE_PATTERN + r"/anthologies/([^/?#]+)"
+    example = "https://dynasty-scans.com/anthologies/TITLE"
+
+    def items(self):
+        url = f"{self.root}/anthologies/{self.groups[0]}.atom"
+        root = self.request_xml(url, xmlns=False)
+
+        data = {
+            "_extractor": DynastyscansChapterExtractor,
+            "anthology" : root[3].text[28:],
+        }
+
+        if self.config("metadata", False):
+            page = self.request(url[:-5]).text
+            alert = text.extr(page, "<div class='alert", "</div>")
+
+            data["alert"] = text.split_html(alert)[1:] if alert else ()
+            data["status"] = text.extr(
+                page, "<small>&mdash; ", "</small>")
+            data["description"] = text.extr(
+                page, "<div class='description'>", "</div>")
+
+        for element in root:
+            if element.tag != "entry":
+                continue
+            content = element[6][0]
+            data["author"] = content[0].text[8:]
+            data["scanlator"] = content[1].text[11:]
+            data["tags"] = content[2].text[6:].lower().split(", ")
+            data["title"] = element[5].text
+            data["date"] = text.parse_datetime(
+                element[1].text, "%Y-%m-%dT%H:%M:%S%z")
+            data["date_updated"] = text.parse_datetime(
+                element[2].text, "%Y-%m-%dT%H:%M:%S%z")
+            yield Message.Queue, element[4].text, data

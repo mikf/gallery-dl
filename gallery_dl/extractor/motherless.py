@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,23 +23,8 @@ class MotherlessExtractor(Extractor):
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
 
-
-class MotherlessMediaExtractor(MotherlessExtractor):
-    """Extractor for a single image/video from motherless.com"""
-    subcategory = "media"
-    pattern = (BASE_PATTERN +
-               r"/((?:g/[^/?#]+/|G[IV]?[A-Z0-9]+/)?"
-               r"(?!G)[A-Z0-9]+)")
-    example = "https://motherless.com/ABC123"
-
-    def items(self):
-        file = self._extract_media(self.groups[0])
-        url = file["url"]
-        yield Message.Directory, file
-        yield Message.Url, url, text.nameext_from_url(url, file)
-
     def _extract_media(self, path):
-        url = self.root + "/" + path
+        url = f"{self.root}/{path}"
         page = self.request(url).text
         extr = text.extract_from(page)
 
@@ -63,10 +48,59 @@ class MotherlessMediaExtractor(MotherlessExtractor):
             "uploader": text.unescape(extr('class="username">', "<").strip()),
         }
 
-        if path and path[0] == "G":
+        if not path:
+            pass
+        elif path[0] == "G":
             data["gallery_id"] = path[1:]
             data["gallery_title"] = self._extract_gallery_title(
                 page, data["gallery_id"])
+        elif path[0] == "g":
+            data["group_id"] = path[2:]
+            data["group_title"] = self._extract_group_title(
+                page, data["group_id"])
+
+        return data
+
+    def _pagination(self, page):
+        while True:
+            for thumb in text.extract_iter(
+                    page, 'class="thumb-container', "</div>"):
+                yield thumb
+
+            url = text.extr(page, '<link rel="next" href="', '"')
+            if not url:
+                return
+            page = self.request(text.unescape(url)).text
+
+    def _extract_data(self, page, category):
+        extr = text.extract_from(page)
+
+        gid = self.groups[-1]
+        if category == "gallery":
+            title = self._extract_gallery_title(page, gid)
+        else:
+            title = self._extract_group_title(page, gid)
+
+        return {
+            f"{category}_id": gid,
+            f"{category}_title": title,
+            "uploader": text.remove_html(extr(
+                f'class="{category}-member-username">', "</")),
+            "count": text.parse_int(
+                extr('<span class="active">', ")")
+                .rpartition("(")[2].replace(",", "")),
+        }
+
+    def _parse_thumb_data(self, thumb):
+        extr = text.extract_from(thumb)
+
+        data = {
+            "id"       : extr('data-codename="', '"'),
+            "type"     : extr('data-mediatype="', '"'),
+            "thumbnail": extr('class="static" src="', '"'),
+            "title"    : extr(' alt="', '"'),
+        }
+        data["url"] = data["thumbnail"].replace("thumb", data["type"])
 
         return data
 
@@ -87,12 +121,37 @@ class MotherlessMediaExtractor(MotherlessExtractor):
         if title:
             return text.unescape(title.strip())
 
-        pos = page.find(' href="/G' + gallery_id + '"')
+        pos = page.find(f' href="/G{gallery_id}"')
         if pos >= 0:
             return text.unescape(text.extract(
                 page, ' title="', '"', pos)[0])
 
         return ""
+
+    @memcache(keyarg=2)
+    def _extract_group_title(self, page, group_id):
+        title = text.extr(
+            text.extr(page, '<h1 class="group-bio-name">', "</h1>"),
+            ">", "<")
+        if title:
+            return text.unescape(title.strip())
+
+        return ""
+
+
+class MotherlessMediaExtractor(MotherlessExtractor):
+    """Extractor for a single image/video from motherless.com"""
+    subcategory = "media"
+    pattern = (BASE_PATTERN +
+               r"/((?:g/[^/?#]+/|G[IV]?[A-Z0-9]+/)?"
+               r"(?!G)[A-Z0-9]+)")
+    example = "https://motherless.com/ABC123"
+
+    def items(self):
+        file = self._extract_media(self.groups[0])
+        url = file["url"]
+        yield Message.Directory, file
+        yield Message.Url, url, text.nameext_from_url(url, file)
 
 
 class MotherlessGalleryExtractor(MotherlessExtractor):
@@ -109,59 +168,62 @@ class MotherlessGalleryExtractor(MotherlessExtractor):
 
         if not type:
             data = {"_extractor": MotherlessGalleryExtractor}
-            yield Message.Queue, self.root + "/GI" + gid, data
-            yield Message.Queue, self.root + "/GV" + gid, data
+            yield Message.Queue, f"{self.root}/GI{gid}", data
+            yield Message.Queue, f"{self.root}/GV{gid}", data
             return
 
-        url = "{}/G{}{}".format(self.root, type, gid)
+        url = f"{self.root}/G{type}{gid}"
         page = self.request(url).text
-        data = self._extract_gallery_data(page)
+        data = self._extract_data(page, "gallery")
 
         for num, thumb in enumerate(self._pagination(page), 1):
             file = self._parse_thumb_data(thumb)
+            thumbnail = file["thumbnail"]
+
+            if file["type"] == "video":
+                file = self._extract_media(file["id"])
+
             file.update(data)
             file["num"] = num
+            file["thumbnail"] = thumbnail
             url = file["url"]
             yield Message.Directory, file
             yield Message.Url, url, text.nameext_from_url(url, file)
 
-    def _pagination(self, page):
-        while True:
-            for thumb in text.extract_iter(
-                    page, 'class="thumb-container', "</div>"):
-                yield thumb
 
-            url = text.extr(page, '<link rel="next" href="', '"')
-            if not url:
-                return
-            page = self.request(text.unescape(url)).text
+class MotherlessGroupExtractor(MotherlessExtractor):
+    subcategory = "group"
+    directory_fmt = ("{category}", "{uploader}",
+                     "{group_id} {group_title}")
+    archive_fmt = "{group_id}_{id}"
+    pattern = BASE_PATTERN + "/g([iv]?)/?([a-z0-9_]+)/?$"
+    example = "https://motherless.com/g/abc123"
 
-    def _extract_gallery_data(self, page):
-        extr = text.extract_from(page)
-        return {
-            "gallery_id": self.groups[-1],
-            "gallery_title": text.unescape(extr(
-                "<title>", "<").rpartition(" | ")[0]),
-            "uploader": text.remove_html(extr(
-                'class="gallery-member-username">', "</")),
-            "count": text.parse_int(
-                extr('<span class="active">', ")")
-                .rpartition("(")[2].replace(",", "")),
-        }
+    def items(self):
+        type, gid = self.groups
 
-    def _parse_thumb_data(self, thumb):
-        extr = text.extract_from(thumb)
-        data = {
-            "id"       : extr('data-codename="', '"'),
-            "type"     : extr('data-mediatype="', '"'),
-            "thumbnail": extr('class="static" src="', '"'),
-            "title"    : extr(' alt="', '"'),
-        }
+        if not type:
+            data = {"_extractor": MotherlessGroupExtractor}
+            yield Message.Queue, f"{self.root}/gi/{gid}", data
+            yield Message.Queue, f"{self.root}/gv/{gid}", data
+            return
 
-        type = data["type"]
-        url = data["thumbnail"].replace("thumb", type)
-        if type == "video":
-            url = "{}/{}.mp4".format(url.rpartition("/")[0], data["id"])
-        data["url"] = url
+        url = f"{self.root}/g{type}/{gid}"
+        page = self.request(url).text
+        data = self._extract_data(page, "group")
 
-        return data
+        for num, thumb in enumerate(self._pagination(page), 1):
+            file = self._parse_thumb_data(thumb)
+            thumbnail = file["thumbnail"]
+
+            file = self._extract_media(file["id"])
+
+            uploader = file.get("uploader")
+            file.update(data)
+            file["num"] = num
+            file["thumbnail"] = thumbnail
+            file["uploader"] = uploader
+            file["group"] = file["group_id"]
+            url = file["url"]
+            yield Message.Directory, file
+            yield Message.Url, url, text.nameext_from_url(url, file)

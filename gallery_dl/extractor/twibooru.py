@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -36,8 +36,7 @@ class TwibooruExtractor(BooruExtractor):
             return post["view_url"].rpartition(".")[0] + ".svg"
         return post["view_url"]
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_datetime(
             post["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
@@ -55,7 +54,7 @@ class TwibooruPostExtractor(TwibooruExtractor):
 
     def __init__(self, match):
         TwibooruExtractor.__init__(self, match)
-        self.post_id = match.group(1)
+        self.post_id = match[1]
 
     def posts(self):
         return (self.api.post(self.post_id),)
@@ -104,7 +103,7 @@ class TwibooruGalleryExtractor(TwibooruExtractor):
 
     def __init__(self, match):
         TwibooruExtractor.__init__(self, match)
-        self.gallery_id = match.group(1)
+        self.gallery_id = match[1]
 
     def metadata(self):
         return {"gallery": self.api.gallery(self.gallery_id)}
@@ -155,8 +154,7 @@ class TwibooruAPI():
 
             # error
             self.extractor.log.debug(response.content)
-            raise exception.StopExtraction(
-                "%s %s", response.status_code, response.reason)
+            raise exception.HttpError("", response)
 
     def _pagination(self, endpoint, params):
         extr = self.extractor

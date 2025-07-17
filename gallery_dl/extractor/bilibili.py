@@ -30,7 +30,7 @@ class BilibiliUserArticlesExtractor(BilibiliExtractor):
     def items(self):
         for article in self.api.user_articles(self.groups[0]):
             article["_extractor"] = BilibiliArticleExtractor
-            url = "{}/opus/{}".format(self.root, article["opus_id"])
+            url = f"{self.root}/opus/{article['opus_id']}"
             yield Message.Queue, url, article
 
 
@@ -98,7 +98,7 @@ class BilibiliUserArticlesFavoriteExtractor(BilibiliExtractor):
     def items(self):
         for article in self.api.user_favlist():
             article["_extractor"] = BilibiliArticleExtractor
-            url = "{}/opus/{}".format(self.root, article["opus_id"])
+            url = f"{self.root}/opus/{article['opus_id']}"
             yield Message.Queue, url, article
 
 
@@ -108,11 +108,11 @@ class BilibiliAPI():
 
     def _call(self, endpoint, params):
         url = "https://api.bilibili.com/x/polymer/web-dynamic/v1" + endpoint
-        data = self.extractor.request(url, params=params).json()
+        data = self.extractor.request_json(url, params=params)
 
         if data["code"] != 0:
             self.extractor.log.debug("Server response: %s", data)
-            raise exception.StopExtraction("API request failed")
+            raise exception.AbortExtraction("API request failed")
 
         return data
 
@@ -140,8 +140,8 @@ class BilibiliAPI():
                     page, "window.__INITIAL_STATE__=", "};") + "}")
             except Exception:
                 if "window._riskdata_" not in page:
-                    raise exception.StopExtraction(
-                        "%s: Unable to extract INITIAL_STATE data", article_id)
+                    raise exception.AbortExtraction(
+                        f"{article_id}: Unable to extract INITIAL_STATE data")
             self.extractor.wait(seconds=300)
 
     def user_favlist(self):
@@ -159,12 +159,13 @@ class BilibiliAPI():
 
     def login_user_id(self):
         url = "https://api.bilibili.com/x/space/v2/myinfo"
-        data = self.extractor.request(url).json()
+        data = self.extractor.request_json(url)
 
         if data["code"] != 0:
             self.extractor.log.debug("Server response: %s", data)
-            raise exception.StopExtraction("API request failed,Are you login?")
+            raise exception.AbortExtraction(
+                "API request failed. Are you logges in?")
         try:
             return data["data"]["profile"]["mid"]
         except Exception:
-            raise exception.StopExtraction("API request failed")
+            raise exception.AbortExtraction("API request failed")

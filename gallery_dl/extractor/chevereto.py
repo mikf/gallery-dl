@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,19 +18,23 @@ class CheveretoExtractor(BaseExtractor):
     directory_fmt = ("{category}", "{user}", "{album}",)
     archive_fmt = "{id}"
 
-    def __init__(self, match):
-        BaseExtractor.__init__(self, match)
-        self.path = match.group(match.lastindex)
+    def _init(self):
+        self.path = self.groups[-1]
 
     def _pagination(self, url):
-        while url:
+        while True:
             page = self.request(url).text
 
             for item in text.extract_iter(
                     page, '<div class="list-item-image ', 'image-container'):
-                yield text.extr(item, '<a href="', '"')
+                yield text.urljoin(self.root, text.extr(
+                    item, '<a href="', '"'))
 
-            url = text.extr(page, '<a data-pagination="next" href="', '" ><')
+            url = text.extr(page, 'data-pagination="next" href="', '"')
+            if not url:
+                return
+            if url[0] == "/":
+                url = self.root + url
 
 
 BASE_PATTERN = CheveretoExtractor.update({
@@ -41,6 +45,10 @@ BASE_PATTERN = CheveretoExtractor.update({
     "imgkiwi": {
         "root": "https://img.kiwi",
         "pattern": r"img\.kiwi",
+    },
+    "imagepond": {
+        "root": "https://imagepond.net",
+        "pattern": r"imagepond\.net",
     },
 })
 
@@ -60,7 +68,7 @@ class CheveretoImageExtractor(CheveretoExtractor):
                extr('url: "', '"'))
         if not url or url.endswith("/loading.svg"):
             pos = page.find(" download=")
-            url = text.rextract(page, 'href="', '"', pos)[0]
+            url = text.rextr(page, 'href="', '"', pos)
             if not url.startswith("https://"):
                 url = util.decrypt_xor(
                     url, b"seltilovessimpcity@simpcityhatesscrapers",
@@ -70,6 +78,8 @@ class CheveretoImageExtractor(CheveretoExtractor):
             "id"   : self.path.rpartition(".")[2],
             "url"  : url,
             "album": text.extr(extr("Added to <a", "/a>"), ">", "<"),
+            "date" : text.parse_datetime(extr(
+                '<span title="', '"'), "%Y-%m-%d %H:%M:%S"),
             "user" : extr('username: "', '"'),
         }
 

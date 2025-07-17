@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, util, exception
 import datetime
-import re
 
 
 class PlurkExtractor(Extractor):
@@ -29,8 +28,7 @@ class PlurkExtractor(Extractor):
     def plurks(self):
         """Return an iterable with all relevant 'plurk' objects"""
 
-    @staticmethod
-    def _urls(obj):
+    def _urls(self, obj):
         """Extract URLs from a 'plurk' object"""
         return text.extract_iter(obj["content"], ' href="', '"')
 
@@ -51,8 +49,8 @@ class PlurkExtractor(Extractor):
         }
 
         while True:
-            info = self.request(
-                url, method="POST", headers=headers, data=data).json()
+            info = self.request_json(
+                url, method="POST", headers=headers, data=data)
             yield from info["responses"]
             if not info["has_newer"]:
                 return
@@ -60,11 +58,11 @@ class PlurkExtractor(Extractor):
                 del data["count"]
             data["from_response_id"] = info["responses"][-1]["id"] + 1
 
-    @staticmethod
-    def _load(data):
+    def _load(self, data):
         if not data:
             raise exception.NotFoundError("user")
-        return util.json_loads(re.sub(r"new Date\(([^)]+)\)", r"\1", data))
+        return util.json_loads(
+            util.re(r"new Date\(([^)]+)\)").sub(r"\1", data))
 
 
 class PlurkTimelineExtractor(PlurkExtractor):
@@ -75,10 +73,10 @@ class PlurkTimelineExtractor(PlurkExtractor):
 
     def __init__(self, match):
         PlurkExtractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
 
     def plurks(self):
-        url = "{}/{}".format(self.root, self.user)
+        url = f"{self.root}/{self.user}"
         page = self.request(url).text
         user_id, pos = text.extract(page, '"page_user": {"id":', ',')
         plurks = self._load(text.extract(page, "_PLURKS = ", ";\n", pos)[0])
@@ -105,7 +103,7 @@ class PlurkPostExtractor(PlurkExtractor):
     example = "https://www.plurk.com/p/12345"
 
     def plurks(self):
-        url = "{}/p/{}".format(self.root, self.groups[0])
+        url = f"{self.root}/p/{self.groups[0]}"
         page = self.request(url).text
         user, pos = text.extract(page, " GLOBAL=", "\n")
         data, pos = text.extract(page, "plurk =", ";\n", pos)

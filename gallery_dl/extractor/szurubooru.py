@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -36,7 +36,7 @@ class SzurubooruExtractor(booru.BooruExtractor):
 
     def _api_request(self, endpoint, params=None):
         url = self.root + "/api" + endpoint
-        return self.request(url, headers=self.headers, params=params).json()
+        return self.request_json(url, headers=self.headers, params=params)
 
     def _pagination(self, endpoint, params):
         params["offset"] = 0
@@ -58,20 +58,17 @@ class SzurubooruExtractor(booru.BooruExtractor):
             url = self.root + "/" + url
         return url
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_datetime(
             post["creationTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
         tags = []
-        append = tags.append
         tags_categories = collections.defaultdict(list)
-
         for tag in post["tags"]:
             tag_type = tag["category"].rpartition("_")[2]
             tag_name = tag["names"][0]
             tags_categories[tag_type].append(tag_name)
-            append(tag_name)
+            tags.append(tag_name)
 
         post["tags"] = tags
         for category, tags in tags_categories.items():

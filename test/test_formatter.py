@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,6 +17,11 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import formatter, text, util  # noqa E402
 
+try:
+    import jinja2
+except ImportError:
+    jinja2 = None
+
 
 class TestFormatter(unittest.TestCase):
 
@@ -27,14 +32,22 @@ class TestFormatter(unittest.TestCase):
         "d": {"a": "foo", "b": 0, "c": None},
         "i": 2,
         "l": ["a", "b", "c"],
+        "L": [
+            {"name": "John Doe"      , "age": 42, "email": "jd@example.org"},
+            {"name": "Jane Smith"    , "age": 24, "email": None},
+            {"name": "Max Mustermann", "age": False},
+        ],
         "n": None,
         "s": " \n\r\tSPACE    ",
         "h": "<p>foo </p> &amp; bar <p> </p>",
         "u": "&#x27;&lt; / &gt;&#x27;",
         "t": 1262304000,
-        "ds": "2010-01-01T01:00:00+0100",
+        "ds": "2010-01-01T01:00:00+01:00",
         "dt": datetime.datetime(2010, 1, 1),
         "dt_dst": datetime.datetime(2010, 6, 1),
+        "i_str": "12345",
+        "f_str": "12.45",
+        "lang": "en",
         "name": "Name",
         "title1": "Title",
         "title2": "",
@@ -63,13 +76,23 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{n!S}", "")
         self._run_test("{t!d}", datetime.datetime(2010, 1, 1))
         self._run_test("{t!d:%Y-%m-%d}", "2010-01-01")
+        self._run_test("{t!D}" , datetime.datetime(2010, 1, 1))
+        self._run_test("{ds!D}", datetime.datetime(2010, 1, 1))
+        self._run_test("{dt!D}", datetime.datetime(2010, 1, 1))
+        self._run_test("{t!D:%Y-%m-%d}", "2010-01-01")
         self._run_test("{dt!T}", "1262304000")
         self._run_test("{l!j}", '["a","b","c"]')
         self._run_test("{dt!j}", '"2010-01-01 00:00:00"')
         self._run_test("{a!g}", "hello-world")
-        self._run_test("{a!L}", 11)
-        self._run_test("{l!L}", 3)
-        self._run_test("{d!L}", 3)
+        self._run_test("{lang!L}", "English")
+        self._run_test("{'fr'!L}", "French")
+        self._run_test("{a!L}", None)
+        self._run_test("{a!n}", 11)
+        self._run_test("{l!n}", 3)
+        self._run_test("{d!n}", 3)
+        self._run_test("{i_str!i}", 12345)
+        self._run_test("{i_str!f}", 12345.0)
+        self._run_test("{f_str!f}", 12.45)
 
         with self.assertRaises(KeyError):
             self._run_test("{a!q}", "hello world")
@@ -196,7 +219,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{j:[b:]}"     , v)
         self._run_test("{j:[b::]}"    , v)
 
-    def test_maxlen(self):
+    def test_specifier_maxlen(self):
         v = self.kwdict["a"]
         self._run_test("{a:L5/foo/}" , "foo")
         self._run_test("{a:L50/foo/}", v)
@@ -204,7 +227,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a:L50/foo/>51}", "foo")
         self._run_test("{a:Lab/foo/}", "foo")
 
-    def test_join(self):
+    def test_specifier_join(self):
         self._run_test("{l:J}"       , "abc")
         self._run_test("{l:J,}"      , "a,b,c")
         self._run_test("{l:J,/}"     , "a,b,c")
@@ -216,7 +239,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a:J/}"      , self.kwdict["a"])
         self._run_test("{a:J, /}"    , self.kwdict["a"])
 
-    def test_replace(self):
+    def test_specifier_replace(self):
         self._run_test("{a:Rh/C/}"  , "CElLo wOrLd")
         self._run_test("{a!l:Rh/C/}", "Cello world")
         self._run_test("{a!u:Rh/C/}", "HELLO WORLD")
@@ -225,12 +248,12 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!l:Rl//}" , "heo word")
         self._run_test("{name:Rame/othing/}", "Nothing")
 
-    def test_datetime(self):
+    def test_specifier_datetime(self):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", "2010-01-01 00:00:00")
-        self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+0100")
+        self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+01:00")
         self._run_test("{l:D%Y}", "None")
 
-    def test_offset(self):
+    def test_specifier_offset(self):
         self._run_test("{dt:O 01:00}", "2010-01-01 01:00:00")
         self._run_test("{dt:O+02:00}", "2010-01-01 02:00:00")
         self._run_test("{dt:O-03:45}", "2009-12-31 20:15:00")
@@ -241,7 +264,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z/O1}", "2010-01-01 01:00:00")
         self._run_test("{t!d:O2}", "2010-01-01 02:00:00")
 
-    def test_offset_local(self):
+    def test_specifier_offset_local(self):
         ts = self.kwdict["dt"].replace(
             tzinfo=datetime.timezone.utc).timestamp()
         offset = time.localtime(ts).tm_gmtoff
@@ -256,7 +279,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{dt_dst:O}", str(dt))
         self._run_test("{dt_dst:Olocal}", str(dt))
 
-    def test_sort(self):
+    def test_specifier_sort(self):
         self._run_test("{l:S}" , "['a', 'b', 'c']")
         self._run_test("{l:Sa}", "['a', 'b', 'c']")
         self._run_test("{l:Sd}", "['c', 'b', 'a']")
@@ -288,6 +311,19 @@ class TestFormatter(unittest.TestCase):
         with self.assertRaises(ValueError):
             self._run_test("{a:Xfoo/ */}", "hello wo *")
 
+    def test_specifier_map(self):
+        self._run_test("{L:Mname/}" ,
+                       "['John Doe', 'Jane Smith', 'Max Mustermann']")
+        self._run_test("{L:Mage/}"  ,
+                       "[42, 24, False]")
+
+        self._run_test("{a:Mname}", self.kwdict["a"])
+        self._run_test("{n:Mname}", "None")
+        self._run_test("{title4:Mname}", "0")
+
+        with self.assertRaises(ValueError):
+            self._run_test("{t:Mname", "")
+
     def test_chain_special(self):
         # multiple replacements
         self._run_test("{a:Rh/C/RE/e/RL/l/}", "Cello wOrld")
@@ -308,6 +344,9 @@ class TestFormatter(unittest.TestCase):
 
         # sort and join
         self._run_test("{a:S/J}", " ELLOdhlorw")
+
+        # map and join
+        self._run_test("{L:Mname/J-}", "John Doe-Jane Smith-Max Mustermann")
 
     def test_separator(self):
         orig_separator = formatter._SEPARATOR
@@ -415,7 +454,6 @@ class TestFormatter(unittest.TestCase):
         self._run_test("\fE name * 2 + ' ' + a", "{}{} {}".format(
             self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
 
-    @unittest.skipIf(sys.hexversion < 0x3060000, "no fstring support")
     def test_fstring(self):
         self._run_test("\fF {a}", self.kwdict["a"])
         self._run_test("\fF {name}{name} {a}", "{}{} {}".format(
@@ -423,7 +461,6 @@ class TestFormatter(unittest.TestCase):
         self._run_test("\fF foo-'\"{a.upper()}\"'-bar",
                        """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
 
-    @unittest.skipIf(sys.hexversion < 0x3060000, "no fstring support")
     def test_template_fstring(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
             path1 = os.path.join(tmpdirname, "tpl1")
@@ -443,6 +480,35 @@ class TestFormatter(unittest.TestCase):
 
         with self.assertRaises(OSError):
             formatter.parse("\fTF /")
+
+    @unittest.skipIf(jinja2 is None, "no jinja2")
+    def test_jinja(self):
+        self._run_test("\fJ {{a}}", self.kwdict["a"])
+        self._run_test("\fJ {{name}}{{name}} {{a}}", "{}{} {}".format(
+            self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
+        self._run_test("\fJ foo-'\"{{a | upper}}\"'-bar",
+                       """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+
+    @unittest.skipIf(jinja2 is None, "no jinja2")
+    def test_template_jinja(self):
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path1 = os.path.join(tmpdirname, "tpl1")
+            path2 = os.path.join(tmpdirname, "tpl2")
+
+            with open(path1, "w") as fp:
+                fp.write("{{a}}")
+            fmt1 = formatter.parse("\fTJ " + path1)
+
+            with open(path2, "w") as fp:
+                fp.write("foo-'\"{{a | upper}}\"'-bar")
+            fmt2 = formatter.parse("\fTJ " + path2)
+
+        self.assertEqual(fmt1.format_map(self.kwdict), self.kwdict["a"])
+        self.assertEqual(fmt2.format_map(self.kwdict),
+                         """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+
+        with self.assertRaises(OSError):
+            formatter.parse("\fTJ /")
 
     def test_module(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -483,10 +549,10 @@ def noarg():
             fmt4 = formatter.parse("\fM " + path + ":lengths")
 
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt2.format_map(self.kwdict), "126")
+        self.assertEqual(fmt2.format_map(self.kwdict), "142")
 
         self.assertEqual(fmt3.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt4.format_map(self.kwdict), "126")
+        self.assertEqual(fmt4.format_map(self.kwdict), "142")
 
         with self.assertRaises(TypeError):
             self.assertEqual(fmt0.format_map(self.kwdict), "")

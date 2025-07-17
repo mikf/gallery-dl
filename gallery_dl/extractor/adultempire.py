@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,7 +22,7 @@ class AdultempireGalleryExtractor(GalleryExtractor):
 
     def __init__(self, match):
         GalleryExtractor.__init__(self, match)
-        self.gallery_id = match.group(2)
+        self.gallery_id = match[2]
 
     def _init(self):
         self.cookies.set("ageConfirmed", "true", domain="www.adultempire.com")
@@ -48,4 +48,4 @@ class AdultempireGalleryExtractor(GalleryExtractor):
             if len(urls) < 24:
                 return
             params["page"] += 1
-            page = self.request(self.gallery_url, params=params).text
+            page = self.request(self.page_url, params=params).text

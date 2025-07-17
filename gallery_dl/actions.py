@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,6 @@
 
 """ """
 
-import re
 import time
 import logging
 import operator
@@ -16,7 +15,7 @@ import functools
 from . import util, exception
 
 
-def parse(actionspec):
+def parse_logging(actionspec):
     if isinstance(actionspec, dict):
         actionspec = actionspec.items()
 
@@ -32,7 +31,7 @@ def parse(actionspec):
 
     for event, spec in actionspec:
         level, _, pattern = event.partition(":")
-        search = re.compile(pattern).search if pattern else util.true
+        search = util.re(pattern).search if pattern else util.true
 
         if isinstance(spec, str):
             type, _, args = spec.partition(" ")
@@ -72,6 +71,41 @@ def parse(actionspec):
                 actions[level].append((search, after))
 
     return actions
+
+
+def parse_signals(actionspec):
+    import signal
+
+    if isinstance(actionspec, dict):
+        actionspec = actionspec.items()
+
+    for signal_name, spec in actionspec:
+        signal_num = getattr(signal, signal_name, None)
+        if signal_num is None:
+            log = logging.getLogger("gallery-dl")
+            log.warning("signal '%s' is not defined", signal_name)
+            continue
+
+        if isinstance(spec, str):
+            type, _, args = spec.partition(" ")
+            before, after = ACTIONS[type](args)
+            action = before if after is None else after
+        else:
+            actions_before = []
+            actions_after = []
+            for s in spec:
+                type, _, args = s.partition(" ")
+                before, after = ACTIONS[type](args)
+                if before is not None:
+                    actions_before.append(before)
+                if after is not None:
+                    actions_after.append(after)
+
+            actions = actions_before
+            actions.extend(actions_after)
+            action = _chain_actions(actions)
+
+        signal.signal(signal_num, signals_handler(action))
 
 
 class LoggerAdapter():
@@ -129,6 +163,12 @@ def _chain_actions(actions):
     return _chain
 
 
+def signals_handler(action, args={}):
+    def handler(signal_num, frame):
+        action(args)
+    return handler
+
+
 # --------------------------------------------------------------------
 
 def action_print(opts):
@@ -138,7 +178,7 @@ def action_print(opts):
 
 
 def action_status(opts):
-    op, value = re.match(r"\s*([&|^=])=?\s*(\d+)", opts).groups()
+    op, value = util.re(r"\s*([&|^=])=?\s*(\d+)").match(opts).groups()
 
     op = {
         "&": operator.and_,
@@ -181,6 +221,36 @@ def action_wait(opts):
     return None, _wait
 
 
+def action_flag(opts):
+    flag, value = util.re(
+        r"(?i)(file|post|child|download)(?:\s*[= ]\s*(.+))?"
+    ).match(opts).groups()
+    flag = flag.upper()
+    value = "stop" if value is None else value.lower()
+
+    def _flag(args):
+        util.FLAGS.__dict__[flag] = value
+    return _flag, None
+
+
+def action_raise(opts):
+    name, _, arg = opts.partition(" ")
+
+    exc = getattr(exception, name, None)
+    if exc is None:
+        import builtins
+        exc = getattr(builtins, name, Exception)
+
+    if arg:
+        def _raise(args):
+            raise exc(arg)
+    else:
+        def _raise(args):
+            raise exc()
+
+    return None, _raise
+
+
 def action_abort(opts):
     return None, util.raises(exception.StopExtraction)
 
@@ -208,8 +278,10 @@ ACTIONS = {
     "abort"    : action_abort,
     "exec"     : action_exec,
     "exit"     : action_exit,
+    "flag"     : action_flag,
     "level"    : action_level,
     "print"    : action_print,
+    "raise"    : action_raise,
     "restart"  : action_restart,
     "status"   : action_status,
     "terminate": action_terminate,

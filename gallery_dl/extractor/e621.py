@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -40,8 +40,8 @@ class E621Extractor(danbooru.DanbooruExtractor):
 
             if not file["url"]:
                 md5 = file["md5"]
-                file["url"] = "https://static1.{}/data/{}/{}/{}.{}".format(
-                    self.root[8:], md5[0:2], md5[2:4], md5, file["ext"])
+                file["url"] = (f"https://static1.{self.root[8:]}/data"
+                               f"/{md5[0:2]}/{md5[2:4]}/{md5}.{file['ext']}")
 
             if notes and post.get("has_notes"):
                 post["notes"] = self._get_notes(post["id"])
@@ -60,13 +60,13 @@ class E621Extractor(danbooru.DanbooruExtractor):
             yield Message.Url, file["url"], post
 
     def _get_notes(self, id):
-        return self.request(
-            "{}/notes.json?search[post_id]={}".format(self.root, id)).json()
+        return self.request_json(
+            f"{self.root}/notes.json?search[post_id]={id}")
 
     @memcache(keyarg=1)
     def _get_pools(self, ids):
-        pools = self.request(
-            "{}/pools.json?search[id]={}".format(self.root, ids)).json()
+        pools = self.request_json(
+            f"{self.root}/pools.json?search[id]={ids}")
         for pool in pools:
             pool["name"] = pool["name"].replace("_", " ")
         return pools
@@ -75,7 +75,7 @@ class E621Extractor(danbooru.DanbooruExtractor):
 BASE_PATTERN = E621Extractor.update({
     "e621": {
         "root": "https://e621.net",
-        "pattern": r"e621\.net",
+        "pattern": r"e621\.(?:net|cc)",
     },
     "e926": {
         "root": "https://e926.net",
@@ -109,12 +109,11 @@ class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
         }
 
         posts = []
-        append = posts.append
         for num, pid in enumerate(self.post_ids, 1):
             if pid in id_to_post:
                 post = id_to_post[pid]
                 post["num"] = num
-                append(post)
+                posts.append(post)
             else:
                 self.log.warning("Post %s is unavailable", pid)
         return posts
@@ -126,8 +125,8 @@ class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
     example = "https://e621.net/posts/12345"
 
     def posts(self):
-        url = "{}/posts/{}.json".format(self.root, self.groups[-1])
-        return (self.request(url).json()["post"],)
+        url = f"{self.root}/posts/{self.groups[-1]}.json"
+        return (self.request_json(url)["post"],)
 
 
 class E621PopularExtractor(E621Extractor, danbooru.DanbooruPopularExtractor):

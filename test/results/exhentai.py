@@ -125,7 +125,7 @@ __tests__ = (
     "#category": ("", "exhentai", "favorite"),
     "#class"   : exhentai.ExhentaiFavoriteExtractor,
     "#auth"    : True,
-    "#urls"    : "https://e-hentai.org/g/1200119/d55c44d3d0/",
+    "#results" : "https://e-hentai.org/g/1200119/d55c44d3d0/",
 },
 
 {

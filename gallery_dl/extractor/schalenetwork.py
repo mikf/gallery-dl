@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,9 +22,9 @@ BASE_PATTERN = (
 )
 
 
-class KoharuExtractor(Extractor):
-    """Base class for koharu extractors"""
-    category = "koharu"
+class SchalenetworkExtractor(Extractor):
+    """Base class for schale.network extractors"""
+    category = "schalenetwork"
     root = "https://niyaniya.moe"
     root_api = "https://api.schale.network"
     request_interval = (0.5, 1.5)
@@ -40,8 +40,8 @@ class KoharuExtractor(Extractor):
         url_api = self.root_api + endpoint
 
         while True:
-            data = self.request(
-                url_api, params=params, headers=self.headers).json()
+            data = self.request_json(
+                url_api, params=params, headers=self.headers)
 
             try:
                 entries = data["entries"]
@@ -49,9 +49,8 @@ class KoharuExtractor(Extractor):
                 return
 
             for entry in entries:
-                url = "{}/g/{}/{}".format(
-                    self.root, entry["id"], entry["public_key"])
-                entry["_extractor"] = KoharuGalleryExtractor
+                url = f"{self.root}/g/{entry['id']}/{entry['public_key']}"
+                entry["_extractor"] = SchalenetworkGalleryExtractor
                 yield Message.Queue, url, entry
 
             try:
@@ -62,8 +61,8 @@ class KoharuExtractor(Extractor):
             params["page"] += 1
 
 
-class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
-    """Extractor for koharu galleries"""
+class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
+    """Extractor for schale.network galleries"""
     filename_fmt = "{num:>03}.{extension}"
     directory_fmt = ("{category}", "{id} {title}")
     archive_fmt = "{id}_{num}"
@@ -89,7 +88,7 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
 
     def __init__(self, match):
         GalleryExtractor.__init__(self, match)
-        self.gallery_url = None
+        self.page_url = None
 
     def _init(self):
         self.headers = {
@@ -106,9 +105,8 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
             self.directory_fmt = ("{category}",)
 
     def metadata(self, _):
-        url = "{}/books/detail/{}/{}".format(
-            self.root_api, self.groups[1], self.groups[2])
-        self.data = data = self.request(url, headers=self.headers).json()
+        url = f"{self.root_api}/books/detail/{self.groups[1]}/{self.groups[2]}"
+        self.data = data = self.request_json(url, headers=self.headers)
         data["date"] = text.parse_timestamp(data["created_at"] // 1000)
 
         tags = []
@@ -142,11 +140,8 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
         data = self.data
         fmt = self._select_format(data["data"])
 
-        url = "{}/books/data/{}/{}/{}/{}".format(
-            self.root_api,
-            data["id"], data["public_key"],
-            fmt["id"], fmt["public_key"],
-        )
+        url = (f"{self.root_api}/books/data/{data['id']}/"
+               f"{data['public_key']}/{fmt['id']}/{fmt['public_key']}")
         params = {
             "v": data["updated_at"],
             "w": fmt["w"],
@@ -154,16 +149,16 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
 
         if self.cbz:
             params["action"] = "dl"
-            base = self.request(
+            base = self.request_json(
                 url, method="POST", params=params, headers=self.headers,
-            ).json()["base"]
-            url = "{}?v={}&w={}".format(base, data["updated_at"], fmt["w"])
+            )["base"]
+            url = f"{base}?v={data['updated_at']}&w={fmt['w']}"
             info = text.nameext_from_url(base)
             if not info["extension"]:
                 info["extension"] = "cbz"
             return ((url, info),)
 
-        data = self.request(url, params=params, headers=self.headers).json()
+        data = self.request_json(url, params=params, headers=self.headers)
         base = data["base"]
 
         results = []
@@ -205,8 +200,8 @@ class KoharuGalleryExtractor(KoharuExtractor, GalleryExtractor):
         return fmt
 
 
-class KoharuSearchExtractor(KoharuExtractor):
-    """Extractor for koharu search results"""
+class SchalenetworkSearchExtractor(SchalenetworkExtractor):
+    """Extractor for schale.network search results"""
     subcategory = "search"
     pattern = BASE_PATTERN + r"/\?([^#]*)"
     example = "https://niyaniya.moe/?s=QUERY"
@@ -217,8 +212,8 @@ class KoharuSearchExtractor(KoharuExtractor):
         return self._pagination("/books", params)
 
 
-class KoharuFavoriteExtractor(KoharuExtractor):
-    """Extractor for koharu favorites"""
+class SchalenetworkFavoriteExtractor(SchalenetworkExtractor):
+    """Extractor for schale.network favorites"""
     subcategory = "favorite"
     pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
     example = "https://niyaniya.moe/favorites"

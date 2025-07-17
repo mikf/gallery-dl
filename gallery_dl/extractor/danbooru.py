@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -112,8 +112,7 @@ class DanbooruExtractor(BaseExtractor):
     def items_artists(self):
         for artist in self.artists():
             artist["_extractor"] = DanbooruTagExtractor
-            url = "{}/posts?tags={}".format(
-                self.root, text.quote(artist["name"]))
+            url = f"{self.root}/posts?tags={text.quote(artist['name'])}"
             yield Message.Queue, url, artist
 
     def metadata(self):
@@ -129,7 +128,7 @@ class DanbooruExtractor(BaseExtractor):
 
         first = True
         while True:
-            posts = self.request(url, params=params).json()
+            posts = self.request_json(url, params=params)
             if isinstance(posts, dict):
                 posts = posts["posts"]
 
@@ -142,8 +141,7 @@ class DanbooruExtractor(BaseExtractor):
                     }
                     data = {
                         meta["id"]: meta
-                        for meta in self.request(
-                            url, params=params_meta).json()
+                        for meta in self.request_json(url, params=params_meta)
                     }
                     for post in posts:
                         post.update(data[post["id"]])
@@ -157,7 +155,7 @@ class DanbooruExtractor(BaseExtractor):
                 return
 
             if prefix:
-                params["page"] = "{}{}".format(prefix, posts[-1]["id"])
+                params["page"] = f"{prefix}{posts[-1]['id']}"
             elif params["page"]:
                 params["page"] += 1
             else:
@@ -165,15 +163,66 @@ class DanbooruExtractor(BaseExtractor):
             first = False
 
     def _ugoira_frames(self, post):
-        data = self.request("{}/posts/{}.json?only=media_metadata".format(
-            self.root, post["id"])
-        ).json()["media_metadata"]["metadata"]
+        data = self.request_json(
+            f"{self.root}/posts/{post['id']}.json?only=media_metadata"
+        )["media_metadata"]["metadata"]
 
-        ext = data["ZIP:ZipFileName"].rpartition(".")[2]
+        if "Ugoira:FrameMimeType" in data:
+            ext = data["Ugoira:FrameMimeType"].rpartition("/")[2]
+            if ext == "jpeg":
+                ext = "jpg"
+        else:
+            ext = data["ZIP:ZipFileName"].rpartition(".")[2]
+
         fmt = ("{:>06}." + ext).format
         delays = data["Ugoira:FrameDelays"]
         return [{"file": fmt(index), "delay": delay}
                 for index, delay in enumerate(delays)]
+
+    def _collection_posts(self, cid, ctype):
+        reverse = prefix = None
+
+        order = self.config("order-posts")
+        if not order or order in {"asc", "pool", "pool_asc", "asc_pool"}:
+            params = {"tags": f"ord{ctype}:{cid}"}
+        elif order in {"id", "desc_id", "id_desc"}:
+            params = {"tags": f"{ctype}:{cid}"}
+            prefix = "b"
+        elif order in {"desc", "desc_pool", "pool_desc"}:
+            params = {"tags": f"ord{ctype}:{cid}"}
+            reverse = True
+        elif order in {"asc_id", "id_asc"}:
+            params = {"tags": f"{ctype}:{cid}"}
+            reverse = True
+
+        posts = self._pagination("/posts.json", params, prefix)
+        if reverse:
+            self.log.info("Collecting posts of %s %s", ctype, cid)
+            return self._collection_enumerate_reverse(posts)
+        else:
+            return self._collection_enumerate(posts)
+
+    def _collection_metadata(self, cid, ctype, cname=None):
+        url = f"{self.root}/{cname or ctype}s/{cid}.json"
+        collection = self.request_json(url)
+        collection["name"] = collection["name"].replace("_", " ")
+        self.post_ids = collection.pop("post_ids", ())
+        return {ctype: collection}
+
+    def _collection_enumerate(self, posts):
+        pid_to_num = {pid: num for num, pid in enumerate(self.post_ids, 1)}
+        for post in posts:
+            post["num"] = pid_to_num[post["id"]]
+            yield post
+
+    def _collection_enumerate_reverse(self, posts):
+        posts = list(posts)
+        posts.reverse()
+
+        pid_to_num = {pid: num for num, pid in enumerate(self.post_ids, 1)}
+        for post in posts:
+            post["num"] = pid_to_num[post["id"]]
+        return posts
 
 
 BASE_PATTERN = DanbooruExtractor.update({
@@ -228,7 +277,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
 
 
 class DanbooruPoolExtractor(DanbooruExtractor):
-    """Extractor for posts from danbooru pools"""
+    """Extractor for Danbooru pools"""
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name]}")
     filename_fmt = "{num:>04}_{id}_{filename}.{extension}"
@@ -238,49 +287,28 @@ class DanbooruPoolExtractor(DanbooruExtractor):
 
     def metadata(self):
         self.pool_id = self.groups[-1]
-        url = "{}/pools/{}.json".format(self.root, self.pool_id)
-        pool = self.request(url).json()
-        pool["name"] = pool["name"].replace("_", " ")
-        self.post_ids = pool.pop("post_ids", ())
-        return {"pool": pool}
+        return self._collection_metadata(self.pool_id, "pool")
 
     def posts(self):
-        reverse = prefix = None
+        return self._collection_posts(self.pool_id, "pool")
 
-        order = self.config("order-posts")
-        if not order or order in ("asc", "pool", "pool_asc", "asc_pool"):
-            params = {"tags": "ordpool:" + self.pool_id}
-        elif order in ("id", "desc_id", "id_desc"):
-            params = {"tags": "pool:" + self.pool_id}
-            prefix = "b"
-        elif order in ("desc", "desc_pool", "pool_desc"):
-            params = {"tags": "ordpool:" + self.pool_id}
-            reverse = True
-        elif order in ("asc_id", "id_asc"):
-            params = {"tags": "pool:" + self.pool_id}
-            reverse = True
 
-        posts = self._pagination("/posts.json", params, prefix)
-        if reverse:
-            return self._enumerate_posts_reverse(posts)
-        else:
-            return self._enumerate_posts(posts)
+class DanbooruFavgroupExtractor(DanbooruExtractor):
+    """Extractor for Danbooru favorite groups"""
+    subcategory = "favgroup"
+    directory_fmt = ("{category}", "Favorite Groups",
+                     "{favgroup[id]} {favgroup[name]}")
+    filename_fmt = "{num:>04}_{id}_{filename}.{extension}"
+    archive_fmt = "fg_{favgroup[id]}_{id}"
+    pattern = BASE_PATTERN + r"/favorite_group(?:s|/show)/(\d+)"
+    example = "https://danbooru.donmai.us/favorite_groups/12345"
 
-    def _enumerate_posts(self, posts):
-        pid_to_num = {pid: num+1 for num, pid in enumerate(self.post_ids)}
-        for post in posts:
-            post["num"] = pid_to_num[post["id"]]
-            yield post
+    def metadata(self):
+        return self._collection_metadata(
+            self.groups[-1], "favgroup", "favorite_group")
 
-    def _enumerate_posts_reverse(self, posts):
-        self.log.info("Collecting posts of pool %s", self.pool_id)
-        posts = list(posts)
-        posts.reverse()
-
-        pid_to_num = {pid: num+1 for num, pid in enumerate(self.post_ids)}
-        for post in posts:
-            post["num"] = pid_to_num[post["id"]]
-        return posts
+    def posts(self):
+        return self._collection_posts(self.groups[-1], "favgroup")
 
 
 class DanbooruPostExtractor(DanbooruExtractor):
@@ -291,11 +319,11 @@ class DanbooruPostExtractor(DanbooruExtractor):
     example = "https://danbooru.donmai.us/posts/12345"
 
     def posts(self):
-        url = "{}/posts/{}.json".format(self.root, self.groups[-1])
-        post = self.request(url).json()
+        url = f"{self.root}/posts/{self.groups[-1]}.json"
+        post = self.request_json(url)
         if self.includes:
             params = {"only": self.includes}
-            post.update(self.request(url, params=params).json())
+            post.update(self.request_json(url, params=params))
         return (post,)
 
 
@@ -333,8 +361,8 @@ class DanbooruArtistExtractor(DanbooruExtractor):
     items = DanbooruExtractor.items_artists
 
     def artists(self):
-        url = "{}/artists/{}.json".format(self.root, self.groups[-1])
-        return (self.request(url).json(),)
+        url = f"{self.root}/artists/{self.groups[-1]}.json"
+        return (self.request_json(url),)
 
 
 class DanbooruArtistSearchExtractor(DanbooruExtractor):
@@ -351,7 +379,7 @@ class DanbooruArtistSearchExtractor(DanbooruExtractor):
         params["page"] = text.parse_int(params.get("page"), 1)
 
         while True:
-            artists = self.request(url, params=params).json()
+            artists = self.request_json(url, params=params)
 
             yield from artists
 

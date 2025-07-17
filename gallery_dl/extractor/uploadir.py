@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -24,10 +24,10 @@ class UploadirFileExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.file_id = match.group(1)
+        self.file_id = match[1]
 
     def items(self):
-        url = "{}/u/{}".format(self.root, self.file_id)
+        url = f"{self.root}/u/{self.file_id}"
         response = self.request(url, method="HEAD", allow_redirects=False)
 
         if 300 <= response.status_code < 400:

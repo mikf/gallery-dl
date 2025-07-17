@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -29,7 +29,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         GalleryExtractor.__init__(self, match, url)
 
     def _init(self):
-        self.session.headers["Referer"] = self.gallery_url
+        self.session.headers["Referer"] = self.page_url
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -55,9 +55,9 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         return data
 
     def images(self, _):
-        url = self.gallery_url + "/all-pages"
+        url = self.page_url + "/all-pages"
         headers = {"Accept": "application/json"}
-        images = self.request(url, headers=headers).json()
+        images = self.request_json(url, headers=headers)
         return [
             (
                 urls["full"].replace("/giant_thumb_", "/"),
@@ -80,8 +80,8 @@ class SimplyhentaiImageExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.page_url = "https://old." + match.group(1)
-        self.type = match.group(2)
+        self.page_url = "https://old." + match[1]
+        self.type = match[2]
 
     def items(self):
         extr = text.extract_from(self.request(self.page_url).text)
@@ -123,7 +123,7 @@ class SimplyhentaiVideoExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.page_url = "https://" + match.group(1)
+        self.page_url = "https://" + match[1]
 
     def items(self):
         page = self.request(self.page_url).text

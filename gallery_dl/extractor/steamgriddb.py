@@ -72,9 +72,9 @@ class SteamgriddbExtractor(Extractor):
                 yield Message.Url, url, text.nameext_from_url(url, asset)
 
     def _call(self, endpoint, **kwargs):
-        data = self.request(self.root + endpoint, **kwargs).json()
+        data = self.request_json(self.root + endpoint, **kwargs)
         if not data["success"]:
-            raise exception.StopExtraction(data["error"])
+            raise exception.AbortExtraction(data["error"])
         return data["data"]
 
 
@@ -83,11 +83,11 @@ class SteamgriddbAssetsExtractor(SteamgriddbExtractor):
 
     def __init__(self, match):
         SteamgriddbExtractor.__init__(self, match)
-        list_type = match.group(1)
-        id = int(match.group(2))
+        list_type = match[1]
+        id = int(match[2])
         self.game_id = id if list_type == "game" else None
         self.collection_id = id if list_type == "collection" else None
-        self.page = int(match.group(3) or 1)
+        self.page = int(p) if (p := match[3]) else 1
 
     def assets(self):
         limit = 48
@@ -96,7 +96,7 @@ class SteamgriddbAssetsExtractor(SteamgriddbExtractor):
         sort = self.config("sort", "score_desc")
         if sort not in ("score_desc", "score_asc", "score_old_desc",
                         "score_old_asc", "age_desc", "age_asc"):
-            raise exception.StopExtractor("Invalid sort '%s'", sort)
+            raise exception.AbortExtraction(f"Invalid sort '{sort}'")
 
         json = {
             "static"  : self.config("static", True),
@@ -149,7 +149,7 @@ class SteamgriddbAssetsExtractor(SteamgriddbExtractor):
 
         for i in value:
             if i not in valid_values:
-                raise exception.StopExtraction("Invalid %s '%s'", type_name, i)
+                raise exception.AbortExtraction(f"Invalid {type_name} '{i}'")
 
         return value
 
@@ -162,15 +162,15 @@ class SteamgriddbAssetExtractor(SteamgriddbExtractor):
 
     def __init__(self, match):
         SteamgriddbExtractor.__init__(self, match)
-        self.asset_type = match.group(1)
-        self.asset_id = match.group(2)
+        self.asset_type = match[1]
+        self.asset_id = match[2]
 
     def assets(self):
         endpoint = "/api/public/asset/" + self.asset_type + "/" + self.asset_id
         asset = self._call(endpoint)["asset"]
         if asset is None:
-            raise exception.NotFoundError("asset ({}:{})".format(
-                self.asset_type, self.asset_id))
+            raise exception.NotFoundError(
+                f"asset ({self.asset_type}:{self.asset_id})")
         return (asset,)
 
 
@@ -211,7 +211,7 @@ class SteamgriddbIconsExtractor(SteamgriddbAssetsExtractor):
     asset_type = "icon"
     pattern = BASE_PATTERN + r"/(game|collection)/(\d+)/icons(?:/(\d+))?"
     example = "https://www.steamgriddb.com/game/1234/icons"
-    valid_dimensions = ["{0}x{0}".format(i) for i in (8, 10, 14, 16, 20, 24,
+    valid_dimensions = [f"{i}x{i}" for i in (8, 10, 14, 16, 20, 24,
                         28, 32, 35, 40, 48, 54, 56, 57, 60, 64, 72, 76, 80, 90,
                         96, 100, 114, 120, 128, 144, 150, 152, 160, 180, 192,
                         194, 256, 310, 512, 768, 1024)]

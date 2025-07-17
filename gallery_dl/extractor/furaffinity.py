@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2023 Mike Fährmann
+# Copyright 2020-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extractors for https://www.furaffinity.net/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|sfw\.)?(?:f[ux]|f?xfu)raffinity\.net"
@@ -28,7 +28,7 @@ class FuraffinityExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
         self.offset = 0
 
     def _init(self):
@@ -71,7 +71,7 @@ class FuraffinityExtractor(Extractor):
         return num
 
     def _parse_post(self, post_id):
-        url = "{}/view/{}/".format(self.root, post_id)
+        url = f"{self.root}/view/{post_id}/"
         extr = text.extract_from(self.request(url).text)
 
         if self._new_layout is None:
@@ -147,22 +147,19 @@ class FuraffinityExtractor(Extractor):
         data["user"] = self.user or data["artist_url"]
         data["date"] = text.parse_timestamp(data["filename"].partition(".")[0])
         data["description"] = self._process_description(data["_description"])
-        data["thumbnail"] = "https://t.furaffinity.net/{}@600-{}.jpg".format(
-            post_id, path.rsplit("/", 2)[1])
-
+        data["thumbnail"] = (f"https://t.furaffinity.net/{post_id}@600-"
+                             f"{path.rsplit('/', 2)[1]}.jpg")
         return data
 
-    @staticmethod
-    def _process_description(description):
+    def _process_description(self, description):
         return text.unescape(text.remove_html(description, "", ""))
 
     def _pagination(self, path, folder=None):
         num = 1
-        folder = "" if folder is None else "/folder/{}/a".format(folder)
+        folder = "" if folder is None else f"/folder/{folder}/a"
 
         while True:
-            url = "{}/{}/{}{}/{}/".format(
-                self.root, path, self.user, folder, num)
+            url = f"{self.root}/{path}/{self.user}{folder}/{num}/"
             page = self.request(url).text
             post_id = None
 
@@ -174,7 +171,7 @@ class FuraffinityExtractor(Extractor):
             num += 1
 
     def _pagination_favorites(self):
-        path = "/favorites/{}/".format(self.user)
+        path = f"/favorites/{self.user}/"
 
         while path:
             page = self.request(self.root + path).text
@@ -188,7 +185,7 @@ class FuraffinityExtractor(Extractor):
 
             pos = page.find('type="submit">Next</button>')
             if pos >= 0:
-                path = text.rextract(page, '<form action="', '"', pos)[0]
+                path = text.rextr(page, '<form action="', '"', pos)
                 continue
             path = text.extr(page, 'right" href="', '"')
 
@@ -298,7 +295,7 @@ class FuraffinitySearchExtractor(FuraffinityExtractor):
 
     def __init__(self, match):
         FuraffinityExtractor.__init__(self, match)
-        self.query = text.parse_query(match.group(2))
+        self.query = text.parse_query(match[2])
         if self.user and "q" not in self.query:
             self.query["q"] = text.unquote(self.user)
 
@@ -321,24 +318,18 @@ class FuraffinityPostExtractor(FuraffinityExtractor):
         return (post_id,)
 
 
-class FuraffinityUserExtractor(FuraffinityExtractor):
+class FuraffinityUserExtractor(Dispatch, FuraffinityExtractor):
     """Extractor for furaffinity user profiles"""
-    subcategory = "user"
-    cookies_domain = None
     pattern = BASE_PATTERN + r"/user/([^/?#]+)"
     example = "https://www.furaffinity.net/user/USER/"
 
-    def initialize(self):
-        pass
-
-    skip = Extractor.skip
-
     def items(self):
-        base = "{}/{{}}/{}/".format(self.root, self.user)
+        base = self.root
+        user = f"{self.user}/"
         return self._dispatch_extractors((
-            (FuraffinityGalleryExtractor , base.format("gallery")),
-            (FuraffinityScrapsExtractor  , base.format("scraps")),
-            (FuraffinityFavoriteExtractor, base.format("favorites")),
+            (FuraffinityGalleryExtractor , f"{base}/gallery/{user}"),
+            (FuraffinityScrapsExtractor  , f"{base}/scraps/{user}"),
+            (FuraffinityFavoriteExtractor, f"{base}/favorites/{user}"),
         ), ("gallery",))
 
 
@@ -349,7 +340,7 @@ class FuraffinityFollowingExtractor(FuraffinityExtractor):
     example = "https://www.furaffinity.net/watchlist/by/USER/"
 
     def items(self):
-        url = "{}/watchlist/by/{}/".format(self.root, self.user)
+        url = f"{self.root}/watchlist/by/{self.user}/"
         data = {"_extractor": FuraffinityUserExtractor}
 
         while True:
@@ -358,7 +349,7 @@ class FuraffinityFollowingExtractor(FuraffinityExtractor):
             for path in text.extract_iter(page, '<a href="', '"'):
                 yield Message.Queue, self.root + path, data
 
-            path = text.rextract(page, 'action="', '"')[0]
+            path = text.rextr(page, 'action="', '"')
             if url.endswith(path):
                 return
             url = self.root + path
@@ -382,9 +373,9 @@ class FuraffinitySubmissionsExtractor(FuraffinityExtractor):
             for post_id in text.extract_iter(page, 'id="sid-', '"'):
                 yield post_id
 
-            path = (text.extr(page, '<a class="button standard more" href="', '"') or  # noqa 501
-                    text.extr(page, '<a class="more-half" href="', '"') or
-                    text.extr(page, '<a class="more" href="', '"'))
-            if not path:
+            if (pos := page.find(">Next 48</a>")) < 0 and \
+                    (pos := page.find(">&gt;&gt;&gt; Next 48 &gt;&gt;")) < 0:
                 return
+
+            path = text.rextr(page, 'href="', '"', pos)
             url = self.root + text.unescape(path)

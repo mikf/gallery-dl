@@ -23,12 +23,12 @@ class PoringaExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.item = match.group(1)
+        self.item = match[1]
         self.__cookies = True
 
     def items(self):
         for post_id in self.posts():
-            url = "{}/posts/imagenes/{}".format(self.root, post_id)
+            url = f"{self.root}/posts/imagenes/{post_id}"
 
             try:
                 response = self.request(url)

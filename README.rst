@@ -19,7 +19,7 @@ and powerful `filenaming capabilities <https://gdl-org.github.io/docs/formatting
 Dependencies
 ============
 
-- Python_ 3.4+
+- Python_ 3.8+
 - Requests_
 
 Optional
@@ -35,6 +35,8 @@ Optional
 - toml_: TOML configuration file support for Python<3.11
 - SecretStorage_: GNOME keyring passwords for ``--cookies-from-browser``
 - Psycopg_: PostgreSQL archive support
+- truststore_: Native system certificate support
+- Jinja_: Jinja template support
 
 
 Installation
@@ -77,9 +79,9 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.29.1/gallery-dl.exe>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.30.0/gallery-dl.exe>`__
   (Requires `Microsoft Visual C++ Redistributable Package (x86) <https://aka.ms/vs/17/release/vc_redist.x86.exe>`__)
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.29.1/gallery-dl.bin>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.30.0/gallery-dl.bin>`__
 
 
 Nightly Builds
@@ -461,7 +463,7 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _Python:     https://www.python.org/downloads/
 .. _PyPI:       https://pypi.org/
 .. _pip:        https://pip.pypa.io/en/stable/
-.. _Requests:   https://requests.readthedocs.io/en/master/
+.. _Requests:   https://requests.readthedocs.io/en/latest/
 .. _FFmpeg:     https://www.ffmpeg.org/
 .. _mkvmerge:   https://www.matroska.org/downloads/mkvtoolnix.html
 .. _yt-dlp:     https://github.com/yt-dlp/yt-dlp
@@ -474,10 +476,12 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _toml:       https://pypi.org/project/toml/
 .. _SecretStorage: https://pypi.org/project/SecretStorage/
 .. _Psycopg:    https://www.psycopg.org/
+.. _truststore: https://truststore.readthedocs.io/en/latest/
+.. _Jinja:      https://jinja.palletsprojects.com/
 .. _Snapd:      https://docs.snapcraft.io/installing-snapd
 .. _OAuth:      https://en.wikipedia.org/wiki/OAuth
 .. _Chocolatey: https://chocolatey.org/install
-.. _Scoop:      https://scoop.sh
+.. _Scoop:      https://scoop.sh/
 
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
     :target: https://pypi.org/project/gallery-dl/

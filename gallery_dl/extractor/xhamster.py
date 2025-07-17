@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,7 +20,7 @@ class XhamsterExtractor(Extractor):
     category = "xhamster"
 
     def __init__(self, match):
-        self.root = "https://" + match.group(1)
+        self.root = "https://" + match[1]
         Extractor.__init__(self, match)
 
 
@@ -106,7 +106,7 @@ class XhamsterUserExtractor(XhamsterExtractor):
     example = "https://xhamster.com/users/USER/photos"
 
     def items(self):
-        url = "{}/users/{}/photos".format(self.root, self.groups[1])
+        url = f"{self.root}/users/{self.groups[1]}/photos"
         data = {"_extractor": XhamsterGalleryExtractor}
 
         while url:

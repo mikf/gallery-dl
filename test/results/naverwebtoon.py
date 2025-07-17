@@ -10,8 +10,7 @@ from gallery_dl.extractor import naverwebtoon
 __tests__ = (
 {
     "#url"     : "https://comic.naver.com/webtoon/detail?titleId=26458&no=1&weekday=tue",
-    "#category": ("", "naverwebtoon", "episode"),
-    "#class"   : naverwebtoon.NaverwebtoonEpisodeExtractor,
+    "#class"   : naverwebtoon.NaverWebtoonEpisodeExtractor,
     "#count"       : 14,
     "#sha1_url"    : "47a956ba8c7a837213d5985f50c569fcff986f75",
     "#sha1_content": "3806b6e8befbb1920048de9888dfce6220f69a60",
@@ -34,8 +33,7 @@ __tests__ = (
 
 {
     "#url"     : "https://comic.naver.com/challenge/detail?titleId=765124&no=1",
-    "#category": ("", "naverwebtoon", "episode"),
-    "#class"   : naverwebtoon.NaverwebtoonEpisodeExtractor,
+    "#class"   : naverwebtoon.NaverWebtoonEpisodeExtractor,
     "#pattern" : r"https://image-comic\.pstatic\.net/user_contents_data/challenge_comic/2021/01/19/342586/upload_7149856273586337846\.jpeg",
     "#count"   : 1,
 
@@ -64,8 +62,7 @@ __tests__ = (
 {
     "#url"     : "https://comic.naver.com/bestChallenge/detail?titleId=620732&no=334",
     "#comment" : "empty tags (#5120)",
-    "#category": ("", "naverwebtoon", "episode"),
-    "#class"   : naverwebtoon.NaverwebtoonEpisodeExtractor,
+    "#class"   : naverwebtoon.NaverWebtoonEpisodeExtractor,
     "#count"   : 9,
 
     "artist"  : [],
@@ -81,42 +78,37 @@ __tests__ = (
 
 {
     "#url"     : "https://comic.naver.com/bestChallenge/detail.nhn?titleId=771467&no=3",
-    "#category": ("", "naverwebtoon", "episode"),
-    "#class"   : naverwebtoon.NaverwebtoonEpisodeExtractor,
+    "#class"   : naverwebtoon.NaverWebtoonEpisodeExtractor,
     "#pattern" : r"https://image-comic\.pstatic\.net/user_contents_data/challenge_comic/2021/04/28/345534/upload_3617293622396203109\.jpeg",
     "#count"   : 1,
 },
 
 {
     "#url"     : "https://comic.naver.com/webtoon/list?titleId=22073",
-    "#category": ("", "naverwebtoon", "comic"),
-    "#class"   : naverwebtoon.NaverwebtoonComicExtractor,
-    "#pattern" : naverwebtoon.NaverwebtoonEpisodeExtractor.pattern,
+    "#class"   : naverwebtoon.NaverWebtoonComicExtractor,
+    "#pattern" : naverwebtoon.NaverWebtoonEpisodeExtractor.pattern,
     "#count"   : 32,
 },
 
 {
     "#url"     : "https://comic.naver.com/webtoon/list?titleId=765124",
     "#comment" : "/webtoon/ path for 'challenge' comic (#5123)",
-    "#category": ("", "naverwebtoon", "comic"),
-    "#class"   : naverwebtoon.NaverwebtoonComicExtractor,
+    "#class"   : naverwebtoon.NaverWebtoonComicExtractor,
     "#range"   : "1",
-    "#urls"    : "https://comic.naver.com/challenge/detail?titleId=765124&no=1",
+    "#results" : "https://comic.naver.com/challenge/detail?titleId=765124&no=1",
 },
 
 {
     "#url"     : "https://comic.naver.com/challenge/list?titleId=765124",
-    "#category": ("", "naverwebtoon", "comic"),
-    "#class"   : naverwebtoon.NaverwebtoonComicExtractor,
-    "#pattern" : naverwebtoon.NaverwebtoonEpisodeExtractor.pattern,
+    "#class"   : naverwebtoon.NaverWebtoonComicExtractor,
+    "#pattern" : naverwebtoon.NaverWebtoonEpisodeExtractor.pattern,
     "#count"   : 24,
 },
 
 {
     "#url"     : "https://comic.naver.com/bestChallenge/list.nhn?titleId=789786",
-    "#category": ("", "naverwebtoon", "comic"),
-    "#class"   : naverwebtoon.NaverwebtoonComicExtractor,
-    "#pattern" : naverwebtoon.NaverwebtoonEpisodeExtractor.pattern,
+    "#class"   : naverwebtoon.NaverWebtoonComicExtractor,
+    "#pattern" : naverwebtoon.NaverWebtoonEpisodeExtractor.pattern,
     "#count"   : 1,
 },
 

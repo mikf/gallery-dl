@@ -20,7 +20,7 @@ class SenmangaChapterExtractor(ChapterExtractor):
     example = "https://raw.senmanga.com/MANGA/CHAPTER"
 
     def _init(self):
-        self.session.headers["Referer"] = self.gallery_url
+        self.session.headers["Referer"] = self.page_url
 
         # select "All pages" viewer
         self.cookies.set("viewer", "1", domain="raw.senmanga.com")

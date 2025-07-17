@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,9 +9,8 @@
 """Extractors for https://rule34.us/"""
 
 from .booru import BooruExtractor
-from .. import text
+from .. import text, util
 import collections
-import re
 
 
 class Rule34usExtractor(BooruExtractor):
@@ -20,11 +19,11 @@ class Rule34usExtractor(BooruExtractor):
     per_page = 42
 
     def _init(self):
-        self._find_tags = re.compile(
+        self._find_tags = util.re(
             r'<li class="([^-"]+)-tag"[^>]*><a href="[^;"]+;q=([^"]+)').findall
 
     def _parse_post(self, post_id):
-        url = "{}/index.php?r=posts/view&id={}".format(self.root, post_id)
+        url = f"{self.root}/index.php?r=posts/view&id={post_id}"
         page = self.request(url).text
         extr = text.extract_from(page)
 
@@ -41,7 +40,8 @@ class Rule34usExtractor(BooruExtractor):
 
         url = post["file_url"]
         if "//video-cdn1." in url:
-            post["_fallback"] = (url.replace("//video-cdn1.", "//video."),)
+            post["file_url"] = url.replace("//video-cdn1.", "//video.")
+            post["_fallback"] = (url,)
         post["md5"] = url.rpartition("/")[2].partition(".")[0]
 
         tags = collections.defaultdict(list)
@@ -62,7 +62,7 @@ class Rule34usTagExtractor(Rule34usExtractor):
 
     def __init__(self, match):
         Rule34usExtractor.__init__(self, match)
-        self.tags = text.unquote(match.group(1).replace("+", " "))
+        self.tags = text.unquote(match[1].replace("+", " "))
 
     def metadata(self):
         return {"search_tags": self.tags}
@@ -99,7 +99,7 @@ class Rule34usPostExtractor(Rule34usExtractor):
 
     def __init__(self, match):
         Rule34usExtractor.__init__(self, match)
-        self.post_id = match.group(1)
+        self.post_id = match[1]
 
     def posts(self):
         return (self._parse_post(self.post_id),)

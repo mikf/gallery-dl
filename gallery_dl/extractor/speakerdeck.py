@@ -9,8 +9,7 @@
 """Extractors for https://speakerdeck.com/"""
 
 from .common import GalleryExtractor
-from .. import text
-import re
+from .. import text, util
 
 
 class SpeakerdeckPresentationExtractor(GalleryExtractor):
@@ -24,31 +23,30 @@ class SpeakerdeckPresentationExtractor(GalleryExtractor):
     pattern = r"(?:https?://)?(?:www\.)?speakerdeck\.com/([^/?#]+)/([^/?#]+)"
     example = "https://speakerdeck.com/USER/PRESENTATION"
 
-    def __init__(self, match):
-        GalleryExtractor.__init__(self, match, "")
-        self.user, self.presentation = match.groups()
-
     def metadata(self, _):
+        user, presentation = self.groups
+
         url = self.root + "/oembed.json"
         params = {
-            "url": "{}/{}/{}".format(self.root, self.user, self.presentation),
+            "url": f"{self.root}/{user}/{presentation}",
         }
-        data = self.request(url, params=params).json()
+        data = self.request_json(url, params=params)
 
         self.presentation_id = text.extr(
             data["html"], 'src="//speakerdeck.com/player/', '"')
 
         return {
-            "user": self.user,
-            "presentation": self.presentation,
+            "user": user,
+            "presentation": presentation,
             "presentation_id": self.presentation_id,
             "title": data["title"],
             "author": data["author_name"],
         }
 
     def images(self, _):
-        url = "{}/player/{}".format(self.root, self.presentation_id)
-        page = re.sub(r"\s+", " ", self.request(url).text)
+        url = f"{self.root}/player/{self.presentation_id}"
+        page = self.request(url).text
+        page = util.re(r"\s+").sub(" ", page)
         return [
             (url, None)
             for url in text.extract_iter(page, 'js-sd-slide" data-url="', '"')

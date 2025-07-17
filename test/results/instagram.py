@@ -14,7 +14,7 @@ __tests__ = (
     "#class"   : instagram.InstagramUserExtractor,
     "#auth"    : False,
     "#options" : {"include": "all"},
-    "#urls": [
+    "#results" : (
         "https://www.instagram.com/instagram/info/",
         "https://www.instagram.com/instagram/avatar/",
         "https://www.instagram.com/stories/instagram/",
@@ -22,7 +22,7 @@ __tests__ = (
         "https://www.instagram.com/instagram/posts/",
         "https://www.instagram.com/instagram/reels/",
         "https://www.instagram.com/instagram/tagged/",
-    ],
+    ),
 },
 
 {
@@ -276,5 +276,19 @@ __tests__ = (
     "#category": ("", "instagram", "post"),
     "#class"   : instagram.InstagramPostExtractor,
 },
+
+{
+    "#url"     : "https://www.instagram.com/share/p/BACiUUUYQV",
+    "#category": ("", "instagram", "post"),
+    "#class"   : instagram.InstagramPostExtractor,
+    "shortcode"  : "C6q-XdvsU5v",
+},
+
+{
+    "#url"     : "https://www.instagram.com/share/reel/BARSSL4rTu",
+    "#category": ("", "instagram", "post"),
+    "#class"   : instagram.InstagramPostExtractor,
+    "shortcode"  : "DHbVbT4Jx0c",
+}
 
 )

@@ -20,9 +20,6 @@ class FacebookExtractor(Extractor):
     filename_fmt = "{id}.{extension}"
     archive_fmt = "{id}.{extension}"
 
-    set_url_fmt = root + "/media/set/?set={set_id}"
-    photo_url_fmt = root + "/photo/?fbid={photo_id}&set={set_id}"
-
     def _init(self):
         headers = self.session.headers
         headers["Accept"] = (
@@ -37,22 +34,20 @@ class FacebookExtractor(Extractor):
         self.videos = self.config("videos", True)
         self.author_followups = self.config("author-followups", False)
 
-    @staticmethod
-    def decode_all(txt):
+    def decode_all(self, txt):
         return text.unescape(
             txt.encode().decode("unicode_escape")
             .encode("utf_16", "surrogatepass").decode("utf_16")
         ).replace("\\/", "/")
 
-    @staticmethod
-    def parse_set_page(set_page):
+    def parse_set_page(self, set_page):
         directory = {
             "set_id": text.extr(
                 set_page, '"mediaSetToken":"', '"'
             ) or text.extr(
                 set_page, '"mediasetToken":"', '"'
             ),
-            "username": FacebookExtractor.decode_all(
+            "username": self.decode_all(
                 text.extr(
                     set_page, '"user":{"__isProfile":"User","name":"', '","'
                 ) or text.extr(
@@ -62,7 +57,7 @@ class FacebookExtractor(Extractor):
             "user_id": text.extr(
                 set_page, '"owner":{"__typename":"User","id":"', '"'
             ),
-            "title": FacebookExtractor.decode_all(text.extr(
+            "title": self.decode_all(text.extr(
                 set_page, '"title":{"text":"', '"'
             )),
             "first_photo_id": text.extr(
@@ -77,8 +72,7 @@ class FacebookExtractor(Extractor):
 
         return directory
 
-    @staticmethod
-    def parse_photo_page(photo_page):
+    def parse_photo_page(self, photo_page):
         photo = {
             "id": text.extr(
                 photo_page, '"__isNode":"Photo","id":"', '"'
@@ -88,13 +82,13 @@ class FacebookExtractor(Extractor):
                 '"url":"https:\\/\\/www.facebook.com\\/photo\\/?fbid=',
                 '"'
             ).rsplit("&set=", 1)[-1],
-            "username": FacebookExtractor.decode_all(text.extr(
+            "username": self.decode_all(text.extr(
                 photo_page, '"owner":{"__typename":"User","name":"', '"'
             )),
             "user_id": text.extr(
                 photo_page, '"owner":{"__typename":"User","id":"', '"'
             ),
-            "caption": FacebookExtractor.decode_all(text.extr(
+            "caption": self.decode_all(text.extr(
                 photo_page,
                 '"message":{"delight_ranges"',
                 '"},"message_preferred_body"'
@@ -103,7 +97,7 @@ class FacebookExtractor(Extractor):
                 text.extr(photo_page, '\\"publish_time\\":', ',') or
                 text.extr(photo_page, '"created_time":', ',')
             ),
-            "url": FacebookExtractor.decode_all(text.extr(
+            "url": self.decode_all(text.extr(
                 photo_page, ',"image":{"uri":"', '","'
             )),
             "next_photo_id": text.extr(
@@ -133,8 +127,7 @@ class FacebookExtractor(Extractor):
 
         return photo
 
-    @staticmethod
-    def parse_post_page(post_page):
+    def parse_post_page(self, post_page):
         first_photo_url = text.extr(
             text.extr(
                 post_page, '"__isMedia":"Photo"', '"target_group"'
@@ -148,13 +141,12 @@ class FacebookExtractor(Extractor):
 
         return post
 
-    @staticmethod
-    def parse_video_page(video_page):
+    def parse_video_page(self, video_page):
         video = {
             "id": text.extr(
                 video_page, '\\"video_id\\":\\"', '\\"'
             ),
-            "username": FacebookExtractor.decode_all(text.extr(
+            "username": self.decode_all(text.extr(
                 video_page, '"actors":[{"__typename":"User","name":"', '","'
             )),
             "user_id": text.extr(
@@ -167,7 +159,7 @@ class FacebookExtractor(Extractor):
         }
 
         if not video["username"]:
-            video["username"] = FacebookExtractor.decode_all(text.extr(
+            video["username"] = self.decode_all(text.extr(
                 video_page,
                 '"__typename":"User","id":"' + video["user_id"] + '","name":"',
                 '","'
@@ -179,7 +171,7 @@ class FacebookExtractor(Extractor):
 
         audio = {
             **video,
-            "url": FacebookExtractor.decode_all(text.extr(
+            "url": self.decode_all(text.extr(
                 text.extr(
                     first_video_raw,
                     "AudioChannelConfiguration",
@@ -196,7 +188,7 @@ class FacebookExtractor(Extractor):
             first_video_raw, 'FBQualityLabel=\\"', '\\u003C\\/BaseURL>'
         ):
             resolution = raw_url.split('\\"', 1)[0]
-            video["urls"][resolution] = FacebookExtractor.decode_all(
+            video["urls"][resolution] = self.decode_all(
                 raw_url.split('BaseURL>', 1)[1]
             )
 
@@ -224,17 +216,16 @@ class FacebookExtractor(Extractor):
         res = self.request(url, **kwargs)
 
         if res.url.startswith(self.root + "/login"):
-            raise exception.AuthenticationError(
-                "You must be logged in to continue viewing images." +
-                LEFT_OFF_TXT
+            raise exception.LoginRequires(
+                f"You must be logged in to continue viewing images."
+                f"{LEFT_OFF_TXT}"
             )
 
         if b'{"__dr":"CometErrorRoot.react"}' in res.content:
-            raise exception.StopExtraction(
-                "You've been temporarily blocked from viewing images. "
-                "\nPlease try using a different account, "
-                "using a VPN or waiting before you retry." +
-                LEFT_OFF_TXT
+            raise exception.AbortExtraction(
+                f"You've been temporarily blocked from viewing images.\n"
+                f"Please try using a different account, "
+                f"using a VPN or waiting before you retry.{LEFT_OFF_TXT}"
             )
 
         return res
@@ -248,9 +239,7 @@ class FacebookExtractor(Extractor):
 
         while i < len(all_photo_ids):
             photo_id = all_photo_ids[i]
-            photo_url = self.photo_url_fmt.format(
-                photo_id=photo_id, set_id=set_id
-            )
+            photo_url = f"{self.root}/photo/?fbid={photo_id}&set={set_id}"
             photo_page = self.photo_page_request_wrapper(photo_url).text
 
             photo = self.parse_photo_page(photo_page)
@@ -323,7 +312,7 @@ class FacebookSetExtractor(FacebookExtractor):
             post_page = self.request(post_url).text
             set_id = self.parse_post_page(post_page)["set_id"]
 
-        set_url = self.set_url_fmt.format(set_id=set_id)
+        set_url = f"{self.root}/media/set/?set={set_id}"
         set_page = self.request(set_url).text
         set_data = self.parse_set_page(set_page)
         if self.groups[2]:
@@ -342,16 +331,15 @@ class FacebookPhotoExtractor(FacebookExtractor):
 
     def items(self):
         photo_id = self.groups[0]
-        photo_url = self.photo_url_fmt.format(photo_id=photo_id, set_id="")
+        photo_url = f"{self.root}/photo/?fbid={photo_id}&set="
         photo_page = self.photo_page_request_wrapper(photo_url).text
 
         i = 1
         photo = self.parse_photo_page(photo_page)
         photo["num"] = i
 
-        set_page = self.request(
-            self.set_url_fmt.format(set_id=photo["set_id"])
-        ).text
+        set_url = f"{self.root}/media/set/?set={photo['set_id']}"
+        set_page = self.request(set_url).text
 
         directory = self.parse_set_page(set_page)
 
@@ -362,9 +350,7 @@ class FacebookPhotoExtractor(FacebookExtractor):
             for comment_photo_id in photo["followups_ids"]:
                 comment_photo = self.parse_photo_page(
                     self.photo_page_request_wrapper(
-                        self.photo_url_fmt.format(
-                            photo_id=comment_photo_id, set_id=""
-                        )
+                        f"{self.root}/photo/?fbid={comment_photo_id}&set="
                     ).text
                 )
                 i += 1
@@ -410,8 +396,7 @@ class FacebookProfileExtractor(FacebookExtractor):
     )
     example = "https://www.facebook.com/USERNAME"
 
-    @staticmethod
-    def get_profile_photos_set_id(profile_photos_page):
+    def get_profile_photos_set_id(self, profile_photos_page):
         set_ids_raw = text.extr(
             profile_photos_page, '"pageItems"', '"page_info"'
         )
@@ -433,7 +418,7 @@ class FacebookProfileExtractor(FacebookExtractor):
         set_id = self.get_profile_photos_set_id(profile_photos_page)
 
         if set_id:
-            set_url = self.set_url_fmt.format(set_id=set_id)
+            set_url = f"{self.root}/media/set/?set={set_id}"
             set_page = self.request(set_url).text
             set_data = self.parse_set_page(set_page)
             return self.extract_set(set_data)

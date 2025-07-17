@@ -31,7 +31,7 @@ jobs:
           architecture: "x64"
           python-version: "3.13"
           python-packages: "secretstorage"
-        - os: "windows-2019"
+        - os: "windows-2022"
           architecture: "x86"
           python-version: "3.8"
           python-packages: "toml"
@@ -72,6 +72,7 @@ jobs:
     - name: Build executable
       run: |
         pip install requests requests[socks] yt-dlp[default] pyyaml ${{ matrix.python-packages }} pyinstaller
+        pip install truststore || true
         python ./scripts/pyinstaller.py --label '${{ env.LABEL }}'
 
     - uses: actions/upload-artifact@v4

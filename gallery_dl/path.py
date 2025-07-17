@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,6 @@
 """Filesystem path handling"""
 
 import os
-import re
 import shutil
 import functools
 from . import util, formatter, exception
@@ -134,26 +133,45 @@ class PathFormat():
             basedir = self.clean_path(basedir)
         self.basedirectory = basedir
 
-    @staticmethod
-    def _build_cleanfunc(chars, repl):
+    def _build_cleanfunc(self, chars, repl):
         if not chars:
             return util.identity
         elif isinstance(chars, dict):
+            if 0 not in chars:
+                chars = self._process_repl_dict(chars)
+                chars[0] = None
+
             def func(x, table=str.maketrans(chars)):
                 return x.translate(table)
         elif len(chars) == 1:
             def func(x, c=chars, r=repl):
                 return x.replace(c, r)
         else:
-            return functools.partial(
-                re.compile("[" + chars + "]").sub, repl)
+            return functools.partial(util.re(f"[{chars}]").sub, repl)
         return func
+
+    def _process_repl_dict(self, chars):
+        # can't modify 'chars' while *directly* iterating over its keys
+        for char in [c for c in chars if len(c) > 1]:
+            if len(char) == 3 and char[1] == "-":
+                citer = range(ord(char[0]), ord(char[2])+1)
+            else:
+                citer = char
+
+            repl = chars.pop(char)
+            for c in citer:
+                chars[c] = repl
+
+        return chars
 
     def open(self, mode="wb"):
         """Open file and return a corresponding file object"""
         try:
             return open(self.temppath, mode)
         except FileNotFoundError:
+            if "r" in mode:
+                # '.part' file no longer exists
+                return util.NullContext()
             os.makedirs(self.realdirectory)
             return open(self.temppath, mode)
 
@@ -163,8 +181,7 @@ class PathFormat():
             return self.check_file()
         return False
 
-    @staticmethod
-    def check_file():
+    def check_file(self):
         return True
 
     def _enum_file(self):
@@ -263,24 +280,22 @@ class PathFormat():
     def build_directory(self, kwdict):
         """Apply 'kwdict' to directory format strings"""
         segments = []
-        append = segments.append
         strip = self.strip
 
         try:
             for fmt in self.directory_formatters:
                 segment = fmt(kwdict).strip()
-                if strip and segment != "..":
+                if strip and segment not in {".", ".."}:
                     # remove trailing dots and spaces (#647)
                     segment = segment.rstrip(strip)
                 if segment:
-                    append(self.clean_segment(segment))
+                    segments.append(self.clean_segment(segment))
             return segments
         except Exception as exc:
             raise exception.DirectoryFormatError(exc)
 
     def build_directory_conditional(self, kwdict):
         segments = []
-        append = segments.append
         strip = self.strip
 
         try:
@@ -294,7 +309,7 @@ class PathFormat():
                 if strip and segment != "..":
                     segment = segment.rstrip(strip)
                 if segment:
-                    append(self.clean_segment(segment))
+                    segments.append(self.clean_segment(segment))
             return segments
         except Exception as exc:
             raise exception.DirectoryFormatError(exc)
@@ -329,6 +344,11 @@ class PathFormat():
             pass
         return 0
 
+    def set_mtime(self, path=None):
+        if (mtime := (self.kwdict.get("_mtime_meta") or
+                      self.kwdict.get("_mtime_http"))):
+            util.set_mtime(self.realpath if path is None else path, mtime)
+
     def finalize(self):
         """Move tempfile to its target location"""
         if self.delete:
@@ -362,6 +382,4 @@ class PathFormat():
                     os.unlink(self.temppath)
                 break
 
-        mtime = self.kwdict.get("_mtime")
-        if mtime:
-            util.set_mtime(self.realpath, mtime)
+        self.set_mtime()

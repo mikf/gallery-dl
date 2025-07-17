@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -46,7 +46,7 @@ class ComicvineTagExtractor(BooruExtractor):
         }
 
         while True:
-            images = self.request(url, params=params).json()["images"]
+            images = self.request_json(url, params=params)["images"]
             yield from images
 
             if len(images) < self.per_page:
@@ -59,8 +59,7 @@ class ComicvineTagExtractor(BooruExtractor):
 
     _file_url = operator.itemgetter("original")
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_datetime(
             post["dateCreated"], "%a, %b %d %Y")
         post["tags"] = [tag["name"] for tag in post["tags"] if tag["name"]]

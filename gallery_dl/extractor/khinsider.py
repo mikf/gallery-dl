@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,7 +26,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.album = match.group(1)
+        self.album = match[1]
 
     def items(self):
         url = self.root + "/game-soundtracks/album/" + self.album

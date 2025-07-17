@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"  : "https://tenor.com/view/moving-gif-8525772382434057283",
     "#class": tenor.TenorImageExtractor,
-    "#urls" : "https://media1.tenor.com/m/dlGgz3LRXEMAAAAC/moving.gif",
+    "#results": "https://media1.tenor.com/m/dlGgz3LRXEMAAAAC/moving.gif",
 
     "bg_color" : "",
     "description": "an illustration of a tree with green leaves",
@@ -22,9 +22,13 @@ __tests__ = (
     "filename" : "moving",
     "h1_title" : "Moving Sticker",
     "hasaudio" : False,
+    "format"   : "gif",
     "width"    : 467,
     "height"   : 498,
+    "size"     : 60157,
+    "duration" : 0,
     "id"       : "8525772382434057283",
+    "id_format": "dlGgz3LRXEMAAAAC",
     "index"    : 0,
     "itemurl"  : "https://tenor.com/view/moving-gif-8525772382434057283",
     "long_title": "Moving Sticker - Moving Stickers",
@@ -65,14 +69,22 @@ __tests__ = (
     "#comment": "'format' option",
     "#class"  : tenor.TenorImageExtractor,
     "#options": {"format": ["mkv", "foobar", "webp"]},
-    "#urls"   : "https://media.tenor.com/dlGgz3LRXEMAAAAx/moving.webp",
+    "#results": "https://media.tenor.com/dlGgz3LRXEMAAAAx/moving.webp",
+
+    "format"   : "webp",
+    "width"    : 468,
+    "height"   : 498,
+    "size"     : 9808,
+    "duration" : 0,
+    "id"       : "8525772382434057283",
+    "id_format": "dlGgz3LRXEMAAAAx",
 },
 
 {
     "#url"    : "https://tenor.com/view/vtuber-hololive-%E3%83%9B%E3%83%AD%E3%83%A9%E3%82%A4%E3%83%96-hologra-%E3%83%9B%E3%83%AD%E3%81%90%E3%82%89-gif-26058046",
     "#comment": "non-ASCII characters in URL",
     "#class"  : tenor.TenorImageExtractor,
-    "#urls"   : "https://media1.tenor.com/m/jHugoUKy-T0AAAAC/vtuber-hololive.gif",
+    "#results": "https://media1.tenor.com/m/jHugoUKy-T0AAAAC/vtuber-hololive.gif",
 
     "id": "10122861201914526013",
 },
@@ -110,7 +122,7 @@ __tests__ = (
 {
     "#url"    : "https://tenor.com/users/robloxfan123",
     "#class"  : tenor.TenorUserExtractor,
-    "#urls"   : "https://media1.tenor.com/m/1auSjzCikuoAAAAC/2016-roblox.gif",
+    "#results": "https://media1.tenor.com/m/1auSjzCikuoAAAAC/2016-roblox.gif",
 
     "user": {
         "profile_id": "8180139772821505417",

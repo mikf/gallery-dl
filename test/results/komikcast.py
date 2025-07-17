@@ -9,7 +9,7 @@ from gallery_dl.extractor import komikcast
 
 __tests__ = (
 {
-    "#url"     : "https://komikcast.lol/chapter/apotheosis-chapter-02-2-bahasa-indonesia/",
+    "#url"     : "https://komikcast.li/chapter/apotheosis-chapter-02-2-bahasa-indonesia/",
     "#class"   : komikcast.KomikcastChapterExtractor,
     "#pattern" : r"https://svr?\d+\.imgkc\d+\.my\.id/wp-content/img/A/Apotheosis/002-2/\d{3}\.jpg",
     "#count"   : 18,
@@ -24,6 +24,16 @@ __tests__ = (
     "manga"    : "Apotheosis",
     "page"     : range(1, 18),
     "title"    : "",
+},
+
+{
+    "#url"     : "https://komikcast02.com/chapter/apotheosis-chapter-02-2-bahasa-indonesia/",
+    "#class"   : komikcast.KomikcastChapterExtractor,
+},
+
+{
+    "#url"     : "https://komikcast.lol/chapter/apotheosis-chapter-02-2-bahasa-indonesia/",
+    "#class"   : komikcast.KomikcastChapterExtractor,
 },
 
 {

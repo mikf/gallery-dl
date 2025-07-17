@@ -20,13 +20,11 @@ class TumblrgalleryExtractor(GalleryExtractor):
     root = "https://tumblrgallery.xyz"
     referer = False
 
-    @staticmethod
-    def _urls_from_page(page):
+    def _urls_from_page(self, page):
         return text.extract_iter(
             page, '<div class="report"> <a class="xx-co-me" href="', '"')
 
-    @staticmethod
-    def _data_from_url(url):
+    def _data_from_url(self, url):
         filename = text.nameext_from_url(url)["filename"]
         parts = filename.split("_")
         try:
@@ -43,7 +41,7 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
 
     def __init__(self, match):
         TumblrgalleryExtractor.__init__(self, match)
-        self.gallery_id = text.parse_int(match.group(2))
+        self.gallery_id = text.parse_int(match[2])
 
     def metadata(self, page):
         return {
@@ -52,10 +50,11 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
         }
 
     def images(self, _):
-        page_num = 1
+        base = f"{self.root}/tumblrblog/gallery/{self.gallery_id}/"
+        pnum = 1
+
         while True:
-            url = "{}/tumblrblog/gallery/{}/{}.html".format(
-                self.root, self.gallery_id, page_num)
+            url = f"{base}{pnum}.html"
             response = self.request(url, allow_redirects=False, fatal=False)
 
             if response.status_code >= 300:
@@ -63,7 +62,7 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
 
             for url in self._urls_from_page(response.text):
                 yield url, self._data_from_url(url)
-            page_num += 1
+            pnum += 1
 
 
 class TumblrgalleryPostExtractor(TumblrgalleryExtractor):
@@ -74,7 +73,7 @@ class TumblrgalleryPostExtractor(TumblrgalleryExtractor):
 
     def __init__(self, match):
         TumblrgalleryExtractor.__init__(self, match)
-        self.gallery_id = text.parse_int(match.group(2))
+        self.gallery_id = text.parse_int(match[2])
 
     def metadata(self, page):
         return {
@@ -99,7 +98,7 @@ class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
 
     def __init__(self, match):
         TumblrgalleryExtractor.__init__(self, match)
-        self.search_term = match.group(2)
+        self.search_term = match[2]
 
     def metadata(self, page):
         return {
@@ -114,7 +113,7 @@ class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
             for gallery_id in text.extract_iter(
                     page, '<div class="title"><a href="post/', '.html'):
 
-                url = "{}/post/{}.html".format(self.root, gallery_id)
+                url = f"{self.root}/post/{gallery_id}.html"
                 post_page = self.request(url).text
 
                 for url in self._urls_from_page(post_page):

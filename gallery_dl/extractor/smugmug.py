@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -71,7 +71,7 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
 
     def __init__(self, match):
         SmugmugExtractor.__init__(self, match)
-        self.album_id = match.group(1)
+        self.album_id = match[1]
 
     def items(self):
         album = self.api.album(self.album_id, "User")
@@ -98,7 +98,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
 
     def __init__(self, match):
         SmugmugExtractor.__init__(self, match)
-        self.image_id = match.group(3)
+        self.image_id = match[3]
 
     def items(self):
         image = self.api.image(self.image_id, "ImageSizeDetails")
@@ -197,7 +197,7 @@ class SmugmugAPI(oauth.OAuth1API):
         return self._expansion(endpoint, "Node", params)
 
     def _call(self, endpoint, params=None, domain=API_DOMAIN):
-        url = "https://{}/api/v2/{}".format(domain, endpoint)
+        url = f"https://{domain}/api/v2/{endpoint}"
         params = params or {}
         if self.api_key:
             params["APIKey"] = self.api_key
@@ -211,9 +211,9 @@ class SmugmugAPI(oauth.OAuth1API):
         if data["Code"] == 404:
             raise exception.NotFoundError()
         if data["Code"] == 429:
-            raise exception.StopExtraction("Rate limit reached")
+            raise exception.AbortExtraction("Rate limit reached")
         self.log.debug(data)
-        raise exception.StopExtraction("API request failed")
+        raise exception.AbortExtraction("API request failed")
 
     def _expansion(self, endpoint, expands, params=None):
         endpoint = self._extend(endpoint, expands)
@@ -234,14 +234,12 @@ class SmugmugAPI(oauth.OAuth1API):
                 return
             params["start"] += params["count"]
 
-    @staticmethod
-    def _extend(endpoint, expands):
+    def _extend(self, endpoint, expands):
         if expands:
             endpoint += "?_expand=" + expands
         return endpoint
 
-    @staticmethod
-    def _apply_expansions(data, expands):
+    def _apply_expansions(self, data, expands):
 
         def unwrap(response):
             locator = response["Locator"]

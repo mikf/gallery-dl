@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extractors for https://www.weibo.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
 from ..cache import cache
 import random
@@ -46,9 +46,9 @@ class WeiboExtractor(Extractor):
 
         if response.history:
             if "login.sina.com" in response.url:
-                raise exception.StopExtraction(
-                    "HTTP redirect to login page (%s)",
-                    response.url.partition("?")[0])
+                raise exception.AbortExtraction(
+                    f"HTTP redirect to login page "
+                    f"({response.url.partition('?')[0]})")
             if "passport.weibo.com" in response.url:
                 self._sina_visitor_system(response)
                 response = Extractor.request(self, url, **kwargs)
@@ -98,16 +98,15 @@ class WeiboExtractor(Extractor):
                 yield Message.Url, file["url"], file
 
     def _extract_status(self, status, files):
-        append = files.append
-
         if "mix_media_info" in status:
             for item in status["mix_media_info"]["items"]:
                 type = item.get("type")
                 if type == "video":
                     if self.videos:
-                        append(self._extract_video(item["data"]["media_info"]))
+                        files.append(self._extract_video(
+                            item["data"]["media_info"]))
                 elif type == "pic":
-                    append(item["data"]["largest"].copy())
+                    files.append(item["data"]["largest"].copy())
                 else:
                     self.log.warning("Unknown media type '%s'", type)
             return
@@ -121,22 +120,22 @@ class WeiboExtractor(Extractor):
 
                 if pic_type == "gif" and self.gifs:
                     if self.gifs_video:
-                        append({"url": pic["video"]})
+                        files.append({"url": pic["video"]})
                     else:
-                        append(pic["largest"].copy())
+                        files.append(pic["largest"].copy())
 
                 elif pic_type == "livephoto" and self.livephoto:
-                    append(pic["largest"].copy())
-                    append({"url": pic["video"]})
+                    files.append(pic["largest"].copy())
+                    files.append({"url": pic["video"]})
 
                 else:
-                    append(pic["largest"].copy())
+                    files.append(pic["largest"].copy())
 
         if "page_info" in status:
             info = status["page_info"]
             if "media_info" in info and self.videos:
                 if info.get("type") != "5" or self.movies:
-                    append(self._extract_video(info["media_info"]))
+                    files.append(self._extract_video(info["media_info"]))
                 else:
                     self.log.debug("%s: Ignoring 'movie' video", status["id"])
 
@@ -151,25 +150,24 @@ class WeiboExtractor(Extractor):
             return media["play_info"].copy()
 
     def _status_by_id(self, status_id):
-        url = "{}/ajax/statuses/show?id={}".format(self.root, status_id)
-        return self.request(url).json()
+        url = f"{self.root}/ajax/statuses/show?id={status_id}"
+        return self.request_json(url)
 
     def _user_id(self):
         if len(self.user) >= 10 and self.user.isdecimal():
             return self.user[-10:]
         else:
-            url = "{}/ajax/profile/info?{}={}".format(
-                self.root,
-                "screen_name" if self._prefix == "n" else "custom",
-                self.user)
-            return self.request(url).json()["data"]["user"]["idstr"]
+            url = (f"{self.root}/ajax/profile/info?"
+                   f"{'screen_name' if self._prefix == 'n' else 'custom'}="
+                   f"{self.user}")
+            return self.request_json(url)["data"]["user"]["idstr"]
 
     def _pagination(self, endpoint, params):
         url = self.root + "/ajax" + endpoint
         headers = {
             "X-Requested-With": "XMLHttpRequest",
             "X-XSRF-TOKEN": None,
-            "Referer": "{}/u/{}".format(self.root, params["uid"]),
+            "Referer": f"{self.root}/u/{params['uid']}",
         }
 
         while True:
@@ -181,8 +179,8 @@ class WeiboExtractor(Extractor):
             if not data.get("ok"):
                 self.log.debug(response.content)
                 if "since_id" not in params:  # first iteration
-                    raise exception.StopExtraction(
-                        '"%s"', data.get("msg") or "unknown error")
+                    raise exception.AbortExtraction(
+                        f'"{data.get("msg") or "unknown error"}"')
 
             data = data["data"]
             statuses = data["list"]
@@ -235,7 +233,7 @@ class WeiboExtractor(Extractor):
             "a"    : "incarnate",
             "t"    : data["tid"],
             "w"    : "3" if data.get("new_tid") else "2",
-            "c"    : "{:>03}".format(data.get("confidence") or 100),
+            "c"    : f"{data.get('confidence') or 100:>03}",
             "gc"   : "",
             "cb"   : "cross_domain",
             "from" : "weibo",
@@ -257,8 +255,8 @@ class WeiboUserExtractor(WeiboExtractor):
     #     pass
 
     def items(self):
-        base = "{}/u/{}?tabtype=".format(self.root, self._user_id())
-        return self._dispatch_extractors((
+        base = f"{self.root}/u/{self._user_id()}?tabtype="
+        return Dispatch._dispatch_extractors(self, (
             (WeiboHomeExtractor    , base + "home"),
             (WeiboFeedExtractor    , base + "feed"),
             (WeiboVideosExtractor  , base + "video"),

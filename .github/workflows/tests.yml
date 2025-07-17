@@ -17,7 +17,6 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
-        - "3.7"
         - "3.8"
         - "3.9"
         - "3.10"
@@ -46,10 +45,7 @@ jobs:
     - name: Install yt-dlp
       run: |
         case "${{ matrix.python-version }}" in
-            3.4|3.5)
-                # don't install yt-dlp
-                ;;
-            3.6|3.7|3.8)
+            3.8)
                 # install from PyPI
                 pip install yt-dlp
                 ;;
@@ -61,14 +57,7 @@ jobs:
 
     - name: Lint with flake8
       run: |
-        case "${{ matrix.python-version }}" in
-            3.4|3.5|3.6|3.7)
-                flake8 --extend-exclude scripts/export_tests.py,scripts/pyprint.py .
-                ;;
-            *)
-                flake8 .
-                ;;
-        esac
+        flake8 .
 
     - name: Run tests
       run: |

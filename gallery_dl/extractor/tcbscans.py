@@ -19,7 +19,7 @@ class TcbscansChapterExtractor(ChapterExtractor):
     example = "https://tcbscans.me/chapters/12345/MANGA-chapter-123"
 
     def __init__(self, match):
-        self.root = text.root_from_url(match.group(0))
+        self.root = text.root_from_url(match[0])
         ChapterExtractor.__init__(self, match)
 
     def images(self, page):
@@ -48,7 +48,7 @@ class TcbscansMangaExtractor(MangaExtractor):
     example = "https://tcbscans.me/mangas/123/MANGA"
 
     def __init__(self, match):
-        self.root = text.root_from_url(match.group(0))
+        self.root = text.root_from_url(match[0])
         MangaExtractor.__init__(self, match)
 
     def chapters(self, page):

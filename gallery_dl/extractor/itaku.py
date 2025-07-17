@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -63,6 +63,15 @@ class ItakuGalleryExtractor(ItakuExtractor):
 
     def posts(self):
         return self.api.galleries_images(*self.groups)
+
+
+class ItakuStarsExtractor(ItakuExtractor):
+    subcategory = "stars"
+    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/stars(?:/(\d+))?"
+    example = "https://itaku.ee/profile/USER/stars"
+
+    def posts(self):
+        return self.api.galleries_images_starred(*self.groups)
 
 
 class ItakuImageExtractor(ItakuExtractor):
@@ -139,13 +148,28 @@ class ItakuAPI():
         }
         return self._pagination(endpoint, params, self.image)
 
+    def galleries_images_starred(self, username, section=None):
+        endpoint = "/galleries/images/user_starred_imgs/"
+        params = {
+            "cursor"    : None,
+            "stars_of"  : self.user(username)["owner"],
+            "sections"  : section,
+            "date_range": "",
+            "ordering"  : "-date_added",
+            "maturity_rating": ("SFW", "Questionable", "NSFW"),
+            "page"      : "1",
+            "page_size" : "30",
+            "visibility": ("PUBLIC", "PROFILE_ONLY"),
+        }
+        return self._pagination(endpoint, params, self.image)
+
     def image(self, image_id):
-        endpoint = "/galleries/images/{}/".format(image_id)
+        endpoint = f"/galleries/images/{image_id}/"
         return self._call(endpoint)
 
     @memcache(keyarg=1)
     def user(self, username):
-        return self._call("/user_profiles/{}/".format(username))
+        return self._call(f"/user_profiles/{username}/")
 
     def _call(self, endpoint, params=None):
         if not endpoint.startswith("http"):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -29,26 +29,25 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
     example = "https://issuu.com/issuu/docs/TITLE/"
 
     def metadata(self, page):
-        pos = page.rindex('id="initial-data"')
-        data = util.json_loads(text.unescape(text.rextract(
-            page, '<script data-json="', '"', pos)[0]))
+
+        data = text.extr(
+            page, '{\\"documentTextVersion\\":', ']\\n"])</script>')
+        data = util.json_loads(text.unescape(
+            '{"":' + data.replace('\\"', '"')))
 
         doc = data["initialDocumentData"]["document"]
         doc["date"] = text.parse_datetime(
             doc["originalPublishDateInISOString"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
-        self._cnt = text.parse_int(doc["pageCount"])
-        self._tpl = "https://{}/{}-{}/jpg/page_{{}}.jpg".format(
-            data["config"]["hosts"]["image"],
-            doc["revisionId"],
-            doc["publicationId"],
-        )
+        self.count = text.parse_int(doc["pageCount"])
+        self.base = (f"https://image.isu.pub/{doc['revisionId']}-"
+                     f"{doc['publicationId']}/jpg/page_")
 
         return {"document": doc}
 
     def images(self, page):
-        fmt = self._tpl.format
-        return [(fmt(i), None) for i in range(1, self._cnt + 1)]
+        return [(f"{self.base}{i}.jpg", None)
+                for i in range(1, self.count + 1)]
 
 
 class IssuuUserExtractor(IssuuBase, Extractor):
@@ -66,9 +65,8 @@ class IssuuUserExtractor(IssuuBase, Extractor):
             url = base + "/" + str(pnum) if pnum > 1 else base
             try:
                 html = self.request(url).text
-                data = util.json_loads(text.unescape(text.extr(
-                    html, '</main></div><script data-json="', '" id="')))
-                docs = data["docs"]
+                data = text.extr(html, '\\"docs\\":', '}]\\n"]')
+                docs = util.json_loads(data.replace('\\"', '"'))
             except Exception as exc:
                 self.log.debug("", exc_info=exc)
                 return

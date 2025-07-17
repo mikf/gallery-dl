@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2023 Mike Fährmann
+# Copyright 2020-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,7 +23,7 @@ class RedgifsExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.key = match.group(1)
+        self.key = match[1]
 
     def _init(self):
         self.api = RedgifsAPI(self)
@@ -94,7 +94,7 @@ class RedgifsUserExtractor(RedgifsExtractor):
 
     def __init__(self, match):
         RedgifsExtractor.__init__(self, match)
-        self.query = match.group(2)
+        self.query = match[2]
 
     def metadata(self):
         return {"userName": self.key}
@@ -116,7 +116,7 @@ class RedgifsCollectionExtractor(RedgifsExtractor):
 
     def __init__(self, match):
         RedgifsExtractor.__init__(self, match)
-        self.collection_id = match.group(2)
+        self.collection_id = match[2]
 
     def metadata(self):
         collection = self.api.collection_info(self.key, self.collection_id)
@@ -135,9 +135,9 @@ class RedgifsCollectionsExtractor(RedgifsExtractor):
     example = "https://www.redgifs.com/users/USER/collections"
 
     def items(self):
+        base = f"{self.root}/users/{self.key}/collections/"
         for collection in self.api.collections(self.key):
-            url = "{}/users/{}/collections/{}".format(
-                self.root, self.key, collection["folderId"])
+            url = f"{base}{collection['folderId']}"
             collection["_extractor"] = RedgifsCollectionExtractor
             yield Message.Queue, url, collection
 
@@ -151,7 +151,7 @@ class RedgifsNichesExtractor(RedgifsExtractor):
 
     def __init__(self, match):
         RedgifsExtractor.__init__(self, match)
-        self.query = match.group(2)
+        self.query = match[2]
 
     def gifs(self):
         order = text.parse_query(self.query).get("order")
@@ -223,25 +223,24 @@ class RedgifsAPI():
         return self._call(endpoint)
 
     def user(self, user, order="new"):
-        endpoint = "/v2/users/{}/search".format(user.lower())
+        endpoint = f"/v2/users/{user.lower()}/search"
         params = {"order": order}
         return self._pagination(endpoint, params)
 
     def collection(self, user, collection_id):
-        endpoint = "/v2/users/{}/collections/{}/gifs".format(
-            user, collection_id)
+        endpoint = f"/v2/users/{user}/collections/{collection_id}/gifs"
         return self._pagination(endpoint)
 
     def collection_info(self, user, collection_id):
-        endpoint = "/v2/users/{}/collections/{}".format(user, collection_id)
+        endpoint = f"/v2/users/{user}/collections/{collection_id}"
         return self._call(endpoint)
 
     def collections(self, user):
-        endpoint = "/v2/users/{}/collections".format(user)
+        endpoint = f"/v2/users/{user}/collections"
         return self._pagination(endpoint, key="collections")
 
     def niches(self, niche, order):
-        endpoint = "/v2/niches/{}/gifs".format(niche)
+        endpoint = f"/v2/niches/{niche}/gifs"
         params = {"count": 30, "order": order}
         return self._pagination(endpoint, params)
 
@@ -257,8 +256,8 @@ class RedgifsAPI():
     def _call(self, endpoint, params=None):
         url = self.API_ROOT + endpoint
         self.headers["Authorization"] = self._auth()
-        return self.extractor.request(
-            url, params=params, headers=self.headers).json()
+        return self.extractor.request_json(
+            url, params=params, headers=self.headers)
 
     def _pagination(self, endpoint, params=None, key="gifs"):
         if params is None:
@@ -278,5 +277,5 @@ class RedgifsAPI():
         # https://github.com/Redgifs/api/wiki/Temporary-tokens
         url = self.API_ROOT + "/v2/auth/temporary"
         self.headers["Authorization"] = None
-        return "Bearer " + self.extractor.request(
-            url, headers=self.headers).json()["token"]
+        return "Bearer " + self.extractor.request_json(
+            url, headers=self.headers)["token"]

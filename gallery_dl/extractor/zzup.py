@@ -16,7 +16,7 @@ class ZzupGalleryExtractor(GalleryExtractor):
     filename_fmt = "{num:>03}.{extension}"
     archive_fmt = "{slug}_{num}"
     root = "https://zzup.com"
-    pattern = (r"(?:https?://)?(up\.|www\.)?zzup\.com(/(?:viewalbum|content)"
+    pattern = (r"(?:https?://)?(up\.|w+\.)?zzup\.com(/(?:viewalbum|content)"
                r"/[\w=]+/([^/?#]+)/[\w=]+)/(?:index|page-\d+)\.html")
     example = "https://zzup.com/content/xyz=/12345_TITLE/123=/index.html"
 
@@ -25,7 +25,7 @@ class ZzupGalleryExtractor(GalleryExtractor):
         if subdomain == "up.":
             self.root = "https://up.zzup.com"
             self.images = self.images_v2
-        url = "{}{}/index.html".format(self.root, path)
+        url = f"{self.root}{path}/index.html"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -41,22 +41,23 @@ class ZzupGalleryExtractor(GalleryExtractor):
         page = self.request(self.root + path).text
         url = self.root + text.extr(page, '\n<a href="', '"')
         p1, _, p2 = url.partition("/image0")
-        ufmt = p1 + "/image{:>05}" + p2[4:]
-        return [(ufmt.format(num), None) for num in range(1, count + 1)]
+        p2 = p2[4:]
+        return [(f"{p1}/image{i:>05}{p2}", None) for i in range(1, count + 1)]
 
     def images_v2(self, page):
+        base = f"{self.root}/showimage/"
         results = []
 
         while True:
             for path in text.extract_iter(
                     page, ' class="picbox"><a target="_blank" href="', '"'):
-                results.append(("{}/showimage/{}/zzup.com.jpg".format(
-                    self.root, "/".join(path.split("/")[2:-2])), None))
+                url = f"{base}{'/'.join(path.split('/')[2:-2])}/zzup.com.jpg"
+                results.append((url, None))
 
             pos = page.find("glyphicon-arrow-right")
             if pos < 0:
                 break
-            path = text.rextract(page, ' href="', '"', pos)[0]
-            page = self.request(text.urljoin(self.gallery_url, path)).text
+            path = text.rextr(page, ' href="', '"', pos)
+            page = self.request(text.urljoin(self.page_url, path)).text
 
         return results

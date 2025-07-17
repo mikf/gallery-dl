@@ -13,7 +13,7 @@ __tests__ = (
     "#comment" : "'view_url' yields 404 (#6922)",
     "#category": ("philomena", "manebooru.art", "post"),
     "#class"   : philomena.PhilomenaPostExtractor,
-    "#urls"        : "https://static.manebooru.art/img/view/2020/10/27/307071.png",
+    "#results"     : "https://static.manebooru.art/img/view/2020/10/27/307071.png",
     "#sha1_content": "82c21bfb2675449893fa4b2546546f404019b3c8",
 
     "date"     : "dt:2020-10-27 11:58:40"
@@ -23,7 +23,7 @@ __tests__ = (
     "#url"     : "philomena:https://ponerpics.org/images/1",
     "#category": ("philomena", "ponerpics.org", "post"),
     "#class"   : philomena.PhilomenaPostExtractor,
-    "#urls"    : "https://ponerpics.org/img/view/2012/1/2/1.png",
+    "#results" : "https://ponerpics.org/img/view/2012/1/2/1.png",
 
     "date"     : "dt:2012-01-02 03:12:33"
 },

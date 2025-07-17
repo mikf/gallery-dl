@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://warosu.org/jp/thread/16656025",
     "#category": ("", "warosu", "thread"),
     "#class"   : warosu.WarosuThreadExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://i.warosu.org/data/jp/img/0166/56/1488487280004.png",
         "https://i.warosu.org/data/jp/img/0166/56/1488493239417.png",
         "https://i.warosu.org/data/jp/img/0166/56/1488493636725.jpg",
@@ -32,7 +32,7 @@ __tests__ = (
     "#category": ("", "warosu", "thread"),
     "#class"   : warosu.WarosuThreadExtractor,
     "#sha1_content" : "d48df0a701e6599312bfff8674f4aa5d4fb8db1c",
-    "#urls"         : "https://i.warosu.org/data/jp/img/0166/58/1488521824388.jpg",
+    "#results"      : "https://i.warosu.org/data/jp/img/0166/58/1488521824388.jpg",
     "#count"        : 1,
 
     "board"     : "jp",
@@ -89,6 +89,14 @@ __tests__ = (
     "time"      : range(1590415759, 1590755510),
     "title"     : "American Classic Comic Artists",
     "w"         : range(200, 3000),
+},
+
+{
+    "#url"     : "https://warosu.org/fa/thread/18460691",
+    "#comment" : "non-archived post (#7698)",
+    "#class"   : warosu.WarosuThreadExtractor,
+    "#pattern" : r"https://i.warosu.org/data/fa/img/0184/60/17\d+\.\w+",
+    "#count"   : 20,
 },
 
 )

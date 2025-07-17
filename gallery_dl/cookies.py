@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,7 +26,9 @@ from . import aes, text, util
 
 SUPPORTED_BROWSERS_CHROMIUM = {
     "brave", "chrome", "chromium", "edge", "opera", "thorium", "vivaldi"}
-SUPPORTED_BROWSERS = SUPPORTED_BROWSERS_CHROMIUM | {"firefox", "safari"}
+SUPPORTED_BROWSERS_FIREFOX = {"firefox", "librewolf", "zen"}
+SUPPORTED_BROWSERS = \
+    SUPPORTED_BROWSERS_CHROMIUM | SUPPORTED_BROWSERS_FIREFOX | {"safari"}
 
 logger = logging.getLogger("cookies")
 
@@ -34,18 +36,20 @@ logger = logging.getLogger("cookies")
 def load_cookies(browser_specification):
     browser_name, profile, keyring, container, domain = \
         _parse_browser_specification(*browser_specification)
-    if browser_name == "firefox":
-        return load_cookies_firefox(profile, container, domain)
+    if browser_name in SUPPORTED_BROWSERS_FIREFOX:
+        return load_cookies_firefox(browser_name, profile, container, domain)
     elif browser_name == "safari":
         return load_cookies_safari(profile, domain)
     elif browser_name in SUPPORTED_BROWSERS_CHROMIUM:
         return load_cookies_chromium(browser_name, profile, keyring, domain)
     else:
-        raise ValueError("unknown browser '{}'".format(browser_name))
+        raise ValueError(f"unknown browser '{browser_name}'")
 
 
-def load_cookies_firefox(profile=None, container=None, domain=None):
-    path, container_id = _firefox_cookies_database(profile, container)
+def load_cookies_firefox(browser_name, profile=None,
+                         container=None, domain=None):
+    path, container_id = _firefox_cookies_database(browser_name,
+                                                   profile, container)
 
     sql = ("SELECT name, value, host, path, isSecure, expiry "
            "FROM moz_cookies")
@@ -55,7 +59,7 @@ def load_cookies_firefox(profile=None, container=None, domain=None):
     if container_id is False:
         conditions.append("NOT INSTR(originAttributes,'userContextId=')")
     elif container_id:
-        uid = "%userContextId={}".format(container_id)
+        uid = f"%userContextId={container_id}"
         conditions.append("originAttributes LIKE ? OR originAttributes LIKE ?")
         parameters += (uid, uid + "&%")
 
@@ -68,7 +72,7 @@ def load_cookies_firefox(profile=None, container=None, domain=None):
             parameters += (domain, "." + domain)
 
     if conditions:
-        sql = "{} WHERE ( {} )".format(sql, " ) AND ( ".join(conditions))
+        sql = f"{sql} WHERE ( {' ) AND ( '.join(conditions)} )"
 
     with DatabaseConnection(path) as db:
         cookies = [
@@ -83,7 +87,8 @@ def load_cookies_firefox(profile=None, container=None, domain=None):
                 sql, parameters)
         ]
 
-    _log_info("Extracted %s cookies from Firefox", len(cookies))
+    _log_info("Extracted %s cookies from %s",
+              len(cookies), browser_name.capitalize())
     return cookies
 
 
@@ -181,7 +186,7 @@ def load_cookies_chromium(browser_name, profile=None,
             ))
 
     if failed_cookies > 0:
-        failed_message = " ({} could not be decrypted)".format(failed_cookies)
+        failed_message = f" ({failed_cookies} could not be decrypted)"
     else:
         failed_message = ""
 
@@ -196,18 +201,20 @@ def load_cookies_chromium(browser_name, profile=None,
 # --------------------------------------------------------------------
 # firefox
 
-def _firefox_cookies_database(profile=None, container=None):
+def _firefox_cookies_database(browser_name, profile=None, container=None):
     if not profile:
-        search_root = _firefox_browser_directory()
+        search_root = _firefox_browser_directory(browser_name)
     elif _is_path(profile):
         search_root = profile
     else:
-        search_root = os.path.join(_firefox_browser_directory(), profile)
+        search_root = os.path.join(
+            _firefox_browser_directory(browser_name), profile)
 
     path = _find_most_recently_used_file(search_root, "cookies.sqlite")
     if path is None:
-        raise FileNotFoundError("Unable to find Firefox cookies database in "
-                                "{}".format(search_root))
+        raise FileNotFoundError(f"Unable to find {browser_name.capitalize()} "
+                                f"cookies database in {search_root}")
+
     _log_debug("Extracting cookies from %s", path)
 
     if not container or container == "none":
@@ -237,22 +244,37 @@ def _firefox_cookies_database(profile=None, container=None):
                 container_id = context["userContextId"]
                 break
         else:
-            raise ValueError("Unable to find Firefox container '{}'".format(
-                container))
+            raise ValueError(f"Unable to find Firefox container '{container}'")
         _log_debug("Only loading cookies from container '%s' (ID %s)",
                    container, container_id)
 
     return path, container_id
 
 
-def _firefox_browser_directory():
+def _firefox_browser_directory(browser_name):
+    join = os.path.join
+
     if sys.platform in ("win32", "cygwin"):
-        return os.path.expandvars(
-            r"%APPDATA%\Mozilla\Firefox\Profiles")
-    if sys.platform == "darwin":
-        return os.path.expanduser(
-            "~/Library/Application Support/Firefox/Profiles")
-    return os.path.expanduser("~/.mozilla/firefox")
+        appdata = os.path.expandvars("%APPDATA%")
+        return {
+            "firefox"  : join(appdata, R"Mozilla\Firefox\Profiles"),
+            "librewolf": join(appdata, R"librewolf\Profiles"),
+            "zen"      : join(appdata, R"zen\Profiles"),
+        }[browser_name]
+    elif sys.platform == "darwin":
+        appdata = os.path.expanduser("~/Library/Application Support")
+        return {
+            "firefox"  : join(appdata, R"Firefox/Profiles"),
+            "librewolf": join(appdata, R"librewolf/Profiles"),
+            "zen"      : join(appdata, R"zen/Profiles"),
+        }[browser_name]
+    else:
+        home = os.path.expanduser("~")
+        return {
+            "firefox"  : join(home, R".mozilla/firefox"),
+            "librewolf": join(home, R".librewolf"),
+            "zen"      : join(home, R".zen"),
+        }[browser_name]
 
 
 # --------------------------------------------------------------------
@@ -367,8 +389,8 @@ def _chromium_cookies_database(profile, config):
 
     path = _find_most_recently_used_file(search_root, "Cookies")
     if path is None:
-        raise FileNotFoundError("Unable to find {} cookies database in "
-                                "'{}'".format(config["browser"], search_root))
+        raise FileNotFoundError(f"Unable to find {config['browser']} cookies "
+                                f"database in '{search_root}'")
     return path
 
 
@@ -500,8 +522,7 @@ class LinuxChromiumCookieDecryptor(ChromiumCookieDecryptor):
         self._cookie_counts = {"v10": 0, "v11": 0, "other": 0}
         self._offset = (32 if meta_version >= 24 else 0)
 
-    @staticmethod
-    def derive_key(password):
+    def derive_key(self, password):
         # values from
         # https://chromium.googlesource.com/chromium/src/+/refs/heads
         # /main/components/os_crypt/os_crypt_linux.cc
@@ -545,8 +566,7 @@ class MacChromiumCookieDecryptor(ChromiumCookieDecryptor):
         self._cookie_counts = {"v10": 0, "other": 0}
         self._offset = (32 if meta_version >= 24 else 0)
 
-    @staticmethod
-    def derive_key(password):
+    def derive_key(self, password):
         # values from
         # https://chromium.googlesource.com/chromium/src/+/refs/heads
         # /main/components/os_crypt/os_crypt_mac.mm
@@ -694,9 +714,9 @@ def _get_kwallet_password(browser_keyring_name):
         )
 
         if proc.returncode != 0:
-            _log_error("kwallet-query failed with return code {}. "
-                       "Please consult the kwallet-query man page "
-                       "for details".format(proc.returncode))
+            _log_error(f"kwallet-query failed with return code "
+                       f"{proc.returncode}. Please consult the kwallet-query "
+                       f"man page for details")
             return b""
 
         if stdout.lower().startswith(b"failed to read"):
@@ -825,7 +845,7 @@ class DataParser:
 
     def read_bytes(self, num_bytes):
         if num_bytes < 0:
-            raise ParserError("invalid read of {} bytes".format(num_bytes))
+            raise ParserError(f"invalid read of {num_bytes} bytes")
         end = self.cursor + num_bytes
         if end > len(self._data):
             raise ParserError("reached end of input")
@@ -836,8 +856,8 @@ class DataParser:
     def expect_bytes(self, expected_value, message):
         value = self.read_bytes(len(expected_value))
         if value != expected_value:
-            raise ParserError("unexpected value: {} != {} ({})".format(
-                value, expected_value, message))
+            raise ParserError(f"unexpected value: {value} != {expected_value} "
+                              f"({message})")
 
     def read_uint(self, big_endian=False):
         data_format = ">I" if big_endian else "<I"
@@ -858,10 +878,10 @@ class DataParser:
 
     def skip(self, num_bytes, description="unknown"):
         if num_bytes > 0:
-            _log_debug("Skipping {} bytes ({}): {!r}".format(
-                num_bytes, description, self.read_bytes(num_bytes)))
+            _log_debug(f"Skipping {num_bytes} bytes ({description}): "
+                       f"{self.read_bytes(num_bytes)!r}")
         elif num_bytes < 0:
-            raise ParserError("Invalid skip of {} bytes".format(num_bytes))
+            raise ParserError(f"Invalid skip of {num_bytes} bytes")
 
     def skip_to(self, offset, description="unknown"):
         self.skip(offset - self.cursor, description)
@@ -884,7 +904,7 @@ class DatabaseConnection():
             if util.WINDOWS:
                 path = "/" + os.path.abspath(path)
 
-            uri = "file:{}?mode=ro&immutable=1".format(path)
+            uri = f"file:{path}?mode=ro&immutable=1"
             self.database = sqlite3.connect(
                 uri, uri=True, isolation_level=None, check_same_thread=False)
             return self.database
@@ -1082,9 +1102,9 @@ def _parse_browser_specification(
         browser, profile=None, keyring=None, container=None, domain=None):
     browser = browser.lower()
     if browser not in SUPPORTED_BROWSERS:
-        raise ValueError("Unsupported browser '{}'".format(browser))
+        raise ValueError(f"Unsupported browser '{browser}'")
     if keyring and keyring not in SUPPORTED_KEYRINGS:
-        raise ValueError("Unsupported keyring '{}'".format(keyring))
+        raise ValueError(f"Unsupported keyring '{keyring}'")
     if profile and _is_path(profile):
         profile = os.path.expanduser(profile)
     return browser, profile, keyring, container, domain

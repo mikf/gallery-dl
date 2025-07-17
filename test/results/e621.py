@@ -140,25 +140,31 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://e621.net/favorites?page=2&user_id=53275",
+    "#url"     : "https://e621.net/favorites?page=1&user_id=460755",
     "#category": ("E621", "e621", "favorite"),
     "#class"   : e621.E621FavoriteExtractor,
     "#pattern" : r"https://static\d.e621.net/data/../../[0-9a-f]+",
-    "#count"   : "> 260",
+    "#count"   : 15,
+},
+
+{
+    "#url"     : "https://e621.cc/posts?tags=rating:safe",
+    "#category": ("E621", "e621", "tag"),
+    "#class"   : e621.E621TagExtractor,
 },
 
 {
     "#url"     : "https://e621.cc/?tags=rating:safe",
     "#category": ("E621", "e621", "frontend"),
     "#class"   : e621.E621FrontendExtractor,
-    "#urls"    : "https://e621.net/posts?tags=rating:safe",
+    "#results" : "https://e621.net/posts?tags=rating:safe",
 },
 
 {
     "#url"     : "https://e621.anthro.fr/?q=rating:safe",
     "#category": ("E621", "e621", "frontend"),
     "#class"   : e621.E621FrontendExtractor,
-    "#urls"    : "https://e621.net/posts?tags=rating:safe",
+    "#results" : "https://e621.net/posts?tags=rating:safe",
 },
 
 )

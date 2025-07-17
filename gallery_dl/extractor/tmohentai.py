@@ -20,15 +20,14 @@ class TmohentaiGalleryExtractor(GalleryExtractor):
     example = "https://tmohentai.com/contents/12345a67b89c0"
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
-        url = "{}/contents/{}".format(self.root, self.gallery_id)
+        self.gallery_id = match[1]
+        url = f"{self.root}/contents/{self.gallery_id}"
         GalleryExtractor.__init__(self, match, url)
 
     def images(self, page):
-        fmt = "https://imgrojo.tmohentai.com/contents/{}/{{:>03}}.webp".format(
-            self.gallery_id).format
+        base = f"https://imgrojo.tmohentai.com/contents/{self.gallery_id}/"
         cnt = page.count('class="lanzador')
-        return [(fmt(i), None) for i in range(0, cnt)]
+        return [(f"{base}{i:>03}.webp", None) for i in range(0, cnt)]
 
     def metadata(self, page):
         extr = text.extract_from(page)

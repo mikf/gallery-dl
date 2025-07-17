@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -155,11 +155,36 @@ def status():
 
         paths.append((path, status))
 
-    fmt = "{{:<{}}} : {{}}\n".format(
-        max(len(p[0]) for p in paths)).format
+    fmt = f"{{:<{max(len(p[0]) for p in paths)}}} : {{}}\n".format
 
     for path, status in paths:
         stdout_write(fmt(path, status))
+
+
+def remap_categories():
+    opts = _config.get("extractor")
+    if not opts:
+        return
+
+    cmap = opts.get("config-map")
+    if cmap is None:
+        cmap = (
+            ("coomerparty" , "coomer"),
+            ("kemonoparty" , "kemono"),
+            ("koharu"      , "schalenetwork"),
+            ("naver"       , "naver-blog"),
+            ("chzzk"       , "naver-chzzk"),
+            ("naverwebtoon", "naver-webtoon"),
+            ("pixiv"       , "pixiv-novel"),
+        )
+    elif not cmap:
+        return
+    elif isinstance(cmap, dict):
+        cmap = cmap.items()
+
+    for old, new in cmap:
+        if old in opts and new not in opts:
+            opts[new] = opts[old]
 
 
 def load(files=None, strict=False, loads=util.json_loads):
@@ -322,6 +347,7 @@ class apply():
             set(path, key, value)
 
     def __exit__(self, exc_type, exc_value, traceback):
+        self.original.reverse()
         for path, key, value in self.original:
             if value is util.SENTINEL:
                 unset(path, key)

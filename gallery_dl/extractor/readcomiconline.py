@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -37,9 +37,9 @@ class ReadcomiconlineBase():
                     "the CAPTCHA, and press ENTER to continue", response.url)
                 self.input()
             else:
-                raise exception.StopExtraction(
-                    "Redirect to \n%s\nVisit this URL in your browser and "
-                    "solve the CAPTCHA to continue", response.url)
+                raise exception.AbortExtraction(
+                    f"Redirect to \n{response.url}\nVisit this URL in your "
+                    f"browser and solve the CAPTCHA to continue")
 
 
 class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
@@ -50,7 +50,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
 
     def __init__(self, match):
         ChapterExtractor.__init__(self, match)
-        self.params = match.group(2)
+        self.params = match[2]
 
     def _init(self):
         params = text.parse_query(self.params)
@@ -62,7 +62,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         else:
             params["quality"] = str(quality)
 
-        self.gallery_url += "&".join(k + "=" + v for k, v in params.items())
+        self.page_url += "&".join(k + "=" + v for k, v in params.items())
         self.issue_id = params.get("id")
 
     def metadata(self, page):
@@ -71,7 +71,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         match = re.match(r"(?:Issue )?#(\d+)|(.+)", iinfo)
         return {
             "comic": comic,
-            "issue": match.group(1) or match.group(2),
+            "issue": match[1] or match[2],
             "issue_id": text.parse_int(self.issue_id),
             "lang": "en",
             "language": "English",
@@ -79,22 +79,21 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
 
     def images(self, page):
         results = []
-        referer = {"_http_headers": {"Referer": self.gallery_url}}
-        root = text.extr(page, "return baeu(l, '", "'")
+        referer = {"_http_headers": {"Referer": self.page_url}}
+        root, pos = text.extract(page, "return baeu(l, '", "'")
+        _   , pos = text.extract(page, "var pth = '", "", pos)
+        var , pos = text.extract(page, "var ", "= '", pos)
 
         replacements = re.findall(
             r"l = l\.replace\(/([^/]+)/g, [\"']([^\"']*)", page)
 
-        for block in page.split("    pth = '")[1:]:
-            pth = text.extr(block, "", "'")
+        for path in page.split(var)[2:]:
+            path = text.extr(path, "= '", "'")
 
-            for needle, repl in re.findall(
-                    r"pth = pth\.replace\(/([^/]+)/g, [\"']([^\"']*)", block):
-                pth = pth.replace(needle, repl)
             for needle, repl in replacements:
-                pth = pth.replace(needle, repl)
+                path = path.replace(needle, repl)
 
-            results.append((baeu(pth, root), referer))
+            results.append((baeu(path, root), referer))
 
         return results
 
@@ -112,7 +111,7 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
         page , pos = text.extract(page, ' class="listing">', '</table>', pos)
 
         comic = comic.rpartition("information")[0].strip()
-        needle = ' title="Read {} '.format(comic)
+        needle = f' title="Read {comic} '
         comic = text.unescape(comic)
 
         for item in text.extract_iter(page, ' href="', ' comic online '):
@@ -129,7 +128,7 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
 
 
 def baeu(url, root="", root_blogspot="https://2.bp.blogspot.com"):
-    """https://readcomiconline.li/Scripts/rguard.min.js"""
+    """https://readcomiconline.li/Scripts/rguard.min.js?v=1.5.4"""
     if not root:
         root = root_blogspot
 

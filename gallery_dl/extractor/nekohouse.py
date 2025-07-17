@@ -32,8 +32,7 @@ class NekohousePostExtractor(NekohouseExtractor):
 
     def items(self):
         service, user_id, post_id = self.groups
-        url = "{}/{}/user/{}/post/{}".format(
-            self.root, service, user_id, post_id)
+        url = f"{self.root}/{service}/user/{user_id}/post/{post_id}"
         html = self.request(url).text
 
         files = self._extract_files(html)
@@ -104,7 +103,7 @@ class NekohouseUserExtractor(NekohouseExtractor):
 
     def items(self):
         service, user_id, _ = self.groups
-        creator_url = "{}/{}/user/{}".format(self.root, service, user_id)
+        creator_url = f"{self.root}/{service}/user/{user_id}"
         params = {"o": 0}
 
         data = {"_extractor": NekohousePostExtractor}
