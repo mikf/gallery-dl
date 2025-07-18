@@ -512,5 +512,10 @@ __tests__ = (
     "#exception": exception.AuthorizationError,
 },
 
+{
+    "#url"     : "https://civitai.com/generate",
+    "#class"   : civitai.CivitaiGenerateExtractor,
+    "#auth"    : True,
+},
 
 )
