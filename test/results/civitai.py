@@ -514,7 +514,7 @@ __tests__ = (
 
 {
     "#url"     : "https://civitai.com/generate",
-    "#class"   : civitai.CivitaiGenerateExtractor,
+    "#class"   : civitai.CivitaiGeneratedExtractor,
     "#auth"    : True,
 },
 
