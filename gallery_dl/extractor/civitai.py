@@ -528,9 +528,9 @@ class CivitaiUserVideosExtractor(CivitaiExtractor):
     images = CivitaiUserImagesExtractor.images
 
 
-class CivitaiGenerateExtractor(CivitaiExtractor):
+class CivitaiGeneratedExtractor(CivitaiExtractor):
     """Extractor for your generated files feed"""
-    subcategory = "generate"
+    subcategory = "generated"
     filename_fmt = "{filename}.{extension}"
     directory_fmt = ("{category}", "generated")
     pattern = f"{BASE_PATTERN}/generate"
