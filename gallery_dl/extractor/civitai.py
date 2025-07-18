@@ -186,10 +186,7 @@ class CivitaiExtractor(Extractor):
             yield data
 
     def _image_reactions(self):
-        if "Authorization" not in self.api.headers and \
-                not self.cookies.get(
-                "__Secure-civitai-token", domain=".civitai.com"):
-            raise exception.AuthorizationError("api-key or cookies required")
+        self._require_auth()
 
         params = self.params
         params["authed"] = True
@@ -197,6 +194,12 @@ class CivitaiExtractor(Extractor):
         if "reactions" not in params:
             params["reactions"] = ("Like", "Dislike", "Heart", "Laugh", "Cry")
         return self.api.images(params)
+
+    def _require_auth(self):
+        if "Authorization" not in self.api.headers and \
+                not self.cookies.get(
+                "__Secure-civitai-token", domain=".civitai.com"):
+            raise exception.LoginRequired("'api-key' or cookies needed")
 
     def _parse_query(self, value):
         return text.parse_query_list(
@@ -525,6 +528,28 @@ class CivitaiUserVideosExtractor(CivitaiExtractor):
     images = CivitaiUserImagesExtractor.images
 
 
+class CivitaiGenerateExtractor(CivitaiExtractor):
+    """Extractor for your generated files feed"""
+    subcategory = "generate"
+    filename_fmt = "{filename}.{extension}"
+    directory_fmt = ("{category}", "generated")
+    pattern = f"{BASE_PATTERN}/generate"
+    example = "https://civitai.com/generate"
+
+    def items(self):
+        self._require_auth()
+
+        for gen in self.api.orchestrator_queryGeneratedImages():
+            gen["date"] = text.parse_datetime(
+                gen["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            yield Message.Directory, gen
+            for step in gen.pop("steps", ()):
+                for image in step.pop("images", ()):
+                    data = {"file": image, **step, **gen}
+                    url = image["url"]
+                    yield Message.Url, url, text.nameext_from_url(url, data)
+
+
 class CivitaiRestAPI():
     """Interface for the Civitai Public REST API
 
@@ -738,6 +763,15 @@ class CivitaiTrpcAPI():
         endpoint = "user.getCreator"
         params = {"username": username}
         return (self._call(endpoint, params),)
+
+    def orchestrator_queryGeneratedImages(self):
+        endpoint = "orchestrator.queryGeneratedImages"
+        params = {
+            "ascending": False,
+            "tags"     : ("gen",),
+            "authed"   : True,
+        }
+        return self._pagination(endpoint, params)
 
     def _call(self, endpoint, params, meta=None):
         url = self.root + endpoint
