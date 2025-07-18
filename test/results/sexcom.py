@@ -223,4 +223,31 @@ __tests__ = (
     "#class"   : sexcom.SexcomSearchExtractor,
 },
 
+{
+    "#url"     : "https://www.sex.com/en/gifs?search=bed",
+    "#class"   : sexcom.SexcomSearchExtractor,
+    "#pattern" : r"https://imagex1.sx.cdn.live/images/pinporn/\d\d\d\d/\d\d/\d\d/\d+\.gif",
+    "#range"   : "1-50",
+    "#count"   : 50,
+
+    "date"       : "type:datetime",
+    "date_url"   : "type:datetime",
+    "extension"  : "gif",
+    "externalId" : int,
+    "filename"   : str,
+    "width"      : range(10, 1000),
+    "height"     : range(10, 1000),
+    "pin_id"     : int,
+    "search"     : {
+        "order"             : "likeCount",
+        "search"            : "bed",
+        "sexual-orientation": "straight",
+        "type"              : "gif",
+    },
+    "title"      : str,
+    "type"       : "gif",
+    "uri"        : str,
+    "url"        : str,
+},
+
 )
