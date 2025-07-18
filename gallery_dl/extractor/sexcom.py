@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text
 from datetime import datetime
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?sex\.com"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?sex\.com(?:/[a-z]{2})?"
 
 
 class SexcomExtractor(Extractor):
@@ -273,26 +273,68 @@ class SexcomBoardExtractor(SexcomExtractor):
 class SexcomSearchExtractor(SexcomExtractor):
     """Extractor for search results on www.sex.com"""
     subcategory = "search"
-    directory_fmt = ("{category}", "search", "{search[query]}")
-    pattern = (BASE_PATTERN + r"/((?:"
-               r"(pic|gif|video)s/([^/?#]*)|search/(pic|gif|video)s"
-               r")/?(?:\?([^#]+))?)")
+    directory_fmt = ("{category}", "search", "{search[search]}")
+    pattern = (BASE_PATTERN + r"/(?:"
+               r"(pic|gif|video)s(?:\?(search=[^#]+)$|/([^/?#]*))"
+               r"|search/(pic|gif|video)s"
+               r")/?(?:\?([^#]+))?")
     example = "https://www.sex.com/search/pics?query=QUERY"
 
     def _init(self):
-        self.path, t1, query_alt, t2, query = self.groups
+        t1, qs1, search_alt, t2, qs2 = self.groups
 
-        self.search = text.parse_query(query)
-        self.search["type"] = t1 or t2
-        if "query" not in self.search:
-            self.search["query"] = query_alt or ""
+        self.params = params = text.parse_query(qs1 or qs2)
+        if "query" in params:
+            params["search"] = params.pop("query")
+        params.setdefault("sexual-orientation", "straight")
+        params.setdefault("order", "likeCount")
+        params.setdefault("search", search_alt or "")
 
-    def metadata(self):
-        return {"search": self.search}
+        self.kwdict["search"] = search = params.copy()
+        search["type"] = self.type = t1 or t2
 
-    def pins(self):
-        url = f"{self.root}/{self.path}"
-        return self._pagination(url)
+    def items(self):
+        root = "https://imagex1.sx.cdn.live"
+        type = self.type
+        gifs = self.config("gifs", True)
+
+        url = (f"{self.root}/portal/api/"
+               f"{'picture' if type == 'pic' else type}s/search")
+        params = self.params
+        params["page"] = text.parse_int(params.get("page"), 1)
+        params["limit"] = 40
+
+        while True:
+            data = self.request_json(url, params=params)
+
+            for pin in data["data"]:
+                path = pin["uri"]
+                pin["pin_id"] = pin.pop("id")
+                text.nameext_from_url(path, pin)
+
+                parts = path.rsplit("/", 4)
+                try:
+                    pin["date_url"] = pin["date"] = datetime(
+                        int(parts[1]), int(parts[2]), int(parts[3]))
+                except Exception:
+                    pass
+
+                if type == "pic":
+                    pin["type"] = "picture"
+                else:
+                    pin["type"] = "gif"
+                    if gifs and pin["extension"] == "webp":
+                        pin["extension"] = "gif"
+                        pin["_fallback"] = (f"{root}{path}",)
+                        path = f"{path[:-4]}gif"
+
+                pin["url"] = f"{root}{path}"
+                yield Message.Directory, pin
+                yield Message.Url, pin["url"], pin
+
+            if params["page"] >= data["paging"]["numberOfPages"]:
+                break
+            params["page"] += 1
 
 
 def _check_empty(response):
