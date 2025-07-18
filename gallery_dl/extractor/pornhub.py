@@ -85,6 +85,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
         extr = text.extract_from(self.request(url).text)
 
         title = extr("<title>", "</title>")
+        self._token = extr('name="token" value="', '"')
         score = extr('<div id="albumGreenBar" style="width:', '"')
         views = extr('<div id="viewsPhotAlbumCounter">', '<')
         tags = extr('<div id="photoTagsBox"', '<script')
@@ -103,12 +104,12 @@ class PornhubGalleryExtractor(PornhubExtractor):
         }
 
     def images(self):
-        url = f"{self.root}/album/show_album_json?album={self.gallery_id}"
-        response = self.request(url)
+        url = f"{self.root}/api/v1/album/{self.gallery_id}/show_album_json"
+        params = {"token": self._token}
+        data = self.request_json(url, params=params)
 
-        if response.content == b"Permission denied":
+        if not (images := data.get("photos")):
             raise exception.AuthorizationError()
-        images = response.json()
         key = end = self._first
 
         results = []
