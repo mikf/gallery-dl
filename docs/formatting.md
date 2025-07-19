@@ -129,6 +129,12 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
     <td><code>7</code></td>
 </tr>
 <tr>
+    <td align="center"><code>W</code></td>
+    <td>Sanitize whitespace - Remove leading and trailing whitespace characters and replace <em>all</em> whitespace (sequences) with a single space <code> </code> character</td>
+    <td><code>{space!W}</code></td>
+    <td><code>Foo Bar</code></td>
+</tr>
+<tr>
     <td align="center"><code>t</code></td>
     <td>Trim a string, i.e. remove leading and trailing whitespace characters</td>
     <td><code>{bar!t}</code></td>

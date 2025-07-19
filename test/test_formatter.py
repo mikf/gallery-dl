@@ -39,6 +39,7 @@ class TestFormatter(unittest.TestCase):
         ],
         "n": None,
         "s": " \n\r\tSPACE    ",
+        "S": " \n\r\tS  P         A\tC\nE    ",
         "h": "<p>foo </p> &amp; bar <p> </p>",
         "u": "&#x27;&lt; / &gt;&#x27;",
         "t": 1262304000,
@@ -61,6 +62,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!c}", "Hello world")
         self._run_test("{a!C}", "Hello World")
         self._run_test("{s!t}", "SPACE")
+        self._run_test("{S!t}", "S  P         A\tC\nE")
         self._run_test("{a!U}", self.kwdict["a"])
         self._run_test("{u!U}", "'< / >'")
         self._run_test("{a!H}", self.kwdict["a"])
@@ -90,6 +92,8 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a!n}", 11)
         self._run_test("{l!n}", 3)
         self._run_test("{d!n}", 3)
+        self._run_test("{s!W}", "SPACE")
+        self._run_test("{S!W}", "S P A C E")
         self._run_test("{i_str!i}", 12345)
         self._run_test("{i_str!f}", 12345.0)
         self._run_test("{f_str!f}", 12.45)
@@ -549,10 +553,10 @@ def noarg():
             fmt4 = formatter.parse("\fM " + path + ":lengths")
 
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt2.format_map(self.kwdict), "142")
+        self.assertEqual(fmt2.format_map(self.kwdict), "168")
 
         self.assertEqual(fmt3.format_map(self.kwdict), "'Title' by Name")
-        self.assertEqual(fmt4.format_map(self.kwdict), "142")
+        self.assertEqual(fmt4.format_map(self.kwdict), "168")
 
         with self.assertRaises(TypeError):
             self.assertEqual(fmt0.format_map(self.kwdict), "")
