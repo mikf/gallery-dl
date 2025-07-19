@@ -181,6 +181,9 @@ class CivitaiExtractor(Extractor):
                     self._image_ext)
             if "id" not in file and data["filename"].isdecimal():
                 file["id"] = text.parse_int(data["filename"])
+            if "date" not in file:
+                file["date"] = text.parse_datetime(
+                    file["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
             if self._meta_generation:
                 file["generation"] = self._extract_meta_generation(file)
             yield data
@@ -214,7 +217,10 @@ class CivitaiExtractor(Extractor):
 
     def _extract_meta_post(self, image):
         try:
-            return self.api.post(image["postId"])
+            post = self.api.post(image["postId"])
+            post["date"] = text.parse_datetime(
+                post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            return post
         except Exception as exc:
             return self.log.debug("", exc_info=exc)
 
@@ -635,7 +641,7 @@ class CivitaiTrpcAPI():
         self.root = extractor.root + "/api/trpc/"
         self.headers = {
             "content-type"    : "application/json",
-            "x-client-version": "5.0.882",
+            "x-client-version": "5.0.920",
             "x-client-date"   : "",
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",
