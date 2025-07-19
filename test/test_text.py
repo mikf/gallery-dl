@@ -106,6 +106,17 @@ class TestText(unittest.TestCase):
         self.assertEqual(f(1), "1")
         self.assertEqual(f(2.3), "23")
 
+    def test_sanitize_whitespace(self, f=text.sanitize_whitespace):
+        self.assertEqual(f("Hello World"), "Hello World")
+        self.assertEqual(f("Hello\tWorld"), "Hello World")
+        self.assertEqual(f("  Hello   World  "), "Hello World")
+        self.assertEqual(f("\tHello  \n\tWorld  "), "Hello World")
+
+        self.assertEqual(f(""), "")
+        self.assertEqual(f(" "), "")
+        self.assertEqual(f("      "), "")
+        self.assertEqual(f(" \t\n "), "")
+
     def test_ensure_http_scheme(self, f=text.ensure_http_scheme):
         result = "https://example.org/filename.ext"
 
