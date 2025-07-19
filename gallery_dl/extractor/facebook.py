@@ -413,9 +413,13 @@ class FacebookProfileExtractor(FacebookExtractor):
         profile_photos_url = (
             self.root + "/" + self.groups[0] + "/photos_by"
         )
-        profile_photos_page = self.request(profile_photos_url).text
 
-        set_id = self.get_profile_photos_set_id(profile_photos_page)
+        for _ in range(self.fallback_retries + 1):
+            profile_photos_page = self.request(profile_photos_url).text
+            set_id = self.get_profile_photos_set_id(profile_photos_page)
+            if set_id:
+                break
+            self.log.debug("Failed to find profile photos set ID, retrying...")
 
         if set_id:
             set_url = f"{self.root}/media/set/?set={set_id}"
