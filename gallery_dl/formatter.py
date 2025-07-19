@@ -541,6 +541,7 @@ _CONVERSIONS = {
     "U": text.unescape,
     "H": lambda s: text.unescape(text.remove_html(s)),
     "g": text.slugify,
+    "W": text.sanitize_whitespace,
     "S": util.to_string,
     "s": str,
     "r": repr,
