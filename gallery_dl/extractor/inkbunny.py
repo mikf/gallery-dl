@@ -304,6 +304,7 @@ class InkbunnyAPI():
         params = {
             "submission_ids": ",".join(ids),
             "show_description": "yes",
+            "show_pools": "yes",
         }
 
         submissions = [None] * len(ids)
