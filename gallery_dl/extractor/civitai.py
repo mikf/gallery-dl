@@ -235,12 +235,11 @@ class CivitaiExtractor(Extractor):
         return None, None
 
     def _extract_version_id(self, item, is_post=True):
-        version_id = item.get("modelVersionId")
-        if version_id:
+        if version_id := item.get("modelVersionId"):
             return version_id
-
-        version_ids = item.get("modelVersionIds")
-        if version_ids:
+        if version_ids := item.get("modelVersionIds"):
+            return version_ids[0]
+        if version_ids := item.get("modelVersionIdsManual"):
             return version_ids[0]
 
         if is_post:
