@@ -174,6 +174,7 @@ modules = [
     "smugmug",
     "soundgasm",
     "speakerdeck",
+    "steamcommunity",
     "steamgriddb",
     "subscribestar",
     "szurubooru",
