@@ -163,8 +163,11 @@ class CivitaiExtractor(Extractor):
         image["uuid"] = url
         name = image.get("name")
         if not name:
-            mime = image.get("mimeType") or self._image_ext
-            name = f"{image.get('id')}.{mime.rpartition('/')[2]}"
+            if mime := image.get("mimeType"):
+                name = f"{image.get('id')}.{mime.rpartition('/')[2]}"
+            else:
+                ext = self._video_ext if video else self._image_ext
+                name = f"{image.get('id')}.{ext}"
         return (f"https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA"
                 f"/{url}/{quality}/{name}")
 
@@ -528,7 +531,6 @@ class CivitaiUserVideosExtractor(CivitaiExtractor):
         else:
             self.params["username"] = text.unquote(user)
         CivitaiExtractor.__init__(self, match)
-        self._image_ext = "mp4"
 
     images = CivitaiUserImagesExtractor.images
 
