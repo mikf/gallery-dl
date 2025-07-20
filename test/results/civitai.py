@@ -225,6 +225,7 @@ __tests__ = (
     "post": {
         "availability": "Public",
         "collectionId": None,
+        "date"        : "dt:2024-12-10 19:20:51",
         "detail"      : None,
         "id"          : 10151863,
         "modelVersion": None,
@@ -336,6 +337,7 @@ __tests__ = (
     },
     "file": {
         "id"  : {30748752, 30748747, 30748733},
+        "date": "dt:2024-09-22 12:54:15",
         "uuid": {"6220fa0f-9037-4b1d-bfbd-a740a06eeb7c",
                  "cd1edb7f-7b50-4da5-bf23-d38f24d8aef0",
                  "cfd5b231-accd-49bd-8bde-370880f63aa6"},
@@ -436,6 +438,15 @@ __tests__ = (
     "#pattern": r"https://image\.civitai\.com/xG1nkqKTMzGDvpLrqFT7WA/[0-9a-f-]+/original=true/\S+\.(jpe?g|png)",
     "#range"  : "1-50",
     "#count"  : 50,
+
+    "file": {
+        "id"  : int,
+        "date": "type:datetime",
+    },
+    "post": {
+        "id"  : int,
+        "date": "type:datetime",
+    },
 },
 
 {
@@ -514,7 +525,7 @@ __tests__ = (
 
 {
     "#url"     : "https://civitai.com/generate",
-    "#class"   : civitai.CivitaiGenerateExtractor,
+    "#class"   : civitai.CivitaiGeneratedExtractor,
     "#auth"    : True,
 },
 

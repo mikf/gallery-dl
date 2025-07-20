@@ -126,7 +126,8 @@ class CivitaiExtractor(Extractor):
                         data["post"] = file.pop("post")
                 if self._meta_post and "post" not in data:
                     data["post"] = post = self._extract_meta_post(file)
-                    post.pop("user", None)
+                    if post:
+                        post.pop("user", None)
                 file["date"] = text.parse_datetime(
                     file["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
@@ -163,8 +164,11 @@ class CivitaiExtractor(Extractor):
         image["uuid"] = url
         name = image.get("name")
         if not name:
-            mime = image.get("mimeType") or self._image_ext
-            name = f"{image.get('id')}.{mime.rpartition('/')[2]}"
+            if mime := image.get("mimeType"):
+                name = f"{image.get('id')}.{mime.rpartition('/')[2]}"
+            else:
+                ext = self._video_ext if video else self._image_ext
+                name = f"{image.get('id')}.{ext}"
         return (f"https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA"
                 f"/{url}/{quality}/{name}")
 
@@ -181,6 +185,9 @@ class CivitaiExtractor(Extractor):
                     self._image_ext)
             if "id" not in file and data["filename"].isdecimal():
                 file["id"] = text.parse_int(data["filename"])
+            if "date" not in file:
+                file["date"] = text.parse_datetime(
+                    file["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
             if self._meta_generation:
                 file["generation"] = self._extract_meta_generation(file)
             yield data
@@ -214,7 +221,10 @@ class CivitaiExtractor(Extractor):
 
     def _extract_meta_post(self, image):
         try:
-            return self.api.post(image["postId"])
+            post = self.api.post(image["postId"])
+            post["date"] = text.parse_datetime(
+                post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            return post
         except Exception as exc:
             return self.log.debug("", exc_info=exc)
 
@@ -229,12 +239,11 @@ class CivitaiExtractor(Extractor):
         return None, None
 
     def _extract_version_id(self, item, is_post=True):
-        version_id = item.get("modelVersionId")
-        if version_id:
+        if version_id := item.get("modelVersionId"):
             return version_id
-
-        version_ids = item.get("modelVersionIds")
-        if version_ids:
+        if version_ids := item.get("modelVersionIds"):
+            return version_ids[0]
+        if version_ids := item.get("modelVersionIdsManual"):
             return version_ids[0]
 
         if is_post:
@@ -523,14 +532,13 @@ class CivitaiUserVideosExtractor(CivitaiExtractor):
         else:
             self.params["username"] = text.unquote(user)
         CivitaiExtractor.__init__(self, match)
-        self._image_ext = "mp4"
 
     images = CivitaiUserImagesExtractor.images
 
 
-class CivitaiGenerateExtractor(CivitaiExtractor):
+class CivitaiGeneratedExtractor(CivitaiExtractor):
     """Extractor for your generated files feed"""
-    subcategory = "generate"
+    subcategory = "generated"
     filename_fmt = "{filename}.{extension}"
     directory_fmt = ("{category}", "generated")
     pattern = f"{BASE_PATTERN}/generate"
@@ -635,7 +643,7 @@ class CivitaiTrpcAPI():
         self.root = extractor.root + "/api/trpc/"
         self.headers = {
             "content-type"    : "application/json",
-            "x-client-version": "5.0.882",
+            "x-client-version": "5.0.920",
             "x-client-date"   : "",
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",

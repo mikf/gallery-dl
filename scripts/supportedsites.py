@@ -236,7 +236,7 @@ SUBCATEGORY_MAP = {
         "user-images": ("User Images", "Image Reactions"),
         "user-posts" : "User Posts",
         "user-videos": ("User Videos", "Video Reactions"),
-        "generate": "Generated Files",
+        "generated": "Generated Files",
     },
     "coomer": {
         "discord"       : "",

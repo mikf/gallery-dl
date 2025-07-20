@@ -37,12 +37,12 @@ class UrlgalleriesGalleryExtractor(GalleryExtractor):
         data = self.metadata(page)
         data["count"] = len(imgs)
 
-        root = "https://urlgalleries.net/b/" + blog
+        root = self.root
         yield Message.Directory, data
         for data["num"], img in enumerate(imgs, 1):
             page = self.request(root + img).text
             url = text.extr(page, "window.location.href = '", "'")
-            yield Message.Queue, url, data
+            yield Message.Queue, url.partition("?")[0], data
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -53,7 +53,7 @@ class UrlgalleriesGalleryExtractor(GalleryExtractor):
             "_rprt": extr(' title="', '"'),  # report button
             "title": text.unescape(extr(' title="', '"').strip()),
             "date" : text.parse_datetime(
-                extr(" images in gallery | ", "<"), "%B %d, %Y %H:%M"),
+                extr(" images in gallery | ", "<"), "%B %d, %Y"),
         }
 
     def images(self, page):

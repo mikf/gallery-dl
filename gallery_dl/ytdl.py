@@ -26,14 +26,16 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
     opts = argv = None
     config = obj.config
 
-    cfg = config("config-file")
-    if cfg:
+    if not config("deprecations"):
+        module.YoutubeDL.deprecated_feature = util.false
+        module.YoutubeDL.deprecation_warning = util.false
+
+    if cfg := config("config-file"):
         with open(util.expand_path(cfg)) as fp:
             contents = fp.read()
         argv = shlex.split(contents, comments=True)
 
-    cmd = config("cmdline-args")
-    if cmd:
+    if cmd := config("cmdline-args"):
         if isinstance(cmd, str):
             cmd = shlex.split(cmd)
         argv = (argv + cmd) if argv else cmd
@@ -54,8 +56,7 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
     if opts.get("max_filesize") is None:
         opts["max_filesize"] = text.parse_bytes(config("filesize-max"), None)
     if opts.get("ratelimit") is None:
-        rate = config("rate")
-        if rate:
+        if rate := config("rate"):
             func = util.build_selection_func(rate, 0, text.parse_bytes)
             if hasattr(func, "args"):
                 opts["__gdl_ratelimit_func"] = func
@@ -64,8 +65,7 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
         else:
             opts["ratelimit"] = None
 
-    raw_opts = config("raw-options")
-    if raw_opts:
+    if raw_opts := config("raw-options"):
         opts.update(raw_opts)
     if config("logging", True):
         opts["logger"] = obj.log
