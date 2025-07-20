@@ -10,12 +10,14 @@
 
 from .common import PostProcessor
 from .. import util, formatter
+import subprocess
 import os
 
 
 if util.WINDOWS:
     def quote(s):
-        return '"' + s.replace('"', '\\"') + '"'
+        s = s.replace('"', '\\"')
+        return f'"{s}"'
 else:
     from shlex import quote
 
@@ -25,14 +27,21 @@ class ExecPP(PostProcessor):
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
 
-        cmds = options.get("commands")
-        if cmds:
+        if cmds := options.get("commands"):
             self.cmds = [self._prepare_cmd(c) for c in cmds]
             execute = self.exec_many
         else:
             execute, self.args = self._prepare_cmd(options["command"])
             if options.get("async", False):
-                self._exec = self._exec_async
+                self._exec = self._popen
+
+        self.session = None
+        self.creationflags = 0
+        if options.get("session"):
+            if util.WINDOWS:
+                self.creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+            else:
+                self.session = True
 
         events = options.get("event")
         if events is None:
@@ -83,8 +92,7 @@ class ExecPP(PostProcessor):
         return retcode
 
     def exec_many(self, pathfmt):
-        archive = self.archive
-        if archive:
+        if archive := self.archive:
             if archive.check(pathfmt.kwdict):
                 return
             self.archive = False
@@ -92,8 +100,7 @@ class ExecPP(PostProcessor):
         retcode = 0
         for execute, args in self.cmds:
             self.args = args
-            retcode = execute(pathfmt)
-            if retcode:
+            if retcode := execute(pathfmt):
                 # non-zero exit status
                 break
 
@@ -103,16 +110,19 @@ class ExecPP(PostProcessor):
         return retcode
 
     def _exec(self, args, shell):
-        self.log.debug("Running '%s'", args)
-        retcode = util.Popen(args, shell=shell).wait()
-        if retcode:
+        if retcode := self._popen(args, shell).wait():
             self.log.warning("'%s' returned with non-zero exit status (%d)",
                              args, retcode)
         return retcode
 
-    def _exec_async(self, args, shell):
+    def _popen(self, args, shell):
         self.log.debug("Running '%s'", args)
-        util.Popen(args, shell=shell)
+        return util.Popen(
+            args,
+            shell=shell,
+            creationflags=self.creationflags,
+            start_new_session=self.session,
+        )
 
     def _replace(self, match):
         name = match[1]

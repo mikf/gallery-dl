@@ -20,7 +20,7 @@ import collections
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, output, path  # noqa E402
+from gallery_dl import extractor, output, path, util  # noqa E402
 from gallery_dl import postprocessor, config  # noqa E402
 from gallery_dl.postprocessor.common import PostProcessor  # noqa E402
 
@@ -209,7 +209,10 @@ class ExecTest(BasePostprocessorTest):
                 self.pathfmt.realpath,
                 self.pathfmt.realdirectory,
                 self.pathfmt.filename),
-            shell=True)
+            shell=True,
+            creationflags=0,
+            start_new_session=None,
+        )
         i.wait.assert_called_once_with()
 
     def test_command_list(self):
@@ -231,6 +234,8 @@ class ExecTest(BasePostprocessorTest):
                 self.pathfmt.realdirectory.upper(),
             ],
             shell=False,
+            creationflags=0,
+            start_new_session=None,
         )
 
     def test_command_many(self):
@@ -254,6 +259,8 @@ class ExecTest(BasePostprocessorTest):
                     self.pathfmt.realdirectory,
                     self.pathfmt.filename),
                 shell=True,
+                creationflags=0,
+                start_new_session=None,
             ),
             call(
                 [
@@ -262,6 +269,8 @@ class ExecTest(BasePostprocessorTest):
                     self.pathfmt.realdirectory.upper(),
                 ],
                 shell=False,
+                creationflags=0,
+                start_new_session=None,
             ),
         ])
 
@@ -295,6 +304,47 @@ class ExecTest(BasePostprocessorTest):
 
         self.assertTrue(p.called)
         self.assertFalse(i.wait.called)
+
+    @unittest.skipIf(util.WINDOWS, "not POSIX")
+    def test_session_posix(self):
+        self._create({
+            "session": True,
+            "command": ["echo", "foobar"],
+        })
+
+        with patch("gallery_dl.util.Popen") as p:
+            i = Mock()
+            p.return_value = i
+            self._trigger(("after",))
+
+        p.assert_called_once_with(
+            ["echo", "foobar"],
+            shell=False,
+            creationflags=0,
+            start_new_session=True,
+        )
+        i.wait.assert_called_once_with()
+
+    @unittest.skipIf(not util.WINDOWS, "not Windows")
+    def test_session_windows(self):
+        self._create({
+            "session": True,
+            "command": ["echo", "foobar"],
+        })
+
+        with patch("gallery_dl.util.Popen") as p:
+            i = Mock()
+            p.return_value = i
+            self._trigger(("after",))
+
+        import subprocess
+        p.assert_called_once_with(
+            ["echo", "foobar"],
+            shell=False,
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+            start_new_session=False,
+        )
+        i.wait.assert_called_once_with()
 
 
 class HashTest(BasePostprocessorTest):
