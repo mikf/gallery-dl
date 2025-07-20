@@ -126,7 +126,8 @@ class CivitaiExtractor(Extractor):
                         data["post"] = file.pop("post")
                 if self._meta_post and "post" not in data:
                     data["post"] = post = self._extract_meta_post(file)
-                    post.pop("user", None)
+                    if post:
+                        post.pop("user", None)
                 file["date"] = text.parse_datetime(
                     file["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
