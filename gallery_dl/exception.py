@@ -16,7 +16,7 @@ Exception
       │    ├── HttpError
       │    │    └── ChallengeError
       │    ├── AuthorizationError
-      │    │    └── LoginRequired
+      │    │    └── AuthRequired
       │    ├── AuthenticationError
       │    └── NotFoundError
       ├── InputError
@@ -93,12 +93,20 @@ class AuthenticationError(ExtractionError):
 
 class AuthorizationError(ExtractionError):
     """Insufficient privileges to access a resource"""
-    default = "Insufficient privileges to access the specified resource"
+    default = "Insufficient privileges to access this resource"
     code = 16
 
 
-class LoginRequired(AuthorizationError):
-    default = "Account credentials or cookies required"
+class AuthRequired(AuthorizationError):
+    default = "Account credentials required"
+
+    def __init__(self, required=None, message=None):
+        if required and not message:
+            if isinstance(required, str):
+                message = f"{required} required"
+            else:
+                message = f"{' or '.join(required)} required"
+        AuthorizationError.__init__(self, message)
 
 
 class NotFoundError(ExtractionError):
