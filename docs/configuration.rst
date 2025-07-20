@@ -6939,6 +6939,26 @@ Description
     See `metadata.event`_ for a list of available events.
 
 
+exec.session
+------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Start subprocesses in a new session.
+
+    On Windows, this means passing
+    `CREATE_NEW_PROCESS_GROUP <https://docs.python.org/3/library/subprocess.html#subprocess.CREATE_NEW_PROCESS_GROUP>`__
+    as a ``creationflags`` argument to
+    `subprocess.Popen <https://docs.python.org/3/library/subprocess.html#subprocess.Popen>`__
+
+    On POSIX systems, this means enabling the
+    ``start_new_session`` argument of
+    `subprocess.Popen <https://docs.python.org/3/library/subprocess.html#subprocess.Popen>`__
+    to have it call ``setsid()``.
+
+
 hash.chunk-size
 ---------------
 Type
