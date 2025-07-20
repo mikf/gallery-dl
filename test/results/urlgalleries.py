@@ -21,10 +21,10 @@ __tests__ = (
 
     "blog"      : "photos2q",
     "count"     : 39,
-    "date"      : "dt:2023-12-08 13:59:00",
+    "date"      : "dt:2023-12-08 00:00:00",
     "gallery_id": "7851311",
     "num"       : range(1, 3),
-    "title"     : "Clarice window 8",
+    "title"     : "Clarice window 8 g7rn2ebbao",
 },
 
 {
@@ -40,10 +40,10 @@ __tests__ = (
 
     "blog"      : "photos2q",
     "count"     : 39,
-    "date"      : "dt:2023-12-08 13:59:00",
+    "date"      : "dt:2023-12-08 00:00:00",
     "gallery_id": "7851311",
     "num"       : range(1, 3),
-    "title"     : "Clarice window 8",
+    "title"     : "Clarice window 8 g7rn2ebbao",
 },
 
 {
@@ -59,10 +59,10 @@ __tests__ = (
 
     "blog"      : "Dreamer",
     "count"     : 105,
-    "date"      : "dt:2020-03-10 21:17:00",
+    "date"      : "dt:2020-03-10 00:00:00",
     "gallery_id": "7645840",
     "num"       : range(1, 3),
-    "title"     : "Angelika - Rustic Charm - AmourAngels 2016-09-27",
+    "title"     : "Angelika - Rustic Charm - AmourAngels 2016-09-27 7722lhrmys",
 },
 
 )
