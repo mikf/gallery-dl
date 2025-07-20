@@ -206,7 +206,7 @@ class CivitaiExtractor(Extractor):
         if "Authorization" not in self.api.headers and \
                 not self.cookies.get(
                 "__Secure-civitai-token", domain=".civitai.com"):
-            raise exception.LoginRequired("'api-key' or cookies needed")
+            raise exception.AuthRequired(("'api-key'", "cookies"))
 
     def _parse_query(self, value):
         return text.parse_query_list(

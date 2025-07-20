@@ -216,9 +216,9 @@ class FacebookExtractor(Extractor):
         res = self.request(url, **kwargs)
 
         if res.url.startswith(self.root + "/login"):
-            raise exception.LoginRequires(
-                f"You must be logged in to continue viewing images."
-                f"{LEFT_OFF_TXT}"
+            raise exception.AuthRequired(
+                message=(f"You must be logged in to continue viewing images."
+                         f"{LEFT_OFF_TXT}")
             )
 
         if b'{"__dr":"CometErrorRoot.react"}' in res.content:

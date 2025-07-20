@@ -63,7 +63,7 @@ __tests__ = (
     "#comment"  : "no username & password",
     "#class"    : madokami.MadokamiMangaExtractor,
     "#auth"     : False,
-    "#exception": exception.LoginRequired,
+    "#exception": exception.AuthRequired,
 },
 
 )
