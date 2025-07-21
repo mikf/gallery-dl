@@ -211,14 +211,38 @@ class FStringFormatter():
         self.format_map = util.compile_expression(f'f"""{fstring}"""')
 
 
+def _init_jinja():
+    import jinja2
+    from . import config
+
+    if opts := config.get((), "jinja"):
+        JinjaFormatter.env = env = jinja2.Environment(
+            **opts.get("environment") or {})
+    else:
+        JinjaFormatter.env = jinja2.Environment()
+        return
+
+    if policies := opts.get("policies"):
+        env.policies.update(policies)
+
+    if path := opts.get("filters"):
+        module = util.import_file(path).__dict__
+        env.filters.update(
+            module["__filters__"] if "__filters__" in module else module)
+
+    if path := opts.get("tests"):
+        module = util.import_file(path).__dict__
+        env.tests.update(
+            module["__tests__"] if "__tests__" in module else module)
+
+
 class JinjaFormatter():
     """Generate text by evaluating a Jinja template string"""
     env = None
 
     def __init__(self, source, default=NONE, fmt=None):
         if self.env is None:
-            import jinja2
-            JinjaFormatter.env = jinja2.Environment()
+            _init_jinja()
         self.format_map = self.env.from_string(source).render
 
 

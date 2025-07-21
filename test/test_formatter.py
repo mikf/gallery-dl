@@ -15,7 +15,7 @@ import datetime
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import formatter, text, util  # noqa E402
+from gallery_dl import formatter, text, util, config  # noqa E402
 
 try:
     import jinja2
@@ -24,6 +24,9 @@ except ImportError:
 
 
 class TestFormatter(unittest.TestCase):
+
+    def tearDown(self):
+        config.clear()
 
     kwdict = {
         "a": "hElLo wOrLd",
@@ -487,6 +490,8 @@ class TestFormatter(unittest.TestCase):
 
     @unittest.skipIf(jinja2 is None, "no jinja2")
     def test_jinja(self):
+        formatter.JinjaFormatter.env = None
+
         self._run_test("\fJ {{a}}", self.kwdict["a"])
         self._run_test("\fJ {{name}}{{name}} {{a}}", "{}{} {}".format(
             self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
@@ -495,6 +500,8 @@ class TestFormatter(unittest.TestCase):
 
     @unittest.skipIf(jinja2 is None, "no jinja2")
     def test_template_jinja(self):
+        formatter.JinjaFormatter.env = None
+
         with tempfile.TemporaryDirectory() as tmpdirname:
             path1 = os.path.join(tmpdirname, "tpl1")
             path2 = os.path.join(tmpdirname, "tpl2")
@@ -513,6 +520,57 @@ class TestFormatter(unittest.TestCase):
 
         with self.assertRaises(OSError):
             formatter.parse("\fTJ /")
+
+    @unittest.skipIf(jinja2 is None, "no jinja2")
+    def test_template_jinja_opts(self):
+        formatter.JinjaFormatter.env = None
+
+        with tempfile.TemporaryDirectory() as tmpdirname:
+            path_filters = os.path.join(tmpdirname, "jinja_filters.py")
+            path_template = os.path.join(tmpdirname, "jinja_template.txt")
+
+            config.set((), "jinja", {
+                "environment": {
+                    "variable_start_string": "(((",
+                    "variable_end_string"  : ")))",
+                    "keep_trailing_newline": True,
+                },
+                "filters": path_filters,
+            })
+
+            with open(path_filters, "w") as fp:
+                fp.write(r"""
+import re
+
+def datetime_format(value, format="%H:%M %d-%m-%y"):
+    return value.strftime(format)
+
+def sanitize(value):
+    return re.sub(r"\s+", " ", value.strip())
+
+__filters__ = {
+    "dt_fmt": datetime_format,
+    "sanitize_whitespace": sanitize,
+}
+""")
+
+            with open(path_template, "w") as fp:
+                fp.write("""\
+Present Day  is ((( dt | dt_fmt("%B %d, %Y") )))
+Present Time is ((( dt | dt_fmt("%H:%M:%S") )))
+
+Hello ((( s | sanitize_whitespace ))).
+I hope there is enough "(((S|sanitize_whitespace)))" for you.
+""")
+            fmt = formatter.parse("\fTJ " + path_template)
+
+        self.assertEqual(fmt.format_map(self.kwdict), """\
+Present Day  is January 01, 2010
+Present Time is 00:00:00
+
+Hello SPACE.
+I hope there is enough "S P A C E" for you.
+""")
 
     def test_module(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
