@@ -548,12 +548,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Leakgallery</td>
-    <td>https://leakgallery.com</td>
-    <td>Mostlikeds, Posts, Trendings, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
     <td>Lensdump</td>
     <td>https://lensdump.com/</td>
     <td>Albums, individual Images</td>
