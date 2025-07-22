@@ -150,8 +150,11 @@ class TestExtractorModule(unittest.TestCase):
             if cls.category == "ytdl":
                 continue
             extr = cls.from_url(cls.example)
-            if not extr and cls.basecategory and not cls.instances:
-                continue
+            if not extr:
+                if cls.basecategory and not cls.instances:
+                    continue
+                self.fail(f"{cls.__name__} pattern does not match "
+                          f"example URL '{cls.example}'")
 
             extr.request = fail_request
             extr.initialize()
