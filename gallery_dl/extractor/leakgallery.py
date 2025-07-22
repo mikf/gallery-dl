@@ -26,8 +26,9 @@ class LeakGalleryExtractorBase(Extractor):
                 continue
             seen.add(cdn_url)
             media_creator = (
-                media.get("profile", {}).get("username")
-                or creator or "unknown"
+                media.get("profile", {}).get("username") or
+                creator or
+                "unknown"
             )
             data = {
                 "id": media["id"],
