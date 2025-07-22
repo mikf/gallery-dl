@@ -92,6 +92,8 @@
                                 (e.g. 2.7 or 2.0-3.5)
     --sleep-request SECONDS     Number of seconds to wait between HTTP requests
                                 during data extraction
+    --sleep-429 SECONDS         Number of seconds to wait when receiving a '429
+                                Too Many Requests' response
     --sleep-extractor SECONDS   Number of seconds to wait before starting data
                                 extraction for an input URL
     --no-part                   Do not use .part files
