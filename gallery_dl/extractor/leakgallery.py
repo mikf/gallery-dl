@@ -101,7 +101,7 @@ class LeakgalleryTrendingExtractor(LeakgalleryExtractor):
                 return
 
 
-class LeakgalleryMostLikedExtractor(LeakgalleryExtractor):
+class LeakgalleryMostlikedExtractor(LeakgalleryExtractor):
     """Extractor for most liked posts on leakgallery.com"""
     subcategory = "mostliked"
     pattern = BASE_PATTERN + r"/most-liked"
