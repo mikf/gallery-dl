@@ -539,6 +539,12 @@ def build_parser():
               "during data extraction"),
     )
     downloader.add_argument(
+        "--sleep-429",
+        dest="sleep-429", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait when receiving a "
+              "'429 Too Many Requests' response"),
+    )
+    downloader.add_argument(
         "--sleep-extractor",
         dest="sleep-extractor", metavar="SECONDS", action=ConfigAction,
         help=("Number of seconds to wait before starting data extraction "
