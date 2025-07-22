@@ -32,14 +32,31 @@ class LeakgalleryExtractor(Extractor):
             )
             data = {
                 "id": media["id"],
-                "creator": media_creator,
-                "category": self.category,
                 "url": cdn_url,
-                "_extractor": self,
+                "creator": media_creator,
             }
             text.nameext_from_url(cdn_url, data)
             yield Message.Directory, data
             yield Message.Url, cdn_url, data
+
+    def _pagination(self, type, base, params=None, pnum=1):
+        while True:
+            try:
+                data = self.request_json(f"{base}{pnum}", params=params)
+
+                if not data:
+                    return
+                if "medias" in data:
+                    data = data["medias"]
+                    if not data or not isinstance(data, list):
+                        return
+
+                yield from self._yield_media_items(data)
+                pnum += 1
+            except Exception as exc:
+                self.log.error("Failed to retrieve %s page %s: %s",
+                               type, pnum, exc)
+                return
 
 
 class LeakgalleryUserExtractor(LeakgalleryExtractor):
@@ -54,51 +71,24 @@ class LeakgalleryUserExtractor(LeakgalleryExtractor):
     example = "https://leakgallery.com/creator"
 
     def items(self):
-        creator = self.groups[0]
-        mtype = self.groups[1] or "All"
-        msort = self.groups[2] or "MostRecent"
+        creator, mtype, msort = self.groups
         base = f"https://api.leakgallery.com/profile/{creator}/"
-        params = {"type": mtype, "sort": msort}
-        page = 1
-        while True:
-            try:
-                response = self.request(base + str(page), params=params).json()
-                medias = response.get("medias")
-                if not isinstance(medias, list) or not medias:
-                    return
-                yield from self._yield_media_items(medias, creator=creator)
-                page += 1
-            except Exception as e:
-                self.log("error", f"Failed to retrieve page {page}: {e}")
-                return
+        params = {"type": mtype or "All", "sort": msort or "MostRecent"}
+
+        self.kwdict["creator"] = creator
+        return self._pagination(creator, base, params)
 
 
 class LeakgalleryTrendingExtractor(LeakgalleryExtractor):
     """Extractor for trending posts on leakgallery.com"""
     subcategory = "trending"
-    pattern = BASE_PATTERN + r"/trending-medias(?:/([A-Za-z0-9\-]+))?"
+    pattern = BASE_PATTERN + r"/trending-medias(?:/([\w-]+))?"
     example = "https://leakgallery.com/trending-medias/Week"
 
     def items(self):
         period = self.groups[0] or "Last-Hour"
-        page = 1
-        while True:
-            try:
-                url = (
-                    f"https://api.leakgallery.com/popular/media/"
-                    f"{period}/{page}"
-                )
-                response = self.request(url).json()
-                if not response:
-                    return
-                yield from self._yield_media_items(response)
-                page += 1
-            except Exception as e:
-                self.log(
-                    "error",
-                    f"Failed to retrieve trending page {page}: {e}"
-                )
-                return
+        base = f"https://api.leakgallery.com/popular/media/{period}/"
+        return self._pagination("trending", base)
 
 
 class LeakgalleryMostlikedExtractor(LeakgalleryExtractor):
@@ -108,41 +98,29 @@ class LeakgalleryMostlikedExtractor(LeakgalleryExtractor):
     example = "https://leakgallery.com/most-liked"
 
     def items(self):
-        page = 1
-        while True:
-            try:
-                url = f"https://api.leakgallery.com/most-liked/{page}"
-                response = self.request(url).json()
-                if not response:
-                    return
-                yield from self._yield_media_items(response)
-                page += 1
-            except Exception as e:
-                self.log(
-                    "error",
-                    f"Failed to retrieve most-liked page {page}: {e}"
-                )
-                return
+        base = "https://api.leakgallery.com/most-liked/"
+        return self._pagination("most-liked", base)
 
 
 class LeakgalleryPostExtractor(LeakgalleryExtractor):
     """Extractor for individual posts on leakgallery.com"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/([^/?#]+)/([0-9]+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/(\d+)"
     example = "https://leakgallery.com/CREATOR/12345"
 
     def items(self):
         creator, post_id = self.groups
-        self.url = f"https://leakgallery.com/{creator}/{post_id}"
+        url = f"https://leakgallery.com/{creator}/{post_id}"
+
         try:
-            page = self.request(self.url).text
+            page = self.request(url).text
             video_urls = text.re(
-                r"https://cdn\.leakgallery\.com/content[^/]*/"
+                r"https://cdn\.leakgallery\.com/content[^/?#]*/"
                 r"(?:compressed_)?watermark_[^\"]+\."
                 r"(?:mp4|mov|m4a|webm)"
             ).findall(page)
             image_urls = text.re(
-                r"https://cdn\.leakgallery\.com/content[^/]*/"
+                r"https://cdn\.leakgallery\.com/content[^/?#]*/"
                 r"watermark_[^\"]+\.(?:jpe?g|png)"
             ).findall(page)
 
@@ -154,14 +132,11 @@ class LeakgalleryPostExtractor(LeakgalleryExtractor):
                 data = {
                     "id": post_id,
                     "creator": creator,
-                    "category": self.category,
                     "url": url,
                 }
                 text.nameext_from_url(url, data)
                 yield Message.Directory, data
                 yield Message.Url, url, data
-
-            if not seen:
-                self.log("info", f"No downloadable media found for {self.url}")
-        except Exception as e:
-            self.log("error", f"Failed to extract post page: {e}")
+        except Exception as exc:
+            self.log.error("Failed to extract post page %s/%s: %s",
+                           creator, post_id, exc)
