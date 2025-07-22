@@ -41,8 +41,7 @@ class JschanThreadExtractor(JschanExtractor):
 
         yield Message.Directory, thread
         for post in itertools.chain((thread,), posts):
-            files = post.pop("files", ())
-            if files:
+            if files := post.pop("files", ()):
                 thread.update(post)
                 thread["count"] = len(files)
                 for num, file in enumerate(files):

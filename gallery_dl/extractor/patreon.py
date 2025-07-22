@@ -295,12 +295,10 @@ class PatreonExtractor(Extractor):
         if bootstrap:
             return util.json_loads(bootstrap + "}")
 
-        bootstrap = text.extr(page, "window.patreon.bootstrap,", "});")
-        if bootstrap:
+        if bootstrap := text.extr(page, "window.patreon.bootstrap,", "});"):
             return util.json_loads(bootstrap + "}")
 
-        data = text.extr(page, "window.patreon = {", "};\n")
-        if data:
+        if data := text.extr(page, "window.patreon = {", "};\n"):
             try:
                 return util.json_loads(f"{{{data}}}")["bootstrap"]
             except Exception:
@@ -340,8 +338,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
         if creator and creator.startswith("id:"):
             return creator[3:]
 
-        campaign_id = query.get("c") or query.get("campaign_id")
-        if campaign_id:
+        if campaign_id := query.get("c") or query.get("campaign_id"):
             return campaign_id
 
         if user_id := query.get("u"):

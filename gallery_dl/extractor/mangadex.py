@@ -58,8 +58,7 @@ class MangadexExtractor(Extractor):
         cattributes = chapter["attributes"]
         mattributes = manga["attributes"]
 
-        lang = cattributes.get("translatedLanguage")
-        if lang:
+        if lang := cattributes.get("translatedLanguage"):
             lang = lang.partition("-")[0]
 
         if cattributes["chapter"]:
@@ -279,8 +278,7 @@ class MangadexAPI():
 
     @cache(maxage=900, keyarg=1)
     def _authenticate_impl_client(self, username, password):
-        refresh_token = _refresh_token_cache((username, "personal"))
-        if refresh_token:
+        if refresh_token := _refresh_token_cache((username, "personal")):
             self.extractor.log.info("Refreshing access token")
             data = {
                 "grant_type"   : "refresh_token",
@@ -317,8 +315,7 @@ class MangadexAPI():
 
     @cache(maxage=900, keyarg=1)
     def _authenticate_impl_legacy(self, username, password):
-        refresh_token = _refresh_token_cache(username)
-        if refresh_token:
+        if refresh_token := _refresh_token_cache(username):
             self.extractor.log.info("Refreshing access token")
             url = self.root + "/auth/refresh"
             json = {"token": refresh_token}
@@ -389,8 +386,7 @@ class MangadexAPI():
             params["contentRating[]"] = ratings
         params["offset"] = 0
 
-        api_params = config("api-parameters")
-        if api_params:
+        if api_params := config("api-parameters"):
             params.update(api_params)
 
         while True:

@@ -33,8 +33,7 @@ class NaverBlogPostExtractor(NaverBlogBase, GalleryExtractor):
     example = "https://blog.naver.com/BLOGID/12345"
 
     def __init__(self, match):
-        blog_id = match[1]
-        if blog_id:
+        if blog_id := match[1]:
             self.blog_id = blog_id
             self.post_id = match[2]
         else:

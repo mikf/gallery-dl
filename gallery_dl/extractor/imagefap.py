@@ -28,8 +28,7 @@ class ImagefapExtractor(Extractor):
         response = Extractor.request(self, url, **kwargs)
 
         if response.history and response.url.endswith("/human-verification"):
-            msg = text.extr(response.text, '<div class="mt-4', '<')
-            if msg:
+            if msg := text.extr(response.text, '<div class="mt-4', '<'):
                 msg = " ".join(msg.partition(">")[2].split())
                 raise exception.AbortExtraction(f"'{msg}'")
             self.log.warning("HTTP redirect to %s", response.url)

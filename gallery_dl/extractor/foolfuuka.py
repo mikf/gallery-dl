@@ -164,8 +164,7 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
 
     def posts(self):
         op = (self.data["op"],)
-        posts = self.data.get("posts")
-        if posts:
+        if posts := self.data.get("posts"):
             posts = list(posts.values())
             posts.sort(key=lambda p: p["timestamp"])
             return itertools.chain(op, posts)

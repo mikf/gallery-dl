@@ -306,8 +306,7 @@ class FacebookSetExtractor(FacebookExtractor):
 
     def items(self):
         set_id = self.groups[0] or self.groups[3]
-        path = self.groups[1]
-        if path:
+        if path := self.groups[1]:
             post_url = self.root + "/" + path
             post_page = self.request(post_url).text
             set_id = self.parse_post_page(post_page)["set_id"]

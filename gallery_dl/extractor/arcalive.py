@@ -86,8 +86,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
 
             fallback = ()
             query = f"?type=orig&{query}"
-            orig = text.extr(media, 'data-orig="', '"')
-            if orig:
+            if orig := text.extr(media, 'data-orig="', '"'):
                 path, _, ext = url.rpartition(".")
                 if ext != orig:
                     fallback = (url + query,)

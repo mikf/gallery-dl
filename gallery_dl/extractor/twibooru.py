@@ -159,12 +159,10 @@ class TwibooruAPI():
     def _pagination(self, endpoint, params):
         extr = self.extractor
 
-        api_key = extr.config("api-key")
-        if api_key:
+        if api_key := extr.config("api-key"):
             params["key"] = api_key
 
-        filter_id = extr.config("filter")
-        if filter_id:
+        if filter_id := extr.config("filter"):
             params["filter_id"] = filter_id
         elif not api_key:
             params["filter_id"] = "2"

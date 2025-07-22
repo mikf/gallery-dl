@@ -24,8 +24,7 @@ class E621Extractor(danbooru.DanbooruExtractor):
     request_interval_min = 1.0
 
     def items(self):
-        includes = self.config("metadata") or ()
-        if includes:
+        if includes := self.config("metadata") or ():
             if isinstance(includes, str):
                 includes = includes.split(",")
             elif not isinstance(includes, (list, tuple)):

@@ -90,8 +90,7 @@ class SimplyhentaiImageExtractor(Extractor):
         url = extr('&quot;image&quot;:&quot;'  , '&')
         url = extr("&quot;content&quot;:&quot;", "&") or url
 
-        tags = text.extr(descr, " tagged with ", " online for free ")
-        if tags:
+        if tags := text.extr(descr, " tagged with ", " online for free "):
             tags = tags.split(", ")
             tags[-1] = tags[-1].partition(" ")[2]
         else:

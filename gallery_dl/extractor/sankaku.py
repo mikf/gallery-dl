@@ -78,8 +78,7 @@ class SankakuExtractor(BooruExtractor):
     def _tags(self, post, page):
         tags = collections.defaultdict(list)
         for tag in self.api.tags(post["id"]):
-            name = tag["name"]
-            if name:
+            if name := tag["name"]:
                 tags[tag["type"]].append(name.lower().replace(" ", "_"))
         types = self.TAG_TYPES
         for type, values in tags.items():
@@ -315,8 +314,7 @@ class SankakuAPI():
         params["lang"] = "en"
         params["limit"] = str(self.extractor.per_page)
 
-        refresh = self.extractor.config("refresh", False)
-        if refresh:
+        if refresh := self.extractor.config("refresh", False):
             offset = expires = 0
             from time import time
 
@@ -330,8 +328,7 @@ class SankakuAPI():
 
                 for post in posts:
                     if not expires:
-                        url = post["file_url"]
-                        if url:
+                        if url := post["file_url"]:
                             expires = text.parse_int(
                                 text.extr(url, "e=", "&")) - 60
 

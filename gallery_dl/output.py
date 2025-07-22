@@ -121,8 +121,7 @@ class PathfmtProxy():
         return pathfmt.__dict__.get(name) if pathfmt else None
 
     def __str__(self):
-        pathfmt = object.__getattribute__(self, "job").pathfmt
-        if pathfmt:
+        if pathfmt := object.__getattribute__(self, "job").pathfmt:
             return pathfmt.path or pathfmt.directory
         return ""
 
@@ -235,8 +234,7 @@ def configure_logging(loglevel):
             minlevel = handler.level
 
     # file logging handler
-    handler = setup_logging_handler("logfile", lvl=loglevel)
-    if handler:
+    if handler := setup_logging_handler("logfile", lvl=loglevel):
         root.addHandler(handler)
         if minlevel > handler.level:
             minlevel = handler.level
@@ -394,8 +392,7 @@ class PipeOutput(NullOutput):
 class TerminalOutput():
 
     def __init__(self):
-        shorten = config.get(("output",), "shorten", True)
-        if shorten:
+        if shorten := config.get(("output",), "shorten", True):
             func = shorten_string_eaw if shorten == "eaw" else shorten_string
             limit = shutil.get_terminal_size().columns - OFFSET
             sep = CHAR_ELLIPSIES
@@ -460,8 +457,7 @@ class CustomOutput():
         if isinstance(fmt_success, list):
             off_success, fmt_success = fmt_success
 
-        shorten = config.get(("output",), "shorten", True)
-        if shorten:
+        if shorten := config.get(("output",), "shorten", True):
             func = shorten_string_eaw if shorten == "eaw" else shorten_string
             width = shutil.get_terminal_size().columns
 

@@ -320,20 +320,17 @@ def dump_response(response, fp, headers=False, content=True, hide_auth=True):
         res_headers = response.headers.copy()
 
         if hide_auth:
-            authorization = req_headers.get("Authorization")
-            if authorization:
+            if authorization := req_headers.get("Authorization"):
                 atype, sep, _ = str(authorization).partition(" ")
                 req_headers["Authorization"] = f"{atype} ***" if sep else "***"
 
-            cookie = req_headers.get("Cookie")
-            if cookie:
+            if cookie := req_headers.get("Cookie"):
                 req_headers["Cookie"] = ";".join(
                     c.partition("=")[0] + "=***"
                     for c in cookie.split(";")
                 )
 
-            set_cookie = res_headers.get("Set-Cookie")
-            if set_cookie:
+            if set_cookie := res_headers.get("Set-Cookie"):
                 res_headers["Set-Cookie"] = re(r"(^|, )([^ =]+)=[^,;]*").sub(
                     r"\1\2=***", set_cookie)
 
@@ -377,14 +374,11 @@ def extract_headers(response):
     headers = response.headers
     data = dict(headers)
 
-    hcd = headers.get("content-disposition")
-    if hcd:
-        name = text.extr(hcd, 'filename="', '"')
-        if name:
+    if hcd := headers.get("content-disposition"):
+        if name := text.extr(hcd, 'filename="', '"'):
             text.nameext_from_url(name, data)
 
-    hlm = headers.get("last-modified")
-    if hlm:
+    if hlm := headers.get("last-modified"):
         data["date"] = datetime.datetime(*parsedate_tz(hlm)[:6])
 
     return data

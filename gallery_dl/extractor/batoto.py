@@ -152,8 +152,7 @@ class BatotoMangaExtractor(BatotoBase, MangaExtractor):
     def chapters(self, page):
         extr = text.extract_from(page)
 
-        warning = extr(' class="alert alert-warning">', "</div>")
-        if warning:
+        if warning := extr(' class="alert alert-warning">', "</div>"):
             self.log.warning("'%s'", text.remove_html(warning))
 
         data = {

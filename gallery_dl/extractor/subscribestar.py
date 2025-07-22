@@ -115,8 +115,7 @@ class SubscribestarExtractor(Extractor):
         }
 
         def check_errors(response):
-            errors = response.json().get("errors")
-            if errors:
+            if errors := response.json().get("errors"):
                 self.log.debug(errors)
                 try:
                     msg = f'"{errors.popitem()[1]}"'
@@ -146,8 +145,7 @@ class SubscribestarExtractor(Extractor):
     def _media_from_post(self, html):
         media = []
 
-        gallery = text.extr(html, 'data-gallery="', '"')
-        if gallery:
+        if gallery := text.extr(html, 'data-gallery="', '"'):
             for item in util.json_loads(text.unescape(gallery)):
                 if "/previews" in item["url"]:
                     self._warn_preview()

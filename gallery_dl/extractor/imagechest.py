@@ -28,8 +28,7 @@ class ImagechestGalleryExtractor(GalleryExtractor):
         GalleryExtractor.__init__(self, match, url)
 
     def _init(self):
-        access_token = self.config("access-token")
-        if access_token:
+        if access_token := self.config("access-token"):
             self.api = ImagechestAPI(self, access_token)
             self.page_url = None
             self.metadata = self._metadata_api

@@ -73,8 +73,7 @@ class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
 
         metadata = self.metadata(page)
 
-        url = text.extr(page, 'class="main-image" src="', '"')
-        if url:
+        if url := text.extr(page, 'class="main-image" src="', '"'):
             metadata["type"] = "picture"
         else:
             url = text.extr(page, '<source src="', '"')

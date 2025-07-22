@@ -25,8 +25,7 @@ class VipergirlsExtractor(Extractor):
     cookies_names = ("vg_userid", "vg_password")
 
     def _init(self):
-        domain = self.config("domain")
-        if domain:
+        if domain := self.config("domain"):
             pos = domain.find("://")
             if pos >= 0:
                 self.root = domain.rstrip("/")
@@ -45,8 +44,7 @@ class VipergirlsExtractor(Extractor):
         forum_title = root[1].attrib["title"]
         thread_title = root[2].attrib["title"]
 
-        like = self.config("like")
-        if like:
+        if like := self.config("like"):
             user_hash = root[0].get("hash")
             if len(user_hash) < 16:
                 self.log.warning("Login required to like posts")

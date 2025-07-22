@@ -75,8 +75,7 @@ class KeenspotComicExtractor(Extractor):
             self._image = '<div id="comic">'
             return "http://brawlinthefamily.keenspot.com/comic/theshowdown/"
 
-        url = text.extr(page, '<link rel="first" href="', '"')
-        if url:
+        if url := text.extr(page, '<link rel="first" href="', '"'):
             if self.comic == "porcelain":
                 self._needle = 'id="porArchivetop_"'
             else:

@@ -111,8 +111,7 @@ class WeiboExtractor(Extractor):
                     self.log.warning("Unknown media type '%s'", type)
             return
 
-        pic_ids = status.get("pic_ids")
-        if pic_ids:
+        if pic_ids := status.get("pic_ids"):
             pics = status["pic_infos"]
             for pic_id in pic_ids:
                 pic = pics[pic_id]
@@ -187,17 +186,15 @@ class WeiboExtractor(Extractor):
             yield from statuses
 
             # videos, newvideo
-            cursor = data.get("next_cursor")
-            if cursor:
+            if cursor := data.get("next_cursor"):
                 if cursor == -1:
                     return
                 params["cursor"] = cursor
                 continue
 
             # album
-            since_id = data.get("since_id")
-            if since_id:
-                params["sinceid"] = data["since_id"]
+            if since_id := data.get("since_id"):
+                params["sinceid"] = since_id
                 continue
 
             # home, article

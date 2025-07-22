@@ -37,8 +37,7 @@ class _8musesAlbumExtractor(Extractor):
                 self.request(url).text,
                 'id="ractive-public" type="text/plain">', '</script>'))
 
-            images = data.get("pictures")
-            if images:
+            if images := data.get("pictures"):
                 count = len(images)
                 album = self._make_album(data["album"])
                 yield Message.Directory, {"album": album, "count": count}
@@ -54,8 +53,7 @@ class _8musesAlbumExtractor(Extractor):
                     }
                     yield Message.Url, url, img
 
-            albums = data.get("albums")
-            if albums:
+            if albums := data.get("albums"):
                 for album in albums:
                     permalink = album.get("permalink")
                     if not permalink:

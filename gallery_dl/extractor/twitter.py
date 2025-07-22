@@ -278,8 +278,7 @@ class TwitterExtractor(Extractor):
             bvals = {bval["key"]: bval["value"]
                      for bval in card["binding_values"]}
 
-        cbl = self.cards_blacklist
-        if cbl:
+        if cbl := self.cards_blacklist:
             if name in cbl:
                 return
             if "vanity_url" in bvals:
@@ -339,8 +338,8 @@ class TwitterExtractor(Extractor):
             response = self.request(url, fatal=False)
             if response.status_code >= 400:
                 continue
-            url = text.extr(response.text, 'name="twitter:image" value="', '"')
-            if url:
+            if url := text.extr(
+                    response.text, 'name="twitter:image" value="', '"'):
                 files.append({"url": url})
 
     def _transform_tweet(self, tweet):
@@ -411,12 +410,10 @@ class TwitterExtractor(Extractor):
             content = tget("full_text") or tget("text") or ""
             entities = legacy["entities"]
 
-        hashtags = entities.get("hashtags")
-        if hashtags:
+        if hashtags := entities.get("hashtags"):
             tdata["hashtags"] = [t["text"] for t in hashtags]
 
-        mentions = entities.get("user_mentions")
-        if mentions:
+        if mentions := entities.get("user_mentions"):
             tdata["mentions"] = [{
                 "id": text.parse_int(u["id_str"]),
                 "name": u["screen_name"],
@@ -424,8 +421,7 @@ class TwitterExtractor(Extractor):
             } for u in mentions]
 
         content = text.unescape(content)
-        urls = entities.get("urls")
-        if urls:
+        if urls := entities.get("urls"):
             for url in urls:
                 try:
                     content = content.replace(url["url"], url["expanded_url"])
@@ -496,8 +492,7 @@ class TwitterExtractor(Extractor):
         }
 
         descr = user["description"]
-        urls = entities["description"].get("urls")
-        if urls:
+        if urls := entities["description"].get("urls"):
             for url in urls:
                 try:
                     descr = descr.replace(url["url"], url["expanded_url"])
@@ -922,8 +917,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         self.tweet_id = match[2]
 
     def tweets(self):
-        conversations = self.config("conversations")
-        if conversations:
+        if conversations := self.config("conversations"):
             self._accessible = (conversations == "accessible")
             return self._tweets_conversation(self.tweet_id)
 
@@ -1563,8 +1557,7 @@ class TwitterAPI():
                 headers=self.headers, fatal=None)
 
             # update 'x-csrf-token' header (#1170)
-            csrf_token = response.cookies.get("ct0")
-            if csrf_token:
+            if csrf_token := response.cookies.get("ct0"):
                 self.headers["x-csrf-token"] = csrf_token
 
             remaining = int(response.headers.get("x-rate-limit-remaining", 6))
@@ -1639,8 +1632,7 @@ class TwitterAPI():
 
     def _pagination_legacy(self, endpoint, params):
         extr = self.extractor
-        cursor = extr._init_cursor()
-        if cursor:
+        if cursor := extr._init_cursor():
             params["cursor"] = cursor
         original_retweets = (extr.retweets == "original")
         bottom = ("cursor-bottom-", "sq-cursor-bottom")
@@ -1721,8 +1713,7 @@ class TwitterAPI():
                 yield tweet
 
                 if "quoted_status_id_str" in tweet:
-                    quoted = tweets.get(tweet["quoted_status_id_str"])
-                    if quoted:
+                    if quoted := tweets.get(tweet["quoted_status_id_str"]):
                         quoted = quoted.copy()
                         quoted["author"] = users[quoted["user_id_str"]]
                         quoted["quoted_by"] = tweet["user"]["screen_name"]
@@ -1742,8 +1733,7 @@ class TwitterAPI():
         pinned_tweet = extr.pinned
 
         params = {"variables": None}
-        cursor = extr._init_cursor()
-        if cursor:
+        if cursor := extr._init_cursor():
             variables["cursor"] = cursor
         if features is None:
             features = self.features_pagination
@@ -1792,8 +1782,7 @@ class TwitterAPI():
             except LookupError:
                 extr.log.debug(data)
 
-                user = extr._user_obj
-                if user:
+                if user := extr._user_obj:
                     user = user["legacy"]
                     if user.get("blocked_by"):
                         if self.headers["x-twitter-auth-type"] and \
@@ -1942,8 +1931,7 @@ class TwitterAPI():
 
     def _pagination_users(self, endpoint, variables, path=None):
         extr = self.extractor
-        cursor = extr._init_cursor()
-        if cursor:
+        if cursor := extr._init_cursor():
             variables["cursor"] = cursor
         params = {
             "variables": None,
@@ -2018,8 +2006,7 @@ def _login_impl(extr, username, password):
             method="POST", fatal=None)
 
         # update 'x-csrf-token' header (#5945)
-        csrf_token = response.cookies.get("ct0")
-        if csrf_token:
+        if csrf_token := response.cookies.get("ct0"):
             headers["x-csrf-token"] = csrf_token
 
         try:

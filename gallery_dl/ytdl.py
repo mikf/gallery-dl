@@ -258,8 +258,7 @@ def parse_command_line(module, argv):
         None if opts.match_filter is None
         else module.match_filter_func(opts.match_filter))
 
-    cookiesfrombrowser = getattr(opts, "cookiesfrombrowser", None)
-    if cookiesfrombrowser:
+    if cookiesfrombrowser := getattr(opts, "cookiesfrombrowser", None):
         pattern = util.re(r"""(?x)
             (?P<name>[^+:]+)
             (?:\s*\+\s*(?P<keyring>[^:]+))?

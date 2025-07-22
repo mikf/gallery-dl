@@ -22,8 +22,7 @@ class PostProcessor():
         return self.__class__.__name__
 
     def _init_archive(self, job, options, prefix=None):
-        archive_path = options.get("archive")
-        if archive_path:
+        if archive_path := options.get("archive"):
             extr = job.extractor
 
             archive_table = options.get("archive-table")

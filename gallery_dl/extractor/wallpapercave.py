@@ -44,8 +44,7 @@ class WallpapercaveImageExtractor(Extractor):
         if path is None:
             for wp in text.extract_iter(
                     page, 'class="wallpaper" id="wp', '</picture>'):
-                path = text.rextr(wp, ' src="', '"')
-                if path:
+                if path := text.rextr(wp, ' src="', '"'):
                     image = text.nameext_from_url(path)
                     yield Message.Directory, image
                     yield Message.Url, self.root + path, image

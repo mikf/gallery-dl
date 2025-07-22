@@ -94,8 +94,7 @@ class WarosuThreadExtractor(Extractor):
             "", "<").rstrip().rpartition(".")[0])
         extr("<br>", "")
 
-        url = extr("<a href=", ">")
-        if url:
+        if url := extr("<a href=", ">"):
             if url[0] == "/":
                 data["image"] = self.root + url
             elif "warosu." not in url:

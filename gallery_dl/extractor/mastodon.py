@@ -49,10 +49,8 @@ class MastodonExtractor(BaseExtractor):
                 attachments.extend(status["reblog"]["media_attachments"])
 
             if self.cards:
-                card = status.get("card")
-                if card:
-                    url = card.get("image")
-                    if url:
+                if card := status.get("card"):
+                    if url := card.get("image"):
                         card["weburl"] = card.get("url")
                         card["url"] = url
                         card["id"] = "card" + "".join(

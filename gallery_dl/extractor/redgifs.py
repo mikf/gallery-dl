@@ -40,8 +40,7 @@ class RedgifsExtractor(Extractor):
 
         for gif in self.gifs():
 
-            gallery = gif.get("gallery")
-            if gallery:
+            if gallery := gif.get("gallery"):
                 gifs = self.api.gallery(gallery)["gifs"]
                 enum = 1
                 cnt = len(gifs)
@@ -71,8 +70,7 @@ class RedgifsExtractor(Extractor):
     def _formats(self, gif):
         urls = gif["urls"]
         for fmt in self.formats:
-            url = urls.get(fmt)
-            if url:
+            if url := urls.get(fmt):
                 url = url.replace("//thumbs2.", "//thumbs3.", 1)
                 text.nameext_from_url(url, gif)
                 yield url
