@@ -7,7 +7,7 @@
 """Extractors for https://leakgallery.com"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?leakgallery\.com"
 
@@ -25,7 +25,11 @@ class LeakGalleryExtractorBase(Extractor):
             if cdn_url in seen:
                 continue
             seen.add(cdn_url)
-            media_creator = media.get("profile", {}).get("username") or creator or "unknown"
+            media_creator = (
+                media.get("profile", {}).get("username")
+                or creator
+                or "unknown"
+            )
             data = {
                 "id": media["id"],
                 "creator": media_creator,
@@ -41,7 +45,11 @@ class LeakGalleryExtractorBase(Extractor):
 class LeakGalleryUserExtractor(LeakGalleryExtractorBase):
     """Extractor for profile posts on leakgallery.com"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!trending-medias|most-liked|random/medias)([^/?#]+)(?:/(Photos|Videos|All))?(?:/(MostRecent|MostViewed|MostLiked))?/?$"
+    pattern = (
+        BASE_PATTERN
+        + r"/(?!trending-medias|most-liked|random/medias)([^/?#]+)"
+        + r"(?:/(Photos|Videos|All))?(?:/(MostRecent|MostViewed|MostLiked))?/?$"
+    )
     example = "https://leakgallery.com/creator"
 
     def items(self):
@@ -77,14 +85,19 @@ class LeakGalleryTrendingExtractor(LeakGalleryExtractorBase):
         page = 1
         while True:
             try:
-                url = f"https://api.leakgallery.com/popular/media/{period}/{page}"
+                url = (
+                    f"https://api.leakgallery.com/popular/media/{period}/{page}"
+                )
                 response = self.request(url).json()
                 if not response:
                     return
                 yield from self._yield_media_items(response)
                 page += 1
             except Exception as e:
-                self.log("error", f"Failed to retrieve trending page {page}: {e}")
+                self.log(
+                    "error",
+                    f"Failed to retrieve trending page {page}: {e}"
+                )
                 return
 
 
@@ -105,7 +118,10 @@ class LeakGalleryMostLikedExtractor(LeakGalleryExtractorBase):
                 yield from self._yield_media_items(response)
                 page += 1
             except Exception as e:
-                self.log("error", f"Failed to retrieve most-liked page {page}: {e}")
+                self.log(
+                    "error",
+                    f"Failed to retrieve most-liked page {page}: {e}"
+                )
                 return
 
 
@@ -121,10 +137,12 @@ class LeakGalleryPostExtractor(LeakGalleryExtractorBase):
         try:
             page = self.request(self.url).text
             video_urls = text.re(
-                r'https://cdn\.leakgallery\.com/content[^/]*/(?:compressed_)?watermark_[^\"]+\.(?:mp4|mov|m4a|webm)'
+                r"https://cdn\.leakgallery\.com/content[^/]*/"
+                r"(?:compressed_)?watermark_[^\"]+\.(?:mp4|mov|m4a|webm)"
             ).findall(page)
             image_urls = text.re(
-                r'https://cdn\.leakgallery\.com/content[^/]*/watermark_[^\"]+\.(?:jpe?g|png)'
+                r"https://cdn\.leakgallery\.com/content[^/]*/"
+                r"watermark_[^\"]+\.(?:jpe?g|png)"
             ).findall(page)
 
             seen = set()
