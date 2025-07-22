@@ -10,23 +10,23 @@ __tests__ = (
     {
         "#url": "https://leakgallery.com/sophieraiin/12240",
         "#category": ("", "leakgallery", "post"),
-        "#class": leakgallery.LeakGalleryPostExtractor,
+        "#class": leakgallery.LeakgalleryPostExtractor,
         "id": 12240,
         "creator": "sophieraiin",
     },
     {
         "#url": "https://leakgallery.com/sophieraiin",
         "#category": ("", "leakgallery", "user"),
-        "#class": leakgallery.LeakGalleryUserExtractor,
+        "#class": leakgallery.LeakgalleryUserExtractor,
     },
     {
         "#url": "https://leakgallery.com/trending-medias/Week",
         "#category": ("", "leakgallery", "trending"),
-        "#class": leakgallery.LeakGalleryTrendingExtractor,
+        "#class": leakgallery.LeakgalleryTrendingExtractor,
     },
     {
         "#url": "https://leakgallery.com/most-liked",
         "#category": ("", "leakgallery", "mostliked"),
-        "#class": leakgallery.LeakGalleryMostLikedExtractor,
+        "#class": leakgallery.LeakgalleryMostLikedExtractor,
     },
 )
