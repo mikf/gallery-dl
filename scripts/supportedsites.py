@@ -91,6 +91,7 @@ CATEGORY_MAP = {
     "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
     "schalenetwork"  : "Schale Network",
+    "leakgallery"    : "Leak Gallery",
     "livedoor"       : "livedoor Blog",
     "lofter"         : "LOFTER",
     "ohpolly"        : "Oh Polly",
@@ -297,6 +298,10 @@ SUBCATEGORY_MAP = {
         "discord"       : "Discord Servers",
         "discord-server": "",
         "posts"         : "",
+    },
+    "leakgallery": {
+        "trending" : "Trending Medias",
+        "mostliked": "Most Liked Posts",
     },
     "lensdump": {
         "albums": "",
