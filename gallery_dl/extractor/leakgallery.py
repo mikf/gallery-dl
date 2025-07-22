@@ -129,7 +129,7 @@ class LeakgalleryPostExtractor(LeakgalleryExtractor):
     """Extractor for individual posts on leakgallery.com"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/([^/?#]+)/([0-9]+)"
-    example = "https://leakgallery.com/creator/post_id"
+    example = "https://leakgallery.com/CREATOR/12345"
 
     def items(self):
         creator, post_id = self.groups
