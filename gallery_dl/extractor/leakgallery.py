@@ -12,7 +12,7 @@ from .. import text
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?leakgallery\.com"
 
 
-class LeakGalleryExtractorBase(Extractor):
+class LeakgalleryExtractor(Extractor):
     category = "leakgallery"
     directory_fmt = ("{category}", "{creator}")
     filename_fmt = "{id}_{filename}.{extension}"
@@ -42,7 +42,7 @@ class LeakGalleryExtractorBase(Extractor):
             yield Message.Url, cdn_url, data
 
 
-class LeakGalleryUserExtractor(LeakGalleryExtractorBase):
+class LeakgalleryUserExtractor(LeakgalleryExtractor):
     """Extractor for profile posts on leakgallery.com"""
     subcategory = "user"
     pattern = (
@@ -73,7 +73,7 @@ class LeakGalleryUserExtractor(LeakGalleryExtractorBase):
                 return
 
 
-class LeakGalleryTrendingExtractor(LeakGalleryExtractorBase):
+class LeakgalleryTrendingExtractor(LeakgalleryExtractor):
     """Extractor for trending posts on leakgallery.com"""
     subcategory = "trending"
     pattern = BASE_PATTERN + r"/trending-medias(?:/([A-Za-z0-9\-]+))?"
@@ -101,7 +101,7 @@ class LeakGalleryTrendingExtractor(LeakGalleryExtractorBase):
                 return
 
 
-class LeakGalleryMostLikedExtractor(LeakGalleryExtractorBase):
+class LeakgalleryMostLikedExtractor(LeakgalleryExtractor):
     """Extractor for most liked posts on leakgallery.com"""
     subcategory = "mostliked"
     pattern = BASE_PATTERN + r"/most-liked"
@@ -125,7 +125,7 @@ class LeakGalleryMostLikedExtractor(LeakGalleryExtractorBase):
                 return
 
 
-class LeakGalleryPostExtractor(LeakGalleryExtractorBase):
+class LeakgalleryPostExtractor(LeakgalleryExtractor):
     """Extractor for individual posts on leakgallery.com"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/([^/?#]+)/([0-9]+)"
