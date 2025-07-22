@@ -99,6 +99,7 @@ modules = [
     "kemono",
     "khinsider",
     "komikcast",
+    "leakgallery",
     "lensdump",
     "lexica",
     "lightroom",
