@@ -66,7 +66,7 @@ parts:
     - jq
     - sed
     python-packages:
-    - youtube_dl
+    - yt-dlp[default]
     override-build: |
       # build manpages and bash completion
       make man completion
@@ -100,4 +100,4 @@ apps:
       LC_ALL: C.UTF-8
 
       # Satisfy FFmpeg's libpulsecommon dependency
-      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/pulseaudio
+      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pulseaudio
