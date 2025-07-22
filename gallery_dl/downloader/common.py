@@ -20,7 +20,6 @@ class DownloaderBase():
     def __init__(self, job):
         extractor = job.extractor
         self.log = job.get_logger("downloader." + self.scheme)
-        self.proxy_rotate = self.config("proxy-rotate", False)
 
         if opts := self._extractor_config(extractor):
             self.opts = opts
@@ -30,19 +29,20 @@ class DownloaderBase():
         self.session = extractor.session
         self.part = self.config("part", True)
         self.partdir = self.config("part-directory")
+        self.proxy_rotate = self.config("proxy-rotate", False)
 
         if self.partdir:
             self.partdir = util.expand_path(self.partdir)
             os.makedirs(self.partdir, exist_ok=True)
-
-        if self.proxy_rotate:
-            self.proxies = None  # Clear static proxies
+        
+        proxies = self.config("proxy", util.SENTINEL)
+        if proxies is util.SENTINEL:
+            self.proxies = extractor._proxies
         else:
-            proxies = self.config("proxy", util.SENTINEL)
-            if proxies is util.SENTINEL:
-                self.proxies = extractor._proxies
-            else:
-                self.proxies = util.build_proxy_map(proxies, self.log)
+            self.proxies = util.build_proxy_map(proxies, self.log)
+
+        if self.proxy_rotate and not self.proxies:
+            self.proxies = None  # Clear static proxies       
 
     def config(self, key, default=None):
         """Interpolate downloader config value for 'key'"""
