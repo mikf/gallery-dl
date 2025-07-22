@@ -82,7 +82,7 @@ def insert_test_result(args, result):
     path = util.path("test", "results", f"{args.cat}.py")
     LOG.info("Adding '%s:%s' test result into '%s'", args.cat, args.sub, path)
 
-    with open(path) as fp:
+    with util.open(path) as fp:
         lines = fp.readlines()
 
     lines.insert(-2, result)

@@ -228,8 +228,8 @@ and https://github.com/mikf/gallery-dl/graphs/contributors
 
 def parse_docs_configuration():
 
-    doc_path = util.path("docs", "configuration.rst")
-    with open(doc_path, encoding="utf-8") as fp:
+    path = util.path("docs", "configuration.rst")
+    with util.open(path) as fp:
         doc_lines = fp.readlines()
 
     sections = {}
