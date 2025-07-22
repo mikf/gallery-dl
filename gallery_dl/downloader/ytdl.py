@@ -26,12 +26,13 @@ class YoutubeDLDownloader(DownloaderBase):
         self.proxy_rotate = self.config("proxy-rotate", False)
         proxy_url = None
         
-        if self.proxy_rotate:
+        if self.proxies:
+            proxy_url = self.proxies.get("http") if self.proxies else None
+        elif self.proxy_rotate:
             proxy_info = self._proxy_rotator.get_next_proxy()
             proxy_url = proxy_info["url"]
             self.log.debug("YTDL using rotated proxy: %s", proxy_url)
-        elif self.proxies:
-            proxy_url = self.proxies.get("http") if self.proxies else None
+
         self.ytdl_opts = {
             "retries": retries+1 if retries >= 0 else float("inf"),
             "socket_timeout": self.config("timeout", extractor._timeout),
