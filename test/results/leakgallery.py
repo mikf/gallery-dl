@@ -27,6 +27,6 @@ __tests__ = (
     {
         "#url": "https://leakgallery.com/most-liked",
         "#category": ("", "leakgallery", "mostliked"),
-        "#class": leakgallery.LeakgalleryMostLikedExtractor,
+        "#class": leakgallery.LeakgalleryMostlikedExtractor,
     },
 )
