@@ -27,8 +27,7 @@ class LeakGalleryExtractorBase(Extractor):
             seen.add(cdn_url)
             media_creator = (
                 media.get("profile", {}).get("username")
-                or creator
-                or "unknown"
+                or creator or "unknown"
             )
             data = {
                 "id": media["id"],
@@ -46,9 +45,10 @@ class LeakGalleryUserExtractor(LeakGalleryExtractorBase):
     """Extractor for profile posts on leakgallery.com"""
     subcategory = "user"
     pattern = (
-        BASE_PATTERN
-        + r"/(?!trending-medias|most-liked|random/medias)([^/?#]+)"
-        + r"(?:/(Photos|Videos|All))?(?:/(MostRecent|MostViewed|MostLiked))?/?$"
+        BASE_PATTERN +
+        r"/(?!trending-medias|most-liked|random/medias)([^/?#]+)"
+        r"(?:/(Photos|Videos|All))?"
+        r"(?:/(MostRecent|MostViewed|MostLiked))?/?$"
     )
     example = "https://leakgallery.com/creator"
 
@@ -56,10 +56,8 @@ class LeakGalleryUserExtractor(LeakGalleryExtractorBase):
         creator = self.groups[0]
         mtype = self.groups[1] or "All"
         msort = self.groups[2] or "MostRecent"
-
         base = f"https://api.leakgallery.com/profile/{creator}/"
         params = {"type": mtype, "sort": msort}
-
         page = 1
         while True:
             try:
@@ -86,7 +84,8 @@ class LeakGalleryTrendingExtractor(LeakGalleryExtractorBase):
         while True:
             try:
                 url = (
-                    f"https://api.leakgallery.com/popular/media/{period}/{page}"
+                    f"https://api.leakgallery.com/popular/media/"
+                    f"{period}/{page}"
                 )
                 response = self.request(url).json()
                 if not response:
@@ -138,7 +137,8 @@ class LeakGalleryPostExtractor(LeakGalleryExtractorBase):
             page = self.request(self.url).text
             video_urls = text.re(
                 r"https://cdn\.leakgallery\.com/content[^/]*/"
-                r"(?:compressed_)?watermark_[^\"]+\.(?:mp4|mov|m4a|webm)"
+                r"(?:compressed_)?watermark_[^\"]+\."
+                r"(?:mp4|mov|m4a|webm)"
             ).findall(page)
             image_urls = text.re(
                 r"https://cdn\.leakgallery\.com/content[^/]*/"
