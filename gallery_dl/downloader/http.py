@@ -39,6 +39,7 @@ class HttpDownloader(DownloaderBase):
         self.mtime = self.config("mtime", True)
         self.rate = self.config("rate")
         interval_429 = self.config("sleep-429")
+        self.proxy_rotate = self.config("proxy-rotate", False)
 
         if not self.config("consume-content", False):
             # this resets the underlying TCP connection, and therefore
@@ -112,7 +113,7 @@ class HttpDownloader(DownloaderBase):
             pathfmt.part_enable(self.partdir)
 
         proxies = self.proxies
-        if self._proxy_rotator:
+        if self.proxy_rotate:
             proxy_info = self._proxy_rotator.get_next_proxy()
             proxy_url = proxy_info["url"]
             proxies = {

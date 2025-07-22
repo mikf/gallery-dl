@@ -55,6 +55,7 @@ class Extractor():
         self.groups = match.groups()
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
+        self.proxy_rotate = self.config("proxy-rotate", False)
 
     @classmethod
     def from_url(cls, url):
@@ -142,7 +143,7 @@ class Extractor():
         if retry_codes is None:
             retry_codes = self._retry_codes
         if "proxies" not in kwargs:
-            if self._proxy_rotator:
+            if self.proxy_rotate:
                 proxy_info = self._proxy_rotator.get_next_proxy()
                 proxy_url = proxy_info["url"]
                 kwargs["proxies"] = {

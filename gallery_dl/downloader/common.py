@@ -20,6 +20,7 @@ class DownloaderBase():
     def __init__(self, job):
         extractor = job.extractor
         self.log = job.get_logger("downloader." + self.scheme)
+        self.proxy_rotate = self.config("proxy-rotate", False)
 
         opts = self._extractor_config(extractor)
         if opts:
@@ -35,8 +36,7 @@ class DownloaderBase():
             self.partdir = util.expand_path(self.partdir)
             os.makedirs(self.partdir, exist_ok=True)
 
-        self._proxy_rotator = extractor._proxy_rotator
-        if self._proxy_rotator:
+        if self.proxy_rotate:
             self.proxies = None  # Clear static proxies
         else:
             proxies = self.config("proxy", util.SENTINEL)
