@@ -55,7 +55,6 @@ class Extractor():
         self.groups = match.groups()
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
-        self.proxy_rotate = self.config("proxy-rotate", False)
 
     @classmethod
     def from_url(cls, url):
@@ -143,7 +142,7 @@ class Extractor():
         if retry_codes is None:
             retry_codes = self._retry_codes
         if "proxies" not in kwargs:
-            if self.proxy_rotate:
+            if self._proxy_rotate and not self._proxies:
                 proxy_info = self._proxy_rotator.get_next_proxy()
                 proxy_url = proxy_info["url"]
                 kwargs["proxies"] = {
@@ -340,17 +339,18 @@ class Extractor():
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
         self._proxies = util.build_proxy_map(self.config("proxy"), self.log)
+        self._proxy_rotate = self.config("proxy-rotate", False)
+        self._proxy_list = self.config("proxy-list")
         self._proxy_rotator = None
-
-        proxy_list = self.config("proxy-list")
-        if proxy_list:
+        
+        if self._proxy_rotate and not self._proxies: 
             proxy_strategy = self.config("proxy-strategy")
             try:
                 self._proxy_rotator = util.ProxyRotator(
-                    proxy_list, strategy=proxy_strategy)
+                    self._proxy_list, strategy=proxy_strategy)
                 self.log.debug(
                     "Initialized proxy rotator with file: %s, strategy: %s",
-                    proxy_list, self._proxy_rotator.strategy or "random"
+                    self._proxy_list, self._proxy_rotator.strategy or "random"
                 )
             except (FileNotFoundError, ValueError) as e:
                 self.log.error("Failed to initialize proxy rotator: %s", e)

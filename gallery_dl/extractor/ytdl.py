@@ -26,7 +26,6 @@ class YoutubeDLExtractor(Extractor):
         ytdl_module = ytdl.import_module(config.get(
             ("extractor", "ytdl"), "module"))
         self.ytdl_module_name = ytdl_module.__name__
-        self.proxy_rotate = self.config("proxy-rotate", False)
 
         # find suitable youtube_dl extractor
         self.ytdl_url = url = match.group(1)
@@ -65,14 +64,14 @@ class YoutubeDLExtractor(Extractor):
             "nocheckcertificate"     : not self._verify,
         }
 
-        if self.proxy_rotate:
+        if self._proxy_rotate and not self._proxies:
             proxy_info = self._proxy_rotator.get_next_proxy()
             proxy_url = proxy_info["url"]
             user_opts["proxy"] = proxy_url
             self.log.debug(
                 "YTDL (extractor) using rotated proxy: %s", proxy_url
             )
-        elif self._proxies:
+        else:
             user_opts["proxy"] = self._proxies.get("http")
 
         username, password = self._get_auth_info()

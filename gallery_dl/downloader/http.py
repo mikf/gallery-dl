@@ -113,7 +113,7 @@ class HttpDownloader(DownloaderBase):
             pathfmt.part_enable(self.partdir)
 
         proxies = self.proxies
-        if self.proxy_rotate:
+        if self.proxy_rotate and not proxies:
             proxy_info = self._proxy_rotator.get_next_proxy()
             proxy_url = proxy_info["url"]
             proxies = {
