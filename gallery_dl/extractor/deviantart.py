@@ -55,8 +55,7 @@ class DeviantartExtractor(Extractor):
         self.group = False
         self._premium_cache = {}
 
-        unwatch = self.config("auto-unwatch")
-        if unwatch:
+        if self.config("auto-unwatch"):
             self.unwatch = []
             self.finalize = self._unwatch_premium
         else:
@@ -118,10 +117,8 @@ class DeviantartExtractor(Extractor):
 
     def items(self):
         if self.user:
-            group = self.config("group", True)
-            if group:
-                user = _user_details(self, self.user)
-                if user:
+            if group := self.config("group", True):
+                if user := _user_details(self, self.user):
                     self.user = user["username"]
                     self.group = False
                 elif group == "skip":
@@ -179,8 +176,7 @@ class DeviantartExtractor(Extractor):
                 yield self.commit(deviation, deviation["flash"])
 
             if self.commit_journal:
-                journal = self._extract_journal(deviation)
-                if journal:
+                if journal := self._extract_journal(deviation):
                     if self.extra:
                         deviation["_journal"] = journal["html"]
                     deviation["is_original"] = True
@@ -389,8 +385,7 @@ class DeviantartExtractor(Extractor):
             deviations = state["@@entities"]["deviation"]
             content = deviations.popitem()[1]["textContent"]
 
-            html = self._textcontent_to_html(deviation, content)
-            if html:
+            if html := self._textcontent_to_html(deviation, content):
                 return {"html": html}
             return {"html": content["excerpt"].replace("\n", "<br />")}
 
@@ -432,8 +427,7 @@ class DeviantartExtractor(Extractor):
         type = content["type"]
 
         if type == "paragraph":
-            children = content.get("content")
-            if children:
+            if children := content.get("content"):
                 html.append('<p style="')
 
                 attrs = content["attrs"]
@@ -547,8 +541,7 @@ class DeviantartExtractor(Extractor):
             self.log.warning("Unsupported content type '%s'", type)
 
     def _tiptap_process_text(self, html, content):
-        marks = content.get("marks")
-        if marks:
+        if marks := content.get("marks"):
             close = []
             for mark in marks:
                 type = mark["type"]
@@ -587,8 +580,7 @@ class DeviantartExtractor(Extractor):
             html.append(text.escape(content["text"]))
 
     def _tiptap_process_children(self, html, content):
-        children = content.get("content")
-        if children:
+        if children := content.get("content"):
             for block in children:
                 self._tiptap_process_content(html, block)
 
@@ -841,8 +833,7 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
             for fmt in media["types"]
         }
 
-        tokens = media.get("token") or ()
-        if tokens:
+        if tokens := media.get("token") or ():
             if len(tokens) <= 1:
                 fmt = formats[format]
                 if "c" in fmt:
@@ -1057,8 +1048,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
             page = self._limited_request(url).text
 
         if stash_id[0] == "0":
-            uuid = text.extr(page, '//deviation/', '"')
-            if uuid:
+            if uuid := text.extr(page, '//deviation/', '"'):
                 deviation = self.api.deviation(uuid)
                 deviation["_page"] = page
                 deviation["index"] = text.parse_int(text.extr(
@@ -1081,8 +1071,7 @@ class DeviantartStashExtractor(DeviantartExtractor):
                 yield deviation
                 return
 
-        stash_data = text.extr(page, ',\\"stash\\":', ',\\"@@')
-        if stash_data:
+        if stash_data := text.extr(page, ',\\"stash\\":', ',\\"@@'):
             stash_data = util.json_loads(self._unescape_json(stash_data))
 
         for sid in text.extract_iter(
@@ -1461,8 +1450,7 @@ class DeviantartOAuthAPI():
         self.folders = extractor.config("folders", False)
         self.public = extractor.config("public", True)
 
-        client_id = extractor.config("client-id")
-        if client_id:
+        if client_id := extractor.config("client-id"):
             self.client_id = str(client_id)
             self.client_secret = extractor.config("client-secret")
         else:

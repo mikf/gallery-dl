@@ -103,14 +103,12 @@ def open_extern():
         openers = ("explorer", "notepad")
     else:
         openers = ("xdg-open", "open")
-        editor = os.environ.get("EDITOR")
-        if editor:
+        if editor := os.environ.get("EDITOR"):
             openers = (editor,) + openers
 
     import shutil
     for opener in openers:
-        opener = shutil.which(opener)
-        if opener:
+        if opener := shutil.which(opener):
             break
     else:
         log.warning("Unable to find a program to open '%s' with", path)
@@ -211,8 +209,7 @@ def load(files=None, strict=False, loads=util.json_loads):
             _files.append(pathfmt)
 
             if "subconfigs" in conf:
-                subconfigs = conf["subconfigs"]
-                if subconfigs:
+                if subconfigs := conf["subconfigs"]:
                     if isinstance(subconfigs, str):
                         subconfigs = (subconfigs,)
                     load(subconfigs, strict, loads)
@@ -284,8 +281,7 @@ def accumulate(path, key, conf=_config):
     result = []
     try:
         if key in conf:
-            value = conf[key]
-            if value:
+            if value := conf[key]:
                 if isinstance(value, list):
                     result.extend(value)
                 else:
@@ -293,8 +289,7 @@ def accumulate(path, key, conf=_config):
         for p in path:
             conf = conf[p]
             if key in conf:
-                value = conf[key]
-                if value:
+                if value := conf[key]:
                     if isinstance(value, list):
                         result[:0] = value
                     else:

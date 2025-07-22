@@ -33,8 +33,7 @@ class RedditExtractor(Extractor):
         previews = self.config("previews", True)
         embeds = self.config("embeds", True)
 
-        videos = self.config("videos", True)
-        if videos:
+        if videos := self.config("videos", True):
             if videos == "ytdl":
                 self._extract_video = self._extract_video_ytdl
             elif videos == "dash":
@@ -139,8 +138,7 @@ class RedditExtractor(Extractor):
                     )):
                         continue
 
-                    match = match_submission(url)
-                    if match:
+                    if match := match_submission(url):
                         extra.append(match[1])
                     elif not match_user(url) and not match_subreddit(url):
                         if previews and "comment" not in data and \
@@ -181,8 +179,7 @@ class RedditExtractor(Extractor):
                     submission["id"], item["media_id"], data.get("status"))
                 continue
             src = data["s"]
-            url = src.get("u") or src.get("gif") or src.get("mp4")
-            if url:
+            if url := src.get("u") or src.get("gif") or src.get("mp4"):
                 yield url.partition("?")[0].replace("/preview.", "/i.", 1)
             else:
                 self.log.error(
@@ -202,8 +199,7 @@ class RedditExtractor(Extractor):
                     submission["id"], mid, data.get("status"))
                 continue
             src = data["s"]
-            url = src.get("u") or src.get("gif") or src.get("mp4")
-            if url:
+            if url := src.get("u") or src.get("gif") or src.get("mp4"):
                 yield url.partition("?")[0].replace("/preview.", "/i.", 1)
             else:
                 self.log.error(
@@ -242,8 +238,7 @@ class RedditExtractor(Extractor):
 
         try:
             for image in post["preview"]["images"]:
-                variants = image.get("variants")
-                if variants:
+                if variants := image.get("variants"):
                     if "gif" in variants:
                         yield variants["gif"]["source"]["url"]
                     if "mp4" in variants:

@@ -62,12 +62,10 @@ class HitomiGalleryExtractor(HitomiExtractor, GalleryExtractor):
         self.info = info = util.json_loads(page.partition("=")[2])
         iget = info.get
 
-        language = iget("language")
-        if language:
+        if language := iget("language"):
             language = language.capitalize()
 
-        date = iget("date")
-        if date:
+        if date := iget("date"):
             date += ":00"
 
         tags = []

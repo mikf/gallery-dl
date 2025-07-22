@@ -74,8 +74,7 @@ class OAuthBase(Extractor):
         """Open 'url' in browser amd return response parameters"""
         url += "?" + urllib.parse.urlencode(params)
 
-        browser = self.config("browser", True)
-        if browser:
+        if browser := self.config("browser", True):
             try:
                 import webbrowser
                 browser = webbrowser.get()
@@ -83,8 +82,7 @@ class OAuthBase(Extractor):
                 browser = None
 
         if browser and browser.open(url):
-            name = getattr(browser, "name", None)
-            if name:
+            if name := getattr(browser, "name", None):
                 self.log.info("Opening URL with %s:", name.capitalize())
         else:
             self.log.info("Please open this URL in your browser:")

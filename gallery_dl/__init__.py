@@ -121,14 +121,12 @@ def main():
                 util.compile_expression = util.compile_expression_defaultdict
 
         # format string separator
-        separator = config.get((), "format-separator")
-        if separator:
+        if separator := config.get((), "format-separator"):
             from . import formatter
             formatter._SEPARATOR = separator
 
         # eval globals
-        path = config.get((), "globals")
-        if path:
+        if path := config.get((), "globals"):
             util.GLOBALS.update(util.import_file(path).__dict__)
 
         # loglevels
@@ -140,13 +138,12 @@ def main():
             import platform
             import requests
 
-            extra = ""
             if util.EXECUTABLE:
                 extra = f" - Executable ({version.__variant__})"
+            elif git_head := util.git_head():
+                extra = " - Git HEAD: " + git_head
             else:
-                git_head = util.git_head()
-                if git_head:
-                    extra = " - Git HEAD: " + git_head
+                extra = ""
 
             log.debug("Version %s%s", __version__, extra)
             log.debug("Python %s - %s",
@@ -256,8 +253,7 @@ def main():
                 ))
 
         else:
-            input_files = config.get((), "input-files")
-            if input_files:
+            if input_files := config.get((), "input-files"):
                 for input_file in input_files:
                     if isinstance(input_file, str):
                         input_file = (input_file, None)
@@ -287,17 +283,15 @@ def main():
             input_manager.log = input_log = logging.getLogger("inputfile")
 
             # unsupported file logging handler
-            handler = output.setup_logging_handler(
-                "unsupportedfile", fmt="{message}")
-            if handler:
+            if handler := output.setup_logging_handler(
+                    "unsupportedfile", fmt="{message}"):
                 ulog = job.Job.ulog = logging.getLogger("unsupported")
                 ulog.addHandler(handler)
                 ulog.propagate = False
 
             # error file logging handler
-            handler = output.setup_logging_handler(
-                "errorfile", fmt="{message}", mode="a")
-            if handler:
+            if handler := output.setup_logging_handler(
+                    "errorfile", fmt="{message}", mode="a"):
                 elog = input_manager.err = logging.getLogger("errorfile")
                 elog.addHandler(handler)
                 elog.propagate = False
@@ -319,8 +313,7 @@ def main():
                     args.loglevel < logging.ERROR:
                 input_manager.progress(pformat)
 
-            catmap = config.interpolate(("extractor",), "category-map")
-            if catmap:
+            if catmap := config.interpolate(("extractor",), "category-map"):
                 if catmap == "compat":
                     catmap = {
                         "coomer"       : "coomerparty",

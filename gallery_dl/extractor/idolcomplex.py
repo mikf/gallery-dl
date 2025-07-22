@@ -108,8 +108,7 @@ class IdolcomplexExtractor(SankakuExtractor):
         pid = extr(">Post ID:", "<")
         created = extr(' title="', '"')
 
-        file_url = extr('>Original:', 'id=')
-        if file_url:
+        if file_url := extr('>Original:', 'id='):
             file_url = extr(' href="', '"')
             width = extr(">", "x")
             height = extr("", " ")

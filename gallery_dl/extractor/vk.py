@@ -112,8 +112,7 @@ class VkExtractor(Extractor):
             if offset_next >= total:
                 # the last chunk of photos also contains the first few photos
                 # again if 'total' is not a multiple of 10
-                extra = total - offset_next
-                if extra:
+                if extra := total - offset_next:
                     del photos[extra:]
 
                 yield from photos

@@ -61,8 +61,7 @@ class AryionExtractor(Extractor):
         data = self.metadata()
 
         for post_id in self.posts():
-            post = self._parse_post(post_id)
-            if post:
+            if post := self._parse_post(post_id):
                 if data:
                     post.update(data)
                 yield Message.Directory, post

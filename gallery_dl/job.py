@@ -48,15 +48,13 @@ class Job():
         self.kwdict = {}
         self.kwdict_eval = False
 
-        cfgpath = self._build_config_path(parent)
-        if cfgpath:
+        if cfgpath := self._build_config_path(parent):
             if isinstance(cfgpath, list):
                 extr.config = extr._config_shared
                 extr.config_accumulate = extr._config_shared_accumulate
             extr._cfgpath = cfgpath
 
-        actions = extr.config("actions")
-        if actions:
+        if actions := extr.config("actions"):
             from .actions import LoggerAdapter, parse_logging
             self._logger_adapter = LoggerAdapter
             self._logger_actions = parse_logging(actions)
@@ -89,8 +87,7 @@ class Job():
                 "current_git_head": util.git_head()
             }
         # user-supplied metadata
-        kwdict = extr.config("keywords")
-        if kwdict:
+        if kwdict := extr.config("keywords"):
             if extr.config("keywords-eval"):
                 self.kwdict_eval = []
                 for key, value in kwdict.items():
@@ -260,8 +257,7 @@ class Job():
         if self.extractor.config(target + "-unique"):
             predicates.append(util.UniquePredicate())
 
-        pfilter = self.extractor.config(target + "-filter")
-        if pfilter:
+        if pfilter := self.extractor.config(target + "-filter"):
             try:
                 pred = util.FilterPredicate(pfilter, target)
             except (SyntaxError, ValueError, TypeError) as exc:
@@ -269,8 +265,7 @@ class Job():
             else:
                 predicates.append(pred)
 
-        prange = self.extractor.config(target + "-range")
-        if prange:
+        if prange := self.extractor.config(target + "-range"):
             try:
                 pred = util.RangePredicate(prange)
             except ValueError as exc:
@@ -411,12 +406,10 @@ class DownloadJob(Job):
             return
         self.visited.add(url)
 
-        cls = kwdict.get("_extractor")
-        if cls:
+        if cls := kwdict.get("_extractor"):
             extr = cls.from_url(url)
         else:
-            extr = extractor.find(url)
-            if extr:
+            if extr := extractor.find(url):
                 if self._extractor_filter is None:
                     self._extractor_filter = self._build_extractor_filter()
                 if not self._extractor_filter(extr):
@@ -432,8 +425,7 @@ class DownloadJob(Job):
             else:
                 extr._parentdir = pextr._parentdir
 
-            pmeta = pextr.config2("parent-metadata", "metadata-parent")
-            if pmeta:
+            if pmeta := pextr.config2("parent-metadata", "metadata-parent"):
                 if isinstance(pmeta, str):
                     data = self.kwdict.copy()
                     if kwdict:
@@ -486,8 +478,7 @@ class DownloadJob(Job):
                 self.archive.finalize()
             self.archive.close()
 
-        pathfmt = self.pathfmt
-        if pathfmt:
+        if pathfmt := self.pathfmt:
             hooks = self.hooks
             if "post-after" in hooks:
                 for callback in hooks["post-after"]:
@@ -523,8 +514,7 @@ class DownloadJob(Job):
     def download(self, url):
         """Download 'url'"""
         scheme = url.partition(":")[0]
-        downloader = self.get_downloader(scheme)
-        if downloader:
+        if downloader := self.get_downloader(scheme):
             try:
                 return downloader.download(url, self.pathfmt)
             except OSError as exc:
@@ -570,8 +560,7 @@ class DownloadJob(Job):
             # monkey-patch method to do nothing and always return True
             self.download = pathfmt.fix_extension
 
-        archive_path = cfg("archive")
-        if archive_path:
+        if archive_path := cfg("archive"):
             archive_table = cfg("archive-table")
             archive_prefix = cfg("archive-prefix")
             if archive_prefix is None:
@@ -608,8 +597,7 @@ class DownloadJob(Job):
                     self._archive_write_file = ("file" in events)
                     self._archive_write_skip = ("skip" in events)
 
-        skip = cfg("skip", True)
-        if skip:
+        if skip := cfg("skip", True):
             self._skipexc = None
             if skip == "enumerate":
                 pathfmt.check_file = pathfmt._enum_file
@@ -623,8 +611,7 @@ class DownloadJob(Job):
                     self._skipexc = SystemExit
                 self._skipmax = text.parse_int(smax)
 
-                skip_filter = cfg("skip-filter")
-                if skip_filter:
+                if skip_filter := cfg("skip-filter"):
                     self._skipftr = util.compile_filter(skip_filter)
                 else:
                     self._skipftr = None
@@ -637,8 +624,7 @@ class DownloadJob(Job):
         if not cfg("postprocess", True):
             return
 
-        postprocessors = extr.config_accumulate("postprocessors")
-        if postprocessors:
+        if postprocessors := extr.config_accumulate("postprocessors"):
             self.hooks = collections.defaultdict(list)
 
             pp_log = self.get_logger("postprocessor")
@@ -867,8 +853,7 @@ class UrlJob(Job):
                 stdout_write("| " + url + "\n")
 
     def handle_queue(self, url, kwdict):
-        cls = kwdict.get("_extractor")
-        if cls:
+        if cls := kwdict.get("_extractor"):
             extr = cls.from_url(url)
         else:
             extr = extractor.find(url)
@@ -981,8 +966,7 @@ class DataJob(Job):
         self.data.append((Message.Queue, url, self.filter(kwdict)))
 
     def handle_queue_resolve(self, url, kwdict):
-        cls = kwdict.get("_extractor")
-        if cls:
+        if cls := kwdict.get("_extractor"):
             extr = cls.from_url(url)
         else:
             extr = extractor.find(url)

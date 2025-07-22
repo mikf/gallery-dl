@@ -39,8 +39,7 @@ class ItakuExtractor(Extractor):
 
             sections = []
             for s in post["sections"]:
-                group = s["group"]
-                if group:
+                if group := s["group"]:
                     sections.append(group["title"] + "/" + s["title"])
                 else:
                     sections.append(s["title"])

@@ -144,8 +144,7 @@ class BoostyExtractor(Extractor):
         url = block["url"]
         sep = "&" if "?" in url else "?"
 
-        signed_query = post.get("signedQuery")
-        if signed_query:
+        if signed_query := post.get("signedQuery"):
             url += sep + signed_query[1:]
             sep = "&"
 
@@ -280,8 +279,7 @@ class BoostyAPI():
         }
 
         if not access_token:
-            auth = self.extractor.cookies.get("auth", domain=".boosty.to")
-            if auth:
+            if auth := self.extractor.cookies.get("auth", domain=".boosty.to"):
                 access_token = text.extr(
                     auth, "%22accessToken%22%3A%22", "%22")
         if access_token:

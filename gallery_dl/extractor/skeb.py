@@ -162,8 +162,7 @@ class SkebExtractor(Extractor):
             })
 
         if self.article and "article_image_url" in resp:
-            url = resp["article_image_url"]
-            if url:
+            if url := resp["article_image_url"]:
                 files.append({
                     "content_category": "article",
                     "file_id" : "article",

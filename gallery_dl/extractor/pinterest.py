@@ -60,8 +60,7 @@ class PinterestExtractor(Extractor):
                 "closeup_description",
                 "closeup_unified_description",
             ):
-                value = pin.get(key)
-                if value:
+                if value := pin.get(key):
                     pin[key] = value.strip()
 
             yield Message.Directory, pin
@@ -93,8 +92,7 @@ class PinterestExtractor(Extractor):
         if story_pin_data and self.stories:
             return self._extract_story(pin, story_pin_data)
 
-        carousel_data = pin.get("carousel_data")
-        if carousel_data:
+        if carousel_data := pin.get("carousel_data"):
             return self._extract_carousel(pin, carousel_data)
 
         videos = pin.get("videos")
@@ -270,8 +268,7 @@ class PinterestUserExtractor(PinterestExtractor):
 
     def items(self):
         for board in self.api.boards(self.user):
-            url = board.get("url")
-            if url:
+            if url := board.get("url"):
                 board["_extractor"] = PinterestBoardExtractor
                 yield Message.Queue, self.root + url, board
 

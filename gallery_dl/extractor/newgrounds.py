@@ -228,12 +228,10 @@ class NewgroundsExtractor(Extractor):
         data["index"] = text.parse_int(index)
         data["_index"] = index
 
-        image_data = extr("let imageData =", "\n];")
-        if image_data:
+        if image_data := extr("let imageData =", "\n];"):
             data["_multi"] = self._extract_images_multi(image_data)
         else:
-            art_images = extr('<div class="art-images', '\n\t\t</div>')
-            if art_images:
+            if art_images := extr('<div class="art-images', '\n\t\t</div>'):
                 data["_multi"] = self._extract_images_art(art_images, data)
 
         return data
@@ -544,8 +542,7 @@ class NewgroundsSearchExtractor(NewgroundsExtractor):
         self.query = text.parse_query(query)
 
     def posts(self):
-        suitabilities = self.query.get("suitabilities")
-        if suitabilities:
+        if suitabilities := self.query.get("suitabilities"):
             data = {"view_suitability_" + s: "on"
                     for s in suitabilities.split(",")}
             self.request(self.root + "/suitabilities",

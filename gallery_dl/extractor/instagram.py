@@ -55,8 +55,7 @@ class InstagramExtractor(Extractor):
         self.login()
 
         data = self.metadata()
-        videos = self.config("videos", True)
-        if videos:
+        if videos := self.config("videos", True):
             videos_dash = (videos != "merged")
             videos_headers = {"User-Agent": "Mozilla/5.0"}
         previews = self.config("previews", False)
@@ -91,8 +90,7 @@ class InstagramExtractor(Extractor):
             for file in files:
                 file.update(post)
 
-                url = file.get("video_url")
-                if url:
+                if url := file.get("video_url"):
                     if videos:
                         file["_http_headers"] = videos_headers
                         text.nameext_from_url(url, file)
@@ -144,8 +142,7 @@ class InstagramExtractor(Extractor):
         if www_claim is not None:
             self.www_claim = www_claim
 
-        csrf_token = response.cookies.get("csrftoken")
-        if csrf_token:
+        if csrf_token := response.cookies.get("csrftoken"):
             self.csrf_token = csrf_token
 
         return response
@@ -164,8 +161,7 @@ class InstagramExtractor(Extractor):
         if "items" in post:  # story or highlight
             items = post["items"]
             reel_id = str(post["id"]).rpartition(":")[2]
-            expires = post.get("expiring_at")
-            if expires:
+            if expires := post.get("expiring_at"):
                 post_url = f"{self.root}/stories/{post['user']['username']}/"
             else:
                 post_url = f"{self.root}/stories/highlights/{reel_id}/"
@@ -193,20 +189,17 @@ class InstagramExtractor(Extractor):
             caption = post["caption"]
             data["description"] = caption["text"] if caption else ""
 
-            tags = self._find_tags(data["description"])
-            if tags:
+            if tags := self._find_tags(data["description"]):
                 data["tags"] = sorted(set(tags))
 
-            location = post.get("location")
-            if location:
+            if location := post.get("location"):
                 slug = location["short_name"].replace(" ", "-").lower()
                 data["location_id"] = location["pk"]
                 data["location_slug"] = slug
                 data["location_url"] = \
                     f"{self.root}/explore/locations/{location['pk']}/{slug}/"
 
-            coauthors = post.get("coauthor_producers")
-            if coauthors:
+            if coauthors := post.get("coauthor_producers"):
                 data["coauthors"] = [
                     {"id"       : user["pk"],
                      "username" : user["username"],
@@ -214,8 +207,7 @@ class InstagramExtractor(Extractor):
                     for user in coauthors
                 ]
 
-            items = post.get("carousel_media")
-            if items:
+            if items := post.get("carousel_media"):
                 data["sidecar_media_id"] = data["post_id"]
                 data["sidecar_shortcode"] = data["post_shortcode"]
             else:
@@ -237,8 +229,7 @@ class InstagramExtractor(Extractor):
                                  data["post_shortcode"])
                 continue
 
-            video_versions = item.get("video_versions")
-            if video_versions:
+            if video_versions := item.get("video_versions"):
                 video = max(
                     video_versions,
                     key=lambda x: (x["width"], x["height"], x["type"]),
@@ -281,8 +272,7 @@ class InstagramExtractor(Extractor):
                     "edge_sidecar_to_children" not in post:
                 post = self.api.media(post["id"])[0]
 
-        pinned = post.get("pinned_for_users", ())
-        if pinned:
+        if pinned := post.get("pinned_for_users", ()):
             for index, user in enumerate(pinned):
                 pinned[index] = int(user["id"])
 
@@ -306,19 +296,16 @@ class InstagramExtractor(Extractor):
         }
         data["date"] = data["post_date"]
 
-        tags = self._find_tags(data["description"])
-        if tags:
+        if tags := self._find_tags(data["description"]):
             data["tags"] = sorted(set(tags))
 
-        location = post.get("location")
-        if location:
+        if location := post.get("location"):
             data["location_id"] = location["id"]
             data["location_slug"] = location["slug"]
             data["location_url"] = (f"{self.root}/explore/locations/"
                                     f"{location['id']}/{location['slug']}/")
 
-        coauthors = post.get("coauthor_producers")
-        if coauthors:
+        if coauthors := post.get("coauthor_producers"):
             data["coauthors"] = [
                 {"id"      : user["id"],
                  "username": user["username"]}
@@ -365,32 +352,28 @@ class InstagramExtractor(Extractor):
     def _extract_tagged_users(self, src, dest):
         dest["tagged_users"] = tagged_users = []
 
-        edges = src.get("edge_media_to_tagged_user")
-        if edges:
+        if edges := src.get("edge_media_to_tagged_user"):
             for edge in edges["edges"]:
                 user = edge["node"]["user"]
                 tagged_users.append({"id"       : user["id"],
                                      "username" : user["username"],
                                      "full_name": user["full_name"]})
 
-        usertags = src.get("usertags")
-        if usertags:
+        if usertags := src.get("usertags"):
             for tag in usertags["in"]:
                 user = tag["user"]
                 tagged_users.append({"id"       : user["pk"],
                                      "username" : user["username"],
                                      "full_name": user["full_name"]})
 
-        mentions = src.get("reel_mentions")
-        if mentions:
+        if mentions := src.get("reel_mentions"):
             for mention in mentions:
                 user = mention["user"]
                 tagged_users.append({"id"       : user.get("pk"),
                                      "username" : user["username"],
                                      "full_name": user["full_name"]})
 
-        stickers = src.get("story_bloks_stickers")
-        if stickers:
+        if stickers := src.get("story_bloks_stickers"):
             for sticker in stickers:
                 sticker = sticker["bloks_sticker"]
                 if sticker["bloks_sticker_type"] == "mention":
@@ -698,8 +681,7 @@ class InstagramAvatarExtractor(InstagramExtractor):
             url = user.get("profile_pic_url_hd") or user["profile_pic_url"]
             avatar = {"url": url, "width": 0, "height": 0}
 
-        pk = user.get("profile_pic_id")
-        if pk:
+        if pk := user.get("profile_pic_id"):
             pk = pk.partition("_")[0]
             code = shortcode_from_id(pk)
         else:
@@ -753,8 +735,7 @@ class InstagramRestAPI():
     def highlights_media(self, user_id, chunk_size=5):
         reel_ids = [hl["id"] for hl in self.highlights_tray(user_id)]
 
-        order = self.extractor.config("order-posts")
-        if order:
+        if order := self.extractor.config("order-posts"):
             if order in ("desc", "reverse"):
                 reel_ids.reverse()
             elif order in ("id", "id_asc"):

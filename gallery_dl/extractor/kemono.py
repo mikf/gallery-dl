@@ -422,8 +422,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
         find_hash = util.re(HASH_PATTERN).match
 
         posts = self.api.discord_channel(channel_id)
-        max_posts = self.config("max-posts")
-        if max_posts:
+        if max_posts := self.config("max-posts"):
             posts = itertools.islice(posts, max_posts)
 
         for post in posts:

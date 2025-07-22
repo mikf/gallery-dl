@@ -173,8 +173,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
             self.posts = self.posts_api
             self.session.headers["User-Agent"] = util.USERAGENT
 
-        exts = self.config("extensions")
-        if exts:
+        if exts := self.config("extensions"):
             if isinstance(exts, str):
                 exts = exts.split(",")
             self.exts = exts

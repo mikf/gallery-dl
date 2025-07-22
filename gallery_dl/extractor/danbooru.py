@@ -49,8 +49,7 @@ class DanbooruExtractor(BaseExtractor):
     def items(self):
         # 'includes' initialization must be done here and not in '_init()'
         # or it'll cause an exception with e621 when 'metadata' is enabled
-        includes = self.config("metadata")
-        if includes:
+        if includes := self.config("metadata"):
             if isinstance(includes, (list, tuple)):
                 includes = ",".join(includes)
             elif not isinstance(includes, str):

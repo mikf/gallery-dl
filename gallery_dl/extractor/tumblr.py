@@ -34,8 +34,7 @@ class TumblrExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
 
-        name = match[2]
-        if name:
+        if name := match[2]:
             self.blog = name + ".tumblr.com"
         else:
             self.blog = match[1] or match[3]
@@ -139,8 +138,7 @@ class TumblrExtractor(Extractor):
             if url and url.startswith("https://a.tumblr.com/"):
                 posts.append(self._prepare(url, post.copy()))
 
-            url = post.get("video_url")  # type "video"
-            if url:
+            if url := post.get("video_url"):  # type "video"
                 posts.append(self._prepare(
                     self._original_video(url), post.copy()))
 
@@ -160,8 +158,7 @@ class TumblrExtractor(Extractor):
                     posts.append(self._prepare(url, post.copy()))
 
             if self.external:  # external links
-                url = post.get("permalink_url") or post.get("url")
-                if url:
+                if url := post.get("permalink_url") or post.get("url"):
                     post["extension"] = None
                     posts.append((Message.Queue, url, post.copy()))
                     del post["extension"]
@@ -191,8 +188,7 @@ class TumblrExtractor(Extractor):
                 types = types.split(",")
             types = frozenset(types)
 
-            invalid = types - POST_TYPES
-            if invalid:
+            if invalid := types - POST_TYPES:
                 types = types & POST_TYPES
                 self.log.warning("Invalid post types: '%s'",
                                  "', '".join(sorted(invalid)))
@@ -504,8 +500,7 @@ class TumblrAPI(oauth.OAuth1API):
                         f"{t.hour:02}:{t.minute:02}:{t.second:02}")
 
                 # hourly rate limit
-                reset = response.headers.get("x-ratelimit-perhour-reset")
-                if reset:
+                if reset := response.headers.get("x-ratelimit-perhour-reset"):
                     self.log.info("Hourly API rate limit exceeded")
                     self.extractor.wait(seconds=reset)
                     continue

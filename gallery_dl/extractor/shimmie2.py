@@ -19,13 +19,11 @@ class Shimmie2Extractor(BaseExtractor):
     archive_fmt = "{id}"
 
     def _init(self):
-        cookies = self.config_instance("cookies")
-        if cookies:
+        if cookies := self.config_instance("cookies"):
             domain = self.root.rpartition("/")[2]
             self.cookies_update_dict(cookies, domain=domain)
 
-        file_url = self.config_instance("file_url")
-        if file_url:
+        if file_url := self.config_instance("file_url"):
             self.file_url_fmt = file_url
 
         if self.category == "giantessbooru":

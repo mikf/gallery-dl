@@ -93,8 +93,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
     def _init(self):
         BehanceExtractor._init(self)
 
-        modules = self.config("modules")
-        if modules:
+        if modules := self.config("modules"):
             if isinstance(modules, str):
                 modules = modules.split(",")
             self.modules = set(modules)
@@ -208,8 +207,8 @@ class BehanceGalleryExtractor(BehanceExtractor):
                             break
 
             elif mtype == "embed":
-                embed = module.get("originalEmbed") or module.get("fluidEmbed")
-                if embed:
+                if embed := (module.get("originalEmbed") or
+                             module.get("fluidEmbed")):
                     embed = text.unescape(text.extr(embed, 'src="', '"'))
                     module["extension"] = "mp4"
                     results.append(("ytdl:" + embed, module))

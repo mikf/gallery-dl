@@ -205,8 +205,7 @@ class Ao3WorkExtractor(Ao3Extractor):
         }
         data["language"] = util.code_to_language(data["lang"])
 
-        series = data["series"]
-        if series:
+        if series := data["series"]:
             extr = text.extract_from(series)
             data["series"] = {
                 "prev" : extr(' class="previous" href="/works/', '"'),

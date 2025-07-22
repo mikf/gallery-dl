@@ -35,8 +35,7 @@ class CivitaiExtractor(Extractor):
             self.log.debug("Using tRPC API")
             self.api = CivitaiTrpcAPI(self)
 
-        quality = self.config("quality")
-        if quality:
+        if quality := self.config("quality"):
             if not isinstance(quality, str):
                 quality = ",".join(quality)
             self._image_quality = quality
@@ -45,8 +44,7 @@ class CivitaiExtractor(Extractor):
             self._image_quality = "original=true"
             self._image_ext = "png"
 
-        quality_video = self.config("quality-videos")
-        if quality_video:
+        if quality_video := self.config("quality-videos"):
             if not isinstance(quality_video, str):
                 quality_video = ",".join(quality_video)
             if quality_video[0] == "+":
@@ -59,8 +57,7 @@ class CivitaiExtractor(Extractor):
             self._video_quality = "quality=100"
         self._video_ext = "webm"
 
-        metadata = self.config("metadata")
-        if metadata:
+        if metadata := self.config("metadata"):
             if isinstance(metadata, str):
                 metadata = metadata.split(",")
             elif not isinstance(metadata, (list, tuple)):
@@ -73,16 +70,14 @@ class CivitaiExtractor(Extractor):
                 False
 
     def items(self):
-        models = self.models()
-        if models:
+        if models := self.models():
             data = {"_extractor": CivitaiModelExtractor}
             for model in models:
                 url = f"{self.root}/models/{model['id']}"
                 yield Message.Queue, url, data
             return
 
-        posts = self.posts()
-        if posts:
+        if posts := self.posts():
             for post in posts:
 
                 if "images" in post:
@@ -107,8 +102,7 @@ class CivitaiExtractor(Extractor):
                     yield Message.Url, file["url"], file
             return
 
-        images = self.images()
-        if images:
+        if images := self.images():
             for file in images:
 
                 data = {
@@ -230,8 +224,7 @@ class CivitaiExtractor(Extractor):
 
     def _extract_meta_version(self, item, is_post=True):
         try:
-            version_id = self._extract_version_id(item, is_post)
-            if version_id:
+            if version_id := self._extract_version_id(item, is_post):
                 version = self.api.model_version(version_id).copy()
                 return version.pop("model", None), version
         except Exception as exc:
@@ -569,8 +562,7 @@ class CivitaiRestAPI():
         self.root = extractor.root + "/api"
         self.headers = {"Content-Type": "application/json"}
 
-        api_key = extractor.config("api-key")
-        if api_key:
+        if api_key := extractor.config("api-key"):
             extractor.log.debug("Using api_key authentication")
             self.headers["Authorization"] = "Bearer " + api_key
 
@@ -648,8 +640,7 @@ class CivitaiTrpcAPI():
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",
         }
-        api_key = extractor.config("api-key")
-        if api_key:
+        if api_key := extractor.config("api-key"):
             extractor.log.debug("Using api_key authentication")
             self.headers["Authorization"] = "Bearer " + api_key
 

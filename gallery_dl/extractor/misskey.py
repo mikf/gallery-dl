@@ -33,15 +33,13 @@ class MisskeyExtractor(BaseExtractor):
             if "note" in note:
                 note = note["note"]
             files = note.pop("files") or []
-            renote = note.get("renote")
-            if renote:
+            if renote := note.get("renote"):
                 if not self.renotes:
                     self.log.debug("Skipping %s (renote)", note["id"])
                     continue
                 files.extend(renote.get("files") or ())
 
-            reply = note.get("reply")
-            if reply:
+            if reply := note.get("reply"):
                 if not self.replies:
                     self.log.debug("Skipping %s (reply)", note["id"])
                     continue

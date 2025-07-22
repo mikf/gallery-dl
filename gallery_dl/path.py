@@ -202,8 +202,7 @@ class PathFormat():
         """Build directory path and create it if necessary"""
         self.kwdict = kwdict
 
-        segments = self.build_directory(kwdict)
-        if segments:
+        if segments := self.build_directory(kwdict):
             self.directory = directory = self.basedirectory + self.clean_path(
                 os.sep.join(segments) + os.sep)
         else:

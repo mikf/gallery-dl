@@ -109,8 +109,7 @@ class InkbunnyPoolExtractor(InkbunnyExtractor):
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
-        pid = match[1]
-        if pid:
+        if pid := match[1]:
             self.pool_id = pid
             self.orderby = "pool_order"
         else:
@@ -142,8 +141,7 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
 
     def __init__(self, match):
         InkbunnyExtractor.__init__(self, match)
-        uid = match[1]
-        if uid:
+        if uid := match[1]:
             self.user_id = uid
             self.orderby = self.config("orderby", "fav_datetime")
         else:
@@ -218,8 +216,7 @@ class InkbunnySearchExtractor(InkbunnyExtractor):
         params["dayslimit"] = pop("days", None)
         params["username"] = pop("artist", None)
 
-        favsby = pop("favsby", None)
-        if favsby:
+        if favsby := pop("favsby", None):
             # get user_id from user profile
             url = f"{self.root}/{favsby}"
             page = self.request(url).text
