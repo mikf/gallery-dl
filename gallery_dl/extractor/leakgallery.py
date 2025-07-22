@@ -21,25 +21,26 @@ class LeakgalleryExtractor(Extractor):
     def _yield_media_items(self, medias, creator=None):
         seen = set()
         for media in medias:
-            cdn_url = "https://cdn.leakgallery.com/" + media["file_path"]
-            if cdn_url in seen:
+            path = media["file_path"]
+            if path in seen:
                 continue
-            seen.add(cdn_url)
-            media_creator = (
-                media.get("profile", {}).get("username") or
-                creator or
-                "unknown"
-            )
-            data = {
-                "id": media["id"],
-                "url": cdn_url,
-                "creator": media_creator,
-            }
-            text.nameext_from_url(cdn_url, data)
-            yield Message.Directory, data
-            yield Message.Url, cdn_url, data
+            seen.add(path)
 
-    def _pagination(self, type, base, params=None, pnum=1):
+            if creator is None:
+                try:
+                    media["creator"] = \
+                        media["profile"]["username"] or "unknown"
+                except Exception:
+                    media["creator"] = "unknown"
+            else:
+                media["creator"] = creator
+
+            media["url"] = url = f"https://cdn.leakgallery.com/{path}"
+            text.nameext_from_url(url, media)
+            yield Message.Directory, media
+            yield Message.Url, url, media
+
+    def _pagination(self, type, base, params=None, creator=None, pnum=1):
         while True:
             try:
                 data = self.request_json(f"{base}{pnum}", params=params)
@@ -51,7 +52,7 @@ class LeakgalleryExtractor(Extractor):
                     if not data or not isinstance(data, list):
                         return
 
-                yield from self._yield_media_items(data)
+                yield from self._yield_media_items(data, creator)
                 pnum += 1
             except Exception as exc:
                 self.log.error("Failed to retrieve %s page %s: %s",
@@ -74,9 +75,7 @@ class LeakgalleryUserExtractor(LeakgalleryExtractor):
         creator, mtype, msort = self.groups
         base = f"https://api.leakgallery.com/profile/{creator}/"
         params = {"type": mtype or "All", "sort": msort or "MostRecent"}
-
-        self.kwdict["creator"] = creator
-        return self._pagination(creator, base, params)
+        return self._pagination(creator, base, params, creator)
 
 
 class LeakgalleryTrendingExtractor(LeakgalleryExtractor):
