@@ -69,7 +69,7 @@ def create_extractor_module(opts=NONE):
     else:
         generate_extractors = generate_extractors_basic
 
-    with open(path, opts["open_mode"], encoding="utf-8") as fp:
+    with util.open(path, opts["open_mode"]) as fp:
         if copyright := opts.get("copyright", ""):
             copyright = f"\n# Copyright {dt.date.today().year} {copyright}\n#"
 
@@ -222,8 +222,7 @@ def create_test_results_file(opts=NONE):
     LOG.info("Creating '%s'", trim_path(path))
 
     import_stmt = generate_test_result_import(opts)
-    with open(path, "x", encoding="utf-8") as fp:
-
+    with util.open(path, "x") as fp:
         fp.write(f"""\
 {ENCODING}
 {LICENSE}
@@ -260,7 +259,7 @@ def insert_into_modules_list(opts=NONE):
              category)
 
     path = util.path("gallery_dl", "extractor", "__init__.py")
-    with open(path) as fp:
+    with util.open(path) as fp:
         lines = fp.readlines()
 
     module_name = f'    "{category}",\n'
@@ -289,7 +288,7 @@ def insert_into_supportedsites(opts):
              category)
 
     path = util.path("scripts", "supportedsites.py")
-    with open(path) as fp:
+    with util.open(path) as fp:
         lines = fp.readlines()
 
     compare = False
