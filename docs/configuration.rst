@@ -4873,11 +4873,11 @@ Description
 extractor.tiktok.user.module
 ----------------------------
 Type
-    ``string``
+    |Module|_
 Default
     ``null``
 Description
-    Name or filesystem path of the ``ytdl`` Python module
+    The |ytdl| |Module|_
     to extract posts from a ``tiktok`` user profile with.
 
     See `extractor.ytdl.module`_.
@@ -5904,15 +5904,14 @@ Description
 extractor.ytdl.module
 ---------------------
 Type
-    * ``string``
-    * |Path|_
+    |Module|_
 Default
     ``null``
 Example
     * ``"yt-dlp"``
     * ``"/home/user/.local/lib/python3.13/site-packages/youtube_dl"``
 Description
-    Name or filesystem path of the ``ytdl`` Python module to import.
+    The ``ytdl`` |Module|_ to import.
 
     Setting this to ``null`` will try to import ``"yt_dlp"``
     followed by ``"youtube_dl"`` as fallback.
@@ -5930,7 +5929,6 @@ Example
             "writesubtitles": true,
             "merge_output_format": "mkv"
         }
-
 Description
     Additional options passed directly to the ``YoutubeDL`` constructor.
 
@@ -6415,15 +6413,14 @@ Description
 downloader.ytdl.module
 ----------------------
 Type
-    * ``string``
-    * |Path|_
+    |Module|_
 Default
     ``null``
 Example
     * ``"yt-dlp"``
     * ``"/home/user/.local/lib/python3.13/site-packages/youtube_dl"``
 Description
-    Name or filesystem path of the ``ytdl`` Python module to import.
+    The ``ytdl`` |Module|_ to import.
 
     Setting this to ``null`` will try to import ``"yt_dlp"``
     followed by ``"youtube_dl"`` as fallback.
@@ -7475,15 +7472,15 @@ Type
     ``string``
 Example
     * ``"my_module:generate_text"``
-    * ``"~/.local/share/gdl-utils.py:resize"``
+    * ``"~/.local/share/gdl_utils.py:resize"``
 Description
     The Python function to call.
 
-    This function is specified as ``<module>:<function name>``
-    and gets called with the current metadata dict as argument.
+    | This function is specified as ``<module>:<function name>``, where
+    | ``<module>`` is a |Module|_ and
+      ``<function name>`` is the name of the function in that module.
 
-    ``module`` is either an importable Python module name
-    or the |Path|_ to a `.py` file,
+    It gets called with the current metadata dict as argument.
 
 
 rename.from
@@ -7854,23 +7851,71 @@ Description
     Duplicate the configuration settings of extractor `categories`
     to other names.
 
+    For example, a ``"naver": "naver-blog"`` key-value pair will make all
+    ``naver`` config settings available for ´´naver-blog´´ extractors as well.
+
+
+jinja.environment
+-----------------
+Type
+    ``object`` (`name` -> `value`)
+Example
+    .. code:: json
+
+        {
+            "variable_start_string": "(((",
+            "variable_end_string"  : ")))",
+            "keep_trailing_newline": true
+        }
+Description
+    Initialization parameters for the |jinja|
+    `Environment <https://jinja.palletsprojects.com/en/stable/api/#jinja2.Environment>`__
+    object.
+
+
+jinja.policies
+--------------
+Type
+    ``object`` (`name` -> `value`)
+Example
+    .. code:: json
+
+        {
+            "urlize.rel": "nofollow noopener",
+            "ext.i18n.trimmed": true
+        }
+Description
+    |jinja|
+    `Policies <https://jinja.palletsprojects.com/en/stable/api/#policies>`__
+
+
+jinja.filters
+-------------
+Type
+    |Module|_
+Description
+    A Python |Module|_ containing custom |jinja|
+    `filters <https://jinja.palletsprojects.com/en/stable/api/#custom-filters>`__
+
+
+jinja.tests
+-----------
+Type
+    |Module|_
+Description
+    A Python |Module|_ containing custom |jinja|
+    `tests <https://jinja.palletsprojects.com/en/stable/api/#custom-tests>`__
+
 
 globals
 -------
 Type
-    * |Path|_
-    * ``string``
-Example
-    * ``"~/.local/share/gdl-globals.py"``
-    * ``"gdl-globals"``
+    |Module|_
 Description
-    | Path to or name of an
-      `importable <https://docs.python.org/3/reference/import.html>`__
-      Python module,
-    | whose namespace,
-      in addition to the ``GLOBALS`` dict in
-      `util.py <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/util.py#L566-L578>`__,
-      gets used as |globals parameter|__ for compiled Python expressions.
+    A Python |Module|_ whose namespace,
+    in addition to the ``GLOBALS`` dict in
+    `util.py <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/util.py#L566-L578>`__,
+    is used as |globals parameter|__ for compiled Python expressions.
 
 .. |globals parameter| replace:: ``globals`` parameter
 .. __: https://docs.python.org/3/library/functions.html#eval
@@ -8159,6 +8204,33 @@ Description
       value (``"2.85"``) or a range  (``"1.5-3.0"``).
 
 
+Module
+------
+Type
+    * ``string``
+    * |Path|_
+Example
+    * ``"gdl_utils"``
+    * ``"~/.local/share/gdl/"``
+    * ``"~/.local/share/gdl_utils.py"``
+Description
+    A Python
+    `Module <https://docs.python.org/3/glossary.html#term-module>`__
+
+    This can be one of
+
+    * the name of an
+      `importable <https://docs.python.org/3/reference/import.html>`__
+      Python module
+    * the |Path|_ to a Python
+      `package <https://docs.python.org/3/glossary.html#term-package>`__
+    * the |Path|_ to a `.py` file
+
+    See
+    `Python/Modules <https://docs.python.org/3/tutorial/modules.html>`__
+    for details.
+
+
 Path
 ----
 Type
@@ -8176,13 +8248,20 @@ Description
     Simple `tilde expansion <https://docs.python.org/3/library/os.path.html#os.path.expanduser>`__
     and `environment variable expansion <https://docs.python.org/3/library/os.path.html#os.path.expandvars>`__
     is supported.
+Note:
+    In Windows environments,
+    both backslashes ``\`` as well as forward slashes ``/``
+    can be used as path separators.
 
-    In Windows environments, backslashes (``"\"``) can, in addition to
-    forward slashes (``"/"``), be used as path separators.
-    Because backslashes are JSON's escape character,
-    they themselves have to be escaped.
-    The path ``C:\path\to\file.ext`` has therefore to be written as
-    ``"C:\\path\\to\\file.ext"`` if you want to use backslashes.
+    However, since backslashes are JSON's escape character,
+    they themselves must be escaped as ``\\``.
+
+    For example, a path like ``C:\path\to\file.ext`` has to be specified as
+
+    * ``"C:\\path\\to\\file.ext"`` when using backslashes
+    * ``"C:/path/to/file.ext"`` when using forward slashes
+
+    in a JSON file.
 
 
 Logging Configuration
@@ -8372,6 +8451,8 @@ Description
 .. |ytdl| replace:: `yt-dlp`_/`youtube-dl`_
 .. |ytdl's| replace:: yt-dlp's/youtube-dl's
 .. |ffmpeg| replace:: FFmpeg_
+.. |jinja| replace:: Jinja
+
 
 .. |.netrc| replace:: ``.netrc``
 .. |requests.request()| replace:: ``requests.request()``
@@ -8383,6 +8464,7 @@ Description
 .. |datetime.max| replace:: ``datetime.max``
 .. |Date| replace:: ``Date``
 .. |Duration| replace:: ``Duration``
+.. |Module| replace:: ``Module``
 .. |Path| replace:: ``Path``
 .. |Last-Modified| replace:: ``Last-Modified``
 .. |Logging Configuration| replace:: ``Logging Configuration``
