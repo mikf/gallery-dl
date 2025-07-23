@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,18 +10,54 @@ import os
 import sys
 import shutil
 import logging
-import functools
 import unicodedata
 from . import config, util, formatter
 
-COLORS_DEFAULT = {
-    "success": "1;32",
-    "skip"   : "2",
-    "debug"  : "0;37",
-    "info"   : "1;37",
-    "warning": "1;33",
-    "error"  : "1;31",
-}
+
+# --------------------------------------------------------------------
+# Globals
+
+try:
+    TTY_STDOUT = sys.stdout.isatty()
+except Exception:
+    TTY_STDOUT = False
+
+try:
+    TTY_STDERR = sys.stderr.isatty()
+except Exception:
+    TTY_STDERR = False
+
+try:
+    TTY_STDIN = sys.stdin.isatty()
+except Exception:
+    TTY_STDIN = False
+
+
+COLORS_DEFAULT = {}
+COLORS = not os.environ.get("NO_COLOR")
+if COLORS:
+    if TTY_STDOUT:
+        COLORS_DEFAULT["success"] = "1;32"
+        COLORS_DEFAULT["skip"] = "2"
+    if TTY_STDERR:
+        COLORS_DEFAULT["debug"] = "0;37"
+        COLORS_DEFAULT["info"] = "1;37"
+        COLORS_DEFAULT["warning"] = "1;33"
+        COLORS_DEFAULT["error"] = "1;31"
+
+
+if util.WINDOWS:
+    ANSI = COLORS and os.environ.get("TERM") == "ANSI"
+    OFFSET = 1
+    CHAR_SKIP = "# "
+    CHAR_SUCCESS = "* "
+    CHAR_ELLIPSIES = "..."
+else:
+    ANSI = COLORS
+    OFFSET = 0
+    CHAR_SKIP = "# "
+    CHAR_SUCCESS = "✔ "
+    CHAR_ELLIPSIES = "…"
 
 
 # --------------------------------------------------------------------
@@ -74,38 +110,6 @@ class LoggerAdapter():
             self.logger._log(logging.ERROR, msg, args, **kwargs)
 
 
-class LoggerAdapterActions():
-
-    def __init__(self, logger, job):
-        self.logger = logger
-        self.extra = job._logger_extra
-        self.actions = job._logger_actions
-
-        self.debug = functools.partial(self.log, logging.DEBUG)
-        self.info = functools.partial(self.log, logging.INFO)
-        self.warning = functools.partial(self.log, logging.WARNING)
-        self.error = functools.partial(self.log, logging.ERROR)
-
-    def log(self, level, msg, *args, **kwargs):
-        if args:
-            msg = msg % args
-
-        actions = self.actions[level]
-        if actions:
-            args = self.extra.copy()
-            args["level"] = level
-
-            for cond, action in actions:
-                if cond(msg):
-                    action(args)
-
-            level = args["level"]
-
-        if self.logger.isEnabledFor(level):
-            kwargs["extra"] = self.extra
-            self.logger._log(level, msg, (), **kwargs)
-
-
 class PathfmtProxy():
     __slots__ = ("job",)
 
@@ -117,8 +121,7 @@ class PathfmtProxy():
         return pathfmt.__dict__.get(name) if pathfmt else None
 
     def __str__(self):
-        pathfmt = object.__getattribute__(self, "job").pathfmt
-        if pathfmt:
+        if pathfmt := object.__getattribute__(self, "job").pathfmt:
             return pathfmt.path or pathfmt.directory
         return ""
 
@@ -231,8 +234,7 @@ def configure_logging(loglevel):
             minlevel = handler.level
 
     # file logging handler
-    handler = setup_logging_handler("logfile", lvl=loglevel)
-    if handler:
+    if handler := setup_logging_handler("logfile", lvl=loglevel):
         root.addHandler(handler)
         if minlevel > handler.level:
             minlevel = handler.level
@@ -338,7 +340,7 @@ def select():
 
     if mode is None or mode == "auto":
         try:
-            if sys.stdout.isatty():
+            if TTY_STDOUT:
                 output = ColorOutput() if ANSI else TerminalOutput()
             else:
                 output = PipeOutput()
@@ -346,6 +348,8 @@ def select():
             output = PipeOutput()
     elif isinstance(mode, dict):
         output = CustomOutput(mode)
+    elif not mode:
+        output = NullOutput()
     else:
         output = {
             "default" : PipeOutput,
@@ -388,8 +392,7 @@ class PipeOutput(NullOutput):
 class TerminalOutput():
 
     def __init__(self):
-        shorten = config.get(("output",), "shorten", True)
-        if shorten:
+        if shorten := config.get(("output",), "shorten", True):
             func = shorten_string_eaw if shorten == "eaw" else shorten_string
             limit = shutil.get_terminal_size().columns - OFFSET
             sep = CHAR_ELLIPSIES
@@ -410,10 +413,10 @@ class TerminalOutput():
         bdl = util.format_value(bytes_downloaded)
         bps = util.format_value(bytes_per_second)
         if bytes_total is None:
-            stderr_write("\r{:>7}B {:>7}B/s ".format(bdl, bps))
+            stderr_write(f"\r{bdl:>7}B {bps:>7}B/s ")
         else:
-            stderr_write("\r{:>3}% {:>7}B {:>7}B/s ".format(
-                bytes_downloaded * 100 // bytes_total, bdl, bps))
+            stderr_write(f"\r{bytes_downloaded * 100 // bytes_total:>3}% "
+                         f"{bdl:>7}B {bps:>7}B/s ")
 
 
 class ColorOutput(TerminalOutput):
@@ -425,10 +428,8 @@ class ColorOutput(TerminalOutput):
         if colors is None:
             colors = COLORS_DEFAULT
 
-        self.color_skip = "\033[{}m".format(
-            colors.get("skip", "2"))
-        self.color_success = "\r\033[{}m".format(
-            colors.get("success", "1;32"))
+        self.color_skip = f"\x1b[{colors.get('skip', '2')}m"
+        self.color_success = f"\r\x1b[{colors.get('success', '1;32')}m"
 
     def start(self, path):
         stdout_write_flush(self.shorten(path))
@@ -456,8 +457,7 @@ class CustomOutput():
         if isinstance(fmt_success, list):
             off_success, fmt_success = fmt_success
 
-        shorten = config.get(("output",), "shorten", True)
-        if shorten:
+        if shorten := config.get(("output",), "shorten", True):
             func = shorten_string_eaw if shorten == "eaw" else shorten_string
             width = shutil.get_terminal_size().columns
 
@@ -477,8 +477,7 @@ class CustomOutput():
         self._fmt_progress_total = (options.get("progress-total") or
                                     "\r{3:>3}% {0:>7}B {1:>7}B/s ").format
 
-    @staticmethod
-    def _make_func(shorten, format_string, limit):
+    def _make_func(self, shorten, format_string, limit):
         fmt = format_string.format
         return lambda txt: fmt(shorten(txt, limit, CHAR_ELLIPSIES))
 
@@ -550,17 +549,3 @@ def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
         right -= 1
 
     return txt[:left] + sep + txt[right+1:]
-
-
-if util.WINDOWS:
-    ANSI = os.environ.get("TERM") == "ANSI"
-    OFFSET = 1
-    CHAR_SKIP = "# "
-    CHAR_SUCCESS = "* "
-    CHAR_ELLIPSIES = "..."
-else:
-    ANSI = True
-    OFFSET = 0
-    CHAR_SKIP = "# "
-    CHAR_SUCCESS = "✔ "
-    CHAR_ELLIPSIES = "…"

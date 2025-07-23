@@ -14,6 +14,13 @@ except ImportError:
         from Crypto.Cipher import AES as Cryptodome_AES
     except ImportError:
         Cryptodome_AES = None
+except Exception as exc:
+    Cryptodome_AES = None
+    import logging
+    logging.getLogger("aes").warning(
+        "Error when trying to import 'Cryptodome' module (%s: %s)",
+        exc.__class__.__name__, exc)
+    del logging
 
 
 if Cryptodome_AES:
@@ -51,7 +58,7 @@ bytes_to_intlist = list
 def intlist_to_bytes(xs):
     if not xs:
         return b""
-    return struct.pack("%dB" % len(xs), *xs)
+    return struct.pack(f"{len(xs)}B", *xs)
 
 
 def unpad_pkcs7(data):
@@ -71,7 +78,7 @@ def aes_ecb_encrypt(data, key, iv=None):
     @returns {int[]}           encrypted data
     """
     expanded_key = key_expansion(key)
-    block_count = int(ceil(float(len(data)) / BLOCK_SIZE_BYTES))
+    block_count = ceil(len(data) / BLOCK_SIZE_BYTES)
 
     encrypted_data = []
     for i in range(block_count):
@@ -92,7 +99,7 @@ def aes_ecb_decrypt(data, key, iv=None):
     @returns {int[]}           decrypted data
     """
     expanded_key = key_expansion(key)
-    block_count = int(ceil(float(len(data)) / BLOCK_SIZE_BYTES))
+    block_count = ceil(len(data) / BLOCK_SIZE_BYTES)
 
     encrypted_data = []
     for i in range(block_count):
@@ -125,7 +132,7 @@ def aes_ctr_encrypt(data, key, iv):
     @returns {int[]}           encrypted data
     """
     expanded_key = key_expansion(key)
-    block_count = int(ceil(float(len(data)) / BLOCK_SIZE_BYTES))
+    block_count = ceil(len(data) / BLOCK_SIZE_BYTES)
     counter = iter_vector(iv)
 
     encrypted_data = []
@@ -151,7 +158,7 @@ def aes_cbc_decrypt(data, key, iv):
     @returns {int[]}           decrypted data
     """
     expanded_key = key_expansion(key)
-    block_count = int(ceil(float(len(data)) / BLOCK_SIZE_BYTES))
+    block_count = ceil(len(data) / BLOCK_SIZE_BYTES)
 
     decrypted_data = []
     previous_cipher_block = iv
@@ -177,7 +184,7 @@ def aes_cbc_encrypt(data, key, iv):
     @returns {int[]}           encrypted data
     """
     expanded_key = key_expansion(key)
-    block_count = int(ceil(float(len(data)) / BLOCK_SIZE_BYTES))
+    block_count = ceil(len(data) / BLOCK_SIZE_BYTES)
 
     encrypted_data = []
     previous_cipher_block = iv
@@ -227,11 +234,12 @@ def aes_gcm_decrypt_and_verify(data, key, tag, nonce):
     decrypted_data = aes_ctr_decrypt(
         data, key, iv_ctr + [0] * (BLOCK_SIZE_BYTES - len(iv_ctr)))
 
-    pad_len = len(data) // 16 * 16
+    pad_len = (
+        (BLOCK_SIZE_BYTES - (len(data) % BLOCK_SIZE_BYTES)) % BLOCK_SIZE_BYTES)
     s_tag = ghash(
         hash_subkey,
         data +
-        [0] * (BLOCK_SIZE_BYTES - len(data) + pad_len) +  # pad
+        [0] * pad_len +                           # pad
         bytes_to_intlist(
             (0 * 8).to_bytes(8, "big") +          # length of associated data
             ((len(data) * 8).to_bytes(8, "big"))  # length of data
@@ -607,7 +615,7 @@ def block_product(block_x, block_y):
 
     if len(block_x) != BLOCK_SIZE_BYTES or len(block_y) != BLOCK_SIZE_BYTES:
         raise ValueError(
-            "Length of blocks need to be %d bytes" % BLOCK_SIZE_BYTES)
+            f"Length of blocks need to be {BLOCK_SIZE_BYTES} bytes")
 
     block_r = [0xE1] + [0] * (BLOCK_SIZE_BYTES - 1)
     block_v = block_y[:]
@@ -631,7 +639,7 @@ def ghash(subkey, data):
 
     if len(data) % BLOCK_SIZE_BYTES:
         raise ValueError(
-            "Length of data should be %d bytes" % BLOCK_SIZE_BYTES)
+            f"Length of data should be {BLOCK_SIZE_BYTES} bytes")
 
     last_y = [0] * BLOCK_SIZE_BYTES
     for i in range(0, len(data), BLOCK_SIZE_BYTES):

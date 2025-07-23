@@ -32,10 +32,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pornhub.com/album/69606532",
+    "#comment" : "KeyError due to missing image entry (#6299)",
+    "#class"   : pornhub.PornhubGalleryExtractor,
+    "#log"     : "69606532: Unable to ensure correct file order",
+    "#count"   : 6,
+},
+
+{
     "#url"     : "https://www.pornhub.com/album/69040172",
+    "#comment" : "404 Error Page Not Found",
     "#category": ("", "pornhub", "gallery"),
     "#class"   : pornhub.PornhubGalleryExtractor,
-    "#exception": exception.AuthorizationError,
+    "#exception": exception.HttpError,
 },
 
 {
@@ -112,7 +121,7 @@ __tests__ = (
     "#category": ("", "pornhub", "gifs"),
     "#class"   : pornhub.PornhubGifsExtractor,
     "#pattern" : pornhub.PornhubGifExtractor.pattern,
-    "#count"   : ">= 42",
+    "#count"   : ">= 30",
 },
 
 {

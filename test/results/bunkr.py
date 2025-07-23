@@ -12,40 +12,39 @@ __tests__ = (
     "#url"     : "https://bunkr.sk/a/Lktg9Keq",
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,
-    "#urls"        : "https://i-burger.bunkr.ru/test-テスト-\"&>-QjgneIQv.png",
-    "#sha1_content": "961b25d85b5f5bd18cbe3e847ac55925f14d0286",
+    "#results"     : "https://brg-bk.cdn.gigachad-cdn.ru/test-%E3%83%86%E3%82%B9%E3%83%88-%22%26%3E-QjgneIQv.png?n=test-%E3%83%86%E3%82%B9%E3%83%88-%22%26%3E.png",
+    "#sha1_content": "0c8768055e4e20e7c7259608b67799171b691140",
 
     "album_id"   : "Lktg9Keq",
     "album_name" : "test テスト \"&>",
-    "album_size" : "182 B",
+    "album_size" : "182 bytes",
     "count"      : 1,
     "extension"  : "png",
-    "file"       : "https://i-burger.bunkr.ru/test-テスト-\"&>-QjgneIQv.png",
+    "file"       : str,
     "filename"   : "test-テスト-\"&>-QjgneIQv",
     "id"         : "QjgneIQv",
+    "id_url"     : "1044478",
     "name"       : "test-テスト-\"&>",
     "num"        : 1,
 },
 
 {
     "#url"     : "https://bunkr.is/a/iXTTc1o2",
-    "#comment" : "cdn4",
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,
-    "#urls"        : (
-        "https://i-milkshake.bunkr.ru/image-sZrQUeOx.jpg",
-        "https://burger.bunkr.ru/video-gLn1hgpw.mp4",
+    "#results"     : (
+        "https://mlk-bk.cdn.gigachad-cdn.ru/image-sZrQUeOx.jpg?n=image.jpg",
     ),
-    "#sha1_content": "80914b8190ad001662f64e3b0b9c02ea3872c584",
+    "#sha1_content": "55998743751dfe008d0e95605114fcbfa7dc4de8",
 
     "album_id"   : "iXTTc1o2",
     "album_name" : "test2",
-    "album_size" : "561.6 KB",
-    "count"      : 2,
-    "filename"   : r"re:video-gLn1hgpw|image-sZrQUeOx",
-    "id"         : r"re:gLn1hgpw|sZrQUeOx",
-    "name"       : r"re:video|image",
-    "num"        : range(1, 2),
+    "album_size" : "534.61 KB",
+    "count"      : 1,
+    "filename"   : r"image-sZrQUeOx",
+    "id"         : r"sZrQUeOx",
+    "name"       : r"image",
+    "num"        : 1,
 },
 
 {
@@ -54,7 +53,64 @@ __tests__ = (
     "#category": ("lolisafe", "bunkr", "album"),
     "#class"   : bunkr.BunkrAlbumExtractor,
     "#pattern" : r"https://(i-)?meatballs.bunkr.ru/\w+",
-    "#count"   : 9,
+    "#range"   : "5-",
+    "#count"   : 3,
+},
+
+{
+    "#url"     : "https://bunkr.cr/a/Gm931jJz",
+    "#comment" : "empty 'id', duplicate archive IDs (#6935)",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
+    "#count"   : 2,
+
+    "id"    : "",
+    "id_url": {"UPKDHBf0CvrCe", "zQgSePr1f4HZ2"},
+},
+
+{
+    "#url"     : "https://bunkr.ph/a/Lktg9Keq",
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkr.ps/a/Lktg9Keq",
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkr.pk/a/Lktg9Keq",
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkr.ax/a/Lktg9Keq",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkrrr.org/a/Lktg9Keq",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkr.ci/a/Lktg9Keq",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkr.cr/a/Lktg9Keq",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
+    "#url"     : "https://bunkr.fi/a/Lktg9Keq",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
 },
 
 {
@@ -130,33 +186,91 @@ __tests__ = (
 },
 
 {
+    "#url"     : "bunkr:http://example.org/a/Lktg9Keq",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
+},
+
+{
     "#url"     : "https://bunkr.black/i/image-sZrQUeOx.jpg",
     "#category": ("lolisafe", "bunkr", "media"),
     "#class"   : bunkr.BunkrMediaExtractor,
-    "#urls"        : "https://i-milkshake.bunkr.ru/image-sZrQUeOx.jpg",
+    "#results"     : "https://mlk-bk.cdn.gigachad-cdn.ru/image-sZrQUeOx.jpg?n=image.jpg",
     "#sha1_content": "55998743751dfe008d0e95605114fcbfa7dc4de8",
 
     "count"    : 1,
     "extension": "jpg",
-    "file"     : "https://i-milkshake.bunkr.ru/image-sZrQUeOx.jpg",
+    "file"     : "https://mlk-bk.cdn.gigachad-cdn.ru/image-sZrQUeOx.jpg?n=image.jpg",
     "filename" : "image-sZrQUeOx",
     "id"       : "sZrQUeOx",
     "name"     : "image",
 },
 
 {
-    "#url"     : "https://bunkr.red/v/MY5aa4cLO7jN5",
+    "#url"     : "https://bunkr.cr/f/image-sZrQUeOx.jpg",
+    "#comment" : "/f/ URL",
     "#category": ("lolisafe", "bunkr", "media"),
     "#class"   : bunkr.BunkrMediaExtractor,
-    "#urls"        : "https://burger.bunkr.ru/video-gLn1hgpw.mp4",
-    "#sha1_content": "f7a2ab24766a15ceffff1b07bada432b13ff8e5b",
+    "#results" : "https://mlk-bk.cdn.gigachad-cdn.ru/image-sZrQUeOx.jpg?n=image.jpg",
+},
+
+{
+    "#url"     : "https://bunkrrr.org/d/dJuETSzKLrUps",
+    "#category": ("lolisafe", "bunkr", "media"),
+    "#class"   : bunkr.BunkrMediaExtractor,
+    "#results"     : "https://brg-bk.cdn.gigachad-cdn.ru/file-r5fmwjdd.zip?n=file.zip",
+    "#sha1_content": "102ddd7894fe39b3843098fc51f972a0af938f45",
 
     "count"    : 1,
+    "extension": "zip",
+    "file"     : "https://brg-bk.cdn.gigachad-cdn.ru/file-r5fmwjdd.zip?n=file.zip",
+    "filename" : "file-r5fmwjdd",
+    "id"       : "r5fmwjdd",
+    "id_url"   : "38792076",
+    "name"     : "file",
+},
+
+{
+    "#url"     : "https://bunkr.ph/v/rEeTUL8MXR17A",
+    "#comment" : "redirect to '/f/rEeTUL8MXR17A' (#6790)",
+    "#category": ("lolisafe", "bunkr", "media"),
+    "#class"   : bunkr.BunkrMediaExtractor,
+    "#results" : "https://meatballs.bunkr.ru/27-03-2024-Rp-0FfrropA.mp4",
+},
+
+{
+    "#url"     : "https://bunkr.site/f/wYGCKbGhSvuAW",
+    "#comment" : "correct 'name' from HTML (#6790)",
+    "#category": ("lolisafe", "bunkr", "media"),
+    "#class"   : bunkr.BunkrMediaExtractor,
+    "#results" : "https://kebab.bunkr.ru/80ca5405-8b8d-4f9f-8167-8b046bb9dc67.mp4",
+
+    "id"       : "",
+    "id_url"   : "wYGCKbGhSvuAW",
+    "name"     : "0hwndshtfmj7hcbut1nd4_source",
+    "filename" : "0hwndshtfmj7hcbut1nd4_source",
     "extension": "mp4",
-    "file"     : "https://burger.bunkr.ru/video-gLn1hgpw.mp4",
-    "filename" : "video-gLn1hgpw",
-    "id"       : "gLn1hgpw",
-    "name"     : "video",
+},
+
+{
+    "#url"     : "https://bunkr.site/f/JEn5iQgYVYJfi",
+    "#comment" : "file gone --- 403 error for main 'brg-bk.cdn.gigachad-cdn.ru' URL (#6732 #6972)",
+    "#category": ("lolisafe", "bunkr", "media"),
+    "#class"   : bunkr.BunkrMediaExtractor,
+    "#results"     : "https://brg-bk.cdn.gigachad-cdn.ru/IMG_47272f2c698d257fd22f4300ae98ec35929b-iEYVkLPQ.jpg?n=IMG_47272f2c698d257fd22f4300ae98ec35929b.jpg",
+    "#sha1_content": "f1c839743563828b250e48d485933a735a508527",
+
+    "_fallback": (
+        "https://i-burger.bunkr.ru/IMG_47272f2c698d257fd22f4300ae98ec35929b-iEYVkLPQ.jpg",
+    ),
+    "_http_headers": {
+        "Referer": "https://get.bunkrr.su/file/29682239",
+    },
+    "extension": "jpg",
+    "filename" : "IMG_47272f2c698d257fd22f4300ae98ec35929b-iEYVkLPQ",
+    "id"       : "iEYVkLPQ",
+    "id_url"   : "29682239",
+    "name"     : "IMG_47272f2c698d257fd22f4300ae98ec35929b",
 },
 
 )

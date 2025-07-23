@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,13 +21,13 @@ class FuskatorGalleryExtractor(GalleryExtractor):
     example = "https://fuskator.com/thumbs/ID/"
 
     def __init__(self, match):
-        self.gallery_hash = match.group(1)
-        url = "{}/thumbs/{}/index.html".format(self.root, self.gallery_hash)
+        self.gallery_hash = match[1]
+        url = f"{self.root}/thumbs/{self.gallery_hash}/index.html"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
         headers = {
-            "Referer"         : self.gallery_url,
+            "Referer"         : self.page_url,
             "X-Requested-With": "XMLHttpRequest",
         }
         auth = self.request(
@@ -39,9 +39,8 @@ class FuskatorGalleryExtractor(GalleryExtractor):
             "hash"  : self.gallery_hash,
             "_"     : int(time.time()),
         }
-        self.data = data = self.request(
-            self.root + "/ajax/gal.aspx", params=params, headers=headers,
-        ).json()
+        self.data = data = self.request_json(
+            self.root + "/ajax/gal.aspx", params=params, headers=headers)
 
         title = text.extr(page, "<title>", "</title>").strip()
         title, _, gallery_id = title.rpartition("#")
@@ -72,7 +71,7 @@ class FuskatorSearchExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.path = match.group(1)
+        self.path = match[1]
 
     def items(self):
         url = self.root + self.path
@@ -87,4 +86,4 @@ class FuskatorSearchExtractor(Extractor):
             pages = text.extr(page, 'class="pages"><span>', '>&gt;&gt;<')
             if not pages:
                 return
-            url = self.root + text.rextract(pages, 'href="', '"')[0]
+            url = self.root + text.rextr(pages, 'href="', '"')

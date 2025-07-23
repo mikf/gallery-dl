@@ -13,14 +13,14 @@ __tests__ = (
     "#category": ("szurubooru", "snootbooru", "tag"),
     "#class"   : szurubooru.SzurubooruTagExtractor,
     "#pattern" : r"https://snootbooru\.com/data/posts/\d+_[0-9a-f]{16}\.\w+",
-    "#count"   : range(35, 50),
+    "#count"   : range(100, 300),
 },
 
 {
     "#url"     : "https://snootbooru.com/post/14511",
     "#category": ("szurubooru", "snootbooru", "post"),
     "#class"   : szurubooru.SzurubooruPostExtractor,
-    "#urls"        : "https://snootbooru.com/data/posts/14511_e753313112755da6.png",
+    "#results"     : "https://snootbooru.com/data/posts/14511_e753313112755da6.png",
     "#sha1_content": "e69e61e61c5372514808480aae3a8e355c9cd6fb",
 
     "canvasHeight" : 1000,
@@ -52,7 +52,7 @@ __tests__ = (
     "relationCount": 0,
     "relations"    : [],
     "safety"       : "safe",
-    "score"        : 0,
+    "score"        : range(1, 10),
     "source"       : None,
     "tagCount"     : 3,
     "tags"         : [

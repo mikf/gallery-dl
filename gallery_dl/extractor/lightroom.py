@@ -22,7 +22,7 @@ class LightroomGalleryExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.href = match.group(1)
+        self.href = match[1]
 
     def items(self):
         # Get config

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2022 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,7 +19,6 @@ import binascii
 import tempfile
 import threading
 import http.server
-
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import downloader, extractor, output, config, path  # noqa E402
@@ -45,11 +44,18 @@ class TestDownloaderModule(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # allow import of ytdl downloader module without youtube_dl installed
+        cls._orig_ytdl = sys.modules.get("youtube_dl")
         sys.modules["youtube_dl"] = MagicMock()
 
     @classmethod
     def tearDownClass(cls):
-        del sys.modules["youtube_dl"]
+        if cls._orig_ytdl:
+            sys.modules["youtube_dl"] = cls._orig_ytdl
+        else:
+            del sys.modules["youtube_dl"]
+
+    def setUp(self):
+        downloader._cache.clear()
 
     def tearDown(self):
         downloader._cache.clear()
@@ -103,6 +109,64 @@ class TestDownloaderModule(unittest.TestCase):
         self.assertEqual(import_module.call_count, 1)
 
 
+class TestDownloaderConfig(unittest.TestCase):
+
+    def setUp(self):
+        config.clear()
+
+    def tearDown(self):
+        config.clear()
+
+    def test_default_http(self):
+        job = FakeJob()
+        extr = job.extractor
+        dl = downloader.find("http")(job)
+
+        self.assertEqual(dl.adjust_extension, True)
+        self.assertEqual(dl.chunk_size, 32768)
+        self.assertEqual(dl.metadata, None)
+        self.assertEqual(dl.progress, 3.0)
+        self.assertEqual(dl.validate, True)
+        self.assertEqual(dl.headers, None)
+        self.assertEqual(dl.minsize, None)
+        self.assertEqual(dl.maxsize, None)
+        self.assertEqual(dl.mtime, True)
+        self.assertEqual(dl.rate, None)
+        self.assertEqual(dl.part, True)
+        self.assertEqual(dl.partdir, None)
+
+        self.assertIs(dl.interval_429, extr._interval_429)
+        self.assertIs(dl.retry_codes, extr._retry_codes)
+        self.assertIs(dl.retries, extr._retries)
+        self.assertIs(dl.timeout, extr._timeout)
+        self.assertIs(dl.proxies, extr._proxies)
+        self.assertIs(dl.verify, extr._verify)
+
+    def test_config_http(self):
+        config.set((), "rate", 42)
+        config.set((), "mtime", False)
+        config.set((), "headers", {"foo": "bar"})
+        config.set(("downloader",), "retries", -1)
+        config.set(("downloader", "http"), "filesize-min", "10k")
+        config.set(("extractor", "generic"), "verify", False)
+        config.set(("extractor", "generic", "example.org"), "timeout", 10)
+        config.set(("extractor", "generic", "http"), "part", False)
+        config.set(
+            ("extractor", "generic", "example.org", "http"), "headers", {})
+
+        job = FakeJob()
+        dl = downloader.find("http")(job)
+
+        self.assertEqual(dl.headers, {"foo": "bar"})
+        self.assertEqual(dl.minsize, 10240)
+        self.assertEqual(dl.retries, float("inf"))
+        self.assertEqual(dl.timeout, 10)
+        self.assertEqual(dl.verify, False)
+        self.assertEqual(dl.mtime, False)
+        self.assertEqual(dl.rate(), 42)
+        self.assertEqual(dl.part, False)
+
+
 class TestDownloaderBase(unittest.TestCase):
 
     @classmethod
@@ -136,8 +200,8 @@ class TestDownloaderBase(unittest.TestCase):
 
         if content:
             mode = "w" + ("b" if isinstance(content, bytes) else "")
-            with pathfmt.open(mode) as file:
-                file.write(content)
+            with pathfmt.open(mode) as fp:
+                fp.write(content)
 
         return pathfmt
 
@@ -151,8 +215,8 @@ class TestDownloaderBase(unittest.TestCase):
 
         # test content
         mode = "r" + ("b" if isinstance(output, bytes) else "")
-        with pathfmt.open(mode) as file:
-            content = file.read()
+        with pathfmt.open(mode) as fp:
+            content = fp.read()
         self.assertEqual(content, output)
 
         # test filename extension
@@ -174,9 +238,17 @@ class TestHTTPDownloader(TestDownloaderBase):
         TestDownloaderBase.setUpClass()
         cls.downloader = downloader.find("http")(cls.job)
 
-        port = 8088
-        cls.address = "http://127.0.0.1:{}".format(port)
-        server = http.server.HTTPServer(("", port), HttpRequestHandler)
+        host = "127.0.0.1"
+        port = 0  # select random not-in-use port
+
+        try:
+            server = http.server.HTTPServer((host, port), HttpRequestHandler)
+        except OSError as exc:
+            raise unittest.SkipTest(
+                "cannot spawn local HTTP server ({})".format(exc))
+
+        host, port = server.server_address
+        cls.address = "http://{}:{}".format(host, port)
         threading.Thread(target=server.serve_forever, daemon=True).start()
 
     def _run_test(self, ext, input, output,
@@ -260,7 +332,7 @@ class HttpRequestHandler(http.server.BaseHTTPRequestHandler):
             status = 206
 
             match = re.match(r"bytes=(\d+)-", self.headers["Range"])
-            start = int(match.group(1))
+            start = int(match[1])
 
             headers["Content-Range"] = "bytes {}-{}/{}".format(
                 start, len(output)-1, len(output))
@@ -297,6 +369,8 @@ SAMPLES = {
     ("heic", b"????ftypheis"),
     ("heic", b"????ftypheix"),
     ("svg" , b"<?xml"),
+    ("html", b"<!DOCTYPE html><html>...</html>"),
+    ("html", b"  \n  \n\r\t\n  <!DOCTYPE html><html>...</html>"),
     ("ico" , b"\x00\x00\x01\x00"),
     ("cur" , b"\x00\x00\x02\x00"),
     ("psd" , b"8BPS"),

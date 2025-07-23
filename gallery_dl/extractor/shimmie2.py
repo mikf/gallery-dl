@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,13 +19,11 @@ class Shimmie2Extractor(BaseExtractor):
     archive_fmt = "{id}"
 
     def _init(self):
-        cookies = self.config_instance("cookies")
-        if cookies:
+        if cookies := self.config_instance("cookies"):
             domain = self.root.rpartition("/")[2]
             self.cookies_update_dict(cookies, domain=domain)
 
-        file_url = self.config_instance("file_url")
-        if file_url:
+        if file_url := self.config_instance("file_url"):
             self.file_url_fmt = file_url
 
         if self.category == "giantessbooru":
@@ -69,19 +67,10 @@ class Shimmie2Extractor(BaseExtractor):
 
 
 BASE_PATTERN = Shimmie2Extractor.update({
-    "loudbooru": {
-        "root": "https://loudbooru.com",
-        "pattern": r"loudbooru\.com",
-        "cookies": {"ui-tnc-agreed": "true"},
-    },
     "giantessbooru": {
         "root": "https://sizechangebooru.com",
         "pattern": r"(?:sizechange|giantess)booru\.com",
         "cookies": {"agreed": "true"},
-    },
-    "tentaclerape": {
-        "root": "https://tentaclerape.net",
-        "pattern": r"tentaclerape\.net",
     },
     "cavemanon": {
         "root": "https://booru.cavemanon.xyz",
@@ -92,6 +81,10 @@ BASE_PATTERN = Shimmie2Extractor.update({
         "root": "https://rule34hentai.net",
         "pattern": r"rule34hentai\.net",
     },
+    "vidyapics": {
+        "root": "https://vidya.pics",
+        "pattern": r"vidya\.pics",
+    },
 }) + r"/(?:index\.php\?q=/?)?"
 
 
@@ -100,27 +93,22 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     file_url_fmt = "{}/_images/{}/{}%20-%20{}.{}"
-    pattern = BASE_PATTERN + r"post/list/([^/?#]+)(?:/(\d+))?()"
-    example = "https://loudbooru.com/post/list/TAG/1"
-
-    def __init__(self, match):
-        Shimmie2Extractor.__init__(self, match)
-        lastindex = match.lastindex
-        self.tags = text.unquote(match.group(lastindex-2))
-        self.page = match.group(lastindex-1)
+    pattern = BASE_PATTERN + r"post/list/([^/?#]+)(?:/(\d+))?"
+    example = "https://vidya.pics/post/list/TAG/1"
 
     def metadata(self):
+        self.tags = text.unquote(self.groups[-2])
         return {"search_tags": self.tags}
 
     def posts(self):
-        pnum = text.parse_int(self.page, 1)
+        pnum = text.parse_int(self.groups[-1], 1)
         file_url_fmt = self.file_url_fmt.format
 
         init = True
         mime = ""
 
         while True:
-            url = "{}/post/list/{}/{}".format(self.root, self.tags, pnum)
+            url = f"{self.root}/post/list/{self.tags}/{pnum}"
             page = self.request(url).text
             extr = text.extract_from(page)
 
@@ -163,16 +151,15 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
 
             pnum += 1
             if not extr(">Next<", ">"):
-                if not extr("/{}'>{}<".format(pnum, pnum), ">"):
+                if not extr(f"/{pnum}'>{pnum}<", ">"):
                     return
 
     def _posts_giantessbooru(self):
-        pnum = text.parse_int(self.page, 1)
+        pnum = text.parse_int(self.groups[-1], 1)
         file_url_fmt = (self.root + "/index.php?q=/image/{}.jpg").format
 
         while True:
-            url = "{}/index.php?q=/post/list/{}/{}".format(
-                self.root, self.tags, pnum)
+            url = f"{self.root}/index.php?q=/post/list/{self.tags}/{pnum}"
             extr = text.extract_from(self.request(url).text)
 
             while True:
@@ -194,7 +181,7 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
                 }
 
             pnum += 1
-            if not extr("/{0}'>{0}<".format(pnum), ">"):
+            if not extr(f"/{pnum}'>{pnum}<", ">"):
                 return
 
 
@@ -202,25 +189,22 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
     """Extractor for single shimmie2 posts"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"post/view/(\d+)"
-    example = "https://loudbooru.com/post/view/12345"
-
-    def __init__(self, match):
-        Shimmie2Extractor.__init__(self, match)
-        self.post_id = match.group(match.lastindex)
+    example = "https://vidya.pics/post/view/12345"
 
     def posts(self):
-        url = "{}/post/view/{}".format(self.root, self.post_id)
+        post_id = self.groups[-1]
+        url = f"{self.root}/post/view/{post_id}"
         page = self.request(url).text
         extr = text.extract_from(page)
-        quote = self._quote_type(page)
+        qt = self._quote_type(page)
 
         post = {
-            "id"      : self.post_id,
+            "id"      : post_id,
             "tags"    : extr(": ", "<").partition(" - ")[0].rstrip(")"),
             "md5"     : extr("/_thumbs/", "/"),
             "file_url": self.root + (
-                extr("id={0}main_image{0} src={0}".format(quote), quote) or
-                extr("<source src="+quote, quote)).lstrip("."),
+                extr(f"id={qt}main_image{qt} src={qt}", qt) or
+                extr("<source src="+qt, qt)).lstrip("."),
             "width"   : extr("data-width=", " ").strip("\"'"),
             "height"  : extr("data-height=", ">").partition(
                 " ")[0].strip("\"'"),
@@ -233,12 +217,12 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
         return (post,)
 
     def _posts_giantessbooru(self):
-        url = "{}/index.php?q=/post/view/{}".format(
-            self.root, self.post_id)
+        post_id = self.groups[-1]
+        url = f"{self.root}/index.php?q=/post/view/{post_id}"
         extr = text.extract_from(self.request(url).text)
 
         return ({
-            "id"      : self.post_id,
+            "id"      : post_id,
             "tags"    : extr(": ", "<").partition(" - ")[0].rstrip(")"),
             "md5"     : "",
             "file_url": self.root + extr("id='main_image' src='.", "'"),

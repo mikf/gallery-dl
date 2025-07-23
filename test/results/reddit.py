@@ -41,6 +41,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.reddit.com/r/IdiotsInCars/search/?q=flair%3AOC",
+    "#comment" : "(#7025)",
+    "#category": ("", "reddit", "subreddit-search"),
+    "#class"   : reddit.RedditSubredditExtractor,
+    "#range"   : "1-25",
+
+    "subreddit"      : "IdiotsInCars",
+    "link_flair_text": "OC",
+},
+
+{
     "#url"     : "https://www.reddit.com/",
     "#category": ("", "reddit", "home"),
     "#class"   : reddit.RedditHomeExtractor,
@@ -171,13 +182,20 @@ __tests__ = (
 {
     "#url"     : "https://www.reddit.com/r/RobloxArt/comments/15ko0qu/",
     "#comment" : "comment embeds (#5366)",
-    "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,
     "#options" : {"comments": 10},
-    "#urls"    : (
+    "#results" : (
         "https://i.redd.it/ppt5yciyipgb1.jpg",
         "https://i.redd.it/u0ojzd69kpgb1.png",
     ),
+},
+
+{
+    "#url"     : "https://www.reddit.com/r/RobloxArt/comments/15ko0qu/",
+    "#comment" : "disabled comment embeds (#6357)",
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#options" : {"comments": 10, "embeds": False},
+    "#results" : "https://i.redd.it/ppt5yciyipgb1.jpg",
 },
 
 {
@@ -202,7 +220,27 @@ __tests__ = (
     "#comment" : "preview.redd.it (#4470)",
     "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,
-    "#urls"    : "https://preview.redd.it/u9ud4k6xaf271.jpg?auto=webp&s=19b1334cb4409111cda136c01f7b44c2c42bf9fb",
+    "#results" : "https://preview.redd.it/u9ud4k6xaf271.jpg?auto=webp&s=19b1334cb4409111cda136c01f7b44c2c42bf9fb",
+},
+
+{
+    "#url"     : "https://www.reddit.com/r/gonewildaudio/comments/1j2pxfn/",
+    "#comment" : "'selftext' option (#7111)",
+    "#category": ("", "reddit", "submission"),
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#options" : {"selftext": True, "comments": 0},
+    "#results" : (
+        "https://www.reddit.com/r/gonewildaudio/s/22pP7vizkx",
+        "https://soundgasm.net/u/chuwa/Your-Timid-Neighbor-Asks-You-To-Turn-Your-Music-Down-So-You-Fuck-Her-Stupid",
+    ),
+},
+
+{
+    "#url"     : "https://old.reddit.com/r/redgifs/comments/gfvw9v/redgifs_links_on_reddit_see_comment/",
+    "#comment" : "redgifs embed",
+    "#category": ("", "reddit", "submission"),
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#results" : "https://redgifs.com/watch/foolishforkedabyssiniancat",
 },
 
 {
@@ -259,6 +297,22 @@ __tests__ = (
     "#category": ("", "reddit", "redirect"),
     "#class"   : reddit.RedditRedirectExtractor,
     "#pattern" : r"^https://www\.reddit\.com/r/analog/comments/179exao/photographing_the_recent_annular_eclipse_with_a",
+},
+
+{
+    "#url"     : "https://www.reddit.com/u/Tailhook91/s/w4yAMbtOYm",
+    "#comment" : "Mobile share URL, user submission",
+    "#category": ("", "reddit", "redirect"),
+    "#class"   : reddit.RedditRedirectExtractor,
+    "#pattern" : r"^https://www.reddit.com/user/Tailhook91/comments/znfxbr/prove_it/",
+},
+
+{
+    "#url"     : "https://www.reddit.com/user/Tailhook91/s/w4yAMbtOYm",
+    "#comment" : "Mobile share URL, user submission",
+    "#category": ("", "reddit", "redirect"),
+    "#class"   : reddit.RedditRedirectExtractor,
+    "#pattern" : r"^https://www.reddit.com/user/Tailhook91/comments/znfxbr/prove_it/",
 },
 
 )

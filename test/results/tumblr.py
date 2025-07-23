@@ -93,6 +93,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://tumblr.com/mikf123",
+    "#comment" : "no 'www.' subdomain (#7358)",
+    "#category": ("", "tumblr", "user"),
+    "#class"   : tumblr.TumblrUserExtractor,
+},
+
+{
     "#url"     : "https://donttrustthetits.tumblr.com/",
     "#comment" : "pagination with 'date-max' (#2191) and 'api-key'",
     "#category": ("", "tumblr", "user"),
@@ -230,7 +237,7 @@ __tests__ = (
     "#category": ("", "tumblr", "post"),
     "#class"   : tumblr.TumblrPostExtractor,
     "#options"     : {"retries": 0},
-    "#urls"        : "https://64.media.tumblr.com/5e9d760aba24c65beaf0e72de5aae4dd/tumblr_psj5yaqV871t1ig6no1_1280.gif",
+    "#results"     : "https://64.media.tumblr.com/5e9d760aba24c65beaf0e72de5aae4dd/tumblr_psj5yaqV871t1ig6no1_1280.gif",
     "#sha1_content": "3508d894b6cc25e364d182a8e1ff370d706965fb",
 },
 
@@ -269,6 +276,12 @@ __tests__ = (
 
 {
     "#url"     : "https://www.tumblr.com/smarties-art/686047436641353728",
+    "#category": ("", "tumblr", "post"),
+    "#class"   : tumblr.TumblrPostExtractor,
+},
+
+{
+    "#url"     : "https://tumblr.com/smarties-art/686047436641353728",
     "#category": ("", "tumblr", "post"),
     "#class"   : tumblr.TumblrPostExtractor,
 },
@@ -335,6 +348,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "http://mikf123.tumblr.com/likes",
+    "#category": ("", "tumblr", "likes"),
+    "#class"   : tumblr.TumblrLikesExtractor,
+    "#options" : {"api-secret": None},
+    "#count"   : 1,
+},
+
+{
     "#url"     : "https://www.tumblr.com/blog/view/mikf123/likes",
     "#category": ("", "tumblr", "likes"),
     "#class"   : tumblr.TumblrLikesExtractor,
@@ -350,6 +371,36 @@ __tests__ = (
     "#url"     : "https://www.tumblr.com/mikf123/likes",
     "#category": ("", "tumblr", "likes"),
     "#class"   : tumblr.TumblrLikesExtractor,
+},
+
+{
+    "#url"     : "https://tumblr.com/mikf123/likes",
+    "#category": ("", "tumblr", "likes"),
+    "#class"   : tumblr.TumblrLikesExtractor,
+},
+
+{
+    "#url"     : "https://www.tumblr.com/search/nathan fielder",
+    "#category": ("", "tumblr", "search"),
+    "#class"   : tumblr.TumblrSearchExtractor,
+},
+
+{
+    "#url"     : "https://www.tumblr.com/search/nathan fielder/recent/quote?src=typed_query",
+    "#category": ("", "tumblr", "search"),
+    "#class"   : tumblr.TumblrSearchExtractor,
+},
+
+{
+    "#url"     : "https://www.tumblr.com/search/nathan%20fielder?t=90",
+    "#category": ("", "tumblr", "search"),
+    "#class"   : tumblr.TumblrSearchExtractor,
+},
+
+{
+    "#url"     : "https://tumblr.com/search/nathan%20fielder?t=90",
+    "#category": ("", "tumblr", "search"),
+    "#class"   : tumblr.TumblrSearchExtractor,
 },
 
 )

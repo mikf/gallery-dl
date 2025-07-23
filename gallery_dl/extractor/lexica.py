@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -24,7 +24,7 @@ class LexicaSearchExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.query = match.group(1)
+        self.query = match[1]
         self.text = text.unquote(self.query).replace("+", " ")
 
     def items(self):
@@ -43,7 +43,7 @@ class LexicaSearchExtractor(Extractor):
         url = self.root + "/api/infinite-prompts"
         headers = {
             "Accept" : "application/json, text/plain, */*",
-            "Referer": "{}/?q={}".format(self.root, self.query),
+            "Referer": f"{self.root}/?q={self.query}",
         }
         json = {
             "text"      : self.text,
@@ -54,8 +54,8 @@ class LexicaSearchExtractor(Extractor):
         }
 
         while True:
-            data = self.request(
-                url, method="POST", headers=headers, json=json).json()
+            data = self.request_json(
+                url, method="POST", headers=headers, json=json)
 
             prompts = {
                 prompt["id"]: prompt

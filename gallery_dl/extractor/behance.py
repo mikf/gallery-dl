@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,6 +17,7 @@ class BehanceExtractor(Extractor):
     category = "behance"
     root = "https://www.behance.net"
     request_interval = (2.0, 4.0)
+    tls12 = False
 
     def _init(self):
         self._bcp = self.cookies.get("bcp", domain="www.behance.net")
@@ -44,12 +45,12 @@ class BehanceExtractor(Extractor):
             "variables": variables,
         }
 
-        return self.request(url, method="POST", headers=headers,
-                            json=data).json()["data"]
+        return self.request_json(
+            url, method="POST", headers=headers, json=data)["data"]
 
     def _update(self, data):
         # compress data to simple lists
-        if data["fields"] and isinstance(data["fields"][0], dict):
+        if data.get("fields") and isinstance(data["fields"][0], dict):
             data["fields"] = [
                 field.get("name") or field.get("label")
                 for field in data["fields"]
@@ -87,13 +88,12 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
     def __init__(self, match):
         BehanceExtractor.__init__(self, match)
-        self.gallery_id = match.group(1)
+        self.gallery_id = match[1]
 
     def _init(self):
         BehanceExtractor._init(self)
 
-        modules = self.config("modules")
-        if modules:
+        if modules := self.config("modules"):
             if isinstance(modules, str):
                 modules = modules.split(",")
             self.modules = set(modules)
@@ -114,12 +114,15 @@ class BehanceGalleryExtractor(BehanceExtractor):
 
     def get_gallery_data(self):
         """Collect gallery info dict"""
-        url = "{}/gallery/{}/a".format(self.root, self.gallery_id)
+        url = f"{self.root}/gallery/{self.gallery_id}/a"
         cookies = {
-            "gki": '{"feature_project_view":false,'
-                   '"feature_discover_login_prompt":false,'
-                   '"feature_project_login_prompt":false}',
+            "gk_suid": "14118261",
+            "gki": "feature_3_in_1_checkout_test:false,hire_browse_get_quote_c"
+                   "ta_ab_test:false,feature_hire_dashboard_services_ab_test:f"
+                   "alse,feature_show_details_jobs_row_ab_test:false,feature_a"
+                   "i_freelance_project_create_flow:false,",
             "ilo0": "true",
+            "originalReferrer": "",
         }
         page = self.request(url, cookies=cookies).text
 
@@ -141,9 +144,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 raise exception.AuthorizationError()
             return ()
 
-        result = []
-        append = result.append
-
+        results = []
         for module in data["modules"]:
             mtype = module["__typename"][:-6].lower()
 
@@ -152,10 +153,32 @@ class BehanceGalleryExtractor(BehanceExtractor):
                 continue
 
             if mtype == "image":
-                url = module["imageSizes"]["size_original"]["url"]
-                append((url, module))
+                sizes = {
+                    size["url"].rsplit("/", 2)[1]: size
+                    for size in module["imageSizes"]["allAvailable"]
+                }
+                size = (sizes.get("source") or
+                        sizes.get("max_3840") or
+                        sizes.get("fs") or
+                        sizes.get("hd") or
+                        sizes.get("disp"))
+                results.append((size["url"], module))
 
             elif mtype == "video":
+                try:
+                    url = text.extr(module["embed"], 'src="', '"')
+                    page = self.request(text.unescape(url)).text
+
+                    url = text.extr(page, '<source src="', '"')
+                    if text.ext_from_url(url) == "m3u8":
+                        url = "ytdl:" + url
+                        module["_ytdl_manifest"] = "hls"
+                        module["extension"] = "mp4"
+                    results.append((url, module))
+                    continue
+                except Exception as exc:
+                    self.log.debug("%s: %s", exc.__class__.__name__, exc)
+
                 try:
                     renditions = module["videoData"]["renditions"]
                 except Exception:
@@ -172,7 +195,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
                     self.log.debug("%s: %s", exc.__class__.__name__, exc)
                     url = "ytdl:" + renditions[-1]["url"]
 
-                append((url, module))
+                results.append((url, module))
 
             elif mtype == "mediacollection":
                 for component in module["components"]:
@@ -180,21 +203,21 @@ class BehanceGalleryExtractor(BehanceExtractor):
                         if size:
                             parts = size["url"].split("/")
                             parts[4] = "source"
-                            append(("/".join(parts), module))
+                            results.append(("/".join(parts), module))
                             break
 
             elif mtype == "embed":
-                embed = module.get("originalEmbed") or module.get("fluidEmbed")
-                if embed:
+                if embed := (module.get("originalEmbed") or
+                             module.get("fluidEmbed")):
                     embed = text.unescape(text.extr(embed, 'src="', '"'))
                     module["extension"] = "mp4"
-                    append(("ytdl:" + embed, module))
+                    results.append(("ytdl:" + embed, module))
 
             elif mtype == "text":
                 module["extension"] = "txt"
-                append(("text:" + module["text"], module))
+                results.append(("text:" + module["text"], module))
 
-        return result
+        return results
 
 
 class BehanceUserExtractor(BehanceExtractor):
@@ -206,7 +229,7 @@ class BehanceUserExtractor(BehanceExtractor):
 
     def __init__(self, match):
         BehanceExtractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
 
     def galleries(self):
         endpoint = "GetProfileProjects"
@@ -234,7 +257,7 @@ class BehanceCollectionExtractor(BehanceExtractor):
 
     def __init__(self, match):
         BehanceExtractor.__init__(self, match)
-        self.collection_id = match.group(1)
+        self.collection_id = match[1]
 
     def galleries(self):
         endpoint = "GetMoodboardItemsAndRecommendations"

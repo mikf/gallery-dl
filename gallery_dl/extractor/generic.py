@@ -7,15 +7,14 @@
 """Generic information extractor"""
 
 from .common import Extractor, Message
-from .. import config, text
+from .. import config, text, util
 import os.path
-import re
 
 
 class GenericExtractor(Extractor):
     """Extractor for images in a generic web page."""
     category = "generic"
-    directory_fmt = ("{category}", "{pageurl}")
+    directory_fmt = ("{category}", "{subcategory}", "{path}")
     archive_fmt = "{imageurl}"
 
     # By default, the generic extractor is disabled
@@ -37,25 +36,28 @@ class GenericExtractor(Extractor):
     example = "generic:https://www.nongnu.org/lzip/"
 
     def __init__(self, match):
+        self.subcategory = match['domain']
         Extractor.__init__(self, match)
 
         # Strip the "g(eneric):" prefix
         # and inform about "forced" or "fallback" mode
-        if match.group('generic'):
-            self.url = match.group(0).partition(":")[2]
+        if match['generic']:
+            self.url = match[0].partition(":")[2]
         else:
             self.log.info("Falling back on generic information extractor.")
-            self.url = match.group(0)
+            self.url = match[0]
 
         # Make sure we have a scheme, or use https
-        if match.group('scheme'):
-            self.scheme = match.group('scheme')
+        if match['scheme']:
+            self.scheme = match['scheme']
         else:
             self.scheme = 'https://'
-            self.url = self.scheme + self.url
+            self.url = text.ensure_http_scheme(self.url, self.scheme)
+
+        self.path = match['path']
 
         # Used to resolve relative image urls
-        self.root = self.scheme + match.group('domain')
+        self.root = self.scheme + match['domain']
 
     def items(self):
         """Get page, extract metadata & images, yield them in suitable messages
@@ -86,29 +88,33 @@ class GenericExtractor(Extractor):
 
     def metadata(self, page):
         """Extract generic webpage metadata, return them in a dict."""
-        data = {}
-        data['pageurl'] = self.url
-        data['title'] = text.extr(page, '<title>', "</title>")
-        data['description'] = text.extr(
-            page, '<meta name="description" content="', '"')
-        data['keywords'] = text.extr(
-            page, '<meta name="keywords" content="', '"')
-        data['language'] = text.extr(
-            page, '<meta name="language" content="', '"')
-        data['name'] = text.extr(
-            page, '<meta itemprop="name" content="', '"')
-        data['copyright'] = text.extr(
-            page, '<meta name="copyright" content="', '"')
-        data['og_site'] = text.extr(
-            page, '<meta property="og:site" content="', '"')
-        data['og_site_name'] = text.extr(
-            page, '<meta property="og:site_name" content="', '"')
-        data['og_title'] = text.extr(
-            page, '<meta property="og:title" content="', '"')
-        data['og_description'] = text.extr(
-            page, '<meta property="og:description" content="', '"')
+        data = {
+            "title"         : text.extr(
+                page, "<title>", "</title>"),
+            "description"   : text.extr(
+                page, '<meta name="description" content="', '"'),
+            "keywords"      : text.extr(
+                page, '<meta name="keywords" content="', '"'),
+            "language"      : text.extr(
+                page, '<meta name="language" content="', '"'),
+            "name"          : text.extr(
+                page, '<meta itemprop="name" content="', '"'),
+            "copyright"     : text.extr(
+                page, '<meta name="copyright" content="', '"'),
+            "og_site"       : text.extr(
+                page, '<meta property="og:site" content="', '"'),
+            "og_site_name"  : text.extr(
+                page, '<meta property="og:site_name" content="', '"'),
+            "og_title"      : text.extr(
+                page, '<meta property="og:title" content="', '"'),
+            "og_description": text.extr(
+                page, '<meta property="og:description" content="', '"'),
 
-        data = {k: text.unescape(data[k]) for k in data if data[k] != ""}
+        }
+
+        data = {k: text.unescape(v) for k, v in data.items() if v}
+        data["path"] = self.path.replace("/", "")
+        data["pageurl"] = self.url
 
         return data
 
@@ -165,8 +171,8 @@ class GenericExtractor(Extractor):
             r"(?:[^\"'<>\s]*)?"            # optional query and fragment
         )
 
-        imageurls_src = re.findall(imageurl_pattern_src, page)
-        imageurls_ext = re.findall(imageurl_pattern_ext, page)
+        imageurls_src = util.re(imageurl_pattern_src).findall(page)
+        imageurls_ext = util.re(imageurl_pattern_ext).findall(page)
         imageurls = imageurls_src + imageurls_ext
 
         # Resolve relative urls
@@ -175,10 +181,10 @@ class GenericExtractor(Extractor):
         # by prepending a suitable base url.
         #
         # If the page contains a <base> element, use it as base url
-        basematch = re.search(
-            r"(?i)(?:<base\s.*?href=[\"']?)(?P<url>[^\"' >]+)", page)
+        basematch = util.re(
+            r"(?i)(?:<base\s.*?href=[\"']?)(?P<url>[^\"' >]+)").search(page)
         if basematch:
-            self.baseurl = basematch.group('url').rstrip('/')
+            self.baseurl = basematch['url'].rstrip('/')
         # Otherwise, extract the base url from self.url
         else:
             if self.url.endswith("/"):

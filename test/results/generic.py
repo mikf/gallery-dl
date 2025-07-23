@@ -10,7 +10,7 @@ from gallery_dl.extractor import generic
 __tests__ = (
 {
     "#url"     : "generic:https://www.nongnu.org/lzip/",
-    "#category": ("", "generic", ""),
+    "#category": ("", "generic", "www.nongnu.org"),
     "#class"   : generic.GenericExtractor,
     "#count"       : 1,
     "#sha1_content": "40be5c77773d3e91db6e1c5df720ee30afb62368",
@@ -23,7 +23,7 @@ __tests__ = (
 
 {
     "#url"     : "generic:https://räksmörgås.josefsson.org/",
-    "#category": ("", "generic", ""),
+    "#category": ("", "generic", "räksmörgås.josefsson.org"),
     "#class"   : generic.GenericExtractor,
     "#pattern" : "^https://räksmörgås.josefsson.org/",
     "#count"   : 2,
@@ -31,37 +31,37 @@ __tests__ = (
 
 {
     "#url"     : "generic:https://en.wikipedia.org/Main_Page",
-    "#category": ("", "generic", ""),
+    "#category": ("", "generic", "en.wikipedia.org"),
     "#class"   : generic.GenericExtractor,
 },
 
 {
     "#url"     : "generic:https://example.org/path/to/file?que=1?&ry=2/#fragment",
-    "#category": ("", "generic", ""),
+    "#category": ("", "generic", "example.org"),
     "#class"   : generic.GenericExtractor,
 },
 
 {
     "#url"     : "generic:https://example.org/%27%3C%23/%23%3E%27.htm?key=%3C%26%3E",
-    "#category": ("", "generic", ""),
+    "#category": ("", "generic", "example.org"),
     "#class"   : generic.GenericExtractor,
 },
 
 {
     "#url"     : "generic:https://en.wikipedia.org/Main_Page",
-    "#category": ("", "generic", ""),
+    "#category": ("", "generic", "en.wikipedia.org"),
     "#class"   : generic.GenericExtractor,
 },
 
 {
     "#url"     : "generic:https://example.org/path/to/file?que=1?&ry=2/#fragment",
-    "#category": ("", "generic", ""),
+    "#category": ("", "generic", "example.org"),
     "#class"   : generic.GenericExtractor,
 },
 
 {
     "#url"     : "generic:https://example.org/%27%3C%23/%23%3E%27.htm?key=%3C%26%3E",
-    "#category": ("", "generic", ""),
+    "#category": ("", "generic", "example.org"),
     "#class"   : generic.GenericExtractor,
 },
 

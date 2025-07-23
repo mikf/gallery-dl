@@ -14,7 +14,7 @@ __tests__ = (
     "#url"     : "https://4archive.org/board/u/thread/2397221",
     "#category": ("", "4archive", "thread"),
     "#class"   : _4archive._4archiveThreadExtractor,
-    "#pattern" : r"https://i\.imgur\.com/\w{7}\.\w+$",
+    "#pattern" : r"https://(cdn\.4archive\.org/u/image/150\d/\d\d\d/\d+\.\w+|4archive\.org/image/image-404\.png)",
     "#count"   : 16,
 
     "board" : "u",
@@ -35,7 +35,7 @@ __tests__ = (
     "#url"     : "https://4archive.org/board/jp/thread/17611798",
     "#category": ("", "4archive", "thread"),
     "#class"   : _4archive._4archiveThreadExtractor,
-    "#pattern" : r"https://i\.imgur\.com/\w{7}\.\w+$",
+    "#pattern" : r"https://(cdn\.4archive\.org/jp/image/\d\d\d\d/\d\d\d/\d+\.\w+|4archive\.org/image/image-404\.png)",
     "#count"   : 85,
 },
 

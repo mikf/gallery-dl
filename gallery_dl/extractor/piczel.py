@@ -11,6 +11,8 @@
 from .common import Extractor, Message
 from .. import text
 
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?piczel\.tv"
+
 
 class PiczelExtractor(Extractor):
     """Base class for piczel extractors"""
@@ -19,7 +21,7 @@ class PiczelExtractor(Extractor):
     filename_fmt = "{category}_{id}_{title}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
     root = "https://piczel.tv"
-    api_root = root
+    root_api = root
 
     def items(self):
         for post in self.posts():
@@ -30,6 +32,7 @@ class PiczelExtractor(Extractor):
             if post["multi"]:
                 images = post["images"]
                 del post["images"]
+                post["count"] = len(images)
                 yield Message.Directory, post
                 for post["num"], image in enumerate(images):
                     if "id" in image:
@@ -39,6 +42,7 @@ class PiczelExtractor(Extractor):
                     yield Message.Url, url, text.nameext_from_url(url, post)
 
             else:
+                post["count"] = 1
                 yield Message.Directory, post
                 post["num"] = 0
                 url = post["image"]["url"]
@@ -47,35 +51,27 @@ class PiczelExtractor(Extractor):
     def posts(self):
         """Return an iterable with all relevant post objects"""
 
-    def _pagination(self, url, folder_id=None):
-        params = {
-            "from_id"  : None,
-            "folder_id": folder_id,
-        }
+    def _pagination(self, url, pnum=1):
+        params = {"page": pnum}
 
         while True:
-            data = self.request(url, params=params).json()
-            if not data:
-                return
-            params["from_id"] = data[-1]["id"]
+            data = self.request_json(url, params=params)
 
-            for post in data:
-                if not folder_id or folder_id == post["folder_id"]:
-                    yield post
+            yield from data["data"]
+
+            params["page"] = data["meta"]["next_page"]
+            if not params["page"]:
+                return
 
 
 class PiczelUserExtractor(PiczelExtractor):
     """Extractor for all images from a user's gallery"""
     subcategory = "user"
-    pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/([^/?#]+)/?$"
+    pattern = BASE_PATTERN + r"/gallery/([^/?#]+)/?$"
     example = "https://piczel.tv/gallery/USER"
 
-    def __init__(self, match):
-        PiczelExtractor.__init__(self, match)
-        self.user = match.group(1)
-
     def posts(self):
-        url = "{}/api/users/{}/gallery".format(self.api_root, self.user)
+        url = f"{self.root_api}/api/users/{self.groups[0]}/gallery"
         return self._pagination(url)
 
 
@@ -84,29 +80,20 @@ class PiczelFolderExtractor(PiczelExtractor):
     subcategory = "folder"
     directory_fmt = ("{category}", "{user[username]}", "{folder[name]}")
     archive_fmt = "f{folder[id]}_{id}_{num}"
-    pattern = (r"(?:https?://)?(?:www\.)?piczel\.tv"
-               r"/gallery/(?!image)([^/?#]+)/(\d+)")
+    pattern = BASE_PATTERN + r"/gallery/(?!image/)[^/?#]+/(\d+)"
     example = "https://piczel.tv/gallery/USER/12345"
 
-    def __init__(self, match):
-        PiczelExtractor.__init__(self, match)
-        self.user, self.folder_id = match.groups()
-
     def posts(self):
-        url = "{}/api/users/{}/gallery".format(self.api_root, self.user)
-        return self._pagination(url, int(self.folder_id))
+        url = f"{self.root_api}/api/gallery/folder/{self.groups[0]}"
+        return self._pagination(url)
 
 
 class PiczelImageExtractor(PiczelExtractor):
     """Extractor for individual images"""
     subcategory = "image"
-    pattern = r"(?:https?://)?(?:www\.)?piczel\.tv/gallery/image/(\d+)"
+    pattern = BASE_PATTERN + r"/gallery/image/(\d+)"
     example = "https://piczel.tv/gallery/image/12345"
 
-    def __init__(self, match):
-        PiczelExtractor.__init__(self, match)
-        self.image_id = match.group(1)
-
     def posts(self):
-        url = "{}/api/gallery/{}".format(self.api_root, self.image_id)
-        return (self.request(url).json(),)
+        url = f"{self.root_api}/api/gallery/{self.groups[0]}"
+        return (self.request_json(url),)

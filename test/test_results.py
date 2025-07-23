@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,12 +20,17 @@ import collections
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import \
     extractor, util, job, config, exception, formatter  # noqa E402
-from test import results  # noqa E402
+
+
+RESULTS = os.environ.get("GDL_TEST_RESULTS")
+if RESULTS:
+    results = util.import_file(RESULTS)
+else:
+    from test import results
 
 
 # temporary issues, etc.
 BROKEN = {
-    "photobucket",
 }
 
 CONFIG = {
@@ -38,7 +43,8 @@ CONFIG = {
     },
 }
 
-AUTH = {
+
+AUTH_REQUIRED = {
     "pixiv",
     "nijie",
     "horne",
@@ -49,7 +55,7 @@ AUTH = {
     "twitter",
 }
 
-AUTH_CONFIG = (
+AUTH_KEYS = (
     "username",
     "cookies",
     "api-key",
@@ -74,9 +80,9 @@ class TestExtractorResults(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         if cls._skipped:
-            print("\n\nSkipped tests:")
-            for url, exc in cls._skipped:
-                print('- {} ("{}")'.format(url, exc))
+            sys.stdout.write("\n\nSkipped tests:\n")
+            for url, reason in cls._skipped:
+                sys.stdout.write(f'- {url} ("{reason}")\n')
 
     def assertRange(self, value, range, msg=None):
         if range.step > 1:
@@ -85,40 +91,70 @@ class TestExtractorResults(unittest.TestCase):
             self.assertLessEqual(value, range.stop, msg=msg)
             self.assertGreaterEqual(value, range.start, msg=msg)
 
-    def _run_test(self, result):
-        result.pop("#comment", None)
-        only_matching = (len(result) <= 3)
+    def assertLogEqual(self, expected, output):
+        if isinstance(expected, str):
+            expected = (expected,)
 
-        auth = result.get("#auth")
+        for exp, out in zip(expected, output):
+            level, name, message = out.split(":", 2)
+
+            if isinstance(exp, str):
+                return self.assertEqual(exp, message, "#log")
+
+            self.assertEqual(exp[0].lower(), level.lower(), "#log/level")
+            if len(exp) < 3:
+                self.assertEqual(exp[1], message, "#log/message")
+            else:
+                self.assertEqual(exp[1], name   , "#log/name")
+                self.assertEqual(exp[2], message, "#log/message")
+
+    def _run_test(self, result):
+        if result.get("#fail"):
+            del result["#fail"]
+            try:
+                self._run_test(result)
+            except AssertionError:
+                return
+            else:
+                self.fail("Test did not fail")
+
+        base, cat, sub = result_categories(result)
+        result.pop("#comment", None)
+        result.pop("#category", None)
+        auth = result.pop("#auth", None)
+
+        extr_url = extractor.find(result["#url"])
+        self.assertTrue(extr_url, "extractor by URL/find")
+        extr_cls = extr = result["#class"].from_url(result["#url"])
+        self.assertTrue(extr_url, "extractor by cls.from_url()")
+        self.assertIs(extr_url.__class__, extr_cls.__class__)
+
+        if len(result) <= 2:
+            return  # only matching
+
+        skip = result.pop("#skip", False)
+        if skip:
+            return self._skipped.append((result["#url"], skip))
+
         if auth is None:
-            auth = (result["#category"][1] in AUTH)
+            auth = (cat in AUTH_REQUIRED)
         elif not auth:
-            for key in AUTH_CONFIG:
+            # auth explicitly disabled
+            for key in AUTH_KEYS:
                 config.set((), key, None)
 
-        if auth:
-            extr = result["#class"].from_url(result["#url"])
-            if not any(extr.config(key) for key in AUTH_CONFIG):
-                self._skipped.append((result["#url"], "no auth"))
-                only_matching = True
+        if auth and not any(extr.config(key) for key in AUTH_KEYS):
+            return self._skipped.append((result["#url"], "no auth"))
 
-        if only_matching:
-            content = False
-        else:
-            if "#options" in result:
-                for key, value in result["#options"].items():
-                    key = key.split(".")
-                    config.set(key[:-1], key[-1], value)
-            if "#range" in result:
-                config.set((), "image-range"  , result["#range"])
-                config.set((), "chapter-range", result["#range"])
-            content = ("#sha1_content" in result)
+        if "#options" in result:
+            for key, value in result["#options"].items():
+                key = key.split(".")
+                config.set(key[:-1], key[-1], value)
+        if "#range" in result:
+            config.set((), "image-range"  , result["#range"])
+            config.set((), "chapter-range", result["#range"])
 
-        tjob = ResultJob(result["#url"], content=content)
-        self.assertEqual(result["#class"], tjob.extractor.__class__, "#class")
-
-        if only_matching:
-            return
+        tjob = ResultJob(extr, content=("#sha1_content" in result))
 
         if "#exception" in result:
             with self.assertRaises(result["#exception"], msg="#exception"):
@@ -126,7 +162,12 @@ class TestExtractorResults(unittest.TestCase):
             return
 
         try:
-            tjob.run()
+            if "#log" in result:
+                with self.assertLogs() as log_info:
+                    tjob.run()
+                self.assertLogEqual(result["#log"], log_info.output)
+            else:
+                tjob.run()
         except exception.StopExtraction:
             pass
         except exception.HttpError as exc:
@@ -201,12 +242,15 @@ class TestExtractorResults(unittest.TestCase):
                 for url, pat in zip(tjob.url_list, pattern):
                     self.assertRegex(url, pat, msg="#pattern")
 
-        if "#urls" in result:
-            expected = result["#urls"]
+        if "#results" in result:
+            expected = result["#results"]
             if isinstance(expected, str):
-                self.assertEqual(tjob.url_list[0], expected, msg="#urls")
+                self.assertTrue(tjob.url_list, msg="#results")
+                self.assertEqual(
+                    tjob.url_list[0], expected, msg="#results")
             else:
-                self.assertSequenceEqual(tjob.url_list, expected, msg="#urls")
+                self.assertSequenceEqual(
+                    tjob.url_list, expected, msg="#results")
 
         metadata = {k: v for k, v in result.items() if k[0] != "#"}
         if metadata:
@@ -215,44 +259,74 @@ class TestExtractorResults(unittest.TestCase):
 
     def _test_kwdict(self, kwdict, tests, parent=None):
         for key, test in tests.items():
+
             if key.startswith("?"):
                 key = key[1:]
                 if key not in kwdict:
                     continue
+
+            if key.endswith("[*]"):
+                key = key[:-3]
+                subtest = True
+            else:
+                subtest = False
+
             path = "{}.{}".format(parent, key) if parent else key
+
+            if key.startswith("!"):
+                self.assertNotIn(key[1:], kwdict, msg=path)
+                continue
+
             self.assertIn(key, kwdict, msg=path)
             value = kwdict[key]
 
-            if isinstance(test, dict):
-                self._test_kwdict(value, test, path)
-            elif isinstance(test, type):
-                self.assertIsInstance(value, test, msg=path)
-            elif isinstance(test, range):
-                self.assertRange(value, test, msg=path)
-            elif isinstance(test, list):
-                subtest = False
-                for idx, item in enumerate(test):
-                    if isinstance(item, dict):
-                        subtest = True
-                        subpath = "{}[{}]".format(path, idx)
-                        self._test_kwdict(value[idx], item, subpath)
-                if not subtest:
-                    self.assertEqual(test, value, msg=path)
-            elif isinstance(test, str):
-                if test.startswith("re:"):
-                    self.assertRegex(value, test[3:], msg=path)
-                elif test.startswith("dt:"):
-                    self.assertIsInstance(value, datetime.datetime, msg=path)
-                    self.assertEqual(test[3:], str(value), msg=path)
-                elif test.startswith("type:"):
-                    self.assertEqual(test[5:], type(value).__name__, msg=path)
-                elif test.startswith("len:"):
-                    self.assertIsInstance(value, (list, tuple), msg=path)
-                    self.assertEqual(int(test[4:]), len(value), msg=path)
-                else:
-                    self.assertEqual(test, value, msg=path)
+            if subtest:
+                self.assertNotIsInstance(value, str, msg=path)
+                for idx, item in enumerate(value):
+                    subpath = "{}[{}]".format(path, idx)
+                    self._test_kwdict_value(item, test, subpath)
+            else:
+                self._test_kwdict_value(value, test, path)
+
+    def _test_kwdict_value(self, value, test, path):
+        if isinstance(test, dict):
+            self._test_kwdict(value, test, path)
+        elif isinstance(test, type):
+            self.assertIsInstance(value, test, msg=path)
+        elif isinstance(test, range):
+            self.assertRange(value, test, msg=path)
+        elif isinstance(test, set):
+            try:
+                self.assertIn(value, test, msg=path)
+            except AssertionError:
+                self.assertIn(type(value), test, msg=path)
+        elif isinstance(test, list):
+            subtest = False
+            for idx, item in enumerate(test):
+                if isinstance(item, dict):
+                    subtest = True
+                    subpath = "{}[{}]".format(path, idx)
+                    self._test_kwdict(value[idx], item, subpath)
+            if not subtest:
+                self.assertEqual(test, value, msg=path)
+        elif isinstance(test, str):
+            if test.startswith("re:"):
+                self.assertRegex(value, test[3:], msg=path)
+            elif test.startswith("dt:"):
+                self.assertIsInstance(value, datetime.datetime, msg=path)
+                self.assertEqual(test[3:], str(value), msg=path)
+            elif test.startswith("type:"):
+                self.assertEqual(test[5:], type(value).__name__, msg=path)
+            elif test.startswith("len:"):
+                cls, _, length = test[4:].rpartition(":")
+                if cls:
+                    self.assertEqual(
+                        cls, type(value).__name__, msg=path + "/type")
+                self.assertEqual(int(length), len(value), msg=path)
             else:
                 self.assertEqual(test, value, msg=path)
+        else:
+            self.assertEqual(test, value, msg=path)
 
 
 class ResultJob(job.DownloadJob):
@@ -280,6 +354,8 @@ class ResultJob(job.DownloadJob):
             "".join(self.extractor.directory_fmt)).format_map
         self.format_filename = TestFormatter(
             self.extractor.filename_fmt).format_map
+        self.format_archive = TestFormatter(
+            self.extractor.archive_fmt).format_map
 
     def run(self):
         self._init()
@@ -317,7 +393,7 @@ class ResultJob(job.DownloadJob):
             json.dumps(kwdict, sort_keys=True, default=str).encode())
 
     def _update_archive(self, kwdict):
-        archive_id = self.extractor.archive_fmt.format_map(kwdict)
+        archive_id = self.format_archive(kwdict)
         self.archive_list.append(archive_id)
         self.archive_hash.update(archive_id.encode())
 
@@ -347,7 +423,7 @@ class TestPathfmt():
     def __enter__(self):
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, exc_type, exc_value, traceback):
         pass
 
     def open(self, mode):
@@ -368,27 +444,31 @@ class TestPathfmt():
 
 class TestFormatter(formatter.StringFormatter):
 
-    @staticmethod
-    def _noop(_):
-        return ""
-
     def _apply_simple(self, key, fmt):
         if key == "extension" or "_parse_optional." in repr(fmt):
-            return self._noop
-
-        def wrap(obj):
-            return fmt(obj[key])
+            def wrap(obj):
+                try:
+                    return fmt(obj[key])
+                except KeyError:
+                    return ""
+        else:
+            def wrap(obj):
+                return fmt(obj[key])
         return wrap
 
     def _apply(self, key, funcs, fmt):
         if key == "extension" or "_parse_optional." in repr(fmt):
-            return self._noop
-
-        def wrap(obj):
-            obj = obj[key]
-            for func in funcs:
-                obj = func(obj)
-            return fmt(obj)
+            def wrap(obj):
+                obj = obj[key] if key in obj else ""
+                for func in funcs:
+                    obj = func(obj)
+                return fmt(obj)
+        else:
+            def wrap(obj):
+                obj = obj[key]
+                for func in funcs:
+                    obj = func(obj)
+                return fmt(obj)
         return wrap
 
 
@@ -410,11 +490,23 @@ def load_test_config():
             path, exc.__class__.__name__, exc))
 
 
+def result_categories(result):
+    categories = result.get("#category")
+    if categories:
+        return categories
+
+    cls = result["#class"]
+    return cls.basecategory, cls.category, cls.subcategory
+
+
 def generate_tests():
     """Dynamically generate extractor unittests"""
     def _generate_method(result):
         def test(self):
-            print("\n" + result["#url"])
+            sys.stdout.write(f"\n{result['#url']}\n")
+            if "#comment" in result:
+                sys.stdout.write(f"# {result['#comment']}\n")
+
             try:
                 self._run_test(result)
             except KeyboardInterrupt as exc:
@@ -436,7 +528,7 @@ def generate_tests():
         if category.startswith("+"):
             basecategory = category[1:].lower()
             tests = [t for t in results.all()
-                     if t["#category"][0].lower() == basecategory]
+                     if result_categories(t)[0].lower() == basecategory]
         else:
             tests = results.category(category)
 
@@ -449,14 +541,16 @@ def generate_tests():
                 tests = [t for t in tests
                          if "#comment" in t and com in t["#comment"].lower()]
             else:
-                tests = [t for t in tests if t["#category"][-1] == subcategory]
+                tests = [t for t in tests
+                         if result_categories(t)[-1] == subcategory]
     else:
         tests = results.all()
 
     # add 'test_...' methods
     enum = collections.defaultdict(int)
     for result in tests:
-        name = "{1}_{2}".format(*result["#category"])
+        base, cat, sub = result_categories(result)
+        name = "{}_{}".format(cat, sub)
         enum[name] += 1
 
         method = _generate_method(result)

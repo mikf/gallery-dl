@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -90,13 +90,108 @@ def initialize():
     return 0
 
 
+def open_extern():
+    for path in _default_configs:
+        path = util.expand_path(path)
+        if os.access(path, os.R_OK | os.W_OK):
+            break
+    else:
+        log.warning("Unable to find any writable configuration file")
+        return 1
+
+    if util.WINDOWS:
+        openers = ("explorer", "notepad")
+    else:
+        openers = ("xdg-open", "open")
+        if editor := os.environ.get("EDITOR"):
+            openers = (editor,) + openers
+
+    import shutil
+    for opener in openers:
+        if opener := shutil.which(opener):
+            break
+    else:
+        log.warning("Unable to find a program to open '%s' with", path)
+        return 1
+
+    log.info("Running '%s %s'", opener, path)
+    retcode = util.Popen((opener, path)).wait()
+
+    if not retcode:
+        try:
+            with open(path, encoding="utf-8") as fp:
+                util.json_loads(fp.read())
+        except Exception as exc:
+            log.warning("%s when parsing '%s': %s",
+                        exc.__class__.__name__, path, exc)
+            return 2
+
+    return retcode
+
+
+def status():
+    from .output import stdout_write
+
+    paths = []
+    for path in _default_configs:
+        path = util.expand_path(path)
+
+        try:
+            with open(path, encoding="utf-8") as fp:
+                util.json_loads(fp.read())
+        except FileNotFoundError:
+            status = "Not Present"
+        except OSError:
+            status = "Inaccessible"
+        except ValueError:
+            status = "Invalid JSON"
+        except Exception as exc:
+            log.debug(exc)
+            status = "Unknown"
+        else:
+            status = "OK"
+
+        paths.append((path, status))
+
+    fmt = f"{{:<{max(len(p[0]) for p in paths)}}} : {{}}\n".format
+
+    for path, status in paths:
+        stdout_write(fmt(path, status))
+
+
+def remap_categories():
+    opts = _config.get("extractor")
+    if not opts:
+        return
+
+    cmap = opts.get("config-map")
+    if cmap is None:
+        cmap = (
+            ("coomerparty" , "coomer"),
+            ("kemonoparty" , "kemono"),
+            ("koharu"      , "schalenetwork"),
+            ("naver"       , "naver-blog"),
+            ("chzzk"       , "naver-chzzk"),
+            ("naverwebtoon", "naver-webtoon"),
+            ("pixiv"       , "pixiv-novel"),
+        )
+    elif not cmap:
+        return
+    elif isinstance(cmap, dict):
+        cmap = cmap.items()
+
+    for old, new in cmap:
+        if old in opts and new not in opts:
+            opts[new] = opts[old]
+
+
 def load(files=None, strict=False, loads=util.json_loads):
     """Load JSON configuration files"""
     for pathfmt in files or _default_configs:
         path = util.expand_path(pathfmt)
         try:
-            with open(path, encoding="utf-8") as file:
-                conf = loads(file.read())
+            with open(path, encoding="utf-8") as fp:
+                conf = loads(fp.read())
         except OSError as exc:
             if strict:
                 log.error(exc)
@@ -114,8 +209,7 @@ def load(files=None, strict=False, loads=util.json_loads):
             _files.append(pathfmt)
 
             if "subconfigs" in conf:
-                subconfigs = conf["subconfigs"]
-                if subconfigs:
+                if subconfigs := conf["subconfigs"]:
                     if isinstance(subconfigs, str):
                         subconfigs = (subconfigs,)
                     load(subconfigs, strict, loads)
@@ -187,15 +281,19 @@ def accumulate(path, key, conf=_config):
     result = []
     try:
         if key in conf:
-            value = conf[key]
-            if value:
-                result.extend(value)
+            if value := conf[key]:
+                if isinstance(value, list):
+                    result.extend(value)
+                else:
+                    result.append(value)
         for p in path:
             conf = conf[p]
             if key in conf:
-                value = conf[key]
-                if value:
-                    result[:0] = value
+                if value := conf[key]:
+                    if isinstance(value, list):
+                        result[:0] = value
+                    else:
+                        result.insert(0, value)
     except Exception:
         pass
     return result
@@ -243,7 +341,8 @@ class apply():
             self.original.append((path, key, get(path, key, util.SENTINEL)))
             set(path, key, value)
 
-    def __exit__(self, etype, value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.original.reverse()
         for path, key, value in self.original:
             if value is util.SENTINEL:
                 unset(path, key)

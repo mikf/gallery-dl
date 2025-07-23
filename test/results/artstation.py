@@ -87,7 +87,7 @@ __tests__ = (
     "#url"     : "https://www.artstation.com/mikf/collections",
     "#category": ("", "artstation", "collections"),
     "#class"   : artstation.ArtstationCollectionsExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://www.artstation.com/mikf/collections/2647023",
         "https://www.artstation.com/mikf/collections/2647719",
     ),
@@ -163,10 +163,23 @@ __tests__ = (
     "#class"   : artstation.ArtstationImageExtractor,
     "#options" : {"videos": True},
     "#range"   : "2-3",
-    "#urls"    : (
+    "#results" : (
         "https://cdn.artstation.com/p/video_sources/000/819/843/infection-4.mp4",
         "https://cdn.artstation.com/p/video_sources/000/819/725/infection-veinonly-2.mp4",
     ),
+},
+
+{
+    "#url"     : "https://www.artstation.com/artwork/r8zRm",
+    "#comment" : "mview embeds (#2566)",
+    "#class"   : artstation.ArtstationImageExtractor,
+    "#options" : {"mviews": True},
+    "#range"   : "4",
+    "#results" : (
+        "https://cdna.artstation.com/p/assets/marmosets/attachments/010/915/068/original/Orca-MarmosetViewer.mview?1526922111",
+    ),
+
+    "extension": "mview",
 },
 
 {

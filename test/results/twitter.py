@@ -14,8 +14,16 @@ __tests__ = (
     "#category": ("", "twitter", "user"),
     "#class"   : twitter.TwitterUserExtractor,
     "#options" : {"include": "all"},
-    "#pattern" : r"https://twitter\.com/supernaturepics/(photo|header_photo|timeline|tweets|media|with_replies|likes)$",
-    "#count"   : 7,
+    "#results" : (
+        "https://x.com/supernaturepics/info",
+        "https://x.com/supernaturepics/photo",
+        "https://x.com/supernaturepics/header_photo",
+        "https://x.com/supernaturepics/timeline",
+        "https://x.com/supernaturepics/tweets",
+        "https://x.com/supernaturepics/media",
+        "https://x.com/supernaturepics/with_replies",
+        "https://x.com/supernaturepics/likes",
+    ),
 },
 
 {
@@ -264,6 +272,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://twitter.com/supernaturepics/followers",
+    "#category": ("", "twitter", "followers"),
+    "#class"   : twitter.TwitterFollowersExtractor,
+},
+
+{
     "#url"     : "https://twitter.com/search?q=nature",
     "#category": ("", "twitter", "search"),
     "#class"   : twitter.TwitterSearchExtractor,
@@ -277,7 +291,7 @@ __tests__ = (
     "#category": ("", "twitter", "hashtag"),
     "#class"   : twitter.TwitterHashtagExtractor,
     "#pattern" : twitter.TwitterSearchExtractor.pattern,
-    "#urls"    : "https://twitter.com/search?q=%23nature",
+    "#results" : "https://x.com/search?q=%23nature",
 },
 
 {
@@ -319,6 +333,10 @@ __tests__ = (
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
     "#sha1_url": "3a2a43dc5fb79dd5432c701d8e55e87c4e551f47",
+
+    "type"        : "photo",
+    "source_id"   : 0,
+    "!source_user": dict,
 },
 
 {
@@ -327,6 +345,8 @@ __tests__ = (
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
     "#pattern" : r"https://video.twimg.com/ext_tw_video/.+\.mp4\?tag=5",
+
+    "type": "video",
 },
 
 {
@@ -540,6 +560,13 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
 },
 
 {
+    "#url"     : "https://twitter.com/perrypumas/status/1065692031626829824/video/1",
+    "#comment" : "/video/ URL",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+},
+
+{
     "#url"     : "https://twitter.com/morino_ya/status/1392763691599237121",
     "#comment" : "retweet with missing media entities (#1555)",
     "#category": ("", "twitter", "tweet"),
@@ -580,6 +607,7 @@ You’ll be able to receive four Galarian form Pokémon with Hidden Abilities, p
     "#class"   : twitter.TwitterTweetExtractor,
 
     "description": "oc",
+    "type"       : "photo",
 },
 
 {
@@ -608,10 +636,43 @@ The Washington Post writes, "Three weeks after the toxic train derailment in Ohi
     "#comment" : "'birdwatch' note (#5317)",
     "#category": ("", "twitter", "tweet"),
     "#class"   : twitter.TwitterTweetExtractor,
-    "#options"  : {"text-tweets": True},
+    "#options" : {"text-tweets": True},
 
     "birdwatch": "In addition to the known harm of lead exposure, especially to children, Mr. Kobach is incorrect when he states the mandate is unfunded. In fact, the BIPARTISAN Infrastructure Law Joe Biden signed into law in Nov 2021 provides $15B toward lead service line replacement projects. epa.gov/ground-water-a…",
     "content"  : "Biden wants to replace lead pipes. He failed to mention that the unfunded mandate sets an almost impossible timeline, will cost billions, infringe on the rights of the States and their residents – all for benefits that may be entirely speculative. #sotu https://ag.ks.gov/media-center/news-releases/2024/02/09/kobach-leads-coalition-demanding-biden-drop-unnecessary-epa-rule",
+},
+
+{
+    "#url"     : "https://x.com/jsports_motor/status/1801338077618524583",
+    "#comment" : "geo-restricted video (#5736)",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+    "#count"   : 0,
+},
+
+{
+    "#url"     : "https://x.com/fw_rion_/status/1866737025824829544",
+    "#comment" : "grok share (#7040)",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+    "#options" : {"cards": True},
+    "#results" : "https://pbs.twimg.com/grok-img-share/1866736156786008064.jpg",
+},
+
+{
+    "#url"     : "https://x.com/gdldev/status/1932109706354733077",
+    "#comment" : "'source_id' and 'source_user' metadata (#7470, #7640)",
+    "#category": ("", "twitter", "tweet"),
+    "#class"   : twitter.TwitterTweetExtractor,
+    "#results" : (
+        "https://video.twimg.com/amplify_video/1932079443264376832/vid/avc1/640x336/7xo7NCPkMLRWb8NZ.mp4?tag=14",
+        "https://video.twimg.com/ext_tw_video/1930425322333229056/pu/vid/avc1/1024x576/6f_cdEPY3a5CcbZP.mp4?tag=12",
+    ),
+
+    "source_id"  : {1932079546590982508, 1930425346404274416},
+    "source_user": {
+        "name": {"Satorin69", "Derlan144p_"},
+    },
 },
 
 {
@@ -619,14 +680,20 @@ The Washington Post writes, "Three weeks after the toxic train derailment in Ohi
     "#category": ("", "twitter", "quotes"),
     "#class"   : twitter.TwitterQuotesExtractor,
     "#pattern" : twitter.TwitterSearchExtractor.pattern,
-    "#urls"    : "https://twitter.com/search?q=quoted_tweet_id:1263832915173048321",
+    "#results" : "https://x.com/search?q=quoted_tweet_id:1263832915173048321",
+},
+
+{
+    "#url"     : "https://twitter.com/supernaturepics/info",
+    "#category": ("", "twitter", "info"),
+    "#class"   : twitter.TwitterInfoExtractor,
 },
 
 {
     "#url"     : "https://twitter.com/supernaturepics/photo",
     "#category": ("", "twitter", "avatar"),
     "#class"   : twitter.TwitterAvatarExtractor,
-    "#urls"    : "https://pbs.twimg.com/profile_images/554585280938659841/FLVAlX18.jpeg",
+    "#results" : "https://pbs.twimg.com/profile_images/554585280938659841/FLVAlX18.jpeg",
 
     "date"     : "dt:2015-01-12 10:26:49",
     "extension": "jpeg",
@@ -646,7 +713,7 @@ The Washington Post writes, "Three weeks after the toxic train derailment in Ohi
     "#comment" : "old avatar with small ID and no valid 'date' (#4696)",
     "#category": ("", "twitter", "avatar"),
     "#class"   : twitter.TwitterAvatarExtractor,
-    "#urls"    : "https://pbs.twimg.com/profile_images/2946444489/32028c6affdab425e037ff5a6bf77c1d.jpeg",
+    "#results" : "https://pbs.twimg.com/profile_images/2946444489/32028c6affdab425e037ff5a6bf77c1d.jpeg",
 
     "date"     : util.NONE,
     "tweet_id" : 2946444489,

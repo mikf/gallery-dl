@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -8,7 +8,7 @@
 
 """Extractors for https://vsco.co/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?vsco\.co"
@@ -25,25 +25,29 @@ class VscoExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1).lower()
+        self.user = match[1].lower()
 
     def items(self):
         videos = self.config("videos", True)
         yield Message.Directory, {"user": self.user}
         for img in self.images():
 
-            if not img or "responsive_url" not in img:
+            if not img:
+                continue
+            elif "playback_url" in img:
+                img = self._transform_video(img)
+            elif "responsive_url" not in img:
                 continue
 
             if img["is_video"]:
                 if not videos:
                     continue
-                url = "https://" + img["video_url"]
+                url = text.ensure_http_scheme(img["video_url"])
             else:
                 base = img["responsive_url"].partition("/")[2]
                 cdn, _, path = base.partition("/")
                 if cdn.startswith("aws"):
-                    url = "https://image-{}.vsco.co/{}".format(cdn, path)
+                    url = f"https://image-{cdn}.vsco.co/{path}"
                 elif cdn.isdecimal():
                     url = "https://image.vsco.co/" + base
                 elif img["responsive_url"].startswith("http"):
@@ -63,6 +67,10 @@ class VscoExtractor(Extractor):
                 "height": img["height"],
                 "description": img.get("description") or "",
             })
+            if data["extension"] == "m3u8":
+                url = "ytdl:" + url
+                data["_ytdl_manifest"] = "hls"
+                data["extension"] = "mp4"
             yield Message.Url, url, data
 
     def images(self):
@@ -70,11 +78,12 @@ class VscoExtractor(Extractor):
 
     def _extract_preload_state(self, url):
         page = self.request(url, notfound=self.subcategory).text
-        return util.json_loads(text.extr(page, "__PRELOADED_STATE__ = ", "<"))
+        return util.json_loads(text.extr(page, "__PRELOADED_STATE__ = ", "<")
+                               .replace('":undefined', '":null'))
 
     def _pagination(self, url, params, token, key, extra=None):
         headers = {
-            "Referer"          : "{}/{}".format(self.root, self.user),
+            "Referer"          : f"{self.root}/{self.user}",
             "Authorization"    : "Bearer " + token,
             "X-Client-Platform": "web",
             "X-Client-Build"   : "1",
@@ -84,7 +93,7 @@ class VscoExtractor(Extractor):
             yield from map(self._transform_media, extra)
 
         while True:
-            data = self.request(url, params=params, headers=headers).json()
+            data = self.request_json(url, params=params, headers=headers)
             medias = data.get(key)
             if not medias:
                 return
@@ -100,8 +109,7 @@ class VscoExtractor(Extractor):
                 yield from medias
                 params["page"] += 1
 
-    @staticmethod
-    def _transform_media(media):
+    def _transform_media(self, media):
         if "responsiveUrl" not in media:
             return None
         media["_id"] = media["id"]
@@ -113,20 +121,43 @@ class VscoExtractor(Extractor):
         media["image_meta"] = media.get("imageMeta")
         return media
 
+    def _transform_video(self, media):
+        media["is_video"] = True
+        media["grid_name"] = ""
+        media["video_url"] = media["playback_url"]
+        media["responsive_url"] = media["poster_url"]
+        media["upload_date"] = media["created_date"]
+        return media
 
-class VscoUserExtractor(VscoExtractor):
-    """Extractor for images from a user on vsco.co"""
-    subcategory = "user"
-    pattern = USER_PATTERN + r"(?:/gallery|/images(?:/\d+)?)?/?(?:$|[?#])"
+
+class VscoUserExtractor(Dispatch, VscoExtractor):
+    """Extractor for a vsco user profile"""
+    pattern = USER_PATTERN + r"/?$"
+    example = "https://vsco.co/USER"
+
+    def items(self):
+        base = f"{self.root}/{self.user}/"
+        return self._dispatch_extractors((
+            (VscoAvatarExtractor    , base + "avatar"),
+            (VscoGalleryExtractor   , base + "gallery"),
+            (VscoSpacesExtractor    , base + "spaces"),
+            (VscoCollectionExtractor, base + "collection"),
+        ), ("gallery",))
+
+
+class VscoGalleryExtractor(VscoExtractor):
+    """Extractor for a vsco user's gallery"""
+    subcategory = "gallery"
+    pattern = USER_PATTERN + r"/(?:gallery|images)"
     example = "https://vsco.co/USER/gallery"
 
     def images(self):
-        url = "{}/{}/gallery".format(self.root, self.user)
+        url = f"{self.root}/{self.user}/gallery"
         data = self._extract_preload_state(url)
         tkn = data["users"]["currentUser"]["tkn"]
         sid = str(data["sites"]["siteByUsername"][self.user]["site"]["id"])
 
-        url = "{}/api/3.0/medias/profile".format(self.root)
+        url = f"{self.root}/api/3.0/medias/profile"
         params = {
             "site_id"  : sid,
             "limit"    : "14",
@@ -145,14 +176,14 @@ class VscoCollectionExtractor(VscoExtractor):
     example = "https://vsco.co/USER/collection/1"
 
     def images(self):
-        url = "{}/{}/collection/1".format(self.root, self.user)
+        url = f"{self.root}/{self.user}/collection/1"
         data = self._extract_preload_state(url)
 
         tkn = data["users"]["currentUser"]["tkn"]
         cid = (data["sites"]["siteByUsername"][self.user]
                ["site"]["siteCollectionId"])
 
-        url = "{}/api/2.0/collections/{}/medias".format(self.root, cid)
+        url = f"{self.root}/api/2.0/collections/{cid}/medias"
         params = {"page": 2, "size": "20"}
         return self._pagination(url, params, tkn, "medias", (
             data["medias"]["byId"][mid["id"]]["media"]
@@ -170,7 +201,7 @@ class VscoSpaceExtractor(VscoExtractor):
     example = "https://vsco.co/spaces/a1b2c3d4e5f"
 
     def images(self):
-        url = "{}/spaces/{}".format(self.root, self.user)
+        url = f"{self.root}/spaces/{self.user}"
         data = self._extract_preload_state(url)
 
         tkn = data["users"]["currentUser"]["tkn"]
@@ -184,14 +215,14 @@ class VscoSpaceExtractor(VscoExtractor):
         space = data["spaces"]["byId"][sid]
         space["postsList"] = [posts[pid] for pid in space["postsList"]]
 
-        url = "{}/grpc/spaces/{}/posts".format(self.root, sid)
+        url = f"{self.root}/grpc/spaces/{sid}/posts"
         params = {}
         return self._pagination(url, params, tkn, space)
 
     def _pagination(self, url, params, token, data):
         headers = {
             "Accept"       : "application/json",
-            "Referer"      : "{}/spaces/{}".format(self.root, self.user),
+            "Referer"      : f"{self.root}/spaces/{self.user}",
             "Content-Type" : "application/json",
             "Authorization": "Bearer " + token,
         }
@@ -207,7 +238,7 @@ class VscoSpaceExtractor(VscoExtractor):
                 return
             params["cursor"] = cursor["postcursorcontext"]["postId"]
 
-            data = self.request(url, params=params, headers=headers).json()
+            data = self.request_json(url, params=params, headers=headers)
 
 
 class VscoSpacesExtractor(VscoExtractor):
@@ -217,7 +248,7 @@ class VscoSpacesExtractor(VscoExtractor):
     example = "https://vsco.co/USER/spaces"
 
     def items(self):
-        url = "{}/{}/spaces".format(self.root, self.user)
+        url = f"{self.root}/{self.user}/spaces"
         data = self._extract_preload_state(url)
 
         tkn = data["users"]["currentUser"]["tkn"]
@@ -230,12 +261,12 @@ class VscoSpacesExtractor(VscoExtractor):
             "Authorization": "Bearer " + tkn,
         }
         # this would theoretically need to be paginated
-        url = "{}/grpc/spaces/user/{}".format(self.root, uid)
-        data = self.request(url, headers=headers).json()
+        url = f"{self.root}/grpc/spaces/user/{uid}"
+        data = self.request_json(url, headers=headers)
 
         for space in data["spacesWithRoleList"]:
             space = space["space"]
-            url = "{}/spaces/{}".format(self.root, space["id"])
+            url = f"{self.root}/spaces/{space['id']}"
             space["_extractor"] = VscoSpaceExtractor
             yield Message.Queue, url, space
 
@@ -247,7 +278,7 @@ class VscoAvatarExtractor(VscoExtractor):
     example = "https://vsco.co/USER/avatar"
 
     def images(self):
-        url = "{}/{}/gallery".format(self.root, self.user)
+        url = f"{self.root}/{self.user}/gallery"
         page = self.request(url).text
         piid = text.extr(page, '"profileImageId":"', '"')
 
@@ -274,12 +305,33 @@ class VscoImageExtractor(VscoExtractor):
     pattern = USER_PATTERN + r"/media/([0-9a-fA-F]+)"
     example = "https://vsco.co/USER/media/0123456789abcdef"
 
-    def __init__(self, match):
-        VscoExtractor.__init__(self, match)
-        self.media_id = match.group(2)
-
     def images(self):
-        url = "{}/{}/media/{}".format(self.root, self.user, self.media_id)
+        url = f"{self.root}/{self.user}/media/{self.groups[1]}"
         data = self._extract_preload_state(url)
         media = data["medias"]["byId"].popitem()[1]["media"]
         return (self._transform_media(media),)
+
+
+class VscoVideoExtractor(VscoExtractor):
+    """Extractor for vsco.co videos links"""
+    subcategory = "video"
+    pattern = USER_PATTERN + r"/video/([^/?#]+)"
+    example = "https://vsco.co/USER/video/012345678-9abc-def0"
+
+    def images(self):
+        url = f"{self.root}/{self.user}/video/{self.groups[1]}"
+        data = self._extract_preload_state(url)
+        media = data["medias"]["byId"].popitem()[1]["media"]
+
+        return ({
+            "_id"           : media["id"],
+            "is_video"      : True,
+            "grid_name"     : "",
+            "upload_date"   : media["createdDate"],
+            "responsive_url": media["posterUrl"],
+            "video_url"     : media.get("playbackUrl"),
+            "image_meta"    : None,
+            "width"         : media["width"],
+            "height"        : media["height"],
+            "description"   : media["description"],
+        },)

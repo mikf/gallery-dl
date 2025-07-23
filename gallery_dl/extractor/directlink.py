@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,13 +18,15 @@ class DirectlinkExtractor(Extractor):
     filename_fmt = "{domain}/{path}/{filename}.{extension}"
     archive_fmt = filename_fmt
     pattern = (r"(?i)https?://(?P<domain>[^/?#]+)/(?P<path>[^?#]+\."
-               r"(?:jpe?g|jpe|png|gif|web[mp]|mp4|mkv|og[gmv]|opus))"
+               r"(?:jpe?g|jpe|png|gif|bmp|svg|web[mp]|avif|heic|psd"
+               r"|mp4|m4v|mov|mkv|og[gmv]|wav|mp3|opus|zip|rar|7z|pdf|swf))"
                r"(?:\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?$")
     example = "https://en.wikipedia.org/static/images/project-logos/enwiki.png"
 
     def __init__(self, match):
+        self.data = data = match.groupdict()
+        self.subcategory = ".".join(data["domain"].rsplit(".", 2)[-2:])
         Extractor.__init__(self, match)
-        self.data = match.groupdict()
 
     def items(self):
         data = self.data

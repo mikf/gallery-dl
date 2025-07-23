@@ -40,6 +40,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.weasyl.com/view/2031/a-wesley",
+    "#category": ("", "weasyl", "submission"),
+    "#class"   : weasyl.WeasylSubmissionExtractor,
+},
+
+{
     "#url"     : "https://www.weasyl.com/~tanidareal",
     "#category": ("", "weasyl", "submissions"),
     "#class"   : weasyl.WeasylSubmissionsExtractor,
@@ -91,5 +97,12 @@ __tests__ = (
     "#class"   : weasyl.WeasylFavoriteExtractor,
     "#count"   : ">= 5",
 },
+
+{
+    "#url"     : "https://www.weasyl.com/favorites/furoferre",
+    "#category": ("", "weasyl", "favorite"),
+    "#class"   : weasyl.WeasylFavoriteExtractor,
+    "#count"   : ">= 5",
+}
 
 )

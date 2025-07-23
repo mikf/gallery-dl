@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,6 @@
 """Filesystem path handling"""
 
 import os
-import re
 import shutil
 import functools
 from . import util, formatter, exception
@@ -38,7 +37,7 @@ class PathFormat():
                 filename_fmt = extractor.filename_fmt
             elif isinstance(filename_fmt, dict):
                 self.filename_conditions = [
-                    (util.compile_expression(expr),
+                    (util.compile_filter(expr),
                      formatter.parse(fmt, kwdefault).format_map)
                     for expr, fmt in filename_fmt.items() if expr
                 ]
@@ -51,12 +50,13 @@ class PathFormat():
             raise exception.FilenameFormatError(exc)
 
         directory_fmt = config("directory")
+        self.directory_conditions = ()
         try:
             if directory_fmt is None:
                 directory_fmt = extractor.directory_fmt
             elif isinstance(directory_fmt, dict):
                 self.directory_conditions = [
-                    (util.compile_expression(expr), [
+                    (util.compile_filter(expr), [
                         formatter.parse(fmt, kwdefault).format_map
                         for fmt in fmts
                     ])
@@ -133,26 +133,45 @@ class PathFormat():
             basedir = self.clean_path(basedir)
         self.basedirectory = basedir
 
-    @staticmethod
-    def _build_cleanfunc(chars, repl):
+    def _build_cleanfunc(self, chars, repl):
         if not chars:
             return util.identity
         elif isinstance(chars, dict):
+            if 0 not in chars:
+                chars = self._process_repl_dict(chars)
+                chars[0] = None
+
             def func(x, table=str.maketrans(chars)):
                 return x.translate(table)
         elif len(chars) == 1:
             def func(x, c=chars, r=repl):
                 return x.replace(c, r)
         else:
-            return functools.partial(
-                re.compile("[" + chars + "]").sub, repl)
+            return functools.partial(util.re(f"[{chars}]").sub, repl)
         return func
+
+    def _process_repl_dict(self, chars):
+        # can't modify 'chars' while *directly* iterating over its keys
+        for char in [c for c in chars if len(c) > 1]:
+            if len(char) == 3 and char[1] == "-":
+                citer = range(ord(char[0]), ord(char[2])+1)
+            else:
+                citer = char
+
+            repl = chars.pop(char)
+            for c in citer:
+                chars[c] = repl
+
+        return chars
 
     def open(self, mode="wb"):
         """Open file and return a corresponding file object"""
         try:
             return open(self.temppath, mode)
         except FileNotFoundError:
+            if "r" in mode:
+                # '.part' file no longer exists
+                return util.NullContext()
             os.makedirs(self.realdirectory)
             return open(self.temppath, mode)
 
@@ -162,8 +181,7 @@ class PathFormat():
             return self.check_file()
         return False
 
-    @staticmethod
-    def check_file():
+    def check_file(self):
         return True
 
     def _enum_file(self):
@@ -183,28 +201,29 @@ class PathFormat():
     def set_directory(self, kwdict):
         """Build directory path and create it if necessary"""
         self.kwdict = kwdict
-        sep = os.sep
 
-        segments = self.build_directory(kwdict)
-        if segments:
+        if segments := self.build_directory(kwdict):
             self.directory = directory = self.basedirectory + self.clean_path(
-                sep.join(segments) + sep)
+                os.sep.join(segments) + os.sep)
         else:
             self.directory = directory = self.basedirectory
 
         if WINDOWS and self.extended:
-            # Enable longer-than-260-character paths
-            directory = os.path.abspath(directory)
-            if directory.startswith("\\\\"):
-                directory = "\\\\?\\UNC\\" + directory[2:]
-            else:
-                directory = "\\\\?\\" + directory
-
-            # abspath() in Python 3.7+ removes trailing path separators (#402)
-            if directory[-1] != sep:
-                directory += sep
-
+            directory = self._extended_path(directory)
         self.realdirectory = directory
+
+    def _extended_path(self, path):
+        # Enable longer-than-260-character paths
+        path = os.path.abspath(path)
+        if not path.startswith("\\\\"):
+            path = "\\\\?\\" + path
+        elif not path.startswith("\\\\?\\"):
+            path = "\\\\?\\UNC\\" + path[2:]
+
+        # abspath() in Python 3.7+ removes trailing path separators (#402)
+        if path[-1] != os.sep:
+            return path + os.sep
+        return path
 
     def set_filename(self, kwdict):
         """Set general filename data"""
@@ -260,24 +279,22 @@ class PathFormat():
     def build_directory(self, kwdict):
         """Apply 'kwdict' to directory format strings"""
         segments = []
-        append = segments.append
         strip = self.strip
 
         try:
             for fmt in self.directory_formatters:
                 segment = fmt(kwdict).strip()
-                if strip:
+                if strip and segment not in {".", ".."}:
                     # remove trailing dots and spaces (#647)
                     segment = segment.rstrip(strip)
                 if segment:
-                    append(self.clean_segment(segment))
+                    segments.append(self.clean_segment(segment))
             return segments
         except Exception as exc:
             raise exception.DirectoryFormatError(exc)
 
     def build_directory_conditional(self, kwdict):
         segments = []
-        append = segments.append
         strip = self.strip
 
         try:
@@ -288,10 +305,10 @@ class PathFormat():
                 formatters = self.directory_formatters
             for fmt in formatters:
                 segment = fmt(kwdict).strip()
-                if strip:
+                if strip and segment != "..":
                     segment = segment.rstrip(strip)
                 if segment:
-                    append(self.clean_segment(segment))
+                    segments.append(self.clean_segment(segment))
             return segments
         except Exception as exc:
             raise exception.DirectoryFormatError(exc)
@@ -326,6 +343,11 @@ class PathFormat():
             pass
         return 0
 
+    def set_mtime(self, path=None):
+        if (mtime := (self.kwdict.get("_mtime_meta") or
+                      self.kwdict.get("_mtime_http"))):
+            util.set_mtime(self.realpath if path is None else path, mtime)
+
     def finalize(self):
         """Move tempfile to its target location"""
         if self.delete:
@@ -339,15 +361,24 @@ class PathFormat():
                 try:
                     os.replace(self.temppath, self.realpath)
                 except FileNotFoundError:
-                    # delayed directory creation
-                    os.makedirs(self.realdirectory)
+                    try:
+                        # delayed directory creation
+                        os.makedirs(self.realdirectory)
+                    except FileExistsError:
+                        # file at self.temppath does not exist
+                        return False
                     continue
                 except OSError:
                     # move across different filesystems
-                    shutil.copyfile(self.temppath, self.realpath)
+                    try:
+                        shutil.copyfile(self.temppath, self.realpath)
+                    except FileNotFoundError:
+                        try:
+                            os.makedirs(self.realdirectory)
+                        except FileExistsError:
+                            return False
+                        shutil.copyfile(self.temppath, self.realpath)
                     os.unlink(self.temppath)
                 break
 
-        mtime = self.kwdict.get("_mtime")
-        if mtime:
-            util.set_mtime(self.realpath, mtime)
+        self.set_mtime()

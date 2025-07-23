@@ -33,7 +33,7 @@ __tests__ = (
     "#url"     : "https://sizechangebooru.com/index.php?q=/post/view/41",
     "#category": ("shimmie2", "giantessbooru", "post"),
     "#class"   : shimmie2.Shimmie2PostExtractor,
-    "#urls"        : "https://sizechangebooru.com/index.php?q=/image/41.jpg",
+    "#results"     : "https://sizechangebooru.com/index.php?q=/image/41.jpg",
     "#sha1_content": "79115ed309d1f4e82e7bead6948760e889139c91",
 
     "extension": "jpg",

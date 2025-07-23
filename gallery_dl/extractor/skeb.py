@@ -7,7 +7,7 @@
 """Extractors for https://skeb.jp/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 import itertools
 
 
@@ -21,29 +21,39 @@ class SkebExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user_name = match.group(1)
+        self.user_name = match[1]
 
     def _init(self):
         self.thumbnails = self.config("thumbnails", False)
         self.article = self.config("article", False)
-        self.headers = {"Accept": "application/json, text/plain, */*"}
+        self.headers = {
+            "Accept": "application/json, text/plain, */*",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-origin",
+        }
 
         if "Authorization" not in self.session.headers:
             self.headers["Authorization"] = "Bearer null"
 
-    def request(self, url, **kwargs):
-        while True:
-            try:
-                return Extractor.request(self, url, **kwargs)
-            except exception.HttpError as exc:
-                if exc.status == 429 and "request_key" in exc.response.cookies:
-                    continue
-                raise
+    def _handle_429(self, response):
+        if "request_key" in response.cookies:
+            return True
+
+        request_key = text.extr(
+            response.text, "request_key=", ";")
+        if request_key:
+            self.cookies.set("request_key", request_key, domain="skeb.jp")
+            return True
 
     def items(self):
         metadata = self.metadata()
         for user_name, post_num in self.posts():
-            response, post = self._get_post_data(user_name, post_num)
+            try:
+                response, post = self._get_post_data(user_name, post_num)
+            except Exception as exc:
+                self.log.error("@%s/%s: %s: %s", user_name, post_num,
+                               exc.__class__.__name__, exc)
+                continue
             if metadata:
                 post.update(metadata)
 
@@ -71,8 +81,8 @@ class SkebExtractor(Extractor):
         params["offset"] = 0
 
         while True:
-            posts = self.request(
-                url, params=params, headers=self.headers).json()
+            posts = self.request_json(
+                url, params=params, headers=self.headers)
 
             for post in posts:
                 parts = post["path"].split("/")
@@ -90,13 +100,13 @@ class SkebExtractor(Extractor):
             params["offset"] += 30
 
     def _pagination_users(self, endpoint, params):
-        url = "{}/api{}".format(self.root, endpoint)
+        url = f"{self.root}/api{endpoint}"
         params["offset"] = 0
         params["limit"] = 90
 
         while True:
-            data = self.request(
-                url, params=params, headers=self.headers).json()
+            data = self.request_json(
+                url, params=params, headers=self.headers)
             yield from data
 
             if len(data) < params["limit"]:
@@ -104,9 +114,8 @@ class SkebExtractor(Extractor):
             params["offset"] += params["limit"]
 
     def _get_post_data(self, user_name, post_num):
-        url = "{}/api/users/{}/works/{}".format(
-            self.root, user_name, post_num)
-        resp = self.request(url, headers=self.headers).json()
+        url = f"{self.root}/api/users/{user_name}/works/{post_num}"
+        resp = self.request_json(url, headers=self.headers)
         creator = resp["creator"]
         post = {
             "post_id"          : resp["id"],
@@ -153,8 +162,7 @@ class SkebExtractor(Extractor):
             })
 
         if self.article and "article_image_url" in resp:
-            url = resp["article_image_url"]
-            if url:
+            if url := resp["article_image_url"]:
                 files.append({
                     "content_category": "article",
                     "file_id" : "article",
@@ -174,7 +182,7 @@ class SkebExtractor(Extractor):
                     "height"    : info["height"],
                     "byte_size" : info["byte_size"],
                     "duration"  : info["duration"],
-                    "frame_rate": info["frame_rate"],
+                    "frame_rate": info.get("frame_rate"),
                     "software"  : info["software"],
                     "extension" : info["extension"],
                     "is_movie"  : info["is_movie"],
@@ -193,7 +201,7 @@ class SkebPostExtractor(SkebExtractor):
 
     def __init__(self, match):
         SkebExtractor.__init__(self, match)
-        self.post_num = match.group(2)
+        self.post_num = match[2]
 
     def posts(self):
         return ((self.user_name, self.post_num),)
@@ -206,7 +214,7 @@ class SkebUserExtractor(SkebExtractor):
     example = "https://skeb.jp/@USER"
 
     def posts(self):
-        url = "{}/api/users/{}/works".format(self.root, self.user_name)
+        url = f"{self.root}/api/users/{self.user_name}/works"
 
         params = {"role": "creator", "sort": "date"}
         posts = self._pagination(url, params)
@@ -256,9 +264,9 @@ class SkebSearchExtractor(SkebExtractor):
         data = {"requests": (request,)}
 
         while True:
-            result = self.request(
+            result = self.request_json(
                 url, method="POST", params=params, headers=headers, json=data,
-            ).json()["results"][0]
+            )["results"][0]
 
             for post in result["hits"]:
                 parts = post["path"].split("/")
@@ -279,7 +287,7 @@ class SkebFollowingExtractor(SkebExtractor):
     items = SkebExtractor._items_users
 
     def users(self):
-        endpoint = "/users/{}/following_creators".format(self.user_name)
+        endpoint = f"/users/{self.user_name}/following_creators"
         params = {"sort": "date"}
         return self._pagination_users(endpoint, params)
 

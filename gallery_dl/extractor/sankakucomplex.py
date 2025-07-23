@@ -1,40 +1,39 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://www.sankakucomplex.com/"""
+"""Extractors for https://news.sankakucomplex.com/"""
 
 from .common import Extractor, Message
 from .. import text, util
-import re
 
 
 class SankakucomplexExtractor(Extractor):
     """Base class for sankakucomplex extractors"""
     category = "sankakucomplex"
-    root = "https://www.sankakucomplex.com"
+    root = "https://news.sankakucomplex.com"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.path = match.group(1)
+        self.path = match[1]
 
 
 class SankakucomplexArticleExtractor(SankakucomplexExtractor):
-    """Extractor for articles on www.sankakucomplex.com"""
+    """Extractor for articles on news.sankakucomplex.com"""
     subcategory = "article"
     directory_fmt = ("{category}", "{date:%Y-%m-%d} {title}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{date:%Y%m%d}_{filename}"
-    pattern = (r"(?:https?://)?www\.sankakucomplex\.com"
+    pattern = (r"(?:https?://)?(?:news|www)\.sankakucomplex\.com"
                r"/(\d\d\d\d/\d\d/\d\d/[^/?#]+)")
-    example = "https://www.sankakucomplex.com/1970/01/01/TITLE"
+    example = "https://news.sankakucomplex.com/1970/01/01/TITLE"
 
     def items(self):
-        url = "{}/{}/?pg=X".format(self.root, self.path)
+        url = f"{self.root}/{self.path}/?pg=X"
         extr = text.extract_from(self.request(url).text)
         data = {
             "title"      : text.unescape(
@@ -64,39 +63,36 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
             file.update(data)
             yield Message.Url, url, file
 
-    @staticmethod
-    def _extract_images(content):
-        orig_sub = re.compile(r"-\d+x\d+\.").sub
+    def _extract_images(self, content):
+        orig_sub = util.re(r"-\d+x\d+\.").sub
         return [
             orig_sub(".", url) for url in
             util.unique(text.extract_iter(content, 'data-lazy-src="', '"'))
         ]
 
-    @staticmethod
-    def _extract_videos(content):
-        return re.findall(r"<source [^>]*src=[\"']([^\"']+)", content)
+    def _extract_videos(self, content):
+        return util.re(r"<source [^>]*src=[\"']([^\"']+)").findall(content)
 
-    @staticmethod
-    def _extract_embeds(content):
+    def _extract_embeds(self, content):
         return [
             "ytdl:" + url for url in
-            re.findall(r"<iframe [^>]*src=[\"']([^\"']+)", content)
+            util.re(r"<iframe [^>]*src=[\"']([^\"']+)").findall(content)
         ]
 
 
 class SankakucomplexTagExtractor(SankakucomplexExtractor):
     """Extractor for sankakucomplex blog articles by tag or author"""
     subcategory = "tag"
-    pattern = (r"(?:https?://)?www\.sankakucomplex\.com"
+    pattern = (r"(?:https?://)?(?:news|www)\.sankakucomplex\.com"
                r"/((?:tag|category|author)/[^/?#]+)")
-    example = "https://www.sankakucomplex.com/tag/TAG/"
+    example = "https://news.sankakucomplex.com/tag/TAG/"
 
     def items(self):
         pnum = 1
         data = {"_extractor": SankakucomplexArticleExtractor}
 
         while True:
-            url = "{}/{}/page/{}/".format(self.root, self.path, pnum)
+            url = f"{self.root}/{self.path}/page/{pnum}/"
             response = self.request(url, fatal=False)
             if response.status_code >= 400:
                 return

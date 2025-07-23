@@ -56,11 +56,23 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.hentai-foundry.com/pictures/tagged/kancolle",
+    "#category": ("", "hentaifoundry", "tag"),
+    "#class"   : hentaifoundry.HentaifoundryTagExtractor,
+    "#pattern" : r"https://pictures.hentai-foundry.com/[^/]/[^/?#]+/\d+/",
+    "#range"   : "20-30",
+
+    "search_tags": "kancolle",
+},
+
+{
     "#url"     : "https://www.hentai-foundry.com/pictures/recent/2018-09-20",
     "#category": ("", "hentaifoundry", "recent"),
     "#class"   : hentaifoundry.HentaifoundryRecentExtractor,
     "#pattern" : r"https://pictures.hentai-foundry.com/[^/]/[^/?#]+/\d+/",
     "#range"   : "20-30",
+
+    "date": "2018-09-20",
 },
 
 {
@@ -106,7 +118,7 @@ __tests__ = (
     "#comment" : "SWF / rumble embed (#4641)",
     "#category": ("", "hentaifoundry", "image"),
     "#class"   : hentaifoundry.HentaifoundryImageExtractor,
-    "#urls"    : "https://pictures.hentai-foundry.com/s/Soloid/186714/Soloid-186714-Osaloop.swf",
+    "#results" : "https://pictures.hentai-foundry.com/s/Soloid/186714/Soloid-186714-Osaloop.swf",
 
     "artist"     : "Soloid",
     "date"       : "dt:2013-02-07 17:25:54",

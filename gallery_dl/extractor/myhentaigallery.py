@@ -20,12 +20,12 @@ class MyhentaigalleryGalleryExtractor(GalleryExtractor):
     example = "https://myhentaigallery.com/g/12345"
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
-        url = "{}/g/{}".format(self.root, self.gallery_id)
+        self.gallery_id = match[1]
+        url = f"{self.root}/g/{self.gallery_id}"
         GalleryExtractor.__init__(self, match, url)
 
     def _init(self):
-        self.session.headers["Referer"] = self.gallery_url
+        self.session.headers["Referer"] = self.page_url
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -33,7 +33,7 @@ class MyhentaigalleryGalleryExtractor(GalleryExtractor):
 
         title = extr('<div class="comic-description">\n', '</h1>').lstrip()
         if title.startswith("<h1>"):
-            title = title[len("<h1>"):]
+            title = title[4:]
 
         if not title:
             raise exception.NotFoundError("gallery")
@@ -41,10 +41,10 @@ class MyhentaigalleryGalleryExtractor(GalleryExtractor):
         return {
             "title"     : text.unescape(title),
             "gallery_id": text.parse_int(self.gallery_id),
-            "tags"      : split(extr('<div>\nCategories:', '</div>')),
-            "artist"    : split(extr('<div>\nArtists:'   , '</div>')),
-            "group"     : split(extr('<div>\nGroups:'    , '</div>')),
-            "parodies"  : split(extr('<div>\nParodies:'  , '</div>')),
+            "tags"      : split(extr("        Categories:", "</div>")),
+            "artist"    : split(extr("        Artists:"   , "</div>")),
+            "group"     : split(extr("        Groups:"    , "</div>")),
+            "parodies"  : split(extr("        Parodies:"  , "</div>")),
         }
 
     def images(self, page):

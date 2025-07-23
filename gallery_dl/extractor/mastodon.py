@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -19,11 +19,10 @@ class MastodonExtractor(BaseExtractor):
     directory_fmt = ("mastodon", "{instance}", "{account[username]}")
     filename_fmt = "{category}_{id}_{media[id]}.{extension}"
     archive_fmt = "{media[id]}"
-    cookies_domain = None
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.item = match.group(match.lastindex)
+        self.item = self.groups[-1]
 
     def _init(self):
         self.instance = self.root.partition("://")[2]
@@ -50,10 +49,8 @@ class MastodonExtractor(BaseExtractor):
                 attachments.extend(status["reblog"]["media_attachments"])
 
             if self.cards:
-                card = status.get("card")
-                if card:
-                    url = card.get("image")
-                    if url:
+                if card := status.get("card"):
+                    if url := card.get("image"):
                         card["weburl"] = card.get("url")
                         card["url"] = url
                         card["id"] = "card" + "".join(
@@ -197,10 +194,15 @@ class MastodonFollowingExtractor(MastodonExtractor):
 class MastodonStatusExtractor(MastodonExtractor):
     """Extractor for images from a status"""
     subcategory = "status"
-    pattern = BASE_PATTERN + r"/@[^/?#]+/(?!following)([^/?#]+)"
+    pattern = (BASE_PATTERN + r"/(?:@[^/?#]+|(?:users/[^/?#]+/)?"
+               r"(?:statuses|notice|objects()))/(?!following)([^/?#]+)")
     example = "https://mastodon.social/@USER/12345"
 
     def statuses(self):
+        if self.groups[-2] is not None:
+            url = f"{self.root}/objects/{self.item}"
+            location = self.request_location(url)
+            self.item = location.rpartition("/")[2]
         return (MastodonAPI(self).status(self.item),)
 
 
@@ -239,7 +241,7 @@ class MastodonAPI():
         if "@" in username:
             handle = "@" + username
         else:
-            handle = "@{}@{}".format(username, self.extractor.instance)
+            handle = f"@{username}@{self.extractor.instance}"
 
         for account in self.account_search(handle, 1):
             if account["acct"] == username:
@@ -259,7 +261,7 @@ class MastodonAPI():
 
     def account_following(self, account_id):
         """Accounts which the given account is following"""
-        endpoint = "/v1/accounts/{}/following".format(account_id)
+        endpoint = f"/v1/accounts/{account_id}/following"
         return self._pagination(endpoint, None)
 
     def account_lookup(self, username):
@@ -277,7 +279,7 @@ class MastodonAPI():
     def account_statuses(self, account_id, only_media=True,
                          exclude_replies=False):
         """Statuses posted to the given account"""
-        endpoint = "/v1/accounts/{}/statuses".format(account_id)
+        endpoint = f"/v1/accounts/{account_id}/statuses"
         params = {"only_media"     : "true" if only_media else "false",
                   "exclude_replies": "true" if exclude_replies else "false"}
         return self._pagination(endpoint, params)
@@ -311,10 +313,9 @@ class MastodonAPI():
             if code < 400:
                 return response
             if code == 401:
-                raise exception.StopExtraction(
-                    "Invalid or missing access token.\n"
-                    "Run 'gallery-dl oauth:mastodon:%s' to obtain one.",
-                    self.extractor.instance)
+                raise exception.AbortExtraction(
+                    f"Invalid or missing access token.\nRun 'gallery-dl oauth:"
+                    f"mastodon:{self.extractor.instance}' to obtain one.")
             if code == 404:
                 raise exception.NotFoundError()
             if code == 429:
@@ -323,7 +324,7 @@ class MastodonAPI():
                     "%Y-%m-%dT%H:%M:%S.%fZ",
                 ))
                 continue
-            raise exception.StopExtraction(response.json().get("error"))
+            raise exception.AbortExtraction(response.json().get("error"))
 
     def _pagination(self, endpoint, params):
         url = endpoint

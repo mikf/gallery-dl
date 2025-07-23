@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,17 +26,15 @@ class SzurubooruExtractor(booru.BooruExtractor):
             "Content-Type": "application/json",
         }
 
-        username = self.config("username")
-        if username:
-            token = self.config("token")
-            if token:
+        if username := self.config("username"):
+            if token := self.config("token"):
                 value = username + ":" + token
                 self.headers["Authorization"] = "Token " + \
                     binascii.b2a_base64(value.encode())[:-1].decode()
 
     def _api_request(self, endpoint, params=None):
         url = self.root + "/api" + endpoint
-        return self.request(url, headers=self.headers, params=params).json()
+        return self.request_json(url, headers=self.headers, params=params)
 
     def _pagination(self, endpoint, params):
         params["offset"] = 0
@@ -58,20 +56,17 @@ class SzurubooruExtractor(booru.BooruExtractor):
             url = self.root + "/" + url
         return url
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_datetime(
             post["creationTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
         tags = []
-        append = tags.append
         tags_categories = collections.defaultdict(list)
-
         for tag in post["tags"]:
             tag_type = tag["category"].rpartition("_")[2]
             tag_name = tag["names"][0]
             tags_categories[tag_type].append(tag_name)
-            append(tag_name)
+            tags.append(tag_name)
 
         post["tags"] = tags
         for category, tags in tags_categories.items():
@@ -79,17 +74,18 @@ class SzurubooruExtractor(booru.BooruExtractor):
 
 
 BASE_PATTERN = SzurubooruExtractor.update({
-    "foalcon": {
-        "root": "https://booru.foalcon.com",
-        "pattern": r"booru\.foalcon\.com",
-    },
     "bcbnsfw": {
         "root": "https://booru.bcbnsfw.space",
         "pattern": r"booru\.bcbnsfw\.space",
+        "query-all": "*",
     },
     "snootbooru": {
         "root": "https://snootbooru.com",
         "pattern": r"snootbooru\.com",
+    },
+    "visuabusters": {
+        "root": "https://www.visuabusters.com/booru",
+        "pattern": r"(?:www\.)?visuabusters\.com/booru",
     },
 })
 
@@ -98,30 +94,31 @@ class SzurubooruTagExtractor(SzurubooruExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}_{version}"
-    pattern = BASE_PATTERN + r"/posts/query=([^/?#]+)"
-    example = "https://booru.foalcon.com/posts/query=TAG"
+    pattern = BASE_PATTERN + r"/posts(?:/query=([^/?#]*))?"
+    example = "https://booru.bcbnsfw.space/posts/query=TAG"
 
     def __init__(self, match):
         SzurubooruExtractor.__init__(self, match)
-        query = match.group(match.lastindex)
-        self.query = text.unquote(query.replace("+", " "))
+        query = self.groups[-1]
+        self.query = text.unquote(query.replace("+", " ")) if query else ""
 
     def metadata(self):
         return {"search_tags": self.query}
 
     def posts(self):
-        return self._pagination("/posts/", {"query": self.query})
+        if self.query.strip():
+            query = self.query
+        else:
+            query = self.config_instance("query-all")
+
+        return self._pagination("/posts/", {"query": query})
 
 
 class SzurubooruPostExtractor(SzurubooruExtractor):
     subcategory = "post"
     archive_fmt = "{id}_{version}"
     pattern = BASE_PATTERN + r"/post/(\d+)"
-    example = "https://booru.foalcon.com/post/12345"
-
-    def __init__(self, match):
-        SzurubooruExtractor.__init__(self, match)
-        self.post_id = match.group(match.lastindex)
+    example = "https://booru.bcbnsfw.space/post/12345"
 
     def posts(self):
-        return (self._api_request("/post/" + self.post_id),)
+        return (self._api_request("/post/" + self.groups[-1]),)

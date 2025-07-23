@@ -93,7 +93,7 @@ class FantiaExtractor(Extractor):
     def _get_post_data(self, post_id):
         """Fetch and process post data"""
         url = self.root+"/api/v1/posts/"+post_id
-        resp = self.request(url, headers=self.headers).json()["post"]
+        resp = self.request_json(url, headers=self.headers)["post"]
         return {
             "post_id": resp["id"],
             "post_url": self.root + "/posts/" + str(resp["id"]),
@@ -181,10 +181,10 @@ class FantiaCreatorExtractor(FantiaExtractor):
 
     def __init__(self, match):
         FantiaExtractor.__init__(self, match)
-        self.creator_id = match.group(1)
+        self.creator_id = match[1]
 
     def posts(self):
-        url = "{}/fanclubs/{}/posts".format(self.root, self.creator_id)
+        url = f"{self.root}/fanclubs/{self.creator_id}/posts"
         return self._pagination(url)
 
 
@@ -196,7 +196,7 @@ class FantiaPostExtractor(FantiaExtractor):
 
     def __init__(self, match):
         FantiaExtractor.__init__(self, match)
-        self.post_id = match.group(1)
+        self.post_id = match[1]
 
     def posts(self):
         self._csrf_token()

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,7 +26,7 @@ class UnsplashExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.item = match.group(1)
+        self.item = match[1]
 
     def items(self):
         fmt = self.config("format") or "raw"
@@ -48,8 +48,7 @@ class UnsplashExtractor(Extractor):
             yield Message.Directory, photo
             yield Message.Url, url, photo
 
-    @staticmethod
-    def metadata():
+    def metadata(self):
         return None
 
     def skip(self, num):
@@ -62,7 +61,7 @@ class UnsplashExtractor(Extractor):
         params["page"] = self.page_start
 
         while True:
-            photos = self.request(url, params=params).json()
+            photos = self.request_json(url, params=params)
             if results:
                 photos = photos["results"]
             yield from photos
@@ -79,8 +78,8 @@ class UnsplashImageExtractor(UnsplashExtractor):
     example = "https://unsplash.com/photos/ID"
 
     def photos(self):
-        url = "{}/napi/photos/{}".format(self.root, self.item)
-        return (self.request(url).json(),)
+        url = f"{self.root}/napi/photos/{self.item}"
+        return (self.request_json(url),)
 
 
 class UnsplashUserExtractor(UnsplashExtractor):
@@ -90,7 +89,7 @@ class UnsplashUserExtractor(UnsplashExtractor):
     example = "https://unsplash.com/@USER"
 
     def photos(self):
-        url = "{}/napi/users/{}/photos".format(self.root, self.item)
+        url = f"{self.root}/napi/users/{self.item}/photos"
         params = {"order_by": "latest"}
         return self._pagination(url, params)
 
@@ -102,7 +101,7 @@ class UnsplashFavoriteExtractor(UnsplashExtractor):
     example = "https://unsplash.com/@USER/likes"
 
     def photos(self):
-        url = "{}/napi/users/{}/likes".format(self.root, self.item)
+        url = f"{self.root}/napi/users/{self.item}/likes"
         params = {"order_by": "latest"}
         return self._pagination(url, params)
 
@@ -115,13 +114,13 @@ class UnsplashCollectionExtractor(UnsplashExtractor):
 
     def __init__(self, match):
         UnsplashExtractor.__init__(self, match)
-        self.title = match.group(2) or ""
+        self.title = match[2] or ""
 
     def metadata(self):
         return {"collection_id": self.item, "collection_title": self.title}
 
     def photos(self):
-        url = "{}/napi/collections/{}/photos".format(self.root, self.item)
+        url = f"{self.root}/napi/collections/{self.item}/photos"
         params = {"order_by": "latest"}
         return self._pagination(url, params)
 
@@ -134,7 +133,7 @@ class UnsplashSearchExtractor(UnsplashExtractor):
 
     def __init__(self, match):
         UnsplashExtractor.__init__(self, match)
-        self.query = match.group(2)
+        self.query = match[2]
 
     def photos(self):
         url = self.root + "/napi/search/photos"

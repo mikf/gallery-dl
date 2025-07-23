@@ -71,7 +71,7 @@ def get_test_source(extr, *, cache={}):
         tests = cache[extr.__module__]
     except KeyError:
         path = sys.modules[extr.__module__].__file__
-        with open(path) as fp:
+        with util.open(path) as fp:
             lines = fp.readlines()
         tests = cache[extr.__module__] = extract_tests_from_source(lines)
     return tests.get(extr.url) or ("",)
@@ -239,8 +239,8 @@ def main():
     os.makedirs(args.target, exist_ok=True)
     for name, tests in collect_tests(args.category).items():
         name = name.replace(".", "")
-        with util.lazy(f"{args.target}/{name}.py") as file:
-            file.write(export_tests(tests))
+        with util.lazy(f"{args.target}/{name}.py") as fp:
+            fp.write(export_tests(tests))
 
 
 if __name__ == "__main__":

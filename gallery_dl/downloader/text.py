@@ -18,8 +18,8 @@ class TextDownloader(DownloaderBase):
         if self.part:
             pathfmt.part_enable(self.partdir)
         self.out.start(pathfmt.path)
-        with pathfmt.open("wb") as file:
-            file.write(url.encode()[5:])
+        with pathfmt.open("wb") as fp:
+            fp.write(url.encode()[5:])
         return True
 
 

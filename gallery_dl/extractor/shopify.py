@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,10 +17,6 @@ class ShopifyExtractor(BaseExtractor):
     basecategory = "shopify"
     filename_fmt = "{product[title]}_{num:>02}_{id}.{extension}"
     archive_fmt = "{id}"
-
-    def __init__(self, match):
-        BaseExtractor.__init__(self, match)
-        self.item_url = self.root + match.group(match.lastindex)
 
     def items(self):
         data = self.metadata()
@@ -98,14 +94,15 @@ class ShopifyCollectionExtractor(ShopifyExtractor):
     example = "https://www.fashionnova.com/collections/TITLE"
 
     def metadata(self):
-        return self.request(self.item_url + ".json").json()
+        url = f"{self.root}{self.groups[-1]}.json"
+        return self.request_json(url)
 
     def products(self):
-        url = self.item_url + "/products.json"
+        url = f"{self.root}{self.groups[-1]}/products.json"
         params = {"page": 1}
 
         while True:
-            data = self.request(url, params=params).json()["products"]
+            data = self.request_json(url, params=params)["products"]
             if not data:
                 return
             yield from data
@@ -120,6 +117,7 @@ class ShopifyProductExtractor(ShopifyExtractor):
     example = "https://www.fashionnova.com/collections/TITLE/products/NAME"
 
     def products(self):
-        product = self.request(self.item_url + ".json").json()["product"]
+        url = f"{self.root}{self.groups[-1]}.json"
+        product = self.request_json(url)["product"]
         del product["image"]
         return (product,)

@@ -6,8 +6,9 @@
 
 """Extractors for Misskey instances"""
 
-from .common import BaseExtractor, Message
+from .common import BaseExtractor, Message, Dispatch
 from .. import text, exception
+from ..cache import memcache
 
 
 class MisskeyExtractor(BaseExtractor):
@@ -19,7 +20,7 @@ class MisskeyExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.item = match.group(match.lastindex)
+        self.item = self.groups[-1]
 
     def _init(self):
         self.api = MisskeyAPI(self)
@@ -32,15 +33,13 @@ class MisskeyExtractor(BaseExtractor):
             if "note" in note:
                 note = note["note"]
             files = note.pop("files") or []
-            renote = note.get("renote")
-            if renote:
+            if renote := note.get("renote"):
                 if not self.renotes:
                     self.log.debug("Skipping %s (renote)", note["id"])
                     continue
                 files.extend(renote.get("files") or ())
 
-            reply = note.get("reply")
-            if reply:
+            if reply := note.get("reply"):
                 if not self.replies:
                     self.log.debug("Skipping %s (reply)", note["id"])
                     continue
@@ -64,6 +63,23 @@ class MisskeyExtractor(BaseExtractor):
         """Return an iterable containing all relevant Note objects"""
         return ()
 
+    def _make_note(self, type, user, url):
+        # extract real URL from potential proxy
+        path, sep, query = url.partition("?")
+        if sep:
+            url = text.parse_query(query).get("url") or path
+
+        return {
+            "id"   : type,
+            "user" : user,
+            "files": ({
+                "id" : url.rpartition("/")[2].partition(".")[0],  # ID from URL
+                "url": url,
+                "createdAt": "",
+            },),
+            "createdAt": "",
+        }
+
 
 BASE_PATTERN = MisskeyExtractor.update({
     "misskey.io": {
@@ -85,14 +101,65 @@ BASE_PATTERN = MisskeyExtractor.update({
 })
 
 
-class MisskeyUserExtractor(MisskeyExtractor):
+class MisskeyUserExtractor(Dispatch, MisskeyExtractor):
     """Extractor for all images of a Misskey user"""
     subcategory = "user"
     pattern = BASE_PATTERN + r"/@([^/?#]+)/?$"
     example = "https://misskey.io/@USER"
 
+    def items(self):
+        base = f"{self.root}/@{self.item}/"
+        return self._dispatch_extractors((
+            (MisskeyInfoExtractor      , base + "info"),
+            (MisskeyAvatarExtractor    , base + "avatar"),
+            (MisskeyBackgroundExtractor, base + "banner"),
+            (MisskeyNotesExtractor     , base + "notes"),
+        ), ("notes",))
+
+
+class MisskeyNotesExtractor(MisskeyExtractor):
+    """Extractor for a Misskey user's notes"""
+    subcategory = "notes"
+    pattern = BASE_PATTERN + r"/@([^/?#]+)/notes"
+    example = "https://misskey.io/@USER/notes"
+
     def notes(self):
         return self.api.users_notes(self.api.user_id_by_username(self.item))
+
+
+class MisskeyInfoExtractor(MisskeyExtractor):
+    """Extractor for a Misskey user's profile data"""
+    subcategory = "info"
+    pattern = BASE_PATTERN + r"/@([^/?#]+)/info"
+    example = "https://misskey.io/@USER/info"
+
+    def items(self):
+        user = self.api.users_show(self.item)
+        return iter(((Message.Directory, user),))
+
+
+class MisskeyAvatarExtractor(MisskeyExtractor):
+    """Extractor for a Misskey user's avatar"""
+    subcategory = "avatar"
+    pattern = BASE_PATTERN + r"/@([^/?#]+)/avatar"
+    example = "https://misskey.io/@USER/avatar"
+
+    def notes(self):
+        user = self.api.users_show(self.item)
+        url = user.get("avatarUrl")
+        return (self._make_note("avatar", user, url),) if url else ()
+
+
+class MisskeyBackgroundExtractor(MisskeyExtractor):
+    """Extractor for a Misskey user's banner image"""
+    subcategory = "background"
+    pattern = BASE_PATTERN + r"/@([^/?#]+)/ba(?:nner|ckground)"
+    example = "https://misskey.io/@USER/banner"
+
+    def notes(self):
+        user = self.api.users_show(self.item)
+        url = user.get("bannerUrl")
+        return (self._make_note("background", user, url),) if url else ()
 
 
 class MisskeyFollowingExtractor(MisskeyExtractor):
@@ -105,10 +172,9 @@ class MisskeyFollowingExtractor(MisskeyExtractor):
         user_id = self.api.user_id_by_username(self.item)
         for user in self.api.users_following(user_id):
             user = user["followee"]
-            url = self.root + "/@" + user["username"]
-            host = user["host"]
-            if host is not None:
-                url += "@" + host
+            url = f"{self.root}/@{user['username']}"
+            if (host := user["host"]) is not None:
+                url = f"{url}@{host}"
             user["_extractor"] = MisskeyUserExtractor
             yield Message.Queue, url, user
 
@@ -144,15 +210,10 @@ class MisskeyAPI():
     def __init__(self, extractor):
         self.root = extractor.root
         self.extractor = extractor
-        self.headers = {"Content-Type": "application/json"}
         self.access_token = extractor.config("access-token")
 
     def user_id_by_username(self, username):
-        endpoint = "/users/show"
-        data = {"username": username}
-        if "@" in username:
-            data["username"], _, data["host"] = username.partition("@")
-        return self._call(endpoint, data)["id"]
+        return self.users_show(username)["id"]
 
     def users_following(self, user_id):
         endpoint = "/users/following"
@@ -163,6 +224,13 @@ class MisskeyAPI():
         endpoint = "/users/notes"
         data = {"userId": user_id}
         return self._pagination(endpoint, data)
+
+    @memcache(keyarg=1)
+    def users_show(self, username):
+        endpoint = "/users/show"
+        username, _, host = username.partition("@")
+        data = {"username": username, "host": host or None}
+        return self._call(endpoint, data)
 
     def notes_show(self, note_id):
         endpoint = "/notes/show"
@@ -177,9 +245,8 @@ class MisskeyAPI():
         return self._pagination(endpoint, data)
 
     def _call(self, endpoint, data):
-        url = self.root + "/api" + endpoint
-        return self.extractor.request(
-            url, method="POST", headers=self.headers, json=data).json()
+        url = f"{self.root}/api{endpoint}"
+        return self.extractor.request_json(url, method="POST", json=data)
 
     def _pagination(self, endpoint, data):
         data["limit"] = 100

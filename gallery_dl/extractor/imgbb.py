@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -112,7 +112,7 @@ class ImgbbExtractor(Extractor):
                 params["page"] += 1
             elif not seek or 'class="pagination-next"' not in page:
                 return
-            data = self.request(endpoint, method="POST", data=params).json()
+            data = self.request_json(endpoint, method="POST", data=params)
             page = data["html"]
 
 
@@ -126,8 +126,8 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
     def __init__(self, match):
         ImgbbExtractor.__init__(self, match)
         self.album_name = None
-        self.album_id = match.group(1)
-        self.sort = text.parse_query(match.group(2)).get("sort", "date_desc")
+        self.album_id = match[1]
+        self.sort = text.parse_query(match[2]).get("sort", "date_desc")
         self.page_url = "https://ibb.co/album/" + self.album_id
 
     def metadata(self, page):
@@ -162,9 +162,9 @@ class ImgbbUserExtractor(ImgbbExtractor):
 
     def __init__(self, match):
         ImgbbExtractor.__init__(self, match)
-        self.user = match.group(1)
-        self.sort = text.parse_query(match.group(2)).get("sort", "date_desc")
-        self.page_url = "https://{}.imgbb.com/".format(self.user)
+        self.user = match[1]
+        self.sort = text.parse_query(match[2]).get("sort", "date_desc")
+        self.page_url = f"https://{self.user}.imgbb.com/"
 
     def metadata(self, page):
         user = self._extract_user(page)
@@ -191,7 +191,7 @@ class ImgbbImageExtractor(ImgbbExtractor):
 
     def __init__(self, match):
         ImgbbExtractor.__init__(self, match)
-        self.image_id = match.group(1)
+        self.image_id = match[1]
 
     def items(self):
         url = "https://ibb.co/" + self.image_id

@@ -9,8 +9,8 @@ import warnings
 
 def read(fname):
     path = os.path.join(os.path.dirname(__file__), fname)
-    with open(path, encoding="utf-8") as file:
-        return file.read()
+    with open(path, encoding="utf-8") as fp:
+        return fp.read()
 
 
 def check_file(fname):
@@ -28,7 +28,7 @@ def check_file(fname):
 VERSION = re.search(
     r'__version__\s*=\s*"([^"]+)"',
     read("gallery_dl/version.py"),
-).group(1)
+)[1]
 
 FILES = [
     (path, [f for f in files if check_file(f)])
@@ -100,13 +100,21 @@ def build_setuptools():
         maintainer="Mike Fährmann",
         maintainer_email="mike_faehrmann@web.de",
         license="GPLv2",
-        python_requires=">=3.4",
+        python_requires=">=3.8",
         install_requires=[
             "requests>=2.11.0",
         ],
         extras_require={
             "video": [
-                "youtube-dl",
+                "yt-dlp",
+            ],
+            "extra": [
+                "requests[socks]",
+                "yt-dlp[default]",
+                "pyyaml",
+                "toml; python_version < '3.11'",
+                "truststore; python_version >= '3.10'",
+                "secretstorage; sys_platform == 'linux'",
             ],
         },
         entry_points={
@@ -127,15 +135,12 @@ def build_setuptools():
             "Programming Language :: Python",
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3 :: Only",
-            "Programming Language :: Python :: 3.4",
-            "Programming Language :: Python :: 3.5",
-            "Programming Language :: Python :: 3.6",
-            "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
             "Programming Language :: Python :: 3.11",
             "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
             "Programming Language :: Python :: Implementation :: CPython",
             "Programming Language :: Python :: Implementation :: PyPy",
             "Topic :: Internet :: WWW/HTTP",

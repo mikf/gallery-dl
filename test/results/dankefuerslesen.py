@@ -1,0 +1,87 @@
+# -*- coding: utf-8 -*-
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+from gallery_dl.extractor import dankefuerslesen
+
+
+__tests__ = (
+{
+    "#url"     : "https://danke.moe/read/manga/awana-chan-wa-kyou-mo-shiawase/2/1/",
+    "#class"   : dankefuerslesen.DankefuerslesenChapterExtractor,
+    "#pattern" : r"https://danke.moe/media/manga/awana-chan-wa-kyou-mo-shiawase/chapters/0002_m9inbehz/69/\d+\.png",
+    "#count"   : 22,
+
+    "volume"    : 1,
+    "chapter"   : 2,
+    "chapter_minor": "",
+    "count"     : 22,
+    "page"      : range(1, 22),
+    "date"      : "dt:2025-02-09 19:03:08",
+    "extension" : "png",
+    "filename"  : str,
+    "group"     : ["Good Try Scans"],
+    "group_id"  : 69,
+    "lang"      : None,
+    "language"  : None,
+    "manga"     : "Awana-chan wa Kyou mo Shiawase",
+    "manga_slug": "awana-chan-wa-kyou-mo-shiawase",
+    "title"     : "Eat some ramen!",
+},
+
+{
+    "#url"     : "https://danke.moe/read/manga/awana-chan-wa-kyou-mo-shiawase/2/1/",
+    "#comment" : "ZIP archive download",
+    "#class"   : dankefuerslesen.DankefuerslesenChapterExtractor,
+    "#options" : {"zip": True},
+    "#results" : "https://danke.moe/api/download_chapter/awana-chan-wa-kyou-mo-shiawase/2/",
+
+    "count"    : 0,
+    "page"     : 0,
+    "extension": "zip",
+},
+
+{
+    "#url"     : "https://danke.moe/read/manga/raul-and-the-vampire/7-5/1/",
+    "#comment" : "minor chapter version",
+    "#class"   : dankefuerslesen.DankefuerslesenChapterExtractor,
+    "#pattern" : r"https://danke.moe/media/manga/raul-and-the-vampire/chapters/0009-5_efnaqvlj/56/\d+\.png",
+    "#count"   : 20,
+
+    "volume"    : 1,
+    "chapter"   : 7,
+    "chapter_minor": ".5",
+    "count"     : 20,
+    "page"      : range(1, 20),
+    "date"      : "dt:2024-10-10 07:12:44",
+    "extension" : "png",
+    "filename"  : str,
+    "group"     : ["Danke fürs Lesen", "Senko-san's Abode"],
+    "group_id"  : 56,
+    "lang"      : None,
+    "language"  : None,
+    "manga"     : "Raul and The Vampire",
+    "manga_slug": "raul-and-the-vampire",
+    "title"     : "Volume 1 Extras",
+},
+
+{
+    "#url"     : "https://danke.moe/read/manga/awana-chan-wa-kyou-mo-shiawase/",
+    "#class"   : dankefuerslesen.DankefuerslesenMangaExtractor,
+    "#pattern" : dankefuerslesen.DankefuerslesenChapterExtractor.pattern,
+    "#results" : (
+        "https://danke.moe/read/manga/awana-chan-wa-kyou-mo-shiawase/1/1/",
+        "https://danke.moe/read/manga/awana-chan-wa-kyou-mo-shiawase/2/1/",
+        "https://danke.moe/read/manga/awana-chan-wa-kyou-mo-shiawase/3/1/",
+        "https://danke.moe/read/manga/awana-chan-wa-kyou-mo-shiawase/4/1/",
+    ),
+
+    "chapter" : range(1, 4),
+    "chapter_minor": "",
+    "lang"    : None,
+    "language": None,
+},
+
+)

@@ -16,6 +16,7 @@ __tests__ = (
     "#count"   : 1,
 
     "album_id": "NQgdlWvk",
+    "date"    : None,
     "count"   : 1,
     "num"     : 1,
     "title"   : "porn",
@@ -30,6 +31,7 @@ __tests__ = (
     "#count"   : 6,
 
     "album_id": "TdbZ4ogi",
+    "date"    : "dt:2024-03-18 00:01:56",
     "count"   : 6,
     "num"     : int,
     "title"   : "82e78cfbb461ad87198f927fcb1fda9a1efac9ff.",
@@ -40,6 +42,7 @@ __tests__ = (
     "#url"     : "https://www.erome.com/yYgWBZw8o8qsMzM",
     "#category": ("", "erome", "user"),
     "#class"   : erome.EromeUserExtractor,
+    "#pattern" : erome.EromeAlbumExtractor.pattern,
     "#range"   : "1-25",
     "#count"   : 25,
 },
@@ -48,6 +51,7 @@ __tests__ = (
     "#url"     : "https://www.erome.com/search?q=cute",
     "#category": ("", "erome", "search"),
     "#class"   : erome.EromeSearchExtractor,
+    "#pattern" : erome.EromeAlbumExtractor.pattern,
     "#range"   : "1-25",
     "#count"   : 25,
 },

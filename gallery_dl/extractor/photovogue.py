@@ -23,7 +23,7 @@ class PhotovogueUserExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user_id = match.group(1)
+        self.user_id = match[1]
 
     def items(self):
         for photo in self.photos():
@@ -45,7 +45,7 @@ class PhotovogueUserExtractor(Extractor):
         }
 
         while True:
-            data = self.request(url, params=params).json()
+            data = self.request_json(url, params=params)
             yield from data["items"]
 
             if not data["has_next"]:

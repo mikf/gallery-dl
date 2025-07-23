@@ -26,8 +26,8 @@ class _2chThreadExtractor(Extractor):
         self.board, self.thread = match.groups()
 
     def items(self):
-        url = "{}/{}/res/{}.json".format(self.root, self.board, self.thread)
-        posts = self.request(url).json()["threads"][0]["posts"]
+        url = f"{self.root}/{self.board}/res/{self.thread}.json"
+        posts = self.request_json(url)["threads"][0]["posts"]
 
         op = posts[0]
         title = op.get("subject") or text.remove_html(op["comment"])
@@ -40,8 +40,7 @@ class _2chThreadExtractor(Extractor):
 
         yield Message.Directory, thread
         for post in posts:
-            files = post.get("files")
-            if files:
+            if files := post.get("files"):
                 post["post_name"] = post["name"]
                 post["date"] = text.parse_timestamp(post["timestamp"])
                 del post["files"]
@@ -68,24 +67,24 @@ class _2chBoardExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.board = match.group(1)
+        self.board = match[1]
 
     def items(self):
+        base = f"{self.root}/{self.board}"
+
         # index page
-        url = "{}/{}/index.json".format(self.root, self.board)
-        index = self.request(url).json()
+        url = f"{base}/index.json"
+        index = self.request_json(url)
         index["_extractor"] = _2chThreadExtractor
         for thread in index["threads"]:
-            url = "{}/{}/res/{}.html".format(
-                self.root, self.board, thread["thread_num"])
+            url = f"{base}/res/{thread['thread_num']}.html"
             yield Message.Queue, url, index
 
         # pages 1..n
         for n in util.advance(index["pages"], 1):
-            url = "{}/{}/{}.json".format(self.root, self.board, n)
-            page = self.request(url).json()
+            url = f"{base}/{n}.json"
+            page = self.request_json(url)
             page["_extractor"] = _2chThreadExtractor
             for thread in page["threads"]:
-                url = "{}/{}/res/{}.html".format(
-                    self.root, self.board, thread["thread_num"])
+                url = f"{base}/res/{thread['thread_num']}.html"
                 yield Message.Queue, url, page

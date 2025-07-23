@@ -44,20 +44,20 @@ class TelegraphGalleryExtractor(GalleryExtractor):
         num_zeroes = len(str(len(figures)))
         num = 0
 
-        result = []
+        results = []
         for figure in figures:
             url, pos = text.extract(figure, 'src="', '"')
             if url.startswith("/embed/"):
                 continue
-            elif url.startswith("/"):
+            elif url[0] == "/":
                 url = self.root + url
             caption, pos = text.extract(figure, "<figcaption>", "<", pos)
             num += 1
 
-            result.append((url, {
+            results.append((url, {
                 "url"          : url,
                 "caption"      : text.unescape(caption) if caption else "",
                 "num"          : num,
                 "num_formatted": str(num).zfill(num_zeroes),
             }))
-        return result
+        return results

@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import hitomi
-from gallery_dl import exception
 
 
 __tests__ = (
@@ -13,9 +12,36 @@ __tests__ = (
     "#url"     : "https://hitomi.la/galleries/867789.html",
     "#category": ("", "hitomi", "gallery"),
     "#class"   : hitomi.HitomiGalleryExtractor,
-    "#pattern"      : r"https://[a-c]a\.hitomi\.la/webp/\d+/\d+/[0-9a-f]{64}\.webp",
-    "#count"        : 16,
-    "#sha1_metadata": "86af5371f38117a07407f11af689bdd460b09710",
+    "#pattern" : r"https://w[1-3]\.gold-usergeneratedcontent\.net/\d+/\d+/[0-9a-f]{64}\.webp",
+    "#count"   : 16,
+
+    "artist"    : ["morris"],
+    "characters": [],
+    "count"     : 16,
+    "date"      : "dt:2015-10-27 19:20:00",
+    "extension" : "webp",
+    "extension_original" : "jpg",
+    "filename"  : str,
+    "gallery_id": 867789,
+    "group"     : [],
+    "lang"      : "en",
+    "language"  : "English",
+    "num"       : range(1, 16),
+    "parody"    : [],
+    "tags"      : [
+        "Cheating ♀",
+        "Drugs ♀",
+        "Drugs ♂",
+        "Incest",
+        "Milf ♀",
+        "Mother ♀",
+        "Sole Female ♀",
+        "Sole Male ♂",
+        "Uncensored"
+    ],
+    "title"     : "Amazon no Hiyaku | Amazon Elixir (decensored)",
+    "title_jpn" : "",
+    "type"      : "Manga",
 },
 
 {
@@ -48,7 +74,6 @@ __tests__ = (
     "#comment" : "gallery with 'broken' redirect",
     "#category": ("", "hitomi", "gallery"),
     "#class"   : hitomi.HitomiGalleryExtractor,
-    "#exception": exception.NotFoundError,
 },
 
 {
@@ -57,8 +82,35 @@ __tests__ = (
     "#category": ("", "hitomi", "gallery"),
     "#class"   : hitomi.HitomiGalleryExtractor,
     "#options" : {"format": "avif"},
-    "#pattern" : r"https://[a-c]a\.hitomi\.la/avif/\d+/\d+/[0-9a-f]{64}\.avif",
+    "#pattern" : r"https://a[1-3]\.gold-usergeneratedcontent\.net/\d+/\d+/[0-9a-f]{64}\.avif",
     "#count"   : 22,
+
+    "artist"    : ["sorairo len"],
+    "characters": [],
+    "count"     : 22,
+    "date"      : "dt:2020-04-19 06:33:00",
+    "extension" : "avif",
+    "filename"  : str,
+    "gallery_id": 1615823,
+    "group"     : ["mofumofuen"],
+    "lang"      : "ja",
+    "language"  : "Japanese",
+    "num"       : range(1, 22),
+    "parody"    : ["original"],
+    "tags"      : [
+        "Blowjob ♀",
+        "Focus Blowjob ♀",
+        "Fox Girl ♀",
+        "Kemonomimi ♀",
+        "Loli ♀",
+        "Miko ♀",
+        "No Penetration",
+        "Unusual Pupils ♀",
+        "Variant Set"
+    ],
+    "title"     : "Kouko-sama ga Okuchi de Reiryoku Hokyuu",
+    "title_jpn" : "コウコ様がお口で霊力補給♡",
+    "type"      : "Artistcg",
 },
 
 {
@@ -110,6 +162,8 @@ __tests__ = (
     "#class"   : hitomi.HitomiTagExtractor,
     "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
     "#count"   : ">= 35",
+
+    "search_tags": "screenshots",
 },
 
 {
@@ -140,6 +194,60 @@ __tests__ = (
     "#url"     : "https://hitomi.la/character/a2-all-1.html",
     "#category": ("", "hitomi", "tag"),
     "#class"   : hitomi.HitomiTagExtractor,
+},
+
+{
+    "#url"     : "https://hitomi.la/index-japanese.html",
+    "#class"   : hitomi.HitomiIndexExtractor,
+    "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
+    "#range"   : "1-150",
+    "#count"   : 150,
+},
+
+{
+    "#url"     : "https://hitomi.la/search.html?tag%3Ascreenshots%20language%3Ajapanese",
+    "#class"   : hitomi.HitomiSearchExtractor,
+    "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
+    "#range"   : "1-150",
+    "#count"   : 150,
+
+    "search_tags": "tag:screenshots language:japanese",
+},
+
+{
+    "#url"     : "https://hitomi.la/search.html?female%3Asole_female%20language%3Ajapanese%20artist%3Asumiya",
+    "#class"   : hitomi.HitomiSearchExtractor,
+    "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
+    "#count"   : range(35, 50),
+
+    "search_tags": "female:sole_female language:japanese artist:sumiya",
+},
+
+{
+    "#url"     : "https://hitomi.la/search.html?language%3Ajapanese%20-tag%3Aanimated%20group%3Aparadiddle#2",
+    "#comment" : "negative search tag (#7694)",
+    "#class"   : hitomi.HitomiSearchExtractor,
+    "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
+    "#count"   : 41,
+
+    "search_tags": "language:japanese -tag:animated group:paradiddle",
+},
+
+{
+    "#url"     : "https://hitomi.la/search.html?group:initial_g",
+    "#class"   : hitomi.HitomiSearchExtractor,
+},
+{
+    "#url"     : "https://hitomi.la/search.html?series:amnesia",
+    "#class"   : hitomi.HitomiSearchExtractor,
+},
+{
+    "#url"     : "https://hitomi.la/search.html?type%3Adoujinshi",
+    "#class"   : hitomi.HitomiSearchExtractor,
+},
+{
+    "#url"     : "https://hitomi.la/search.html?character%3Aa2",
+    "#class"   : hitomi.HitomiSearchExtractor,
 },
 
 )

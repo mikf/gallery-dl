@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,10 +11,13 @@
 modules = [
     "classify",
     "compare",
+    "directory",
     "exec",
+    "hash",
     "metadata",
     "mtime",
     "python",
+    "rename",
     "ugoira",
     "zip",
 ]

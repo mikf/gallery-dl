@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,6 +10,7 @@
 
 import argparse
 import logging
+import os.path
 import sys
 from . import job, util, version
 
@@ -39,8 +40,8 @@ class DeprecatedConfigConstAction(argparse.Action):
     """Set argparse const values as config values + deprecation warning"""
     def __call__(self, parser, namespace, values, option_string=None):
         sys.stderr.write(
-            "warning: {} is deprecated. Use {} instead.\n".format(
-                "/".join(self.option_strings), self.choices))
+            f"Warning: {'/'.join(self.option_strings)} is deprecated. "
+            f"Use {self.choices} instead.\n")
         namespace.options.append(((), self.dest, self.const))
 
 
@@ -70,8 +71,23 @@ class MtimeAction(argparse.Action):
     def __call__(self, parser, namespace, value, option_string=None):
         namespace.postprocessors.append({
             "name": "mtime",
-            "value": "{" + (self.const or value) + "}",
+            "value": f"{{{self.const or value}}}",
         })
+
+
+class RenameAction(argparse.Action):
+    """Configure rename post processors"""
+    def __call__(self, parser, namespace, value, option_string=None):
+        if self.const:
+            namespace.postprocessors.append({
+                "name": "rename",
+                "to"  : value,
+            })
+        else:
+            namespace.postprocessors.append({
+                "name": "rename",
+                "from": value,
+            })
 
 
 class UgoiraAction(argparse.Action):
@@ -116,20 +132,79 @@ class UgoiraAction(argparse.Action):
                                       "[a] palettegen [p];[b][p] paletteuse"),
                 "repeat-last-frame": False,
             }
-        elif value in ("mkv", "copy"):
+        elif value == "mkv" or value == "copy":
             pp = {
                 "extension"        : "mkv",
                 "ffmpeg-args"      : ("-c:v", "copy"),
                 "repeat-last-frame": False,
             }
+        elif value == "zip" or value == "archive":
+            pp = {
+                "mode"             : "archive",
+            }
+            namespace.options.append(((), "ugoira", "original"))
         else:
-            parser.error("Unsupported Ugoira format '{}'".format(value))
+            parser.error(f"Unsupported Ugoira format '{value}'")
 
         pp["name"] = "ugoira"
         pp["whitelist"] = ("pixiv", "danbooru")
 
-        namespace.options.append(((), "ugoira", True))
+        namespace.options.append((("extractor",), "ugoira", True))
         namespace.postprocessors.append(pp)
+
+
+class PrintAction(argparse.Action):
+    def __call__(self, parser, namespace, value, option_string=None):
+        if self.const:
+            if self.const == "-":
+                namespace.options.append(((), "skip", False))
+                namespace.options.append(((), "download", False))
+                namespace.options.append((("output",), "mode", False))
+            filename = "-"
+            base = None
+            mode = "w"
+        else:
+            if self.const is None:
+                namespace.options.append(((), "skip", False))
+                namespace.options.append(((), "download", False))
+            value, path = value
+            base, filename = os.path.split(path)
+            mode = "a"
+
+        event, sep, format_string = value.partition(":")
+        if not sep:
+            format_string = event
+            event = ("prepare",)
+        else:
+            event = event.strip().lower()
+            if event not in {"init", "file", "after", "skip", "error",
+                             "prepare", "prepare-after", "post", "post-after",
+                             "finalize", "finalize-success", "finalize-error"}:
+                format_string = value
+                event = ("prepare",)
+
+        if not format_string:
+            return
+
+        if format_string.startswith("\\f"):
+            format_string = "\f" + format_string[2:]
+
+        if format_string[0] == "\f":
+            if format_string[1] == "F" and format_string[-1] != "\n":
+                format_string += "\n"
+        elif "{" not in format_string and " " not in format_string:
+            format_string = f"{{{format_string}}}\n"
+        elif format_string[-1] != "\n":
+            format_string += "\n"
+
+        namespace.postprocessors.append({
+            "name"          : "metadata",
+            "event"         : event,
+            "filename"      : filename,
+            "base-directory": base or ".",
+            "content-format": format_string,
+            "open"          : mode,
+        })
 
 
 class Formatter(argparse.HelpFormatter):
@@ -137,12 +212,19 @@ class Formatter(argparse.HelpFormatter):
     def __init__(self, prog):
         argparse.HelpFormatter.__init__(self, prog, max_help_position=30)
 
-    def _format_action_invocation(self, action, join=", ".join):
+    def _format_action_invocation(self, action):
         opts = action.option_strings
         if action.metavar:
             opts = opts.copy()
-            opts[-1] += " " + action.metavar
-        return join(opts)
+            opts[-1] = f"{opts[-1]} {action.metavar}"
+        return ", ".join(opts)
+
+    def _format_usage(self, usage, actions, groups, prefix):
+        return f"Usage: {self._prog} [OPTIONS] URL [URL...]\n"
+
+    def format_help(self):
+        return self._long_break_matcher.sub(
+            "\n\n", self._root_section.format_help())
 
 
 def _parse_option(opt):
@@ -157,7 +239,6 @@ def _parse_option(opt):
 def build_parser():
     """Build and configure an ArgumentParser object"""
     parser = argparse.ArgumentParser(
-        usage="%(prog)s [OPTION]... URL...",
         formatter_class=Formatter,
         add_help=False,
     )
@@ -195,16 +276,6 @@ def build_parser():
         help="Load external extractors from PATH",
     )
     general.add_argument(
-        "--proxy",
-        dest="proxy", metavar="URL", action=ConfigAction,
-        help="Use the specified proxy",
-    )
-    general.add_argument(
-        "--source-address",
-        dest="source-address", metavar="IP", action=ConfigAction,
-        help="Client-side IP address to bind to",
-    )
-    general.add_argument(
         "--user-agent",
         dest="user-agent", metavar="UA", action=ConfigAction,
         help="User-Agent request header",
@@ -215,6 +286,36 @@ def build_parser():
         help="Delete cached login sessions, cookies, etc. for MODULE "
              "(ALL to delete everything)",
     )
+    general.add_argument(
+        "--compat",
+        dest="category-map", nargs=0, action=ConfigConstAction, const="compat",
+        help="Restore legacy 'category' names",
+    )
+
+    update = parser.add_argument_group("Update Options")
+    if util.EXECUTABLE:
+        update.add_argument(
+            "-U", "--update",
+            dest="update", action="store_const", const="latest",
+            help="Update to the latest version",
+        )
+        update.add_argument(
+            "--update-to",
+            dest="update", metavar="CHANNEL[@TAG]",
+            help=("Switch to a dfferent release channel (stable or dev) "
+                  "or upgrade/downgrade to a specific version"),
+        )
+        update.add_argument(
+            "--update-check",
+            dest="update", action="store_const", const="check",
+            help="Check if a newer version is available",
+        )
+    else:
+        update.add_argument(
+            "-U", "--update-check",
+            dest="update", action="store_const", const="check",
+            help="Check if a newer version is available",
+        )
 
     input = parser.add_argument_group("Input Options")
     input.add_argument(
@@ -240,6 +341,11 @@ def build_parser():
         dest="input_files", metavar="FILE", action=InputfileAction, const="d",
         help=("Download URLs found in FILE. "
               "Delete them after they were downloaded successfully."),
+    )
+    input.add_argument(
+        "--no-input",
+        dest="input", nargs=0, action=ConfigConstAction, const=False,
+        help="Do not prompt for passwords/tokens",
     )
 
     output = parser.add_argument_group("Output Options")
@@ -273,8 +379,13 @@ def build_parser():
     )
     output.add_argument(
         "-j", "--dump-json",
-        dest="jobtype", action="store_const", const=job.DataJob,
+        dest="dump_json", action="count",
         help="Print JSON information",
+    )
+    output.add_argument(
+        "-J", "--resolve-json",
+        dest="dump_json", action="store_const", const=128,
+        help="Print JSON information; resolve intermediary URLs",
     )
     output.add_argument(
         "-s", "--simulate",
@@ -298,13 +409,41 @@ def build_parser():
         help="Add input URLs which returned an error to FILE",
     )
     output.add_argument(
+        "-N", "--print",
+        dest="postprocessors", metavar="[EVENT:]FORMAT",
+        action=PrintAction, const="-", default=[],
+        help=("Write FORMAT during EVENT (default 'prepare') to standard "
+              "output instead of downloading files. "
+              "Can be used multiple times. "
+              "Examples: 'id' or 'post:{md5[:8]}'"),
+    )
+    output.add_argument(
+        "--Print",
+        dest="postprocessors", metavar="[EVENT:]FORMAT",
+        action=PrintAction, const="+",
+        help="Like --print, but downloads files as well",
+    )
+    output.add_argument(
+        "--print-to-file",
+        dest="postprocessors", metavar="[EVENT:]FORMAT FILE",
+        action=PrintAction, const=None, nargs=2,
+        help=("Append FORMAT during EVENT to FILE instead of downloading "
+              "files. Can be used multiple times"),
+    )
+    output.add_argument(
+        "--Print-to-file",
+        dest="postprocessors", metavar="[EVENT:]FORMAT FILE",
+        action=PrintAction, const=False, nargs=2,
+        help="Like --print-to-file, but downloads files as well",
+    )
+    output.add_argument(
         "--list-modules",
         dest="list_modules", action="store_true",
         help="Print a list of available extractor modules",
     )
     output.add_argument(
         "--list-extractors",
-        dest="list_extractors", action="store_true",
+        dest="list_extractors", metavar="[CATEGORIES]", nargs="*",
         help=("Print a list of extractor classes "
               "with description, (sub)category and example URL"),
     )
@@ -326,27 +465,65 @@ def build_parser():
               "in the current directory to debug problems"),
     )
     output.add_argument(
+        "--print-traffic",
+        dest="print_traffic", action="store_true",
+        help="Display sent and read HTTP traffic",
+    )
+    output.add_argument(
         "--no-colors",
         dest="colors", action="store_false",
-        help=("Do not emit ANSI color codes in output"),
+        help="Do not emit ANSI color codes in output",
+    )
+
+    networking = parser.add_argument_group("Networking Options")
+    networking.add_argument(
+        "-R", "--retries",
+        dest="retries", metavar="N", type=int, action=ConfigAction,
+        help=("Maximum number of retries for failed HTTP requests "
+              "or -1 for infinite retries (default: 4)"),
+    )
+    networking.add_argument(
+        "--http-timeout",
+        dest="timeout", metavar="SECONDS", type=float, action=ConfigAction,
+        help="Timeout for HTTP connections (default: 30.0)",
+    )
+    networking.add_argument(
+        "--proxy",
+        dest="proxy", metavar="URL", action=ConfigAction,
+        help="Use the specified proxy",
+    )
+    networking.add_argument(
+        "--source-address",
+        dest="source-address", metavar="IP", action=ConfigAction,
+        help="Client-side IP address to bind to",
+    )
+    networking.add_argument(
+        "-4", "--force-ipv4",
+        dest="source-address", nargs=0, action=ConfigConstAction,
+        const="0.0.0.0",
+        help="Make all connections via IPv4",
+    )
+    networking.add_argument(
+        "-6", "--force-ipv6",
+        dest="source-address", nargs=0, action=ConfigConstAction, const="::",
+        help="Make all connections via IPv6",
+    )
+    networking.add_argument(
+        "--no-check-certificate",
+        dest="verify", nargs=0, action=ConfigConstAction, const=False,
+        help="Disable HTTPS certificate validation",
     )
 
     downloader = parser.add_argument_group("Downloader Options")
     downloader.add_argument(
         "-r", "--limit-rate",
         dest="rate", metavar="RATE", action=ConfigAction,
-        help="Maximum download rate (e.g. 500k or 2.5M)",
+        help="Maximum download rate (e.g. 500k, 2.5M, or 800k-2M)",
     )
     downloader.add_argument(
-        "-R", "--retries",
-        dest="retries", metavar="N", type=int, action=ConfigAction,
-        help=("Maximum number of retries for failed HTTP requests "
-              "or -1 for infinite retries (default: 4)"),
-    )
-    downloader.add_argument(
-        "--http-timeout",
-        dest="timeout", metavar="SECONDS", type=float, action=ConfigAction,
-        help="Timeout for HTTP connections (default: 30.0)",
+        "--chunk-size",
+        dest="chunk-size", metavar="SIZE", action=ConfigAction,
+        help="Size of in-memory data chunks (default: 32k)",
     )
     downloader.add_argument(
         "--sleep",
@@ -362,25 +539,16 @@ def build_parser():
               "during data extraction"),
     )
     downloader.add_argument(
+        "--sleep-429",
+        dest="sleep-429", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait when receiving a "
+              "'429 Too Many Requests' response"),
+    )
+    downloader.add_argument(
         "--sleep-extractor",
         dest="sleep-extractor", metavar="SECONDS", action=ConfigAction,
         help=("Number of seconds to wait before starting data extraction "
               "for an input URL"),
-    )
-    downloader.add_argument(
-        "--filesize-min",
-        dest="filesize-min", metavar="SIZE", action=ConfigAction,
-        help="Do not download files smaller than SIZE (e.g. 500k or 2.5M)",
-    )
-    downloader.add_argument(
-        "--filesize-max",
-        dest="filesize-max", metavar="SIZE", action=ConfigAction,
-        help="Do not download files larger than SIZE (e.g. 500k or 2.5M)",
-    )
-    downloader.add_argument(
-        "--chunk-size",
-        dest="chunk-size", metavar="SIZE", action=ConfigAction,
-        help="Size of in-memory data chunks (default: 32k)",
     )
     downloader.add_argument(
         "--no-part",
@@ -402,16 +570,6 @@ def build_parser():
         "--no-download",
         dest="download", nargs=0, action=ConfigConstAction, const=False,
         help=("Do not download any files")
-    )
-    downloader.add_argument(
-        "--no-postprocessors",
-        dest="postprocess", nargs=0, action=ConfigConstAction, const=False,
-        help=("Do not run any post processors")
-    )
-    downloader.add_argument(
-        "--no-check-certificate",
-        dest="verify", nargs=0, action=ConfigConstAction, const=False,
-        help="Disable HTTPS certificate validation",
     )
 
     configuration = parser.add_argument_group("Configuration Options")
@@ -439,8 +597,18 @@ def build_parser():
     )
     configuration.add_argument(
         "--config-create",
-        dest="config_init", action="store_true",
+        dest="config", action="store_const", const="init",
         help="Create a basic configuration file",
+    )
+    configuration.add_argument(
+        "--config-status",
+        dest="config", action="store_const", const="status",
+        help="Show configuration file status",
+    )
+    configuration.add_argument(
+        "--config-open",
+        dest="config", action="store_const", const="open",
+        help="Open configuration file in external application",
     )
     configuration.add_argument(
         "--config-ignore",
@@ -489,16 +657,11 @@ def build_parser():
               "domain prefixed with '/', "
               "keyring name prefixed with '+', "
               "profile prefixed with ':', and "
-              "container prefixed with '::' ('none' for no container)"),
+              "container prefixed with '::' "
+              "('none' for no container (default), 'all' for all containers)"),
     )
 
     selection = parser.add_argument_group("Selection Options")
-    selection.add_argument(
-        "--download-archive",
-        dest="archive", metavar="FILE", action=ConfigAction,
-        help=("Record all downloaded or skipped files in FILE and "
-              "skip downloading any file already in it"),
-    )
     selection.add_argument(
         "-A", "--abort",
         dest="abort", metavar="N", type=int,
@@ -510,6 +673,22 @@ def build_parser():
         dest="terminate", metavar="N", type=int,
         help=("Stop current and parent extractor runs "
               "after N consecutive file downloads were skipped"),
+    )
+    selection.add_argument(
+        "--filesize-min",
+        dest="filesize-min", metavar="SIZE", action=ConfigAction,
+        help="Do not download files smaller than SIZE (e.g. 500k or 2.5M)",
+    )
+    selection.add_argument(
+        "--filesize-max",
+        dest="filesize-max", metavar="SIZE", action=ConfigAction,
+        help="Do not download files larger than SIZE (e.g. 500k or 2.5M)",
+    )
+    selection.add_argument(
+        "--download-archive",
+        dest="archive", metavar="FILE", action=ConfigAction,
+        help=("Record successfully downloaded files in FILE and "
+              "skip downloading any file already in it"),
     )
     selection.add_argument(
         "--range",
@@ -548,8 +727,13 @@ def build_parser():
     postprocessor = parser.add_argument_group("Post-processing Options")
     postprocessor.add_argument(
         "-P", "--postprocessor",
-        dest="postprocessors", metavar="NAME", action="append", default=[],
+        dest="postprocessors", metavar="NAME", action="append",
         help="Activate the specified post processor",
+    )
+    postprocessor.add_argument(
+        "--no-postprocessors",
+        dest="postprocess", nargs=0, action=ConfigConstAction, const=False,
+        help=("Do not run any post processors")
     )
     postprocessor.add_argument(
         "-O", "--postprocessor-option",
@@ -609,11 +793,23 @@ def build_parser():
         help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
+        "--rename",
+        dest="postprocessors", metavar="FORMAT", action=RenameAction, const=0,
+        help=("Rename previously downloaded files from FORMAT "
+              "to the current filename format"),
+    )
+    postprocessor.add_argument(
+        "--rename-to",
+        dest="postprocessors", metavar="FORMAT", action=RenameAction, const=1,
+        help=("Rename previously downloaded files from the current filename "
+              "format to FORMAT"),
+    )
+    postprocessor.add_argument(
         "--ugoira",
-        dest="postprocessors", metavar="FORMAT", action=UgoiraAction,
-        help=("Convert Pixiv Ugoira to FORMAT using FFmpeg. "
+        dest="postprocessors", metavar="FMT", action=UgoiraAction,
+        help=("Convert Pixiv Ugoira to FMT using FFmpeg. "
               "Supported formats are 'webm', 'mp4', 'gif', "
-              "'vp8', 'vp9', 'vp9-lossless', 'copy'."),
+              "'vp8', 'vp9', 'vp9-lossless', 'copy', 'zip'."),
     )
     postprocessor.add_argument(
         "--ugoira-conv",
@@ -649,5 +845,11 @@ def build_parser():
               "Example: --exec-after \"cd {_directory} "
               "&& convert * ../doc.pdf\""),
     )
+
+    try:
+        # restore normal behavior when adding '-4' or '-6' as arguments
+        parser._has_negative_number_optionals.clear()
+    except Exception:
+        pass
 
     return parser

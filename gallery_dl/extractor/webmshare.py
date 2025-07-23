@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -25,10 +25,10 @@ class WebmshareVideoExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.video_id = match.group(1)
+        self.video_id = match[1]
 
     def items(self):
-        url = "{}/{}".format(self.root, self.video_id)
+        url = f"{self.root}/{self.video_id}"
         extr = text.extract_from(self.request(url).text)
 
         data = {

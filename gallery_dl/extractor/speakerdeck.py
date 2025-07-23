@@ -8,56 +8,46 @@
 
 """Extractors for https://speakerdeck.com/"""
 
-from .common import Extractor, Message
-from .. import text
+from .common import GalleryExtractor
+from .. import text, util
 
 
-class SpeakerdeckPresentationExtractor(Extractor):
+class SpeakerdeckPresentationExtractor(GalleryExtractor):
     """Extractor for images from a presentation on speakerdeck.com"""
     category = "speakerdeck"
     subcategory = "presentation"
     directory_fmt = ("{category}", "{user}")
     filename_fmt = "{presentation}-{num:>02}.{extension}"
     archive_fmt = "{presentation}_{num}"
+    root = "https://speakerdeck.com"
     pattern = r"(?:https?://)?(?:www\.)?speakerdeck\.com/([^/?#]+)/([^/?#]+)"
     example = "https://speakerdeck.com/USER/PRESENTATION"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.user, self.presentation = match.groups()
-        self.presentation_id = None
+    def metadata(self, _):
+        user, presentation = self.groups
 
-    def items(self):
-        data = self.get_job_metadata()
-        imgs = self.get_image_urls()
-        data["count"] = len(imgs)
-        yield Message.Directory, data
-        for data["num"], url in enumerate(imgs, 1):
-            yield Message.Url, url, text.nameext_from_url(url, data)
-
-    def get_job_metadata(self):
-        """Collect metadata for extractor-job"""
-        url = "https://speakerdeck.com/oembed.json"
+        url = self.root + "/oembed.json"
         params = {
-            "url": "https://speakerdeck.com/" + self.user +
-                   "/" + self.presentation,
+            "url": f"{self.root}/{user}/{presentation}",
         }
+        data = self.request_json(url, params=params)
 
-        data = self.request(url, params=params).json()
-
-        self.presentation_id, pos = \
-            text.extract(data["html"], 'src="//speakerdeck.com/player/', '"')
+        self.presentation_id = text.extr(
+            data["html"], 'src="//speakerdeck.com/player/', '"')
 
         return {
-            "user": self.user,
-            "presentation": self.presentation,
+            "user": user,
+            "presentation": presentation,
             "presentation_id": self.presentation_id,
             "title": data["title"],
             "author": data["author_name"],
         }
 
-    def get_image_urls(self):
-        """Extract and return a list of all image-urls"""
-        page = self.request("https://speakerdeck.com/player/" +
-                            self.presentation_id).text
-        return list(text.extract_iter(page, 'js-sd-slide" data-url="', '"'))
+    def images(self, _):
+        url = f"{self.root}/player/{self.presentation_id}"
+        page = self.request(url).text
+        page = util.re(r"\s+").sub(" ", page)
+        return [
+            (url, None)
+            for url in text.extract_iter(page, 'js-sd-slide" data-url="', '"')
+        ]

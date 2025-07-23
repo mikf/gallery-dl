@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,7 +23,7 @@ class WikiartExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.lang = match.group(1)
+        self.lang = match[1]
 
     def items(self):
         data = self.metadata()
@@ -54,7 +54,7 @@ class WikiartExtractor(Extractor):
             params.update(extra_params)
 
         while True:
-            data = self.request(url, headers=headers, params=params).json()
+            data = self.request_json(url, headers=headers, params=params)
             items = data.get(key)
             if not items:
                 return
@@ -73,17 +73,16 @@ class WikiartArtistExtractor(WikiartExtractor):
 
     def __init__(self, match):
         WikiartExtractor.__init__(self, match)
-        self.artist_name = match.group(2)
+        self.artist_name = match[2]
         self.artist = None
 
     def metadata(self):
-        url = "{}/{}/{}?json=2".format(self.root, self.lang, self.artist_name)
-        self.artist = self.request(url).json()
+        url = f"{self.root}/{self.lang}/{self.artist_name}?json=2"
+        self.artist = self.request_json(url)
         return {"artist": self.artist}
 
     def paintings(self):
-        url = "{}/{}/{}/mode/all-paintings".format(
-            self.root, self.lang, self.artist_name)
+        url = f"{self.root}/{self.lang}/{self.artist_name}/mode/all-paintings"
         return self._pagination(url)
 
 
@@ -95,16 +94,14 @@ class WikiartImageExtractor(WikiartArtistExtractor):
 
     def __init__(self, match):
         WikiartArtistExtractor.__init__(self, match)
-        self.title = match.group(3)
+        self.title = match[3]
 
     def paintings(self):
         title, sep, year = self.title.rpartition("-")
         if not sep or not year.isdecimal():
             title = self.title
-        url = "{}/{}/Search/{} {}".format(
-            self.root, self.lang,
-            self.artist.get("artistName") or self.artist_name, title,
-        )
+        url = (f"{self.root}/{self.lang}/Search/"
+               f"{self.artist.get('artistName') or self.artist_name} {title}")
         return self._pagination(url, stop=True)
 
 
@@ -117,15 +114,14 @@ class WikiartArtworksExtractor(WikiartExtractor):
 
     def __init__(self, match):
         WikiartExtractor.__init__(self, match)
-        self.group = match.group(2)
-        self.type = match.group(3)
+        self.group = match[2]
+        self.type = match[3]
 
     def metadata(self):
         return {"group": self.group, "type": self.type}
 
     def paintings(self):
-        url = "{}/{}/paintings-by-{}/{}".format(
-            self.root, self.lang, self.group, self.type)
+        url = f"{self.root}/{self.lang}/paintings-by-{self.group}/{self.type}"
         return self._pagination(url)
 
 
@@ -137,12 +133,11 @@ class WikiartArtistsExtractor(WikiartExtractor):
 
     def __init__(self, match):
         WikiartExtractor.__init__(self, match)
-        self.group = match.group(2)
-        self.type = match.group(3)
+        self.group = match[2]
+        self.type = match[3]
 
     def items(self):
-        url = "{}/{}/App/Search/Artists-by-{}".format(
-            self.root, self.lang, self.group)
+        url = f"{self.root}/{self.lang}/App/Search/Artists-by-{self.group}"
         params = {"json": "3", "searchterm": self.type}
 
         for artist in self._pagination(url, params, "Artists"):
