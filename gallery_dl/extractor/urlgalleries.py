@@ -42,7 +42,7 @@ class UrlgalleriesGalleryExtractor(GalleryExtractor):
         for data["num"], img in enumerate(imgs, 1):
             page = self.request(root + img).text
             url = text.extr(page, "window.location.href = '", "'")
-            yield Message.Queue, url.partition("?")[0], data
+            yield Message.Queue, url, data
 
     def metadata(self, page):
         extr = text.extract_from(page)
