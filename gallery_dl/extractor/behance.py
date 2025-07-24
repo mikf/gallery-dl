@@ -51,10 +51,10 @@ class BehanceExtractor(Extractor):
 
     def _update(self, data):
         # compress data to simple lists
-        if data.get("fields") and isinstance(data["fields"][0], dict):
+        if (fields := data.get("fields")) and isinstance(fields[0], dict):
             data["fields"] = [
                 field.get("name") or field.get("label")
-                for field in data["fields"]
+                for field in fields
             ]
 
         data["owners"] = [
@@ -69,6 +69,9 @@ class BehanceExtractor(Extractor):
 
         data["date"] = text.parse_timestamp(
             data.get("publishedOn") or data.get("conceived_on") or 0)
+
+        if creator := data.get("creator"):
+            creator["name"] = creator["url"].rpartition("/")[2]
 
         # backwards compatibility
         data["gallery_id"] = data["id"]
