@@ -19,19 +19,14 @@ class BilibiliExtractor(Extractor):
     def _init(self):
         self.api = BilibiliAPI(self)
 
-
-class BilibiliUserArticlesExtractor(BilibiliExtractor):
-    """Extractor for a bilibili user's articles"""
-    subcategory = "user-articles"
-    pattern = (r"(?:https?://)?space\.bilibili\.com/(\d+)"
-               r"/(?:article|upload/opus)")
-    example = "https://space.bilibili.com/12345/article"
-
     def items(self):
-        for article in self.api.user_articles(self.groups[0]):
+        for article in self.articles():
             article["_extractor"] = BilibiliArticleExtractor
             url = f"{self.root}/opus/{article['opus_id']}"
             yield Message.Queue, url, article
+
+    def articles(self):
+        return ()
 
 
 class BilibiliArticleExtractor(BilibiliExtractor):
@@ -86,6 +81,17 @@ class BilibiliArticleExtractor(BilibiliExtractor):
             yield Message.Url, url, text.nameext_from_url(url, article)
 
 
+class BilibiliUserArticlesExtractor(BilibiliExtractor):
+    """Extractor for a bilibili user's articles"""
+    subcategory = "user-articles"
+    pattern = (r"(?:https?://)?space\.bilibili\.com/(\d+)"
+               r"/(?:article|upload/opus)")
+    example = "https://space.bilibili.com/12345/article"
+
+    def articles(self):
+        return self.api.user_articles(self.groups[0])
+
+
 class BilibiliUserArticlesFavoriteExtractor(BilibiliExtractor):
     subcategory = "user-articles-favorite"
     pattern = (r"(?:https?://)?space\.bilibili\.com"
@@ -93,18 +99,12 @@ class BilibiliUserArticlesFavoriteExtractor(BilibiliExtractor):
     example = "https://space.bilibili.com/12345/favlist?fid=opus"
     _warning = True
 
-    def _init(self):
-        BilibiliExtractor._init(self)
+    def articles(self):
         if self._warning:
             if not self.cookies_check(("SESSDATA",)):
                 self.log.error("'SESSDATA' cookie required")
             BilibiliUserArticlesFavoriteExtractor._warning = False
-
-    def items(self):
-        for article in self.api.user_favlist():
-            article["_extractor"] = BilibiliArticleExtractor
-            url = f"{self.root}/opus/{article['opus_id']}"
-            yield Message.Queue, url, article
+        return self.api.user_favlist()
 
 
 class BilibiliAPI():
@@ -115,7 +115,7 @@ class BilibiliAPI():
         url = "https://api.bilibili.com/x/polymer/web-dynamic/v1" + endpoint
         data = self.extractor.request_json(url, params=params)
 
-        if data["code"] != 0:
+        if data["code"]:
             self.extractor.log.debug("Server response: %s", data)
             raise exception.AbortExtraction("API request failed")
 
