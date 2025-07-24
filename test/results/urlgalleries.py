@@ -14,9 +14,9 @@ __tests__ = (
     "#class"   : urlgalleries.UrlgalleriesGalleryExtractor,
     "#range"   : "1-3",
     "#results" : (
-        "https://fappic.com/x207mqkn2463/4gq1yv.jpg",
-        "https://fappic.com/q684ua2rp0j9/4gq1xv.jpg",
-        "https://fappic.com/8vf3n8fgz9po/4gq1ya.jpg",
+        "https://fappic.com/x207mqkn2463/4gq1yv.jpg?gname=Clarice+window+8",
+        "https://fappic.com/q684ua2rp0j9/4gq1xv.jpg?gname=Clarice+window+8",
+        "https://fappic.com/8vf3n8fgz9po/4gq1ya.jpg?gname=Clarice+window+8",
     ),
 
     "blog"      : "photos2q",
@@ -33,9 +33,9 @@ __tests__ = (
     "#class"   : urlgalleries.UrlgalleriesGalleryExtractor,
     "#range"   : "1-3",
     "#results" : (
-        "https://fappic.com/x207mqkn2463/4gq1yv.jpg",
-        "https://fappic.com/q684ua2rp0j9/4gq1xv.jpg",
-        "https://fappic.com/8vf3n8fgz9po/4gq1ya.jpg",
+        "https://fappic.com/x207mqkn2463/4gq1yv.jpg?gname=Clarice+window+8",
+        "https://fappic.com/q684ua2rp0j9/4gq1xv.jpg?gname=Clarice+window+8",
+        "https://fappic.com/8vf3n8fgz9po/4gq1ya.jpg?gname=Clarice+window+8",
     ),
 
     "blog"      : "photos2q",
@@ -63,6 +63,25 @@ __tests__ = (
     "gallery_id": "7645840",
     "num"       : range(1, 3),
     "title"     : "Angelika - Rustic Charm - AmourAngels 2016-09-27 7722lhrmys",
+},
+
+{
+    "#url"     : "https://urlgalleries.net/b/xarchivesx/porn-gallery-6722560/caroline",
+    "#comment" : "image host URLs with query parameters (#7888)",
+    "#class"   : urlgalleries.UrlgalleriesGalleryExtractor,
+    "#range"   : "1-3",
+    "#results" : (
+        "http://img272.imagevenue.com/img.php?image=63353_qedf2jsd4j_123_376lo.jpg",
+        "http://img220.imagevenue.com/img.php?image=63140_hl2kkhv0n4_123_621lo.jpg",
+        "http://img217.imagevenue.com/img.php?image=63140_z2edqlkpkz_123_986lo.jpg",
+    ),
+
+    "blog"      : "The Archives Blog",
+    "count"     : 141,
+    "date"      : "dt:2016-06-11 00:00:00",
+    "gallery_id": "6722560",
+    "num"       : range(1, 3),
+    "title"     : "Caroline q5c75eeybn",
 },
 
 )
