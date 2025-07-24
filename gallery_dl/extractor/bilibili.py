@@ -45,12 +45,16 @@ class BilibiliArticleExtractor(BilibiliExtractor):
     archive_fmt = "{id}_{num}"
 
     def items(self):
-        article = self.api.article(self.groups[0])
+        article_id = self.groups[0]
+        article = self.api.article(article_id)
 
         # Flatten modules list
         modules = {}
         for module in article["detail"]["modules"]:
-            del module['module_type']
+            if module["module_type"] == "MODULE_TYPE_BLOCKED":
+                self.log.warning("%s: Blocked Article\n%s", article_id,
+                                 module["module_blocked"].get("hint_message"))
+            del module["module_type"]
             modules.update(module)
         article["detail"]["modules"] = modules
 
@@ -64,14 +68,15 @@ class BilibiliArticleExtractor(BilibiliExtractor):
             except Exception:
                 pass
 
-        for paragraph in modules['module_content']['paragraphs']:
-            if "pic" not in paragraph:
-                continue
+        if "module_content" in modules:
+            for paragraph in modules["module_content"]["paragraphs"]:
+                if "pic" not in paragraph:
+                    continue
 
-            try:
-                pics.extend(paragraph["pic"]["pics"])
-            except Exception:
-                pass
+                try:
+                    pics.extend(paragraph["pic"]["pics"])
+                except Exception:
+                    pass
 
         article["count"] = len(pics)
         yield Message.Directory, article
