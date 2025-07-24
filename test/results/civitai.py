@@ -406,8 +406,8 @@ __tests__ = (
     "#url"  : "https://civitai.com/user/waomodder",
     "#class": civitai.CivitaiUserExtractor,
     "#results": (
-        "https://civitai.com/user/waomodder/models",
-        "https://civitai.com/user/waomodder/posts",
+        "https://civitai.com/user/waomodder/images",
+        "https://civitai.com/user/waomodder/videos",
     ),
 },
 

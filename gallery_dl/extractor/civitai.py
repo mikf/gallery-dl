@@ -461,7 +461,7 @@ class CivitaiUserExtractor(Dispatch, CivitaiExtractor):
             (CivitaiUserPostsExtractor , base + "posts"),
             (CivitaiUserImagesExtractor, base + "images"),
             (CivitaiUserVideosExtractor, base + "videos"),
-        ), ("user-models", "user-posts"))
+        ), ("user-images", "user-videos"))
 
 
 class CivitaiUserModelsExtractor(CivitaiExtractor):
