@@ -11,7 +11,6 @@
 from .common import Extractor, ChapterExtractor, MangaExtractor
 from .. import text, exception
 import binascii
-import re
 
 BASE_PATTERN = r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.(?:li|to)"
 
@@ -65,7 +64,7 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     def metadata(self, page):
         comic, pos = text.extract(page, "   - Read\r\n    ", "\r\n")
         iinfo, pos = text.extract(page, "    ", "\r\n", pos)
-        match = re.match(r"(?:Issue )?#(\d+)|(.+)", iinfo)
+        match = text.re(r"(?:Issue )?#(\d+)|(.+)").match(iinfo)
         return {
             "comic": comic,
             "issue": match[1] or match[2],
@@ -81,8 +80,8 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         _   , pos = text.extract(page, "var pth = '", "", pos)
         var , pos = text.extract(page, "var ", "= '", pos)
 
-        replacements = re.findall(
-            r"l = l\.replace\(/([^/]+)/g, [\"']([^\"']*)", page)
+        replacements = text.re(
+            r"l = l\.replace\(/([^/]+)/g, [\"']([^\"']*)").findall(page)
 
         for path in page.split(var)[2:]:
             path = text.extr(path, "= '", "'")
