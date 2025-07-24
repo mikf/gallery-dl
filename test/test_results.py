@@ -94,6 +94,7 @@ class TestExtractorResults(unittest.TestCase):
     def assertLogEqual(self, expected, output):
         if isinstance(expected, str):
             expected = (expected,)
+        self.assertEqual(len(expected), len(output), "#log/count")
 
         for exp, out in zip(expected, output):
             level, name, message = out.split(":", 2)
@@ -165,7 +166,6 @@ class TestExtractorResults(unittest.TestCase):
             if "#log" in result:
                 with self.assertLogs() as log_info:
                     tjob.run()
-                self.assertLogEqual(result["#log"], log_info.output)
             else:
                 tjob.run()
         except exception.StopExtraction:
@@ -177,6 +177,9 @@ class TestExtractorResults(unittest.TestCase):
                 self._skipped.append((result["#url"], exc))
                 self.skipTest(exc)
             raise
+
+        if "#log" in result:
+            self.assertLogEqual(result["#log"], log_info.output)
 
         if result.get("#archive", True):
             self.assertEqual(
