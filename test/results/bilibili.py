@@ -54,6 +54,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bilibili.com/opus/1047501858770255875",
+    "#comment" : "blocked/paid article (#7880)",
+    "#class"   : bilibili.BilibiliArticleExtractor,
+    "#count"   : 0,
+    "#log"     : """\
+1047501858770255875: Blocked Article
+乌龙茶专属动态
+加入当前UP主的6元档包月充电即可解锁观看\
+""",
+},
+
+{
     "#url"    : "https://space.bilibili.com/405279279/article",
     "#class"  : bilibili.BilibiliUserArticlesExtractor,
     "#pattern": bilibili.BilibiliArticleExtractor.pattern,
