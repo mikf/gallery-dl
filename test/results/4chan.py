@@ -27,6 +27,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://boards.4chan.org/wg/thread/8010591",
+    "#comment" : "file contents filled with null bytes (#7883)",
+    "#class"   : _4chan._4chanThreadExtractor,
+    "#range"   : "1",
+    "#log"     : "File data consists of null bytes",
+    "#results"     : "https://i.4cdn.org/wg/1694023485631944.jpg",
+    "#sha1_content": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+},
+
+{
     "#url"     : "https://boards.4channel.org/po/",
     "#category": ("", "4chan", "board"),
     "#class"   : _4chan._4chanBoardExtractor,
