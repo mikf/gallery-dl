@@ -3032,10 +3032,13 @@ Example
 Description
     Controls from which position to start the extraction process from.
 
-    * ``true``: Start from the beginning.
-      Log the most recent ``cursor`` value when interrupted before reaching the end.
-    * ``false``: Start from the beginning.
-    * any ``string``: Start from the position defined by this value.
+    ``true``
+        | Start from the beginning.
+        | Log the most recent ``cursor`` value when interrupted before reaching the end.
+    ``false``
+        Start from the beginning.
+    any ``string``
+        Start from the position defined by this value.
 
 
 extractor.instagram.include
@@ -3827,6 +3830,27 @@ Description
     Extract additional metadata (``source``, ``uploader``)
 
     Note: This requires 1 additional HTTP request per post.
+
+
+extractor.patreon.cursor
+------------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Example
+    ``"03:eyJ2IjoxLCJjIjoiMzU0NDQ1MjAiLCJ0IjoiIn0=:DTcmjBoVj01o_492YBYqHhqx"``
+Description
+    Controls from which position to start the extraction process from.
+
+    ``true``
+        | Start from the beginning.
+        | Log the most recent ``cursor`` value when interrupted before reaching the end.
+    ``false``
+        Start from the beginning.
+    any ``string``
+        Start from the position defined by this value.
 
 
 extractor.patreon.files
@@ -5183,12 +5207,15 @@ Example
 Description
     Controls from which position to start the extraction process from.
 
-    * ``true``: Start from the beginning.
-      Log the most recent ``cursor`` value when interrupted before reaching the end.
-    * ``false``: Start from the beginning.
-    * any ``string``: Start from the position defined by this value.
-
-    Note: A ``cursor`` value from one timeline cannot be used with another.
+    ``true``
+        | Start from the beginning.
+        | Log the most recent ``cursor`` value when interrupted before reaching the end.
+    ``false``
+        Start from the beginning.
+    any ``string``
+        Start from the position defined by this value.
+Note
+    A ``cursor`` value from one timeline cannot be used with another.
 
 
 extractor.twitter.expand
