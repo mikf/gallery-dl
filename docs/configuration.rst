@@ -684,7 +684,7 @@ extractor.*.browser
 Type
     ``string``
 Default
-    * ``"firefox"``: ``artstation``, ``fanbox``, ``twitter``
+    * ``"firefox"``: ``artstation``, ``behance``, ``fanbox``, ``twitter``
     * ``null``: otherwise
 Example
     * ``"firefox/128:linux"``
