@@ -3894,6 +3894,16 @@ Description
     * ``thumbnail_small`` (``"h":100,"w":100``)
 
 
+extractor.patreon.user.date-max
+-------------------------------
+Type
+    |Date|_
+Default
+    ``0``
+Description
+    Sets the |Date|_ to start from.
+
+
 extractor.[philomena].api-key
 -----------------------------
 Type
