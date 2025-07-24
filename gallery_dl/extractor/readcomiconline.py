@@ -48,12 +48,8 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/[^/?#]+\?)([^#]+)"
     example = "https://readcomiconline.li/Comic/TITLE/Issue-123?id=12345"
 
-    def __init__(self, match):
-        ChapterExtractor.__init__(self, match)
-        self.params = match[2]
-
     def _init(self):
-        params = text.parse_query(self.params)
+        params = text.parse_query(self.groups[1])
         quality = self.config("quality")
 
         if quality is None or quality == "auto":
@@ -61,8 +57,9 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
                 params["quality"] = "hq"
         else:
             params["quality"] = str(quality)
+        params["readType"] = "0"  # force "One page" Reading mode (#7890)
 
-        self.page_url += "&".join(k + "=" + v for k, v in params.items())
+        self.page_url += "&".join(f"{k}={v}" for k, v in params.items())
         self.issue_id = params.get("id")
 
     def metadata(self, page):
