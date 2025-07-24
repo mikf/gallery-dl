@@ -23,6 +23,12 @@ class HotleakstvExtractor(Extractor):
 
     def items(self):
         for post in self.posts():
+            if not post["url"].startswith("ytdl:"):
+                post["url"] = (
+                    post["url"]
+                    .replace("/storage/storage/", "/storage/")
+                    .replace("_thumb.", ".")
+                )
             post["_http_expected_status"] = (404,)
             yield Message.Directory, post
             yield Message.Url, post["url"], post
@@ -59,27 +65,23 @@ class HotleakstvPostExtractor(HotleakstvExtractor):
                r"([^/]+)/(photo|video)/(\d+)")
     example = "https://hotleaks.tv/MODEL/photo/12345"
 
-    def __init__(self, match):
-        HotleakstvExtractor.__init__(self, match)
-        self.creator, self.type, self.id = match.groups()
-
     def posts(self):
-        url = "{}/{}/{}/{}".format(
-            self.root, self.creator, self.type, self.id)
+        creator, type, id = self.groups
+
+        url = f"{self.root}/{creator}/{type}/{id}"
         page = self.request(url).text
-        page = text.extr(
-            page, '<div class="movie-image thumb">', '</article>')
+
         data = {
-            "id"     : text.parse_int(self.id),
-            "creator": self.creator,
-            "type"   : self.type,
+            "id"     : text.parse_int(id),
+            "creator": creator,
+            "type"   : type,
         }
 
-        if self.type == "photo":
-            data["url"] = text.extr(page, 'data-src="', '"')
+        if type == "photo":
+            data["url"] = text.extr(page, '<img data-fancybox src="', '"')
             text.nameext_from_url(data["url"], data)
 
-        elif self.type == "video":
+        elif type == "video":
             data["url"] = "ytdl:" + decode_video_url(text.extr(
                 text.unescape(page), '"src":"', '"'))
             text.nameext_from_url(data["url"], data)
