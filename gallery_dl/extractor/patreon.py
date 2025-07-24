@@ -407,6 +407,11 @@ class PatreonUserExtractor(PatreonExtractor):
     example = "https://www.patreon.com/home"
 
     def posts(self):
+        if date_max := self._get_date_min_max(None, None)[1]:
+            self._cursor = cursor = \
+                util.datetime_from_timestamp(date_max).isoformat()
+            self._init_cursor = lambda: cursor
+
         url = self._build_url("stream", (
             "&filter[is_following]=true"
             "&json-api-use-default-includes=false"
