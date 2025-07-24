@@ -44,9 +44,21 @@ class _4chanThreadExtractor(Extractor):
                 post.update(data)
                 post["extension"] = post["ext"][1:]
                 post["filename"] = text.unescape(post["filename"])
+                post["_http_signature"] = _detect_null_byte
                 url = (f"https://i.4cdn.org"
                        f"/{post['board']}/{post['tim']}{post['ext']}")
                 yield Message.Url, url, post
+
+
+def _detect_null_byte(signature):
+    """Return False if all file signature bytes are null"""
+    if signature:
+        if signature[0]:
+            return True
+        for byte in signature:
+            if byte:
+                return True
+    return "File data consists of null bytes"
 
 
 class _4chanBoardExtractor(Extractor):
