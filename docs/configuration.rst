@@ -1829,7 +1829,7 @@ Type
     * ``string``
     * ``list`` of ``strings``
 Default
-    ``["user-models", "user-posts"]``
+    ``["user-images", "user-videos"]``
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
@@ -1842,6 +1842,13 @@ Description
     * ``"user-videos"``
 
     It is possible to use ``"all"`` instead of listing all values separately.
+Note
+    To get a more complete set of metadata
+    like ``model['name']`` and ``post['title']``,
+    include ``user-models`` and ``user-posts``
+    as well as the default ``user-images`` and ``user-videos``:
+
+    ``["user-models", "user-posts", "user-images", "user-videos"]``
 
 
 extractor.civitai.metadata
