@@ -2615,8 +2615,9 @@ Description
     when processing a user profile.
 
     Supported values are
-    * ``"avatar"``
-    * ``"photos"``
+
+    * ``avatar``
+    * ``photos``
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -3183,6 +3184,28 @@ Default
     ``false``
 Description
     Split ``stories`` elements into separate posts.
+
+
+extractor.itaku.include
+-----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"gallery"``
+Example
+    * ``"stars,gallery"``
+    * ``["stars", "gallery"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Supported values are
+
+    * ``gallery``
+    * ``stars``
+
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.itaku.videos
