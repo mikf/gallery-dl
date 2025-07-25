@@ -446,6 +446,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>ImgAdult</td>
+    <td>https://imgadult.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>ImgBB</td>
     <td>https://imgbb.com/</td>
     <td>Albums, individual Images, User Profiles</td>

@@ -210,6 +210,26 @@ class ImagetwistGalleryExtractor(ImagehostImageExtractor):
             yield Message.Queue, root + path, data
 
 
+class ImgadultImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgadult.com"""
+    category = "imgadult"
+    _cookies = {"img_i_d": "1"}
+    pattern = r"(?:https?://)?((?:www\.)?imgadult\.com/img-([0-9a-f]+)\.html)"
+    example = "https://imgadult.com/img-0123456789abc.html"
+
+    def get_info(self, page):
+        url , pos = text.extract(page, "' src='", "'")
+        name, pos = text.extract(page, "alt='", "'", pos)
+
+        if name:
+            name, _, rhs = name.rpartition(" image hosted at ImgAdult.com")
+            if not name:
+                name = rhs
+            name = text.unescape(name)
+
+        return url, name
+
+
 class ImgspiceImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imgspice.com"""
     category = "imgspice"
