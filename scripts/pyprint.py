@@ -72,7 +72,7 @@ def pyprint(obj, indent=0, lmin=9, lmax=16):
             return "\n".join(lines)
         else:
             key, value = obj.popitem()
-            return f'''{{"{key}": {pyprint(value)}}}'''
+            return f'''{{"{key}": {pyprint(value, indent)}}}'''
 
     if isinstance(obj, list):
         if not obj:
@@ -90,7 +90,7 @@ def pyprint(obj, indent=0, lmin=9, lmax=16):
             lines.append(f'''{ws}]''')
             return "\n".join(lines)
         else:
-            return f'''[{pyprint(obj[0])}]'''
+            return f'''[{pyprint(obj[0], indent)}]'''
 
     if isinstance(obj, tuple):
         if len(obj) == 1:
