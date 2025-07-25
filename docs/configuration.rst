@@ -3203,6 +3203,8 @@ Description
     Supported values are
 
     * ``gallery``
+    * ``followers``
+    * ``following``
     * ``stars``
 
     It is possible to use ``"all"`` instead of listing all values separately.

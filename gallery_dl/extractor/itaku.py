@@ -54,6 +54,13 @@ class ItakuExtractor(Extractor):
             yield Message.Directory, post
             yield Message.Url, url, text.nameext_from_url(url, post)
 
+    def items_user(self, users):
+        base = f"{self.root}/profile/"
+        for user in users:
+            url = f"{base}{user['owner_username']}"
+            user["_extractor"] = ItakuUserExtractor
+            yield Message.Queue, url, user
+
 
 class ItakuGalleryExtractor(ItakuExtractor):
     """Extractor for posts from an itaku user gallery"""
@@ -74,6 +81,24 @@ class ItakuStarsExtractor(ItakuExtractor):
         return self.api.galleries_images_starred(*self.groups)
 
 
+class ItakuFollowingExtractor(ItakuExtractor):
+    subcategory = "following"
+    pattern = USER_PATTERN + r"/following"
+    example = "https://itaku.ee/profile/USER/following"
+
+    def items(self):
+        return self.items_user(self.api.user_following(self.groups[0]))
+
+
+class ItakuFollowersExtractor(ItakuExtractor):
+    subcategory = "followers"
+    pattern = USER_PATTERN + r"/followers"
+    example = "https://itaku.ee/profile/USER/followers"
+
+    def items(self):
+        return self.items_user(self.api.user_followers(self.groups[0]))
+
+
 class ItakuUserExtractor(Dispatch, ItakuExtractor):
     """Extractor for itaku user profiles"""
     pattern = USER_PATTERN + r"/?(?:$|\?|#)"
@@ -82,8 +107,10 @@ class ItakuUserExtractor(Dispatch, ItakuExtractor):
     def items(self):
         base = f"{self.root}/profile/{self.groups[0]}/"
         return self._dispatch_extractors((
-            (ItakuGalleryExtractor, base + "gallery"),
-            (ItakuStarsExtractor  , base + "stara"),
+            (ItakuGalleryExtractor  , base + "gallery"),
+            (ItakuFollowersExtractor, base + "followers"),
+            (ItakuFollowingExtractor, base + "following"),
+            (ItakuStarsExtractor    , base + "stara"),
         ), ("gallery",))
 
 
@@ -180,6 +207,30 @@ class ItakuAPI():
         endpoint = f"/galleries/images/{image_id}/"
         return self._call(endpoint)
 
+    def user_following(self, username):
+        endpoint = "/user_profiles/"
+        params = {
+            "cursor"    : None,
+            "followed_by": self.user(username)["owner"],
+            "ordering"  : "-date_added",
+            "page"      : "1",
+            "page_size" : "50",
+            "sfw_only"  : "false",
+        }
+        return self._pagination(endpoint, params)
+
+    def user_followers(self, username):
+        endpoint = "/user_profiles/"
+        params = {
+            "cursor"    : None,
+            "followers_of": self.user(username)["owner"],
+            "ordering"  : "-date_added",
+            "page"      : "1",
+            "page_size" : "50",
+            "sfw_only"  : "false",
+        }
+        return self._pagination(endpoint, params)
+
     @memcache(keyarg=1)
     def user(self, username):
         return self._call(f"/user_profiles/{username}/")
@@ -187,19 +238,18 @@ class ItakuAPI():
     def _call(self, endpoint, params=None):
         if not endpoint.startswith("http"):
             endpoint = self.root + endpoint
-        response = self.extractor.request(
+        return self.extractor.request_json(
             endpoint, params=params, headers=self.headers)
-        return response.json()
 
-    def _pagination(self, endpoint, params, extend):
+    def _pagination(self, endpoint, params, extend=None):
         data = self._call(endpoint, params)
 
         while True:
-            if extend:
+            if extend is None:
+                yield from data["results"]
+            else:
                 for result in data["results"]:
                     yield extend(result["id"])
-            else:
-                yield from data["results"]
 
             url_next = data["links"].get("next")
             if not url_next:
