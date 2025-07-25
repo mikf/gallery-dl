@@ -2600,6 +2600,27 @@ description
     Extract comments that include photo attachments made by the author of the post.
 
 
+extractor.facebook.include
+--------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"photos"``
+Example
+    * ``"avatar,photos"``
+    * ``["avatar", "photos"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Supported values are
+    * ``"avatar"``
+    * ``"photos"``
+
+    It is possible to use ``"all"`` instead of listing all values separately.
+
+
 extractor.facebook.videos
 -------------------------
 Type

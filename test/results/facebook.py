@@ -11,46 +11,71 @@ import datetime
 __tests__ = (
 {
     "#url"     : "https://www.facebook.com/facebook",
-    "#category": ("", "facebook", "profile"),
-    "#class"   : facebook.FacebookProfileExtractor,
+    "#class"   : facebook.FacebookUserExtractor,
+    "#results" : "https://www.facebook.com/facebook/photos"
+},
+
+{
+    "#url"     : "https://www.facebook.com/people/facebook/100064860875397/?sk=photos",
+    "#class"   : facebook.FacebookUserExtractor,
+    "#results" : "https://www.facebook.com/100064860875397/photos"
+},
+
+{
+    "#url"     : "https://www.facebook.com/profile.php?id=100064860875397",
+    "#class"   : facebook.FacebookUserExtractor,
+    "#results" : "https://www.facebook.com/100064860875397/photos"
+},
+
+{
+    "#url"     : "https://www.facebook.com/facebook/photos",
+    "#class"   : facebook.FacebookPhotosExtractor,
+
     "#range"   : "1-3",
     "#count"   : 3,
 },
 
 {
-    "#url"     : "https://www.facebook.com/facebook/photos",
-    "#category": ("", "facebook", "profile"),
-    "#class"   : facebook.FacebookProfileExtractor,
+    "#url"     : "https://www.facebook.com/100064860875397/photos",
+    "#class"   : facebook.FacebookPhotosExtractor,
+
+    "#range"   : "1-3",
+    "#count"   : 3,
 },
 
 {
     "#url"     : "https://www.facebook.com/facebook/photos_by",
-    "#category": ("", "facebook", "profile"),
-    "#class"   : facebook.FacebookProfileExtractor,
+    "#class"   : facebook.FacebookPhotosExtractor,
 },
 
 {
-    "#url"     : "https://www.facebook.com/people/facebook/100064860875397/?sk=photos",
-    "#category": ("", "facebook", "profile"),
-    "#class"   : facebook.FacebookProfileExtractor,
-},
+    "#url"     : "https://www.facebook.com/facebook/avatar",
+    "#class"   : facebook.FacebookAvatarExtractor,
+    "#pattern" : r"https://scontent-[^7?#]+\.fbcdn\.net/v/t39.30808-6/380700650_10162533193146729_2379134611963304810_n.jpg?.+",
+    "#count"   : 1,
 
-{
-    "#url"     : "https://www.facebook.com/profile.php?id=100064860875397",
-    "#category": ("", "facebook", "profile"),
-    "#class"   : facebook.FacebookProfileExtractor,
+    "caption"  : "",
+    "count"    : 1,
+    "date"     : "dt:2023-10-06 21:13:59",
+    "extension": "jpg",
+    "filename" : str,
+    "id"       : "736550615183628",
+    "num"      : 1,
+    "set_id"   : "a.736550601850296",
+    "type"     : "avatar",
+    "url"      : str,
+    "user_id"  : "100064860875397",
+    "username" : "Facebook",
 },
 
 {
     "#url"     : "https://www.facebook.com/media/set/?set=a.10152716010956729&type=3",
-    "#category": ("", "facebook", "set"),
     "#class"   : facebook.FacebookSetExtractor,
     "#count"   : 6,
 },
 
 {
     "#url"     : "https://www.facebook.com/joho.press.jp/posts/pfbid02mfFRpVkErLQxQ8cpD2f1hwXEVsFzK8kfNBKdK2Jndnx6AkmMQZuXhovwDgwvoDNil",
-    "#category": ("", "facebook", "set"),
     "#class"   : facebook.FacebookSetExtractor,
     "#range"   : "1-3",
     "#count"   : 3,
@@ -62,20 +87,17 @@ __tests__ = (
 
 {
     "#url"     : "https://www.facebook.com/photo/?fbid=10152716011076729&set=a.10152716010956729&setextract",
-    "#category": ("", "facebook", "set"),
     "#class"   : facebook.FacebookSetExtractor,
     "#count"   : 4,
 },
 
 {
     "#url"     : "https://www.facebook.com/photo.php?fbid=10165113568399554&set=t.100064860875397&type=3",
-    "#category": ("", "facebook", "photo"),
     "#class"   : facebook.FacebookPhotoExtractor,
 },
 
 {
     "#url"     : "https://www.facebook.com/photo/?fbid=10160743390456729",
-    "#category": ("", "facebook", "photo"),
     "#class"   : facebook.FacebookPhotoExtractor,
     "#count"   : 1,
 
@@ -92,13 +114,11 @@ __tests__ = (
 
 {
     "#url"     : "https://www.facebook.com/photo/?fbs=home&fbid=10160743390456729",
-    "#category": ("", "facebook", "photo"),
     "#class"   : facebook.FacebookPhotoExtractor,
 },
 
 {
     "#url"     : "https://www.facebook.com/Facebook/photos/a.10152716010956729/10152716011076729",
-    "#category": ("", "facebook", "photo"),
     "#class"   : facebook.FacebookPhotoExtractor,
     "#count"   : 1,
 
@@ -116,7 +136,6 @@ __tests__ = (
 {
     "#url"     : "https://www.facebook.com/photo.php?fbid=1156625586261770",
     "#comment" : "surrogate pair in 'caption' data (#6599)",
-    "#category": ("", "facebook", "photo"),
     "#class"   : facebook.FacebookPhotoExtractor,
 
     "caption"  : "A century of innovation parked side by side.\n\n📸: Vocabutesla via X",
@@ -125,7 +144,6 @@ __tests__ = (
 {
     "#url"     : "https://www.facebook.com/photo.php?fbid=989340003138066&set=pb.100061862277212.-2207520000&type=3",
     "#comment" : "no 'publish_time' (#7151)",
-    "#category": ("", "facebook", "photo"),
     "#class"   : facebook.FacebookPhotoExtractor,
 
     "date"     : "dt:2025-02-25 15:00:09",
@@ -133,7 +151,6 @@ __tests__ = (
 
 {
     "#url"     : "https://www.facebook.com/watch/?v=1165557851291824",
-    "#category": ("", "facebook", "video"),
     "#class"   : facebook.FacebookVideoExtractor,
     "#count"   : 1,
 
@@ -147,7 +164,6 @@ __tests__ = (
 
 {
     "#url"     : "https://www.facebook.com/100064860875397/videos/644342003942740",
-    "#category": ("", "facebook", "video"),
     "#class"   : facebook.FacebookVideoExtractor,
     "#count"   : 2,
 

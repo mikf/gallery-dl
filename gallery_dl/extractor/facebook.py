@@ -6,10 +6,14 @@
 
 """Extractors for https://www.facebook.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, exception
+from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?facebook\.com"
+USER_PATTERN = (BASE_PATTERN +
+                r"/(?!media/|photo/|photo.php|watch/)"
+                r"(?:profile\.php\?id=|people/[^/?#]+/)?([^/?&#]+)")
 
 
 class FacebookExtractor(Extractor):
@@ -291,6 +295,36 @@ class FacebookExtractor(Extractor):
 
             i += 1
 
+    @memcache(keyarg=1)
+    def _extract_profile_photos_page(self, profile):
+        profile_photos_url = f"{self.root}/{profile}/photos_by"
+
+        for _ in range(self.fallback_retries + 1):
+            profile_photos_page = self.request(profile_photos_url).text
+            if set_id := self._extract_profile_set_id(profile_photos_page):
+                break
+            self.log.debug("Got empty profile photos page, retrying...")
+        else:
+            raise exception.AbortExtraction("Failed to extract profile data")
+
+        avatar_page_url = text.extr(
+            profile_photos_page, ',"profilePhoto":{"url":"', '"')
+
+        return set_id, avatar_page_url.replace("\\/", "/")
+
+    def _extract_profile_set_id(self, profile_photos_page):
+        set_ids_raw = text.extr(
+            profile_photos_page, '"pageItems"', '"page_info"'
+        )
+
+        set_id = text.extr(
+            set_ids_raw, 'set=', '"'
+        ).rsplit("&", 1)[0] or text.extr(
+            set_ids_raw, '\\/photos\\/', '\\/'
+        )
+
+        return set_id
+
 
 class FacebookSetExtractor(FacebookExtractor):
     """Base class for Facebook Set extractors"""
@@ -384,47 +418,50 @@ class FacebookVideoExtractor(FacebookExtractor):
                 yield Message.Url, audio["url"], audio
 
 
-class FacebookProfileExtractor(FacebookExtractor):
-    """Base class for Facebook Profile Photos Set extractors"""
-    subcategory = "profile"
-    pattern = (
-        BASE_PATTERN +
-        r"/(?!media/|photo/|photo.php|watch/)"
-        r"(?:profile\.php\?id=|people/[^/?#]+/)?"
-        r"([^/?&#]+)(?:/photos(?:_by)?|/videos|/posts)?/?(?:$|\?|#)"
-    )
-    example = "https://www.facebook.com/USERNAME"
-
-    def get_profile_photos_set_id(self, profile_photos_page):
-        set_ids_raw = text.extr(
-            profile_photos_page, '"pageItems"', '"page_info"'
-        )
-
-        set_id = text.extr(
-            set_ids_raw, 'set=', '"'
-        ).rsplit("&", 1)[0] or text.extr(
-            set_ids_raw, '\\/photos\\/', '\\/'
-        )
-
-        return set_id
+class FacebookPhotosExtractor(FacebookExtractor):
+    """Extractor for Facebook Profile Photos"""
+    subcategory = "photos"
+    pattern = USER_PATTERN + r"/photos(?:_by)?"
+    example = "https://www.facebook.com/USERNAME/photos"
 
     def items(self):
-        profile_photos_url = (
-            self.root + "/" + self.groups[0] + "/photos_by"
-        )
+        set_id = self._extract_profile_photos_page(self.groups[0])[0]
+        set_url = f"{self.root}/media/set/?set={set_id}"
+        set_page = self.request(set_url).text
+        set_data = self.parse_set_page(set_page)
+        return self.extract_set(set_data)
 
-        for _ in range(self.fallback_retries + 1):
-            profile_photos_page = self.request(profile_photos_url).text
-            set_id = self.get_profile_photos_set_id(profile_photos_page)
-            if set_id:
-                break
-            self.log.debug("Failed to find profile photos set ID, retrying...")
 
-        if set_id:
-            set_url = f"{self.root}/media/set/?set={set_id}"
-            set_page = self.request(set_url).text
-            set_data = self.parse_set_page(set_page)
-            return self.extract_set(set_data)
+class FacebookAvatarExtractor(FacebookExtractor):
+    """Extractor for Facebook Profile Avatars"""
+    subcategory = "avatar"
+    pattern = USER_PATTERN + r"/avatar"
+    example = "https://www.facebook.com/USERNAME/avatar"
 
-        self.log.debug("Profile photos set ID not found.")
-        return iter(())
+    def items(self):
+        avatar_page_url = self._extract_profile_photos_page(self.groups[0])[1]
+        avatar_page = self.photo_page_request_wrapper(avatar_page_url).text
+
+        avatar = self.parse_photo_page(avatar_page)
+        avatar["count"] = avatar["num"] = 1
+        avatar["type"] = "avatar"
+
+        set_url = f"{self.root}/media/set/?set={avatar['set_id']}"
+        set_page = self.request(set_url).text
+        directory = self.parse_set_page(set_page)
+
+        yield Message.Directory, directory
+        yield Message.Url, avatar["url"], avatar
+
+
+class FacebookUserExtractor(Dispatch, FacebookExtractor):
+    """Extractor for Facebook Profiles"""
+    pattern = USER_PATTERN + r"/?(?:$|\?|#)"
+    example = "https://www.facebook.com/USERNAME"
+
+    def items(self):
+        base = f"{self.root}/{self.groups[0]}/"
+        return self._dispatch_extractors((
+            (FacebookAvatarExtractor, base + "avatar"),
+            (FacebookPhotosExtractor, base + "photos"),
+        ), ("photos",))

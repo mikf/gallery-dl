@@ -260,6 +260,9 @@ SUBCATEGORY_MAP = {
     "discord": {
         "direct-message" : "",
     },
+    "facebook": {
+        "photos" : "Profile Photos",
+    },
     "fanbox": {
         "supporting": "Supported User Feed",
         "redirect"  : "Pixiv Redirects",
