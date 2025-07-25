@@ -18,7 +18,6 @@ __tests__ = (
 
 {
     "#url"     : "https://itaku.ee/profile/piku/gallery",
-    "#category": ("", "itaku", "gallery"),
     "#class"   : itaku.ItakuGalleryExtractor,
     "#pattern" : r"https://itaku\.ee/api/media/gallery_imgs/[^/?#]+\.(jpg|png|gif)",
     "#range"   : "1-10",
@@ -28,7 +27,6 @@ __tests__ = (
 {
     "#url"     : "https://itaku.ee/profile/piku/gallery/7391",
     "#comment" : "gallery section (#6951)",
-    "#category": ("", "itaku", "gallery"),
     "#class"   : itaku.ItakuGalleryExtractor,
     "#results" : (
         "https://itaku.ee/api/media/gallery_imgs/misty-psyduck_IWbYdwT.png",
@@ -40,7 +38,6 @@ __tests__ = (
 
 {
     "#url"     : "https://itaku.ee/profile/piku/stars",
-    "#category": ("", "itaku", "stars"),
     "#class"   : itaku.ItakuStarsExtractor,
     "#pattern" : r"https://itaku\.ee/api/media/gallery_imgs/[^/?#]+\.(jpg|png|gif)",
     "#range"   : "1-10",
@@ -48,8 +45,23 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://itaku.ee/profile/piku/followers",
+    "#class"   : itaku.ItakuFollowersExtractor,
+    "#pattern" : itaku.ItakuUserExtractor.pattern,
+    "#range"   : "1-60",
+    "#count"   : 60,
+},
+
+{
+    "#url"     : "https://itaku.ee/profile/piku/following",
+    "#class"   : itaku.ItakuFollowingExtractor,
+    "#pattern" : itaku.ItakuUserExtractor.pattern,
+    "#range"   : "1-60",
+    "#count"   : 60,
+},
+
+{
     "#url"     : "https://itaku.ee/images/100471",
-    "#category": ("", "itaku", "image"),
     "#class"   : itaku.ItakuImageExtractor,
     "#results" : "https://itaku.ee/api/media/gallery_imgs/220504_oUNIAFT.png",
 
@@ -103,7 +115,6 @@ __tests__ = (
 {
     "#url"     : "https://itaku.ee/images/19465",
     "#comment" : "video",
-    "#category": ("", "itaku", "image"),
     "#class"   : itaku.ItakuImageExtractor,
     "#results" : "https://itaku.ee/api/media/gallery_vids/sleepy_af_OY5GHWw.mp4",
 },
@@ -111,7 +122,6 @@ __tests__ = (
 {
     "#url"     : "https://itaku.ee/home/images?tags=cute",
     "#comment" : "simple search",
-    "#category": ("", "itaku", "search"),
     "#class"   : itaku.ItakuSearchExtractor,
     "#range"   : "1-10",
     "#count"   : 10,
@@ -120,7 +130,6 @@ __tests__ = (
 {
     "#url"     : "https://itaku.ee/home/images?maturity_rating=SFW&date_range=&ordering=-date_added&text=hello&is_video=true",
     "#comment" : "search for videos",
-    "#category": ("", "itaku", "search"),
     "#class"   : itaku.ItakuSearchExtractor,
     "#count"   : range(5, 50),
 },
@@ -128,7 +137,6 @@ __tests__ = (
 {
     "#url"     : "https://itaku.ee/home/images?tags=cute&tags=-cute&tags=~cute&maturity_rating=SFW&date_range=&ordering=-date_added",
     "#comment" : "search with postive, negative, and optional tags",
-    "#category": ("", "itaku", "search"),
     "#class"   : itaku.ItakuSearchExtractor,
     "#count"   : 0,
 },
