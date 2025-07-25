@@ -8,11 +8,12 @@
 
 """Extractors for https://itaku.ee/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from ..cache import memcache
 from .. import text
 
 BASE_PATTERN = r"(?:https?://)?itaku\.ee"
+USER_PATTERN = BASE_PATTERN + r"/profile/([^/?#]+)"
 
 
 class ItakuExtractor(Extractor):
@@ -57,7 +58,7 @@ class ItakuExtractor(Extractor):
 class ItakuGalleryExtractor(ItakuExtractor):
     """Extractor for posts from an itaku user gallery"""
     subcategory = "gallery"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/gallery(?:/(\d+))?"
+    pattern = USER_PATTERN + r"/gallery(?:/(\d+))?"
     example = "https://itaku.ee/profile/USER/gallery"
 
     def posts(self):
@@ -66,11 +67,24 @@ class ItakuGalleryExtractor(ItakuExtractor):
 
 class ItakuStarsExtractor(ItakuExtractor):
     subcategory = "stars"
-    pattern = BASE_PATTERN + r"/profile/([^/?#]+)/stars(?:/(\d+))?"
+    pattern = USER_PATTERN + r"/stars(?:/(\d+))?"
     example = "https://itaku.ee/profile/USER/stars"
 
     def posts(self):
         return self.api.galleries_images_starred(*self.groups)
+
+
+class ItakuUserExtractor(Dispatch, ItakuExtractor):
+    """Extractor for itaku user profiles"""
+    pattern = USER_PATTERN + r"/?(?:$|\?|#)"
+    example = "https://itaku.ee/profile/USER"
+
+    def items(self):
+        base = f"{self.root}/profile/{self.groups[0]}/"
+        return self._dispatch_extractors((
+            (ItakuGalleryExtractor, base + "gallery"),
+            (ItakuStarsExtractor  , base + "stara"),
+        ), ("gallery",))
 
 
 class ItakuImageExtractor(ItakuExtractor):

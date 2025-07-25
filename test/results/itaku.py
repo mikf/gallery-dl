@@ -9,6 +9,14 @@ from gallery_dl.extractor import itaku
 
 __tests__ = (
 {
+    "#url"     : "https://itaku.ee/profile/piku",
+    "#class"   : itaku.ItakuUserExtractor,
+    "#results" : (
+        "https://itaku.ee/profile/piku/gallery",
+    ),
+},
+
+{
     "#url"     : "https://itaku.ee/profile/piku/gallery",
     "#category": ("", "itaku", "gallery"),
     "#class"   : itaku.ItakuGalleryExtractor,
