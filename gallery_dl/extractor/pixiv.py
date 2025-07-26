@@ -232,7 +232,14 @@ class PixivExtractor(Extractor):
     def _request_ajax(self, endpoint):
         url = f"{self.root}/ajax{endpoint}"
         try:
-            return self.request_json(url, headers=self.headers_web)["body"]
+            data = self.request_json(
+                url, headers=self.headers_web, fatal=False)
+            if not data.get("error"):
+                return data["body"]
+
+            self.log.debug("Server response: %s", util.json_dumps(data))
+            return self.log.error(
+                "'%s'", data.get("message") or "General Error")
         except Exception:
             return None
 
@@ -437,6 +444,8 @@ class PixivArtworksExtractor(PixivExtractor):
         if self.sanity_workaround:
             body = self._request_ajax(
                 f"/user/{self.user_id}/profile/all")
+            if not body:
+                return ()
             try:
                 ajax_ids = list(map(int, body["illusts"]))
                 ajax_ids.extend(map(int, body["manga"]))
