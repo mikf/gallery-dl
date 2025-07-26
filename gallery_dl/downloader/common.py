@@ -34,7 +34,7 @@ class DownloaderBase():
         if self.partdir:
             self.partdir = util.expand_path(self.partdir)
             os.makedirs(self.partdir, exist_ok=True)
-        
+
         proxies = self.config("proxy", util.SENTINEL)
         if proxies is util.SENTINEL:
             self.proxies = extractor._proxies
@@ -42,7 +42,7 @@ class DownloaderBase():
             self.proxies = util.build_proxy_map(proxies, self.log)
 
         if self.proxy_rotate and not self.proxies:
-            self.proxies = None  # Clear static proxies       
+            self.proxies = None  # Clear static proxies
 
     def config(self, key, default=None):
         """Interpolate downloader config value for 'key'"""
