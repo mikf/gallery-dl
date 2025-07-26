@@ -35,7 +35,7 @@ class ExecPP(PostProcessor):
             if options.get("async", False):
                 self._exec = self._popen
 
-        self.session = None
+        self.session = False
         self.creationflags = 0
         if options.get("session"):
             if util.WINDOWS:
