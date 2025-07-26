@@ -94,4 +94,11 @@ def pyprint(obj, indent=0, lmax=16):
             return "set()"
         return f'''{{{", ".join(pyprint(v, indent+4) for v in obj)}}}'''
 
+    if obj.__class__.__name__ == "datetime":
+        if (off := obj.utcoffset()) is not None:
+            obj = obj.replace(tzinfo=None, microsecond=0) - off
+        elif obj.microsecond:
+            obj = obj.replace(microsecond=0)
+        return f'''"dt:{obj}"'''
+
     return f'''{obj}'''
