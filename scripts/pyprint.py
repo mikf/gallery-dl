@@ -86,8 +86,12 @@ def pyprint(obj, indent=0, lmax=16):
         if not obj:
             return "()"
         if len(obj) == 1:
-            return f'''({pyprint(obj[0], indent+4)},)'''
-
+            return f'''({pyprint(obj[0])},)'''
         return f'''({", ".join(pyprint(v, indent+4) for v in obj)})'''
+
+    if isinstance(obj, set):
+        if not obj:
+            return "set()"
+        return f'''{{{", ".join(pyprint(v, indent+4) for v in obj)}}}'''
 
     return f'''{obj}'''
