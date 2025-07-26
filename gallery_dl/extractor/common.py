@@ -342,8 +342,8 @@ class Extractor():
         self._proxy_rotate = self.config("proxy-rotate", False)
         self._proxy_list = self.config("proxy-list")
         self._proxy_rotator = None
-        
-        if self._proxy_rotate and not self._proxies: 
+
+        if self._proxy_rotate and not self._proxies:
             proxy_strategy = self.config("proxy-strategy")
             try:
                 self._proxy_rotator = util.ProxyRotator(
