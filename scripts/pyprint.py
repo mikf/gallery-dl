@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -46,50 +46,48 @@ def pyprint(obj, indent=0, lmax=16):
     if isinstance(obj, dict):
         if not obj:
             return "{}"
-
-        if len(obj) >= 2 or not indent:
-            ws = " " * indent
-            key_maxlen = max(kl for kl in map(len, obj) if kl <= lmax)
-
-            lines = []
-            lines.append("{")
-            for key, value in obj.items():
-                if key.startswith("#blank-"):
-                    lines.append("")
-                else:
-                    lines.append(
-                        f'''{ws}    "{key}"'''
-                        f'''{' '*(key_maxlen - len(key))}: '''
-                        f'''{pyprint(value, indent+4)},'''
-                    )
-            lines.append(f'''{ws}}}''')
-            return "\n".join(lines)
-        else:
-            key, value = obj.popitem()
+        if len(obj) == 1:
+            key, value = next(iter(obj.items()))
             return f'''{{"{key}": {pyprint(value, indent)}}}'''
+
+        ws = " " * indent
+        key_maxlen = max(kl for kl in map(len, obj) if kl <= lmax)
+
+        lines = ["{"]
+        for key, value in obj.items():
+            if key.startswith("#blank-"):
+                lines.append("")
+            else:
+                lines.append(
+                    f'''{ws}    "{key}"'''
+                    f'''{' '*(key_maxlen - len(key))}: '''
+                    f'''{pyprint(value, indent+4)},'''
+                )
+        lines.append(f'''{ws}}}''')
+        return "\n".join(lines)
 
     if isinstance(obj, list):
         if not obj:
             return "[]"
-
-        if len(obj) >= 2:
-            ws = " " * indent
-
-            lines = []
-            lines.append("[")
-            lines.extend(
-                f'''{ws}    {pyprint(value, indent+4)},'''
-                for value in obj
-            )
-            lines.append(f'''{ws}]''')
-            return "\n".join(lines)
-        else:
+        if len(obj) == 1:
             return f'''[{pyprint(obj[0], indent)}]'''
 
+        ws = " " * indent
+
+        lines = ["{"]
+        lines.extend(
+            f'''{ws}    {pyprint(value, indent+4)},'''
+            for value in obj
+        )
+        lines.append(f'''{ws}]''')
+        return "\n".join(lines)
+
     if isinstance(obj, tuple):
+        if not obj:
+            return "()"
         if len(obj) == 1:
             return f'''({pyprint(obj[0], indent+4)},)'''
+
         return f'''({", ".join(pyprint(v, indent+4) for v in obj)})'''
 
-    else:
-        return f'''{obj}'''
+    return f'''{obj}'''
