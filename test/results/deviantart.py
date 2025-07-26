@@ -134,7 +134,7 @@ __tests__ = (
     "#category" : ("", "deviantart", "gallery"),
     "#class"    : deviantart.DeviantartGalleryExtractor,
     "#options"  : {"group": "skip"},
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AbortExtraction,
     "#count"    : 0,
 },
 

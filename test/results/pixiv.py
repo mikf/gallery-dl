@@ -55,7 +55,7 @@ __tests__ = (
         "pawoo_url": None,
         "region": "",
         "total_follow_users": 16,
-        "total_illust_bookmarks_public": 6,
+        "total_illust_bookmarks_public": range(5, 20),
         "total_illust_series": 0,
         "total_illusts": 17,
         "total_manga": 0,
@@ -121,6 +121,13 @@ __tests__ = (
     "#class"   : pixiv.PixivArtworksExtractor,
     "#options"  : {"metadata": True},
     "#exception": exception.NotFoundError,
+},
+
+{
+    "#url"     : "https://www.pixiv.net/users/91306124/artworks",
+    "#comment" : "deleted account with a different error",
+    "#class"   : pixiv.PixivArtworksExtractor,
+    "#log"     : "'User has left pixiv or the user ID does not exist.'",
 },
 
 {
@@ -337,6 +344,10 @@ __tests__ = (
     "#comment" : "deleted limit_sanity_level_360.png work (#6339)",
     "#class"   : pixiv.PixivWorkExtractor,
     "#count"   : 0,
+    "#log"     : (
+        ("warning", "104582860: 'limit_sanity_level' warning"),
+        ("error"  , "'General Error'"),
+    ),
 },
 
 {
@@ -415,11 +426,16 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/en/users/173530/bookmarks/artworks",
     "#class"   : pixiv.PixivFavoriteExtractor,
     "#results" : (
+        "https://i.pximg.net/img-original/img/2025/06/25/02/06/58/131943241_p0.png",
+        "https://i.pximg.net/img-original/img/2025/07/02/03/22/51/132200601_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/10/31/17/54/01/2005108_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/09/27/12/22/40/1719386_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/04/15/01/43/46/669358_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/06/19/21/52/15/1005851_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/06/17/22/16/54/994965_p0.jpg",
+    ),
+    "#log": (
+        ("warning", "1679677: 'My pixiv' locked"),
     ),
 },
 
@@ -427,11 +443,16 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/bookmark.php?id=173530",
     "#class"   : pixiv.PixivFavoriteExtractor,
     "#results" : (
+        "https://i.pximg.net/img-original/img/2025/06/25/02/06/58/131943241_p0.png",
+        "https://i.pximg.net/img-original/img/2025/07/02/03/22/51/132200601_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/10/31/17/54/01/2005108_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/09/27/12/22/40/1719386_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/04/15/01/43/46/669358_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/06/19/21/52/15/1005851_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/06/17/22/16/54/994965_p0.jpg",
+    ),
+    "#log": (
+        ("warning", "1679677: 'My pixiv' locked"),
     ),
 },
 
@@ -526,7 +547,7 @@ __tests__ = (
 {
     "#url"     : "https://www.pixiv.net/ranking.php?mode=unknown",
     "#class"   : pixiv.PixivRankingExtractor,
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AbortExtraction,
 },
 
 {
@@ -539,19 +560,19 @@ __tests__ = (
 {
     "#url"     : "https://pixiv.net/en/tags/foo/artworks?order=week&s_mode=s_tag",
     "#class"   : pixiv.PixivSearchExtractor,
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AbortExtraction,
 },
 
 {
     "#url"     : "https://pixiv.net/en/tags/foo/artworks?order=date&s_mode=tag",
     "#class"   : pixiv.PixivSearchExtractor,
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AbortExtraction,
 },
 
 {
     "#url"     : "https://www.pixiv.net/search.php?s_mode=s_tag&name=Original",
     "#class"   : pixiv.PixivSearchExtractor,
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AbortExtraction,
 },
 
 {

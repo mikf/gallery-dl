@@ -72,7 +72,7 @@ __tests__ = (
     "#url"      : "https://xfolio.jp/portfolio/donguri/series/1391402",
     "#class"    : xfolio.XfolioSeriesExtractor,
     "#auth"     : False,
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AbortExtraction,
 },
 
 {
