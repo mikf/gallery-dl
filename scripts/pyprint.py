@@ -10,7 +10,7 @@
 import re
 
 
-def pyprint(obj, indent=0, lmin=9, lmax=16):
+def pyprint(obj, indent=0, lmax=16):
 
     if isinstance(obj, str):
         if obj.startswith("lit:"):
@@ -49,13 +49,7 @@ def pyprint(obj, indent=0, lmin=9, lmax=16):
 
         if len(obj) >= 2 or not indent:
             ws = " " * indent
-
-            lkey = max(map(len, obj))
-            if not indent:
-                if lkey < lmin:
-                    lkey = lmin
-                elif lkey > lmax:
-                    lkey = lmax
+            key_maxlen = max(kl for kl in map(len, obj) if kl <= lmax)
 
             lines = []
             lines.append("{")
@@ -65,7 +59,7 @@ def pyprint(obj, indent=0, lmin=9, lmax=16):
                 else:
                     lines.append(
                         f'''{ws}    "{key}"'''
-                        f'''{' '*(lkey - len(key))}: '''
+                        f'''{' '*(key_maxlen - len(key))}: '''
                         f'''{pyprint(value, indent+4)},'''
                     )
             lines.append(f'''{ws}}}''')
