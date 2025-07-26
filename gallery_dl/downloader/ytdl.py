@@ -25,7 +25,7 @@ class YoutubeDLDownloader(DownloaderBase):
         retries = self.config("retries", extractor._retries)
         self.proxy_rotate = self.config("proxy-rotate", False)
         proxy_url = None
-        
+
         if self.proxies:
             proxy_url = self.proxies.get("http") if self.proxies else None
         elif self.proxy_rotate:
