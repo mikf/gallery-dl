@@ -314,6 +314,7 @@ class ExecTest(BasePostprocessorTest):
 
         with patch("gallery_dl.util.Popen") as p:
             i = Mock()
+            i.wait.return_value = 0
             p.return_value = i
             self._trigger(("after",))
 
@@ -334,6 +335,7 @@ class ExecTest(BasePostprocessorTest):
 
         with patch("gallery_dl.util.Popen") as p:
             i = Mock()
+            i.wait.return_value = 0
             p.return_value = i
             self._trigger(("after",))
 
