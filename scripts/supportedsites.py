@@ -293,6 +293,9 @@ SUBCATEGORY_MAP = {
         "saved": "Saved Posts",
         "tagged": "Tagged Posts",
     },
+    "itaku": {
+        "posts": "",
+    },
     "iwara": {
         "user-images": "User Images",
         "user-videos": "User Videos",

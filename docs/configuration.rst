@@ -3203,6 +3203,7 @@ Description
     Supported values are
 
     * ``gallery``
+    * ``posts``
     * ``followers``
     * ``following``
     * ``stars``

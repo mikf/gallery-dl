@@ -514,7 +514,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Itaku</td>
     <td>https://itaku.ee/</td>
-    <td>Followers, Followed Users, Galleries, individual Images, Search Results, Stars, User Profiles</td>
+    <td>Followers, Followed Users, Galleries, individual Images, Posts, Search Results, Stars, User Profiles</td>
     <td></td>
 </tr>
 <tr>
