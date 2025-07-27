@@ -184,13 +184,13 @@ __tests__ = (
     "#comment" : "inline image (#1286)",
     "#category": ("", "kemono", "fanbox"),
     "#class"   : kemono.KemonoPostExtractor,
-    "#pattern" : r"https://kemono\.su/data/47/b5/47b5c014ecdcfabdf2c85eec53f1133a76336997ae8596f332e97d956a460ad2\.jpg",
+    "#pattern" : r"https://kemono\.cr/data/47/b5/47b5c014ecdcfabdf2c85eec53f1133a76336997ae8596f332e97d956a460ad2\.jpg",
 
     "hash": "47b5c014ecdcfabdf2c85eec53f1133a76336997ae8596f332e97d956a460ad2",
 },
 
 {
-    "#url"     : "https://kemono.cr/gumroad/user/3101696181060/post/tOWyf",
+    "#url"     : "https://kemono.su/gumroad/user/3101696181060/post/tOWyf",
     "#category": ("", "kemono", "gumroad"),
     "#class"   : kemono.KemonoPostExtractor,
     "#count"   : 12,
@@ -367,7 +367,7 @@ __tests__ = (
     "#comment" : "revisions (#4498)",
     "#category": ("", "kemono", "patreon"),
     "#class"   : kemono.KemonoPostExtractor,
-    "#pattern" : r"https://kemono\.su/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86\.jpg",
+    "#pattern" : r"https://kemono\.cr/data/88/52/88521f71822dfa2f42df3beba319ea4fceda2a2d6dc59da0276a75238f743f86\.jpg",
     "#count"   : 11,
     "#archive" : False,
 
@@ -578,7 +578,7 @@ __tests__ = (
     "#url"     : "https://kemono.cr/discord/server/256559665620451329/channel/462437519519383555#",
     "#category": ("", "kemono", "discord"),
     "#class"   : kemono.KemonoDiscordExtractor,
-    "#pattern" : r"https://kemono\.su/data/(e3/77/e377e3525164559484ace2e64425b0cec1db08.*\.png|51/45/51453640a5e0a4d23fbf57fb85390f9c5ec154.*\.gif)",
+    "#pattern" : r"https://kemono\.cr/data/(e3/77/e377e3525164559484ace2e64425b0cec1db08.*\.png|51/45/51453640a5e0a4d23fbf57fb85390f9c5ec154.*\.gif)",
     "#count"   : ">= 2",
 
     "hash": {
