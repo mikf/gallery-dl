@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message, Dispatch
 from ..cache import memcache
-from .. import text
+from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?itaku\.ee"
 USER_PATTERN = BASE_PATTERN + r"/profile/([^/?#]+)"
@@ -30,36 +30,47 @@ class ItakuExtractor(Extractor):
         self.videos = self.config("videos", True)
 
     def items(self):
-        for post in self.posts():
+        if images := self.images():
+            for image in images:
 
-            post["date"] = text.parse_datetime(
-                post["date_added"], "%Y-%m-%dT%H:%M:%S.%fZ")
-            for category, tags in post.pop("categorized_tags").items():
-                post["tags_" + category.lower()] = [t["name"] for t in tags]
-            post["tags"] = [t["name"] for t in post["tags"]]
+                image["date"] = text.parse_datetime(
+                    image["date_added"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                for category, tags in image.pop("categorized_tags").items():
+                    image[f"tags_{category.lower()}"] = [
+                        t["name"] for t in tags]
+                image["tags"] = [t["name"] for t in image["tags"]]
 
-            sections = []
-            for s in post["sections"]:
-                if group := s["group"]:
-                    sections.append(group["title"] + "/" + s["title"])
+                sections = []
+                for s in image["sections"]:
+                    if group := s["group"]:
+                        sections.append(f"{group['title']}/{s['title']}")
+                    else:
+                        sections.append(s["title"])
+                image["sections"] = sections
+
+                if self.videos and image["video"]:
+                    url = image["video"]["video"]
                 else:
-                    sections.append(s["title"])
-            post["sections"] = sections
+                    url = image["image"]
 
-            if post["video"] and self.videos:
-                url = post["video"]["video"]
-            else:
-                url = post["image"]
+                yield Message.Directory, image
+                yield Message.Url, url, text.nameext_from_url(url, image)
+            return
 
-            yield Message.Directory, post
-            yield Message.Url, url, text.nameext_from_url(url, post)
+        if posts := self.posts():
+            for post in posts:
+                ...
+            return
 
-    def items_user(self, users):
-        base = f"{self.root}/profile/"
-        for user in users:
-            url = f"{base}{user['owner_username']}"
-            user["_extractor"] = ItakuUserExtractor
-            yield Message.Queue, url, user
+        if users := self.users():
+            base = f"{self.root}/profile/"
+            for user in users:
+                url = f"{base}{user['owner_username']}"
+                user["_extractor"] = ItakuUserExtractor
+                yield Message.Queue, url, user
+            return
+
+    images = posts = users = util.noop
 
 
 class ItakuGalleryExtractor(ItakuExtractor):
@@ -68,7 +79,7 @@ class ItakuGalleryExtractor(ItakuExtractor):
     pattern = USER_PATTERN + r"/gallery(?:/(\d+))?"
     example = "https://itaku.ee/profile/USER/gallery"
 
-    def posts(self):
+    def images(self):
         user, section = self.groups
         return self.api.galleries_images({
             "owner"   : self.api.user_id(user),
@@ -81,7 +92,7 @@ class ItakuStarsExtractor(ItakuExtractor):
     pattern = USER_PATTERN + r"/stars(?:/(\d+))?"
     example = "https://itaku.ee/profile/USER/stars"
 
-    def posts(self):
+    def images(self):
         user, section = self.groups
         return self.api.galleries_images({
             "stars_of": self.api.user_id(user),
@@ -95,10 +106,10 @@ class ItakuFollowingExtractor(ItakuExtractor):
     pattern = USER_PATTERN + r"/following"
     example = "https://itaku.ee/profile/USER/following"
 
-    def items(self):
-        return self.items_user(self.api.user_profiles({
+    def users(self):
+        return self.api.user_profiles({
             "followed_by": self.api.user_id(self.groups[0]),
-        }))
+        })
 
 
 class ItakuFollowersExtractor(ItakuExtractor):
@@ -106,10 +117,10 @@ class ItakuFollowersExtractor(ItakuExtractor):
     pattern = USER_PATTERN + r"/followers"
     example = "https://itaku.ee/profile/USER/followers"
 
-    def items(self):
-        return self.items_user(self.api.user_profiles({
+    def users(self):
+        return self.api.user_profiles({
             "followers_of": self.api.user_id(self.groups[0]),
-        }))
+        })
 
 
 class ItakuUserExtractor(Dispatch, ItakuExtractor):
@@ -132,7 +143,7 @@ class ItakuImageExtractor(ItakuExtractor):
     pattern = BASE_PATTERN + r"/images/(\d+)"
     example = "https://itaku.ee/images/12345"
 
-    def posts(self):
+    def images(self):
         return (self.api.image(self.groups[0]),)
 
 
@@ -141,7 +152,7 @@ class ItakuSearchExtractor(ItakuExtractor):
     pattern = BASE_PATTERN + r"/home/images/?\?([^#]+)"
     example = "https://itaku.ee/home/images?tags=SEARCH"
 
-    def posts(self):
+    def images(self):
         required_tags = []
         negative_tags = []
         optional_tags = []
