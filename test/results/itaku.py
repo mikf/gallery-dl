@@ -17,6 +17,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://itaku.ee/profile/piku",
+    "#class"   : itaku.ItakuUserExtractor,
+    "#options" : {"include": "all"},
+    "#results" : (
+        "https://itaku.ee/profile/piku/gallery",
+        "https://itaku.ee/profile/piku/posts",
+        "https://itaku.ee/profile/piku/followers",
+        "https://itaku.ee/profile/piku/following",
+        "https://itaku.ee/profile/piku/stars",
+    ),
+},
+
+{
     "#url"     : "https://itaku.ee/profile/piku/gallery",
     "#class"   : itaku.ItakuGalleryExtractor,
     "#pattern" : r"https://itaku\.ee/api/media/gallery_imgs/[^/?#]+\.(jpg|png|gif)",
@@ -88,6 +101,25 @@ __tests__ = (
     "#pattern" : itaku.ItakuUserExtractor.pattern,
     "#range"   : "1-60",
     "#count"   : 60,
+},
+
+{
+    "#url"     : "https://itaku.ee/profile/USER/bookmarks/image/13712",
+    "#class"   : itaku.ItakuBookmarksExtractor,
+    "#results" : (
+        "https://itaku.ee/api/media/gallery_imgs/220511_rdGpatf.png",
+        "https://itaku.ee/api/media/gallery_imgs/220504_oUNIAFT.png",
+        "https://itaku.ee/api/media/gallery_vids/sleepy_af_OY5GHWw.mp4",
+    ),
+},
+
+{
+    "#url"     : "https://itaku.ee/profile/USER/bookmarks/user/11069",
+    "#class"   : itaku.ItakuBookmarksExtractor,
+    "#results" : (
+        "https://itaku.ee/profile/deliciousorange",
+        "https://itaku.ee/profile/piku",
+    ),
 },
 
 {
