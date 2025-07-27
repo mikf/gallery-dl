@@ -14,7 +14,7 @@ from ..cache import cache, memcache
 import itertools
 import json
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?(kemono|coomer)\.(cr|s[tu]|party)"
+BASE_PATTERN = r"(?:https?://)?(?:www|beta)\.?(kemono|coomer)\.(cr|st|party)"
 USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
 HASH_PATTERN = r"/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})"
 
@@ -576,12 +576,7 @@ class KemonoAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        if extractor.root == "https://coomer.su":
-            self.extractor.root = "https://coomer.st"
-        elif extractor.root == "https://kemono.su":
-            self.extractor.root = "https://kemono.cr"
-        self.root = self.extractor.root + "/api/v1"
-
+        self.root = extractor.root + "/api/v1"
 
     def posts(self, offset=0, query=None, tags=None):
         endpoint = "/posts"
