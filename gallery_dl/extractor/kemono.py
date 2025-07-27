@@ -44,7 +44,7 @@ class KemonoExtractor(Extractor):
         self.revisions_reverse = order[0] in ("r", "a") if order else False
 
         self._find_inline = util.re(
-            r'src="(?:https?://(?:kemono|coomer)\.(st|cr))?(/inline/[^"]+'
+            r'src="(?:https?://(?:kemono\.cr|coomer\.st))?(/inline/[^"]+'
             r'|/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{64}\.[^"]+)').findall
         self._json_dumps = json.JSONEncoder(
             ensure_ascii=False, check_circular=False,
