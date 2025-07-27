@@ -86,7 +86,7 @@ class ItakuExtractor(Extractor):
 
 
 class ItakuGalleryExtractor(ItakuExtractor):
-    """Extractor for images from an itaku user gallery"""
+    """Extractor for an itaku user's gallery"""
     subcategory = "gallery"
     pattern = USER_PATTERN + r"/gallery(?:/(\d+))?"
     example = "https://itaku.ee/profile/USER/gallery"
@@ -118,6 +118,7 @@ class ItakuPostsExtractor(ItakuExtractor):
 
 
 class ItakuStarsExtractor(ItakuExtractor):
+    """Extractor for an itaku user's starred images"""
     subcategory = "stars"
     pattern = USER_PATTERN + r"/stars(?:/(\d+))?"
     example = "https://itaku.ee/profile/USER/stars"
@@ -153,6 +154,28 @@ class ItakuFollowersExtractor(ItakuExtractor):
         })
 
 
+class ItakuBookmarksExtractor(ItakuExtractor):
+    """Extractor for an itaku bookmarks folder"""
+    subcategory = "bookmarks"
+    pattern = USER_PATTERN + r"/bookmarks/(image|user)/(\d+)"
+    example = "https://itaku.ee/profile/USER/bookmarks/image/12345"
+
+    def _init(self):
+        if self.groups[1] == "user":
+            self.images = util.noop
+        ItakuExtractor._init(self)
+
+    def images(self):
+        return self.api.galleries_images({
+            "bookmark_folder": self.groups[2],
+        })
+
+    def users(self):
+        return self.api.user_profiles({
+            "bookmark_folder": self.groups[2],
+        })
+
+
 class ItakuUserExtractor(Dispatch, ItakuExtractor):
     """Extractor for itaku user profiles"""
     pattern = USER_PATTERN + r"/?(?:$|\?|#)"
@@ -165,7 +188,7 @@ class ItakuUserExtractor(Dispatch, ItakuExtractor):
             (ItakuPostsExtractor    , base + "posts"),
             (ItakuFollowersExtractor, base + "followers"),
             (ItakuFollowingExtractor, base + "following"),
-            (ItakuStarsExtractor    , base + "stara"),
+            (ItakuStarsExtractor    , base + "stars"),
         ), ("gallery",))
 
 
