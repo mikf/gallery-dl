@@ -14,7 +14,7 @@ from ..cache import cache, memcache
 import itertools
 import json
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?(kemono|coomer)\.(st|cr|su|party)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?(kemono|coomer)\.(cr|s[tu]|party)"
 USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
 HASH_PATTERN = r"/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})"
 
