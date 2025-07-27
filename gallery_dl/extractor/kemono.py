@@ -14,7 +14,8 @@ from ..cache import cache, memcache
 import itertools
 import json
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?(kemono|coomer)\.(cr|st|party)"
+BASE_PATTERN = (r"(?:https?://)?(?:www\.|beta\.)?"
+                r"(kemono|coomer)\.(cr|s[tu]|party)")
 USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
 HASH_PATTERN = r"/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})"
 
@@ -29,10 +30,10 @@ class KemonoExtractor(Extractor):
     cookies_domain = ".kemono.cr"
 
     def __init__(self, match):
-        tld = match[2]
-        self.category = domain = match[1]
-        self.root = text.root_from_url(match[0])
-        self.cookies_domain = f".{domain}.{tld}"
+        if match[1] == "coomer":
+            self.category = "coomer"
+            self.root = "https://coomer.st"
+            self.cookies_domain = ".coomer.st"
         Extractor.__init__(self, match)
 
     def _init(self):
