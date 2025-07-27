@@ -152,14 +152,14 @@ class Extractor():
         if retry_codes is None:
             retry_codes = self._retry_codes
         if "proxies" not in kwargs:
-            if self._proxy_rotate and not self._proxies:
-                proxy_info = self._proxy_rotator.get_next_proxy()
+            if self._proxy_rotator:
+                proxy_info = self._proxy_rotator.get_proxy()
                 proxy_url = proxy_info["url"]
                 kwargs["proxies"] = {
                     scheme: proxy_url
                     for scheme in proxy_info["schemes"]
                 }
-                self.log.debug("Extractor using rotated proxy: %s", proxy_url)
+                self.log.debug("Extractor using session proxy: %s", proxy_url)
             else:
                 kwargs["proxies"] = self._proxies
         if "timeout" not in kwargs:
@@ -399,13 +399,13 @@ class Extractor():
         self._proxy_rotator = None
 
         if self._proxy_rotate and not self._proxies:
-            proxy_strategy = self.config("proxy-strategy")
+            proxy_strategy = self.config("proxy-strategy", "fixed")
             try:
                 self._proxy_rotator = util.ProxyRotator(
                     self._proxy_list, strategy=proxy_strategy)
                 self.log.debug(
                     "Initialized proxy rotator with file: %s, strategy: %s",
-                    self._proxy_list, self._proxy_rotator.strategy or "random"
+                    self._proxy_list, self._proxy_rotator.strategy
                 )
             except (FileNotFoundError, ValueError) as e:
                 self.log.error("Failed to initialize proxy rotator: %s", e)

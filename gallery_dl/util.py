@@ -28,6 +28,10 @@ from email.utils import mktime_tz, parsedate_tz
 from . import text, version, exception
 
 
+_fixed_proxy_rotator = None
+_fixed_proxy_rotator_lock = threading.Lock()
+
+
 def bencode(num, alphabet="0123456789"):
     """Encode an integer into a base-N encoded string"""
     data = ""
@@ -1099,33 +1103,30 @@ class UniquePredicate():
 class ProxyRotator():
     """Rotate between multiple proxies using different strategies"""
 
-    def __init__(self, proxy_list_path, strategy=None):
-        """Initialize a proxy rotator with proxies from a list
+    def __new__(cls, proxy_list_path, strategy):
+        if strategy != "fixed":
+            return super().__new__(cls)
+        with _fixed_proxy_rotator_lock:
+            global _fixed_proxy_rotator
+            if _fixed_proxy_rotator is None:
+                _fixed_proxy_rotator = super().__new__(cls)
+            return _fixed_proxy_rotator
 
-        Args:
-            proxy_list_path: Path to a list containing proxy URLs
-                             (one per line). Empty lines and lines
-                             starting with '#' are ignored
-
-            strategy: Proxy rotation strategy:
-            - "fixed": Select a random proxy and use it for all requests
-                       in a single session.
-            - "random": Select a random proxy for each extractor request and
-                        download session.
-                        Defaults to "fixed" if None.
-
-        Raises:
-            FileNotFoundError: If the proxy list doesn't exist
-            ValueError: If no valid proxies were found in the list
-        """
+    def __init__(self, proxy_list_path, strategy):
+        if hasattr(self, "_lock"):
+            return
         self.proxies = self._load_proxies(proxy_list_path)
         self._lock = threading.Lock()
-        self.strategy = strategy if strategy is not None else "fixed"
-        self._fixed_proxy = None
-        self._fixed_proxy_info = None
+        self.strategy = strategy
+        self._session_proxy_info = None
 
         if not self.proxies:
             raise ValueError("No valid proxies found in the list")
+
+        if self.strategy == "fixed":
+            # For 'fixed' strategy, determine the proxy at init time
+            proxy_url = random.choice(self.proxies)
+            self._session_proxy_info = self._get_proxy_info(proxy_url)
 
     def _load_proxies(self, file_path):
         """Load proxy URLs from a list"""
@@ -1173,22 +1174,23 @@ class ProxyRotator():
             "schemes": protocol_map.get(scheme, ["http", "https"])
         }
 
-    def get_next_proxy(self):
-        """Get a proxy based on the selected strategy
+    def get_proxy(self):
+        """Get the proxy for the current session."""
+        with self._lock:
+            if self._session_proxy_info is None:
+                # For 'random' strategy, pick a new proxy for the session
+                proxy_url = random.choice(self.proxies)
+                self._session_proxy_info = self._get_proxy_info(proxy_url)
+            return self._session_proxy_info
 
-        Returns:
-            dict: Proxy information including URL and supported schemes
+    def rotate(self):
+        """
+        Forces a new proxy to be chosen for the next session.
+        Only applies to 'random' strategy.
         """
         with self._lock:
-            if self.strategy == "fixed":
-                if self._fixed_proxy_info is None:
-                    proxy_url = random.choice(self.proxies)
-                    self._fixed_proxy = proxy_url
-                    self._fixed_proxy_info = self._get_proxy_info(proxy_url)
-                return self._fixed_proxy_info
-            else:
-                proxy_url = random.choice(self.proxies)
-                return self._get_proxy_info(proxy_url)
+            if self.strategy == "random":
+                self._session_proxy_info = None
 
 
 class FilterPredicate():
