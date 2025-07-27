@@ -69,7 +69,11 @@ class ItakuGalleryExtractor(ItakuExtractor):
     example = "https://itaku.ee/profile/USER/gallery"
 
     def posts(self):
-        return self.api.galleries_images(*self.groups)
+        user, section = self.groups
+        return self.api.galleries_images({
+            "owner"   : self.api.user_id(user),
+            "sections": section,
+        })
 
 
 class ItakuStarsExtractor(ItakuExtractor):
@@ -78,7 +82,12 @@ class ItakuStarsExtractor(ItakuExtractor):
     example = "https://itaku.ee/profile/USER/stars"
 
     def posts(self):
-        return self.api.galleries_images_starred(*self.groups)
+        user, section = self.groups
+        return self.api.galleries_images({
+            "stars_of": self.api.user_id(user),
+            "sections": section,
+            "ordering": "-like_date",
+        }, "/user_starred_imgs")
 
 
 class ItakuFollowingExtractor(ItakuExtractor):
@@ -87,7 +96,9 @@ class ItakuFollowingExtractor(ItakuExtractor):
     example = "https://itaku.ee/profile/USER/following"
 
     def items(self):
-        return self.items_user(self.api.user_following(self.groups[0]))
+        return self.items_user(self.api.user_profiles({
+            "followed_by": self.api.user_id(self.groups[0]),
+        }))
 
 
 class ItakuFollowersExtractor(ItakuExtractor):
@@ -96,7 +107,9 @@ class ItakuFollowersExtractor(ItakuExtractor):
     example = "https://itaku.ee/profile/USER/followers"
 
     def items(self):
-        return self.items_user(self.api.user_followers(self.groups[0]))
+        return self.items_user(self.api.user_profiles({
+            "followers_of": self.api.user_id(self.groups[0]),
+        }))
 
 
 class ItakuUserExtractor(Dispatch, ItakuExtractor):
@@ -129,9 +142,28 @@ class ItakuSearchExtractor(ItakuExtractor):
     example = "https://itaku.ee/home/images?tags=SEARCH"
 
     def posts(self):
+        required_tags = []
+        negative_tags = []
+        optional_tags = []
+
         params = text.parse_query_list(
             self.groups[0], {"tags", "maturity_rating"})
-        return self.api.search_images(params)
+        if tags := params.pop("tags", None):
+            for tag in tags:
+                if not tag:
+                    pass
+                elif tag[0] == "-":
+                    negative_tags.append(tag[1:])
+                elif tag[0] == "~":
+                    optional_tags.append(tag[1:])
+                else:
+                    required_tags.append(tag)
+
+        return self.api.galleries_images({
+            "required_tags": required_tags,
+            "negative_tags": negative_tags,
+            "optional_tags": optional_tags,
+        })
 
 
 class ItakuAPI():
@@ -143,97 +175,44 @@ class ItakuAPI():
             "Accept": "application/json, text/plain, */*",
         }
 
-    def search_images(self, params):
-        endpoint = "/galleries/images/"
-        required_tags = []
-        negative_tags = []
-        optional_tags = []
-
-        for tag in params.pop("tags", None) or ():
-            if not tag:
-                pass
-            elif tag[0] == "-":
-                negative_tags.append(tag[1:])
-            elif tag[0] == "~":
-                optional_tags.append(tag[1:])
-            else:
-                required_tags.append(tag)
-
-        api_params = {
-            "required_tags": required_tags,
-            "negative_tags": negative_tags,
-            "optional_tags": optional_tags,
-            "date_range": "",
-            "maturity_rating": ("SFW", "Questionable", "NSFW"),
-            "ordering"  : "-date_added",
-            "page"      : "1",
-            "page_size" : "30",
-            "visibility": ("PUBLIC", "PROFILE_ONLY"),
-        }
-        api_params.update(params)
-        return self._pagination(endpoint, api_params, self.image)
-
-    def galleries_images(self, username, section=None):
-        endpoint = "/galleries/images/"
+    def galleries_images(self, params, path=""):
+        endpoint = f"/galleries/images{path}/"
         params = {
             "cursor"    : None,
-            "owner"     : self.user(username)["owner"],
-            "sections"  : section,
             "date_range": "",
             "maturity_rating": ("SFW", "Questionable", "NSFW"),
             "ordering"  : "-date_added",
             "page"      : "1",
             "page_size" : "30",
             "visibility": ("PUBLIC", "PROFILE_ONLY"),
+            **params,
         }
         return self._pagination(endpoint, params, self.image)
 
-    def galleries_images_starred(self, username, section=None):
-        endpoint = "/galleries/images/user_starred_imgs/"
+    def user_profiles(self, params):
+        endpoint = "/user_profiles/"
         params = {
-            "cursor"    : None,
-            "stars_of"  : self.user(username)["owner"],
-            "sections"  : section,
-            "date_range": "",
-            "ordering"  : "-date_added",
-            "maturity_rating": ("SFW", "Questionable", "NSFW"),
-            "page"      : "1",
-            "page_size" : "30",
-            "visibility": ("PUBLIC", "PROFILE_ONLY"),
+            "cursor"   : None,
+            "ordering" : "-date_added",
+            "page"     : "1",
+            "page_size": "50",
+            "sfw_only" : "false",
+            **params,
         }
-        return self._pagination(endpoint, params, self.image)
+        return self._pagination(endpoint, params)
 
     def image(self, image_id):
         endpoint = f"/galleries/images/{image_id}/"
         return self._call(endpoint)
 
-    def user_following(self, username):
-        endpoint = "/user_profiles/"
-        params = {
-            "cursor"    : None,
-            "followed_by": self.user(username)["owner"],
-            "ordering"  : "-date_added",
-            "page"      : "1",
-            "page_size" : "50",
-            "sfw_only"  : "false",
-        }
-        return self._pagination(endpoint, params)
-
-    def user_followers(self, username):
-        endpoint = "/user_profiles/"
-        params = {
-            "cursor"    : None,
-            "followers_of": self.user(username)["owner"],
-            "ordering"  : "-date_added",
-            "page"      : "1",
-            "page_size" : "50",
-            "sfw_only"  : "false",
-        }
-        return self._pagination(endpoint, params)
-
     @memcache(keyarg=1)
     def user(self, username):
         return self._call(f"/user_profiles/{username}/")
+
+    def user_id(self, username):
+        if username.startswith("id:"):
+            return int(username[3:])
+        return self.user(username)["owner"]
 
     def _call(self, endpoint, params=None):
         if not endpoint.startswith("http"):
