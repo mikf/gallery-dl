@@ -8,12 +8,15 @@
 
 from .common import Extractor, Message
 from .. import text, util
+import time
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?xasiat\.com"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?xasiat\.com((?:/fr|/ja)?/albums"
 
 
 class XasiatExtractor(Extractor):
     category = "xasiat"
+    directory_fmt = ("{category}", "{title}")
+    archive_fmt = "{album_url}_{num}"
     root = "https://www.xasiat.com"
 
     def items(self):
@@ -24,28 +27,32 @@ class XasiatExtractor(Extractor):
     def posts(self):
         return self._pagination(self.groups[0])
 
-    def _pagination(self, path, params=None, pnum=1):
-        find_posts = util.re(r'thumbnail">\s*<a href="([^"]+)').findall
+    def _pagination(self, path, pnum=1):
+        url = f"{self.root}{path}/"
+        find_posts = util.re(r'class="item  ">\s*<a href="([^"]+)').findall
 
         while True:
-            if pnum == 1:
-                url = "{}{}/".format(self.root, path)
-            else:
-                url = "{}{}/page/{}/".format(self.root, path, pnum)
-            response = self.request(url, params=params, allow_redirects=False)
+            params = {
+                "mode": "async",
+                "function": "get_block",
+                "block_id": "list_albums_common_albums_list",
+                "sort_by": "post_date",
+                "from": pnum,
+                "_": int(time.time() * 1000)
+            }
 
-            if response.status_code >= 300:
+            page = self.request(url, params=params).text
+            yield from find_posts(page)
+
+            if "<span>Next</span>" in page:
                 return
 
-            yield from find_posts(response.text)
             pnum += 1
 
 
 class XasiatAlbumExtractor(XasiatExtractor):
     subcategory = "album"
-    directory_fmt = ("{category}", "{title}")
-    archive_fmt = "{album_url}_{num}"
-    pattern = BASE_PATTERN + r"(/albums/\d+/[^/?#]+)"
+    pattern = BASE_PATTERN + r"/\d+/[^/?#]+)"
     example = "https://www.xasiat.com/albums/12345/abc/"
 
     def items(self):
@@ -59,9 +66,9 @@ class XasiatAlbumExtractor(XasiatExtractor):
             "model": util.re(
                 r'top_models1"></i>\s*(.+)\s*</span').findall(page),
             "tags": util.re(
-                r"tags/[^\"]+\">\s*(.+)\s*</a").findall(page),
+                r'tags/[^"]+\">\s*(.+)\s*</a').findall(page),
             "album_category": util.re(
-                r"categories/[^\"]+\">\s*(.+)\s*</a").findall(page),
+                r'categories/[^"]+\">\s*(.+)\s*</a').findall(page)[0],
             "album_url": text.unquote(url),
             "count": len(urls),
         }
@@ -69,3 +76,21 @@ class XasiatAlbumExtractor(XasiatExtractor):
         yield Message.Directory, data
         for data["num"], url in enumerate(urls, 1):
             yield Message.Url, url, text.nameext_from_url(url[:-1], data)
+
+
+class XasiatTagExtractor(XasiatExtractor):
+    subcategory = "tag"
+    pattern = BASE_PATTERN + r"/tags/[^/?#]+)"
+    example = "https://www.xasiat.com/albums/tags/TAG/"
+
+
+class XasiatCategoryExtractor(XasiatExtractor):
+    subcategory = "category"
+    pattern = BASE_PATTERN + r"/categories/[^/?#])+"
+    example = "https://www.xasiat.com/albums/categories/CATEGORY/"
+
+
+class XasiatModelExtractor(XasiatExtractor):
+    subcategory = "model"
+    pattern = BASE_PATTERN + r"/models/[^/?#]+)"
+    example = "https://www.xasiat.com/albums/models/MODEL/"
