@@ -35,6 +35,7 @@ modules = [
     "blogger",
     "bluesky",
     "boosty",
+    "booth",
     "bunkr",
     "catbox",
     "chevereto",
