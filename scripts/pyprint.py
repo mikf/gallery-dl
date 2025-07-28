@@ -74,7 +74,7 @@ def pyprint(obj, indent=0, lmax=16):
 
         ws = " " * indent
 
-        lines = ["{"]
+        lines = ["["]
         lines.extend(
             f'''{ws}    {pyprint(value, indent+4)},'''
             for value in obj
