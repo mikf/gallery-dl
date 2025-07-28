@@ -59,6 +59,9 @@ class DankefuerslesenChapterExtractor(DankefuerslesenBase, ChapterExtractor):
         return {
             "manga"     : manga["title"],
             "manga_slug": manga["slug"],
+            "author"    : manga["author"],
+            "artist"    : manga["artist"],
+            "description": manga["description"],
             "title"     : data["title"],
             "volume"    : text.parse_int(data["volume"]),
             "chapter"   : text.parse_int(chapter),
