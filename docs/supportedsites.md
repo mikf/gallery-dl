@@ -1506,6 +1506,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Misskey.art</td>
+    <td>https://misskey.art/</td>
+    <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
     <td>Lesbian.energy</td>
     <td>https://lesbian.energy/</td>
     <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
