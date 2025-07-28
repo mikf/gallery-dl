@@ -324,6 +324,9 @@ def parse_args(args=None):
     parser.add_argument("-t", "--type", metavar="TYPE")
     parser.add_argument("-c", "--copyright", metavar="NAME")
     parser.add_argument(
+        "-C",
+        action="store_const", const="Mike Fährmann", dest="copyright")
+    parser.add_argument(
         "-F", "--force",
         action="store_const", const="w", default="x", dest="open_mode")
     parser.add_argument(
@@ -350,14 +353,8 @@ def parse_opts(args=None):
         "site_name"  : args.site,
         "type"       : args.type,
         "open_mode"  : args.open_mode,
+        "copyright"  : args.copyright,
     }
-
-    if copyright := args.copyright:
-        if len(copyright) == 1:
-            copyright = "Mike Fährmann"
-        opts["copyright"] = copyright
-    else:
-        opts["copyright"] = ""
 
     if root := args.root:
         if "://" in root:
