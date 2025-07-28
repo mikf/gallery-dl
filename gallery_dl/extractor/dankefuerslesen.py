@@ -117,7 +117,6 @@ class DankefuerslesenMangaExtractor(DankefuerslesenBase, MangaExtractor):
                 data["chapter"] = text.parse_int(ch)
                 data["chapter_minor"] = ""
 
-            manga.update(data)
-            results.append((f"{base}{ch}/1/", manga))
+            results.append((f"{base}{ch}/1/", {**manga, **data}))
 
         return results
