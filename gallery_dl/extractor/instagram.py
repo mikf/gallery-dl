@@ -223,7 +223,8 @@ class InstagramExtractor(Extractor):
         for num, item in enumerate(items, 1):
 
             try:
-                image = item["image_versions2"]["candidates"][0]
+                candidates = item["image_versions2"]["candidates"]
+                image = candidates[0]
             except Exception:
                 self.log.warning("Missing media in post %s",
                                  data["post_shortcode"])
@@ -238,6 +239,22 @@ class InstagramExtractor(Extractor):
             else:
                 video = None
                 media = image
+
+                if len(candidates) <= 3:
+                    self.log.warning(
+                        "%s: Image candidate list possibly incomplete "
+                        "(%s items). Consider refreshing your cookies.",
+                        data["post_shortcode"], len(candidates))
+                elif image["width"] < item.get("original_width", 0) or \
+                        image["height"] < item.get("original_height", 0):
+                    self.log.warning(
+                        "%s: Available image resolutions lower than the "
+                        "original (%sx%s < %sx%s). "
+                        "Consider refreshing your cookies.",
+                        data["post_shortcode"],
+                        image["width"], image["height"],
+                        item.get("original_width", 0),
+                        item.get("original_height", 0))
 
             media = {
                 "num"        : num,
