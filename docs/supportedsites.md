@@ -158,6 +158,12 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
+    <td>BOOTH</td>
+    <td>https://booth.pm/</td>
+    <td>Items</td>
+    <td></td>
+</tr>
+<tr>
     <td>Bunkr</td>
     <td>https://bunkr.si/</td>
     <td>Albums, Media Files</td>
