@@ -19,9 +19,7 @@ A=$?
 # -----------------------------------------------------------------------------
 DEBUG="$(grep --recursive --line-number \
     --exclude-dir='docs' \
-    --regexp='\bif [01]:' \
-    --regexp='\bif [01] and ' \
-    --regexp='\bif [01] or ' \
+    --regexp='\b\(el\)\?if [01]\(:\| and \| or \)' \
     --regexp='\band 0\b' \
     --regexp='\bor 1\b' \
     --regexp='[[:digit:]]/0\b' \
