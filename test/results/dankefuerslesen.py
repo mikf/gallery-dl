@@ -29,6 +29,9 @@ __tests__ = (
     "manga"     : "Awana-chan wa Kyou mo Shiawase",
     "manga_slug": "awana-chan-wa-kyou-mo-shiawase",
     "title"     : "Eat some ramen!",
+    "artist"    : "Tabayou",
+    "author"    : "Tabayou",
+    "description": "<p>A convenience store part-timer who can't seem to do anything right: Awana-chan. Today, yet again, she messed up over and over, and she can't even count how many times she was told off... How will Awana-chan find happiness in a situation like this, without anyone else to rely on!? This is a manga about creating your own happiness!!</p>",
 },
 
 {
@@ -65,6 +68,9 @@ __tests__ = (
     "manga"     : "Raul and The Vampire",
     "manga_slug": "raul-and-the-vampire",
     "title"     : "Volume 1 Extras",
+    "artist"    : "Sonoguchi Naka",
+    "author"    : "Sonoguchi Naka",
+    "description": "<a href=\"https://twitter.com/2525_25_25_25_\"><img src=\"https://i.imgur.com/dQCXZkU.png\" alt=\"twitter\"/>Artist's Twitter</a>\r\n<a href=\"https://www.pixiv.net/en/users/67164428\"><img src=\"https://i.imgur.com/oiVINmy.png\" alt=\"pixiv\"/>Artist's Pixiv</a>",
 },
 
 {
