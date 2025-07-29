@@ -9,9 +9,7 @@
 """Extractors for https://booth.pm/"""
 
 from .common import Extractor, Message
-from .. import text
-
-BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?booth\.pm(?:/\w\w)?"
+from .. import text, util
 
 
 class BoothExtractor(Extractor):
@@ -21,14 +19,32 @@ class BoothExtractor(Extractor):
     directory_fmt = ("{category}", "{shop[name]}", "{id} {name}")
     filename_fmt = "{num:>02} {filename}.{extension}"
     archive_fmt = "{id}_{filename}"
+    request_interval = (0.5, 1.5)
 
     def _init(self):
         self.cookies.set("adult", "1", domain=".booth.pm")
 
+    def items(self):
+        for item in self.shop_items():
+            item["_extractor"] = BoothItemExtractor
+            yield Message.Queue, item["shop_item_url"], item
+
+    def _pagination(self, url):
+        while True:
+            page = self.request(url).text
+
+            for item in text.extract_iter(page, ' data-item="', '"'):
+                yield util.json_loads(text.unescape(item))
+
+            next = text.extr(page, 'rel="next" class="nav-item" href="', '"')
+            if not next:
+                break
+            url = self.root + next
+
 
 class BoothItemExtractor(BoothExtractor):
     subcategory = "item"
-    pattern = BASE_PATTERN + r"/items/(\d+)"
+    pattern = r"(?:https?://)?(?:[\w-]+\.)?booth\.pm/(?:\w\w/)?items/(\d+)"
     example = "https://booth.pm/items/12345"
 
     def items(self):
@@ -61,6 +77,19 @@ class BoothItemExtractor(BoothExtractor):
             })
 
         return files
+
+
+class BoothShopExtractor(BoothExtractor):
+    subcategory = "shop"
+    pattern = r"(?:https?://)?([\w-]+\.)booth\.pm/(?:\w\w/)?(?:items)?"
+    example = "https://SHOP.booth.pm/"
+
+    def __init__(self, match):
+        self.root = text.root_from_url(match[0])
+        BoothExtractor.__init__(self, match)
+
+    def shop_items(self):
+        return self._pagination(f"{self.root}/items")
 
 
 def _fallback(url):

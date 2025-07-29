@@ -160,7 +160,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>BOOTH</td>
     <td>https://booth.pm/</td>
-    <td>Items</td>
+    <td>Items, Shops</td>
     <td></td>
 </tr>
 <tr>
