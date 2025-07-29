@@ -16,6 +16,7 @@ __tests__ = (
 
     "author": {
         "@type" : "Person",
+        "id"    : 7491,
         "image" : "https://media.ci-en.jp/public/icon/creator/00007491/9601a2a224245156335aaa839fa408d52c32c87dae5787fc03f455b7fd1d3488/image-200-c.jpg",
         "name"  : "やかろ",
         "url"   : "https://ci-en.net/creator/7491",
