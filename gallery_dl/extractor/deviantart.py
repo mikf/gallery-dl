@@ -430,13 +430,15 @@ class DeviantartExtractor(Extractor):
             if children := content.get("content"):
                 html.append('<p style="')
 
-                attrs = content["attrs"]
-                if attrs.get("textAlign"):
-                    html.append("text-align:")
-                    html.append(attrs["textAlign"])
-                    html.append(";")
-                self._tiptap_process_indentation(html, attrs)
-                html.append('">')
+                if attrs := content.get("attrs"):
+                    if align := attrs.get("textAlign"):
+                        html.append("text-align:")
+                        html.append(align)
+                        html.append(";")
+                    self._tiptap_process_indentation(html, attrs)
+                    html.append('">')
+                else:
+                    html.append('margin-inline-start:0px">')
 
                 for block in children:
                     self._tiptap_process_content(html, block)
