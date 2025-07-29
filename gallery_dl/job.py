@@ -513,8 +513,7 @@ class DownloadJob(Job):
 
     def download(self, url):
         """Download 'url'"""
-        scheme = url.partition(":")[0]
-        if downloader := self.get_downloader(scheme):
+        if downloader := self.get_downloader(url[:url.find(":")]):
             try:
                 return downloader.download(url, self.pathfmt)
             except OSError as exc:
