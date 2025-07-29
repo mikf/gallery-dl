@@ -56,8 +56,15 @@ class BoothItemExtractor(BoothExtractor):
             item["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
         item["tags"] = [t["name"] for t in item["tags"]]
 
-        files = self._extract_files(item)
-        item["count"] = len(files)
+        shop = item["shop"]
+        shop["id"] = text.parse_int(shop["thumbnail_url"].rsplit("/", 3)[1])
+
+        if files := self._extract_files(item):
+            item["count"] = len(files)
+            shop["uuid"] = files[0]["url"].split("/", 4)[3]
+        else:
+            item["count"] = 0
+            shop["uuid"] = util.NONE
 
         yield Message.Directory, item
         for num, file in enumerate(files, 1):
