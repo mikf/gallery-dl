@@ -160,6 +160,22 @@ class ControlException(GalleryDLException):
 class StopExtraction(ControlException):
     """Stop data extraction"""
 
+    def __init__(self, target=None):
+        ControlException.__init__(self)
+
+        if target is None:
+            self.target = None
+            self.depth = 1
+        elif isinstance(target, int):
+            self.target = None
+            self.depth = target
+        elif target.isdecimal():
+            self.target = None
+            self.depth = int(target)
+        else:
+            self.target = target
+            self.depth = 128
+
 
 class AbortExtraction(ExtractionError, ControlException):
     """Abort data extraction due to an error"""

@@ -151,7 +151,10 @@ class Job():
         try:
             for msg in extractor:
                 self.dispatch(msg)
-        except exception.StopExtraction:
+        except exception.StopExtraction as exc:
+            if exc.depth > 1 and exc.target != extractor.__class__.subcategory:
+                exc.depth -= 1
+                raise
             pass
         except exception.AbortExtraction as exc:
             log.error(exc.message)
@@ -509,7 +512,7 @@ class DownloadJob(Job):
             if not self._skipftr or self._skipftr(pathfmt.kwdict):
                 self._skipcnt += 1
                 if self._skipcnt >= self._skipmax:
-                    raise self._skipexc()
+                    raise self._skipexc
 
     def download(self, url):
         """Download 'url'"""
@@ -603,7 +606,8 @@ class DownloadJob(Job):
             elif isinstance(skip, str):
                 skip, _, smax = skip.partition(":")
                 if skip == "abort":
-                    self._skipexc = exception.StopExtraction
+                    smax, _, sarg = smax.partition(":")
+                    self._skipexc = exception.StopExtraction(sarg or None)
                 elif skip == "terminate":
                     self._skipexc = exception.TerminateExtraction
                 elif skip == "exit":

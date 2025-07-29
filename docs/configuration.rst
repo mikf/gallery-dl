@@ -313,28 +313,51 @@ Type
     * ``string``
 Default
     ``true``
+Example
+    * ``"abort:5"``
+    * ``"abort:5:2"``
+    * ``"abort:5:manga"``
+    * ``"terminate:3"``
 Description
     Controls the behavior when downloading files that have been
     downloaded before, i.e. a file with the same filename already
     exists or its ID is in a `download archive <extractor.*.archive_>`__.
 
-    * ``true``: Skip downloads
-    * ``false``: Overwrite already existing files
+    ``true``
+        Skip downloads
+    ``false``
+        Overwrite already existing files
 
-    * ``"abort"``: Stop the current extractor run
-    * ``"abort:N"``: Skip downloads and stop the current extractor run
-      after ``N`` consecutive skips
+    ``"abort"``
+        Stop the current extractor
+    ``"abort:N"``
+        Skip downloads and
+        stop the current extractor after ``N`` consecutive skips
+    ``"abort:N:L"``
+        | Skip downloads and
+          stop the current extractor after ``N`` consecutive skips
+        | Ascend ``L`` levels in the extractor hierarchy
+    ``"abort:N:SC"``
+        | Skip downloads and
+          stop the current extractor after ``N`` consecutive skips
+        | Ascend to an extractor with subcategory ``SC`` in the extractor hierarchy
 
-    * ``"terminate"``: Stop the current extractor run, including parent extractors
-    * ``"terminate:N"``: Skip downloads and stop the current extractor run,
-      including parent extractors, after ``N`` consecutive skips
+    ``"terminate"``
+        Stop the current extractor, including parent extractors
+    ``"terminate:N"``
+        Skip downloads and
+        stop the current extractor, including parent extractors,
+        after ``N`` consecutive skips
 
-    * ``"exit"``: Exit the program altogether
-    * ``"exit:N"``: Skip downloads and exit the program
-      after ``N`` consecutive skips
+    ``"exit"``
+        Exit the program altogether
+    ``"exit:N"``
+        Skip downloads and
+        exit the program after ``N`` consecutive skips
 
-    * ``"enumerate"``: Add an enumeration index to the beginning of the
-      filename extension (``file.1.ext``, ``file.2.ext``, etc.)
+    ``"enumerate"``
+        Add an enumeration index to the beginning of the
+        filename extension (``file.1.ext``, ``file.2.ext``, etc.)
 
 
 extractor.*.skip-filter
