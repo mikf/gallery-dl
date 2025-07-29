@@ -386,6 +386,7 @@ Default
     * ``"0.5-1.5"``
         ``ao3``,
         ``arcalive``,
+        ``booth``,
         ``civitai``,
         ``[Danbooru]``,
         ``[E621]``,

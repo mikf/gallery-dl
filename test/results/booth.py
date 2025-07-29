@@ -180,4 +180,59 @@ https://www.melonbooks.co.jp/detail/detail.php?product_id=1872452""",
     ],
 },
 
+{
+    "#url"     : "https://wanoazayaka.booth.pm/",
+    "#class"   : booth.BoothShopExtractor,
+    "#results" : (
+        "https://wanoazayaka.booth.pm/items/4972816",
+        "https://wanoazayaka.booth.pm/items/4855567",
+        "https://wanoazayaka.booth.pm/items/4693741",
+    ),
+
+    "event"         : None,
+    "id"            : int,
+    "is_adult"      : False,
+    "is_end_of_sale": False,
+    "is_placeholder": False,
+    "is_sold_out"   : False,
+    "is_vrchat"     : False,
+    "minimum_stock" : None,
+    "music"         : None,
+    "name"          : str,
+    "price"         : "700 JPY",
+    "url"           : r"re:https://booth.pm/en/items/\d+",
+    "shop_item_url" : r"re:https://wanoazayaka.booth.pm/items/\d+",
+    "wish_list_url" : r"re:https://wanoazayaka.booth.pm/items/\d+/wish_list",
+    "thumbnail_image_urls": list,
+    "shop"          : {
+        "name"         : "ふたりぼっちのSolitude",
+        "thumbnail_url": "https://booth.pximg.net/c/48x48/users/5742915/icon_image/1448e5d8-f93f-445e-8e1e-acb29aa45aa4_base_resized.jpg",
+        "url"          : "https://wanoazayaka.booth.pm/",
+        "verified"     : False,
+    },
+    "tracking_data" : {
+        "product_brand"   : "wanoazayaka",
+        "product_category": 56,
+        "product_event"   : None,
+        "product_id"      : int,
+        "product_name"    : str,
+        "product_price"   : 700,
+        "tracking"        : "impression_item",
+    },
+},
+
+{
+    "#url"     : "https://caramel-crunch.booth.pm/items",
+    "#class"   : booth.BoothShopExtractor,
+    "#pattern" : booth.BoothItemExtractor.pattern,
+    "#count"   : range(90, 120),
+
+    "shop": {
+        "name"         : "ＣＡＲＡＭＥＬ　ＣＲＵＮＣＨ！",
+        "thumbnail_url": "https://booth.pximg.net/c/48x48/users/49832/icon_image/a240e313-6a0f-4155-8310-a0d6abb299e6_base_resized.jpg",
+        "url"          : "https://caramel-crunch.booth.pm/",
+        "verified"     : False,
+    },
+},
+
 )
