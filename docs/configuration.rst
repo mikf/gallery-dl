@@ -8203,8 +8203,8 @@ How To
 
       * choose a name
       * select "installed app"
-      * set ``http://localhost:6414/`` as "redirect uri"
-      * solve the "I'm not a robot" reCAPTCHA if needed
+      * set "redirect uri" to http://localhost:6414/
+      * solve the "I'm not a robot" challenge if needed
       * click "create app"
 
     * copy the client id (third line, under your application's name and
@@ -8226,10 +8226,15 @@ Type
     ``string``
 How To
     * login and `Apply for an API Key <https://api.smugmug.com/api/developer/apply>`__
-    * use a random name and description,
-      set "Type" to "Application", "Platform" to "All",
-      and "Use" to "Non-Commercial"
-    * fill out the two checkboxes at the bottom and click "Apply"
+    * fill out the form:
+
+      * choose a random name and description
+      * set "Type" to "Application"
+      * set "Platform" to "All"
+      * set "Use" to "Non-Commercial"
+      * tick the two checkboxes at the bottom
+      * click "Apply"
+
     * copy ``API Key`` and ``API Secret``
       and put them in your configuration file
       as ``"api-key"`` and ``"api-secret"``
@@ -8243,10 +8248,14 @@ How To
     * login and visit Tumblr's
       `Applications <https://www.tumblr.com/oauth/apps>`__ section
     * click "Register application"
-    * fill out the form: use a random name and description, set
-      https://example.org/ as "Application Website" and "Default
-      callback URL"
-    * solve Google's "I'm not a robot" challenge and click "Register"
+    * fill out the form:
+
+      * choose a random name and description
+      * set "Application Website" to https://example.org/
+      * set "Default callback URL" to https://example.org/
+      * solve the "I'm not a robot" challenge
+      * click "Register"
+
     * click "Show secret key" (below "OAuth Consumer Key")
     * copy your ``OAuth Consumer Key`` and ``Secret Key``
       and put them in your configuration file
