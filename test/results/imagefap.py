@@ -134,7 +134,7 @@ __tests__ = (
     "#url"     : "https://www.imagefap.com/usergallery.php?userid=1981976&folderid=409758",
     "#category": ("", "imagefap", "folder"),
     "#class"   : imagefap.ImagefapFolderExtractor,
-    "#urls"    : "https://www.imagefap.com/gallery/7876223",
+    "#results" : "https://www.imagefap.com/gallery/7876223",
 
     "folder"    : "Softcore",
     "gallery_id": "7876223",

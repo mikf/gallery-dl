@@ -51,7 +51,7 @@ for idx, extr, url, result in tests:
 
     # write test data
     try:
-        with open(os.path.join(path, name), "w") as outfile:
+        with util.open(os.path.join(path, name), "w") as outfile:
             job.DataJob(url, file=outfile, ensure_ascii=False).run()
     except KeyboardInterrupt:
         sys.exit()

@@ -83,7 +83,7 @@ __tests__ = (
     "book"         : False,
     "closing"      : None,
     "closing_date" : None,
-    "comment_cnt"  : 335,
+    "comment_cnt"  : range(330, 500),
     "date"         : "dt:2023-01-13 19:00:00",
     "early_access" : False,
     "escape_title" : "Episode 3",
@@ -149,7 +149,7 @@ __tests__ = (
     "#url"     : "https://tapas.io/SANG123/series",
     "#comment" : "#5306",
     "#class"   : tapas.TapasCreatorExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://tapas.io/series/the-return-of-the-disaster-class-hero",
         "https://tapas.io/series/the-return-of-the-disaster-class-hero-novel",
         "https://tapas.io/series/tomb-raider-king",

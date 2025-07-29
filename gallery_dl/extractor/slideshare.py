@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2016-2017 Leonardo Taccari
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,7 @@
 """Extractors for https://www.slideshare.net/"""
 
 from .common import GalleryExtractor
-from .. import text, util
+from .. import text
 
 
 class SlidesharePresentationExtractor(GalleryExtractor):
@@ -26,13 +26,11 @@ class SlidesharePresentationExtractor(GalleryExtractor):
 
     def __init__(self, match):
         self.user, self.presentation = match.groups()
-        url = "https://www.slideshare.net/{}/{}".format(
-            self.user, self.presentation)
+        url = f"https://www.slideshare.net/{self.user}/{self.presentation}"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        data = util.json_loads(text.extr(
-            page, 'id="__NEXT_DATA__" type="application/json">', '</script>'))
+        data = self._extract_nextdata(page)
         self.slideshow = slideshow = data["props"]["pageProps"]["slideshow"]
 
         return {
@@ -48,11 +46,8 @@ class SlidesharePresentationExtractor(GalleryExtractor):
 
     def images(self, page):
         slides = self.slideshow["slides"]
-        begin = "{}/{}/95/{}-".format(
-            slides["host"],
-            slides["imageLocation"],
-            slides["title"],
-        )
+        begin = (f"{slides['host']}/{slides['imageLocation']}"
+                 f"/95/{slides['title']}-")
         end = "-1024.jpg"
 
         return [

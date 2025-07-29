@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,8 +10,7 @@
 
 from .common import Extractor, Message
 from ..cache import cache
-from .. import text, exception
-import re
+from .. import text, util, exception
 
 BASE_PATTERN = r"(?:https?://)?www\.pillowfort\.social"
 
@@ -28,7 +27,7 @@ class PillowfortExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.item = match.group(1)
+        self.item = match[1]
 
     def items(self):
         self.login()
@@ -37,8 +36,8 @@ class PillowfortExtractor(Extractor):
         external = self.config("external", False)
 
         if inline:
-            inline = re.compile(r'src="(https://img\d+\.pillowfort\.social'
-                                r'/posts/[^"]+)').findall
+            inline = util.re(r'src="(https://img\d+\.pillowfort\.social'
+                             r'/posts/[^"]+)').findall
 
         for post in self.posts():
             if "original_post" in post and not reblogs:
@@ -126,8 +125,8 @@ class PillowfortPostExtractor(PillowfortExtractor):
     example = "https://www.pillowfort.social/posts/12345"
 
     def posts(self):
-        url = "{}/posts/{}/json/".format(self.root, self.item)
-        return (self.request(url).json(),)
+        url = f"{self.root}/posts/{self.item}/json/"
+        return (self.request_json(url),)
 
 
 class PillowfortUserExtractor(PillowfortExtractor):
@@ -137,11 +136,11 @@ class PillowfortUserExtractor(PillowfortExtractor):
     example = "https://www.pillowfort.social/USER"
 
     def posts(self):
-        url = "{}/{}/json/".format(self.root, self.item)
+        url = f"{self.root}/{self.item}/json/"
         params = {"p": 1}
 
         while True:
-            posts = self.request(url, params=params).json()["posts"]
+            posts = self.request_json(url, params=params)["posts"]
             yield from posts
 
             if len(posts) < 20:

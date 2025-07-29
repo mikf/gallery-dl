@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -34,7 +34,7 @@ class ExhentaiExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.version = match.group(1)
+        self.version = match[1]
 
     def initialize(self):
         domain = self.config("domain", "auto")
@@ -59,7 +59,7 @@ class ExhentaiExtractor(Extractor):
     def login(self):
         """Login and set necessary cookies"""
         if self.LIMIT:
-            raise exception.StopExtraction("Image limit reached!")
+            raise exception.AbortExtraction("Image limit reached!")
 
         if self.cookies_check(self.cookies_names):
             return
@@ -122,10 +122,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
     def __init__(self, match):
         ExhentaiExtractor.__init__(self, match)
-        self.gallery_id = text.parse_int(match.group(2) or match.group(5))
-        self.gallery_token = match.group(3)
-        self.image_token = match.group(4)
-        self.image_num = text.parse_int(match.group(6), 1)
+        self.gallery_id = text.parse_int(match[2] or match[5])
+        self.gallery_token = match[3]
+        self.image_token = match[4]
+        self.image_num = text.parse_int(match[6], 1)
         self.key_start = None
         self.key_show = None
         self.key_next = None
@@ -136,11 +136,13 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         source = self.config("source")
         if source == "hitomi":
             self.items = self._items_hitomi
+        elif source == "metadata":
+            self.items = self._items_metadata
 
         limits = self.config("limits", False)
         if limits and limits.__class__ is int:
             self.limits = limits
-            self._remaining = 0
+            self._limits_remaining = 0
         else:
             self.limits = False
 
@@ -176,7 +178,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             self.image_token = text.extr(gpage, 'hentai.org/s/', '"')
             if not self.image_token:
                 self.log.debug("Page content:\n%s", gpage)
-                raise exception.StopExtraction(
+                raise exception.AbortExtraction(
                     "Failed to extract initial image token")
             ipage = self._image_page()
         else:
@@ -184,7 +186,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             part = text.extr(ipage, 'hentai.org/g/', '"')
             if not part:
                 self.log.debug("Page content:\n%s", ipage)
-                raise exception.StopExtraction(
+                raise exception.AbortExtraction(
                     "Failed to extract gallery token")
             self.gallery_token = part.split("/")[1]
             gpage = self._gallery_page()
@@ -198,11 +200,12 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         for url, image in images:
             data.update(image)
             if self.limits:
-                self._check_limits(data)
+                self._limits_check(data)
             if "/fullimg" in url:
                 data["_http_validate"] = self._validate_response
             else:
                 data["_http_validate"] = None
+            data["_http_signature"] = self._validate_signature
             yield Message.Url, url, data
 
         fav = self.config("fav")
@@ -218,9 +221,12 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             data = {}
 
         from .hitomi import HitomiGalleryExtractor
-        url = "https://hitomi.la/galleries/{}.html".format(self.gallery_id)
+        url = f"https://hitomi.la/galleries/{self.gallery_id}.html"
         data["_extractor"] = HitomiGalleryExtractor
         yield Message.Queue, url, data
+
+    def _items_metadata(self):
+        yield Message.Directory, self.metadata_from_api()
 
     def get_metadata(self, page):
         """Extract gallery metadata"""
@@ -240,8 +246,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     def metadata_from_page(self, page):
         extr = text.extract_from(page)
 
-        api_url = extr('var api_url = "', '"')
-        if api_url:
+        if api_url := extr('var api_url = "', '"'):
             self.api_url = api_url
 
         data = {
@@ -293,9 +298,9 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "namespace": 1,
         }
 
-        data = self.request(self.api_url, method="POST", json=data).json()
+        data = self.request_json(self.api_url, method="POST", json=data)
         if "error" in data:
-            raise exception.StopExtraction(data["error"])
+            raise exception.AbortExtraction(data["error"])
 
         return data["gmetadata"][0]
 
@@ -320,8 +325,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 data["_fallback"] = self._fallback_1280(nl, self.image_num)
         except IndexError:
             self.log.debug("Page content:\n%s", page)
-            raise exception.StopExtraction(
-                "Unable to parse image info for '%s'", url)
+            raise exception.AbortExtraction(
+                f"Unable to parse image info for '{url}'")
 
         data["num"] = self.image_num
         data["image_token"] = self.key_start = extr('var startkey="', '";')
@@ -345,7 +350,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         }
 
         for request["page"] in range(self.image_num + 1, self.count + 1):
-            page = self.request(api_url, method="POST", json=request).json()
+            page = self.request_json(api_url, method="POST", json=request)
 
             i3 = page["i3"]
             i6 = page["i6"]
@@ -371,8 +376,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                         nl, request["page"], imgkey)
             except IndexError:
                 self.log.debug("Page content:\n%s", page)
-                raise exception.StopExtraction(
-                    "Unable to parse image info for '%s'", url)
+                raise exception.AbortExtraction(
+                    f"Unable to parse image info for '{url}'")
 
             data["num"] = request["page"]
             data["image_token"] = imgkey
@@ -385,39 +390,61 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             request["imgkey"] = nextkey
 
     def _validate_response(self, response):
-        if not response.history and response.headers.get(
+        if response.history or not response.headers.get(
                 "content-type", "").startswith("text/html"):
-            page = response.text
-            self.log.warning("'%s'", page)
+            return True
 
-            if " requires GP" in page:
-                gp = self.config("gp")
-                if gp == "stop":
-                    raise exception.StopExtraction("Not enough GP")
-                elif gp == "wait":
-                    input("Press ENTER to continue.")
-                    return response.url
+        page = response.text
+        self.log.warning("'%s'", page)
 
-                self.log.info("Falling back to non-original downloads")
-                self.original = False
-                return self.data["_url_1280"]
+        if " requires GP" in page:
+            gp = self.config("gp")
+            if gp == "stop":
+                raise exception.AbortExtraction("Not enough GP")
+            elif gp == "wait":
+                self.input("Press ENTER to continue.")
+                return response.url
 
-            if " temporarily banned " in page:
-                raise exception.AuthorizationError("Temporarily Banned")
+            self.log.info("Falling back to non-original downloads")
+            self.original = False
+            return self.data["_url_1280"]
 
-            self._report_limits()
-        return True
+        if " temporarily banned " in page:
+            raise exception.AuthorizationError("Temporarily Banned")
 
-    def _report_limits(self):
-        ExhentaiExtractor.LIMIT = True
-        raise exception.StopExtraction("Image limit reached!")
+        self._limits_exceeded()
+        return response.url
 
-    def _check_limits(self, data):
-        if not self._remaining or data["num"] % 25 == 0:
-            self._update_limits()
-        self._remaining -= data["cost"]
-        if self._remaining <= 0:
-            self._report_limits()
+    def _validate_signature(self, signature):
+        """Return False if all file signature bytes are zero"""
+        if signature:
+            if byte := signature[0]:
+                # 60 == b"<"
+                if byte == 60 and b"<!doctype html".startswith(
+                        signature[:14].lower()):
+                    return "HTML response"
+                return True
+            for byte in signature:
+                if byte:
+                    return True
+        return False
+
+    def _request_home(self, **kwargs):
+        url = "https://e-hentai.org/home.php"
+        kwargs["cookies"] = {
+            cookie.name: cookie.value
+            for cookie in self.cookies
+            if cookie.domain == self.cookies_domain and
+            cookie.name != "igneous"
+        }
+        page = self.request(url, **kwargs).text
+
+        # update image limits
+        current = text.extr(page, "<strong>", "</strong>").replace(",", "")
+        self.log.debug("Image Limits: %s/%s", current, self.limits)
+        self._limits_remaining = self.limits - text.parse_int(current)
+
+        return page
 
     def _check_509(self, url):
         # full 509.gif URLs
@@ -426,25 +453,43 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if url.endswith(("hentai.org/img/509.gif",
                          "ehgt.org/g/509.gif")):
             self.log.debug(url)
-            self._report_limits()
+            self._limits_exceeded()
 
-    def _update_limits(self):
-        url = "https://e-hentai.org/home.php"
-        cookies = {
-            cookie.name: cookie.value
-            for cookie in self.cookies
-            if cookie.domain == self.cookies_domain and
-            cookie.name != "igneous"
-        }
+    def _limits_exceeded(self):
+        msg = "Image limit exceeded!"
+        action = self.config("limits-action")
 
-        page = self.request(url, cookies=cookies).text
-        current = text.extr(page, "<strong>", "</strong>").replace(",", "")
-        self.log.debug("Image Limits: %s/%s", current, self.limits)
-        self._remaining = self.limits - text.parse_int(current)
+        if not action or action == "stop":
+            ExhentaiExtractor.LIMIT = True
+            raise exception.AbortExtraction(msg)
+
+        self.log.warning(msg)
+        if action == "wait":
+            self.input("Press ENTER to continue.")
+            self._limits_update()
+        elif action == "reset":
+            self._limits_reset()
+        else:
+            self.log.error("Invalid 'limits-action' value '%s'", action)
+
+    def _limits_check(self, data):
+        if not self._limits_remaining or data["num"] % 25 == 0:
+            self._limits_update()
+        self._limits_remaining -= data["cost"]
+        if self._limits_remaining <= 0:
+            self._limits_exceeded()
+
+    def _limits_reset(self):
+        self.log.info("Resetting image limits")
+        self._request_home(
+            method="POST",
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            data=b"reset_imagelimit=Reset+Quota")
+
+    _limits_update = _request_home
 
     def _gallery_page(self):
-        url = "{}/g/{}/{}/".format(
-            self.root, self.gallery_id, self.gallery_token)
+        url = f"{self.root}/g/{self.gallery_id}/{self.gallery_token}/"
         response = self.request(url, fatal=False)
         page = response.text
 
@@ -457,8 +502,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         return page
 
     def _image_page(self):
-        url = "{}/s/{}/{}-{}".format(
-            self.root, self.image_token, self.gallery_id, self.image_num)
+        url = (f"{self.root}/s/{self.image_token}"
+               f"/{self.gallery_id}-{self.image_num}")
         page = self.request(url, fatal=False).text
 
         if page.startswith(("Invalid page", "Keep trying")):
@@ -466,7 +511,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         return page
 
     def _fallback_original(self, nl, fullimg):
-        url = "{}?nl={}".format(fullimg, nl)
+        url = f"{fullimg}?nl={nl}"
         for _ in util.repeat(self.fallback_retries):
             yield url
 
@@ -475,8 +520,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             token = self.key_start
 
         for _ in util.repeat(self.fallback_retries):
-            url = "{}/s/{}/{}-{}?nl={}".format(
-                self.root, token, self.gallery_id, num, nl)
+            url = f"{self.root}/s/{token}/{self.gallery_id}-{num}?nl={nl}"
 
             page = self.request(url, fatal=False).text
             if page.startswith(("Invalid page", "Keep trying")):
@@ -486,8 +530,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
             nl = data["_nl"]
 
-    @staticmethod
-    def _parse_image_info(url):
+    def _parse_image_info(self, url):
         for part in url.split("/")[4:]:
             try:
                 _, size, width, height, _ = part.split("-")
@@ -504,8 +547,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "height": text.parse_int(height),
         }
 
-    @staticmethod
-    def _parse_original_info(info):
+    def _parse_original_info(self, info):
         parts = info.lstrip().split(" ")
         size = text.parse_bytes(parts[3] + parts[4][0])
 
@@ -527,11 +569,11 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
     def __init__(self, match):
         ExhentaiExtractor.__init__(self, match)
 
-        _, query, tag = match.groups()
+        _, query, tag = self.groups
         if tag:
             if "+" in tag:
                 ns, _, tag = tag.rpartition(":")
-                tag = '{}:"{}$"'.format(ns, tag.replace("+", " "))
+                tag = f"{ns}:\"{tag.replace('+', ' ')}$\""
             else:
                 tag += "$"
             self.params = {"f_search": tag, "page": 0}
@@ -553,13 +595,13 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
             last = None
             page = self.request(search_url, params=params).text
 
-            for gallery in ExhentaiGalleryExtractor.pattern.finditer(page):
-                url = gallery.group(0)
+            for match in ExhentaiGalleryExtractor.pattern.finditer(page):
+                url = match[0]
                 if url == last:
                     continue
                 last = url
-                data["gallery_id"] = text.parse_int(gallery.group(2))
-                data["gallery_token"] = gallery.group(3)
+                data["gallery_id"] = text.parse_int(match[2])
+                data["gallery_token"] = match[3]
                 yield Message.Queue, url + "/", data
 
             next_url = text.extr(page, 'nexturl="', '"', None)

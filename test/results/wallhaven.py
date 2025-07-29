@@ -12,6 +12,14 @@ __tests__ = (
     "#url"     : "https://wallhaven.cc/search?q=touhou",
     "#category": ("", "wallhaven", "search"),
     "#class"   : wallhaven.WallhavenSearchExtractor,
+    "#pattern" : r"https://w\.wallhaven\.cc/full/\w\w/wallhaven-\w+\.\w+",
+    "#range"   : "1-10",
+
+    "search": {
+        "q"     : "touhou",
+        "tags"  : "touhou",
+        "tag_id": 0,
+    },
 },
 
 {
@@ -20,6 +28,17 @@ __tests__ = (
     "#class"   : wallhaven.WallhavenSearchExtractor,
     "#pattern" : r"https://w\.wallhaven\.cc/full/\w\w/wallhaven-\w+\.\w+",
     "#count"   : "<= 30",
+
+    "search": {
+        "categories": "111",
+        "order"     : "asc",
+        "page"      : "3",
+        "purity"    : "100",
+        "sorting"   : "date_added",
+        "q"         : "id:87",
+        "tags"      : "Fujibayashi Kyou",
+        "tag_id"    : 87,
+    },
 },
 
 {

@@ -17,6 +17,7 @@ __tests__ = (
     "#count"   : 15,
 
     "attachments"  : list,
+    "campaign"     : dict,
     "comment_count": int,
     "content"      : str,
     "creator"      : dict,
@@ -44,6 +45,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.patreon.com/cw/anythingelse",
+    "#comment" : "Next.js 13 - /cw/ URL",
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
     "#url"     : "https://www.patreon.com/c/koveliana",
     "#class"   : patreon.PatreonCreatorExtractor,
 },
@@ -64,8 +71,42 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.patreon.com/profile/creators?u=2931440",
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
+    "#url"     : "https://www.patreon.com/profile/creators?c=369707",
+    "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
     "#url"     : "https://www.patreon.com/id:369707",
     "#class"   : patreon.PatreonCreatorExtractor,
+},
+
+{
+    "#url"     : "https://www.patreon.com/create",
+    "#class"   : patreon.PatreonCreatorExtractor,
+    "#fail"    : True,
+},
+
+{
+    "#url"     : "https://www.patreon.com/login",
+    "#class"   : patreon.PatreonCreatorExtractor,
+    "#fail"    : True,
+},
+
+{
+    "#url"     : "https://www.patreon.com/search?q=foobar",
+    "#class"   : patreon.PatreonCreatorExtractor,
+    "#fail"    : True,
+},
+
+{
+    "#url"     : "https://www.patreon.com/messages/?mode=user&tab=chats",
+    "#class"   : patreon.PatreonCreatorExtractor,
+    "#fail"    : True,
 },
 
 {
@@ -82,13 +123,9 @@ __tests__ = (
 
 {
     "#url"     : "https://www.patreon.com/posts/free-mari-8s-113049301",
-    "#comment" : "postfile + attachments_media (#6241)",
+    "#comment" : "'This page has been removed' - postfile + attachments_media (#6241)",
     "#class"   : patreon.PatreonPostExtractor,
-    "#pattern" : [
-        r"https://c10\.patreonusercontent\.com/4/patreon-media/p/post/113049301/7ae4fd78d3374d849a80863f3d8eee89/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.jpg",
-        r"https://c10\.patreonusercontent\.com/4/patreon-media/p/post/113049301/b6ea96b18cbc47f78f9334d50d0877ea/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.mp4",
-        r"https://c10\.patreonusercontent\.com/4/patreon-media/p/post/113049301/62dc1d4194db4245aca31c56f71234ed/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.mp4",
-    ],
+    "#exception": exception.NotFoundError,
 },
 
 {
@@ -105,6 +142,26 @@ __tests__ = (
     "#pattern" : r"https://c10.patreonusercontent.com/4/patreon-media/p/post/12497641/3d99f5f5b635428ca237fedf0f223f1a/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.JPG\?.+",
 
     "tags": ["AWMedia"],
+    "campaign": {
+        "avatar_photo_image_urls": dict,
+        "avatar_photo_url": "https://c10.patreonusercontent.com/4/patreon-media/p/campaign/350434/cadc16f03fa1460f9185505b0a858c1b/eyJ3Ijo2MjB9/1.png?token-hash=tpUv_bM0-mEuUSizstb00UrVA-btPS5RyGSCWRx24oc%3D",
+        "creation_name": "creating Art Photography/Videography",
+        "currency": "USD",
+        "current_user_can_be_free_member": True,
+        "current_user_is_free_member": False,
+        "is_free_membership_paused": False,
+        "is_monthly": True,
+        "name": "ReedandWeep",
+        "offers_free_membership": True,
+        "offers_paid_membership": True,
+        "pay_per_name": "month",
+        "pledge_url": "https://www.patreon.com/checkout/Reedandweep",
+        "primary_theme_color": None,
+        "show_audio_post_download_links": True,
+        "show_free_membership_cta": False,
+        "url": "https://www.patreon.com/Reedandweep",
+    },
+
 },
 
 {
@@ -113,7 +170,10 @@ __tests__ = (
     "#class"   : patreon.PatreonPostExtractor,
     "#options" : {"format-images": "thumbnail"},
     "#pattern"     : r"https://c10.patreonusercontent.com/4/patreon-media/p/post/12497641/3d99f5f5b635428ca237fedf0f223f1a/eyJoIjozNjAsInciOjM2MH0%3D/1\.JPG\?.+",
-    "#sha1_content": "190e249295eeca1a8ffbcf1aece788b4f69bbb64",
+    "#sha1_content": (
+        "2967d7567d55debdfa59cfd27cd5edf89d9c3503",
+        "190e249295eeca1a8ffbcf1aece788b4f69bbb64",
+    )
 },
 
 {
@@ -121,7 +181,7 @@ __tests__ = (
     "#class"   : patreon.PatreonPostExtractor,
     "#pattern" : [
         r"https://c10\.patreonusercontent\.com/4/patreon-media/p/post/94714289/be3d8eb994ae44eca4baffcdc6dd25fc/eyJhIjoxLCJwIjoxfQ%3D%3D/1\.png",
-        r"ytdl:https://www.patreon\.com/api/video/255859412/video\.m3u8",
+        r"ytdl:https://stream\.mux\.com/NLrxTLdxyGStpOgapJAtB8uPGAaokEcj8YovML00y2DY\.m3u8\?token=ey",
     ]
 },
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -121,8 +121,7 @@ class PathfmtProxy():
         return pathfmt.__dict__.get(name) if pathfmt else None
 
     def __str__(self):
-        pathfmt = object.__getattribute__(self, "job").pathfmt
-        if pathfmt:
+        if pathfmt := object.__getattribute__(self, "job").pathfmt:
             return pathfmt.path or pathfmt.directory
         return ""
 
@@ -235,8 +234,7 @@ def configure_logging(loglevel):
             minlevel = handler.level
 
     # file logging handler
-    handler = setup_logging_handler("logfile", lvl=loglevel)
-    if handler:
+    if handler := setup_logging_handler("logfile", lvl=loglevel):
         root.addHandler(handler)
         if minlevel > handler.level:
             minlevel = handler.level
@@ -394,8 +392,7 @@ class PipeOutput(NullOutput):
 class TerminalOutput():
 
     def __init__(self):
-        shorten = config.get(("output",), "shorten", True)
-        if shorten:
+        if shorten := config.get(("output",), "shorten", True):
             func = shorten_string_eaw if shorten == "eaw" else shorten_string
             limit = shutil.get_terminal_size().columns - OFFSET
             sep = CHAR_ELLIPSIES
@@ -416,10 +413,10 @@ class TerminalOutput():
         bdl = util.format_value(bytes_downloaded)
         bps = util.format_value(bytes_per_second)
         if bytes_total is None:
-            stderr_write("\r{:>7}B {:>7}B/s ".format(bdl, bps))
+            stderr_write(f"\r{bdl:>7}B {bps:>7}B/s ")
         else:
-            stderr_write("\r{:>3}% {:>7}B {:>7}B/s ".format(
-                bytes_downloaded * 100 // bytes_total, bdl, bps))
+            stderr_write(f"\r{bytes_downloaded * 100 // bytes_total:>3}% "
+                         f"{bdl:>7}B {bps:>7}B/s ")
 
 
 class ColorOutput(TerminalOutput):
@@ -431,10 +428,8 @@ class ColorOutput(TerminalOutput):
         if colors is None:
             colors = COLORS_DEFAULT
 
-        self.color_skip = "\033[{}m".format(
-            colors.get("skip", "2"))
-        self.color_success = "\r\033[{}m".format(
-            colors.get("success", "1;32"))
+        self.color_skip = f"\x1b[{colors.get('skip', '2')}m"
+        self.color_success = f"\r\x1b[{colors.get('success', '1;32')}m"
 
     def start(self, path):
         stdout_write_flush(self.shorten(path))
@@ -462,8 +457,7 @@ class CustomOutput():
         if isinstance(fmt_success, list):
             off_success, fmt_success = fmt_success
 
-        shorten = config.get(("output",), "shorten", True)
-        if shorten:
+        if shorten := config.get(("output",), "shorten", True):
             func = shorten_string_eaw if shorten == "eaw" else shorten_string
             width = shutil.get_terminal_size().columns
 
@@ -483,8 +477,7 @@ class CustomOutput():
         self._fmt_progress_total = (options.get("progress-total") or
                                     "\r{3:>3}% {0:>7}B {1:>7}B/s ").format
 
-    @staticmethod
-    def _make_func(shorten, format_string, limit):
+    def _make_func(self, shorten, format_string, limit):
         fmt = format_string.format
         return lambda txt: fmt(shorten(txt, limit, CHAR_ELLIPSIES))
 

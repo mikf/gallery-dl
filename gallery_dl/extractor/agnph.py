@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,11 +9,8 @@
 """Extractors for https://agn.ph/"""
 
 from . import booru
-from .. import text
-
-from xml.etree import ElementTree
+from .. import text, util
 import collections
-import re
 
 BASE_PATTERN = r"(?:https?://)?agn\.ph"
 
@@ -52,8 +49,7 @@ class AgnphExtractor(booru.BooruExtractor):
             params["page"] = self.page_start
 
         while True:
-            data = self.request(url, params=params).text
-            root = ElementTree.fromstring(data)
+            root = self.request_xml(url, params=params)
 
             yield from map(self._xml_to_dict, root)
 
@@ -64,7 +60,7 @@ class AgnphExtractor(booru.BooruExtractor):
             params["page"] += 1
 
     def _html(self, post):
-        url = "{}/gallery/post/show/{}/".format(self.root, post["id"])
+        url = f"{self.root}/gallery/post/show/{post['id']}/"
         return self.request(url).text
 
     def _tags(self, post, page):
@@ -74,7 +70,7 @@ class AgnphExtractor(booru.BooruExtractor):
             return
 
         tags = collections.defaultdict(list)
-        pattern = re.compile(r'class="(.)typetag">([^<]+)')
+        pattern = util.re(r'class="(.)typetag">([^<]+)')
         for tag_type, tag_name in pattern.findall(tag_container):
             tags[tag_type].append(text.unquote(tag_name).replace(" ", "_"))
         for key, value in tags.items():
@@ -107,7 +103,6 @@ class AgnphPostExtractor(AgnphExtractor):
     example = "https://agn.ph/gallery/post/show/12345/"
 
     def posts(self):
-        url = "{}/gallery/post/show/{}/?api=xml".format(
-            self.root, self.groups[0])
-        post = ElementTree.fromstring(self.request(url).text)
+        url = f"{self.root}/gallery/post/show/{self.groups[0]}/?api=xml"
+        post = self.request_xml(url)
         return (self._xml_to_dict(post),)

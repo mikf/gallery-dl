@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Recursive extractor"""
 
 from .common import Extractor, Message
-from .. import text
-import re
+from .. import text, util
 
 
 class RecursiveExtractor(Extractor):
@@ -28,5 +27,5 @@ class RecursiveExtractor(Extractor):
         else:
             page = self.request(text.ensure_http_scheme(url)).text
 
-        for match in re.finditer(r"https?://[^\s\"']+", page):
-            yield Message.Queue, match.group(0), {}
+        for match in util.re(r"https?://[^\s\"']+").finditer(page):
+            yield Message.Queue, match[0], {}

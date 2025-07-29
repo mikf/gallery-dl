@@ -73,7 +73,7 @@ class DatabaseCacheDecorator():
     _init = True
 
     def __init__(self, func, keyarg, maxage):
-        self.key = "%s.%s" % (func.__module__, func.__name__)
+        self.key = f"{func.__module__}.{func.__name__}"
         self.func = func
         self.cache = {}
         self.keyarg = keyarg
@@ -95,7 +95,7 @@ class DatabaseCacheDecorator():
             pass
 
         # database lookup
-        fullkey = "%s-%s" % (self.key, key)
+        fullkey = f"{self.key}-{key}"
         with self.database() as db:
             cursor = db.cursor()
             try:
@@ -128,7 +128,7 @@ class DatabaseCacheDecorator():
         with self.database() as db:
             db.execute(
                 "INSERT OR REPLACE INTO data VALUES (?,?,?)",
-                ("%s-%s" % (self.key, key), pickle.dumps(value), expires),
+                (f"{self.key}-{key}", pickle.dumps(value), expires),
             )
 
     def invalidate(self, key):
@@ -139,7 +139,7 @@ class DatabaseCacheDecorator():
         with self.database() as db:
             db.execute(
                 "DELETE FROM data WHERE key=?",
-                ("%s-%s" % (self.key, key),),
+                (f"{self.key}-{key}",),
             )
 
     def database(self):

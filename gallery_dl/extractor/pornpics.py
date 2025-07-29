@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,10 +20,6 @@ class PornpicsExtractor(Extractor):
     root = "https://www.pornpics.com"
     request_interval = (0.5, 1.5)
 
-    def __init__(self, match):
-        super().__init__(match)
-        self.item = match.group(1)
-
     def items(self):
         for gallery in self.galleries():
             gallery["_extractor"] = PornpicsGalleryExtractor
@@ -34,9 +30,11 @@ class PornpicsExtractor(Extractor):
             # fetch first 20 galleries from HTML
             # since '"offset": 0' does not return a JSON response
             page = self.request(url).text
-            for path in text.extract_iter(
+            for href in text.extract_iter(
                     page, 'class="rel-link" href="', '"'):
-                yield {"g_url": self.root + path}
+                if href[0] == "/":
+                    href = self.root + href
+                yield {"g_url": href}
             del page
             params = {"offset": 20}
 
@@ -49,8 +47,8 @@ class PornpicsExtractor(Extractor):
         }
 
         while True:
-            galleries = self.request(
-                url, params=params, headers=headers).json()
+            galleries = self.request_json(
+                url, params=params, headers=headers)
             yield from galleries
 
             if len(galleries) < limit:
@@ -60,12 +58,12 @@ class PornpicsExtractor(Extractor):
 
 class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
     """Extractor for pornpics galleries"""
-    pattern = BASE_PATTERN + r"(/galleries/(?:[^/?#]+-)?(\d+))"
+    pattern = BASE_PATTERN + r"/galleries/((?:[^/?#]+-)?(\d+))"
     example = "https://www.pornpics.com/galleries/TITLE-12345/"
 
     def __init__(self, match):
-        PornpicsExtractor.__init__(self, match)
-        self.gallery_id = match.group(2)
+        url = f"{self.root}/galleries/{match[1]}/"
+        GalleryExtractor.__init__(self, match, url)
 
     items = GalleryExtractor.items
 
@@ -73,7 +71,7 @@ class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
         extr = text.extract_from(page)
 
         return {
-            "gallery_id": text.parse_int(self.gallery_id),
+            "gallery_id": text.parse_int(self.groups[1]),
             "slug"      : extr("/galleries/", "/").rpartition("-")[0],
             "title"     : text.unescape(extr("<h1>", "<")),
             "channel"   : text.split_html(extr(">Channel:&nbsp;", '</div>')),
@@ -100,7 +98,7 @@ class PornpicsTagExtractor(PornpicsExtractor):
     example = "https://www.pornpics.com/tags/TAGS/"
 
     def galleries(self):
-        url = "{}/tags/{}/".format(self.root, self.item)
+        url = f"{self.root}/tags/{self.groups[0]}/"
         return self._pagination(url)
 
 
@@ -113,7 +111,7 @@ class PornpicsSearchExtractor(PornpicsExtractor):
     def galleries(self):
         url = self.root + "/search/srch.php"
         params = {
-            "q"     : self.item.replace("-", " "),
+            "q"     : self.groups[0].replace("-", " "),
             "lang"  : "en",
             "offset": 0,
         }

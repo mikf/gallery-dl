@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://vsco.co/missuri",
     "#category": ("", "vsco", "user"),
     "#class"   : vsco.VscoUserExtractor,
-    "#urls"    : "https://vsco.co/missuri/gallery",
+    "#results" : "https://vsco.co/missuri/gallery",
 },
 
 {
@@ -20,21 +20,43 @@ __tests__ = (
     "#category": ("", "vsco", "user"),
     "#class"   : vsco.VscoUserExtractor,
     "#options" : {"include": "all"},
-    "#urls"    : [
+    "#results" : (
         "https://vsco.co/missuri/avatar",
         "https://vsco.co/missuri/gallery",
         "https://vsco.co/missuri/spaces",
         "https://vsco.co/missuri/collection",
-    ],
+    ),
 },
 
 {
     "#url"     : "https://vsco.co/missuri/gallery",
     "#category": ("", "vsco", "gallery"),
     "#class"   : vsco.VscoGalleryExtractor,
-    "#pattern" : r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/[\w-]+\.\w+",
+    "#pattern" : r"https://image(-aws.+)?\.vsco\.co/[0-9a-f/]+/[\w-]+\.\w+|^ytdl:https://stream\.mux\.com/.+",
     "#range"   : "1-80",
     "#count"   : 80,
+},
+
+{
+    "#url"     : "https://vsco.co/shavonec/gallery",
+    "#comment" : "meu8 video (#7113)",
+    "#category": ("", "vsco", "gallery"),
+    "#class"   : vsco.VscoGalleryExtractor,
+    "#pattern" : r"^ytdl:https://stream\.mux\.com/3o01XbjqTI4rkeRwPzR17H9i7VSFdWX1h\.m3u8\?token=ey.+",
+    "#range"   : "8",
+
+    "date"       : "dt:2020-02-04 15:11:52",
+    "description": "Big news: 🎥 YOU CAN NOW POST VIDEOS TO VSCO ⚡️⚡️💪🏾. ⁣\n⁣\n🔗BTS from my #FashionIsActivism panel with the California African American Arts museum ✊🏾",
+    "extension"  : "mp4",
+    "filename"   : "3o01XbjqTI4rkeRwPzR17H9i7VSFdWX1h",
+    "grid"       : "",
+    "id"         : "c5eb34bb-dd13-4d7a-a09c-2a7cd719c9fa",
+    "meta"       : {},
+    "tags"       : [],
+    "user"       : "shavonec",
+    "video"      : True,
+    "width"      : 624,
+    "height"     : 1232,
 },
 
 {
@@ -64,7 +86,7 @@ __tests__ = (
     "#url"     : "https://vsco.co/missuri/spaces",
     "#category": ("", "vsco", "spaces"),
     "#class"   : vsco.VscoSpacesExtractor,
-    "#urls"    : (
+    "#results" : (
         "https://vsco.co/spaces/62e4934e6920440801d19f05",
     ),
 },
@@ -73,7 +95,7 @@ __tests__ = (
     "#url"     : "https://vsco.co/vsco/avatar",
     "#category": ("", "vsco", "avatar"),
     "#class"   : vsco.VscoAvatarExtractor,
-    "#urls"         : "https://image-aws-us-west-2.vsco.co/3c69ae/304128/652d9f3b39a6007526dda683/vscoprofile-avatar.jpg",
+    "#pattern" : r"https://(?:image-aws-us-west-2|img).vsco.co/3c69ae/304128/652d9f3b39a6007526dda683/vscoprofile-avatar.jpg",
     "#sha1_content" : "57cd648759e34a6daefc5c79542ddb4595b9b677",
 
     "id": "652d9f3b39a6007526dda683",
@@ -102,10 +124,30 @@ __tests__ = (
     "#url"     : "https://vsco.co/jimenalazof/media/5b4feec558f6c45c18c040fd",
     "#category": ("", "vsco", "image"),
     "#class"   : vsco.VscoImageExtractor,
-    "#sha1_url"    : "08e7eef3301756ce81206c0b47c1e9373756a74a",
+    "#sha1_url"    : "c2cf4bd2a627419785613dc5475cbb7c2699f3dd",
     "#sha1_content": "e739f058d726ee42c51c180a505747972a7dfa47",
 
     "video": True,
+},
+
+{
+    "#url"     : "https://vsco.co/shavonec/video/c5eb34bb-dd13-4d7a-a09c-2a7cd719c9fa",
+    "#category": ("", "vsco", "video"),
+    "#class"   : vsco.VscoVideoExtractor,
+    "#pattern" : r"^ytdl:https://stream\.mux\.com/3o01XbjqTI4rkeRwPzR17H9i7VSFdWX1h\.m3u8\?token=ey.+",
+
+    "date"       : "dt:2020-02-04 15:11:52",
+    "description": "Big news: 🎥 YOU CAN NOW POST VIDEOS TO VSCO ⚡️⚡️💪🏾. ⁣\n⁣\n🔗BTS from my #FashionIsActivism panel with the California African American Arts museum ✊🏾",
+    "extension"  : "mp4",
+    "filename"   : "3o01XbjqTI4rkeRwPzR17H9i7VSFdWX1h",
+    "grid"       : "",
+    "id"         : "c5eb34bb-dd13-4d7a-a09c-2a7cd719c9fa",
+    "meta"       : {},
+    "tags"       : [],
+    "user"       : "shavonec",
+    "video"      : True,
+    "width"      : 624,
+    "height"     : 1232,
 },
 
 )

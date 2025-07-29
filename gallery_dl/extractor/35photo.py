@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -49,14 +49,14 @@ class _35photoExtractor(Extractor):
         if extra_ids:
             yield from extra_ids
         while params["lastId"]:
-            data = self.request(url, headers=headers, params=params).json()
+            data = self.request_json(url, headers=headers, params=params)
             yield from self._photo_ids(data["data"])
             params["lastId"] = data["lastId"]
 
     def _photo_data(self, photo_id):
         params = {"method": "photo.getData", "photoId": photo_id}
-        data = self.request(
-            "https://api.35photo.pro/", params=params).json()["data"][photo_id]
+        data = self.request_json(
+            "https://api.35photo.pro/", params=params)["data"][photo_id]
         info = {
             "url"        : data["src"],
             "id"         : data["photo_id"],
@@ -83,8 +83,7 @@ class _35photoExtractor(Extractor):
             info["num"] = 1
             yield info
 
-    @staticmethod
-    def _photo_ids(page):
+    def _photo_ids(self, page):
         """Extract unique photo IDs and return them as sorted list"""
         #  searching for photo-id="..." doesn't always work (see unit tests)
         if not page:
@@ -105,11 +104,11 @@ class _35photoUserExtractor(_35photoExtractor):
 
     def __init__(self, match):
         _35photoExtractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
         self.user_id = 0
 
     def metadata(self):
-        url = "{}/{}/".format(self.root, self.user)
+        url = f"{self.root}/{self.user}/"
         page = self.request(url).text
         self.user_id = text.parse_int(text.extr(page, "/user_", ".xml"))
         return {
@@ -134,7 +133,7 @@ class _35photoTagExtractor(_35photoExtractor):
 
     def __init__(self, match):
         _35photoExtractor.__init__(self, match)
-        self.tag = match.group(1)
+        self.tag = match[1]
 
     def metadata(self):
         return {"search_tag": text.unquote(self.tag).lower()}
@@ -143,7 +142,7 @@ class _35photoTagExtractor(_35photoExtractor):
         num = 1
 
         while True:
-            url = "{}/tags/{}/list_{}/".format(self.root, self.tag, num)
+            url = f"{self.root}/tags/{self.tag}/list_{num}/"
             page = self.request(url).text
             prev = None
 
@@ -171,7 +170,7 @@ class _35photoGenreExtractor(_35photoExtractor):
         self.photo_ids = None
 
     def metadata(self):
-        url = "{}/genre_{}{}".format(self.root, self.genre_id, self.new or "/")
+        url = f"{self.root}/genre_{self.genre_id}{self.new or '/'}"
         page = self.request(url).text
         self.photo_ids = self._photo_ids(text.extr(
             page, ' class="photo', '\n'))
@@ -199,7 +198,7 @@ class _35photoImageExtractor(_35photoExtractor):
 
     def __init__(self, match):
         _35photoExtractor.__init__(self, match)
-        self.photo_id = match.group(1)
+        self.photo_id = match[1]
 
     def photos(self):
         return (self.photo_id,)

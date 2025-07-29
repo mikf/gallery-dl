@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,8 +21,8 @@ class SlickpicExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1)
-        self.root = "https://{}.slickpic.com".format(self.user)
+        self.user = match[1]
+        self.root = f"https://{self.user}.slickpic.com"
 
 
 class SlickpicAlbumExtractor(SlickpicExtractor):
@@ -37,7 +37,7 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
 
     def __init__(self, match):
         SlickpicExtractor.__init__(self, match)
-        self.album = match.group(2)
+        self.album = match[2]
 
     def items(self):
         data = self.metadata()
@@ -72,7 +72,7 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
             yield Message.Url, url, img
 
     def metadata(self):
-        url = "{}/albums/{}/?wallpaper".format(self.root, self.album)
+        url = f"{self.root}/albums/{self.album}/?wallpaper"
         extr = text.extract_from(self.request(url).text)
 
         title = text.unescape(extr("<title>", "</title>"))
@@ -105,7 +105,7 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
             "sng"   : "0",
             "whq"   : "1",
         }
-        return self.request(url, method="POST", data=data).json()["list"]
+        return self.request_json(url, method="POST", data=data)["list"]
 
 
 class SlickpicUserExtractor(SlickpicExtractor):

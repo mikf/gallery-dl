@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -29,8 +29,7 @@ class _4chanarchivesThreadExtractor(Extractor):
         self.board, self.thread = match.groups()
 
     def items(self):
-        url = "{}/board/{}/thread/{}".format(
-            self.root, self.board, self.thread)
+        url = f"{self.root}/board/{self.board}/thread/{self.thread}"
         page = self.request(url).text
         data = self.metadata(page)
         posts = self.posts(page)
@@ -66,8 +65,7 @@ class _4chanarchivesThreadExtractor(Extractor):
             post["extension"] = post["url"].rpartition(".")[2]
         return post
 
-    @staticmethod
-    def _extract_post(html):
+    def _extract_post(self, html):
         extr = text.extract_from(html)
         return {
             "no"  : text.parse_int(extr('', '"')),
@@ -77,8 +75,7 @@ class _4chanarchivesThreadExtractor(Extractor):
                 html[html.find('<blockquote'):].partition(">")[2]),
         }
 
-    @staticmethod
-    def _extract_file(html, post):
+    def _extract_file(self, html, post):
         extr = text.extract_from(html, html.index(">File: <"))
         post["url"] = extr('href="', '"')
         post["filename"] = text.unquote(extr(">", "<").rpartition(".")[0])
@@ -106,7 +103,7 @@ class _4chanarchivesBoardExtractor(Extractor):
                         <span><a href="'''
 
         while True:
-            url = "{}/board/{}/{}".format(self.root, self.board, pnum)
+            url = f"{self.root}/board/{self.board}/{pnum}"
             page = self.request(url).text
 
             thread = None

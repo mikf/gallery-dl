@@ -42,22 +42,15 @@ class LynxchanThreadExtractor(LynxchanExtractor):
     pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
     example = "https://endchan.org/a/res/12345.html"
 
-    def __init__(self, match):
-        LynxchanExtractor.__init__(self, match)
-        index = match.lastindex
-        self.board = match.group(index-1)
-        self.thread = match.group(index)
-
     def items(self):
-        url = "{}/{}/res/{}.json".format(self.root, self.board, self.thread)
-        thread = self.request(url).json()
+        url = f"{self.root}/{self.groups[-2]}/res/{self.groups[-1]}.json"
+        thread = self.request_json(url)
         thread["postId"] = thread["threadId"]
         posts = thread.pop("posts", ())
 
         yield Message.Directory, thread
         for post in itertools.chain((thread,), posts):
-            files = post.pop("files", ())
-            if files:
+            if files := post.pop("files", ()):
                 thread.update(post)
                 for num, file in enumerate(files):
                     file.update(thread)
@@ -73,14 +66,10 @@ class LynxchanBoardExtractor(LynxchanExtractor):
     pattern = BASE_PATTERN + r"/([^/?#]+)(?:/index|/catalog|/\d+|/?$)"
     example = "https://endchan.org/a/"
 
-    def __init__(self, match):
-        LynxchanExtractor.__init__(self, match)
-        self.board = match.group(match.lastindex)
-
     def items(self):
-        url = "{}/{}/catalog.json".format(self.root, self.board)
-        for thread in self.request(url).json():
-            url = "{}/{}/res/{}.html".format(
-                self.root, self.board, thread["threadId"])
+        board = self.groups[-1]
+        url = f"{self.root}/{board}/catalog.json"
+        for thread in self.request_json(url):
+            url = f"{self.root}/{board}/res/{thread['threadId']}.html"
             thread["_extractor"] = LynxchanThreadExtractor
             yield Message.Queue, url, thread

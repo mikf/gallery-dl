@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,13 +11,12 @@
 from .common import Extractor, Message
 from .. import text, util, oauth, exception
 from datetime import datetime, date, timedelta
-import re
 
 
 BASE_PATTERN = (
     r"(?:tumblr:(?:https?://)?([^/]+)|"
     r"(?:https?://)?"
-    r"(?:www\.tumblr\.com/(?:blog/(?:view/)?)?([\w-]+)|"
+    r"(?:(?:www\.)?tumblr\.com/(?:blog/(?:view/)?)?([\w-]+)|"
     r"([\w-]+\.tumblr\.com)))"
 )
 
@@ -35,11 +34,10 @@ class TumblrExtractor(Extractor):
     def __init__(self, match):
         Extractor.__init__(self, match)
 
-        name = match.group(2)
-        if name:
+        if name := match[2]:
             self.blog = name + ".tumblr.com"
         else:
-            self.blog = match.group(1) or match.group(3)
+            self.blog = match[1] or match[3]
 
     def _init(self):
         self.api = TumblrAPI(self)
@@ -66,16 +64,16 @@ class TumblrExtractor(Extractor):
         blog = None
 
         # pre-compile regular expressions
-        self._sub_video = re.compile(
+        self._sub_video = util.re(
             r"https?://((?:vt|vtt|ve)(?:\.media)?\.tumblr\.com"
             r"/tumblr_[^_]+)_\d+\.([0-9a-z]+)").sub
         if self.inline:
-            self._sub_image = re.compile(
+            self._sub_image = util.re(
                 r"https?://(\d+\.media\.tumblr\.com(?:/[0-9a-f]+)?"
                 r"/tumblr(?:_inline)?_[^_]+)_\d+\.([0-9a-z]+)").sub
-            self._subn_orig_image = re.compile(r"/s\d+x\d+/").subn
-            _findall_image = re.compile('<img src="([^"]+)"').findall
-            _findall_video = re.compile('<source src="([^"]+)"').findall
+            self._subn_orig_image = util.re(r"/s\d+x\d+/").subn
+            _findall_image = util.re('<img src="([^"]+)"').findall
+            _findall_video = util.re('<source src="([^"]+)"').findall
 
         for post in self.posts():
             if self.date_min > post["timestamp"]:
@@ -140,8 +138,7 @@ class TumblrExtractor(Extractor):
             if url and url.startswith("https://a.tumblr.com/"):
                 posts.append(self._prepare(url, post.copy()))
 
-            url = post.get("video_url")  # type "video"
-            if url:
+            if url := post.get("video_url"):  # type "video"
                 posts.append(self._prepare(
                     self._original_video(url), post.copy()))
 
@@ -161,8 +158,7 @@ class TumblrExtractor(Extractor):
                     posts.append(self._prepare(url, post.copy()))
 
             if self.external:  # external links
-                url = post.get("permalink_url") or post.get("url")
-                if url:
+                if url := post.get("permalink_url") or post.get("url"):
                     post["extension"] = None
                     posts.append((Message.Queue, url, post.copy()))
                     del post["extension"]
@@ -192,21 +188,18 @@ class TumblrExtractor(Extractor):
                 types = types.split(",")
             types = frozenset(types)
 
-            invalid = types - POST_TYPES
-            if invalid:
+            if invalid := types - POST_TYPES:
                 types = types & POST_TYPES
                 self.log.warning("Invalid post types: '%s'",
                                  "', '".join(sorted(invalid)))
             return types
 
-    @staticmethod
-    def _prepare(url, post):
+    def _prepare(self, url, post):
         text.nameext_from_url(url, post)
         post["hash"] = post["filename"].partition("_")[2]
         return Message.Url, url, post
 
-    @staticmethod
-    def _prepare_image(url, post):
+    def _prepare_image(self, url, post):
         text.nameext_from_url(url, post)
 
         # try ".gifv" (#3095)
@@ -227,8 +220,7 @@ class TumblrExtractor(Extractor):
 
         return Message.Url, url, post
 
-    @staticmethod
-    def _prepare_avatar(url, post, blog):
+    def _prepare_avatar(self, url, post, blog):
         text.nameext_from_url(url, post)
         post["num"] = post["count"] = 1
         post["blog"] = blog
@@ -292,15 +284,14 @@ class TumblrPostExtractor(TumblrExtractor):
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
-        self.post_id = match.group(4)
+        self.post_id = match[4]
         self.reblogs = True
         self.date_min = 0
 
     def posts(self):
         return self.api.posts(self.blog, {"id": self.post_id})
 
-    @staticmethod
-    def _setup_posttypes():
+    def _setup_posttypes(self):
         return POST_TYPES
 
 
@@ -312,7 +303,7 @@ class TumblrTagExtractor(TumblrExtractor):
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
-        self.tag = text.unquote(match.group(4).replace("-", " "))
+        self.tag = text.unquote(match[4].replace("-", " "))
 
     def posts(self):
         return self.api.posts(self.blog, {"tag": self.tag})
@@ -326,7 +317,7 @@ class TumblrDayExtractor(TumblrExtractor):
 
     def __init__(self, match):
         TumblrExtractor.__init__(self, match)
-        year, month, day = match.group(4).split("/")
+        year, month, day = match[4].split("/")
         self.ordinal = date(int(year), int(month), int(day)).toordinal()
 
     def _init(self):
@@ -357,7 +348,7 @@ class TumblrLikesExtractor(TumblrExtractor):
 class TumblrSearchExtractor(TumblrExtractor):
     """Extractor for a Tumblr search"""
     subcategory = "search"
-    pattern = (BASE_PATTERN + r"/search/([^/?#]+)"
+    pattern = (r"(?:https?://)?(?:www\.)?tumblr\.com/search/([^/?#]+)"
                r"(?:/([^/?#]+)(?:/([^/?#]+))?)?(?:/?\?([^#]+))?")
     example = "https://www.tumblr.com/search/QUERY"
 
@@ -386,7 +377,7 @@ class TumblrAPI(oauth.OAuth1API):
         try:
             return self.BLOG_CACHE[blog]
         except KeyError:
-            endpoint = "/v2/blog/{}/info".format(blog)
+            endpoint = f"/v2/blog/{blog}/info"
             params = {"api_key": self.api_key} if self.api_key else None
             self.BLOG_CACHE[blog] = blog = self._call(endpoint, params)["blog"]
             return blog
@@ -394,9 +385,9 @@ class TumblrAPI(oauth.OAuth1API):
     def avatar(self, blog, size="512"):
         """Retrieve a blog avatar"""
         if self.api_key:
-            return "{}/v2/blog/{}/avatar/{}?api_key={}".format(
-                self.ROOT, blog, size, self.api_key)
-        endpoint = "/v2/blog/{}/avatar".format(blog)
+            return (f"{self.ROOT}/v2/blog/{blog}/avatar/{size}"
+                    f"?api_key={self.api_key}")
+        endpoint = f"/v2/blog/{blog}/avatar"
         params = {"size": size}
         return self._call(
             endpoint, params, allow_redirects=False)["avatar_url"]
@@ -412,12 +403,12 @@ class TumblrAPI(oauth.OAuth1API):
         if self.before and params["offset"]:
             self.log.warning("'offset' and 'date-max' cannot be used together")
 
-        endpoint = "/v2/blog/{}/posts".format(blog)
+        endpoint = f"/v2/blog/{blog}/posts"
         return self._pagination(endpoint, params, blog=blog, cache=True)
 
     def likes(self, blog):
         """Retrieve liked posts"""
-        endpoint = "/v2/blog/{}/likes".format(blog)
+        endpoint = f"/v2/blog/{blog}/likes"
         params = {"limit": "50", "before": self.before}
         if self.api_key:
             params["api_key"] = self.api_key
@@ -474,8 +465,14 @@ class TumblrAPI(oauth.OAuth1API):
                     board = False
 
                 if board:
-                    self.log.info("Run 'gallery-dl oauth:tumblr' "
-                                  "to access dashboard-only blogs")
+                    if self.api_key is None:
+                        self.log.info(
+                            "Ensure your 'access-token' and "
+                            "'access-token-secret' belong to the same "
+                            "application as 'api-key' and 'api-secret'")
+                    else:
+                        self.log.info("Run 'gallery-dl oauth:tumblr' "
+                                      "to access dashboard-only blogs")
                     raise exception.AuthorizationError(error)
                 raise exception.NotFoundError("user or post")
 
@@ -498,18 +495,17 @@ class TumblrAPI(oauth.OAuth1API):
                         continue
 
                     t = (datetime.now() + timedelta(0, float(reset))).time()
-                    raise exception.StopExtraction(
-                        "Aborting - Rate limit will reset at %s",
-                        "{:02}:{:02}:{:02}".format(t.hour, t.minute, t.second))
+                    raise exception.AbortExtraction(
+                        f"Aborting - Rate limit will reset at "
+                        f"{t.hour:02}:{t.minute:02}:{t.second:02}")
 
                 # hourly rate limit
-                reset = response.headers.get("x-ratelimit-perhour-reset")
-                if reset:
+                if reset := response.headers.get("x-ratelimit-perhour-reset"):
                     self.log.info("Hourly API rate limit exceeded")
                     self.extractor.wait(seconds=reset)
                     continue
 
-            raise exception.StopExtraction(data)
+            raise exception.AbortExtraction(data)
 
     def _pagination(self, endpoint, params,
                     blog=None, key="posts", cache=False):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Extractors for https://www.mangahere.cc/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text
-import re
+from .. import text, util
 
 
 class MangahereBase():
@@ -18,7 +17,6 @@ class MangahereBase():
     category = "mangahere"
     root = "https://www.mangahere.cc"
     root_mobile = "https://m.mangahere.cc"
-    url_fmt = root_mobile + "/manga/{}/{}.html"
 
 
 class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
@@ -29,15 +27,15 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
 
     def __init__(self, match):
         self.part, self.volume, self.chapter = match.groups()
-        url = self.url_fmt.format(self.part, 1)
-        ChapterExtractor.__init__(self, match, url)
+        self.base = f"{self.root_mobile}/manga/{self.part}/"
+        ChapterExtractor.__init__(self, match, f"{self.base}1.html")
 
     def _init(self):
         self.session.headers["Referer"] = self.root_mobile + "/"
 
     def metadata(self, page):
         pos = page.index("</select>")
-        count     , pos = text.extract(page, ">", "<", pos - 20)
+        count     , pos = text.extract(page, ">", "<", pos - 40)
         manga_id  , pos = text.extract(page, "series_id = ", ";", pos)
         chapter_id, pos = text.extract(page, "chapter_id = ", ";", pos)
         manga     , pos = text.extract(page, '"name":"', '"', pos)
@@ -61,14 +59,14 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
 
         while True:
             url, pos = text.extract(page, '<img src="', '"')
-            yield text.ensure_http_scheme(url), None
+            yield text.ensure_http_scheme(text.unescape(url)), None
             url, pos = text.extract(page, ' src="', '"', pos)
-            yield text.ensure_http_scheme(url), None
+            yield text.ensure_http_scheme(text.unescape(url)), None
             pnum += 2
-            page = self.request(self.url_fmt.format(self.part, pnum)).text
+            page = self.request(f"{self.base}{pnum}.html").text
 
     def _get_title(self):
-        url = "{}/manga/{}/".format(self.root, self.part)
+        url = f"{self.root}/manga/{self.part}/"
         page = self.request(url).text
 
         try:
@@ -104,8 +102,8 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
             info, pos = text.extract(page, 'class="title3">', '<', pos)
             date, pos = text.extract(page, 'class="title2">', '<', pos)
 
-            match = re.match(
-                r"(?:Vol\.0*(\d+) )?Ch\.0*(\d+)(\S*)(?: - (.*))?", info)
+            match = util.re(
+                r"(?:Vol\.0*(\d+) )?Ch\.0*(\d+)(\S*)(?: - (.*))?").match(info)
             if match:
                 volume, chapter, minor, title = match.groups()
             else:

@@ -18,7 +18,7 @@ class WarosuThreadExtractor(Extractor):
     subcategory = "thread"
     root = "https://warosu.org"
     directory_fmt = ("{category}", "{board}", "{thread} - {title}")
-    filename_fmt = "{tim}-{filename}.{extension}"
+    filename_fmt = "{tim} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
     pattern = r"(?:https?://)?(?:www\.)?warosu\.org/([^/]+)/thread/(\d+)"
     example = "https://warosu.org/a/thread/12345"
@@ -28,7 +28,7 @@ class WarosuThreadExtractor(Extractor):
         self.board, self.thread = match.groups()
 
     def items(self):
-        url = "{}/{}/thread/{}".format(self.root, self.board, self.thread)
+        url = f"{self.root}/{self.board}/thread/{self.thread}"
         page = self.request(url).text
         data = self.metadata(page)
         posts = self.posts(page)
@@ -42,6 +42,9 @@ class WarosuThreadExtractor(Extractor):
             if "image" in post:
                 for key in ("w", "h", "no", "time", "tim"):
                     post[key] = text.parse_int(post[key])
+                dt = text.parse_timestamp(post["time"])
+                # avoid zero-padding 'day' with %d
+                post["now"] = dt.strftime(f"%a, %b {dt.day}, %Y %H:%M:%S")
                 post.update(data)
                 yield Message.Url, post["image"], post
 
@@ -64,7 +67,8 @@ class WarosuThreadExtractor(Extractor):
     def parse(self, post):
         """Build post object by extracting data from an HTML post"""
         data = self._extract_post(post)
-        if "<span class=fileinfo>" in post and self._extract_image(post, data):
+        if '<span class="fileinfo' in post and \
+                self._extract_image(post, data):
             part = data["image"].rpartition("/")[2]
             data["tim"], _, data["extension"] = part.partition(".")
             data["ext"] = "." + data["extension"]
@@ -76,24 +80,25 @@ class WarosuThreadExtractor(Extractor):
             "no"  : extr("id=p", ">"),
             "name": extr("class=postername>", "<").strip(),
             "time": extr("class=posttime title=", "000>"),
-            "now" : extr("", "<").strip(),
             "com" : text.unescape(text.remove_html(extr(
                 "<blockquote>", "</blockquote>").strip())),
         }
 
     def _extract_image(self, post, data):
         extr = text.extract_from(post)
-        data["fsize"] = extr("<span class=fileinfo> File: ", ", ")
+        extr('<span class="fileinfo">', "")
+        data["fsize"] = extr("File: ", ", ")
         data["w"] = extr("", "x")
         data["h"] = extr("", ", ")
         data["filename"] = text.unquote(extr(
             "", "<").rstrip().rpartition(".")[0])
         extr("<br>", "")
 
-        url = extr("<a href=", ">")
-        if url:
+        if url := extr("<a href=", ">"):
             if url[0] == "/":
                 data["image"] = self.root + url
+            elif "warosu." not in url:
+                return False
             else:
                 data["image"] = url
             return True

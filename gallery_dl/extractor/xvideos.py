@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -33,8 +33,7 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
 
     def __init__(self, match):
         self.user, self.gallery_id = match.groups()
-        url = "{}/profiles/{}/photos/{}".format(
-            self.root, self.user, self.gallery_id)
+        url = f"{self.root}/profiles/{self.user}/photos/{self.gallery_id}"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
@@ -70,7 +69,7 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
             return
 
         while len(results) % 500 == 0:
-            path = text.rextract(page, ' href="', '"', page.find(">Next</"))[0]
+            path = text.rextr(page, ' href="', '"', page.find(">Next</"))
             if not path:
                 break
             page = self.request(self.root + path).text
@@ -92,10 +91,10 @@ class XvideosUserExtractor(XvideosBase, Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
 
     def items(self):
-        url = "{}/profiles/{}".format(self.root, self.user)
+        url = f"{self.root}/profiles/{self.user}"
         page = self.request(url, notfound=self.subcategory).text
         data = util.json_loads(text.extr(
             page, "xv.conf=", ";</script>"))["data"]
@@ -116,7 +115,7 @@ class XvideosUserExtractor(XvideosBase, Extractor):
         ]
         galleries.sort(key=lambda x: x["id"])
 
+        base = f"{self.root}/profiles/{self.user}/photos/"
         for gallery in galleries:
-            url = "https://www.xvideos.com/profiles/{}/photos/{}".format(
-                self.user, gallery["id"])
+            url = f"{base}{gallery['id']}"
             yield Message.Queue, url, gallery

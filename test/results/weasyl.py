@@ -40,6 +40,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.weasyl.com/view/2031/a-wesley",
+    "#category": ("", "weasyl", "submission"),
+    "#class"   : weasyl.WeasylSubmissionExtractor,
+},
+
+{
     "#url"     : "https://www.weasyl.com/~tanidareal",
     "#category": ("", "weasyl", "submissions"),
     "#class"   : weasyl.WeasylSubmissionsExtractor,

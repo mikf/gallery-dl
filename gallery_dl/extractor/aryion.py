@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2023 Mike Fährmann
+# Copyright 2020-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -29,7 +29,7 @@ class AryionExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.user = match.group(1)
+        self.user = match[1]
         self.recursive = True
 
     def login(self):
@@ -61,8 +61,7 @@ class AryionExtractor(Extractor):
         data = self.metadata()
 
         for post_id in self.posts():
-            post = self._parse_post(post_id)
-            if post:
+            if post := self._parse_post(post_id):
                 if data:
                     post.update(data)
                 yield Message.Directory, post
@@ -108,10 +107,10 @@ class AryionExtractor(Extractor):
             pos = page.find("Next &gt;&gt;")
             if pos < 0:
                 return
-            url = self.root + text.rextract(page, "href='", "'", pos)[0]
+            url = self.root + text.rextr(page, "href='", "'", pos)
 
     def _parse_post(self, post_id):
-        url = "{}/g4/data.php?id={}".format(self.root, post_id)
+        url = f"{self.root}/g4/data.php?id={post_id}"
         with self.request(url, method="HEAD", fatal=False) as response:
 
             if response.status_code >= 400:
@@ -141,9 +140,9 @@ class AryionExtractor(Extractor):
             # fix 'Last-Modified' header
             lmod = headers["last-modified"]
             if lmod[22] != ":":
-                lmod = "{}:{} GMT".format(lmod[:22], lmod[22:24])
+                lmod = f"{lmod[:22]}:{lmod[22:24]} GMT"
 
-        post_url = "{}/g4/view/{}".format(self.root, post_id)
+        post_url = f"{self.root}/g4/view/{post_id}"
         extr = text.extract_from(self.request(post_url).text)
 
         title, _, artist = text.unescape(extr(
@@ -169,7 +168,7 @@ class AryionExtractor(Extractor):
                 "<p>", "</p>"), "", "")),
             "filename" : fname,
             "extension": ext,
-            "_mtime"   : lmod,
+            "_http_lastmodified": lmod,
         }
 
 
@@ -195,10 +194,10 @@ class AryionGalleryExtractor(AryionExtractor):
 
     def posts(self):
         if self.recursive:
-            url = "{}/g4/gallery/{}".format(self.root, self.user)
+            url = f"{self.root}/g4/gallery/{self.user}"
             return self._pagination_params(url)
         else:
-            url = "{}/g4/latest.php?name={}".format(self.root, self.user)
+            url = f"{self.root}/g4/latest.php?name={self.user}"
             return util.advance(self._pagination_next(url), self.offset)
 
 
@@ -212,9 +211,8 @@ class AryionFavoriteExtractor(AryionExtractor):
     example = "https://aryion.com/g4/favorites/USER"
 
     def posts(self):
-        url = "{}/g4/favorites/{}".format(self.root, self.user)
-        return self._pagination_params(
-            url, None, "class='gallery-item favorite' id='")
+        url = f"{self.root}/g4/favorites/{self.user}"
+        return self._pagination_params(url, None, "data-item-id='")
 
 
 class AryionTagExtractor(AryionExtractor):

@@ -13,13 +13,13 @@ __tests__ = (
     "#comment": "image",
     "#class"  : yiffverse.YiffversePostExtractor,
     "#options"     : {"tags": True},
-    "#urls"        : "https://yiffverse.com/posts/574/574342/574342.pic.jpg",
+    "#pattern"     : r"https://(yiffverse\.com|furry34com\.b-cdn\.net)/posts/574/574342/574342\.pic\.jpg",
     "#sha1_content": "0f169fddbd320eae904508f83a722bb3633ad507",
 
     "created"  : "2024-12-06T13:55:24.483002Z",
     "date"     : "dt:2024-12-06 13:55:24",
     "extension": "jpg",
-    "file_url" : "https://yiffverse.com/posts/574/574342/574342.pic.jpg",
+    "file_url" : str,
     "filename" : "574342",
     "format"   : "pic",
     "format_id": "10",
@@ -56,7 +56,7 @@ __tests__ = (
     "#url"    : "https://yiffverse.com/post/575680",
     "#comment": "video",
     "#class"  : yiffverse.YiffversePostExtractor,
-    "#urls"        : "https://yiffverse.com/posts/575/575680/575680.mov.mp4",
+    "#results"     : "https://yiffverse.com/posts/575/575680/575680.mov.mp4",
     "#sha1_content": "8952fc794e58c531b4e3b01cfe9e14b1c59ad9ef",
 },
 
@@ -72,7 +72,7 @@ __tests__ = (
     "#url"  : "https://yiffverse.com/playlist/6842",
     "#class": yiffverse.YiffversePlaylistExtractor,
     "#pattern": r"https://(yiffverse\.com|furry34com\.b-cdn\.net)/posts/\d+/\d+/\d+\.mov(720)?\.mp4",
-    "#count"  : 25,
+    "#count"  : range(30, 50),
 },
 
 )

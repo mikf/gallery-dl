@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,7 @@ import logging
 from . import version, config, option, output, extractor, job, util, exception
 
 __author__ = "Mike Fährmann"
-__copyright__ = "Copyright 2014-2023 Mike Fährmann"
+__copyright__ = "Copyright 2014-2025 Mike Fährmann"
 __license__ = "GPLv2"
 __maintainer__ = "Mike Fährmann"
 __email__ = "mike_faehrmann@web.de"
@@ -78,8 +78,7 @@ def main():
         output.configure_standard_streams()
 
         # signals
-        signals = config.get((), "signals-ignore")
-        if signals:
+        if signals := config.get((), "signals-ignore"):
             import signal
             if isinstance(signals, str):
                 signals = signals.split(",")
@@ -89,6 +88,10 @@ def main():
                     log.warning("signal '%s' is not defined", signal_name)
                 else:
                     signal.signal(signal_num, signal.SIG_IGN)
+
+        if signals := config.get((), "signals-actions"):
+            from . import actions
+            actions.parse_signals(signals)
 
         # enable ANSI escape sequences on Windows
         if util.WINDOWS and config.get(("output",), "ansi", output.COLORS):
@@ -118,14 +121,12 @@ def main():
                 util.compile_expression = util.compile_expression_defaultdict
 
         # format string separator
-        separator = config.get((), "format-separator")
-        if separator:
+        if separator := config.get((), "format-separator"):
             from . import formatter
             formatter._SEPARATOR = separator
 
         # eval globals
-        path = config.get((), "globals")
-        if path:
+        if path := config.get((), "globals"):
             util.GLOBALS.update(util.import_file(path).__dict__)
 
         # loglevels
@@ -137,13 +138,12 @@ def main():
             import platform
             import requests
 
-            extra = ""
             if util.EXECUTABLE:
-                extra = " - Executable ({})".format(version.__variant__)
+                extra = f" - Executable ({version.__variant__})"
+            elif git_head := util.git_head():
+                extra = " - Git HEAD: " + git_head
             else:
-                git_head = util.git_head()
-                if git_head:
-                    extra = " - Git HEAD: " + git_head
+                extra = ""
 
             log.debug("Version %s%s", __version__, extra)
             log.debug("Python %s - %s",
@@ -157,9 +157,39 @@ def main():
 
             log.debug("Configuration Files %s", config._files)
 
+        if args.clear_cache:
+            from . import cache
+            log = logging.getLogger("cache")
+            cnt = cache.clear(args.clear_cache)
+
+            if cnt is None:
+                log.error("Database file not available")
+                return 1
+
+            log.info("Deleted %d entr%s from '%s'",
+                     cnt, "y" if cnt == 1 else "ies", cache._path())
+            return 0
+
+        if args.config:
+            if args.config == "init":
+                return config.initialize()
+            elif args.config == "status":
+                return config.status()
+            else:
+                return config.open_extern()
+
         if args.print_traffic:
             import requests
             requests.packages.urllib3.connection.HTTPConnection.debuglevel = 1
+
+        if args.update:
+            from . import update
+            extr = update.UpdateExtractor.from_url("update:" + args.update)
+            ujob = update.UpdateJob(extr)
+            return ujob.run()
+
+        # category renaming
+        config.remap_categories()
 
         # extractor modules
         modules = config.get(("extractor",), "modules")
@@ -199,13 +229,7 @@ def main():
             else:
                 extractor._module_iter = iter(modules[0])
 
-        if args.update:
-            from . import update
-            extr = update.UpdateExtractor.from_url("update:" + args.update)
-            ujob = update.UpdateJob(extr)
-            return ujob.run()
-
-        elif args.list_modules:
+        if args.list_modules:
             extractor.modules.append("")
             sys.stdout.write("\n".join(extractor.modules))
 
@@ -228,31 +252,8 @@ def main():
                     extr.example,
                 ))
 
-        elif args.clear_cache:
-            from . import cache
-            log = logging.getLogger("cache")
-            cnt = cache.clear(args.clear_cache)
-
-            if cnt is None:
-                log.error("Database file not available")
-                return 1
-            else:
-                log.info(
-                    "Deleted %d %s from '%s'",
-                    cnt, "entry" if cnt == 1 else "entries", cache._path(),
-                )
-
-        elif args.config:
-            if args.config == "init":
-                return config.initialize()
-            elif args.config == "status":
-                return config.status()
-            else:
-                return config.open_extern()
-
         else:
-            input_files = config.get((), "input-files")
-            if input_files:
+            if input_files := config.get((), "input-files"):
                 for input_file in input_files:
                     if isinstance(input_file, str):
                         input_file = (input_file, None)
@@ -271,8 +272,7 @@ def main():
                 jobtype = job.UrlJob
                 jobtype.maxdepth = args.list_urls
                 if config.get(("output",), "fallback", True):
-                    jobtype.handle_url = \
-                        staticmethod(jobtype.handle_url_fallback)
+                    jobtype.handle_url = jobtype.handle_url_fallback
             elif args.dump_json:
                 jobtype = job.DataJob
                 jobtype.resolve = args.dump_json - 1
@@ -283,17 +283,15 @@ def main():
             input_manager.log = input_log = logging.getLogger("inputfile")
 
             # unsupported file logging handler
-            handler = output.setup_logging_handler(
-                "unsupportedfile", fmt="{message}")
-            if handler:
+            if handler := output.setup_logging_handler(
+                    "unsupportedfile", fmt="{message}"):
                 ulog = job.Job.ulog = logging.getLogger("unsupported")
                 ulog.addHandler(handler)
                 ulog.propagate = False
 
             # error file logging handler
-            handler = output.setup_logging_handler(
-                "errorfile", fmt="{message}", mode="a")
-            if handler:
+            if handler := output.setup_logging_handler(
+                    "errorfile", fmt="{message}", mode="a"):
                 elog = input_manager.err = logging.getLogger("errorfile")
                 elog.addHandler(handler)
                 elog.propagate = False
@@ -315,6 +313,24 @@ def main():
                     args.loglevel < logging.ERROR:
                 input_manager.progress(pformat)
 
+            if catmap := config.interpolate(("extractor",), "category-map"):
+                if catmap == "compat":
+                    catmap = {
+                        "coomer"       : "coomerparty",
+                        "kemono"       : "kemonoparty",
+                        "schalenetwork": "koharu",
+                        "naver-blog"   : "naver",
+                        "naver-chzzk"  : "chzzk",
+                        "naver-webtoon": "naverwebtoon",
+                        "pixiv-novel"  : "pixiv",
+                        "pixiv-novel:novel"   : ("pixiv", "novel"),
+                        "pixiv-novel:user"    : ("pixiv", "novel-user"),
+                        "pixiv-novel:series"  : ("pixiv", "novel-series"),
+                        "pixiv-novel:bookmark": ("pixiv", "novel-bookmark"),
+                    }
+                from .extractor import common
+                common.CATEGORY_MAP = catmap
+
             # process input URLs
             retval = 0
             for url in input_manager:
@@ -335,13 +351,11 @@ def main():
                     else:
                         input_manager.success()
 
-                except exception.StopExtraction:
-                    pass
-                except exception.TerminateExtraction:
-                    pass
                 except exception.RestartExtraction:
                     log.debug("Restarting '%s'", url)
                     continue
+                except exception.ControlException:
+                    pass
                 except exception.NoExtractorError:
                     log.error("Unsupported URL '%s'", url)
                     retval |= 64
@@ -462,16 +476,15 @@ class InputManager():
                 key, sep, value = line.partition("=")
                 if not sep:
                     raise exception.InputFileError(
-                        "Invalid KEY=VALUE pair '%s' on line %s in %s",
-                        line, n+1, path)
+                        f"Invalid KEY=VALUE pair '{line}' "
+                        f"on line {n+1} in {path}")
 
                 try:
                     value = util.json_loads(value.strip())
                 except ValueError as exc:
                     self.log.debug("%s: %s", exc.__class__.__name__, exc)
                     raise exception.InputFileError(
-                        "Unable to parse '%s' on line %s in %s",
-                        value, n+1, path)
+                        f"Unable to parse '{value}' on line {n+1} in {path}")
 
                 key = key.strip().split(".")
                 conf.append((key[:-1], key[-1], value))
@@ -480,8 +493,7 @@ class InputManager():
                 # url
                 if " #" in line or "\t#" in line:
                     if strip_comment is None:
-                        import re
-                        strip_comment = re.compile(r"\s+#.*").sub
+                        strip_comment = util.re(r"\s+#.*").sub
                     line = strip_comment("", line)
                 if gconf or lconf:
                     url = ExtendedUrl(line, gconf, lconf)
@@ -536,13 +548,11 @@ class InputManager():
                 "Unable to update '%s' (%s: %s)",
                 path, exc.__class__.__name__, exc)
 
-    @staticmethod
-    def _action_comment(lines, indicies):
+    def _action_comment(self, lines, indicies):
         for i in indicies:
             lines[i] = "# " + lines[i]
 
-    @staticmethod
-    def _action_delete(lines, indicies):
+    def _action_delete(self, lines, indicies):
         for i in indicies:
             lines[i] = ""
 

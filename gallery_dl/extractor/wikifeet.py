@@ -21,11 +21,11 @@ class WikifeetGalleryExtractor(GalleryExtractor):
     example = "https://www.wikifeet.com/CELEB"
 
     def __init__(self, match):
-        self.root = text.root_from_url(match.group(0))
+        self.root = text.root_from_url(match[0])
         if "wikifeetx.com" in self.root:
             self.category = "wikifeetx"
         self.type = "men" if "://men." in self.root else "women"
-        self.celeb = match.group(1)
+        self.celeb = match[1]
         GalleryExtractor.__init__(self, match, self.root + "/" + self.celeb)
 
     def metadata(self, page):
@@ -33,12 +33,12 @@ class WikifeetGalleryExtractor(GalleryExtractor):
         return {
             "celeb"     : self.celeb,
             "type"      : self.type,
-            "rating"    : text.parse_float(extr('"ratingValue": "', '"')),
-            "celebrity" : text.unescape(extr("times'>", "</h1>")),
-            "shoesize"  : text.remove_html(extr("Shoe Size:", "edit")),
-            "birthplace": text.remove_html(extr("Birthplace:", "edit")),
-            "birthday"  : text.parse_datetime(text.remove_html(
-                extr("Birth Date:", "edit")), "%Y-%m-%d"),
+            "birthplace": text.unescape(extr('"bplace":"', '"')),
+            "birthday"  : text.parse_datetime(text.unescape(
+                extr('"bdate":"', '"'))[:10], "%Y-%m-%d"),
+            "shoesize"  : text.unescape(extr('"ssize":', ',')),
+            "rating"    : text.parse_float(extr('"score":', ',')),
+            "celebrity" : text.unescape(extr('"cname":"', '"')),
         }
 
     def images(self, page):
@@ -50,9 +50,11 @@ class WikifeetGalleryExtractor(GalleryExtractor):
             "S": "Soles",
             "B": "Barefoot",
         }
-        ufmt = "https://pics.wikifeet.com/" + self.celeb + "-Feet-{}.jpg"
+
+        gallery = text.extr(page, '"gallery":[', '],')
+        base = f"https://pics.wikifeet.com/{self.celeb}-Feet-"
         return [
-            (ufmt.format(data["pid"]), {
+            (f"{base}{data['pid']}.jpg", {
                 "pid"   : data["pid"],
                 "width" : data["pw"],
                 "height": data["ph"],
@@ -61,5 +63,5 @@ class WikifeetGalleryExtractor(GalleryExtractor):
                     for tag in data["tags"] if tag in tagmap
                 ],
             })
-            for data in util.json_loads(text.extr(page, "['gdata'] = ", ";"))
+            for data in util.json_loads(f"[{gallery}]")
         ]

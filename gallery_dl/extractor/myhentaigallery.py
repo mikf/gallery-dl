@@ -20,12 +20,12 @@ class MyhentaigalleryGalleryExtractor(GalleryExtractor):
     example = "https://myhentaigallery.com/g/12345"
 
     def __init__(self, match):
-        self.gallery_id = match.group(1)
-        url = "{}/g/{}".format(self.root, self.gallery_id)
+        self.gallery_id = match[1]
+        url = f"{self.root}/g/{self.gallery_id}"
         GalleryExtractor.__init__(self, match, url)
 
     def _init(self):
-        self.session.headers["Referer"] = self.gallery_url
+        self.session.headers["Referer"] = self.page_url
 
     def metadata(self, page):
         extr = text.extract_from(page)

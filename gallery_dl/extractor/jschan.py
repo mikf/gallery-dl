@@ -33,27 +33,19 @@ class JschanThreadExtractor(JschanExtractor):
     pattern = BASE_PATTERN + r"/([^/?#]+)/thread/(\d+)\.html"
     example = "https://94chan.org/a/thread/12345.html"
 
-    def __init__(self, match):
-        JschanExtractor.__init__(self, match)
-        index = match.lastindex
-        self.board = match.group(index-1)
-        self.thread = match.group(index)
-
     def items(self):
-        url = "{}/{}/thread/{}.json".format(
-            self.root, self.board, self.thread)
-        thread = self.request(url).json()
+        url = f"{self.root}/{self.groups[-2]}/thread/{self.groups[-1]}.json"
+        thread = self.request_json(url)
         thread["threadId"] = thread["postId"]
         posts = thread.pop("replies", ())
 
         yield Message.Directory, thread
         for post in itertools.chain((thread,), posts):
-            files = post.pop("files", ())
-            if files:
+            if files := post.pop("files", ()):
                 thread.update(post)
                 thread["count"] = len(files)
                 for num, file in enumerate(files):
-                    url = self.root + "/file/" + file["filename"]
+                    url = f"{self.root}/file/{file['filename']}"
                     file.update(thread)
                     file["num"] = num
                     file["siteFilename"] = file["filename"]
@@ -68,14 +60,10 @@ class JschanBoardExtractor(JschanExtractor):
                r"(?:/index\.html|/catalog\.html|/\d+\.html|/?$)")
     example = "https://94chan.org/a/"
 
-    def __init__(self, match):
-        JschanExtractor.__init__(self, match)
-        self.board = match.group(match.lastindex)
-
     def items(self):
-        url = "{}/{}/catalog.json".format(self.root, self.board)
-        for thread in self.request(url).json():
-            url = "{}/{}/thread/{}.html".format(
-                self.root, self.board, thread["postId"])
+        board = self.groups[-1]
+        url = f"{self.root}/{board}/catalog.json"
+        for thread in self.request_json(url):
+            url = f"{self.root}/{board}/thread/{thread['postId']}.html"
             thread["_extractor"] = JschanThreadExtractor
             yield Message.Queue, url, thread

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,12 +23,12 @@ class ImagehostImageExtractor(Extractor):
     _params = None
     _cookies = None
     _encoding = None
+    _validate = None
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.page_url = "http{}://{}".format(
-            "s" if self._https else "", match.group(1))
-        self.token = match.group(2)
+        self.page_url = f"http{'s' if self._https else ''}://{match[1]}"
+        self.token = match[2]
 
         if self._params == "simple":
             self._params = {
@@ -57,6 +57,8 @@ class ImagehostImageExtractor(Extractor):
         data.update(self.metadata(page))
         if self._https and url.startswith("http:"):
             url = "https:" + url[5:]
+        if self._validate is not None:
+            data["_http_validate"] = self._validate
 
         yield Message.Directory, data
         yield Message.Url, url, data
@@ -164,6 +166,14 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
         filename, pos = text.extract(page, 'alt="', '"', pos)
         return url, text.unescape(filename)
 
+    def _validate(self, response):
+        hget = response.headers.get
+        return not (
+            hget("content-length") == "14396" and
+            hget("content-type") == "image/jpeg" and
+            hget("last-modified") == "Mon, 04 May 2020 07:19:52 GMT"
+        )
+
 
 class ImagetwistImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagetwist.com"""
@@ -198,6 +208,26 @@ class ImagetwistGalleryExtractor(ImagehostImageExtractor):
         gallery = text.extr(page, 'class="gallerys', "</div")
         for path in text.extract_iter(gallery, ' href="', '"'):
             yield Message.Queue, root + path, data
+
+
+class ImgadultImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgadult.com"""
+    category = "imgadult"
+    _cookies = {"img_i_d": "1"}
+    pattern = r"(?:https?://)?((?:www\.)?imgadult\.com/img-([0-9a-f]+)\.html)"
+    example = "https://imgadult.com/img-0123456789abc.html"
+
+    def get_info(self, page):
+        url , pos = text.extract(page, "' src='", "'")
+        name, pos = text.extract(page, "alt='", "'", pos)
+
+        if name:
+            name, _, rhs = name.rpartition(" image hosted at ImgAdult.com")
+            if not name:
+                name = rhs
+            name = text.unescape(name)
+
+        return url, name
 
 
 class ImgspiceImageExtractor(ImagehostImageExtractor):
@@ -284,6 +314,34 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
     def get_info(self, page):
         url = text.extract(page, 'src="', '"', page.index("<img "))[0]
         return url, url
+
+
+class TurboimagehostGalleryExtractor(ImagehostImageExtractor):
+    """Extractor for image galleries from turboimagehost.com"""
+    category = "turboimagehost"
+    subcategory = "gallery"
+    pattern = (r"(?:https?://)?((?:www\.)?turboimagehost\.com"
+               r"/album/(\d+)/([^/?#]*))")
+    example = "https://www.turboimagehost.com/album/12345/GALLERY_NAME"
+
+    def items(self):
+        data = {"_extractor": TurboimagehostImageExtractor}
+        params = {"p": 1}
+
+        while True:
+            page = self.request(self.page_url, params=params).text
+
+            if params["p"] == 1 and \
+                    "Requested gallery don`t exist on our website." in page:
+                raise exception.NotFoundError("gallery")
+
+            thumb_url = None
+            for thumb_url in text.extract_iter(page, '"><a href="', '"'):
+                yield Message.Queue, thumb_url, data
+            if thumb_url is None:
+                return
+
+            params["p"] += 1
 
 
 class ViprImageExtractor(ImagehostImageExtractor):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -12,7 +12,7 @@ from .booru import BooruExtractor
 from .. import text, exception
 import operator
 
-BASE_PATTERN = r"(?:https?://)?twibooru\.org"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?twibooru\.org"
 
 
 class TwibooruExtractor(BooruExtractor):
@@ -36,8 +36,7 @@ class TwibooruExtractor(BooruExtractor):
             return post["view_url"].rpartition(".")[0] + ".svg"
         return post["view_url"]
 
-    @staticmethod
-    def _prepare(post):
+    def _prepare(self, post):
         post["date"] = text.parse_datetime(
             post["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
@@ -55,7 +54,7 @@ class TwibooruPostExtractor(TwibooruExtractor):
 
     def __init__(self, match):
         TwibooruExtractor.__init__(self, match)
-        self.post_id = match.group(1)
+        self.post_id = match[1]
 
     def posts(self):
         return (self.api.post(self.post_id),)
@@ -104,7 +103,7 @@ class TwibooruGalleryExtractor(TwibooruExtractor):
 
     def __init__(self, match):
         TwibooruExtractor.__init__(self, match)
-        self.gallery_id = match.group(1)
+        self.gallery_id = match[1]
 
     def metadata(self):
         return {"gallery": self.api.gallery(self.gallery_id)}
@@ -155,18 +154,15 @@ class TwibooruAPI():
 
             # error
             self.extractor.log.debug(response.content)
-            raise exception.StopExtraction(
-                "%s %s", response.status_code, response.reason)
+            raise exception.HttpError("", response)
 
     def _pagination(self, endpoint, params):
         extr = self.extractor
 
-        api_key = extr.config("api-key")
-        if api_key:
+        if api_key := extr.config("api-key"):
             params["key"] = api_key
 
-        filter_id = extr.config("filter")
-        if filter_id:
+        if filter_id := extr.config("filter"):
             params["filter_id"] = filter_id
         elif not api_key:
             params["filter_id"] = "2"

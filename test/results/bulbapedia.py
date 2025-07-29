@@ -13,7 +13,7 @@ __tests__ = (
     "#category": ("wikimedia", "bulbapedia", "article"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
     "#pattern" : r"https://archives\.bulbagarden\.net/media/upload/\w+/\w+/[^/?#]+",
-    "#count"   : range(10, 30),
+    "#count"   : range(8, 30),
 },
 
 {

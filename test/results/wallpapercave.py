@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://wallpapercave.com/w/wp10270355",
     "#category": ("", "wallpapercave", "image"),
     "#class"   : wallpapercave.WallpapercaveImageExtractor,
-    "#urls"        : "https://wallpapercave.com/download/sekai-saikou-no-ansatsusha-isekai-kizoku-ni-tensei-suru-wallpapers-wp10270355",
+    "#results"     : "https://wallpapercave.com/download/sekai-saikou-no-ansatsusha-isekai-kizoku-ni-tensei-suru-wallpapers-wp10270355",
     "#sha1_content": "58b088aaa1cf1a60e347015019eb0c5a22b263a6",
 },
 
@@ -22,12 +22,12 @@ __tests__ = (
     "#category": ("", "wallpapercave", "image"),
     "#class"   : wallpapercave.WallpapercaveImageExtractor,
     "#archive" : False,
-    "#urls"    : [
+    "#results" : (
         "https://wallpapercave.com/wp/wp13775438.jpg",
         "https://wallpapercave.com/wp/wp13775439.jpg",
         "https://wallpapercave.com/wp/wp13775440.jpg",
         "https://wallpapercave.com/wp/wp13775441.jpg",
-    ],
+    ),
 },
 
 )

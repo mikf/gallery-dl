@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .booru import BooruExtractor
 from .. import text, exception
-import operator
 
 
 class PhilomenaExtractor(BooruExtractor):
@@ -24,17 +23,21 @@ class PhilomenaExtractor(BooruExtractor):
 
     def _init(self):
         self.api = PhilomenaAPI(self)
-        if not self.config("svg", True):
-            self._file_url = operator.itemgetter("view_url")
+        self.svg = self.config("svg", True)
 
     def _file_url(self, post):
-        if post["format"] == "svg":
-            return post["view_url"].rpartition(".")[0] + ".svg"
-        return post["view_url"]
+        try:
+            url = post["representations"]["full"]
+        except Exception:
+            url = post["view_url"]
 
-    @staticmethod
-    def _prepare(post):
-        post["date"] = text.parse_datetime(post["created_at"])
+        if self.svg and post["format"] == "svg":
+            return url.rpartition(".")[0] + ".svg"
+        return url
+
+    def _prepare(self, post):
+        post["date"] = text.parse_datetime(
+            post["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
 
 
 BASE_PATTERN = PhilomenaExtractor.update({
@@ -62,12 +65,8 @@ class PhilomenaPostExtractor(PhilomenaExtractor):
     pattern = BASE_PATTERN + r"/(?:images/)?(\d+)"
     example = "https://derpibooru.org/images/12345"
 
-    def __init__(self, match):
-        PhilomenaExtractor.__init__(self, match)
-        self.image_id = match.group(match.lastindex)
-
     def posts(self):
-        return (self.api.image(self.image_id),)
+        return (self.api.image(self.groups[-1]),)
 
 
 class PhilomenaSearchExtractor(PhilomenaExtractor):
@@ -79,9 +78,9 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
 
     def __init__(self, match):
         PhilomenaExtractor.__init__(self, match)
-        groups = match.groups()
-        if groups[-1]:
-            q = groups[-1].replace("+", " ")
+
+        if q := self.groups[-1]:
+            q = q.replace("+", " ")
             for old, new in (
                 ("-colon-"  , ":"),
                 ("-dash-"   , "-"),
@@ -94,7 +93,7 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
                     q = q.replace(old, new)
             self.params = {"q": text.unquote(text.unquote(q))}
         else:
-            self.params = text.parse_query(groups[-2])
+            self.params = text.parse_query(self.groups[-2])
 
     def metadata(self):
         return {"search_tags": self.params.get("q", "")}
@@ -111,18 +110,14 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
     pattern = BASE_PATTERN + r"/galleries/(\d+)"
     example = "https://derpibooru.org/galleries/12345"
 
-    def __init__(self, match):
-        PhilomenaExtractor.__init__(self, match)
-        self.gallery_id = match.group(match.lastindex)
-
     def metadata(self):
         try:
-            return {"gallery": self.api.gallery(self.gallery_id)}
+            return {"gallery": self.api.gallery(self.groups[-1])}
         except IndexError:
             raise exception.NotFoundError("gallery")
 
     def posts(self):
-        gallery_id = "gallery_id:" + self.gallery_id
+        gallery_id = f"gallery_id:{self.groups[-1]}"
         params = {"sd": "desc", "sf": gallery_id, "q": gallery_id}
         return self.api.search(params)
 
@@ -165,18 +160,15 @@ class PhilomenaAPI():
 
             # error
             self.extractor.log.debug(response.content)
-            raise exception.StopExtraction(
-                "%s %s", response.status_code, response.reason)
+            raise exception.HttpError("", response)
 
     def _pagination(self, endpoint, params):
         extr = self.extractor
 
-        api_key = extr.config("api-key")
-        if api_key:
+        if api_key := extr.config("api-key"):
             params["key"] = api_key
 
-        filter_id = extr.config("filter")
-        if filter_id:
+        if filter_id := extr.config("filter"):
             params["filter_id"] = filter_id
         elif not api_key:
             params["filter_id"] = extr.config_instance("filter_id") or "2"

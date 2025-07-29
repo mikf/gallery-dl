@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2023 Mike Fährmann
+# Copyright 2016-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text, util
-import re
 
 
 class HentaihereBase():
@@ -27,30 +26,30 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
 
     def __init__(self, match):
         self.manga_id, self.chapter = match.groups()
-        url = "{}/m/S{}/{}/1".format(self.root, self.manga_id, self.chapter)
+        url = f"{self.root}/m/S{self.manga_id}/{self.chapter}/1"
         ChapterExtractor.__init__(self, match, url)
 
     def metadata(self, page):
         title = text.extr(page, "<title>", "</title>")
         chapter_id = text.extr(page, 'report/C', '"')
         chapter, sep, minor = self.chapter.partition(".")
-        pattern = r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by (.+) at "
-        match = re.match(pattern, title)
+        match = util.re(
+            r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by "
+            r"(.+) at ").match(title)
         return {
-            "manga": match.group(1),
+            "manga": match[1],
             "manga_id": text.parse_int(self.manga_id),
             "chapter": text.parse_int(chapter),
             "chapter_minor": sep + minor,
             "chapter_id": text.parse_int(chapter_id),
-            "type": match.group(2),
-            "title": match.group(3),
-            "author": match.group(4),
+            "type": match[2],
+            "title": match[3],
+            "author": match[4],
             "lang": "en",
             "language": "English",
         }
 
-    @staticmethod
-    def images(page):
+    def images(self, page):
         images = text.extr(page, "var rff_imageList = ", ";")
         return [
             ("https://hentaicdn.com/hentai" + part, None)
@@ -73,7 +72,7 @@ class HentaihereMangaExtractor(HentaihereBase, MangaExtractor):
         mtype, pos = text.extract(
             page, '<span class="mngType text-danger">[', ']</span>', pos)
         manga_id = text.parse_int(
-            self.manga_url.rstrip("/").rpartition("/")[2][1:])
+            self.page_url.rstrip("/").rpartition("/")[2][1:])
 
         while True:
             marker, pos = text.extract(

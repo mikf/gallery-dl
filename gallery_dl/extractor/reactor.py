@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,7 +23,7 @@ class ReactorExtractor(BaseExtractor):
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
 
-        url = text.ensure_http_scheme(match.group(0), "http://")
+        url = text.ensure_http_scheme(match[0], "http://")
         pos = url.index("/", 10)
         self.root = url[:pos]
         self.path = url[pos:]
@@ -176,7 +176,7 @@ class ReactorTagExtractor(ReactorExtractor):
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
-        self.tag = match.group(match.lastindex)
+        self.tag = self.groups[-1]
 
     def metadata(self):
         return {"search_tags": text.unescape(self.tag).replace("+", " ")}
@@ -192,7 +192,7 @@ class ReactorSearchExtractor(ReactorExtractor):
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
-        self.tag = match.group(match.lastindex)
+        self.tag = self.groups[-1]
 
     def metadata(self):
         return {"search_tags": text.unescape(self.tag).replace("+", " ")}
@@ -207,7 +207,7 @@ class ReactorUserExtractor(ReactorExtractor):
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
-        self.user = match.group(match.lastindex)
+        self.user = self.groups[-1]
 
     def metadata(self):
         return {"user": text.unescape(self.user).replace("+", " ")}
@@ -221,7 +221,7 @@ class ReactorPostExtractor(ReactorExtractor):
 
     def __init__(self, match):
         ReactorExtractor.__init__(self, match)
-        self.post_id = match.group(match.lastindex)
+        self.post_id = self.groups[-1]
 
     def items(self):
         post = self.request(self.root + self.path).text

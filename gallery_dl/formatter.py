@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -28,21 +28,17 @@ def parse(format_string, default=NONE, fmt=format):
     except KeyError:
         pass
 
-    cls = StringFormatter
-    if format_string.startswith("\f"):
+    if format_string and format_string[0] == "\f":
         kind, _, format_string = format_string.partition(" ")
-        kind = kind[1:]
-
-        if kind == "T":
-            cls = TemplateFormatter
-        elif kind == "TF":
-            cls = TemplateFStringFormatter
-        elif kind == "E":
-            cls = ExpressionFormatter
-        elif kind == "M":
-            cls = ModuleFormatter
-        elif kind == "F":
-            cls = FStringFormatter
+        try:
+            cls = _FORMATTERS[kind[1:]]
+        except KeyError:
+            import logging
+            logging.getLogger("formatter").error(
+                "Invalid formatter type '%s'", kind[1:])
+            cls = StringFormatter
+    else:
+        cls = StringFormatter
 
     formatter = _CACHE[key] = cls(format_string, default, fmt)
     return formatter
@@ -208,6 +204,48 @@ class ExpressionFormatter():
         self.format_map = util.compile_expression(expression)
 
 
+class FStringFormatter():
+    """Generate text by evaluating an f-string literal"""
+
+    def __init__(self, fstring, default=NONE, fmt=None):
+        self.format_map = util.compile_expression(f'f"""{fstring}"""')
+
+
+def _init_jinja():
+    import jinja2
+    from . import config
+
+    if opts := config.get((), "jinja"):
+        JinjaFormatter.env = env = jinja2.Environment(
+            **opts.get("environment") or {})
+    else:
+        JinjaFormatter.env = jinja2.Environment()
+        return
+
+    if policies := opts.get("policies"):
+        env.policies.update(policies)
+
+    if path := opts.get("filters"):
+        module = util.import_file(path).__dict__
+        env.filters.update(
+            module["__filters__"] if "__filters__" in module else module)
+
+    if path := opts.get("tests"):
+        module = util.import_file(path).__dict__
+        env.tests.update(
+            module["__tests__"] if "__tests__" in module else module)
+
+
+class JinjaFormatter():
+    """Generate text by evaluating a Jinja template string"""
+    env = None
+
+    def __init__(self, source, default=NONE, fmt=None):
+        if self.env is None:
+            _init_jinja()
+        self.format_map = self.env.from_string(source).render
+
+
 class ModuleFormatter():
     """Generate text by calling an external function"""
 
@@ -215,13 +253,6 @@ class ModuleFormatter():
         module_name, _, function_name = function_spec.rpartition(":")
         module = util.import_file(module_name)
         self.format_map = getattr(module, function_name)
-
-
-class FStringFormatter():
-    """Generate text by evaluating an f-string literal"""
-
-    def __init__(self, fstring, default=NONE, fmt=None):
-        self.format_map = util.compile_expression('f"""' + fstring + '"""')
 
 
 class TemplateFormatter(StringFormatter):
@@ -240,6 +271,15 @@ class TemplateFStringFormatter(FStringFormatter):
         with open(util.expand_path(path)) as fp:
             fstring = fp.read()
         FStringFormatter.__init__(self, fstring, default, fmt)
+
+
+class TemplateJinjaFormatter(JinjaFormatter):
+    """Generate text by evaluating a Jinja template"""
+
+    def __init__(self, path, default=NONE, fmt=None):
+        with open(util.expand_path(path)) as fp:
+            source = fp.read()
+        JinjaFormatter.__init__(self, source, default, fmt)
 
 
 def parse_field_name(field_name):
@@ -302,7 +342,7 @@ def _parse_optional(format_spec, default):
     fmt = _build_format_func(format_spec, default)
 
     def optional(obj):
-        return before + fmt(obj) + after if obj else ""
+        return f"{before}{fmt(obj)}{after}" if obj else ""
     return optional
 
 
@@ -385,6 +425,27 @@ def _parse_join(format_spec, default):
     return apply_join
 
 
+def _parse_map(format_spec, default):
+    key, _, format_spec = format_spec.partition(_SEPARATOR)
+    key = key[1:]
+    fmt = _build_format_func(format_spec, default)
+
+    def map_(obj):
+        if not obj or isinstance(obj, str):
+            return fmt(obj)
+
+        results = []
+        for item in obj:
+            if isinstance(item, dict):
+                value = item.get(key, ...)
+                results.append(default if value is ... else value)
+            else:
+                results.append(item)
+        return fmt(results)
+
+    return map_
+
+
 def _parse_replace(format_spec, default):
     old, new, format_spec = format_spec.split(_SEPARATOR, 2)
     old = old[1:]
@@ -463,8 +524,7 @@ class Literal():
     # __getattr__, __getattribute__, and __class_getitem__
     # are all slower than regular __getitem__
 
-    @staticmethod
-    def __getitem__(key):
+    def __getitem__(self, key):
         return key
 
 
@@ -472,6 +532,18 @@ _literal = Literal()
 
 _CACHE = {}
 _SEPARATOR = "/"
+_FORMATTERS = {
+    "E" : ExpressionFormatter,
+    "F" : FStringFormatter,
+    "J" : JinjaFormatter,
+    "M" : ModuleFormatter,
+    "S" : StringFormatter,
+    "T" : TemplateFormatter,
+    "TF": TemplateFStringFormatter,
+    "FT": TemplateFStringFormatter,
+    "TJ": TemplateJinjaFormatter,
+    "JT": TemplateJinjaFormatter,
+}
 _GLOBALS = {
     "_env": lambda: os.environ,
     "_lit": lambda: _literal,
@@ -485,16 +557,21 @@ _CONVERSIONS = {
     "C": string.capwords,
     "j": util.json_dumps,
     "t": str.strip,
-    "L": len,
+    "n": len,
+    "L": util.code_to_language,
     "T": util.datetime_to_timestamp_string,
     "d": text.parse_timestamp,
+    "D": util.to_datetime,
     "U": text.unescape,
     "H": lambda s: text.unescape(text.remove_html(s)),
     "g": text.slugify,
+    "W": text.sanitize_whitespace,
     "S": util.to_string,
     "s": str,
     "r": repr,
     "a": ascii,
+    "i": int,
+    "f": float,
 }
 _FORMAT_SPECIFIERS = {
     "?": _parse_optional,
@@ -504,6 +581,7 @@ _FORMAT_SPECIFIERS = {
     "D": _parse_datetime,
     "J": _parse_join,
     "L": _parse_maxlen,
+    "M": _parse_map,
     "O": _parse_offset,
     "R": _parse_replace,
     "S": _parse_sort,

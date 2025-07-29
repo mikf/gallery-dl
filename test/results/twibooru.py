@@ -21,7 +21,7 @@ __tests__ = (
     "created_at"      : "2020-07-08T22:26:55.743Z",
     "date"            : "dt:2020-07-08 22:26:55",
     "description"     : "Why have I done this?",
-    "downvotes"       : 0,
+    "downvotes"       : range(1, 10),
     "duration"        : 0.0,
     "faves"           : int,
     "first_seen_at"   : "2020-07-08T22:26:55.743Z",
@@ -30,7 +30,6 @@ __tests__ = (
     "hidden_from_users": False,
     "id"              : 1,
     "intensities"     : dict,
-    "locations"       : [],
     "media_type"      : "image",
     "mime_type"       : "image/png",
     "name"            : "1676547__safe_artist-colon-scraggleman_oc_oc-colon-floor+bored_oc+only_bags+under+eyes_bust_earth+pony_female_goggles_helmet_mare_meme_neet_neet+home+g.png",
@@ -40,7 +39,7 @@ __tests__ = (
     "score"           : int,
     "sha512_hash"     : "8b4c00d2eff52d51ad9647e14738944ab306fd1d8e1bf634fbb181b32f44070aa588938e26c4eb072b1eb61489aaf3062fb644a76c79f936b97723a2c3e0e5d3",
     "size"            : 70910,
-    "source_url"      : "",
+    "source_url"      : str,
     "tag_ids"         : list,
     "tags"            : list,
     "thumbnails_generated": True,
@@ -49,6 +48,14 @@ __tests__ = (
     "view_url"        : "https://cdn.twibooru.org/img/2020/7/8/1/full.png",
     "width"           : 576,
     "wilson_score"    : float,
+    "locations": [
+        {
+            "id_at_location": 1676547,
+            "location": "derpibooru",
+            "url_at_location": "https://derpibooru.org/images/1676547",
+        },
+    ],
+
 },
 
 {
@@ -56,7 +63,7 @@ __tests__ = (
     "#comment" : "svg (#5643)",
     "#category": ("philomena", "twibooru", "post"),
     "#class"   : twibooru.TwibooruPostExtractor,
-    "#urls"        : "https://cdn.twibooru.org/img/2020/7/13/523964/full.svg",
+    "#results"     : "https://cdn.twibooru.org/img/2020/7/13/523964/full.svg",
     "#sha1_content": "15590fe151ff65ef767b409e46dfdf708b339f4d",
 
     "extension": "svg",
@@ -69,7 +76,7 @@ __tests__ = (
     "#category": ("philomena", "twibooru", "post"),
     "#class"   : twibooru.TwibooruPostExtractor,
     "#options" : {"svg": False},
-    "#urls"        : "https://cdn.twibooru.org/img/2020/7/13/523964/full.png",
+    "#results"     : "https://cdn.twibooru.org/img/2020/7/13/523964/full.png",
     "#sha1_content": "f8ff78e6a929a024f8529199f9a600617898d03c",
 
     "extension": "png",
@@ -90,6 +97,11 @@ __tests__ = (
     "#class"   : twibooru.TwibooruSearchExtractor,
     "#range"   : "1-20",
     "#count"   : 20,
+},
+
+{
+    "#url"     : "https://www.twibooru.org/tags/cute",
+    "#class"   : twibooru.TwibooruSearchExtractor,
 },
 
 {

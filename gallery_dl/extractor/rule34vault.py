@@ -30,8 +30,8 @@ class Rule34vaultExtractor(BooruExtractor):
     def _file_url(self, post):
         post_id = post["id"]
         extension = "jpg" if post["type"] == 0 else "mp4"
-        post["file_url"] = url = "{}/posts/{}/{}/{}.{}".format(
-            self.root_cdn, post_id // 1000, post_id, post_id, extension)
+        post["file_url"] = url = (f"{self.root_cdn}/posts/{post_id // 1000}/"
+                                  f"{post_id}/{post_id}.{extension}")
         return url
 
     def _prepare(self, post):
@@ -53,11 +53,11 @@ class Rule34vaultExtractor(BooruExtractor):
             post["tags_" + types[type]] = values
 
     def _fetch_post(self, post_id):
-        url = "{}/api/v2/post/{}".format(self.root, post_id)
-        return self.request(url).json()
+        url = f"{self.root}/api/v2/post/{post_id}"
+        return self.request_json(url)
 
     def _pagination(self, endpoint, params=None):
-        url = "{}/api{}".format(self.root, endpoint)
+        url = f"{self.root}/api{endpoint}"
 
         if params is None:
             params = {}
@@ -67,7 +67,7 @@ class Rule34vaultExtractor(BooruExtractor):
         threshold = self.per_page
 
         while True:
-            data = self.request(url, method="POST", json=params).json()
+            data = self.request_json(url, method="POST", json=params)
 
             yield from data["items"]
 

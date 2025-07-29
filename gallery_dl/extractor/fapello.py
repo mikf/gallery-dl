@@ -25,11 +25,11 @@ class FapelloPostExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.root = text.root_from_url(match.group(0))
+        self.root = text.root_from_url(match[0])
         self.model, self.id = match.groups()
 
     def items(self):
-        url = "{}/{}/{}/".format(self.root, self.model, self.id)
+        url = f"{self.root}/{self.model}/{self.id}/"
         page = text.extr(
             self.request(url, allow_redirects=False).text,
             'class="uk-align-center"', "</div>", None)
@@ -59,23 +59,25 @@ class FapelloModelExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.root = text.root_from_url(match.group(0))
-        self.model = match.group(1)
+        self.root = text.root_from_url(match[0])
+        self.model = match[1]
 
     def items(self):
         num = 1
         data = {"_extractor": FapelloPostExtractor}
         while True:
-            url = "{}/ajax/model/{}/page-{}/".format(
-                self.root, self.model, num)
+            url = f"{self.root}/ajax/model/{self.model}/page-{num}/"
             page = self.request(url).text
             if not page:
                 return
 
+            url = None
             for url in text.extract_iter(page, '<a href="', '"'):
                 if url == "javascript:void(0);":
                     continue
                 yield Message.Queue, url, data
+            if url is None:
+                return
             num += 1
 
 
@@ -90,8 +92,8 @@ class FapelloPathExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.root = text.root_from_url(match.group(0))
-        self.path = match.group(1)
+        self.root = text.root_from_url(match[0])
+        self.path = match[1]
 
     def items(self):
         num = 1
@@ -106,8 +108,8 @@ class FapelloPathExtractor(Extractor):
                 data = {"_extractor": FapelloModelExtractor}
 
         while True:
-            page = self.request("{}/ajax/{}/page-{}/".format(
-                self.root, self.path, num)).text
+            url = f"{self.root}/ajax/{self.path}/page-{num}/"
+            page = self.request(url).text
             if not page:
                 return
 

@@ -12,8 +12,8 @@ __tests__ = (
     "#url"     : "https://hitomi.la/galleries/867789.html",
     "#category": ("", "hitomi", "gallery"),
     "#class"   : hitomi.HitomiGalleryExtractor,
-    "#pattern"      : r"https://[a-c]a\.hitomi\.la/webp/\d+/\d+/[0-9a-f]{64}\.webp",
-    "#count"        : 16,
+    "#pattern" : r"https://w[1-3]\.gold-usergeneratedcontent\.net/\d+/\d+/[0-9a-f]{64}\.webp",
+    "#count"   : 16,
 
     "artist"    : ["morris"],
     "characters": [],
@@ -82,7 +82,7 @@ __tests__ = (
     "#category": ("", "hitomi", "gallery"),
     "#class"   : hitomi.HitomiGalleryExtractor,
     "#options" : {"format": "avif"},
-    "#pattern" : r"https://[a-c]a\.hitomi\.la/avif/\d+/\d+/[0-9a-f]{64}\.avif",
+    "#pattern" : r"https://a[1-3]\.gold-usergeneratedcontent\.net/\d+/\d+/[0-9a-f]{64}\.avif",
     "#count"   : 22,
 
     "artist"    : ["sorairo len"],
@@ -92,11 +92,11 @@ __tests__ = (
     "extension" : "avif",
     "filename"  : str,
     "gallery_id": 1615823,
-    "group"     : [],
+    "group"     : ["mofumofuen"],
     "lang"      : "ja",
     "language"  : "Japanese",
     "num"       : range(1, 22),
-    "parody"    : [],
+    "parody"    : ["original"],
     "tags"      : [
         "Blowjob ♀",
         "Focus Blowjob ♀",
@@ -162,6 +162,8 @@ __tests__ = (
     "#class"   : hitomi.HitomiTagExtractor,
     "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
     "#count"   : ">= 35",
+
+    "search_tags": "screenshots",
 },
 
 {
@@ -208,12 +210,29 @@ __tests__ = (
     "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
     "#range"   : "1-150",
     "#count"   : 150,
+
+    "search_tags": "tag:screenshots language:japanese",
 },
 
 {
-    "#url"     : "https://hitomi.la/search.html?language%3Ajapanese%20artist%3Asumiya",
+    "#url"     : "https://hitomi.la/search.html?female%3Asole_female%20language%3Ajapanese%20artist%3Asumiya",
     "#class"   : hitomi.HitomiSearchExtractor,
+    "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
+    "#count"   : range(35, 50),
+
+    "search_tags": "female:sole_female language:japanese artist:sumiya",
 },
+
+{
+    "#url"     : "https://hitomi.la/search.html?language%3Ajapanese%20-tag%3Aanimated%20group%3Aparadiddle#2",
+    "#comment" : "negative search tag (#7694)",
+    "#class"   : hitomi.HitomiSearchExtractor,
+    "#pattern" : hitomi.HitomiGalleryExtractor.pattern,
+    "#count"   : 41,
+
+    "search_tags": "language:japanese -tag:animated group:paradiddle",
+},
+
 {
     "#url"     : "https://hitomi.la/search.html?group:initial_g",
     "#class"   : hitomi.HitomiSearchExtractor,

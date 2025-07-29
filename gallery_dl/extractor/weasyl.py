@@ -7,7 +7,7 @@
 """Extractors for https://www.weasyl.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, util
 
 BASE_PATTERN = r"(?:https://)?(?:www\.)?weasyl.com/"
 
@@ -18,9 +18,9 @@ class WeasylExtractor(Extractor):
     filename_fmt = "{submitid} {title}.{extension}"
     archive_fmt = "{submitid}"
     root = "https://www.weasyl.com"
+    useragent = util.USERAGENT
 
-    @staticmethod
-    def populate_submission(data):
+    def populate_submission(self, data):
         # Some submissions don't have content and can be skipped
         if "submission" in data["media"]:
             data["url"] = data["media"]["submission"][0]["url"]
@@ -34,12 +34,12 @@ class WeasylExtractor(Extractor):
         self.session.headers['X-Weasyl-API-Key'] = self.config("api-key")
 
     def request_submission(self, submitid):
-        return self.request(
-            "{}/api/submissions/{}/view".format(self.root, submitid)).json()
+        return self.request_json(
+            f"{self.root}/api/submissions/{submitid}/view")
 
     def retrieve_journal(self, journalid):
-        data = self.request(
-            "{}/api/journals/{}/view".format(self.root, journalid)).json()
+        data = self.request_json(
+            f"{self.root}/api/journals/{journalid}/view")
         data["extension"] = "html"
         data["html"] = "text:" + data["content"]
         data["date"] = text.parse_datetime(data["posted_at"])
@@ -47,14 +47,14 @@ class WeasylExtractor(Extractor):
 
     def submissions(self, owner_login, folderid=None):
         metadata = self.config("metadata")
-        url = "{}/api/users/{}/gallery".format(self.root, owner_login)
+        url = f"{self.root}/api/users/{owner_login}/gallery"
         params = {
             "nextid"  : None,
             "folderid": folderid,
         }
 
         while True:
-            data = self.request(url, params=params).json()
+            data = self.request_json(url, params=params)
             for submission in data["submissions"]:
                 if metadata:
                     submission = self.request_submission(
@@ -71,12 +71,12 @@ class WeasylExtractor(Extractor):
 
 class WeasylSubmissionExtractor(WeasylExtractor):
     subcategory = "submission"
-    pattern = BASE_PATTERN + r"(?:~[\w~-]+/submissions|submission)/(\d+)"
+    pattern = BASE_PATTERN + r"(?:~[\w~-]+/submissions|submission|view)/(\d+)"
     example = "https://www.weasyl.com/~USER/submissions/12345/TITLE"
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
-        self.submitid = match.group(1)
+        self.submitid = match[1]
 
     def items(self):
         data = self.request_submission(self.submitid)
@@ -92,7 +92,7 @@ class WeasylSubmissionsExtractor(WeasylExtractor):
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
-        self.owner_login = match.group(1)
+        self.owner_login = match[1]
 
     def items(self):
         yield Message.Directory, {"owner_login": self.owner_login}
@@ -128,7 +128,7 @@ class WeasylJournalExtractor(WeasylExtractor):
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
-        self.journalid = match.group(1)
+        self.journalid = match[1]
 
     def items(self):
         data = self.retrieve_journal(self.journalid)
@@ -145,12 +145,12 @@ class WeasylJournalsExtractor(WeasylExtractor):
 
     def __init__(self, match):
         WeasylExtractor.__init__(self, match)
-        self.owner_login = match.group(1)
+        self.owner_login = match[1]
 
     def items(self):
         yield Message.Directory, {"owner_login": self.owner_login}
 
-        url = "{}/journals/{}".format(self.root, self.owner_login)
+        url = f"{self.root}/journals/{self.owner_login}"
         page = self.request(url).text
         for journalid in text.extract_iter(page, 'href="/journal/', '/'):
             data = self.retrieve_journal(journalid)
@@ -199,5 +199,5 @@ class WeasylFavoriteExtractor(WeasylExtractor):
                 pos = page.index('">Next (', pos)
             except ValueError:
                 return
-            path = text.unescape(text.rextract(page, 'href="', '"', pos)[0])
+            path = text.unescape(text.rextr(page, 'href="', '"', pos))
             params = None

@@ -13,7 +13,7 @@ __tests__ = (
     "#url"     : "https://weibo.com/1758989602",
     "#category": ("", "weibo", "user"),
     "#class"   : weibo.WeiboUserExtractor,
-    "#urls"    : "https://weibo.com/u/1758989602?tabtype=feed",
+    "#results" : "https://weibo.com/u/1758989602?tabtype=feed",
 },
 
 {
@@ -21,7 +21,7 @@ __tests__ = (
     "#category": ("", "weibo", "user"),
     "#class"   : weibo.WeiboUserExtractor,
     "#options" : {"include": "all"},
-    "#urls"    : (
+    "#results" : (
         "https://weibo.com/u/1758989602?tabtype=home",
         "https://weibo.com/u/1758989602?tabtype=feed",
         "https://weibo.com/u/1758989602?tabtype=video",
@@ -34,14 +34,14 @@ __tests__ = (
     "#url"     : "https://weibo.com/zhouyuxi77",
     "#category": ("", "weibo", "user"),
     "#class"   : weibo.WeiboUserExtractor,
-    "#urls"    : "https://weibo.com/u/7488709788?tabtype=feed",
+    "#results" : "https://weibo.com/u/7488709788?tabtype=feed",
 },
 
 {
     "#url"     : "https://www.weibo.com/n/周于希Sally",
     "#category": ("", "weibo", "user"),
     "#class"   : weibo.WeiboUserExtractor,
-    "#urls"    : "https://weibo.com/u/7488709788?tabtype=feed",
+    "#results" : "https://weibo.com/u/7488709788?tabtype=feed",
 },
 
 {
@@ -243,7 +243,7 @@ __tests__ = (
     "#comment" : "type == gif",
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
-    "#urls"    : "https://wx4.sinaimg.cn/large/68d80d22gy1h2ryfa8k0kg208w06o7wh.gif",
+    "#results" : "https://wx4.sinaimg.cn/large/68d80d22gy1h2ryfa8k0kg208w06o7wh.gif",
 
     "extension": "gif",
 },
@@ -280,6 +280,20 @@ __tests__ = (
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
     "#count"   : 9,
+},
+
+{
+    "#url"     : "https://weibo.com/1919017185/4246199458129705",
+    "#comment" : "'movie'-type video (#3793)",
+    "#category": ("", "weibo", "status"),
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#options" : {"movies": True},
+    "#results" : (
+        "https://wx4.sinaimg.cn/large/7261e0e1gy1frvyc1xnkfj20qo0zkwjh.jpg",
+        "https://wx2.sinaimg.cn/large/7261e0e1gy1frvyc30b1jj20zk0qojwh.jpg",
+        "https://wx4.sinaimg.cn/large/7261e0e1gy1frvyc44lx8j20qo0zk7a6.jpg",
+        "https://gslb.miaopai.com/stream/KdhuavhOnJ7R6zJFXfEXm-sDthpmC5DIGqrdOg__.mp4?yx=&refer=weibo_app&tags=weibocard",
+    ),
 },
 
 {

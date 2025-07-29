@@ -72,7 +72,7 @@ __tests__ = (
     "#category": ("", "wikiart", "image"),
     "#class"   : wikiart.WikiartImageExtractor,
     "#sha1_url": "d7f60118c34067b2b37d9577e412dc1477b94207",
-    "#urls"    : (
+    "#results" : (
         "https://uploads5.wikiart.org/images/huang-shen/summer.jpg",
     ),
 },
@@ -82,7 +82,7 @@ __tests__ = (
     "#category": ("", "wikiart", "artworks"),
     "#class"   : wikiart.WikiartArtworksExtractor,
     "#sha1_url": "36e054fcb3363b7f085c81f4778e6db3994e56a3",
-    "#urls"    : (
+    "#results" : (
         "https://uploads4.wikiart.org/images/hieronymus-bosch/triptych-of-last-judgement.jpg",
         "https://uploads6.wikiart.org/images/hieronymus-bosch/triptych-of-last-judgement-1.jpg",
         "https://uploads0.wikiart.org/images/hieronymus-bosch/tiptych-of-temptation-of-st-anthony-1506.jpg",

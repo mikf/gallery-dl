@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,6 +26,9 @@ class FoolfuukaExtractor(BaseExtractor):
             self.remote = self._remote_direct
         elif self.category == "archivedmoe":
             self.referer = False
+            self.fixup_redirect = True
+        else:
+            self.fixup_redirect = False
 
     def items(self):
         yield Message.Directory, self.metadata()
@@ -57,13 +60,45 @@ class FoolfuukaExtractor(BaseExtractor):
         """Resolve a remote media link"""
         page = self.request(media["remote_media_link"]).text
         url = text.extr(page, 'http-equiv="Refresh" content="0; url=', '"')
-        if url.endswith(".webm") and \
-                url.startswith("https://thebarchive.com/"):
-            return url[:-1]
+
+        if url.startswith("https://thebarchive.com/"):
+            # '.webm' -> '.web' (#5116)
+            if url.endswith(".webm"):
+                url = url[:-1]
+
+        elif self.fixup_redirect:
+            # update redirect domain or filename (#7652)
+            path, _, filename = url.rpartition("/")
+
+            # these boards link directly to i.4cdn.org
+            # -> redirect to warosu or 4plebs instead
+            board_domains = {
+                "3"  : "warosu.org",
+                "biz": "warosu.org",
+                "ck" : "warosu.org",
+                "diy": "warosu.org",
+                "fa" : "warosu.org",
+                "ic" : "warosu.org",
+                "jp" : "warosu.org",
+                "lit": "warosu.org",
+                "sci": "warosu.org",
+                "tg" : "archive.4plebs.org",
+            }
+            board = url.split("/", 4)[3]
+            if board in board_domains:
+                domain = board_domains[board]
+                url = f"https://{domain}/{board}/full_image/{filename}"
+
+            # if it's one of these archives, slice the name
+            elif any(archive in path for archive in (
+                     "b4k.", "desuarchive.", "palanq.")):
+                name, _, ext = filename.rpartition(".")
+                if len(name) > 13:
+                    url = f"{path}/{name[:13]}.{ext}"
+
         return url
 
-    @staticmethod
-    def _remote_direct(media):
+    def _remote_direct(self, media):
         return media["remote_media_link"]
 
 
@@ -81,8 +116,8 @@ BASE_PATTERN = FoolfuukaExtractor.update({
         "pattern": r"(?:www\.)?archiveofsins\.com",
     },
     "b4k": {
-        "root": "https://arch.b4k.co",
-        "pattern": r"arch\.b4k\.co",
+        "root": "https://arch.b4k.dev",
+        "pattern": r"arch\.b4k\.(?:dev|co)",
     },
     "desuarchive": {
         "root": "https://desuarchive.org",
@@ -124,13 +159,12 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
     def metadata(self):
         url = self.root + "/_/api/chan/thread/"
         params = {"board": self.board, "num": self.thread}
-        self.data = self.request(url, params=params).json()[self.thread]
+        self.data = self.request_json(url, params=params)[self.thread]
         return self.data["op"]
 
     def posts(self):
         op = (self.data["op"],)
-        posts = self.data.get("posts")
-        if posts:
+        if posts := self.data.get("posts"):
             posts = list(posts.values())
             posts.sort(key=lambda p: p["timestamp"])
             return itertools.chain(op, posts)
@@ -149,13 +183,12 @@ class FoolfuukaBoardExtractor(FoolfuukaExtractor):
         self.page = self.groups[-1]
 
     def items(self):
-        index_base = "{}/_/api/chan/index/?board={}&page=".format(
-            self.root, self.board)
-        thread_base = "{}/{}/thread/".format(self.root, self.board)
+        index_base = f"{self.root}/_/api/chan/index/?board={self.board}&page="
+        thread_base = f"{self.root}/{self.board}/thread/"
 
         page = self.page
         for pnum in itertools.count(text.parse_int(page, 1)):
-            with self.request(index_base + format(pnum)) as response:
+            with self.request(index_base + str(pnum)) as response:
                 try:
                     threads = response.json()
                 except ValueError:
@@ -209,7 +242,7 @@ class FoolfuukaSearchExtractor(FoolfuukaExtractor):
 
         while True:
             try:
-                data = self.request(url, params=params).json()
+                data = self.request_json(url, params=params)
             except ValueError:
                 return
 
@@ -235,27 +268,17 @@ class FoolfuukaGalleryExtractor(FoolfuukaExtractor):
     pattern = BASE_PATTERN + r"/([^/?#]+)/gallery(?:/(\d+))?"
     example = "https://archived.moe/a/gallery"
 
-    def __init__(self, match):
-        FoolfuukaExtractor.__init__(self, match)
-
-        board = match.group(match.lastindex)
-        if board.isdecimal():
-            self.board = match.group(match.lastindex-1)
-            self.pages = (board,)
-        else:
-            self.board = board
-            self.pages = map(format, itertools.count(1))
-
     def metadata(self):
-        return {"board": self.board}
+        self.board = board = self.groups[-2]
+        return {"board": board}
 
     def posts(self):
-        base = "{}/_/api/chan/gallery/?board={}&page=".format(
-            self.root, self.board)
+        pnum = self.groups[-1]
+        pages = itertools.count(1) if pnum is None else (pnum,)
+        base = f"{self.root}/_/api/chan/gallery/?board={self.board}&page="
 
-        for page in self.pages:
-            with self.request(base + page) as response:
-                posts = response.json()
+        for pnum in pages:
+            posts = self.request_json(f"{base}{pnum}")
             if not posts:
                 return
             yield from posts

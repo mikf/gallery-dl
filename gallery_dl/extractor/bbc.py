@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -26,10 +26,14 @@ class BbcGalleryExtractor(GalleryExtractor):
     example = "https://www.bbc.co.uk/programmes/PATH"
 
     def metadata(self, page):
-        data = util.json_loads(text.extr(
-            page, '<script type="application/ld+json">', '</script>'))
+        data = self._extract_jsonld(page)
+
         return {
-            "programme": self.gallery_url.split("/")[4],
+            "title": text.unescape(text.extr(
+                page, "<h1>", "</h1>").rpartition("</span>")[2]),
+            "description": text.unescape(text.extr(
+                page, 'property="og:description" content="', '"')),
+            "programme": self.page_url.split("/")[4],
             "path": list(util.unique_sequence(
                 element["name"]
                 for element in data["itemListElement"]
@@ -39,20 +43,28 @@ class BbcGalleryExtractor(GalleryExtractor):
     def images(self, page):
         width = self.config("width")
         width = width - width % 16 if width else 1920
-        dimensions = "/{}xn/".format(width)
+        dimensions = f"/{width}xn/"
 
-        return [
-            (src.replace("/320x180_b/", dimensions),
-             {"_fallback": self._fallback_urls(src, width)})
-            for src in text.extract_iter(page, 'data-image-src="', '"')
-        ]
+        results = []
+        for img in text.extract_iter(page, 'class="gallery__thumbnail', ">"):
+            src = text.extr(img, 'data-image-src="', '"')
+            results.append((
+                src.replace("/320x180_b/", dimensions),
+                {
+                    "title_image": text.unescape(text.extr(
+                        img, 'data-gallery-title="', '"')),
+                    "synopsis": text.unescape(text.extr(
+                        img, 'data-gallery-synopsis="', '"')),
+                    "_fallback": self._fallback_urls(src, width),
+                },
+            ))
+        return results
 
-    @staticmethod
-    def _fallback_urls(src, max_width):
+    def _fallback_urls(self, src, max_width):
         front, _, back = src.partition("/320x180_b/")
         for width in (1920, 1600, 1280, 976):
             if width < max_width:
-                yield "{}/{}xn/{}".format(front, width, back)
+                yield f"{front}/{width}xn/{back}"
 
 
 class BbcProgrammeExtractor(Extractor):
@@ -63,14 +75,11 @@ class BbcProgrammeExtractor(Extractor):
     pattern = BASE_PATTERN + r"[^/?#]+/galleries)(?:/?\?page=(\d+))?"
     example = "https://www.bbc.co.uk/programmes/ID/galleries"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.path, self.page = match.groups()
-
     def items(self):
+        path, pnum = self.groups
         data = {"_extractor": BbcGalleryExtractor}
-        params = {"page": text.parse_int(self.page, 1)}
-        galleries_url = self.root + self.path
+        params = {"page": text.parse_int(pnum, 1)}
+        galleries_url = self.root + path
 
         while True:
             page = self.request(galleries_url, params=params).text

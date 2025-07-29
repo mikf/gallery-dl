@@ -12,13 +12,18 @@ __tests__ = (
     "#url"     : "https://rule34.xxx/index.php?page=post&s=list&tags=danraku",
     "#category": ("gelbooru_v02", "rule34", "tag"),
     "#class"   : gelbooru_v02.GelbooruV02TagExtractor,
-    "#pattern"     : r"https?://.*rule34\.xxx/images/\d+/[0-9a-f]+\.jpg",
-    "#count"       : 2,
+    "#results"     : (
+        "https://wimg.rule34.xxx/images/4615/00722987a1e8b5617a15a20c19a0915157048d3b.jpg",
+        "https://wimg.rule34.xxx/images/1845/04981deeac105a9c5fedc34a6ff017789e74f2a8.jpg",
+    ),
     "#sha1_content": [
         "5c6ae9ee13e6d4bc9cb8bdce224c84e67fbfa36c",
         "622e80be3f496672c44aab5c47fbc6941c61bc79",
         "1e0dced55bcb5eefe5cc32f69c7a8df35547b459",
     ],
+
+    "search_tags" : "danraku",
+    "search_count": 2,
 },
 
 {
@@ -50,7 +55,7 @@ __tests__ = (
         "tags" : True,
         "notes": True,
     },
-    "#pattern"     : r"https://api-cdn\.rule34\.xxx/images/1/6aafbdb3e22f3f3b412ea2cf53321317a37063f3\.jpg",
+    "#results"     : r"https://wimg.rule34.xxx/images/1/6aafbdb3e22f3f3b412ea2cf53321317a37063f3.jpg",
     "#sha1_content": [
         "a43f418aa350039af0d11cae501396a33bbe2201",
         "67b516295950867e1c1ab6bc13b35d3b762ed2a3",
@@ -78,6 +83,17 @@ __tests__ = (
             "x"     : 78,
             "y"     : 442,
         },
+    ],
+},
+
+{
+    "#url"     : "https://rule34.xxx/index.php?page=post&s=view&id=13853212",
+    "#comment" : "HTML response with 'api-cdn.' subdomain (#7697)",
+    "#category": ("gelbooru_v02", "rule34", "post"),
+    "#class"   : gelbooru_v02.GelbooruV02PostExtractor,
+    "#results" : "https://wimg.rule34.xxx/images/2164/60d61d06f3cd51be5152852d9c642d80.jpeg",
+    "#sha1_content": [
+        "0a07eb9e871589a012ec922c71eb4640fce09bb2",
     ],
 },
 

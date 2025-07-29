@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,8 +20,8 @@ class ScrolllerExtractor(Extractor):
     category = "scrolller"
     root = "https://scrolller.com"
     directory_fmt = ("{category}", "{subredditTitle}")
-    filename_fmt = "{id}{title:? //}.{extension}"
-    archive_fmt = "{id}"
+    filename_fmt = "{id}{num:?_//>03}{title:? //}.{extension}"
+    archive_fmt = "{id}_{num}"
     request_interval = (0.5, 1.5)
 
     def _init(self):
@@ -31,22 +31,40 @@ class ScrolllerExtractor(Extractor):
         self.login()
 
         for post in self.posts():
-
-            media_sources = post.get("mediaSources")
-            if not media_sources:
-                self.log.warning("%s: No media files", post.get("id"))
-                continue
-
-            src = max(media_sources, key=self._sort_key)
-            post.update(src)
-            url = src["url"]
-            text.nameext_from_url(url, post)
+            files = self._extract_files(post)
+            post["count"] = len(files)
 
             yield Message.Directory, post
-            yield Message.Url, url, post
+            for file in files:
+                url = file["url"]
+                post.update(file)
+                yield Message.Url, url, text.nameext_from_url(url, post)
 
     def posts(self):
         return ()
+
+    def _extract_files(self, post):
+        album = post.pop("albumContent", None)
+        if not album:
+            sources = post.get("mediaSources")
+            if not sources:
+                self.log.warning("%s: No media files", post.get("id"))
+                return ()
+            src = max(sources, key=self._sort_key)
+            src["num"] = 0
+            return (src,)
+
+        files = []
+        for num, media in enumerate(album, 1):
+            sources = media.get("mediaSources")
+            if not sources:
+                self.log.warning("%s/%s: Missing media file",
+                                 post.get("id"), num)
+                continue
+            src = max(sources, key=self._sort_key)
+            src["num"] = num
+            files.append(src)
+        return files
 
     def login(self):
         username, password = self._get_auth_info()
@@ -63,7 +81,7 @@ class ScrolllerExtractor(Extractor):
         }
 
         try:
-            data = self._request_graphql("LoginQuery", variables)
+            data = self._request_graphql("LoginQuery", variables, False)
         except exception.HttpError as exc:
             if exc.status == 403:
                 raise exception.AuthenticationError()
@@ -71,10 +89,9 @@ class ScrolllerExtractor(Extractor):
 
         return data["login"]["token"]
 
-    def _request_graphql(self, opname, variables):
-        url = "https://api.scrolller.com/api/v2/graphql"
+    def _request_graphql(self, opname, variables, admin=True):
         headers = {
-            "Content-Type"  : "text/plain;charset=UTF-8",
+            "Content-Type"  : None,
             "Origin"        : self.root,
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
@@ -85,14 +102,23 @@ class ScrolllerExtractor(Extractor):
             "variables"    : variables,
             "authorization": self.auth_token,
         }
-        return self.request(
-            url, method="POST", headers=headers, data=util.json_dumps(data),
-        ).json()["data"]
 
-    def _pagination(self, opname, variables):
-        while True:
+        if admin:
+            url = "https://api.scrolller.com/admin"
+            headers["Content-Type"] = "application/json"
+        else:
+            url = "https://api.scrolller.com/api/v2/graphql"
+            headers["Content-Type"] = "text/plain;charset=UTF-8"
+
+        return self.request_json(
+            url, method="POST", headers=headers, data=util.json_dumps(data),
+        )["data"]
+
+    def _pagination(self, opname, variables, data=None):
+        if data is None:
             data = self._request_graphql(opname, variables)
 
+        while True:
             while "items" not in data:
                 data = data.popitem()[1]
             yield from data["items"]
@@ -100,6 +126,8 @@ class ScrolllerExtractor(Extractor):
             if not data["iterator"]:
                 return
             variables["iterator"] = data["iterator"]
+
+            data = self._request_graphql(opname, variables)
 
     def _sort_key(self, src):
         return src["width"], not src["isOptimized"]
@@ -114,6 +142,7 @@ class ScrolllerSubredditExtractor(ScrolllerExtractor):
     def posts(self):
         url, query = self.groups
         filter = None
+        sort = "RANDOM"
 
         if query:
             params = text.parse_query(query)
@@ -121,12 +150,24 @@ class ScrolllerSubredditExtractor(ScrolllerExtractor):
                 filter = params["filter"].upper().rstrip("S")
 
         variables = {
-            "url"      : url,
-            "iterator" : None,
-            "filter"   : filter,
-            "hostsDown": None,
+            "url"   : url,
+            "filter": filter,
+            "sortBy": sort,
+            "limit" : 50,
         }
-        return self._pagination("SubredditQuery", variables)
+        subreddit = self._request_graphql(
+            "SubredditQuery", variables)["getSubreddit"]
+
+        variables = {
+            "subredditId": subreddit["id"],
+            "iterator": None,
+            "filter"  : filter,
+            "sortBy"  : sort,
+            "limit"   : 50,
+            "isNsfw"  : subreddit["isNsfw"],
+        }
+        return self._pagination(
+            "SubredditChildrenQuery", variables, subreddit["children"])
 
 
 class ScrolllerFollowingExtractor(ScrolllerExtractor):
@@ -142,11 +183,14 @@ class ScrolllerFollowingExtractor(ScrolllerExtractor):
             raise exception.AuthorizationError("Login required")
 
         variables = {
-            "iterator" : None,
-            "hostsDown": None,
+            "iterator": None,
+            "filter"  : None,
+            "limit"   : 10,
+            "isNsfw"  : False,
+            "sortBy"  : "RANDOM",
         }
 
-        for subreddit in self._pagination("FollowingQuery", variables):
+        for subreddit in self._pagination("GetFollowingSubreddits", variables):
             url = self.root + subreddit["url"]
             subreddit["_extractor"] = ScrolllerSubredditExtractor
             yield Message.Queue, url, subreddit
@@ -156,39 +200,62 @@ class ScrolllerPostExtractor(ScrolllerExtractor):
     """Extractor for media from a single scrolller post"""
     subcategory = "post"
     pattern = BASE_PATTERN + r"/(?!r/|following$)([^/?#]+)"
-    example = "https://scrolller.com/title-slug-a1b2c3d4f5"
+    example = "https://scrolller.com/TITLE-SLUG-a1b2c3d4f5"
 
     def posts(self):
-        url = "{}/{}".format(self.root, self.groups[0])
-        page = self.request(url).text
-        data = util.json_loads(text.extr(
-            page, '<script>window.scrolllerConfig="', '"</script>')
-            .replace('\\"', '"'))
-        return (data["item"],)
+        variables = {"url": "/" + self.groups[0]}
+        data = self._request_graphql("SubredditPostQuery", variables)
+        return (data["getPost"],)
 
 
 QUERIES = {
 
+    "SubredditPostQuery": """\
+query SubredditPostQuery(
+    $url: String!
+) {
+    getPost(
+        data: { url: $url }
+    ) {
+        __typename id url title subredditId subredditTitle subredditUrl
+        redditPath isNsfw hasAudio fullLengthSource gfycatSource redgifsSource
+        ownerAvatar username displayName favoriteCount isPaid tags
+        commentsCount commentsRepliesCount isFavorite
+        albumContent { mediaSources { url width height isOptimized } }
+        mediaSources { url width height isOptimized }
+        blurredMediaSources { url width height isOptimized }
+    }
+}
+""",
+
     "SubredditQuery": """\
 query SubredditQuery(
     $url: String!
-    $filter: SubredditPostFilter
     $iterator: String
+    $sortBy: GallerySortBy
+    $filter: GalleryFilter
+    $limit: Int!
 ) {
     getSubreddit(
-        url: $url
+        data: {
+            url: $url,
+            iterator: $iterator,
+            filter: $filter,
+            limit: $limit,
+            sortBy: $sortBy
+        }
     ) {
-        children(
-            limit: 50
-            iterator: $iterator
-            filter: $filter
-            disabledHosts: null
-        ) {
+        __typename id url title secondaryTitle description createdAt isNsfw
+        subscribers isComplete itemCount videoCount pictureCount albumCount
+        isPaid username tags isFollowing
+        banner { url width height isOptimized }
+        children {
             iterator items {
-                __typename id url title subredditId subredditTitle
-                subredditUrl redditPath isNsfw albumUrl hasAudio
-                fullLengthSource gfycatSource redgifsSource ownerAvatar
-                username displayName isPaid tags isFavorite
+                __typename id url title subredditId subredditTitle subredditUrl
+                redditPath isNsfw hasAudio fullLengthSource gfycatSource
+                redgifsSource ownerAvatar username displayName favoriteCount
+                isPaid tags commentsCount commentsRepliesCount isFavorite
+                albumContent { mediaSources { url width height isOptimized } }
                 mediaSources { url width height isOptimized }
                 blurredMediaSources { url width height isOptimized }
             }
@@ -197,19 +264,59 @@ query SubredditQuery(
 }
 """,
 
-    "FollowingQuery": """\
-query FollowingQuery(
+    "SubredditChildrenQuery": """\
+query SubredditChildrenQuery(
+    $subredditId: Int!
     $iterator: String
+    $filter: GalleryFilter
+    $sortBy: GallerySortBy
+    $limit: Int!
+    $isNsfw: Boolean
 ) {
-    getFollowing(
-        limit: 10
-        iterator: $iterator
+    getSubredditChildren(
+        data: {
+            subredditId: $subredditId,
+            iterator: $iterator,
+            filter: $filter,
+            sortBy: $sortBy,
+            limit: $limit,
+            isNsfw: $isNsfw
+        },
+    ) {
+        iterator items {
+            __typename id url title subredditId subredditTitle subredditUrl
+            redditPath isNsfw hasAudio fullLengthSource gfycatSource
+            redgifsSource ownerAvatar username displayName favoriteCount isPaid
+            tags commentsCount commentsRepliesCount isFavorite
+            albumContent { mediaSources { url width height isOptimized } }
+            mediaSources { url width height isOptimized }
+            blurredMediaSources { url width height isOptimized }
+        }
+    }
+}
+""",
+
+    "GetFollowingSubreddits": """\
+query GetFollowingSubreddits(
+    $iterator: String,
+    $limit: Int!,
+    $filter: GalleryFilter,
+    $isNsfw: Boolean,
+    $sortBy: GallerySortBy
+) {
+    getFollowingSubreddits(
+        data: {
+            isNsfw: $isNsfw
+            limit: $limit
+            filter: $filter
+            iterator: $iterator
+            sortBy: $sortBy
+        }
     ) {
         iterator items {
             __typename id url title secondaryTitle description createdAt isNsfw
             subscribers isComplete itemCount videoCount pictureCount albumCount
-            isPaid username tags isFollowing
-            banner { url width height isOptimized }
+            isFollowing
         }
     }
 }
@@ -226,6 +333,16 @@ query LoginQuery(
     ) {
         username token expiresAt isAdmin status isPremium
     }
+}
+""",
+
+    "ItemTypeQuery": """\
+query ItemTypeQuery(
+    $url: String!
+) {
+    getItemType(
+        url: $url
+    )
 }
 """,
 

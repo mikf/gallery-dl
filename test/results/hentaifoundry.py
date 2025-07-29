@@ -118,7 +118,7 @@ __tests__ = (
     "#comment" : "SWF / rumble embed (#4641)",
     "#category": ("", "hentaifoundry", "image"),
     "#class"   : hentaifoundry.HentaifoundryImageExtractor,
-    "#urls"    : "https://pictures.hentai-foundry.com/s/Soloid/186714/Soloid-186714-Osaloop.swf",
+    "#results" : "https://pictures.hentai-foundry.com/s/Soloid/186714/Soloid-186714-Osaloop.swf",
 
     "artist"     : "Soloid",
     "date"       : "dt:2013-02-07 17:25:54",

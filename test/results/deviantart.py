@@ -14,7 +14,7 @@ __tests__ = (
     "#url"     : "https://www.deviantart.com/shimoda7",
     "#category": ("", "deviantart", "user"),
     "#class"   : deviantart.DeviantartUserExtractor,
-    "#urls"    : "https://www.deviantart.com/shimoda7/gallery",
+    "#results" : "https://www.deviantart.com/shimoda7/gallery",
 },
 
 {
@@ -22,7 +22,7 @@ __tests__ = (
     "#category": ("", "deviantart", "user"),
     "#class"   : deviantart.DeviantartUserExtractor,
     "#options" : {"include": "all"},
-    "#urls"    : (
+    "#results" : (
         "https://www.deviantart.com/shimoda7/avatar",
         "https://www.deviantart.com/shimoda7/banner",
         "https://www.deviantart.com/shimoda7/gallery",
@@ -53,7 +53,6 @@ __tests__ = (
         "userid"  : "9AE51FC7-0278-806C-3FFF-F4961ABF9E2B",
         "username": "shimoda7",
     },
-    "category_path"   : str,
     "content"         : {
         "filesize"    : int,
         "height"      : int,
@@ -135,7 +134,7 @@ __tests__ = (
     "#category" : ("", "deviantart", "gallery"),
     "#class"    : deviantart.DeviantartGalleryExtractor,
     "#options"  : {"group": "skip"},
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AbortExtraction,
     "#count"    : 0,
 },
 
@@ -149,7 +148,7 @@ __tests__ = (
         "folders" : 1,
         "original": 0,
     },
-    "#count"   : 3,
+    "#count"   : 10,
 
     "description": str,
     "folders"    : list,
@@ -173,6 +172,12 @@ __tests__ = (
 
 {
     "#url"     : "https://www.deviantart.com/shimoda7/gallery/all",
+    "#category": ("", "deviantart", "gallery"),
+    "#class"   : deviantart.DeviantartGalleryExtractor,
+},
+
+{
+    "#url"     : "https://www.deviantart.com/shimoda7/gallery/recommended-for-you",
     "#category": ("", "deviantart", "gallery"),
     "#class"   : deviantart.DeviantartGalleryExtractor,
 },
@@ -205,7 +210,7 @@ __tests__ = (
     "#url"     : "https://deviantart.com/shimoda7/avatar",
     "#category": ("", "deviantart", "avatar"),
     "#class"   : deviantart.DeviantartAvatarExtractor,
-    "#urls"        : "https://a.deviantart.net/avatars-big/s/h/shimoda7.jpg?4",
+    "#results"     : "https://a.deviantart.net/avatars-big/s/h/shimoda7.jpg?4",
     "#sha1_content": "abf2cc79b842315f2e54bfdd93bf794a0f612b6f",
 
     "author"         : {
@@ -243,7 +248,7 @@ __tests__ = (
     "#class"   : deviantart.DeviantartAvatarExtractor,
     "#archive" : False,
     "#options" : {"formats": ["original.jpg", "big.jpg", "big.png", "big.gif"]},
-    "#urls"    : (
+    "#results" : (
         "https://a.deviantart.net/avatars-original/s/h/shimoda7.jpg?4",
         "https://a.deviantart.net/avatars-big/s/h/shimoda7.jpg?4",
         "https://a.deviantart.net/avatars-big/s/h/shimoda7.png?4",
@@ -273,7 +278,6 @@ __tests__ = (
         "userid"  : "1A12BA26-33C2-AA0A-7678-0B6DFBA7AC8E",
         "username": "gdldev"
     },
-    "category_path"    : "",
     "content"          : {
         "filename"    : "banner_by_gdldev_dgntyqc.png",
         "filesize"    : 84510,
@@ -347,6 +351,33 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.deviantart.com/avapithecus/gallery/71028779/drake-hero",
+    "#comment" : "main folder + subfolders",
+    "#category": ("", "deviantart", "folder"),
+    "#class"   : deviantart.DeviantartFolderExtractor,
+    "#options" : {"subfolders": True, "original": False, "image-range": "1"},
+    "#pattern" : (
+        r"https://www.deviantart.com/Avapithecus/gallery/6FCC57FA-F21D-14CC-5E0F-BB76479B6555/Folk Hero",
+        r"https://www.deviantart.com/Avapithecus/gallery/8D5E41B0-4BF5-649B-6620-B1D89C6D6BCE/Denizens of Suwarrow",
+        r"https://www.deviantart.com/Avapithecus/gallery/7FE4D499-E883-23D2-1659-1B64CA67358D/Beyond Suwarrow",
+        r"https://www.deviantart.com/Avapithecus/gallery/38AAB41C-F0F1-4DE9-6FB9-D3493CD77D01/The Drake Number",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/c5e7b050-4923-4473-b8c0-ca0bc1c1b1fe/dgqc5py-3371d62e-465f-4b17-bd23-5005517fc68d.jpg/v1/fill/.+",
+    ),
+},
+
+{
+    "#url"     : "https://www.deviantart.com/avapithecus/gallery/87003033/the-drake-number",
+    "#comment" : "subfolder",
+    "#category": ("", "deviantart", "folder"),
+    "#class"   : deviantart.DeviantartFolderExtractor,
+    "#options" : {"original": False},
+    "#pattern" : (
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/c5e7b050-4923-4473-b8c0-ca0bc1c1b1fe/dfu7xyj-44d1a551-dbdc-4614-baee-82612fb044a6.jpg\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/c5e7b050-4923-4473-b8c0-ca0bc1c1b1fe/deeoxic-932e966c-6d3b-473c-8053-ed7bad05813a.jpg/v1/fill/.+",
+    ),
+},
+
+{
     "#url"     : "https://shimoda7.deviantart.com/gallery/722019/Miscellaneous",
     "#category": ("", "deviantart", "folder"),
     "#class"   : deviantart.DeviantartFolderExtractor,
@@ -381,6 +412,11 @@ __tests__ = (
     "index"         : 778297656,
     "index_base36"  : "cvdmbc",
     "published_time": 1545835767,
+    "stash_description": "",
+    "stash_id"      : "022c83odnaxc",
+    "stash_name"    : "",
+    "stash_folder"  : 0,
+    "stash_parent"  : 0,
     "title"         : "01",
     "url"           : "https://www.deviantart.com/stash/022c83odnaxc",
 },
@@ -389,6 +425,19 @@ __tests__ = (
     "#url"     : "https://sta.sh/022c83odnaxc",
     "#category": ("", "deviantart", "stash"),
     "#class"   : deviantart.DeviantartStashExtractor,
+    "#pattern" : r"https://wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmbc-e506cdcf-3208-4c20-85ab-0bfa8a7bcb16.png\?token=ey.+",
+    "#count"   : 1,
+
+    "date"          : "dt:2018-12-26 14:49:27",
+    "deviationid"   : "A4A6AD52-8857-46EE-ABFE-86D49D4FF9D0",
+    "download_filesize": 380,
+    "extension"     : "png",
+    "filename"      : "01_by_justatest235723-dcvdmbc",
+    "index"         : 778297656,
+    "index_base36"  : "cvdmbc",
+    "published_time": 1545835767,
+    "title"         : "01",
+    "url"           : "https://www.deviantart.com/stash/022c83odnaxc",
 },
 
 {
@@ -397,7 +446,18 @@ __tests__ = (
     "#category": ("", "deviantart", "stash"),
     "#class"   : deviantart.DeviantartStashExtractor,
     "#options" : {"original": False},
-    "#count"   : 4,
+    "#pattern" : (
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmcb-b0178127-de9d-48e2-b95c-8627778b1c20.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmc6-a2402b2f-b469-42d2-99ca-a3464b3c5889.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmbz-adf92e46-0481-4c65-9e3b-e142a86a2d44.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/dcvdmbx-08eb6ce5-c892-4f16-8676-668cd2276697.png\?token=ey.+",
+    ),
+
+    "stash_description": """Sta.sh Description\ntest-テスト-"&>""",
+    "stash_id"    : {"021rsajamktz", "099tbcst5u5", "02394fx5fagg", "01okox2yh0o2"},
+    "stash_name"  : """Sta.sh Title test-テスト-"&>""",
+    "stash_folder": 7362377764221985,
+    "stash_parent": 0,
 },
 
 {
@@ -416,6 +476,12 @@ __tests__ = (
     "#class"   : deviantart.DeviantartStashExtractor,
     "#options" : {"original": False},
     "#count"   : 4,
+
+    "stash_description": "",
+    "stash_id"    : {"018dfylek5o1", "0vmi73y92tn", "02g2v51kb8y2", "06nnon5vucx"},
+    "stash_name"  : {"Sta.sh Uploads 147", "1"},
+    "stash_folder": {7382365850253347, 2415594944160654},
+    "stash_parent": {0, 7382365850253347},
 },
 
 {
@@ -739,7 +805,7 @@ __tests__ = (
     "#comment" : "wixmp URL rewrite /intermediary/",
     "#category": ("", "deviantart", "deviation"),
     "#class"   : deviantart.DeviantartDeviationExtractor,
-    "#urls"    : "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/intermediary/f/4deb0f1a-cdef-444e-b194-c8d6b3f7e933/dd1xca2-7f835e62-6fd3-4b99-92c7-2bfd4e1b296f.jpg",
+    "#results" : "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/intermediary/f/4deb0f1a-cdef-444e-b194-c8d6b3f7e933/dd1xca2-7f835e62-6fd3-4b99-92c7-2bfd4e1b296f.jpg",
 
     "is_downloadable": False,
     "is_original"    : False,
@@ -855,6 +921,38 @@ __tests__ = (
                      r"\?token=ey.+",
 
     "extension": "png",
+},
+
+{
+    "#url"     : "https://www.deviantart.com/justatest235723/art/Numbers-1133021832",
+    "#comment" : "multiple images (#6653)",
+    "#category": ("", "deviantart", "deviation"),
+    "#class"   : deviantart.DeviantartDeviationExtractor,
+    "#archive" : False,
+    "#pattern" : (
+        r"https://wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/diqkl8o-235680f0-7746-485c-9022-6042ab1f4d50\.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/diqkl8o-a47549b4-427d-404d-9a39-64cc07c6b5fb\.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/diqkl8o-faac0af6-ef9b-4c49-82af-349ba9f4acf7\.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/940f2d05-c5eb-4917-8192-7eb6a2d508c6/diqkl8o-34396355-d67d-4069-987f-b80f25495635\.png\?token=ey.+",
+    ),
+
+    "index"     : 1133021832,
+    "index_file": {0, 810469878, 810469899, 810469922},
+    "count"     : 4,
+    "num"       : range(1, 4),
+},
+
+{
+    "#url"     : "https://www.deviantart.com/exusiasword/art/Zenith-and-Silpha-combo-1186254616",
+    "#comment" : "JSON escapes in 'additionalMedia' (#6653)",
+    "#category": ("", "deviantart", "deviation"),
+    "#class"   : deviantart.DeviantartDeviationExtractor,
+    "#archive" : False,
+    "#pattern" : (
+        r"https://wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/54e06808-f21d-4b8d-bd48-bdea03cf0af5/djm9jx4-23fc1032-ee0d-460b-ac52-fcdf5e871317\.jpg\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/54e06808-f21d-4b8d-bd48-bdea03cf0af5/djm9jx4-7710b540-c27c-41f2-ae84-9d050ec170bc\.png\?token=ey.+",
+        r"https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/54e06808-f21d-4b8d-bd48-bdea03cf0af5/djm9jx4-e04525ea-b781-451a-ae70-b66243417868\.png\?token=ey.+",
+    ),
 },
 
 {

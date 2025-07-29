@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2021 David Hoppenbrouwers
-# Copyright 2023 Mike Fährmann
+# Copyright 2023-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -32,8 +32,8 @@ class WallpapercaveImageExtractor(Extractor):
 
         if path is None:
             try:
-                path = text.rextract(
-                    page, 'href="', '"', page.index('id="tdownload"'))[0]
+                path = text.rextr(
+                    page, 'href="', '"', page.index('id="tdownload"'), None)
             except Exception:
                 pass
             else:
@@ -44,8 +44,7 @@ class WallpapercaveImageExtractor(Extractor):
         if path is None:
             for wp in text.extract_iter(
                     page, 'class="wallpaper" id="wp', '</picture>'):
-                path = text.rextract(wp, ' src="', '"')[0]
-                if path:
+                if path := text.rextr(wp, ' src="', '"'):
                     image = text.nameext_from_url(path)
                     yield Message.Directory, image
                     yield Message.Url, self.root + path, image

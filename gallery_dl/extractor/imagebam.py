@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2023 Mike Fährmann
+# Copyright 2014-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,8 +9,7 @@
 """Extractors for https://www.imagebam.com/"""
 
 from .common import Extractor, Message
-from .. import text
-import re
+from .. import text, util
 
 
 class ImagebamExtractor(Extractor):
@@ -20,7 +19,7 @@ class ImagebamExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        self.path = match.group(1)
+        self.path = match[1]
 
     def _init(self):
         self.cookies.set("nsfw_inter", "1", domain="www.imagebam.com")
@@ -64,22 +63,19 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
             image.update(data)
             yield Message.Url, image["url"], image
 
-    @staticmethod
-    def metadata(page):
+    def metadata(self, page):
         return {"title": text.unescape(text.extr(
             page, 'id="gallery-name">', '<').strip())}
 
     def images(self, page):
-        findall = re.compile(r'<a href="https://www\.imagebam\.com'
-                             r'(/(?:image/|view/M)[a-zA-Z0-9]+)').findall
-
+        findall = util.re(r'<a href="https://www\.imagebam\.com'
+                          r'(/(?:image/|view/M)[a-zA-Z0-9]+)').findall
         paths = []
         while True:
             paths += findall(page)
             pos = page.find('rel="next" aria-label="Next')
             if pos > 0:
-                url = text.rextract(page, 'href="', '"', pos)[0]
-                if url:
+                if url := text.rextr(page, 'href="', '"', pos):
                     page = self.request(url).text
                     continue
             return paths

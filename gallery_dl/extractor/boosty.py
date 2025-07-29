@@ -8,6 +8,7 @@
 
 from .common import Extractor, Message
 from .. import text, util, exception
+import itertools
 
 BASE_PATTERN = r"(?:https?://)?boosty\.to"
 
@@ -53,7 +54,9 @@ class BoostyExtractor(Extractor):
                 self.log.warning("Not allowed to access post %s", post["id"])
                 continue
 
-            files = self._process_post(post)
+            files = self._extract_files(post)
+            if self._user:
+                post["user"] = self._user
             data = {
                 "post" : post,
                 "user" : post.pop("user", None),
@@ -69,15 +72,13 @@ class BoostyExtractor(Extractor):
     def posts(self):
         """Yield JSON content of all relevant posts"""
 
-    def _process_post(self, post):
+    def _extract_files(self, post):
         files = []
         post["content"] = content = []
         post["links"] = links = []
 
         if "createdAt" in post:
             post["date"] = text.parse_timestamp(post["createdAt"])
-        if self._user:
-            post["user"] = self._user
 
         for block in post["data"]:
             try:
@@ -94,7 +95,7 @@ class BoostyExtractor(Extractor):
                 elif type == "ok_video":
                     if not self.videos:
                         self.log.debug("%s: Skipping video %s",
-                                       post["int_id"], block["id"])
+                                       post["id"], block["id"])
                         continue
                     fmts = {
                         fmt["type"]: fmt["url"]
@@ -114,7 +115,7 @@ class BoostyExtractor(Extractor):
                     else:
                         self.log.warning(
                             "%s: Found no suitable video format for %s",
-                            post["int_id"], block["id"])
+                            post["id"], block["id"])
 
                 elif type == "link":
                     url = block["url"]
@@ -124,9 +125,15 @@ class BoostyExtractor(Extractor):
                 elif type == "audio_file":
                     files.append(self._update_url(post, block))
 
+                elif type == "file":
+                    files.append(self._update_url(post, block))
+
+                elif type == "smile":
+                    content.append(":" + block["name"] + ":")
+
                 else:
                     self.log.debug("%s: Unsupported data type '%s'",
-                                   post["int_id"], type)
+                                   post["id"], type)
             except Exception as exc:
                 self.log.debug("%s: %s", exc.__class__.__name__, exc)
 
@@ -137,8 +144,7 @@ class BoostyExtractor(Extractor):
         url = block["url"]
         sep = "&" if "?" in url else "?"
 
-        signed_query = post.get("signedQuery")
-        if signed_query:
+        if signed_query := post.get("signedQuery"):
             url += sep + signed_query[1:]
             sep = "&"
 
@@ -211,9 +217,54 @@ class BoostyFollowingExtractor(BoostyExtractor):
 
     def items(self):
         for user in self.api.user_subscriptions():
-            url = "{}/{}".format(self.root, user["blog"]["blogUrl"])
+            url = f"{self.root}/{user['blog']['blogUrl']}"
             user["_extractor"] = BoostyUserExtractor
             yield Message.Queue, url, user
+
+
+class BoostyDirectMessagesExtractor(BoostyExtractor):
+    """Extractor for boosty.to direct messages"""
+    subcategory = "direct-messages"
+    directory_fmt = ("{category}", "{user[blogUrl]} ({user[id]})",
+                     "Direct Messages")
+    pattern = BASE_PATTERN + r"/app/messages/?\?dialogId=(\d+)"
+    example = "https://boosty.to/app/messages?dialogId=12345"
+
+    def items(self):
+        """Yield direct messages from a given dialog ID."""
+        dialog_id = self.groups[0]
+        response = self.api.dialog(dialog_id)
+        signed_query = response.get("signedQuery")
+
+        try:
+            messages = response["messages"]["data"]
+            offset = messages[0]["id"]
+        except Exception:
+            return
+
+        try:
+            user = self.api.user(response["chatmate"]["url"])
+        except Exception:
+            user = None
+
+        messages.reverse()
+        for message in itertools.chain(
+            messages,
+            self.api.dialog_messages(dialog_id, offset=offset)
+        ):
+            message["signedQuery"] = signed_query
+            files = self._extract_files(message)
+            data = {
+                "post": message,
+                "user": user,
+                "count": len(files),
+            }
+
+            yield Message.Directory, data
+            for data["num"], file in enumerate(files, 1):
+                data["file"] = file
+                url = file["url"]
+                yield Message.Url, url, text.nameext_from_url(url, data)
 
 
 class BoostyAPI():
@@ -228,15 +279,14 @@ class BoostyAPI():
         }
 
         if not access_token:
-            auth = self.extractor.cookies.get("auth", domain=".boosty.to")
-            if auth:
+            if auth := self.extractor.cookies.get("auth", domain=".boosty.to"):
                 access_token = text.extr(
                     auth, "%22accessToken%22%3A%22", "%22")
         if access_token:
             self.headers["Authorization"] = "Bearer " + access_token
 
     def blog_posts(self, username, params):
-        endpoint = "/v1/blog/{}/post/".format(username)
+        endpoint = f"/v1/blog/{username}/post/"
         params = self._merge_params(params, {
             "limit"         : "5",
             "offset"        : None,
@@ -246,7 +296,7 @@ class BoostyAPI():
         return self._pagination(endpoint, params)
 
     def blog_media_album(self, username, type="all", params=()):
-        endpoint = "/v1/blog/{}/media_album/".format(username)
+        endpoint = f"/v1/blog/{username}/media_album/"
         params = self._merge_params(params, {
             "type"    : type.rstrip("s"),
             "limit"   : "15",
@@ -266,7 +316,7 @@ class BoostyAPI():
         return posts
 
     def post(self, username, post_id):
-        endpoint = "/v1/blog/{}/post/{}".format(username, post_id)
+        endpoint = f"/v1/blog/{username}/post/{post_id}"
         return self._call(endpoint)
 
     def feed_posts(self, params=None):
@@ -329,7 +379,7 @@ class BoostyAPI():
 
             else:
                 self.extractor.log.debug(response.text)
-                raise exception.StopExtraction("API request failed")
+                raise exception.AbortExtraction("API request failed")
 
     def _pagination(self, endpoint, params, transform=None, key=None):
         if "is_only_allowed" not in params and self.extractor.only_allowed:
@@ -364,3 +414,32 @@ class BoostyAPI():
             if offset > data["total"]:
                 return
             params["offset"] = offset
+
+    def dialog(self, dialog_id):
+        endpoint = f"/v1/dialog/{dialog_id}"
+        return self._call(endpoint)
+
+    def dialog_messages(self, dialog_id, limit=300, offset=None):
+        endpoint = f"/v1/dialog/{dialog_id}/message/"
+        params = {
+            "limit": limit,
+            "reverse": "true",
+            "offset": offset,
+        }
+        return self._pagination_dialog(endpoint, params)
+
+    def _pagination_dialog(self, endpoint, params):
+        while True:
+            data = self._call(endpoint, params)
+
+            yield from data["data"]
+
+            try:
+                extra = data["extra"]
+                if extra.get("isLast"):
+                    break
+                params["offset"] = offset = extra["offset"]
+                if not offset:
+                    break
+            except Exception:
+                break

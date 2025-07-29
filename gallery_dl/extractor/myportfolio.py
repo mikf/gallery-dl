@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2023 Mike Fährmann
+# Copyright 2018-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -53,8 +53,7 @@ class MyportfolioGalleryExtractor(Extractor):
             for data["num"], url in enumerate(imgs, 1):
                 yield Message.Url, url, text.nameext_from_url(url, data)
 
-    @staticmethod
-    def metadata(page):
+    def metadata(self, page):
         """Collect general image metadata"""
         # og:title contains data as "<user> - <title>", but both
         # <user> and <title> can contain a "-" as well, so we get the title
@@ -81,8 +80,7 @@ class MyportfolioGalleryExtractor(Extractor):
             "description": text.unescape(descr),
         }
 
-    @staticmethod
-    def images(page):
+    def images(self, page):
         """Extract and return a list of all image-urls"""
         return (
             list(text.extract_iter(page, 'js-lightbox" data-src="', '"')) or

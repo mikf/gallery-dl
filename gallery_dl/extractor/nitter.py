@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2023 Mike Fährmann
+# Copyright 2022-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -24,15 +24,13 @@ class NitterExtractor(BaseExtractor):
         self.cookies_domain = self.root.partition("://")[2]
         BaseExtractor.__init__(self, match)
 
-        lastindex = match.lastindex
-        self.user = match.group(lastindex)
-        self.user_id = match.group(lastindex + 1)
+        self.user = self.groups[-2]
+        self.user_id = self.groups[-1]
         self.user_obj = None
 
     def items(self):
         retweets = self.config("retweets", False)
-        videos = self.config("videos", True)
-        if videos:
+        if videos := self.config("videos", True):
             ytdl = (videos == "ytdl")
             videos = True
             self.cookies.set("hlsPlayback", "on", domain=self.cookies_domain)
@@ -43,11 +41,8 @@ class NitterExtractor(BaseExtractor):
                 self.log.debug("Skipping %s (retweet)", tweet["tweet_id"])
                 continue
 
-            attachments = tweet.pop("_attach", "")
-            if attachments:
+            if attachments := tweet.pop("_attach", ""):
                 files = []
-                append = files.append
-
                 for url in text.extract_iter(
                         attachments, 'href="', '"'):
 
@@ -67,15 +62,12 @@ class NitterExtractor(BaseExtractor):
                     file = {"url": url, "_http_retry": _retry_on_404}
                     file["filename"], _, file["extension"] = \
                         name.rpartition(".")
-                    append(file)
+                    files.append(file)
 
                 if videos and not files:
                     if ytdl:
-                        append({
-                            "url": "ytdl:{}/i/status/{}".format(
-                                self.root, tweet["tweet_id"]),
-                            "extension": None,
-                        })
+                        url = f"ytdl:{self.root}/i/status/{tweet['tweet_id']}"
+                        files.append({"url": url, "extension": "mp4"})
                     else:
                         for url in text.extract_iter(
                                 attachments, 'data-url="', '"'):
@@ -88,7 +80,7 @@ class NitterExtractor(BaseExtractor):
 
                             if url[0] == "/":
                                 url = self.root + url
-                            append({
+                            files.append({
                                 "url"      : "ytdl:" + url,
                                 "filename" : name.rpartition(".")[0],
                                 "extension": "mp4",
@@ -98,7 +90,8 @@ class NitterExtractor(BaseExtractor):
                                 attachments, '<source src="', '"'):
                             if url[0] == "/":
                                 url = self.root + url
-                            append(text.nameext_from_url(url, {"url": url}))
+                            files.append(
+                                text.nameext_from_url(url, {"url": url}))
 
             else:
                 files = ()
@@ -206,10 +199,10 @@ class NitterExtractor(BaseExtractor):
 
         if self.user_id:
             self.user = self.request(
-                "{}/i/user/{}".format(self.root, self.user_id),
+                f"{self.root}/i/user/{self.user_id}",
                 allow_redirects=False,
             ).headers["location"].rpartition("/")[2]
-        base_url = url = "{}/{}{}".format(self.root, self.user, path)
+        base_url = url = f"{self.root}/{self.user}{path}"
 
         while True:
             tweets_html = self.request(url).text.split(
@@ -285,7 +278,7 @@ class NitterTweetExtractor(NitterExtractor):
     example = "https://nitter.net/USER/status/12345"
 
     def tweets(self):
-        url = "{}/i/status/{}".format(self.root, self.user)
+        url = f"{self.root}/i/status/{self.user}"
         html = text.extr(self.request(url).text, 'class="main-tweet', '''\
                 </div>
               </div></div></div>''')

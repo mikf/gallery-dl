@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2023 Mike Fährmann
+# Copyright 2020-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -23,16 +23,12 @@ class KabeuchiUserExtractor(Extractor):
     pattern = r"(?:https?://)?kabe-uchiroom\.com/mypage/?\?id=(\d+)"
     example = "https://kabe-uchiroom.com/mypage/?id=12345"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.user_id = match.group(1)
-
     def items(self):
-        base = "{}/accounts/upfile/{}/{}/".format(
-            self.root, self.user_id[-1], self.user_id)
+        uid = self.groups[0]
+        base = f"{self.root}/accounts/upfile/{uid[-1]}/{uid}/"
         keys = ("image1", "image2", "image3", "image4", "image5", "image6")
 
-        for post in self.posts():
+        for post in self.posts(uid):
             if post.get("is_ad") or not post["image1"]:
                 continue
 
@@ -48,8 +44,8 @@ class KabeuchiUserExtractor(Extractor):
                 post["num"] = ord(key[-1]) - 48
                 yield Message.Url, url, text.nameext_from_url(name, post)
 
-    def posts(self):
-        url = "{}/mypage/?id={}".format(self.root, self.user_id)
+    def posts(self, uid):
+        url = f"{self.root}/mypage/?id={uid}"
         response = self.request(url)
         if response.history and response.url == self.root + "/":
             raise exception.NotFoundError("user")
@@ -57,7 +53,7 @@ class KabeuchiUserExtractor(Extractor):
         return self._pagination(target_id)
 
     def _pagination(self, target_id):
-        url = "{}/get_posts.php".format(self.root)
+        url = f"{self.root}/get_posts.php"
         data = {
             "user_id"    : "0",
             "target_id"  : target_id,
@@ -69,7 +65,7 @@ class KabeuchiUserExtractor(Extractor):
         }
 
         while True:
-            info = self.request(url, method="POST", data=data).json()
+            info = self.request_json(url, method="POST", data=data)
             datas = info["datas"]
 
             if not datas or not isinstance(datas, list):

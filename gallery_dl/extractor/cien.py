@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Extractors for https://ci-en.net/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?ci-en\.(?:net|dlsite\.com)"
 
@@ -20,7 +20,7 @@ class CienExtractor(Extractor):
     request_interval = (1.0, 2.0)
 
     def __init__(self, match):
-        self.root = text.root_from_url(match.group(0))
+        self.root = text.root_from_url(match[0])
         Extractor.__init__(self, match)
 
     def _init(self):
@@ -52,15 +52,11 @@ class CienArticleExtractor(CienExtractor):
     example = "https://ci-en.net/creator/123/article/12345"
 
     def items(self):
-        url = "{}/creator/{}/article/{}".format(
-            self.root, self.groups[0], self.groups[1])
+        url = f"{self.root}/creator/{self.groups[0]}/article/{self.groups[1]}"
         page = self.request(url, notfound="article").text
 
-        post = util.json_loads(text.extr(
-            page, '<script type="application/ld+json">', '</script>'))[0]
-
         files = self._extract_files(page)
-
+        post = self._extract_jsonld(page)[0]
         post["post_url"] = url
         post["post_id"] = text.parse_int(self.groups[1])
         post["count"] = len(files)
@@ -124,7 +120,7 @@ class CienArticleExtractor(CienExtractor):
             auth = text.extr(video, ' auth-key="', '"')
 
             file = text.nameext_from_url(name)
-            file["url"] = "{}video-web.mp4?{}".format(path, auth)
+            file["url"] = f"{path}video-web.mp4?{auth}"
             file["type"] = "video"
             files.append(file)
 
@@ -148,12 +144,12 @@ class CienArticleExtractor(CienExtractor):
                 "gallery_id": text.extr(gallery, ' gallery-id="', '"'),
                 "time"      : text.extr(gallery, ' time="', '"'),
             }
-            data = self.request(url, params=params).json()
+            data = self.request_json(url, params=params)
             url = self.root + "/api/creator/gallery/imagePath"
 
             for params["page"], params["file_id"] in enumerate(
                     data["imgList"]):
-                path = self.request(url, params=params).json()["path"]
+                path = self.request_json(url, params=params)["path"]
 
                 file = params.copy()
                 file["url"] = path
@@ -166,7 +162,7 @@ class CienCreatorExtractor(CienExtractor):
     example = "https://ci-en.net/creator/123"
 
     def items(self):
-        url = "{}/creator/{}/article".format(self.root, self.groups[0])
+        url = f"{self.root}/creator/{self.groups[0]}/article"
         params = text.parse_query(self.groups[1])
         params["mode"] = "list"
         return self._pagination_articles(url, params)

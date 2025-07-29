@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2023 Mike Fährmann
+# Copyright 2019-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -55,8 +55,7 @@ class MetadataPP(PostProcessor):
             self._json_encode = self._make_encoder(options, 4).encode
             ext = "json"
 
-        base_directory = options.get("base-directory")
-        if base_directory:
+        if base_directory := options.get("base-directory"):
             if base_directory is True:
                 self._base = lambda p: p.basedirectory
             else:
@@ -108,6 +107,7 @@ class MetadataPP(PostProcessor):
         self.omode = options.get("open", omode)
         self.encoding = options.get("encoding", "utf-8")
         self.skip = options.get("skip", False)
+        self.meta_path = options.get("metadata-path")
 
     def run(self, pathfmt):
         archive = self.archive
@@ -119,6 +119,9 @@ class MetadataPP(PostProcessor):
         else:
             directory = self._directory(pathfmt)
         path = directory + self._filename(pathfmt)
+
+        if self.meta_path is not None:
+            pathfmt.kwdict[self.meta_path] = path
 
         if self.skip and os.path.exists(path):
             return
@@ -135,9 +138,7 @@ class MetadataPP(PostProcessor):
             archive.add(pathfmt.kwdict)
 
         if self.mtime:
-            mtime = pathfmt.kwdict.get("_mtime")
-            if mtime:
-                util.set_mtime(path, mtime)
+            pathfmt.set_mtime(path)
 
     def _run_stdout(self, pathfmt):
         self.write(sys.stdout, pathfmt.kwdict)
@@ -179,8 +180,10 @@ class MetadataPP(PostProcessor):
         try:
             pathfmt.directory_formatters = self._directory_formatters
             pathfmt.directory_conditions = ()
-            segments = pathfmt.build_directory(pathfmt.kwdict)
-            directory = pathfmt.clean_path(os.sep.join(segments) + os.sep)
+            if segments := pathfmt.build_directory(pathfmt.kwdict):
+                directory = pathfmt.clean_path(os.sep.join(segments) + os.sep)
+            else:
+                directory = "." + os.sep
             return os.path.join(self._base(pathfmt), directory)
         finally:
             pathfmt.directory_conditions = conditions
@@ -239,8 +242,7 @@ class MetadataPP(PostProcessor):
         fp.write(self._json_encode(kwdict) + "\n")
 
     def _make_filter(self, options):
-        include = options.get("include")
-        if include:
+        if include := options.get("include"):
             if isinstance(include, str):
                 include = include.split(",")
             return lambda d: {k: d[k] for k in include if k in d}
@@ -261,8 +263,7 @@ class MetadataPP(PostProcessor):
         if not private:
             return util.filter_dict
 
-    @staticmethod
-    def _make_encoder(options, indent=None):
+    def _make_encoder(self, options, indent=None):
         return json.JSONEncoder(
             ensure_ascii=options.get("ascii", False),
             sort_keys=options.get("sort", False),

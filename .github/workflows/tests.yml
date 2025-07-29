@@ -12,14 +12,11 @@ on:
 jobs:
   test:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         python-version:
-        - "3.5"
-        - "3.6"
-        - "3.7"
         - "3.8"
         - "3.9"
         - "3.10"
@@ -39,8 +36,6 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-      env:
-        PIP_TRUSTED_HOST: "pypi.python.org pypi.org files.pythonhosted.org"
 
     - name: Install dependencies
       run: |
@@ -50,10 +45,7 @@ jobs:
     - name: Install yt-dlp
       run: |
         case "${{ matrix.python-version }}" in
-            3.4|3.5)
-                # don't install yt-dlp
-                ;;
-            3.6|3.7|3.8)
+            3.8)
                 # install from PyPI
                 pip install yt-dlp
                 ;;
@@ -65,14 +57,7 @@ jobs:
 
     - name: Lint with flake8
       run: |
-        case "${{ matrix.python-version }}" in
-            3.4|3.5|3.6|3.7)
-                flake8 --extend-exclude scripts/export_tests.py,scripts/pyprint.py .
-                ;;
-            *)
-                flake8 .
-                ;;
-        esac
+        flake8 .
 
     - name: Run tests
       run: |

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2023 Mike Fährmann
+# Copyright 2017-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -40,8 +40,8 @@ class DeprecatedConfigConstAction(argparse.Action):
     """Set argparse const values as config values + deprecation warning"""
     def __call__(self, parser, namespace, values, option_string=None):
         sys.stderr.write(
-            "warning: {} is deprecated. Use {} instead.\n".format(
-                "/".join(self.option_strings), self.choices))
+            f"Warning: {'/'.join(self.option_strings)} is deprecated. "
+            f"Use {self.choices} instead.\n")
         namespace.options.append(((), self.dest, self.const))
 
 
@@ -71,7 +71,7 @@ class MtimeAction(argparse.Action):
     def __call__(self, parser, namespace, value, option_string=None):
         namespace.postprocessors.append({
             "name": "mtime",
-            "value": "{" + (self.const or value) + "}",
+            "value": f"{{{self.const or value}}}",
         })
 
 
@@ -144,7 +144,7 @@ class UgoiraAction(argparse.Action):
             }
             namespace.options.append(((), "ugoira", "original"))
         else:
-            parser.error("Unsupported Ugoira format '{}'".format(value))
+            parser.error(f"Unsupported Ugoira format '{value}'")
 
         pp["name"] = "ugoira"
         pp["whitelist"] = ("pixiv", "danbooru")
@@ -156,10 +156,17 @@ class UgoiraAction(argparse.Action):
 class PrintAction(argparse.Action):
     def __call__(self, parser, namespace, value, option_string=None):
         if self.const:
-            filename = self.const
+            if self.const == "-":
+                namespace.options.append(((), "skip", False))
+                namespace.options.append(((), "download", False))
+                namespace.options.append((("output",), "mode", False))
+            filename = "-"
             base = None
             mode = "w"
         else:
+            if self.const is None:
+                namespace.options.append(((), "skip", False))
+                namespace.options.append(((), "download", False))
             value, path = value
             base, filename = os.path.split(path)
             mode = "a"
@@ -179,11 +186,15 @@ class PrintAction(argparse.Action):
         if not format_string:
             return
 
-        if "{" not in format_string and \
-                " " not in format_string and \
-                format_string[0] != "\f":
-            format_string = "{" + format_string + "}"
-        if format_string[-1] != "\n":
+        if format_string.startswith("\\f"):
+            format_string = "\f" + format_string[2:]
+
+        if format_string[0] == "\f":
+            if format_string[1] == "F" and format_string[-1] != "\n":
+                format_string += "\n"
+        elif "{" not in format_string and " " not in format_string:
+            format_string = f"{{{format_string}}}\n"
+        elif format_string[-1] != "\n":
             format_string += "\n"
 
         namespace.postprocessors.append({
@@ -201,12 +212,19 @@ class Formatter(argparse.HelpFormatter):
     def __init__(self, prog):
         argparse.HelpFormatter.__init__(self, prog, max_help_position=30)
 
-    def _format_action_invocation(self, action, join=", ".join):
+    def _format_action_invocation(self, action):
         opts = action.option_strings
         if action.metavar:
             opts = opts.copy()
-            opts[-1] += " " + action.metavar
-        return join(opts)
+            opts[-1] = f"{opts[-1]} {action.metavar}"
+        return ", ".join(opts)
+
+    def _format_usage(self, usage, actions, groups, prefix):
+        return f"Usage: {self._prog} [OPTIONS] URL [URL...]\n"
+
+    def format_help(self):
+        return self._long_break_matcher.sub(
+            "\n\n", self._root_section.format_help())
 
 
 def _parse_option(opt):
@@ -221,7 +239,6 @@ def _parse_option(opt):
 def build_parser():
     """Build and configure an ArgumentParser object"""
     parser = argparse.ArgumentParser(
-        usage="%(prog)s [OPTION]... URL...",
         formatter_class=Formatter,
         add_help=False,
     )
@@ -268,6 +285,11 @@ def build_parser():
         dest="clear_cache", metavar="MODULE",
         help="Delete cached login sessions, cookies, etc. for MODULE "
              "(ALL to delete everything)",
+    )
+    general.add_argument(
+        "--compat",
+        dest="category-map", nargs=0, action=ConfigConstAction, const="compat",
+        help="Restore legacy 'category' names",
     )
 
     update = parser.add_argument_group("Update Options")
@@ -323,7 +345,7 @@ def build_parser():
     input.add_argument(
         "--no-input",
         dest="input", nargs=0, action=ConfigConstAction, const=False,
-        help=("Do not prompt for passwords/tokens"),
+        help="Do not prompt for passwords/tokens",
     )
 
     output = parser.add_argument_group("Output Options")
@@ -391,13 +413,28 @@ def build_parser():
         dest="postprocessors", metavar="[EVENT:]FORMAT",
         action=PrintAction, const="-", default=[],
         help=("Write FORMAT during EVENT (default 'prepare') to standard "
-              "output. Examples: 'id' or 'post:{md5[:8]}'"),
+              "output instead of downloading files. "
+              "Can be used multiple times. "
+              "Examples: 'id' or 'post:{md5[:8]}'"),
+    )
+    output.add_argument(
+        "--Print",
+        dest="postprocessors", metavar="[EVENT:]FORMAT",
+        action=PrintAction, const="+",
+        help="Like --print, but downloads files as well",
     )
     output.add_argument(
         "--print-to-file",
         dest="postprocessors", metavar="[EVENT:]FORMAT FILE",
-        action=PrintAction, nargs=2,
-        help="Append FORMAT during EVENT to FILE",
+        action=PrintAction, const=None, nargs=2,
+        help=("Append FORMAT during EVENT to FILE instead of downloading "
+              "files. Can be used multiple times"),
+    )
+    output.add_argument(
+        "--Print-to-file",
+        dest="postprocessors", metavar="[EVENT:]FORMAT FILE",
+        action=PrintAction, const=False, nargs=2,
+        help="Like --print-to-file, but downloads files as well",
     )
     output.add_argument(
         "--list-modules",
@@ -406,7 +443,7 @@ def build_parser():
     )
     output.add_argument(
         "--list-extractors",
-        dest="list_extractors", metavar="CATEGORIES", nargs="*",
+        dest="list_extractors", metavar="[CATEGORIES]", nargs="*",
         help=("Print a list of extractor classes "
               "with description, (sub)category and example URL"),
     )
@@ -430,12 +467,12 @@ def build_parser():
     output.add_argument(
         "--print-traffic",
         dest="print_traffic", action="store_true",
-        help=("Display sent and read HTTP traffic"),
+        help="Display sent and read HTTP traffic",
     )
     output.add_argument(
         "--no-colors",
         dest="colors", action="store_false",
-        help=("Do not emit ANSI color codes in output"),
+        help="Do not emit ANSI color codes in output",
     )
 
     networking = parser.add_argument_group("Networking Options")
@@ -481,7 +518,7 @@ def build_parser():
     downloader.add_argument(
         "-r", "--limit-rate",
         dest="rate", metavar="RATE", action=ConfigAction,
-        help="Maximum download rate (e.g. 500k or 2.5M)",
+        help="Maximum download rate (e.g. 500k, 2.5M, or 800k-2M)",
     )
     downloader.add_argument(
         "--chunk-size",
@@ -500,6 +537,12 @@ def build_parser():
         dest="sleep-request", metavar="SECONDS", action=ConfigAction,
         help=("Number of seconds to wait between HTTP requests "
               "during data extraction"),
+    )
+    downloader.add_argument(
+        "--sleep-429",
+        dest="sleep-429", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait when receiving a "
+              "'429 Too Many Requests' response"),
     )
     downloader.add_argument(
         "--sleep-extractor",
@@ -644,7 +687,7 @@ def build_parser():
     selection.add_argument(
         "--download-archive",
         dest="archive", metavar="FILE", action=ConfigAction,
-        help=("Record all downloaded or skipped files in FILE and "
+        help=("Record successfully downloaded files in FILE and "
               "skip downloading any file already in it"),
     )
     selection.add_argument(

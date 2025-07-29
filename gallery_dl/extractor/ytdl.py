@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2023 Mike Fährmann
+# Copyright 2021-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -28,7 +28,7 @@ class YoutubeDLExtractor(Extractor):
         self.ytdl_module_name = ytdl_module.__name__
 
         # find suitable youtube_dl extractor
-        self.ytdl_url = url = match.group(1)
+        self.ytdl_url = url = match[1]
         generic = config.interpolate(("extractor", "ytdl"), "generic", True)
         if generic == "force":
             self.ytdl_ie_key = "Generic"
@@ -42,8 +42,14 @@ class YoutubeDLExtractor(Extractor):
                 raise exception.NoExtractorError()
             self.force_generic_extractor = False
 
-        # set subcategory to youtube_dl extractor's key
-        self.subcategory = self.ytdl_ie_key
+        if self.ytdl_ie_key == "Generic" and config.interpolate(
+                ("extractor", "ytdl"), "generic-category", True):
+            # set subcategory to URL domain
+            self.category = "ytdl-generic"
+            self.subcategory = url[url.rfind("/", None, 8)+1:url.find("/", 8)]
+        else:
+            # set subcategory to youtube_dl extractor's key
+            self.subcategory = self.ytdl_ie_key
         Extractor.__init__(self, match)
 
     def items(self):
@@ -76,8 +82,7 @@ class YoutubeDLExtractor(Extractor):
             ytdl_module, self, user_opts, extr_opts)
 
         # transfer cookies to ytdl
-        cookies = self.cookies
-        if cookies:
+        if cookies := self.cookies:
             set_cookie = ytdl_instance.cookiejar.set_cookie
             for cookie in cookies:
                 set_cookie(cookie)
@@ -89,7 +94,7 @@ class YoutubeDLExtractor(Extractor):
                 ytdl_instance.get_info_extractor(self.ytdl_ie_key),
                 False, {}, True)
         except ytdl_module.utils.YoutubeDLError:
-            raise exception.StopExtraction("Failed to extract video data")
+            raise exception.AbortExtraction("Failed to extract video data")
 
         if not info_dict:
             return
