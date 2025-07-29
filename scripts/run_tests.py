@@ -34,13 +34,13 @@ suite = unittest.TestSuite()
 for test in TESTS:
     try:
         module = __import__(test)
-    except ImportError:
-        print("unable to import", test)
+    except Exception as exc:
+        sys.stderr.write(f"Failed to import {test}: {exc}\n")
     else:
         tests = unittest.defaultTestLoader.loadTestsFromModule(module)
         suite.addTests(tests)
 
 if __name__ == "__main__":
     result = unittest.TextTestRunner(verbosity=2).run(suite)
-    if result.errors or result.failures:
+    if not result.wasSuccessful():
         sys.exit(1)
