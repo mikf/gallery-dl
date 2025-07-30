@@ -47,8 +47,8 @@ __tests__ = (
 },
 
 {
-    "#url"     : "http://cfnmscenesinmovies.blogspot.com/2011/11/cfnm-scene-jenna-fischer-in-office.html",
-    "#comment" : "video (#587)",
+    "#url"     : "https://hotgrannysomas.blogspot.com/2012/08/para-amantes-del-buen-sexo-anal-los.html",
+    "#comment" : "video",
     "#category": ("blogger", "blogspot", "post"),
     "#class"   : blogger.BloggerPostExtractor,
     "#pattern" : r"https://.+\.googlevideo\.com/videoplayback",

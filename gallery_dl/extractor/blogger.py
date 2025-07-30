@@ -31,6 +31,11 @@ class BloggerExtractor(BaseExtractor):
         self.blog = self.root.rpartition("/")[2]
         self.videos = self.config("videos", True)
 
+        if self.videos:
+            self.findall_video = util.re(
+                r"""src=["'](https?://www\.blogger\.com"""
+                r"""/video\.g\?token=[^"']+)""").findall
+
     def items(self):
         blog = self.api.blog_by_url("http://" + self.blog)
         blog["pages"] = blog["pages"]["totalItems"]
@@ -43,8 +48,6 @@ class BloggerExtractor(BaseExtractor):
             r'blogger\.googleusercontent\.com/img|'
             r'lh\d+(?:-\w+)?\.googleusercontent\.com|'
             r'\d+\.bp\.blogspot\.com)/[^"]+)').findall
-        findall_video = util.re(
-            r'src="(https?://www\.blogger\.com/video\.g\?token=[^"]+)').findall
         metadata = self.metadata()
 
         for post in self.posts(blog):
@@ -54,16 +57,10 @@ class BloggerExtractor(BaseExtractor):
             for idx, url in enumerate(files):
                 files[idx] = original(url)
 
-            if self.videos and 'id="BLOG_video-' in content:
-                page = self.request(post["url"]).text
-                for url in findall_video(page):
-                    page = self.request(url).text
-                    video_config = util.json_loads(text.extr(
-                        page, 'var VIDEO_CONFIG =', '\n'))
-                    files.append(max(
-                        video_config["streams"],
-                        key=lambda x: x["format_id"],
-                    )["play_url"])
+            if self.videos and (
+                    'id="BLOG_video-' in content or
+                    'class="BLOG_video_' in content):
+                self._extract_videos(files, post)
 
             post["author"] = post["author"]["displayName"]
             post["replies"] = post["replies"]["totalItems"]
@@ -86,6 +83,27 @@ class BloggerExtractor(BaseExtractor):
 
     def metadata(self):
         """Return additional metadata"""
+
+    def _extract_videos(self, files, post):
+        url = f"https://{self.blog}/feeds/posts/default/{post['id']}"
+        params = {
+            "alt"          : "json",
+            "v"            : "2",
+            "dynamicviews" : "1",
+            "rewriteforssl": "true",
+        }
+
+        data = self.request_json(url, params=params)
+        html = data["entry"]["content"]["$t"]
+
+        for url in self.findall_video(html):
+            page = self.request(url).text
+            video_config = util.json_loads(text.extr(
+                page, 'var VIDEO_CONFIG =', '\n'))
+            files.append(max(
+                video_config["streams"],
+                key=lambda x: x["format_id"],
+            )["play_url"])
 
 
 BASE_PATTERN = BloggerExtractor.update({
