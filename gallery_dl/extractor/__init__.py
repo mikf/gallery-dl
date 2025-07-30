@@ -211,6 +211,7 @@ modules = [
     "wikiart",
     "wikifeet",
     "wikimedia",
+    "xasiat",
     "xfolio",
     "xhamster",
     "xvideos",
