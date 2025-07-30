@@ -350,6 +350,27 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://x.com/carrotsprout_/status/1577924293023133696",
+    "#comment" : "mixed image & video",
+    "#class"   : twitter.TwitterTweetExtractor,
+    "#results" : (
+        "https://pbs.twimg.com/media/FeXpxOyaYAA9L88?format=jpg&name=orig",
+        "https://video.twimg.com/ext_tw_video/1577924276447248386/pu/vid/720x800/kNsjUvJ5knrSx5WM.mp4?tag=12",
+    ),
+},
+
+{
+    "#url"     : "https://x.com/gopherfootball/status/1950259395432239395",
+    "#comment" : "mixed images & video; 'videos' disabled (#7932)",
+    "#class"   : twitter.TwitterTweetExtractor,
+    "#options" : {"videos": False},
+    "#results" : (
+        "https://pbs.twimg.com/media/GxC2eRJWAAAH_NM?format=jpg&name=orig",
+        "https://pbs.twimg.com/media/GxC2eRAWoAA8gGQ?format=jpg&name=orig",
+    ),
+},
+
+{
     "#url"     : "https://twitter.com/playpokemon/status/1263832915173048321/",
     "#comment" : "content with emoji, newlines, hashtags (#338)",
     "#category": ("", "twitter", "tweet"),
