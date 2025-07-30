@@ -52,24 +52,31 @@ class XasiatExtractor(Extractor):
 
 class XasiatAlbumExtractor(XasiatExtractor):
     subcategory = "album"
-    pattern = BASE_PATTERN + r"/\d+/[^/?#]+)"
-    example = "https://www.xasiat.com/albums/12345/abc/"
+    pattern = BASE_PATTERN + r"/(\d+)/[^/?#]+)"
+    example = "https://www.xasiat.com/albums/12345/TITLE/"
 
     def items(self):
-        url = self.root + self.groups[0] + "/"
-        page = self.request(url).text
-        images = text.extr(page, 'class="images">', "<div")
+        path, album_id = self.groups
+        url = f"{self.root}{path}/"
+        response = self.request(url)
+        extr = text.extract_from(response.text)
+
+        title = extr("<h1>", "<")
+        info = extr('class="info-content"', "</div>")
+        images = extr('class="images"', "</div>")
+
         urls = list(text.extract_iter(images, 'href="', '"'))
 
         data = {
-            "title": text.unescape(text.extr(page, "<h1>", "</h1>")),
+            "title": text.unescape(title),
             "model": util.re(
-                r'top_models1"></i>\s*(.+)\s*</span').findall(page),
+                r'top_models1"></i>\s*(.+)\s*</span').findall(info),
             "tags": util.re(
-                r'tags/[^"]+\">\s*(.+)\s*</a').findall(page),
+                r'tags/[^"]+\">\s*(.+)\s*</a').findall(info),
             "album_category": util.re(
-                r'categories/[^"]+\">\s*(.+)\s*</a').findall(page)[0],
-            "album_url": text.unquote(url),
+                r'categories/[^"]+\">\s*(.+)\s*</a').findall(info)[0],
+            "album_url": response.url,
+            "album_id": text.parse_int(album_id),
             "count": len(urls),
         }
 
