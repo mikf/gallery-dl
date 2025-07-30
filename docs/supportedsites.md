@@ -1176,6 +1176,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Xasiat</td>
+    <td>https://www.xasiat.com</td>
+    <td>Albums, Categories, Models, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
     <td>Xfolio</td>
     <td>https://xfolio.jp/</td>
     <td>Series, User Profiles, Works</td>
