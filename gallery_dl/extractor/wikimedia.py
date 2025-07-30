@@ -32,6 +32,7 @@ class WikimediaExtractor(BaseExtractor):
                 f"{self.root.partition('.')[0].rpartition('/')[2]}")
 
         self.per_page = self.config("limit", 50)
+        self.subcategories = False
 
         if useragent := self.config_instance("useragent"):
             self.useragent = useragent
@@ -217,8 +218,8 @@ class WikimediaArticleExtractor(WikimediaExtractor):
             self.subcategory = prefix
 
         if prefix == "category":
-            self.subcategories = \
-                True if self.config("subcategories", True) else False
+            if self.config("subcategories", True):
+                self.subcategories = True
             self.params = {
                 "generator": "categorymembers",
                 "gcmtitle" : path,
@@ -226,12 +227,10 @@ class WikimediaArticleExtractor(WikimediaExtractor):
                 "gcmlimit" : self.per_page,
             }
         elif prefix == "file":
-            self.subcategories = False
             self.params = {
                 "titles"   : path,
             }
         else:
-            self.subcategories = False
             self.params = {
                 "generator": "images",
                 "gimlimit" : self.per_page,
