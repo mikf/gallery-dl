@@ -86,7 +86,7 @@ class XasiatTagExtractor(XasiatExtractor):
 
 class XasiatCategoryExtractor(XasiatExtractor):
     subcategory = "category"
-    pattern = BASE_PATTERN + r"/categories/[^/?#])+"
+    pattern = BASE_PATTERN + r"/categories/[^/?#]+)"
     example = "https://www.xasiat.com/albums/categories/CATEGORY/"
 
 
