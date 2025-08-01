@@ -142,9 +142,9 @@ class Extractor():
 
         return values
 
-    def request(self, url, method="GET", session=None,
-                retries=None, retry_codes=None, encoding=None,
-                fatal=True, notfound=None, **kwargs):
+    def request(self, url, method="GET", session=None, fatal=True,
+                retries=None, retry_codes=None, interval=True,
+                encoding=None, notfound=None, **kwargs):
         if session is None:
             session = self.session
         if retries is None:
@@ -170,7 +170,7 @@ class Extractor():
         response = challenge = None
         tries = 1
 
-        if self._interval:
+        if self._interval and interval:
             seconds = (self._interval() -
                        (time.time() - Extractor.request_timestamp))
             if seconds > 0.0:
