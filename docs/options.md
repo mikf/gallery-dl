@@ -128,10 +128,14 @@
                                 container (default), 'all' for all containers)
 
 ## Selection Options:
-    -A, --abort N               Stop current extractor run after N consecutive
+    -A, --abort N[:TARGET]      Stop current extractor(s) after N consecutive
+                                file downloads were skipped. Specify a TARGET
+                                to set how many levels to ascend or to which
+                                subcategory to jump to. Examples: '-A 3', '-A
+                                3:2', '-A 3:manga'
+    -T, --terminate N           Stop current & parent extractors and proceed
+                                with the next input URL after N consecutive
                                 file downloads were skipped
-    -T, --terminate N           Stop current and parent extractor runs after N
-                                consecutive file downloads were skipped
     --filesize-min SIZE         Do not download files smaller than SIZE (e.g.
                                 500k or 2.5M)
     --filesize-max SIZE         Do not download files larger than SIZE (e.g.
