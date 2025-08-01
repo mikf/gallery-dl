@@ -1767,6 +1767,23 @@ Description
     * ``tiny`` (144p)
 
 
+extractor.booth.strategy
+------------------------
+Type
+    ``string``
+Default
+    ``"webpage"``
+Description
+    Selects how to handle and extract file URLs.
+
+    ``"webpage"``
+        Retrieve the full HTML page
+        and extract file URLs from it
+    ``"fallback"``
+        Use `fallback <extractor.*.fallback_>`__ URLs
+        to `guess` each file's correct filename extension
+
+
 extractor.bunkr.endpoint
 ------------------------
 Type
