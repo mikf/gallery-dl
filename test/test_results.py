@@ -325,7 +325,13 @@ class TestExtractorResults(unittest.TestCase):
                 if cls:
                     self.assertEqual(
                         cls, type(value).__name__, msg=path + "/type")
-                self.assertEqual(int(length), len(value), msg=path)
+                try:
+                    len_value = len(value)
+                except Exception:
+                    len_value = 0
+                    for _ in value:
+                        len_value += 1
+                self.assertEqual(int(length), len_value, msg=path)
             else:
                 self.assertEqual(test, value, msg=path)
         else:
