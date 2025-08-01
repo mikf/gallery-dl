@@ -383,3 +383,16 @@ class FappicImageExtractor(ImagehostImageExtractor):
             filename = filename[13:]
 
         return url, filename
+
+
+class PicstateImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from picstate.com"""
+    category = "picstate"
+    pattern = r"(?:https?://)?((?:www\.)?picstate\.com/view/full/([^/?#]+))"
+    example = "https://picstate.com/view/full/123"
+
+    def get_info(self, page):
+        pos = page.index(' id="image_container"')
+        url     , pos = text.extract(page, '<img src="', '"', pos)
+        filename, pos = text.extract(page, 'alt="', '"', pos)
+        return url, filename
