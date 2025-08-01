@@ -32,6 +32,10 @@ class HentaifoundryExtractor(Extractor):
         self.start_post = 0
         self.start_page = 1
 
+    def _init(self):
+        if self.config("descriptions") == "html":
+            self._process_description = self._process_html_description
+
     def items(self):
         self._init_site_filters()
         data = self.metadata()
@@ -77,9 +81,9 @@ class HentaifoundryExtractor(Extractor):
             "artist"     : text.unescape(extr('/profile">', '<')),
             "_body"      : extr(
                 '<div class="boxbody"', '<div class="boxfooter"'),
-            "description": text.unescape(text.remove_html(extr(
-                '>Description</div>', '</section>')
-                .replace("\r\n", "\n"), "", "")),
+            "_description": extr(
+                "<div class='picDescript'>", '</section>')
+                .replace("\r\n", "\n"),
             "ratings"    : [text.unescape(r) for r in text.extract_iter(extr(
                 "class='ratings_box'", "</div>"), "title='", "'")],
             "date"       : text.parse_datetime(extr("datetime='", "'")),
@@ -90,6 +94,7 @@ class HentaifoundryExtractor(Extractor):
                 ">Tags </span>", "</div>")),
         }
 
+        data["description"] = self._process_description(data["_description"])
         body = data["_body"]
         if "<object " in body:
             data["src"] = text.urljoin(self.root, text.unescape(text.extr(
@@ -105,6 +110,14 @@ class HentaifoundryExtractor(Extractor):
             data["height"] = text.parse_int(text.extr(body, 'height="', '"'))
 
         return text.nameext_from_url(data["src"], data)
+
+    def _process_html_description(self, description: str):
+        pos1 = description.rfind('</div') # picDescript
+        pos2 = description.rfind('</div', None, pos1) # boxBody
+        return str.strip(description[0:pos2])
+
+    def _process_description(self, description):
+        return text.unescape(text.remove_html(description, "", ""))
 
     def _parse_story(self, html):
         """Collect url and metadata for a story"""
