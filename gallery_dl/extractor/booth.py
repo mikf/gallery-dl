@@ -49,12 +49,25 @@ class BoothItemExtractor(BoothExtractor):
 
     def items(self):
         url = f"{self.root}/ja/items/{self.groups[0]}"
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-CSRF-Token": None,
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+            "Priority": "u=4",
+        }
+
         if self.config("strategy") == "fallback":
             page = None
-            item = self.request_json(url + ".json")
+            item = self.request_json(url + ".json", headers=headers)
         else:
             page = self.request(url).text
-            item = self.request_json(url + ".json", interval=False)
+            headers["X-CSRF-Token"] = text.extr(
+                page, 'name="csrf-token" content="', '"')
+            item = self.request_json(
+                url + ".json", headers=headers, interval=False)
 
         item["booth_category"] = item.pop("category", None)
         item["date"] = text.parse_datetime(
