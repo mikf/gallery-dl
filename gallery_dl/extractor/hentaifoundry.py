@@ -83,7 +83,7 @@ class HentaifoundryExtractor(Extractor):
                 '<div class="boxbody"', '<div class="boxfooter"'),
             "_description": extr(
                 "<div class='picDescript'>", '</section>')
-                .replace("\r\n", "\n"),
+            .replace("\r\n", "\n"),
             "ratings"    : [text.unescape(r) for r in text.extract_iter(extr(
                 "class='ratings_box'", "</div>"), "title='", "'")],
             "date"       : text.parse_datetime(extr("datetime='", "'")),
@@ -112,8 +112,8 @@ class HentaifoundryExtractor(Extractor):
         return text.nameext_from_url(data["src"], data)
 
     def _process_html_description(self, description: str):
-        pos1 = description.rfind('</div') # picDescript
-        pos2 = description.rfind('</div', None, pos1) # boxBody
+        pos1 = description.rfind('</div')  # picDescript
+        pos2 = description.rfind('</div', None, pos1)  # boxBody
         return str.strip(description[0:pos2])
 
     def _process_description(self, description):
