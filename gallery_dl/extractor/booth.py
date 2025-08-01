@@ -22,7 +22,7 @@ class BoothExtractor(Extractor):
     request_interval = (0.5, 1.5)
 
     def _init(self):
-        self.cookies.set("adult", "1", domain=".booth.pm")
+        self.cookies.set("adult", "t", domain=".booth.pm")
 
     def items(self):
         for item in self.shop_items():
@@ -48,8 +48,13 @@ class BoothItemExtractor(BoothExtractor):
     example = "https://booth.pm/items/12345"
 
     def items(self):
-        url = f"{self.root}/ja/items/{self.groups[0]}.json"
-        item = self.request_json(url)
+        url = f"{self.root}/ja/items/{self.groups[0]}"
+        if self.config("strategy") == "fallback":
+            page = None
+            item = self.request_json(url + ".json")
+        else:
+            page = self.request(url).text
+            item = self.request_json(url + ".json", interval=False)
 
         item["booth_category"] = item.pop("category", None)
         item["date"] = text.parse_datetime(
@@ -59,7 +64,7 @@ class BoothItemExtractor(BoothExtractor):
         shop = item["shop"]
         shop["id"] = text.parse_int(shop["thumbnail_url"].rsplit("/", 3)[1])
 
-        if files := self._extract_files(item):
+        if files := self._extract_files(item, page):
             item["count"] = len(files)
             shop["uuid"] = files[0]["url"].split("/", 4)[3]
         else:
@@ -73,17 +78,20 @@ class BoothItemExtractor(BoothExtractor):
             text.nameext_from_url(url, file)
             yield Message.Url, url, {**item, **file}
 
-    def _extract_files(self, item):
-        files = []
+    def _extract_files(self, item, page):
+        if page is None:
+            files = []
+            for image in item.pop("images"):
+                url = image["original"].replace("_base_resized", "")
+                files.append({
+                    "url"      : url,
+                    "_fallback": _fallback(url),
+                })
+            return files
 
-        for image in item.pop("images"):
-            url = image["original"].replace("_base_resized", "")
-            files.append({
-                "url"      : url,
-                "_fallback": _fallback(url),
-            })
-
-        return files
+        del item["images"]
+        return [{"url": url}
+                for url in text.extract_iter(page, 'data-origin="', '"')]
 
 
 class BoothShopExtractor(BoothExtractor):

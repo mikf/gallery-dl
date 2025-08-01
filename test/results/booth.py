@@ -11,18 +11,10 @@ __tests__ = (
 {
     "#url"     : "https://booth.pm/ja/items/4693741",
     "#class"   : booth.BoothItemExtractor,
-    "#pattern" : r"https://booth.pximg.net/792d497b-6e82-4df3-86de-31577e10f476/i/4693741/[\w-]{36}.jpg",
+    "#pattern" : r"https://booth.pximg.net/792d497b-6e82-4df3-86de-31577e10f476/i/4693741/[\w-]{36}\.(jpg|png)",
     "#count"   : 10,
 
-    "booth_category"  : {
-        "id"    : 56,
-        "name"  : "漫画・マンガ",
-        "url"   : "https://booth.pm/ja/browse/%E6%BC%AB%E7%94%BB%E3%83%BB%E3%83%9E%E3%83%B3%E3%82%AC",
-        "parent": {
-            "name": "漫画",
-            "url" : "https://booth.pm/ja/browse/%E6%BC%AB%E7%94%BB",
-        },
-    },
+    "!_fallback"      : ...,
     "buyee_variations": [],
     "count"           : 10,
     "num"             : range(1, 10),
@@ -63,11 +55,28 @@ https://www.melonbooks.co.jp/detail/detail.php?product_id=1872452""",
     "published_at"    : "2023-04-16T23:25:29.000+09:00",
     "purchase_limit"  : None,
     "report_url"      : "https://wanoazayaka.booth.pm/items/4693741/report",
+    "shipping_info"   : "支払いから発送までの日数：4日以内",
+    "small_stock"     : None,
+    "sound"           : None,
+    "tracks"          : None,
+    "url"             : str,
+    "wish_list_url"   : "https://booth.pm/items/4693741/wish_list",
+    "wish_lists_count": range(80, 120),
+    "wished"          : False,
+    "tag_banners"     : "len:list:5",
+    "booth_category"  : {
+        "id"    : 56,
+        "name"  : "漫画・マンガ",
+        "url"   : "https://booth.pm/ja/browse/%E6%BC%AB%E7%94%BB%E3%83%BB%E3%83%9E%E3%83%B3%E3%82%AC",
+        "parent": {
+            "name": "漫画",
+            "url" : "https://booth.pm/ja/browse/%E6%BC%AB%E7%94%BB",
+        },
+    },
     "share"           : {
         "hashtags": ["booth_pm"],
         "text"    : "※英語版※ I can no longer hear the railway crossing.【Bocchi the rock!】 | ふたりぼっちのSolitude",
     },
-    "shipping_info"   : "支払いから発送までの日数：4日以内",
     "shop"            : {
         "id"           : 5742915,
         "uuid"         : "792d497b-6e82-4df3-86de-31577e10f476",
@@ -77,14 +86,6 @@ https://www.melonbooks.co.jp/detail/detail.php?product_id=1872452""",
         "url"          : "https://wanoazayaka.booth.pm/",
         "verified"     : False,
     },
-    "small_stock"     : None,
-    "sound"           : None,
-    "tracks"          : None,
-    "url"             : str,
-    "wish_list_url"   : "https://booth.pm/items/4693741/wish_list",
-    "wish_lists_count": range(80, 120),
-    "wished"          : False,
-    "tag_banners"     : "len:list:5",
     "tag_combination" : {
         "category": "漫画・マンガ",
         "tag"     : "ぼっち・ざ・ろっく!",
@@ -124,9 +125,10 @@ https://www.melonbooks.co.jp/detail/detail.php?product_id=1872452""",
     "#results" : (
         "https://booth.pximg.net/74488d0d-e533-443c-82ce-fa961d5cbaf0/i/7236173/131bf61c-0534-4af3-9408-f19f08cb3622.jpg",
         "https://booth.pximg.net/74488d0d-e533-443c-82ce-fa961d5cbaf0/i/7236173/fb65233a-7a93-4219-ba9f-b63e11329fda.jpg",
-        "https://booth.pximg.net/74488d0d-e533-443c-82ce-fa961d5cbaf0/i/7236173/e18c16a0-b285-4cd8-aacc-6b3c4f4c6ce3.jpg",
+        "https://booth.pximg.net/74488d0d-e533-443c-82ce-fa961d5cbaf0/i/7236173/e18c16a0-b285-4cd8-aacc-6b3c4f4c6ce3.jpeg",
     ),
 
+    "!_fallback"      : ...,
     "count"           : 3,
     "date"            : "dt:2025-07-28 07:00:43",
     "description"     : """C106新作おっぱいマウスパッドです
@@ -182,6 +184,19 @@ https://www.melonbooks.co.jp/detail/detail.php?product_id=1872452""",
         "C106",
         "c106新作",
     ],
+},
+
+{
+    "#url"     : "https://caramel-crunch.booth.pm/items/7236173",
+    "#class"   : booth.BoothItemExtractor,
+    "#options" : {"strategy": "fallback"},
+    "#results" : (
+        "https://booth.pximg.net/74488d0d-e533-443c-82ce-fa961d5cbaf0/i/7236173/131bf61c-0534-4af3-9408-f19f08cb3622.jpg",
+        "https://booth.pximg.net/74488d0d-e533-443c-82ce-fa961d5cbaf0/i/7236173/fb65233a-7a93-4219-ba9f-b63e11329fda.jpg",
+        "https://booth.pximg.net/74488d0d-e533-443c-82ce-fa961d5cbaf0/i/7236173/e18c16a0-b285-4cd8-aacc-6b3c4f4c6ce3.jpg",
+    ),
+
+    "_fallback": "len:3",
 },
 
 {
