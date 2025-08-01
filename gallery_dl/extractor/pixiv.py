@@ -308,7 +308,12 @@ class PixivExtractor(Extractor):
             square1200 = body["userIllusts"][body["id"]]["url"]
         except Exception:
             return
+
         parts = square1200.rpartition("_p0")[0].split("/")
+        if len(parts) < 6:
+            return self.log.warning(
+                "%s: %s", body["id"], square1200.rpartition("/")[2])
+
         del parts[3:5]
         parts[3] = "img-original"
         base = "/".join(parts)
