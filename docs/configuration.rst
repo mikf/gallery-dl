@@ -1973,6 +1973,20 @@ Description
     `quality <extractor.civitai.quality_>`__ ones.
 
 
+extractor.comick.lang
+---------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Example
+    * ``"en"``
+    * ``"fr,it,pl"``
+    * ``["fr", "it", "pl"]``
+Description
+    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language codes
+    to filter chapters by.
+
+
 extractor.cyberdrop.domain
 --------------------------
 Type

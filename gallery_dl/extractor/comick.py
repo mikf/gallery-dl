@@ -160,8 +160,15 @@ class ComickMangaExtractor(ComickBase, MangaExtractor):
             "Sec-Fetch-Site": "same-site",
         }
 
-        query = text.parse_query(query)
-        params = {"lang": query.get("lang") or None}
+        query = text.parse_query_list(query, ("lang",))
+
+        if (lang := query.get("lang")) or (lang := self.config("lang")):
+            if not isinstance(lang, str):
+                lang = ",".join(lang)
+        else:
+            lang = None
+
+        params = {"lang": lang}
         params["page"] = page = text.parse_int(query.get("page"), 1)
 
         if date_order := query.get("date-order"):
@@ -172,7 +179,7 @@ class ComickMangaExtractor(ComickBase, MangaExtractor):
             params["chap-order"] = \
                 "0" if self.config("chapter-reverse", False) else "1"
 
-        group = query.get("group", None)
+        group = query.get("group")
         if group == "0":
             group = None
 
