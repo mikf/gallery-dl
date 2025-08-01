@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"    : "https://scrolller.com/r/AmateurPhotography",
     "#class"  : scrolller.ScrolllerSubredditExtractor,
-    "#pattern": r"https://static\.scrolller\.com/\w+/(\w+/)?[\w-]+-\w+\.(jpg|png|webp)",
+    "#pattern": r"https://images\.scrolller\.com/\w+/[\w-]+\.\w+",
     "#range"  : "1-100",
     "#count"  : 100,
 
@@ -40,9 +40,24 @@ __tests__ = (
 },
 
 {
+    "#url"    : "https://scrolller.com/r/gonewanton",
+    "#comment": "NSFW subreddit",
+    "#class"  : scrolller.ScrolllerSubredditExtractor,
+    "#pattern": r"https://\w+\.scrolller\.com/(\w+/)?[\w-]+\.\w+",
+    "#range"  : "1-100",
+    "#count"  : 100,
+
+    "isNsfw"          : True,
+    "redditPath"      : r"re:/r/gonewanton/comments/...",
+    "subredditId"     : {0, 4403},
+    "subredditTitle"  : "gonewanton",
+    "subredditUrl"    : "/r/gonewanton",
+},
+
+{
     "#url"  : "https://scrolller.com/cabin-in-northern-finland-7nagf1929p",
     "#class": scrolller.ScrolllerPostExtractor,
-    "#results": "https://static.scrolller.com/yocto/cabin-in-northern-finland-93vjsuxmcz.jpg",
+    "#pattern": "https://images.scrolller.com/yocto/cabin-in-northern-finland-93vjsuxmcz.jpg",
 
     "count"           : 1,
     "displayName"     : None,
@@ -66,7 +81,7 @@ __tests__ = (
     "subredditUrl"    : "/r/AmateurPhotography",
     "tags"            : None,
     "title"           : "Cabin in northern Finland",
-    "url"             : "https://static.scrolller.com/yocto/cabin-in-northern-finland-93vjsuxmcz.jpg",
+    "url"             : "https://images.scrolller.com/yocto/cabin-in-northern-finland-93vjsuxmcz.jpg",
     "username"        : "",
     "width"           : 1080,
 },
@@ -75,7 +90,7 @@ __tests__ = (
     "#url"    : "https://scrolller.com/long-comic-the-twelve-tasks-of-eve-12ch1ve8ko",
     "#comment": "album post (#7339)",
     "#class"  : scrolller.ScrolllerPostExtractor,
-    "#pattern": r"https://static\.scrolller\.com/\w+/long-comic-the-twelve-tasks-of-eve-\d+-\w+\.png",
+    "#pattern": r"https://images\.scrolller\.com/\w+/long-comic-the-twelve-tasks-of-eve-\d+-\w+\.png",
     "#count"  : 177,
 
     "count": 177,
@@ -86,7 +101,7 @@ __tests__ = (
     "#url"    : "https://scrolller.com/some-quick-news-tboi-rule-34-mod-czedll1bum",
     "#comment": "album post with empty 'mediaSources' (#7428)",
     "#class"  : scrolller.ScrolllerPostExtractor,
-    "#results": "https://static.scrolller.com/gamma/some-quick-news-tboi-rule-34-mod-1-50uolks94u.png",
+    "#results": "https://images.scrolller.com/gamma/some-quick-news-tboi-rule-34-mod-1-50uolks94u.png",
     "#count"  : 1,
 
     "count": 1,

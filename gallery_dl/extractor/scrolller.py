@@ -115,7 +115,7 @@ class ScrolllerExtractor(Extractor):
         )["data"]
 
     def _pagination(self, opname, variables, data=None):
-        if data is None:
+        if data is None or not data.get("items"):
             data = self._request_graphql(opname, variables)
 
         while True:
