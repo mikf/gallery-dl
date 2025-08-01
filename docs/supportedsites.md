@@ -734,6 +734,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Picstate</td>
+    <td>https://picstate.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Pictoa</td>
     <td>https://pictoa.com/</td>
     <td>Albums, individual Images</td>
