@@ -10,9 +10,11 @@
 
 import os
 import sys
+import tty
 import json
 import time
 import random
+import select
 import getpass
 import hashlib
 import binascii
@@ -1083,6 +1085,7 @@ class RangePredicate():
 
 class UniquePredicate():
     """Predicate; True if given URL has not been encountered before"""
+
     def __init__(self):
         self.urls = set()
 
@@ -1109,3 +1112,78 @@ class FilterPredicate():
             raise
         except Exception as exc:
             raise exception.FilterError(exc)
+
+
+def choose_term_color_theme(base, dark, light):
+    """
+    Makes a best-effort guess at user's terminal color scheme. Returns a dict
+    based on either base+dark or base+light, depending on the result. If no
+    determination can be made, dark mode is returned. All colors can be
+    overridden with environment variables.
+    """
+
+    keys = ["success", "skip", "debug", "info", "warning", "error"]
+
+    def value(k, mod):
+        return os.environ.get(f"COLOR_{k}".upper()) \
+            or (mod[k] if k in mod else base[k])
+
+    DARK = dict([(k, value(k, dark)) for k in keys])
+    LIGHT = dict([(k, value(k, light)) for k in keys])
+
+    if os.environ.get("TERM_LIGHT"):
+        return LIGHT
+
+    FALLBACK = DARK
+
+    # rxvt-derived terminals
+    rxvt = os.environ.get("COLORFGBG")
+    if rxvt:
+        try:
+            # format FG;BG
+            FALLBACK = DARK if float(rxvt.split(";")[1]) < 8 else LIGHT
+        except (ValueError, IndexError):
+            pass
+
+    # guard against other terms (including windows)
+    if not (os.environ.get("TERM") or "").startswith("xterm"):
+        return FALLBACK
+
+    # xterm query
+    try:
+        import termios
+    except ImportError:
+        pass
+    else:
+        try:
+            fd = sys.stdin.fileno()
+            prev = termios.tcgetattr(fd)
+            try:
+                tty.setraw(fd)
+                sys.stdout.write("\x1b]11;?\x07")
+                sys.stdout.flush()
+
+                readable, _, _ = select.select([fd], [], [], 0.1)
+
+                if readable:
+                    response_bytes = os.read(fd, 1024)
+                    response = response_bytes.decode("ascii", errors="ignore")
+
+                    # format: \x1b]11;rgb:RRRR/GGGG/BBBB\x07
+                    parts = response.split(';')[1].split('/')
+                    r, g, b = (parts[0][4:],
+                               parts[1],
+                               parts[2].replace('\x07', ''))
+                    r = 0.2 * (int(r, 16) / 65535)
+                    g = 0.7 * (int(g, 16) / 65535)
+                    b = 0.1 * (int(b, 16) / 65535)
+
+                    return DARK if r+g+b < 0.5 else LIGHT
+            except (IOError, termios.error, IndexError, ValueError):
+                pass
+            finally:
+                termios.tcsetattr(fd, termios.TCSADRAIN, prev)
+        except termios.error:
+            pass
+
+    return FALLBACK
