@@ -369,6 +369,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/artworks/56360615",
+    "#comment" : "limit_unviewable_s / unavailable without cookies (#7940)",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#count"   : 11,
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/artworks/966412",
     "#class"   : pixiv.PixivWorkExtractor,
 },
