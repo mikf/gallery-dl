@@ -2970,7 +2970,7 @@ Description
 
 
 extractor.hentaifoundry.descriptions
-----------------------------------
+------------------------------------
 Type
     ``string``
 Default
