@@ -44,6 +44,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/profile.php?id=100074229772340/photos",
+    "#comment" : "pfbid user ID (#7953)",
+    "#class"   : facebook.FacebookPhotosExtractor,
+    "#range"   : "1",
+
+    "user_id"   : "100074229772340",
+    "user_pfbid": "pfbid0xCZArBYwZ9d4KLbXzSLF6YNUTY3rTJhPpVZ92gBpFQi1JK9RemJ5KhtqSJXkVnQ3l",
+},
+
+{
     "#url"     : "https://www.facebook.com/facebook/photos_by",
     "#class"   : facebook.FacebookPhotosExtractor,
 },
@@ -124,13 +134,43 @@ __tests__ = (
 
     "caption"  : "",
     "date"     : datetime.datetime(2014, 5, 3, 0, 44, 47),
-    "filename" : "10334445_10152716011076729_6502314875328401420_n",
+    "filename" : str,
     "extension": "png",
     "id"       : "10152716011076729",
     "set_id"   : "a.10152716010956729",
     "url"      : str,
     "user_id"  : "100064860875397",
+    "user_pfbid": "",
     "username" : "Facebook",
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo.php?fbid=1143447107814264&set=pb.100064469571787.-2207520000&type=3",
+    "#class"   : facebook.FacebookPhotoExtractor,
+    "#count"   : 1,
+
+    "caption"  : "Wanting to post a pic on Stories but it’s too small? 😡❌\n\nTry using Meta AI to make the pic fit your screen 😇✅\n\n(Available in most of the US)",
+    "date"     : "dt:2025-05-30 18:47:34",
+    "extension": "jpg",
+    "id"       : "1143447107814264",
+    "set_id"   : "a.596799269145720",
+    "user_id"  : "100064469571787",
+    "user_pfbid": "",
+    "username" : "Instagram",
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo/?fbid=221820450302279",
+    "#comment" : "pfbid user ID (#7953)",
+    "#class"   : facebook.FacebookPhotoExtractor,
+
+    "date"    : "dt:2023-02-05 22:41:02",
+    "id"      : "221820450302279",
+    "set_id"  : "a.109762038174788",
+    "user_id" : "100074229772340",
+    "user_pfbid": "pfbid0xCZArBYwZ9d4KLbXzSLF6YNUTY3rTJhPpVZ92gBpFQi1JK9RemJ5KhtqSJXkVnQ3l",
+    "username": "Throwaway Kwon",
+
 },
 
 {
@@ -155,7 +195,7 @@ __tests__ = (
     "#count"   : 1,
 
     "date"     : datetime.datetime(2024, 4, 19, 17, 25, 48),
-    "filename" : "462125225_400524393116630_7457168924362807384_n",
+    "filename" : str,
     "id"       : "1165557851291824",
     "url"      : str,
     "user_id"  : "100064860875397",

@@ -61,6 +61,7 @@ class FacebookExtractor(Extractor):
             "user_id": text.extr(
                 set_page, '"owner":{"__typename":"User","id":"', '"'
             ),
+            "user_pfbid": "",
             "title": self.decode_all(text.extr(
                 set_page, '"title":{"text":"', '"'
             )),
@@ -73,6 +74,13 @@ class FacebookExtractor(Extractor):
                 set_page, '{"__typename":"Photo","id":"', '"'
             )
         }
+
+        if directory["user_id"].startswith("pfbid"):
+            directory["user_pfbid"] = directory["user_id"]
+            directory["user_id"] = (
+                text.extr(
+                    set_page, '"actors":[{"__typename":"User","id":"', '"') or
+                directory["set_id"].split(".")[1])
 
         return directory
 
@@ -92,6 +100,7 @@ class FacebookExtractor(Extractor):
             "user_id": text.extr(
                 photo_page, '"owner":{"__typename":"User","id":"', '"'
             ),
+            "user_pfbid": "",
             "caption": self.decode_all(text.extr(
                 photo_page,
                 '"message":{"delight_ranges"',
@@ -114,6 +123,11 @@ class FacebookExtractor(Extractor):
                 '"'
             )
         }
+
+        if photo["user_id"].startswith("pfbid"):
+            photo["user_pfbid"] = photo["user_id"]
+            photo["user_id"] = text.extr(
+                photo_page, r'\"content_owner_id_new\":\"', r'\"')
 
         text.nameext_from_url(photo["url"], photo)
 
