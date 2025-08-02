@@ -1204,11 +1204,9 @@ class ProxyRotator():
     def rotate(self):
         """
         Forces a new proxy to be chosen for the next session.
-        Only applies to 'random' strategy.
         """
         with self._lock:
-            if self.strategy == "random":
-                self._session_proxy_info = None
+            self._session_proxy_info = None
 
 
 class FilterPredicate():

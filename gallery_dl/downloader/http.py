@@ -125,7 +125,7 @@ class HttpDownloader(DownloaderBase):
                 scheme: proxy_url
                 for scheme in proxy_info["schemes"]
             }
-            self.log.debug("Downloader using session proxy: %s ", proxy_url)
+            self.log.debug("Downloader using rotated proxy: %s ", proxy_url)
 
         while True:
             if tries:
@@ -136,6 +136,17 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning("%s (%s/%s)", msg, tries, self.retries+1)
                 if tries > self.retries:
                     return False
+
+                if self._proxy_rotator and self._proxy_rotate:
+                    self._proxy_rotator.rotate()
+                    proxy_info = self._proxy_rotator.get_proxy()
+                    proxy_url = proxy_info["url"]
+                    proxies = {
+                        scheme: proxy_url
+                        for scheme in proxy_info["schemes"]
+                    }
+                    self.log.debug(
+                        "Rotating to proxy: %s", proxy_url)
 
                 if code == 429 and self.interval_429:
                     s = self.interval_429()
