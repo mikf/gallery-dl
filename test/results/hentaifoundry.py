@@ -145,6 +145,24 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.hentai-foundry.com/pictures/user/Soloid/186714/Osaloop",
+    "#comment" : "HTML 'description'",
+    "#class"   : hentaifoundry.HentaifoundryImageExtractor,
+    "#options" : {"descriptions": "html"},
+    "#results" : "https://pictures.hentai-foundry.com/s/Soloid/186714/Soloid-186714-Osaloop.swf",
+
+    "description": """\
+It took me ages.<br />
+I hope you&#039;ll like it.<br />
+Sorry for the bad quality, I made it on after effect because Flash works like shit when you have 44 layers to animate, and the final ae SWF file is 55mo big.\
+""",
+    "extension"  : "swf",
+    "index"      : 186714,
+    "tags"       : ["soloid"],
+    "title"      : "Osaloop",
+},
+
+{
     "#url"     : "http://www.hentai-foundry.com/pictures/user/Tenpura/407501/",
     "#category": ("", "hentaifoundry", "image"),
     "#class"   : hentaifoundry.HentaifoundryImageExtractor,

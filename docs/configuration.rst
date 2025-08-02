@@ -3000,6 +3000,19 @@ Description
     Recursively download files from subfolders.
 
 
+extractor.hentaifoundry.descriptions
+------------------------------------
+Type
+    ``string``
+Default
+    ``"text"``
+Description
+    Controls the format of ``description`` metadata fields.
+
+    * ``"text"``: Plain text with HTML tags removed
+    * ``"html"``: Raw HTML content
+
+
 extractor.hentaifoundry.include
 -------------------------------
 Type
