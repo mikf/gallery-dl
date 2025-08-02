@@ -10,7 +10,7 @@
 import re
 
 
-def pyprint(obj, indent=0, lmax=16):
+def pyprint(obj, indent=0, sort=None, lmax=16):
 
     if isinstance(obj, str):
         if obj.startswith("lit:"):
@@ -48,7 +48,18 @@ def pyprint(obj, indent=0, lmax=16):
             return "{}"
         if len(obj) == 1:
             key, value = next(iter(obj.items()))
-            return f'''{{"{key}": {pyprint(value, indent)}}}'''
+            return f'''{{"{key}": {pyprint(value, indent, sort)}}}'''
+
+        if sort:
+            if callable(sort):
+                lst = [(sort(key, value), key, value)
+                       for key, value in obj.items()]
+                lst.sort()
+                obj = {key: value for _, key, value in lst}
+            else:
+                keys = list(obj)
+                keys.sort()
+                obj = {key: obj[key] for key in keys}
 
         ws = " " * indent
         key_maxlen = max(kl for kl in map(len, obj) if kl <= lmax)
@@ -61,7 +72,7 @@ def pyprint(obj, indent=0, lmax=16):
                 lines.append(
                     f'''{ws}    "{key}"'''
                     f'''{' '*(key_maxlen - len(key))}: '''
-                    f'''{pyprint(value, indent+4)},'''
+                    f'''{pyprint(value, indent+4, sort)},'''
                 )
         lines.append(f'''{ws}}}''')
         return "\n".join(lines)
@@ -70,13 +81,13 @@ def pyprint(obj, indent=0, lmax=16):
         if not obj:
             return "[]"
         if len(obj) == 1:
-            return f'''[{pyprint(obj[0], indent)}]'''
+            return f'''[{pyprint(obj[0], indent, sort)}]'''
 
         ws = " " * indent
 
         lines = ["["]
         lines.extend(
-            f'''{ws}    {pyprint(value, indent+4)},'''
+            f'''{ws}    {pyprint(value, indent+4, sort)},'''
             for value in obj
         )
         lines.append(f'''{ws}]''')
@@ -86,13 +97,13 @@ def pyprint(obj, indent=0, lmax=16):
         if not obj:
             return "()"
         if len(obj) == 1:
-            return f'''({pyprint(obj[0])},)'''
-        return f'''({", ".join(pyprint(v, indent+4) for v in obj)})'''
+            return f'''({pyprint(obj[0], indent, sort)},)'''
+        return f'''({", ".join(pyprint(v, indent+4, sort) for v in obj)})'''
 
     if isinstance(obj, set):
         if not obj:
             return "set()"
-        return f'''{{{", ".join(pyprint(v, indent+4) for v in obj)}}}'''
+        return f'''{{{", ".join(pyprint(v, indent+4, sort) for v in obj)}}}'''
 
     if obj.__class__.__name__ == "datetime":
         if (off := obj.utcoffset()) is not None:
