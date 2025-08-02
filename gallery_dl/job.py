@@ -734,8 +734,8 @@ class SimulationJob(DownloadJob):
     """Simulate the extraction process without downloading anything"""
 
     def handle_url(self, url, kwdict):
-        if not kwdict["extension"]:
-            kwdict["extension"] = "jpg"
+        ext = kwdict["extension"] or "jpg"
+        kwdict["extension"] = self.pathfmt.extension_map(ext, ext)
         if self.sleep:
             self.extractor.sleep(self.sleep(), "download")
         if self.archive and self._archive_write_skip:
