@@ -22,11 +22,21 @@ class YoutubeDLDownloader(DownloaderBase):
 
         extractor = job.extractor
         retries = self.config("retries", extractor._retries)
+        self.retries = retries
+        proxy_url = None
+
+        if self.proxies:
+            proxy_url = self.proxies.get("http")
+        elif self._proxy_rotator:
+            proxy_info = self._proxy_rotator.get_proxy()
+            proxy_url = proxy_info["url"]
+            self.log.debug("Downloader using rotated proxy: %s", proxy_url)
+
         self.ytdl_opts = {
-            "retries": retries+1 if retries >= 0 else float("inf"),
+            "retries": 0,
             "socket_timeout": self.config("timeout", extractor._timeout),
             "nocheckcertificate": not self.config("verify", extractor._verify),
-            "proxy": self.proxies.get("http") if self.proxies else None,
+            "proxy": proxy_url,
         }
 
         self.ytdl_instance = None
@@ -154,11 +164,29 @@ class YoutubeDLDownloader(DownloaderBase):
             path = pathfmt.realpath.replace("%", "%%")
 
         self._set_outtmpl(ytdl_instance, path)
-        try:
-            ytdl_instance.process_info(info_dict)
-        except Exception as exc:
-            self.log.debug("", exc_info=exc)
-            return False
+        tries = 0
+        while True:
+            try:
+                ytdl_instance.process_info(info_dict)
+                break
+            except Exception as exc:
+                if tries < self.retries:
+                    tries += 1
+                    if self._proxy_rotator and self._proxy_rotate:
+                        self._proxy_rotator.rotate()
+                        proxy_info = self._proxy_rotator.get_proxy()
+                        proxy_url = proxy_info["url"]
+                        ytdl_instance.params["proxy"] = proxy_url
+                        self.log.debug(
+                            "Download error, rotating to proxy: %s (%d/%d)",
+                            proxy_url, tries, self.retries)
+                    else:
+                        self.log.debug(
+                            "Download error, retrying (%d/%d)",
+                            tries, self.retries)
+                    continue
+                self.log.debug("", exc_info=exc)
+                return False
 
         pathfmt.temppath = info_dict.get("filepath") or info_dict["_filename"]
         return True

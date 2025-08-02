@@ -117,6 +117,16 @@ class HttpDownloader(DownloaderBase):
         if self.part and not metadata:
             pathfmt.part_enable(self.partdir)
 
+        proxies = self.proxies
+        if self._proxy_rotator:
+            proxy_info = self._proxy_rotator.get_proxy()
+            proxy_url = proxy_info["url"]
+            proxies = {
+                scheme: proxy_url
+                for scheme in proxy_info["schemes"]
+            }
+            self.log.debug("Downloader using rotated proxy: %s ", proxy_url)
+
         while True:
             if tries:
                 if response:
@@ -126,6 +136,17 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning("%s (%s/%s)", msg, tries, self.retries+1)
                 if tries > self.retries:
                     return False
+
+                if self._proxy_rotator and self._proxy_rotate:
+                    self._proxy_rotator.rotate()
+                    proxy_info = self._proxy_rotator.get_proxy()
+                    proxy_url = proxy_info["url"]
+                    proxies = {
+                        scheme: proxy_url
+                        for scheme in proxy_info["schemes"]
+                    }
+                    self.log.debug(
+                        "Rotating to proxy: %s", proxy_url)
 
                 if code == 429 and self.interval_429:
                     s = self.interval_429()
@@ -157,7 +178,7 @@ class HttpDownloader(DownloaderBase):
                     headers=headers,
                     data=kwdict.get("_http_data"),
                     timeout=self.timeout,
-                    proxies=self.proxies,
+                    proxies=proxies,
                     verify=self.verify,
                 )
             except ConnectionError as exc:

@@ -152,7 +152,16 @@ class Extractor():
         if retry_codes is None:
             retry_codes = self._retry_codes
         if "proxies" not in kwargs:
-            kwargs["proxies"] = self._proxies
+            if self._proxy_rotator:
+                proxy_info = self._proxy_rotator.get_proxy()
+                proxy_url = proxy_info["url"]
+                kwargs["proxies"] = {
+                    scheme: proxy_url
+                    for scheme in proxy_info["schemes"]
+                }
+                self.log.debug("Extractor using rotated proxy: %s", proxy_url)
+            else:
+                kwargs["proxies"] = self._proxies
         if "timeout" not in kwargs:
             kwargs["timeout"] = self._timeout
         if "verify" not in kwargs:
@@ -177,6 +186,17 @@ class Extractor():
                 self.sleep(seconds, "request")
 
         while True:
+            if tries > 1 and self._proxy_rotator and self._proxy_rotate:
+                self._proxy_rotator.rotate()
+                proxy_info = self._proxy_rotator.get_proxy()
+                proxy_url = proxy_info["url"]
+                kwargs["proxies"] = {
+                    scheme: proxy_url
+                    for scheme in proxy_info["schemes"]
+                }
+                self.log.debug(
+                    "Rotating to proxy: %s", proxy_url)
+
             try:
                 response = session.request(method, url, **kwargs)
             except requests.exceptions.ConnectionError as exc:
@@ -385,6 +405,24 @@ class Extractor():
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
         self._proxies = util.build_proxy_map(self.config("proxy"), self.log)
+        self._proxy_list = self.config("proxy-list")
+        self._proxy_rotate = self.config("proxy-rotate", True)
+        self._proxy_rotator = None
+
+        if self._proxy_list and not self._proxies:
+            proxy_strategy = self.config("proxy-strategy", "fixed")
+            try:
+                self._proxy_rotator = util.ProxyRotator(
+                    self._proxy_list, strategy=proxy_strategy)
+                self.log.debug(
+                    "Initialized proxy rotator with file: %s, strategy: %s",
+                    self._proxy_list, self._proxy_rotator.strategy
+                )
+            except (FileNotFoundError, ValueError) as e:
+                self.log.error("Failed to initialize proxy rotator: %s", e)
+                # Ensure rotator is None if init fails
+                self._proxy_rotator = None
+
         self._interval = util.build_duration_func(
             self.config("sleep-request", self.request_interval),
             self.request_interval_min,
