@@ -41,7 +41,7 @@ def connect(path, prefix, format,
 
 
 def sanitize(name):
-    return '"' + name.replace('"', "_") + '"'
+    return f'''"{name.replace('"', '_')}"'''
 
 
 class DownloadArchive():
@@ -68,25 +68,25 @@ class DownloadArchive():
 
         table = "archive" if table is None else sanitize(table)
         self._stmt_select = (
-            "SELECT 1 "
-            "FROM " + table + " "
-            "WHERE entry=? "
-            "LIMIT 1")
+            f"SELECT 1 "
+            f"FROM {table} "
+            f"WHERE entry=? "
+            f"LIMIT 1")
         self._stmt_insert = (
-            "INSERT OR IGNORE INTO " + table + " "
-            "(entry) VALUES (?)")
+            f"INSERT OR IGNORE INTO {table} "
+            f"(entry) VALUES (?)")
 
         if pragma:
             for stmt in pragma:
-                cursor.execute("PRAGMA " + stmt)
+                cursor.execute(f"PRAGMA {stmt}")
 
         try:
-            cursor.execute("CREATE TABLE IF NOT EXISTS " + table + " "
-                           "(entry TEXT PRIMARY KEY) WITHOUT ROWID")
+            cursor.execute(f"CREATE TABLE IF NOT EXISTS {table} "
+                           f"(entry TEXT PRIMARY KEY) WITHOUT ROWID")
         except self._sqlite3.OperationalError:
             # fallback for missing WITHOUT ROWID support (#553)
-            cursor.execute("CREATE TABLE IF NOT EXISTS " + table + " "
-                           "(entry TEXT PRIMARY KEY)")
+            cursor.execute(f"CREATE TABLE IF NOT EXISTS {table} "
+                           f"(entry TEXT PRIMARY KEY)")
 
     def add(self, kwdict):
         """Add item described by 'kwdict' to archive"""
@@ -156,18 +156,18 @@ class DownloadArchivePostgresql():
 
         table = "archive" if table is None else sanitize(table)
         self._stmt_select = (
-            "SELECT true "
-            "FROM " + table + " "
-            "WHERE entry=%s "
-            "LIMIT 1")
+            f"SELECT true "
+            f"FROM {table} "
+            f"WHERE entry=%s "
+            f"LIMIT 1")
         self._stmt_insert = (
-            "INSERT INTO " + table + " (entry) "
-            "VALUES (%s) "
-            "ON CONFLICT DO NOTHING")
+            f"INSERT INTO {table} (entry) "
+            f"VALUES (%s) "
+            f"ON CONFLICT DO NOTHING")
 
         try:
-            cursor.execute("CREATE TABLE IF NOT EXISTS " + table + " "
-                           "(entry TEXT PRIMARY KEY)")
+            cursor.execute(f"CREATE TABLE IF NOT EXISTS {table} "
+                           f"(entry TEXT PRIMARY KEY)")
             con.commit()
         except Exception as exc:
             log.error("%s: %s when creating '%s' table: %s",
