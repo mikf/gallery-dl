@@ -50,12 +50,19 @@ __tests__ = (
     "#range"   : "1",
 
     "user_id"   : "100074229772340",
-    "user_pfbid": "pfbid0xCZArBYwZ9d4KLbXzSLF6YNUTY3rTJhPpVZ92gBpFQi1JK9RemJ5KhtqSJXkVnQ3l",
+    "user_pfbid": r"re:pfbid0x\w{64}",
 },
 
 {
     "#url"     : "https://www.facebook.com/facebook/photos_by",
     "#class"   : facebook.FacebookPhotosExtractor,
+},
+
+{
+    "#url"     : "https://www.facebook.com/brando.cha.3/photos",
+    "#comment" : "empty '/photos' page / missing 'set_id' value (#7962)",
+    "#class"   : facebook.FacebookPhotosExtractor,
+    "#count"   : 0,
 },
 
 {
@@ -89,7 +96,7 @@ __tests__ = (
     "set_id"    : "a.104622317759666",
     "type"      : "avatar",
     "user_id"   : "100046356937542",
-    "user_pfbid": "pfbid0uNaJ41o64vvHGCRnfZSYZkSm6yPnneBN947QdPw3F7iTsbgscr7ZZqLv7GvP2L8l",
+    "user_pfbid": r"re:pfbid0x\w{64}",
     "username"  : "Throwaway Idk",
 },
 
@@ -183,9 +190,8 @@ __tests__ = (
     "id"      : "221820450302279",
     "set_id"  : "a.109762038174788",
     "user_id" : "100074229772340",
-    "user_pfbid": "pfbid0xCZArBYwZ9d4KLbXzSLF6YNUTY3rTJhPpVZ92gBpFQi1JK9RemJ5KhtqSJXkVnQ3l",
+    "user_pfbid": r"re:pfbid0x\w{64}",
     "username": "Throwaway Kwon",
-
 },
 
 {

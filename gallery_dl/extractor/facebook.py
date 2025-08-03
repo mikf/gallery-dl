@@ -441,6 +441,9 @@ class FacebookPhotosExtractor(FacebookExtractor):
 
     def items(self):
         set_id = self._extract_profile_photos_page(self.groups[0])[0]
+        if not set_id:
+            return iter(())
+
         set_url = f"{self.root}/media/set/?set={set_id}"
         set_page = self.request(set_url).text
         set_data = self.parse_set_page(set_page)
