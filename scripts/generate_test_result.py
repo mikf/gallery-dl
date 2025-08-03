@@ -78,17 +78,27 @@ def collect_extractor_results(extr):
     return ()
 
 
-def insert_test_result(args, result):
-    path = util.path("test", "results", f"{args.cat}.py")
-    LOG.info("Adding '%s:%s' test result into '%s'", args.cat, args.sub, path)
+def insert_test_result(args, result, lines):
+    idx_block = None
+    flag = False
 
-    with util.open(path) as fp:
-        lines = fp.readlines()
+    for idx, line in enumerate(lines):
+        line = line.lstrip()
+        if not line:
+            continue
+        elif line[0] == "{":
+            idx_block = idx
+        elif line.startswith('"#class"'):
+            if args.cls.__name__ in line:
+                flag = True
+            elif flag:
+                flag = None
+                break
 
-    lines.insert(-2, result)
-
-    with util.lazy(path) as fp:
-        fp.writelines(lines)
+    if idx_block is None or flag is not None:
+        lines.insert(-2, result)
+    else:
+        lines.insert(idx_block-1, result)
 
 
 def parse_args(args=None):
@@ -116,8 +126,18 @@ def main():
     args.sub = extr.subcategory
     args.base = extr.basecategory
 
+    path = util.path("test", "results", f"{args.cat}.py")
+    with util.open(path) as fp:
+        lines = fp.readlines()
+
+    LOG.info("Collecting data for '%s'", args.url)
     result = generate_test_result(args)
-    insert_test_result(args, result)
+
+    LOG.info("Writing '%s' results to '%s'", args.url, path)
+    insert_test_result(args, result, lines)
+
+    with util.lazy(path) as fp:
+        fp.writelines(lines)
 
 
 if __name__ == "__main__":
