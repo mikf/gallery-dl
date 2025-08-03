@@ -165,9 +165,9 @@ class Formatter(logging.Formatter):
         if record.exc_info and not record.exc_text:
             record.exc_text = self.formatException(record.exc_info)
         if record.exc_text:
-            msg = msg + "\n" + record.exc_text
+            msg = f"{msg}\n{record.exc_text}"
         if record.stack_info:
-            msg = msg + "\n" + record.stack_info
+            msg = f"{msg}\n{record.stack_info}"
         return msg
 
 
@@ -372,10 +372,10 @@ class NullOutput():
 class PipeOutput(NullOutput):
 
     def skip(self, path):
-        stdout_write(CHAR_SKIP + path + "\n")
+        stdout_write(f"{CHAR_SKIP}{path}\n")
 
     def success(self, path):
-        stdout_write(path + "\n")
+        stdout_write(f"{path}\n")
 
 
 class TerminalOutput():
@@ -390,13 +390,13 @@ class TerminalOutput():
             self.shorten = util.identity
 
     def start(self, path):
-        stdout_write_flush(self.shorten("  " + path))
+        stdout_write_flush(self.shorten(f"  {path}"))
 
     def skip(self, path):
-        stdout_write(self.shorten(CHAR_SKIP + path) + "\n")
+        stdout_write(f"{self.shorten(CHAR_SKIP + path)}\n")
 
     def success(self, path):
-        stdout_write("\r" + self.shorten(CHAR_SUCCESS + path) + "\n")
+        stdout_write(f"\r{self.shorten(CHAR_SUCCESS + path)}\n")
 
     def progress(self, bytes_total, bytes_downloaded, bytes_per_second):
         bdl = util.format_value(bytes_downloaded)
@@ -424,10 +424,10 @@ class ColorOutput(TerminalOutput):
         stdout_write_flush(self.shorten(path))
 
     def skip(self, path):
-        stdout_write(self.color_skip + self.shorten(path) + "\033[0m\n")
+        stdout_write(f"{self.color_skip}{self.shorten(path)}\x1b[0m\n")
 
     def success(self, path):
-        stdout_write(self.color_success + self.shorten(path) + "\033[0m\n")
+        stdout_write(f"{self.color_success}{self.shorten(path)}\x1b[0m\n")
 
 
 class CustomOutput():
@@ -503,7 +503,7 @@ def shorten_string(txt, limit, sep="…"):
     if len(txt) <= limit:
         return txt
     limit -= len(sep)
-    return txt[:limit // 2] + sep + txt[-((limit+1) // 2):]
+    return f"{txt[:limit // 2]}{sep}{txt[-((limit+1) // 2):]}"
 
 
 def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
@@ -518,7 +518,7 @@ def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
     limit -= len(sep)
     if text_width == len(txt):
         # all characters have a width of 1
-        return txt[:limit // 2] + sep + txt[-((limit+1) // 2):]
+        return f"{txt[:limit // 2]}{sep}{txt[-((limit+1) // 2):]}"
 
     # wide characters
     left = 0
@@ -537,4 +537,4 @@ def shorten_string_eaw(txt, limit, sep="…", cache=EAWCache()):
             break
         right -= 1
 
-    return txt[:left] + sep + txt[right+1:]
+    return f"{txt[:left]}{sep}{txt[right+1:]}"
