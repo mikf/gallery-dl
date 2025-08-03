@@ -317,18 +317,7 @@ def configure_standard_streams():
         elif not options.get("errors"):
             options["errors"] = "replace"
 
-        try:
-            stream.reconfigure(**options)
-        except AttributeError:
-            # no 'reconfigure' support
-            oget = options.get
-            setattr(sys, name, stream.__class__(
-                stream.buffer,
-                encoding=oget("encoding", stream.encoding),
-                errors=oget("errors", "replace"),
-                newline=oget("newline", stream.newlines),
-                line_buffering=oget("line_buffering", stream.line_buffering),
-            ))
+        stream.reconfigure(**options)
 
 
 # --------------------------------------------------------------------
