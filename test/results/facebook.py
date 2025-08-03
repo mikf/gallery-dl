@@ -79,6 +79,21 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/brando.cha.3/avatar",
+    "#comment" : "empty '/photos_of' page (#7962)",
+    "#class"   : facebook.FacebookAvatarExtractor,
+    "#count"   : 1,
+
+    "date"      : "dt:2020-01-23 17:54:22",
+    "id"        : "104622291093002",
+    "set_id"    : "a.104622317759666",
+    "type"      : "avatar",
+    "user_id"   : "100046356937542",
+    "user_pfbid": "pfbid0uNaJ41o64vvHGCRnfZSYZkSm6yPnneBN947QdPw3F7iTsbgscr7ZZqLv7GvP2L8l",
+    "username"  : "Throwaway Idk",
+},
+
+{
     "#url"     : "https://www.facebook.com/media/set/?set=a.10152716010956729&type=3",
     "#class"   : facebook.FacebookSetExtractor,
     "#count"   : 6,

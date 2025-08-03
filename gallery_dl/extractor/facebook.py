@@ -315,14 +315,15 @@ class FacebookExtractor(Extractor):
 
         for _ in range(self.fallback_retries + 1):
             profile_photos_page = self.request(profile_photos_url).text
-            if set_id := self._extract_profile_set_id(profile_photos_page):
+            set_id = self._extract_profile_set_id(profile_photos_page)
+            avatar_page_url = text.extr(
+                profile_photos_page, ',"profilePhoto":{"url":"', '"')
+
+            if set_id or avatar_page_url:
                 break
             self.log.debug("Got empty profile photos page, retrying...")
         else:
             raise exception.AbortExtraction("Failed to extract profile data")
-
-        avatar_page_url = text.extr(
-            profile_photos_page, ',"profilePhoto":{"url":"', '"')
 
         return set_id, avatar_page_url.replace("\\/", "/")
 
