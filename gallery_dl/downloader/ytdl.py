@@ -109,7 +109,11 @@ class YoutubeDLDownloader(DownloaderBase):
 
     def _download_video(self, ytdl_instance, pathfmt, info_dict):
         if "url" in info_dict:
-            text.nameext_from_url(info_dict["url"], pathfmt.kwdict)
+            if "filename" in pathfmt.kwdict:
+                pathfmt.kwdict["extension"] = \
+                    text.ext_from_url(info_dict["url"])
+            else:
+                text.nameext_from_url(info_dict["url"], pathfmt.kwdict)
 
         formats = info_dict.get("requested_formats")
         if formats and not compatible_formats(formats):
