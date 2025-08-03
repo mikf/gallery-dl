@@ -10,7 +10,7 @@
 import re
 
 
-def pyprint(obj, indent=0, sort=None, lmax=16):
+def pyprint(obj, indent=0, sort=None, lmin=9, lmax=16):
 
     if isinstance(obj, str):
         if obj.startswith("lit:"):
@@ -46,9 +46,6 @@ def pyprint(obj, indent=0, sort=None, lmax=16):
     if isinstance(obj, dict):
         if not obj:
             return "{}"
-        if len(obj) == 1:
-            key, value = next(iter(obj.items()))
-            return f'''{{"{key}": {pyprint(value, indent, sort)}}}'''
 
         if sort:
             if callable(sort):
@@ -62,7 +59,9 @@ def pyprint(obj, indent=0, sort=None, lmax=16):
                 obj = {key: obj[key] for key in keys}
 
         ws = " " * indent
-        key_maxlen = max(kl for kl in map(len, obj) if kl <= lmax)
+        keylen = max(kl for kl in map(len, obj) if kl <= lmax)
+        if keylen < lmin:
+            keylen = lmin
 
         lines = ["{"]
         for key, value in obj.items():
@@ -71,7 +70,7 @@ def pyprint(obj, indent=0, sort=None, lmax=16):
             else:
                 lines.append(
                     f'''{ws}    "{key}"'''
-                    f'''{' '*(key_maxlen - len(key))}: '''
+                    f'''{' '*(keylen - len(key))}: '''
                     f'''{pyprint(value, indent+4, sort)},'''
                 )
         lines.append(f'''{ws}}}''')
@@ -84,12 +83,9 @@ def pyprint(obj, indent=0, sort=None, lmax=16):
             return f'''[{pyprint(obj[0], indent, sort)}]'''
 
         ws = " " * indent
-
         lines = ["["]
-        lines.extend(
-            f'''{ws}    {pyprint(value, indent+4, sort)},'''
-            for value in obj
-        )
+        for value in obj:
+            lines.append(f'''{ws}    {pyprint(value, indent+4, sort)},''')
         lines.append(f'''{ws}]''')
         return "\n".join(lines)
 
