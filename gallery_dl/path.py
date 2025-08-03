@@ -122,7 +122,7 @@ class PathFormat():
             basedir = config("base-directory")
             sep = os.sep
             if basedir is None:
-                basedir = "." + sep + "gallery-dl" + sep
+                basedir = f".{sep}gallery-dl{sep}"
             elif basedir:
                 basedir = util.expand_path(basedir)
                 altsep = os.altsep

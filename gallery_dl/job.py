@@ -853,7 +853,7 @@ class UrlJob(Job):
         stdout_write(url + "\n")
         if "_fallback" in kwdict:
             for url in kwdict["_fallback"]:
-                stdout_write("| " + url + "\n")
+                stdout_write(f"| {url}\n")
 
     def handle_queue(self, url, kwdict):
         if cls := kwdict.get("_extractor"):
