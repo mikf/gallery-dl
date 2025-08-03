@@ -13,7 +13,7 @@ import logging
 import argparse
 import util
 from pyprint import pyprint
-from gallery_dl import extractor
+from gallery_dl import extractor, job
 
 LOG = logging.getLogger("gen-test")
 
@@ -27,8 +27,19 @@ def module_name(opts):
 
 def generate_test_result(args):
     head = generate_head(args)
-    opts = generate_opts(args)
-    meta = generate_meta(args)
+
+    if args.only_matching:
+        opts = meta = None
+    else:
+        djob = job.DataJob(args.extr, file=None)
+        djob.filter = dict.copy
+        djob.run()
+
+        opts = generate_opts(args, djob.data_urls)
+        if args.metadata:
+            meta = generate_meta(args, djob.data_meta)
+        else:
+            meta = None
 
     result = pyprint(head)
     if opts:
@@ -39,9 +50,10 @@ def generate_test_result(args):
 
 
 def generate_head(args):
+    head = {}
     cls = args.cls
 
-    head = {"#url": args.extr.url}
+    head["#url"] = args.extr.url
     if args.comment is not None:
         head["#comment"] = args.comment
     if args.base or args.cat != cls.category or args.sub != cls.subcategory:
@@ -51,11 +63,23 @@ def generate_head(args):
     return head
 
 
-def generate_opts(args):
-    return {}
+def generate_opts(args, urls):
+    opts = {}
+
+    if not urls:
+        opts["#count"] = 0
+    elif len(urls) == 1:
+        opts["#results"] = urls[0]
+    elif len(urls) < args.limit_urls:
+        opts["#results"] = urls
+    else:
+        opts["#pattern"] = urls[0]
+        opts["#count"] = len(urls)
+
+    return opts
 
 
-def generate_meta(args):
+def generate_meta(args, data):
     return {}
 
 
