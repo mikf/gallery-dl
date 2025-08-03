@@ -912,6 +912,10 @@ class DataJob(Job):
         Job.__init__(self, url, parent)
         self.file = file
         self.data = []
+        self.data_urls = []
+        self.data_post = []
+        self.data_meta = []
+        self.exception = None
         self.ascii = config.get(("output",), "ascii", ensure_ascii)
         self.resolve = 128 if resolve is True else (resolve or self.resolve)
 
@@ -937,6 +941,7 @@ class DataJob(Job):
         except exception.StopExtraction:
             pass
         except Exception as exc:
+            self.exception = exc
             self.data.append((-1, {
                 "error"  : exc.__class__.__name__,
                 "message": str(exc),
@@ -960,13 +965,21 @@ class DataJob(Job):
         return 0
 
     def handle_url(self, url, kwdict):
-        self.data.append((Message.Url, url, self.filter(kwdict)))
+        kwdict = self.filter(kwdict)
+        self.data_urls.append(url)
+        self.data_meta.append(kwdict)
+        self.data.append((Message.Url, url, kwdict))
 
     def handle_directory(self, kwdict):
-        self.data.append((Message.Directory, self.filter(kwdict)))
+        kwdict = self.filter(kwdict)
+        self.data_post.append(kwdict)
+        self.data.append((Message.Directory, kwdict))
 
     def handle_queue(self, url, kwdict):
-        self.data.append((Message.Queue, url, self.filter(kwdict)))
+        kwdict = self.filter(kwdict)
+        self.data_urls.append(url)
+        self.data_meta.append(kwdict)
+        self.data.append((Message.Queue, url, kwdict))
 
     def handle_queue_resolve(self, url, kwdict):
         if cls := kwdict.get("_extractor"):
@@ -975,8 +988,14 @@ class DataJob(Job):
             extr = extractor.find(url)
 
         if not extr:
-            return self.data.append((Message.Queue, url, self.filter(kwdict)))
+            kwdict = self.filter(kwdict)
+            self.data_urls.append(url)
+            self.data_meta.append(kwdict)
+            return self.data.append((Message.Queue, url, kwdict))
 
         job = self.__class__(extr, self, None, self.ascii, self.resolve-1)
         job.data = self.data
+        job.data_urls = self.data_urls
+        job.data_post = self.data_post
+        job.data_meta = self.data_meta
         job.run()
