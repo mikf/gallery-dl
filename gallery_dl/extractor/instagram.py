@@ -240,7 +240,7 @@ class InstagramExtractor(Extractor):
                 video = None
                 media = image
 
-                if len(candidates) <= 3:
+                if len(candidates) <= 3 and not post.get("__gdl_gen"):
                     self.log.warning(
                         "%s: Image candidate list possibly incomplete "
                         "(%s items). Consider refreshing your cookies.",
@@ -711,6 +711,7 @@ class InstagramAvatarExtractor(InstagramExtractor):
             "caption"   : None,
             "like_count": 0,
             "image_versions2": {"candidates": (avatar,)},
+            "__gdl_gen" : True,
         },)
 
 
