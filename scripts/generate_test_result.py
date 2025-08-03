@@ -12,6 +12,8 @@
 import logging
 import argparse
 import util
+from pyprint import pyprint
+from gallery_dl import extractor
 
 LOG = logging.getLogger("gen-test")
 
@@ -24,58 +26,37 @@ def module_name(opts):
 
 
 def generate_test_result(args):
+    head = generate_head(args)
+    opts = generate_opts(args)
+    meta = generate_meta(args)
+
+    result = pyprint(head)
+    if opts:
+        result = result[:-2] + pyprint(opts)[1:]
+    if meta:
+        result = result[:-1] + pyprint(meta)[1:]
+    return result + ",\n\n"
+
+
+def generate_head(args):
     cls = args.cls
-    extr = args.extr
 
+    head = {"#url": args.extr.url}
     if args.comment is not None:
-        comment = args.comment if isinstance(args.comment, str) else ""
-        comment = (
-            f'    "#comment": "{comment}",\n')
-    else:
-        comment = ""
+        head["#comment"] = args.comment
+    if args.base or args.cat != cls.category or args.sub != cls.subcategory:
+        head["#category"] = (args.base, args.cat, args.sub)
+    head["#class"] = args.cls
 
-    if (args.base or args.cat != cls.category or args.sub != cls.subcategory):
-        categories = (
-            f'    "#category": ("{args.base}", "{args.cat}", "{args.sub}"),\n')
-    else:
-        categories = ""
-
-    extr_name = args.cls.__name__
-    module_name = args.extr.__module__.rpartition(".")[2]
-
-    head = f"""
-{{
-    "#url"     : "{extr.url}",
-{comment}\
-{categories}\
-    "#class"   : {module_name}.{extr_name},
-"""
-
-    tail = """\
-},
-"""
-
-    from gallery_dl.extractor import common
-
-    if isinstance(extr, common.GalleryExtractor):
-        body = """
-    "#pattern" : r"",
-    "#count"   : 123,
-"""
-    elif isinstance(extr, common.MangaExtractor):
-        extr_name = extr_name.replace("MangaEx", "ChapterEx")
-        body = f"""
-    "#pattern" : {module_name}.{extr_name}.pattern,
-    "#count"   : 123,
-"""
-    else:
-        body = ""
-
-    return f"{head}{body}{tail}"
+    return head
 
 
-def collect_extractor_results(extr):
-    return ()
+def generate_opts(args):
+    return {}
+
+
+def generate_meta(args):
+    return {}
 
 
 def insert_test_result(args, result, lines):
@@ -96,15 +77,18 @@ def insert_test_result(args, result, lines):
                 break
 
     if idx_block is None or flag is not None:
-        lines.insert(-2, result)
+        lines.insert(-1, result)
     else:
-        lines.insert(idx_block-1, result)
+        lines.insert(idx_block, result)
 
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(args)
     parser.add_argument("-c", "--comment", default=None)
     parser.add_argument("-C", dest="comment", action="store_const", const="")
+    parser.add_argument("-l", "--limit_urls", type=int, default=10)
+    parser.add_argument("-m", "--metadata", action="store_true")
+    parser.add_argument("-o", "--only-matching", action="store_true")
     parser.add_argument("URL")
 
     return parser.parse_args()
@@ -114,8 +98,7 @@ def main():
     args = parse_args()
     args.url = args.URL
 
-    from gallery_dl.extractor import find
-    extr = find(args.url)
+    extr = extractor.find(args.url)
     if extr is None:
         LOG.error("Unsupported URL '%s'", args.url)
         raise SystemExit(1)
