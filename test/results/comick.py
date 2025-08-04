@@ -135,6 +135,35 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://comick.io/comic/00-the-100-girlfriends-who-really-really-really-really-really-love-you/Zqu59ZKD",
+    "#comment" : "no chapter info (#7972)",
+    "#class"   : comick.ComickChapterExtractor,
+    "#pattern" : r"https://meo.comick.pictures/\d+-[\w-]+\.(jpg|png)",
+    "#count"   : 22,
+
+    "artist"        : ["Nozawa Yukiko"],
+    "author"        : ["Nakamura Rikito"],
+    "chapter"       : 0,
+    "chapter_hid"   : "Zqu59ZKD",
+    "chapter_id"    : 3437106,
+    "chapter_minor" : "",
+    "chapter_string": "Zqu59ZKD",
+    "count"         : 22,
+    "date"          : "dt:2024-08-29 14:20:51",
+    "date_updated"  : "dt:2024-08-29 14:20:51",
+    "group"         : ["ENCHILADAS NO SEKAI"],
+    "lang"          : "es-419",
+    "manga"         : "The 100 Girlfriends Who Really, Really, Really, Really, Really Love You",
+    "manga_hid"     : "grNTmie1",
+    "manga_id"      : 37955,
+    "manga_slug"    : "00-the-100-girlfriends-who-really-really-really-really-really-love-you",
+    "published"     : 2019,
+    "publisher"     : ["Shueisha"],
+    "title"         : "MAI Y MOMOHA SE CONVIERTEN EN MAIDS CERTIFICADAS(TAL VEZ)",
+    "volume"        : 0,
+},
+
+{
     "#url"     : "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon",
     "#comment" : "all chapters",
     "#class"   : comick.ComickMangaExtractor,
@@ -188,6 +217,21 @@ __tests__ = (
     ),
 
     "lang": {"fr", "id"},
+},
+
+{
+    "#url"     : "https://comick.io/comic/00-the-100-girlfriends-who-really-really-really-really-really-love-you?lang=es-419&chap-order=1&date-order=",
+    "#comment" : "chapter without chapter info (#7972)",
+    "#class"   : comick.ComickMangaExtractor,
+    "#range"   : "1-3",
+    "#results" : (
+        "https://comick.io/comic/00-the-100-girlfriends-who-really-really-really-really-really-love-you/Zqu59ZKD",
+        "https://comick.io/comic/00-the-100-girlfriends-who-really-really-really-really-really-love-you/y6kgR-chapter-1-es-419",
+        "https://comick.io/comic/00-the-100-girlfriends-who-really-really-really-really-really-love-you/wkMZr-chapter-1-es-419",
+    ),
+
+    "chapter": {0, 1},
+    "lang"   : "es-419",
 },
 
 )
