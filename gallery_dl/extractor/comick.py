@@ -86,7 +86,7 @@ class ComickBase():
 class ComickChapterExtractor(ComickBase, ChapterExtractor):
     """Extractor for comick.io manga chapters"""
     archive_fmt = "{chapter_hid}_{page}"
-    pattern = BASE_PATTERN + r"/comic/([\w-]+)/(\w+-chapter-[^/?#]+)"
+    pattern = BASE_PATTERN + r"/comic/([\w-]+)/(\w+(?:-chapter-[^/?#]+)?)"
     example = "https://comick.io/comic/MANGA/ID-chapter-123-en"
 
     def metadata(self, page):
@@ -96,7 +96,12 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
 
         ch = props["chapter"]
         self._images = ch["md_images"]
-        chapter, sep, minor = ch["chap"].partition(".")
+
+        if chapter := ch["chap"]:
+            chapter, sep, minor = chapter.partition(".")
+        else:
+            chapter = 0
+            sep = minor = ""
 
         return {
             **manga,
@@ -137,14 +142,19 @@ class ComickMangaExtractor(ComickBase, MangaExtractor):
         manga = self._manga_info(slug)
 
         for ch in self.chapters(manga):
-            url = (f"{self.root}/comic/{slug}"
-                   f"/{ch['hid']}-chapter-{ch['chap']}-{ch['lang']}")
-
             ch.update(manga)
-            chapter, sep, minor = ch["chap"].partition(".")
-            ch["chapter"] = text.parse_int(chapter)
-            ch["chapter_minor"] = sep + minor
             ch["_extractor"] = ComickChapterExtractor
+
+            if chapter := ch["chap"]:
+                url = (f"{self.root}/comic/{slug}"
+                       f"/{ch['hid']}-chapter-{chapter}-{ch['lang']}")
+                chapter, sep, minor = chapter.partition(".")
+                ch["chapter"] = text.parse_int(chapter)
+                ch["chapter_minor"] = sep + minor
+            else:
+                url = f"{self.root}/comic/{slug}/{ch['hid']}"
+                ch["chapter"] = 0
+                ch["chapter_minor"] = ""
 
             yield Message.Queue, url, ch
 
