@@ -19,6 +19,10 @@ def path(*segments):
     return result
 
 
+def trim(path):
+    return path[len(ROOTDIR)+1:]
+
+
 def open(path, mode="r"):
     return builtins.open(path, mode, encoding="utf-8", newline="\n")
 

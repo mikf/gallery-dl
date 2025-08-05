@@ -60,7 +60,7 @@ def create_extractor_module(args):
     category = args.category
 
     path = util.path("gallery_dl", "extractor", f"{category}.py")
-    LOG.info("Creating '%s'", trim_path(path))
+    LOG.info("Creating '%s'", util.trim(path))
 
     type = args.type
     if type == "manga":
@@ -218,7 +218,7 @@ BASE_PATTERN = r"(?:https?://)?{subdomain}{re.escape(domain)}"
 
 def create_test_results_file(args):
     path = util.path("test", "results", f"{args.category}.py")
-    LOG.info("Creating '%s'", trim_path(path))
+    LOG.info("Creating '%s'", util.trim(path))
 
     import_stmt = generate_test_result_import(args)
     with util.open(path, "x") as fp:
@@ -310,10 +310,6 @@ def insert_into_supportedsites(args):
 
 ###############################################################################
 # General #####################################################################
-
-def trim_path(path):
-    return path[len(util.ROOTDIR)+1:]
-
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(args)
