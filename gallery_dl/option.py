@@ -673,7 +673,7 @@ def build_parser():
     )
     selection.add_argument(
         "-T", "--terminate",
-        dest="terminate", metavar="N", type=int,
+        dest="terminate", metavar="N",
         help=("Stop current & parent extractors "
               "and proceed with the next input URL "
               "after N consecutive file downloads were skipped"),
