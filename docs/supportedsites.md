@@ -476,6 +476,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>ImgDrive.net</td>
+    <td>https://imgdrive.net/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Imgspice</td>
     <td>https://imgspice.com/</td>
     <td>individual Images</td>
