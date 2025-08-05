@@ -29,40 +29,40 @@ LICENSE = """\
 """
 
 
-def init_extractor_module(opts):
-    if opts["init_module"]:
+def init_extractor_module(args):
+    if args.init_module:
         try:
-            create_extractor_module(opts)
+            create_extractor_module(args)
         except FileExistsError:
             LOG.warning("… already present")
         except Exception as exc:
             LOG.error("%s: %s", exc.__class__.__name__, exc, exc_info=exc)
 
-        if msg := insert_into_modules_list(opts):
+        if msg := insert_into_modules_list(args):
             LOG.warning(msg)
 
     try:
-        create_test_results_file(opts)
+        create_test_results_file(args)
     except FileExistsError:
         LOG.warning("… already present")
     except Exception as exc:
         LOG.error("%s: %s", exc.__class__.__name__, exc, exc_info=exc)
 
-    if opts.get("site_name"):
-        if msg := insert_into_supportedsites(opts):
+    if args.site_name:
+        if msg := insert_into_supportedsites(args):
             LOG.warning(msg)
 
 
 ###############################################################################
 # File Creation ###############################################################
 
-def create_extractor_module(opts=NONE):
-    category = opts["category"]
+def create_extractor_module(args):
+    category = args.category
 
     path = util.path("gallery_dl", "extractor", f"{category}.py")
     LOG.info("Creating '%s'", trim_path(path))
 
-    type = opts.get("type")
+    type = args.type
     if type == "manga":
         generate_extractors = generate_extractors_manga
     elif type == "user":
@@ -70,56 +70,55 @@ def create_extractor_module(opts=NONE):
     else:
         generate_extractors = generate_extractors_basic
 
-    with util.open(path, opts["open_mode"]) as fp:
-        if copyright := opts.get("copyright", ""):
+    with util.open(path, args.open_mode) as fp:
+        if copyright := args.copyright:
             copyright = f"\n# Copyright {dt.date.today().year} {copyright}\n#"
 
         fp.write(f'''\
 {ENCODING}{copyright}
 {LICENSE}
-"""Extractors for {opts["root"]}/"""
+"""Extractors for {args.root}/"""
 
-{generate_extractors(opts)}\
+{generate_extractors(args)}\
 ''')
 
 
-def generate_extractors_basic(opts):
-    cat = opts["category"]
-    root = opts["root"]
+def generate_extractors_basic(args):
+    cat = args.category
 
     return f'''\
 from .common import Extractor, Message
 from .. import text
 
-{build_base_pattern(opts)}
+{build_base_pattern(args)}
 
 class {cat.capitalize()}Extractor(Extractor):
     """Base class for {cat} extractors"""
     category = "{cat}"
-    root = "{root}"
+    root = "{args.root}"
 '''
 
 
-def generate_extractors_manga(opts):
-    cat = opts["category"]
+def generate_extractors_manga(args):
+    cat = args.category
     ccat = cat.capitalize()
 
     return f'''\
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
 
-{build_base_pattern(opts)}
+{build_base_pattern(args)}
 
 class {ccat}Base():
     """Base class for {cat} extractors"""
     category = "{cat}"
-    root = "{opts["root"]}"
+    root = "{args.root}"
 
 
 class {ccat}ChapterExtractor({ccat}Base, ChapterExtractor):
     """Extractor for {cat} manga chapters"""
     pattern = rf"{{BASE_PATTERN}}/PATH"
-    example = ""
+    example = "{args.root}/..."
 
     def __init__(self, match):
         url = f"{{self.root}}/PATH"
@@ -151,7 +150,7 @@ class {ccat}MangaExtractor({ccat}Base, MangaExtractor):
     """Extractor for {cat} manga"""
     chapterclass = {ccat}ChapterExtractor
     pattern = rf"{{BASE_PATTERN}}/PATH"
-    example = ""
+    example = "{args.root}/..."
 
     def __init__(self, match):
         url = f"{{self.root}}/PATH"
@@ -167,28 +166,27 @@ class {ccat}MangaExtractor({ccat}Base, MangaExtractor):
 '''
 
 
-def generate_extractors_user(opts):
-    cat = opts["category"]
+def generate_extractors_user(args):
+    cat = args.category
     ccat = cat.capitalize()
-    root = opts["root"]
 
     return f'''\
 from .common import Extractor, Message, Dispatch
 from .. import text
 
-{build_base_pattern(opts)}
+{build_base_pattern(args)}
 USER_PATTERN = rf"{{BASE_PATTERN}}/([^/?#]+)"
 
 class {ccat}Extractor(Extractor):
     """Base class for {cat} extractors"""
     category = "{cat}"
-    root = "{root}"
+    root = "{args.root}"
 
 
 class {ccat}UserExtractor(Dispatch, {ccat}Extractor)
-    """Extractor for {ccat} user profiles"""
+    """Extractor for {cat} user profiles"""
     pattern = rf"{{USER_PATTERN}}/?(?:$|\\?|#)"
-    example = "{root}/USER/"
+    example = "{args.root}/USER/"
 
     def items(self):
         base = f"{{self.root}}/"
@@ -198,8 +196,8 @@ class {ccat}UserExtractor(Dispatch, {ccat}Extractor)
 '''
 
 
-def build_base_pattern(opts):
-    domain = opts["domain"]
+def build_base_pattern(args):
+    domain = args.domain
     if domain.count(".") > 1:
         subdomain, domain, tld = domain.rsplit(".", 2)
         domain = f"{domain}.{tld}"
@@ -218,11 +216,11 @@ BASE_PATTERN = r"(?:https?://)?{subdomain}{re.escape(domain)}"
 ###############################################################################
 # Test Results ################################################################
 
-def create_test_results_file(opts=NONE):
-    path = util.path("test", "results", f"{opts['category']}.py")
+def create_test_results_file(args):
+    path = util.path("test", "results", f"{args.category}.py")
     LOG.info("Creating '%s'", trim_path(path))
 
-    import_stmt = generate_test_result_import(opts)
+    import_stmt = generate_test_result_import(args)
     with util.open(path, "x") as fp:
         fp.write(f"""\
 {ENCODING}
@@ -230,22 +228,21 @@ def create_test_results_file(opts=NONE):
 {import_stmt}
 
 __tests__ = (
-
 )
 """)
 
 
-def generate_test_result_import(opts):
-    category = opts["category"]
+def generate_test_result_import(args):
+    cat = args.category
 
-    if category[0].isdecimal():
+    if cat[0].isdecimal():
         import_stmt = f"""\
-gallery_dl = __import__("gallery_dl.extractor.{category}")
-_{category} = getattr(gallery_dl.extractor, "{category}")
+gallery_dl = __import__("gallery_dl.extractor.{cat}")
+_{cat} = getattr(gallery_dl.extractor, "{cat}")
 """
     else:
         import_stmt = f"""\
-from gallery_dl.extractor import {category}
+from gallery_dl.extractor import {cat}
 """
 
     return import_stmt
@@ -254,8 +251,8 @@ from gallery_dl.extractor import {category}
 ###############################################################################
 # Code Modification ###########################################################
 
-def insert_into_modules_list(opts=NONE):
-    category = opts["category"]
+def insert_into_modules_list(args):
+    category = args.category
     LOG.info("Adding '%s' to gallery_dl/extractor/__init__.py modules list",
              category)
 
@@ -283,8 +280,8 @@ def insert_into_modules_list(opts=NONE):
         fp.writelines(lines)
 
 
-def insert_into_supportedsites(opts):
-    category = opts["category"]
+def insert_into_supportedsites(args):
+    category = args.category
     LOG.info("Adding '%s' to scripts/supportedsites.py category list",
              category)
 
@@ -304,7 +301,7 @@ def insert_into_supportedsites(opts):
             compare = True
 
     ws = " " * max(15 - len(category), 0)
-    line = f'''    "{category}"{ws}: "{opts['site_name']}",\n'''
+    line = f'''    "{category}"{ws}: "{args.site_name}",\n'''
     lines.insert(idx, line)
 
     with util.lazy(path) as fp:
@@ -321,47 +318,38 @@ def trim_path(path):
 def parse_args(args=None):
     parser = argparse.ArgumentParser(args)
 
-    parser.add_argument("-s", "--site", metavar="TITLE")
-    parser.add_argument("-c", "--copyright", metavar="NAME")
+    parser.add_argument(
+        "-s", "--site",
+        dest="site_name", metavar="TITLE")
+    parser.add_argument(
+        "-c", "--copyright",
+        dest="copyright", metavar="NAME")
     parser.add_argument(
         "-C",
-        action="store_const", const="Mike Fährmann", dest="copyright")
-
+        dest="copyright", action="store_const", const="Mike Fährmann")
     parser.add_argument(
         "-F", "--force",
-        action="store_const", const="w", default="x", dest="open_mode")
+        dest="open_mode", action="store_const", const="w", default="x")
     parser.add_argument(
         "-M", "--no-module",
-        dest="module", action="store_false")
-
-    parser.add_argument("-t", "--type", metavar="TYPE")
+        dest="init_module", action="store_false")
+    parser.add_argument(
+        "-t", "--type",
+        dest="type", metavar="TYPE")
     parser.add_argument(
         "--manga",
-        action="store_const", const="manga", dest="type")
+        dest="type", action="store_const", const="manga")
     parser.add_argument(
         "--base",
-        action="store_const", const="base", dest="type")
+        dest="type", action="store_const", const="base")
     parser.add_argument(
         "--user",
-        action="store_const", const="user", dest="type")
+        dest="type", action="store_const", const="user")
 
     parser.add_argument("category")
     parser.add_argument("root", nargs="?")
 
-    return parser.parse_args()
-
-
-def parse_opts(args=None):
-    args = parse_args(args)
-
-    opts = {
-        "category"   : args.category,
-        "site_name"  : args.site,
-        "type"       : args.type,
-        "open_mode"  : args.open_mode,
-        "copyright"  : args.copyright,
-        "init_module": args.module,
-    }
+    args = parser.parse_args()
 
     if root := args.root:
         if "://" in root:
@@ -375,17 +363,19 @@ def parse_opts(args=None):
         if domain.startswith("www."):
             domain = domain[4:]
 
-        opts["root"] = root
-        opts["domain"] = domain
+        args.root = root
+        args.domain = domain
+    elif args.init_module:
+        parser.error("'root' URL required")
     else:
-        opts["root"] = opts["domain"] = ""
+        args.domain = ""
 
-    return opts
+    return args
 
 
 def main():
-    opts = parse_opts()
-    init_extractor_module(opts)
+    args = parse_args()
+    init_extractor_module(args)
 
 
 if __name__ == "__main__":
