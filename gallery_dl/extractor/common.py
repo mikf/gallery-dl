@@ -419,10 +419,15 @@ class Extractor():
                     "Initialized proxy rotator with file: %s, strategy: %s",
                     self._proxy_list, self._proxy_rotator.strategy
                 )
-            except (FileNotFoundError, ValueError) as e:
-                self.log.error("Failed to initialize proxy rotator: %s", e)
-                # Ensure rotator is None if init fails
-                self._proxy_rotator = None
+            except FileNotFoundError as exc:
+                self.log.error(exc)
+                raise exception.AbortExtraction()
+            except ValueError as exc:
+                self.log.error("Error parsing proxy list: %s", exc)
+                raise exception.AbortExtraction()
+            except Exception as exc:
+                self.log.error("Failed to initialize proxy rotator: %s", exc)
+                raise exception.AbortExtraction()
 
         self._interval = util.build_duration_func(
             self.config("sleep-request", self.request_interval),
