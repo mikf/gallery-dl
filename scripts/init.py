@@ -30,12 +30,16 @@ LICENSE = """\
 
 
 def init_extractor_module(opts):
-    try:
-        create_extractor_module(opts)
-    except FileExistsError:
-        LOG.warning("… already present")
-    except Exception as exc:
-        LOG.error("%s: %s", exc.__class__.__name__, exc, exc_info=exc)
+    if opts["init_module"]:
+        try:
+            create_extractor_module(opts)
+        except FileExistsError:
+            LOG.warning("… already present")
+        except Exception as exc:
+            LOG.error("%s: %s", exc.__class__.__name__, exc, exc_info=exc)
+
+        if msg := insert_into_modules_list(opts):
+            LOG.warning(msg)
 
     try:
         create_test_results_file(opts)
@@ -43,9 +47,6 @@ def init_extractor_module(opts):
         LOG.warning("… already present")
     except Exception as exc:
         LOG.error("%s: %s", exc.__class__.__name__, exc, exc_info=exc)
-
-    if msg := insert_into_modules_list(opts):
-        LOG.warning(msg)
 
     if opts.get("site_name"):
         if msg := insert_into_supportedsites(opts):
@@ -321,26 +322,31 @@ def parse_args(args=None):
     parser = argparse.ArgumentParser(args)
 
     parser.add_argument("-s", "--site", metavar="TITLE")
-    parser.add_argument("-t", "--type", metavar="TYPE")
     parser.add_argument("-c", "--copyright", metavar="NAME")
     parser.add_argument(
         "-C",
         action="store_const", const="Mike Fährmann", dest="copyright")
+
     parser.add_argument(
         "-F", "--force",
         action="store_const", const="w", default="x", dest="open_mode")
     parser.add_argument(
-        "-M", "--manga",
+        "-M", "--no-module",
+        dest="module", action="store_false")
+
+    parser.add_argument("-t", "--type", metavar="TYPE")
+    parser.add_argument(
+        "--manga",
         action="store_const", const="manga", dest="type")
     parser.add_argument(
-        "-B", "--base",
+        "--base",
         action="store_const", const="base", dest="type")
     parser.add_argument(
-        "-U", "--user",
+        "--user",
         action="store_const", const="user", dest="type")
 
     parser.add_argument("category")
-    parser.add_argument("root")
+    parser.add_argument("root", nargs="?")
 
     return parser.parse_args()
 
@@ -354,6 +360,7 @@ def parse_opts(args=None):
         "type"       : args.type,
         "open_mode"  : args.open_mode,
         "copyright"  : args.copyright,
+        "init_module": args.module,
     }
 
     if root := args.root:
