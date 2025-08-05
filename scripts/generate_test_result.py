@@ -140,7 +140,7 @@ def main():
     LOG.info("Collecting data for '%s'", args.url)
     result = generate_test_result(args)
 
-    LOG.info("Writing '%s' results to '%s'", args.url, path)
+    LOG.info("Writing '%s' results to '%s'", args.url, util.trim(path))
     insert_test_result(args, result, lines)
 
     with util.lazy(path) as fp:
