@@ -19,6 +19,7 @@ import getpass
 import logging
 import requests
 import threading
+import urllib.parse
 from datetime import datetime
 from xml.etree import ElementTree
 from requests.adapters import HTTPAdapter
@@ -412,7 +413,7 @@ class Extractor():
         if self._proxy_list and not self._proxies:
             proxy_strategy = self.config("proxy-strategy", "fixed")
             try:
-                self._proxy_rotator = util.ProxyRotator(
+                self._proxy_rotator = ProxyRotator(
                     self._proxy_list, strategy=proxy_strategy)
                 self.log.debug(
                     "Initialized proxy rotator with file: %s, strategy: %s",
@@ -1027,6 +1028,101 @@ class BaseExtractor(Extractor):
             r"(?:" + cls.basecategory + r":(https?://[^/?#]+)|"
             r"(?:https?://)?(?:" + "|".join(pattern_list) + r"))"
         )
+
+
+_fixed_proxy_rotator = None
+_fixed_proxy_rotator_lock = threading.Lock()
+
+
+class ProxyRotator():
+    """Rotate between multiple proxies using different strategies"""
+
+    def __new__(cls, proxy_list_path, strategy):
+        if strategy != "fixed":
+            return super().__new__(cls)
+        with _fixed_proxy_rotator_lock:
+            global _fixed_proxy_rotator
+            if _fixed_proxy_rotator is None:
+                _fixed_proxy_rotator = super().__new__(cls)
+            return _fixed_proxy_rotator
+
+    def __init__(self, proxy_list_path, strategy):
+        if hasattr(self, "_lock"):
+            return
+        self.proxies = self._load_proxies(proxy_list_path)
+        self._lock = threading.Lock()
+        self.strategy = strategy
+        self._session_proxy_info = None
+
+        if not self.proxies:
+            raise ValueError("No valid proxies found in the list")
+
+        if self.strategy == "fixed":
+            # For 'fixed' strategy, determine the proxy at init time
+            proxy_url = random.choice(self.proxies)
+            self._session_proxy_info = self._get_proxy_info(proxy_url)
+
+    def _load_proxies(self, file_path):
+        """Load proxy URLs from a list"""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                # Filter out empty lines and comments
+                proxies = [
+                    line.strip() for line in f if line.strip() and not
+                    line.strip().startswith('#')
+                ]
+                if not proxies:
+                    raise ValueError(
+                        "Proxy list is empty or contains only comments"
+                    )
+                random.shuffle(proxies)
+                return proxies
+        except FileNotFoundError:
+            raise FileNotFoundError(f"Proxy list not found: {file_path}")
+
+    def _get_proxy_info(self, proxy_url):
+        """Determine proxy capabilities based on URL scheme
+
+        Args:
+            proxy_url: The proxy URL string
+
+        Returns:
+            dict: Information about the proxy including URL and
+            supported schemes
+        """
+        # Parse the proxy URL to get the scheme
+        scheme = urllib.parse.urlparse(proxy_url).scheme.lower()
+
+        # Map proxy types to supported protocols
+        protocol_map = {
+            "http": ["http"],
+            "https": ["https"],
+            "socks4": ["http", "https"],
+            "socks5": ["http", "https"],
+            "socks5h": ["http", "https"],
+            "": ["http", "https"]  # Default for URLs without a scheme
+        }
+
+        return {
+            "url": proxy_url,
+            "schemes": protocol_map.get(scheme, ["http", "httpshttps"])
+        }
+
+    def get_proxy(self):
+        """Get the proxy for the current session."""
+        with self._lock:
+            if self._session_proxy_info is None:
+                # For 'random' strategy, pick a new proxy for the session
+                proxy_url = random.choice(self.proxies)
+                self._session_proxy_info = self._get_proxy_info(proxy_url)
+            return self._session_proxy_info
+
+    def rotate(self):
+        """
+        Forces a new proxy to be chosen for the next session.
+        """
+        with self._lock:
+            self._session_proxy_info = None
 
 
 class RequestsAdapter(HTTPAdapter):
