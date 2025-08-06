@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import facebook
+from gallery_dl import exception
 import datetime
 
 
@@ -63,6 +64,13 @@ __tests__ = (
     "#comment" : "empty '/photos' page / missing 'set_id' value (#7962)",
     "#class"   : facebook.FacebookPhotosExtractor,
     "#count"   : 0,
+},
+
+{
+    "#url"      : "https://www.facebook.com/Forgetmen0w/photos",
+    "#comment"  : "'This content isn't available right now'",
+    "#class"    : facebook.FacebookPhotosExtractor,
+    "#exception": exception.AuthRequired,
 },
 
 {
