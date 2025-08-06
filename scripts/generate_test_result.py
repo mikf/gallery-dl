@@ -42,6 +42,9 @@ def generate_test_result(args):
                     pass
                 options[key] = value
                 config.set((), key, value)
+        if args.range:
+            config.set((), "image-range"  , args.range)
+            config.set((), "chapter-range", args.range)
 
         djob = job.DataJob(args.extr, file=None)
         djob.filter = dict.copy
@@ -82,6 +85,9 @@ def generate_opts(args, urls, exc=None):
 
     if args.options:
         opts["#options"] = args.options_parsed
+
+    if args.range:
+        opts["#range"] = args.range
 
     if exc:
         opts["#exception"] = exc.__class__
@@ -133,6 +139,7 @@ def parse_args(args=None):
     parser.add_argument("-m", "--metadata", action="store_true")
     parser.add_argument("-o", "--option", dest="options", action="append")
     parser.add_argument("-O", "--only-matching", action="store_true")
+    parser.add_argument("-r", "--range")
     parser.add_argument("URL")
 
     return parser.parse_args()
