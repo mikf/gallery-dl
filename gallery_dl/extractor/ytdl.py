@@ -65,7 +65,7 @@ class YoutubeDLExtractor(Extractor):
             "force_generic_extractor": self.force_generic_extractor,
         }
         user_opts = {
-            "retries"                : 0,
+            "retries"                : self._retries,
             "socket_timeout"         : self._timeout,
             "nocheckcertificate"     : not self._verify,
         }
@@ -95,32 +95,13 @@ class YoutubeDLExtractor(Extractor):
                 set_cookie(cookie)
 
         # extract youtube_dl info_dict
-        tries = 0
-        while True:
-            try:
-                info_dict = ytdl_instance._YoutubeDL__extract_info(
-                    self.ytdl_url,
-                    ytdl_instance.get_info_extractor(self.ytdl_ie_key),
-                    False, {}, True)
-                break
-            except ytdl_module.utils.YoutubeDLError:
-                if tries < self._retries:
-                    tries += 1
-                    if self._proxy_rotator and self._proxy_rotate:
-                        self._proxy_rotator.rotate()
-                        proxy_info = self._proxy_rotator.get_proxy()
-                        proxy_url = proxy_info["url"]
-                        ytdl_instance.params["proxy"] = proxy_url
-                        self.log.debug(
-                            "Extraction error, rotating to proxy: %s (%d/%d)",
-                            proxy_url, tries, self._retries)
-                    else:
-                        self.log.debug(
-                            "Extraction error, retrying (%d/%d)",
-                            tries, self._retries)
-                    continue
-
-                raise exception.AbortExtraction("Failed to extract video data")
+        try:
+            info_dict = ytdl_instance._YoutubeDL__extract_info(
+                self.ytdl_url,
+                ytdl_instance.get_info_extractor(self.ytdl_ie_key),
+                False, {}, True)
+        except ytdl_module.utils.YoutubeDLError:
+            raise exception.AbortExtraction("Failed to extract video data")
 
         if not info_dict:
             return

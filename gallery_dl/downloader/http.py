@@ -137,17 +137,6 @@ class HttpDownloader(DownloaderBase):
                 if tries > self.retries:
                     return False
 
-                if self._proxy_rotator and self._proxy_rotate:
-                    self._proxy_rotator.rotate()
-                    proxy_info = self._proxy_rotator.get_proxy()
-                    proxy_url = proxy_info["url"]
-                    proxies = {
-                        scheme: proxy_url
-                        for scheme in proxy_info["schemes"]
-                    }
-                    self.log.debug(
-                        "Rotating to proxy: %s", proxy_url)
-
                 if code == 429 and self.interval_429:
                     s = self.interval_429()
                     time.sleep(s if s > tries else tries)
