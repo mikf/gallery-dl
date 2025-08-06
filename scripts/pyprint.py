@@ -10,7 +10,7 @@
 import re
 
 
-def pyprint(obj, indent=0, sort=None, lmin=9, lmax=16):
+def pyprint(obj, indent=0, sort=None, oneline=True, lmin=0, lmax=16):
 
     if isinstance(obj, str):
         if obj.startswith("lit:"):
@@ -46,6 +46,9 @@ def pyprint(obj, indent=0, sort=None, lmin=9, lmax=16):
     if isinstance(obj, dict):
         if not obj:
             return "{}"
+        if len(obj) == 1 and oneline:
+            key, value = next(iter(obj.items()))
+            return f'''{{"{key}": {pyprint(value, indent, sort)}}}'''
 
         if sort:
             if callable(sort):
@@ -79,7 +82,7 @@ def pyprint(obj, indent=0, sort=None, lmin=9, lmax=16):
     if isinstance(obj, list):
         if not obj:
             return "[]"
-        if len(obj) == 1:
+        if len(obj) == 1 and oneline:
             return f'''[{pyprint(obj[0], indent, sort)}]'''
 
         ws = " " * indent
