@@ -315,6 +315,11 @@ class FacebookExtractor(Extractor):
 
         for _ in range(self.fallback_retries + 1):
             profile_photos_page = self.request(profile_photos_url).text
+
+            if ('"props":{"title":"This content isn\'t available right now"' in
+                    profile_photos_page):
+                raise exception.AuthRequired("cookies")
+
             set_id = self._extract_profile_set_id(profile_photos_page)
             avatar_page_url = text.extr(
                 profile_photos_page, ',"profilePhoto":{"url":"', '"')
