@@ -47,7 +47,7 @@ def generate_test_result(args):
         djob.filter = dict.copy
         djob.run()
 
-        opts = generate_opts(args, djob.data_urls)
+        opts = generate_opts(args, djob.data_urls, djob.exception)
         ool = (len(opts) > 1 or "#options" in opts)
 
         if args.metadata:
@@ -77,13 +77,15 @@ def generate_head(args):
     return head
 
 
-def generate_opts(args, urls):
+def generate_opts(args, urls, exc=None):
     opts = {}
 
     if args.options:
         opts["#options"] = args.options_parsed
 
-    if not urls:
+    if exc:
+        opts["#exception"] = exc.__class__
+    elif not urls:
         opts["#count"] = 0
     elif len(urls) == 1:
         opts["#results"] = urls[0]
