@@ -429,14 +429,11 @@ class PixivArtworksExtractor(PixivExtractor):
         self.user_id = u1 or u2
         self.tag = t1 or t2
 
-        if self.sanity_workaround:
-            self.cookies_domain = domain = ".pixiv.net"
-            self._init_cookies()
-            if self._warn_phpsessid:
-                PixivArtworksExtractor._warn_phpsessid = False
-                if not self.cookies.get("PHPSESSID", domain=domain):
-                    self.log.warning("No 'PHPSESSID' cookie set. Can detect on"
-                                     "ly non R-18 'limit_sanity_level' works.")
+        if self.sanity_workaround and self._warn_phpsessid:
+            PixivArtworksExtractor._warn_phpsessid = False
+            if not self.cookies.get("PHPSESSID", domain=self.cookies_domain):
+                self.log.warning("No 'PHPSESSID' cookie set. Can detect only "
+                                 "non R-18 'limit_sanity_level' works.")
 
     def metadata(self):
         if self.config("metadata"):
