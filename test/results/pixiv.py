@@ -103,6 +103,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/users/173530/artworks",
+    "#comment" : "Invalid PHPSESSID cookie",
+    "#class"   : pixiv.PixivArtworksExtractor,
+    "#options" : {"cookies": {"PHPSESSID": "12345_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}},
+    "#sha1_url": "852c31ad83b6840bacbce824d85f2a997889efb7",
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/users/173530/artworks/%E6%89%8B%E3%81%B6%E3%82%8D",
     "#comment" : "illusts with specific tag",
     "#class"   : pixiv.PixivArtworksExtractor,
