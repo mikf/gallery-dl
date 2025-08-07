@@ -696,11 +696,18 @@ Default
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/LATEST.0.0.0 Safari/537.36"``: ``instagram``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``: otherwise
+Example
+    * ``"curl/8.14.1"``
+    * ``"browser"``
+    * ``"@chrome"``
 Description
     User-Agent header value used for HTTP requests.
 
     Setting this value to ``"browser"`` will try to automatically detect
     and use the ``User-Agent`` header of the system's default browser.
+
+    Setting this value to ``"@BROWSER"``, e.g. ``"@chrome"``, will try to automatically detect
+    and use the ``User-Agent`` header of this installed browser.
 
 
 extractor.*.browser
