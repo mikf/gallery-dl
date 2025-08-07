@@ -464,7 +464,9 @@ class Extractor():
         if custom_ua is None or custom_ua == "auto":
             pass
         elif custom_ua == "browser":
-            headers["User-Agent"] = _browser_useragent()
+            headers["User-Agent"] = _browser_useragent(None)
+        elif custom_ua[0] == "@":
+            headers["User-Agent"] = _browser_useragent(custom_ua[1:])
         elif self.useragent is Extractor.useragent and not self.browser or \
                 custom_ua is not config.get(("extractor",), "user-agent"):
             headers["User-Agent"] = custom_ua
@@ -1042,19 +1044,20 @@ def _build_requests_adapter(
     return adapter
 
 
-@cache.cache(maxage=86400)
-def _browser_useragent():
+@cache.cache(maxage=86400, keyarg=0)
+def _browser_useragent(name):
     """Get User-Agent header from default browser"""
     import webbrowser
-    import socket
+    browser = webbrowser.get(name)
 
+    import socket
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(("127.0.0.1", 0))
     server.listen(1)
 
     host, port = server.getsockname()
-    webbrowser.open(f"http://{host}:{port}/user-agent")
+    browser.open(f"http://{host}:{port}/user-agent")
 
     client = server.accept()[0]
     server.close()
