@@ -31,7 +31,7 @@ class MadokamiMangaExtractor(MadokamiExtractor):
     def items(self):
         username, password = self._get_auth_info()
         if not username:
-            raise exception.AuthRequired("'username' & 'password'")
+            raise exception.AuthRequired("username & password")
         self.session.auth = util.HTTPBasicAuth(username, password)
 
         url = f"{self.root}/Manga/{self.groups[0]}"

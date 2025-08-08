@@ -341,7 +341,8 @@ class IwaraAPI():
 
     def favorites(self, type):
         if not self.username:
-            raise exception.AuthRequired("'username' & 'password'")
+            raise exception.AuthRequired(
+                "username & password", "your favorites")
         endpoint = f"/favorites/{type}s"
         return self._pagination(endpoint)
 
