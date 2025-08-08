@@ -9,7 +9,7 @@
 """Extractors for https://motherless.com/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
 from ..cache import memcache
 from datetime import timedelta
 
@@ -22,6 +22,17 @@ class MotherlessExtractor(Extractor):
     root = "https://motherless.com"
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
+
+    def request(self, url, **kwargs):
+        response = Extractor.request(self, url, **kwargs)
+
+        content = response.content
+        if (b'<div class="error-page' in content or
+                b">The page you're looking for cannot be found.<" in content):
+            raise exception.NotFoundError("page")
+
+        self.request = Extractor.request.__get__(self)
+        return response
 
     def _extract_media(self, path):
         url = f"{self.root}/{path}"
