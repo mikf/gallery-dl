@@ -443,9 +443,8 @@ class PixivArtworksExtractor(PixivExtractor):
     def works(self):
         works = self.api.user_illusts(self.user_id)
 
-        if self.sanity_workaround:
-            body = self._request_ajax(
-                f"/user/{self.user_id}/profile/all")
+        if self.sanity_workaround and (body := self._request_ajax(
+                f"/user/{self.user_id}/profile/all")):
             try:
                 ajax_ids = list(map(int, body["illusts"]))
                 ajax_ids.extend(map(int, body["manga"]))
@@ -1297,7 +1296,10 @@ class PixivAppAPI():
                 self.extractor.wait(seconds=300)
                 continue
 
-            raise exception.AbortExtraction(f"API request failed: {error}")
+            msg = (f"'{msg}'" if (msg := error.get("user_message")) else
+                   f"'{msg}'" if (msg := error.get("message")) else
+                   error)
+            raise exception.AbortExtraction(f"API request failed: {msg}")
 
     def _pagination(self, endpoint, params,
                     key_items="illusts", key_data=None, user_data=None):
