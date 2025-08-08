@@ -1045,10 +1045,21 @@ def _build_requests_adapter(
 
 
 @cache.cache(maxage=86400, keyarg=0)
-def _browser_useragent(name):
+def _browser_useragent(browser):
     """Get User-Agent header from default browser"""
     import webbrowser
-    browser = webbrowser.get(name)
+    try:
+        open = webbrowser.get(browser).open
+    except webbrowser.Error:
+        if not browser:
+            raise
+        import shutil
+        if not (browser := shutil.which(browser)):
+            raise
+
+        def open(url):
+            util.Popen((browser, url),
+                       start_new_session=False if util.WINDOWS else True)
 
     import socket
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -1057,7 +1068,7 @@ def _browser_useragent(name):
     server.listen(1)
 
     host, port = server.getsockname()
-    browser.open(f"http://{host}:{port}/user-agent")
+    open(f"http://{host}:{port}/user-agent")
 
     client = server.accept()[0]
     server.close()
