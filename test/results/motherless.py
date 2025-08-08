@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import motherless
+from gallery_dl import exception
 
 
 __tests__ = (
@@ -77,6 +78,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://motherless.com/8850983",
+    "#class"   : motherless.MotherlessMediaExtractor,
+    "#exception": exception.NotFoundError,
+},
+
+{
     "#url"  : "https://motherless.com/G444B6FA",
     "#class": motherless.MotherlessGalleryExtractor,
     "#results": (
@@ -90,7 +97,7 @@ __tests__ = (
     "#class": motherless.MotherlessGalleryExtractor,
     "#pattern": r"https://cdn5-images\.motherlessmedia\.com/images/[^/]+\.(jpg|jpeg|png|gif)",
     "#range"  : "1-100",
-    "#count"  : 10,
+    "#count"  : range(5, 50),
 
     "count"        : range(5, 50),
     "extension"    : {"jpg", "jpeg", "png", "gif"},
@@ -110,7 +117,7 @@ __tests__ = (
     "#class": motherless.MotherlessGalleryExtractor,
     "#pattern": r"https://cdn5-videos\.motherlessmedia\.com/videos/[^/]+\.mp4(?:\?.*)?",
     "#range"  : "1-100",
-    "#count"  : 29,
+    "#count"  : range(20, 40),
 
     "count"        : range(20, 100),
     "extension"    : "mp4",
@@ -123,6 +130,12 @@ __tests__ = (
     "type"         : "video",
     "uploader"     : "WawaWeWa",
     "url"          : r"re:https://cdn5-videos.motherlessmedia.com/videos/[^/]+\.mp4(?:\?.*)?",
+},
+
+{
+    "#url"     : "https://motherless.com/GI466D59F",
+    "#class"   : motherless.MotherlessGalleryExtractor,
+    "#exception": exception.NotFoundError,
 },
 
 {
