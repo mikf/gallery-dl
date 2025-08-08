@@ -158,8 +158,11 @@ class TestExtractorResults(unittest.TestCase):
         tjob = ResultJob(extr, content=("#sha1_content" in result))
 
         if "#exception" in result:
-            with self.assertRaises(result["#exception"], msg="#exception"):
+            with self.assertRaises(result["#exception"], msg="#exception"), \
+                    self.assertLogs() as log_info:
                 tjob.run()
+            if "#log" in result:
+                self.assertLogEqual(result["#log"], log_info.output)
             return
 
         try:
