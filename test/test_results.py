@@ -145,7 +145,8 @@ class TestExtractorResults(unittest.TestCase):
                 config.set((), key, None)
 
         if auth and not any(extr.config(key) for key in AUTH_KEYS):
-            return self._skipped.append((result["#url"], "no auth"))
+            self._skipped.append((result["#url"], "no auth"))
+            self.skipTest("no auth")
 
         if "#options" in result:
             for key, value in result["#options"].items():
