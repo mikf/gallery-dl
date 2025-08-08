@@ -7,7 +7,7 @@
 """Extractors for https://www.facebook.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?facebook\.com"
@@ -440,6 +440,34 @@ class FacebookVideoExtractor(FacebookExtractor):
                 yield Message.Url, audio["url"], audio
 
 
+class FacebookAlbumsExtractor(FacebookExtractor):
+    """Extractor for Facebook Profile albums"""
+    subcategory = "albums"
+    pattern = USER_PATTERN + r"/photos_albums"
+    example = "https://www.facebook.com/USERNAME/photos_albums"
+
+    def items(self):
+        url = f"{self.root}/{self.groups[0]}/photos_albums"
+        page = self.request(url).text
+
+        pos = page.find(
+            '"TimelineAppCollectionAlbumsRenderer","collection":{"id":"')
+        if pos < 0:
+            return
+
+        items = text.extract(page, '},"pageItems":', '}}},', pos)[0]
+        edges = util.json_loads(items + "}}")["edges"]
+
+        # TODO: use /graphql API endpoint
+        for edge in edges:
+            node = edge["node"]
+            album = node["node"]
+            album["_extractor"] = FacebookSetExtractor
+            album["title"] = node["title"]["text"]
+            album["thumbnail"] = (img := node["image"]) and img["uri"]
+            yield Message.Queue, album["url"], album
+
+
 class FacebookPhotosExtractor(FacebookExtractor):
     """Extractor for Facebook Profile Photos"""
     subcategory = "photos"
@@ -489,4 +517,5 @@ class FacebookUserExtractor(Dispatch, FacebookExtractor):
         return self._dispatch_extractors((
             (FacebookAvatarExtractor, base + "avatar"),
             (FacebookPhotosExtractor, base + "photos"),
+            (FacebookAlbumsExtractor, base + "photos_albums"),
         ), ("photos",))
