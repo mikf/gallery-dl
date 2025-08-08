@@ -265,4 +265,17 @@ __tests__ = (
     "url"      : str,
 },
 
+{
+    "#url"     : "https://www.facebook.com/facebook/photos_albums/Mobile uploads",
+    "#class"   : facebook.FacebookAlbumsExtractor,
+    "#results" : (
+        "https://www.facebook.com/media/set/?set=a.736550611850295&type=3",
+    ),
+
+    "id"       : "736550611850295",
+    "thumbnail": str,
+    "title"    : "Mobile uploads",
+    "url"      : "https://www.facebook.com/media/set/?set=a.736550611850295&type=3",
+},
+
 )

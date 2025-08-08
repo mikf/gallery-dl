@@ -443,17 +443,20 @@ class FacebookVideoExtractor(FacebookExtractor):
 class FacebookAlbumsExtractor(FacebookExtractor):
     """Extractor for Facebook Profile albums"""
     subcategory = "albums"
-    pattern = USER_PATTERN + r"/photos_albums"
+    pattern = USER_PATTERN + r"/photos_albums(?:/([^/?#]+))?"
     example = "https://www.facebook.com/USERNAME/photos_albums"
 
     def items(self):
-        url = f"{self.root}/{self.groups[0]}/photos_albums"
+        profile, name = self.groups
+        url = f"{self.root}/{profile}/photos_albums"
         page = self.request(url).text
 
         pos = page.find(
             '"TimelineAppCollectionAlbumsRenderer","collection":{"id":"')
         if pos < 0:
             return
+        if name is not None:
+            name = name.lower()
 
         items = text.extract(page, '},"pageItems":', '}}},', pos)[0]
         edges = util.json_loads(items + "}}")["edges"]
@@ -462,8 +465,10 @@ class FacebookAlbumsExtractor(FacebookExtractor):
         for edge in edges:
             node = edge["node"]
             album = node["node"]
+            album["title"] = title = node["title"]["text"]
+            if name is not None and name != title.lower():
+                continue
             album["_extractor"] = FacebookSetExtractor
-            album["title"] = node["title"]["text"]
             album["thumbnail"] = (img := node["image"]) and img["uri"]
             yield Message.Queue, album["url"], album
 
