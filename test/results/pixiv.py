@@ -136,6 +136,7 @@ __tests__ = (
     "#comment" : "deleted account with a different error",
     "#class"   : pixiv.PixivArtworksExtractor,
     "#log"     : "'User has left pixiv or the user ID does not exist.'",
+    "#exception": exception.NotFoundError,
 },
 
 {
@@ -173,6 +174,13 @@ __tests__ = (
 {
     "#url"     : "https://phixiv.net/en/users/56514424/artworks",
     "#class"   : pixiv.PixivArtworksExtractor,
+},
+
+{
+    "#url"      : "https://www.pixiv.net/users/70060776/artworks",
+    "#comment"  : "suspended account (#7990)",
+    "#class"    : pixiv.PixivArtworksExtractor,
+    "#exception": exception.NotFoundError,
 },
 
 {
