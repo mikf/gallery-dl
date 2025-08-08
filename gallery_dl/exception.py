@@ -100,12 +100,17 @@ class AuthorizationError(ExtractionError):
 class AuthRequired(AuthorizationError):
     default = "Account credentials required"
 
-    def __init__(self, required=None, message=None):
-        if required and not message:
-            if isinstance(required, str):
-                message = f"{required} required"
+    def __init__(self, auth=None, resource="resource", message=None):
+        if auth:
+            if not isinstance(auth, str):
+                auth = " or ".join(auth)
+            if " " not in resource:
+                resource = "this " + resource
+            if message is None:
+                message = (f"{auth} needed to access {resource}")
             else:
-                message = f"{' or '.join(required)} required"
+                message = (f"{auth} needed to access {resource} "
+                           f"('{message}')")
         AuthorizationError.__init__(self, message)
 
 

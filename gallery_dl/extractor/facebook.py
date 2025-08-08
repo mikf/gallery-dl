@@ -318,7 +318,9 @@ class FacebookExtractor(Extractor):
 
             if ('"props":{"title":"This content isn\'t available right now"' in
                     profile_photos_page):
-                raise exception.AuthRequired("cookies")
+                raise exception.AuthRequired(
+                    "authenticated cookies", "profile",
+                    "This content isn't available right now")
 
             set_id = self._extract_profile_set_id(profile_photos_page)
             avatar_page_url = text.extr(
