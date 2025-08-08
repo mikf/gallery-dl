@@ -75,6 +75,7 @@ CATEGORY_MAP = {
     "hiperdex"       : "HiperDEX",
     "hitomi"         : "Hitomi.la",
     "horne"          : "horne",
+    "hreads"         : "Hreads",
     "idolcomplex"    : "Idol Complex",
     "illusioncardsbooru": "Illusion Game Cards",
     "imagebam"       : "ImageBam",
