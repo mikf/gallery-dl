@@ -244,4 +244,25 @@ __tests__ = (
     "username" : "Facebook",
 },
 
+{
+    "#url"     : "https://www.facebook.com/facebook/photos_albums",
+    "#class"   : facebook.FacebookAlbumsExtractor,
+    "#pattern" : facebook.FacebookSetExtractor.pattern,
+    "#results" : [
+        "https://www.facebook.com/media/set/?set=a.736550598516963&type=3",
+        "https://www.facebook.com/media/set/?set=a.736550611850295&type=3",
+        "https://www.facebook.com/media/set/?set=a.1198986285606723&type=3",
+        "https://www.facebook.com/media/set/?set=a.1188430493328969&type=3",
+        "https://www.facebook.com/media/set/?set=a.1182920610546624&type=3",
+        "https://www.facebook.com/media/set/?set=a.1152503723588313&type=3",
+        "https://www.facebook.com/media/set/?set=a.912647394240615&type=3",
+        "https://www.facebook.com/media/set/?set=a.862611645910857&type=3",
+    ],
+
+    "id"       : r"re:\d+",
+    "thumbnail": {str, None},
+    "title"    : str,
+    "url"      : str,
+},
+
 )
