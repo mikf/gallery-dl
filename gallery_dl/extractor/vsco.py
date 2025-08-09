@@ -143,6 +143,7 @@ class VscoUserExtractor(Dispatch, VscoExtractor):
             (VscoGalleryExtractor   , base + "gallery"),
             (VscoSpacesExtractor    , base + "spaces"),
             (VscoCollectionExtractor, base + "collection"),
+            (VscoJournalExtractor  , base + "journal"), 
         ), ("gallery",))
 
 
@@ -161,7 +162,7 @@ class VscoGalleryExtractor(VscoExtractor):
         url = f"{self.root}/api/3.0/medias/profile"
         params = {
             "site_id"  : sid,
-            "limit"    : "14",
+            "limit"    : "30",
             "cursor"   : None,
         }
 
@@ -336,3 +337,64 @@ class VscoVideoExtractor(VscoExtractor):
             "height"        : media["height"],
             "description"   : media["description"],
         },)
+        
+        
+class VscoJournalExtractor(VscoExtractor):
+    """Extractor for a vsco user's journal articles"""
+    subcategory = "journal"
+    directory_fmt = ("{category}", "{user}")
+    archive_fmt = "j_{user}_{id}"
+    pattern = USER_PATTERN + r"/journal(?:/p/(\d+))?"
+    example = "https://vsco.co/USER/journal"
+
+    def __init__(self, match):
+        VscoExtractor.__init__(self, match)
+        self.page = match.group(2)
+
+    def images(self):
+        url = f"{self.root}/{self.user}/journal"
+        data = self._extract_preload_state(url)
+
+        tkn = data["users"]["currentUser"]["tkn"]
+        sid = str(data["sites"]["siteByUsername"][self.user]["site"]["id"])
+
+        url = f"{self.root}/api/2.0/articles"
+        params = {
+            "site_id": sid,
+            "size": 12,
+            "page": int(self.page) if self.page else 1,
+        }
+
+        headers = {
+            "Authorization": "Bearer " + tkn,
+        }
+
+        while True:
+            data = self.request_json(url, params=params, headers=headers)
+            if not data.get("articles"):
+                break
+
+            for article in data["articles"]:
+                for item in article.get("body", []):
+                    if item.get("type") == "image":
+                        for image in item.get("content", []):
+                            if "responsive_url" in image:
+                                # Transform journal image format to match VSCO media format
+                                media = {
+                                    "_id": image["id"],
+                                    "is_video": False,
+                                    "grid_name": "",
+                                    "upload_date": article.get("created_at", 0),
+                                    "responsive_url": image["responsive_url"],
+                                    "video_url": "",
+                                    "image_meta": None,
+                                    "width": image.get("width", 0),
+                                    "height": image.get("height", 0),
+                                    "description": article.get("title", ""),
+                                }
+                                yield media
+
+            # Check if we've reached the end
+            if len(data["articles"]) < params["size"]:
+                break
+            params["page"] += 1
