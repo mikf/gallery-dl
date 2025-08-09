@@ -29,25 +29,13 @@ def connect(path, prefix, format,
     else:
         path = util.expand_path(path)
         if kwdict is not None and "{" in path:
+            if pathfmt:
+                kw = kwdict.copy()
+                for key, value in kw.items():
+                    if isinstance(value, str):
+                        kw[key] = pathfmt.clean_segment(value)
+                kwdict = kw
             path = formatter.parse(path).format_map(kwdict)
-
-        if pathfmt:
-            drive, tail = os.path.splitdrive(path)
-            tail = os.path.normpath(tail)
-            segments = tail.split(os.sep)
-            if segments and not segments[0]:
-                # absolute path
-                segments.pop(0)
-                sanitized = [
-                    pathfmt.clean_segment(s) for s in segments
-                ]
-                path = drive + os.sep + os.sep.join(sanitized)
-            else:
-                sanitized = [
-                    pathfmt.clean_segment(s) for s in segments
-                ]
-                path = drive + os.sep.join(sanitized)
-
         if mode == "memory":
             cls = DownloadArchiveMemory
         else:
