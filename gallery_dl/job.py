@@ -581,6 +581,7 @@ class DownloadJob(Job):
                     cfg("archive-mode"),
                     cfg("archive-pragma"),
                     kwdict,
+                    pathfmt=pathfmt,
                 )
             except Exception as exc:
                 extr.log.warning(

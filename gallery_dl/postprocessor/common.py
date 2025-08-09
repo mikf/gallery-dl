@@ -46,6 +46,7 @@ class PostProcessor():
                     options.get("archive-pragma"),
                     job.pathfmt.kwdict,
                     "_archive_" + self.name,
+                    pathfmt=job.pathfmt,
                 )
             except Exception as exc:
                 self.log.warning(

@@ -16,7 +16,8 @@ log = logging.getLogger("archive")
 
 
 def connect(path, prefix, format,
-            table=None, mode=None, pragma=None, kwdict=None, cache_key=None):
+            table=None, mode=None, pragma=None, kwdict=None, cache_key=None,
+            pathfmt=None):
     keygen = formatter.parse(prefix + format).format_map
 
     if isinstance(path, str) and path.startswith(
@@ -29,6 +30,24 @@ def connect(path, prefix, format,
         path = util.expand_path(path)
         if kwdict is not None and "{" in path:
             path = formatter.parse(path).format_map(kwdict)
+
+        if pathfmt:
+            drive, tail = os.path.splitdrive(path)
+            tail = os.path.normpath(tail)
+            segments = tail.split(os.sep)
+            if segments and not segments[0]:
+                # absolute path
+                segments.pop(0)
+                sanitized = [
+                    pathfmt.clean_segment(s) for s in segments
+                ]
+                path = drive + os.sep + os.sep.join(sanitized)
+            else:
+                sanitized = [
+                    pathfmt.clean_segment(s) for s in segments
+                ]
+                path = drive + os.sep.join(sanitized)
+
         if mode == "memory":
             cls = DownloadArchiveMemory
         else:
