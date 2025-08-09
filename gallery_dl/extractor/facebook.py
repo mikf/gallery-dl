@@ -322,17 +322,39 @@ class FacebookExtractor(Extractor):
                     "authenticated cookies", "profile",
                     "This content isn't available right now")
 
-            set_id = self._extract_profile_set_id(profile_photos_page)
-            avatar_page_url = text.extr(
-                profile_photos_page, ',"profilePhoto":{"url":"', '"')
+            set_id = self._extract_profile_set_id(
+                profile_photos_page)
+            user_data = text.extr(
+                profile_photos_page, '","user":{"', '},"viewer":{')
 
-            if set_id or avatar_page_url:
+            if set_id or user_data:
                 break
             self.log.debug("Got empty profile photos page, retrying...")
         else:
             raise exception.AbortExtraction("Failed to extract profile data")
 
-        return set_id, avatar_page_url.replace("\\/", "/")
+        try:
+            data = util.json_loads(f'{{"{user_data}}}')
+        except Exception:
+            data = {}
+            self.log.debug(user_data)
+
+        try:
+            data["profile_tabs"] = [
+                edge["node"]
+                for edge in (data["profile_tabs"]["profile_user"]
+                             ["timeline_nav_app_sections"]["edges"])
+            ]
+        except Exception:
+            pass
+
+        data["set_id"] = set_id
+        data["vanity"] = (
+            text.extr(profile_photos_page, '"userVanity":"', '"') or
+            text.extr(profile_photos_page, '"vanity":"', '"')
+        )
+
+        return data
 
     def _extract_profile_set_id(self, profile_photos_page):
         set_ids_raw = text.extr(
@@ -440,6 +462,17 @@ class FacebookVideoExtractor(FacebookExtractor):
                 yield Message.Url, audio["url"], audio
 
 
+class FacebookInfoExtractor(FacebookExtractor):
+    """Extractor for Facebook Profile data"""
+    subcategory = "info"
+    pattern = USER_PATTERN + r"/info"
+    example = "https://www.facebook.com/USERNAME/info"
+
+    def items(self):
+        user = self._extract_profile_photos_page(self.groups[0])
+        return iter(((Message.Directory, user),))
+
+
 class FacebookAlbumsExtractor(FacebookExtractor):
     """Extractor for Facebook Profile albums"""
     subcategory = "albums"
@@ -480,7 +513,7 @@ class FacebookPhotosExtractor(FacebookExtractor):
     example = "https://www.facebook.com/USERNAME/photos"
 
     def items(self):
-        set_id = self._extract_profile_photos_page(self.groups[0])[0]
+        set_id = self._extract_profile_photos_page(self.groups[0])["set_id"]
         if not set_id:
             return iter(())
 
@@ -497,7 +530,8 @@ class FacebookAvatarExtractor(FacebookExtractor):
     example = "https://www.facebook.com/USERNAME/avatar"
 
     def items(self):
-        avatar_page_url = self._extract_profile_photos_page(self.groups[0])[1]
+        user = self._extract_profile_photos_page(self.groups[0])
+        avatar_page_url = user["profilePhoto"]["url"]
         avatar_page = self.photo_page_request_wrapper(avatar_page_url).text
 
         avatar = self.parse_photo_page(avatar_page)
@@ -520,6 +554,7 @@ class FacebookUserExtractor(Dispatch, FacebookExtractor):
     def items(self):
         base = f"{self.root}/{self.groups[0]}/"
         return self._dispatch_extractors((
+            (FacebookInfoExtractor  , base + "info"),
             (FacebookAvatarExtractor, base + "avatar"),
             (FacebookPhotosExtractor, base + "photos"),
             (FacebookAlbumsExtractor, base + "photos_albums"),

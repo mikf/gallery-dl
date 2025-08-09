@@ -29,6 +29,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/facebook",
+    "#class"   : facebook.FacebookUserExtractor,
+    "#options" : {"include": "all"},
+    "#results" : [
+        "https://www.facebook.com/facebook/info",
+        "https://www.facebook.com/facebook/avatar",
+        "https://www.facebook.com/facebook/photos",
+        "https://www.facebook.com/facebook/photos_albums",
+    ],
+},
+
+{
     "#url"     : "https://www.facebook.com/facebook/photos",
     "#class"   : facebook.FacebookPhotosExtractor,
 
@@ -51,7 +63,7 @@ __tests__ = (
     "#range"   : "1",
 
     "user_id"   : "100074229772340",
-    "user_pfbid": r"re:pfbid0x\w{64}",
+    "user_pfbid": r"re:pfbid\w{66}",
 },
 
 {
@@ -104,7 +116,7 @@ __tests__ = (
     "set_id"    : "a.104622317759666",
     "type"      : "avatar",
     "user_id"   : "100046356937542",
-    "user_pfbid": r"re:pfbid0x\w{64}",
+    "user_pfbid": r"re:pfbid\w{66}",
     "username"  : "Throwaway Idk",
 },
 
@@ -198,7 +210,7 @@ __tests__ = (
     "id"      : "221820450302279",
     "set_id"  : "a.109762038174788",
     "user_id" : "100074229772340",
-    "user_pfbid": r"re:pfbid0x\w{64}",
+    "user_pfbid": r"re:pfbid\w{66}",
     "username": "Throwaway Kwon",
 },
 
@@ -276,6 +288,11 @@ __tests__ = (
     "thumbnail": str,
     "title"    : "Mobile uploads",
     "url"      : "https://www.facebook.com/media/set/?set=a.736550611850295&type=3",
+},
+
+{
+    "#url"     : "https://www.facebook.com/brando.cha.3/info",
+    "#class"   : facebook.FacebookInfoExtractor,
 },
 
 )

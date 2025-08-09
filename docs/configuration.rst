@@ -2678,6 +2678,7 @@ Description
 
     Supported values are
 
+    * ``info``
     * ``avatar``
     * ``photos``
     * ``albums``
