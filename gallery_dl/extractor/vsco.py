@@ -143,7 +143,7 @@ class VscoUserExtractor(Dispatch, VscoExtractor):
             (VscoGalleryExtractor   , base + "gallery"),
             (VscoSpacesExtractor    , base + "spaces"),
             (VscoCollectionExtractor, base + "collection"),
-            (VscoJournalExtractor  , base + "journal"), 
+            (VscoJournalExtractor  , base + "journal"),
         ), ("gallery",))
 
 
@@ -337,8 +337,8 @@ class VscoVideoExtractor(VscoExtractor):
             "height"        : media["height"],
             "description"   : media["description"],
         },)
-        
-        
+
+
 class VscoJournalExtractor(VscoExtractor):
     """Extractor for a vsco user's journal articles"""
     subcategory = "journal"
@@ -379,7 +379,6 @@ class VscoJournalExtractor(VscoExtractor):
                     if item.get("type") == "image":
                         for image in item.get("content", []):
                             if "responsive_url" in image:
-                                # Transform journal image format to match VSCO media format
                                 media = {
                                     "_id": image["id"],
                                     "is_video": False,
@@ -394,7 +393,6 @@ class VscoJournalExtractor(VscoExtractor):
                                 }
                                 yield media
 
-            # Check if we've reached the end
             if len(data["articles"]) < params["size"]:
                 break
             params["page"] += 1
