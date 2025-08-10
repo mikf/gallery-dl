@@ -483,6 +483,7 @@ class CivitaiUserExtractor(Dispatch, CivitaiExtractor):
             (CivitaiUserPostsExtractor , base + "posts"),
             (CivitaiUserImagesExtractor, base + "images"),
             (CivitaiUserVideosExtractor, base + "videos"),
+            (CivitaiUserCollectionsExtractor, base + "collections"),
         ), ("user-images", "user-videos"))
 
 
@@ -549,6 +550,22 @@ class CivitaiUserVideosExtractor(CivitaiExtractor):
         CivitaiExtractor.__init__(self, match)
 
     images = CivitaiUserImagesExtractor.images
+
+
+class CivitaiUserCollectionsExtractor(CivitaiExtractor):
+    subcategory = "user-collections"
+    pattern = USER_PATTERN + r"/collections/?(?:\?([^#]+))?"
+    example = "https://civitai.com/user/USER/collections"
+
+    def items(self):
+        user, query = self.groups
+        params = self._parse_query(query)
+        params["userId"] = self.api.user(text.unquote(user))[0]["id"]
+
+        base = f"{self.root}/collections/"
+        for collection in self.api.collections(params):
+            collection["_extractor"] = CivitaiCollectionExtractor
+            yield Message.Queue, f"{base}{collection['id']}", collection
 
 
 class CivitaiGeneratedExtractor(CivitaiExtractor):
@@ -784,6 +801,18 @@ class CivitaiTrpcAPI():
         endpoint = "collection.getById"
         params = {"id": int(collection_id)}
         return self._call(endpoint, params)["collection"]
+
+    def collections(self, params, defaults=True):
+        endpoint = "collection.getInfinite"
+
+        if defaults:
+            params = self._merge_params(params, {
+                "browsingLevel": self.nsfw,
+                "sort"         : "Newest",
+            })
+
+        params = self._type_params(params)
+        return self._pagination(endpoint, params)
 
     def user(self, username):
         endpoint = "user.getCreator"
