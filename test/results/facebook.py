@@ -63,7 +63,7 @@ __tests__ = (
     "#range"   : "1",
 
     "user_id"   : "100074229772340",
-    "user_pfbid": r"re:pfbid\w{66}",
+    "user_pfbid": r"re:pfbid\w{64}",
 },
 
 {
@@ -116,7 +116,7 @@ __tests__ = (
     "set_id"    : "a.104622317759666",
     "type"      : "avatar",
     "user_id"   : "100046356937542",
-    "user_pfbid": r"re:pfbid\w{66}",
+    "user_pfbid": r"re:pfbid\w{64}",
     "username"  : "Throwaway Idk",
 },
 
@@ -210,7 +210,7 @@ __tests__ = (
     "id"      : "221820450302279",
     "set_id"  : "a.109762038174788",
     "user_id" : "100074229772340",
-    "user_pfbid": r"re:pfbid\w{66}",
+    "user_pfbid": r"re:pfbid\w{64}",
     "username": "Throwaway Kwon",
 },
 
