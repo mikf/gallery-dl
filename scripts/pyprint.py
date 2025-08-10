@@ -61,10 +61,13 @@ def pyprint(obj, indent=0, sort=None, oneline=True, lmin=0, lmax=16):
                 keys.sort()
                 obj = {key: obj[key] for key in keys}
 
-        ws = " " * indent
-        keylen = max(kl for kl in map(len, obj) if kl <= lmax)
+        try:
+            keylen = max(kl for kl in map(len, obj) if kl <= lmax)
+        except Exception:
+            keylen = lmin
         if keylen < lmin:
             keylen = lmin
+        ws = " " * indent
 
         lines = ["{"]
         for key, value in obj.items():
