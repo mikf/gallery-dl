@@ -96,9 +96,10 @@ def generate_opts(args, urls, exc=None):
     elif len(urls) == 1:
         opts["#results"] = urls[0]
     elif len(urls) < args.limit_urls:
-        opts["#results"] = urls
+        opts["#results"] = tuple(urls)
     else:
-        opts["#pattern"] = urls[0]
+        import re
+        opts["#pattern"] = re.escape(urls[0])
         opts["#count"] = len(urls)
 
     return opts
