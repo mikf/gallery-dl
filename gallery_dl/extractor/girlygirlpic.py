@@ -6,16 +6,17 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://girlgirlgo.org"""
+"""Extractors for https://girlygirlpic.com"""
 
 from .common import Extractor, Message
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?([a-z]{2})\.girlgirlgo\.org"
+BASE_PATTERN = (r"(?:https?://)?([a-z]{2})\."
+                r"(?:girlygirlpic\.com|girlgirlgo\.org)")
 
 
-class GirlgirlgoExtractor(Extractor):
-    category = "girlgirlgo"
+class GirlygirlpicExtractor(Extractor):
+    category = "Girlygirlpic"
     directory_fmt = ("{category}", "{title}")
     filename_fmt = "{num:>03}.{extension}"
 
@@ -35,8 +36,8 @@ class GirlgirlgoExtractor(Extractor):
     }
 
     def _pagination(self, endpoint):
-        url = f"https://{self.groups[0]}.girlgirlgo.org/api/{endpoint}"
-        data = {"_extractor": GirlgirlgoAlbumExtractor}
+        url = f"https://{self.groups[0]}.girlygirlpic.com/api/{endpoint}"
+        data = {"_extractor": GirlygirlpicAlbumExtractor}
         while True:
             json = self.request(url, method="POST", json=self.payload).json()
             if not json["new_posts"]:
@@ -51,23 +52,25 @@ class GirlgirlgoExtractor(Extractor):
                 yield Message.Queue, album, data
 
 
-class GirlgirlgoAlbumExtractor(GirlgirlgoExtractor):
+class GirlygirlpicAlbumExtractor(GirlygirlpicExtractor):
     subcategory = "album"
     pattern = BASE_PATTERN + r"/a/([a-zA-Z0-9]+)"
-    example = "https://en.girlgirlgo.org/a/ALBUM"
+    example = "https://en.girlygirlpic.com/a/ALBUMID"
 
     def items(self):
-        url = f"https://{self.groups[0]}.girlgirlgo.org/ax"
+        url = f"https://{self.groups[0]}.girlygirlpic.com/ax"
         payload = {"album_id": self.groups[1]}
         page = self.request(url, method="POST", json=payload).text
-        date = text.extr(page, "datetime=", ">")
+        extr = text.extract_from(page)
         urls = list(text.extract_iter(page, "link-w><a href=", " class"))
         data = {
-            "title": text.extr(page, "<li><span>", "</span>"),
-            "model": text.extr(page, "rel=author>", "</a>"),
+            "title": text.unescape(extr("<li><span>", "</span>")),
+            "date": text.parse_datetime(
+                extr("datetime=", ">"), "%Y-%m-%dT%H:%M:%S"),
+            "model": extr("rel=author>", "</a>"),
             "tags": list(text.extract_iter(page, 'tag">', "</a>")),
-            "date": text.parse_datetime(date, "%Y-%m-%dT%H:%M:%S"),
-            "count": len(urls)
+            "count": len(urls),
+            "album_id": self.groups[1]
         }
 
         yield Message.Directory, data
@@ -76,50 +79,50 @@ class GirlgirlgoAlbumExtractor(GirlgirlgoExtractor):
             yield Message.Url, image, data
 
 
-class GirlgirlgoModelExtractor(GirlgirlgoExtractor):
+class GirlygirlpicModelExtractor(GirlygirlpicExtractor):
     subcategory = "model"
     pattern = BASE_PATTERN + r"/m/([a-z0-9]{7})"
-    example = "https://en.girlgirlgo.org/m/abc1234"
+    example = "https://en.girlygirlpic.com/m/MODELID"
 
     def items(self):
         self.payload["model_id"] = self.groups[1]
         yield from self._pagination("getmodelalbumslist")
 
 
-class GirlgirlgoStudioExtractor(GirlgirlgoExtractor):
+class GirlygirlpicStudioExtractor(GirlygirlpicExtractor):
     subcategory = "studio"
     pattern = BASE_PATTERN + r"/c/([a-z0-9]{7})"
-    example = "https://en.girlgirlgo.org/c/abc1234"
+    example = "https://en.girlygirlpic.com/c/STUDIOID"
 
     def items(self):
         self.payload["company_id"] = self.groups[1]
         yield from self._pagination("getcompanyalbumslist")
 
 
-class GirlgirlgoTagExtractor(GirlgirlgoExtractor):
+class GirlygirlpicTagExtractor(GirlygirlpicExtractor):
     subcategory = "tag"
     pattern = BASE_PATTERN + r"/t/([a-z0-9]{7})"
-    example = "https://en.girlgirlgo.org/t/TAG"
+    example = "https://en.girlygirlpic.com/t/TAGID"
 
     def items(self):
         self.payload["tag_id"] = self.groups[1]
         yield from self._pagination("gettagalbumslist")
 
 
-class GirlgirlgoRegionExtractor(GirlgirlgoExtractor):
+class GirlygirlpicRegionExtractor(GirlygirlpicExtractor):
     subcategory = "region"
     pattern = BASE_PATTERN + r"/l/([a-z0-9]{7})"
-    example = "https://en.girlgirlgo.org/l/abc1234"
+    example = "https://en.girlygirlpic.com/l/REGIONID"
 
     def items(self):
         self.payload["country_id"] = self.groups[1]
         yield from self._pagination("getcountryalbumslist")
 
 
-class GirlgirlgoSearchExtractor(GirlgirlgoExtractor):
+class GirlygirlpicSearchExtractor(GirlygirlpicExtractor):
     subcategory = "search"
     pattern = BASE_PATTERN + r"/s/(.+)"
-    example = "https://en.girlgirlgo.org/s/SEARCH"
+    example = "https://en.girlygirlpic.com/s/SEARCH"
 
     def items(self):
         self.payload["search_keys_tag"] = self.groups[1]

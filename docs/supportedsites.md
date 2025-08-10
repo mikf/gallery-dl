@@ -338,12 +338,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Girlgirlgo</td>
-    <td>https://girlgirlgo.org</td>
-    <td>Albums, Models, Regions, Search Results, Studios, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
     <td>Girls with Muscle</td>
     <td>https://www.girlswithmuscle.com/</td>
     <td>Posts, Search Results</td>
@@ -353,6 +347,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Girlsreleased</td>
     <td>https://girlsreleased.com/</td>
     <td>Models, Sets, Sites</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Girlygirlpic</td>
+    <td>https://girlygirlpic.com</td>
+    <td>Albums, Models, Regions, Search Results, Studios, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
