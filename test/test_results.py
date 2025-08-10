@@ -156,7 +156,9 @@ class TestExtractorResults(unittest.TestCase):
             config.set((), "image-range"  , result["#range"])
             config.set((), "chapter-range", result["#range"])
 
-        tjob = ResultJob(extr, content=("#sha1_content" in result))
+        tjob = ResultJob(extr,
+                         content=("#sha1_content" in result),
+                         format=(result.get("#metadata") != "post"))
 
         if "#exception" in result:
             with self.assertRaises(result["#exception"], msg="#exception"), \
@@ -261,7 +263,11 @@ class TestExtractorResults(unittest.TestCase):
 
         metadata = {k: v for k, v in result.items() if k[0] != "#"}
         if metadata:
-            for kwdict in tjob.kwdict_list:
+            if result.get("#metadata") == "post":
+                kwdicts = tjob.kwdict_post
+            else:
+                kwdicts = tjob.kwdict_list
+            for kwdict in kwdicts:
                 self._test_kwdict(kwdict, metadata)
 
     def _test_kwdict(self, kwdict, tests, parent=None):
@@ -345,7 +351,7 @@ class TestExtractorResults(unittest.TestCase):
 class ResultJob(job.DownloadJob):
     """Generate test-results for extractor runs"""
 
-    def __init__(self, url, parent=None, content=False):
+    def __init__(self, url, parent=None, content=False, format=True):
         job.DownloadJob.__init__(self, url, parent)
         self.queue = False
         self.content = content
@@ -353,6 +359,7 @@ class ResultJob(job.DownloadJob):
         self.url_list = []
         self.url_hash = hashlib.sha1()
         self.kwdict_list = []
+        self.kwdict_post = []
         self.kwdict_hash = hashlib.sha1()
         self.archive_list = []
         self.archive_hash = hashlib.sha1()
@@ -363,12 +370,17 @@ class ResultJob(job.DownloadJob):
         else:
             self._update_content = lambda url, kwdict: None
 
-        self.format_directory = TestFormatter(
-            "".join(self.extractor.directory_fmt)).format_map
-        self.format_filename = TestFormatter(
-            self.extractor.filename_fmt).format_map
-        self.format_archive = TestFormatter(
-            self.extractor.archive_fmt).format_map
+        if format:
+            self.format_directory = TestFormatter(
+                "".join(self.extractor.directory_fmt)).format_map
+            self.format_filename = TestFormatter(
+                self.extractor.filename_fmt).format_map
+            self.format_archive = TestFormatter(
+                self.extractor.archive_fmt).format_map
+        else:
+            self.format_directory = \
+                self.format_filename = \
+                self.format_archive = lambda kwdict: ""
 
     def run(self):
         self._init()
@@ -401,6 +413,8 @@ class ResultJob(job.DownloadJob):
     def _update_kwdict(self, kwdict, to_list=True):
         if to_list:
             self.kwdict_list.append(kwdict.copy())
+        else:
+            self.kwdict_post.append(kwdict.copy())
         kwdict = util.filter_dict(kwdict)
         self.kwdict_hash.update(
             json.dumps(kwdict, sort_keys=True, default=str).encode())

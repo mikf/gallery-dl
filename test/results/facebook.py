@@ -260,7 +260,7 @@ __tests__ = (
     "#url"     : "https://www.facebook.com/facebook/photos_albums",
     "#class"   : facebook.FacebookAlbumsExtractor,
     "#pattern" : facebook.FacebookSetExtractor.pattern,
-    "#results" : [
+    "#results" : (
         "https://www.facebook.com/media/set/?set=a.736550598516963&type=3",
         "https://www.facebook.com/media/set/?set=a.736550611850295&type=3",
         "https://www.facebook.com/media/set/?set=a.1198986285606723&type=3",
@@ -269,7 +269,7 @@ __tests__ = (
         "https://www.facebook.com/media/set/?set=a.1152503723588313&type=3",
         "https://www.facebook.com/media/set/?set=a.912647394240615&type=3",
         "https://www.facebook.com/media/set/?set=a.862611645910857&type=3",
-    ],
+    ),
 
     "id"       : r"re:\d+",
     "thumbnail": {str, None},
@@ -293,6 +293,44 @@ __tests__ = (
 {
     "#url"     : "https://www.facebook.com/brando.cha.3/info",
     "#class"   : facebook.FacebookInfoExtractor,
+    "#metadata": "post",
+
+    "id"            : "100046356937542",
+    "name"          : "Throwaway Idk",
+    "username"      : "brando.cha.3",
+    "url"           : "https://www.facebook.com/brando.cha.3",
+    "alternate_name": "",
+    "profile_video" : None,
+    "set_id"        : "",
+    "user_pfbid"    : r"re:pfbid\w{64}",
+    "profilePhoto"  : {
+        "id"          : "104622291093002",
+        "url"         : "https://www.facebook.com/photo/?fbid=104622291093002&set=a.104622317759666",
+        "viewer_image": {
+            "height": 1947,
+            "width" : 1928,
+        },
+    },
+    "profile_tabs"  : [
+        {
+            "id"      : "YXBwX3NlY3Rpb246MTAwMDQ2MzU2OTM3NTQyOjIzNTYzMTgzNDk=",
+            "name"    : "Friends",
+            "tracking": "friends",
+            "url"     : "https://www.facebook.com/brando.cha.3/friends",
+        },
+        {
+            "id"      : "YXBwX3NlY3Rpb246MTAwMDQ2MzU2OTM3NTQyOjIzMDUyNzI3MzI=",
+            "name"    : "Photos",
+            "tracking": "photos",
+            "url"     : "https://www.facebook.com/brando.cha.3/photos",
+        },
+        {
+            "id"      : "YXBwX3NlY3Rpb246MTAwMDQ2MzU2OTM3NTQyOjE1NjA2NTMzMDQxNzQ1MTQ=",
+            "name"    : "Videos",
+            "tracking": "user_videos",
+            "url"     : "https://www.facebook.com/brando.cha.3/videos",
+        },
+    ],
 },
 
 )
