@@ -100,7 +100,17 @@ def pyprint(obj, indent=0, sort=None, oneline=True, lmin=0, lmax=16):
             return "()"
         if len(obj) == 1:
             return f'''({pyprint(obj[0], indent, sort)},)'''
-        return f'''({", ".join(pyprint(v, indent+4, sort) for v in obj)})'''
+
+        result = f'''({", ".join(pyprint(v, indent+4, sort) for v in obj)})'''
+        if len(result) < 80:
+            return result
+
+        ws = " " * indent
+        lines = ["("]
+        for value in obj:
+            lines.append(f'''{ws}    {pyprint(value, indent+4, sort)},''')
+        lines.append(f'''{ws})''')
+        return "\n".join(lines)
 
     if isinstance(obj, set):
         if not obj:
