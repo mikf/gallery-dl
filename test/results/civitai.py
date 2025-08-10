@@ -660,4 +660,18 @@ __tests__ = (
     },
 },
 
+{
+    "#url"     : "https://civitai.com/user/SakuraCherryBlossoms/collections",
+    "#class"   : civitai.CivitaiUserCollectionsExtractor,
+    "#results" : (
+        "https://civitai.com/collections/11462456",
+        "https://civitai.com/collections/11453431",
+        "https://civitai.com/collections/11453135",
+        "https://civitai.com/collections/11407164",
+        "https://civitai.com/collections/11405046",
+        "https://civitai.com/collections/11395523",
+        "https://civitai.com/collections/11395467",
+    ),
+},
+
 )

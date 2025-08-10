@@ -240,6 +240,7 @@ SUBCATEGORY_MAP = {
         "user-images": ("User Images", "Image Reactions"),
         "user-posts" : "User Posts",
         "user-videos": ("User Videos", "Video Reactions"),
+        "user-collections" : "User Collections",
         "generated": "Generated Files",
     },
     "coomer": {

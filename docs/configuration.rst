@@ -1888,6 +1888,7 @@ Description
     * ``"user-posts"``
     * ``"user-images"``
     * ``"user-videos"``
+    * ``"user-collections"``
 
     It is possible to use ``"all"`` instead of listing all values separately.
 Note
