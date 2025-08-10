@@ -377,6 +377,28 @@ class CivitaiImageExtractor(CivitaiExtractor):
         return self.api.image(self.groups[0])
 
 
+class CivitaiCollectionExtractor(CivitaiExtractor):
+    subcategory = "collection"
+    directory_fmt = ("{category}", "{user_collection[username]}",
+                     "collections", "{collection[id]}{collection[name]:? //}")
+    pattern = BASE_PATTERN + r"/collections/(\d+)"
+    example = "https://civitai.com/collections/12345"
+
+    def images(self):
+        cid = int(self.groups[0])
+        self.kwdict["collection"] = col = self.api.collection(cid)
+        self.kwdict["user_collection"] = col.pop("user", None)
+
+        params = {
+            "collectionId"  : cid,
+            "period"        : "AllTime",
+            "sort"          : "Newest",
+            "browsingLevel" : self.api.nsfw,
+            "include"       : ("cosmetics",),
+        }
+        return self.api.images(params, defaults=False)
+
+
 class CivitaiPostExtractor(CivitaiExtractor):
     subcategory = "post"
     directory_fmt = ("{category}", "{username|user[username]}", "posts",
@@ -635,7 +657,7 @@ class CivitaiTrpcAPI():
         self.root = extractor.root + "/api/trpc/"
         self.headers = {
             "content-type"    : "application/json",
-            "x-client-version": "5.0.920",
+            "x-client-version": "5.0.954",
             "x-client-date"   : "",
             "x-client"        : "web",
             "x-fingerprint"   : "undefined",
@@ -758,6 +780,11 @@ class CivitaiTrpcAPI():
         params = self._type_params(params)
         return self._pagination(endpoint, params, meta)
 
+    def collection(self, collection_id):
+        endpoint = "collection.getById"
+        params = {"id": int(collection_id)}
+        return self._call(endpoint, params)["collection"]
+
     def user(self, username):
         endpoint = "user.getCreator"
         params = {"username": username}
@@ -783,9 +810,8 @@ class CivitaiTrpcAPI():
 
         params = {"input": util.json_dumps(input)}
         headers["x-client-date"] = str(int(time.time() * 1000))
-        response = self.extractor.request(url, params=params, headers=headers)
-
-        return response.json()["result"]["data"]["json"]
+        return self.extractor.request_json(
+            url, params=params, headers=headers)["result"]["data"]["json"]
 
     def _pagination(self, endpoint, params, meta=None):
         if "cursor" not in params:
