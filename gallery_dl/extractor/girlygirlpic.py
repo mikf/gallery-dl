@@ -11,12 +11,11 @@
 from .common import Extractor, Message
 from .. import text
 
-BASE_PATTERN = (r"(?:https?://)?([a-z]{2})\."
-                r"(?:girlygirlpic\.com|girlgirlgo\.org)")
+BASE_PATTERN = r"(?:https?://)?([a-z]{2})\.girl(?:ygirlpic\.com|girlgo\.org)"
 
 
 class GirlygirlpicExtractor(Extractor):
-    category = "Girlygirlpic"
+    category = "girlygirlpic"
     directory_fmt = ("{category}", "{title}")
     filename_fmt = "{num:>03}.{extension}"
 
