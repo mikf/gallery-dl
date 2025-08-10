@@ -310,51 +310,33 @@ class FacebookExtractor(Extractor):
             i += 1
 
     @memcache(keyarg=1)
-    def _extract_profile_photos_page(self, profile):
-        profile_photos_url = f"{self.root}/{profile}/photos_by"
+    def _extract_profile(self, profile, set_id=False):
+        if set_id:
+            url = f"{self.root}/{profile}/photos_by"
+        else:
+            url = f"{self.root}/{profile}"
+        return self._extract_profile_page(url)
 
+    def _extract_profile_page(self, url):
         for _ in range(self.fallback_retries + 1):
-            profile_photos_page = self.request(profile_photos_url).text
+            page = self.request(url).text
 
+            if page.find('>Page Not Found</title>', 0, 3000) > 0:
+                break
             if ('"props":{"title":"This content isn\'t available right now"' in
-                    profile_photos_page):
+                    page):
                 raise exception.AuthRequired(
                     "authenticated cookies", "profile",
                     "This content isn't available right now")
 
-            set_id = self._extract_profile_set_id(
-                profile_photos_page)
-            user_data = text.extr(
-                profile_photos_page, '","user":{"', '},"viewer":{')
+            set_id = self._extract_profile_set_id(page)
+            user = self._extract_profile_user(page)
+            if set_id or user:
+                user["set_id"] = set_id
+                return user
 
-            if set_id or user_data:
-                break
             self.log.debug("Got empty profile photos page, retrying...")
-        else:
-            raise exception.AbortExtraction("Failed to extract profile data")
-
-        try:
-            data = util.json_loads(f'{{"{user_data}}}')
-        except Exception:
-            data = {}
-            self.log.debug(user_data)
-
-        try:
-            data["profile_tabs"] = [
-                edge["node"]
-                for edge in (data["profile_tabs"]["profile_user"]
-                             ["timeline_nav_app_sections"]["edges"])
-            ]
-        except Exception:
-            pass
-
-        data["set_id"] = set_id
-        data["vanity"] = (
-            text.extr(profile_photos_page, '"userVanity":"', '"') or
-            text.extr(profile_photos_page, '"vanity":"', '"')
-        )
-
-        return data
+        return {}
 
     def _extract_profile_set_id(self, profile_photos_page):
         set_ids_raw = text.extr(
@@ -368,6 +350,28 @@ class FacebookExtractor(Extractor):
         )
 
         return set_id
+
+    def _extract_profile_user(self, page):
+        data = text.extr(page, '","user":{"', '},"viewer":{')
+
+        user = None
+        try:
+            user = util.json_loads(f'{{"{data}}}')
+            if user["id"].startswith("pfbid"):
+                user["user_pfbid"] = user["id"]
+                user["id"] = text.extr(page, '"userID":"', '"')
+            user["username"] = (text.extr(page, '"userVanity":"', '"') or
+                                text.extr(page, '"vanity":"', '"'))
+            user["profile_tabs"] = [
+                edge["node"]
+                for edge in (user["profile_tabs"]["profile_user"]
+                             ["timeline_nav_app_sections"]["edges"])
+            ]
+        except Exception:
+            if user is None:
+                self.log.debug("Failed to extract user data: %s", data)
+                user = {}
+        return user
 
 
 class FacebookSetExtractor(FacebookExtractor):
@@ -465,11 +469,12 @@ class FacebookVideoExtractor(FacebookExtractor):
 class FacebookInfoExtractor(FacebookExtractor):
     """Extractor for Facebook Profile data"""
     subcategory = "info"
+    directory_fmt = ("{category}", "{username}")
     pattern = USER_PATTERN + r"/info"
     example = "https://www.facebook.com/USERNAME/info"
 
     def items(self):
-        user = self._extract_profile_photos_page(self.groups[0])
+        user = self._extract_profile(self.groups[0])
         return iter(((Message.Directory, user),))
 
 
@@ -513,7 +518,7 @@ class FacebookPhotosExtractor(FacebookExtractor):
     example = "https://www.facebook.com/USERNAME/photos"
 
     def items(self):
-        set_id = self._extract_profile_photos_page(self.groups[0])["set_id"]
+        set_id = self._extract_profile(self.groups[0], True)["set_id"]
         if not set_id:
             return iter(())
 
@@ -530,7 +535,7 @@ class FacebookAvatarExtractor(FacebookExtractor):
     example = "https://www.facebook.com/USERNAME/avatar"
 
     def items(self):
-        user = self._extract_profile_photos_page(self.groups[0])
+        user = self._extract_profile(self.groups[0])
         avatar_page_url = user["profilePhoto"]["url"]
         avatar_page = self.photo_page_request_wrapper(avatar_page_url).text
 
