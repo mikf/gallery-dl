@@ -61,7 +61,7 @@ class GirlygirlpicAlbumExtractor(GirlygirlpicExtractor):
         payload = {"album_id": self.groups[0]}
         page = self.request(url, method="POST", json=payload).text
         extr = text.extract_from(page)
-        urls = list(text.extract_iter(page, "link-w><a href=", " class"))
+        urls = list(text.extract_iter(page, "data-srcset=", ">"))
         info = text.split_html(extr("<ul class=bar-breadcrumbs>", "</ul>"))
 
         data = {
