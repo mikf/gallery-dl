@@ -29,7 +29,7 @@ class YoutubeDLDownloader(DownloaderBase):
         elif self._proxy_rotator:
             proxy_info = self._proxy_rotator.get_proxy()
             proxy_url = proxy_info["url"]
-            self.log.debug("Downloader using rotated proxy: %s", proxy_url)
+            self.log.debug("Downloader using proxy: %s", proxy_url)
 
         self.ytdl_opts = {
             "retries": retries+1 if retries >= 0 else float("inf"),

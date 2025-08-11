@@ -125,7 +125,7 @@ class HttpDownloader(DownloaderBase):
                 scheme: proxy_url
                 for scheme in proxy_info["schemes"]
             }
-            self.log.debug("Downloader using rotated proxy: %s ", proxy_url)
+            self.log.debug("Downloader using proxy: %s ", proxy_url)
 
         while True:
             if tries:
