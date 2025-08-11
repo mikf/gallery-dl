@@ -160,7 +160,7 @@ class Extractor():
                     scheme: proxy_url
                     for scheme in proxy_info["schemes"]
                 }
-                self.log.debug("Extractor using rotated proxy: %s", proxy_url)
+                self.log.debug("Extractor using proxy: %s", proxy_url)
             else:
                 kwargs["proxies"] = self._proxies
         if "timeout" not in kwargs:
@@ -187,17 +187,6 @@ class Extractor():
                 self.sleep(seconds, "request")
 
         while True:
-            if tries > 1 and self._proxy_rotator and self._proxy_rotate:
-                self._proxy_rotator.rotate()
-                proxy_info = self._proxy_rotator.get_proxy()
-                proxy_url = proxy_info["url"]
-                kwargs["proxies"] = {
-                    scheme: proxy_url
-                    for scheme in proxy_info["schemes"]
-                }
-                self.log.debug(
-                    "Rotating to proxy: %s", proxy_url)
-
             try:
                 response = session.request(method, url, **kwargs)
             except requests.exceptions.ConnectionError as exc:
@@ -209,6 +198,21 @@ class Extractor():
                 except Exception:
                     msg = exc
                 code = 0
+
+                if self._proxy_rotator and self._proxy_rotate:
+                    self.log.debug(
+                        "Connection error with proxy. Marking as "
+                        "failed and rotating.")
+                    try:
+                        self._proxy_rotator.mark_failed()
+                        proxy_info = self._proxy_rotator.get_proxy()
+                        kwargs["proxies"] = {
+                            s: proxy_info["url"] for s in proxy_info["schemes"]
+                        }
+                    except exception.NoAvailableProxyError as e:
+                        self.log.error("Proxy rotation failed: %s", e)
+                        raise
+
             except (requests.exceptions.Timeout,
                     requests.exceptions.ChunkedEncodingError,
                     requests.exceptions.ContentDecodingError) as exc:
@@ -240,6 +244,26 @@ class Extractor():
                 challenge = util.detect_challenge(response)
                 if challenge is not None:
                     self.log.warning(challenge)
+
+                rotate_proxy_on_status = False
+                if self._proxy_rotator and self._proxy_rotate:
+                    if code in self._proxy_rotate_codes:
+                        rotate_proxy_on_status = True
+                    elif 500 <= code < 600:
+                        rotate_proxy_on_status = True
+
+                if rotate_proxy_on_status:
+                    self.log.debug(
+                        "HTTP status %d triggered proxy rotation.", code)
+                    try:
+                        self._proxy_rotator.mark_failed()
+                        proxy_info = self._proxy_rotator.get_proxy()
+                        kwargs["proxies"] = {
+                            s: proxy_info["url"] for s in proxy_info["schemes"]
+                        }
+                    except exception.NoAvailableProxyError as e:
+                        self.log.error("Proxy rotation failed: %s", e)
+                        raise
 
                 if code == 429 and self._handle_429(response):
                     continue
@@ -408,22 +432,22 @@ class Extractor():
         self._proxies = util.build_proxy_map(self.config("proxy"), self.log)
         self._proxy_list = self.config("proxy-list")
         self._proxy_rotate = self.config("proxy-rotate", True)
+        self._proxy_rotate_codes = self.config("proxy-rotate-codes", [403])
         self._proxy_rotator = None
 
         if self._proxy_list and not self._proxies:
             proxy_strategy = self.config("proxy-strategy", "fixed")
+            if proxy_strategy not in ("fixed", "random"):
+                self.log.warning(
+                    "Invalid proxy strategy '%s'. "
+                    "Must be 'fixed' or 'random'. "
+                    "Falling back to 'fixed'.", proxy_strategy)
+                proxy_strategy = "fixed"
             try:
                 self._proxy_rotator = ProxyRotator(
-                    self._proxy_list, strategy=proxy_strategy)
-                self.log.debug(
-                    "Initialized proxy rotator with file: %s, strategy: %s",
-                    self._proxy_list, self._proxy_rotator.strategy
-                )
+                    self._proxy_list, proxy_strategy, self.log)
             except FileNotFoundError as exc:
-                self.log.error(exc)
-                raise exception.AbortExtraction()
-            except ValueError as exc:
-                self.log.error("Error parsing proxy list: %s", exc)
+                self.log.error("%s", exc)
                 raise exception.AbortExtraction()
             except Exception as exc:
                 self.log.error("Failed to initialize proxy rotator: %s", exc)
@@ -1054,8 +1078,8 @@ _fixed_proxy_rotator_lock = threading.Lock()
 class ProxyRotator():
     """Rotate between multiple proxies using different strategies"""
 
-    def __new__(cls, proxy_list_path, strategy):
-        if strategy != "fixed":
+    def __new__(cls, proxy_list_path, strategy, log):
+        if strategy == "random":
             return super().__new__(cls)
         with _fixed_proxy_rotator_lock:
             global _fixed_proxy_rotator
@@ -1063,83 +1087,121 @@ class ProxyRotator():
                 _fixed_proxy_rotator = super().__new__(cls)
             return _fixed_proxy_rotator
 
-    def __init__(self, proxy_list_path, strategy):
+    def __init__(self, proxy_list_path, strategy, log):
         if hasattr(self, "_lock"):
             return
-        self.proxies = self._load_proxies(proxy_list_path)
-        self._lock = threading.Lock()
-        self.strategy = strategy
-        self._session_proxy_info = None
 
+        self.log = log
+        self.proxies = self._load_proxies(proxy_list_path)
         if not self.proxies:
             raise ValueError("No valid proxies found in the list")
 
-        if self.strategy == "fixed":
-            # For 'fixed' strategy, determine the proxy at init time
-            proxy_url = random.choice(self.proxies)
-            self._session_proxy_info = self._get_proxy_info(proxy_url)
+        random.shuffle(self.proxies)
+        self.strategy = strategy
+        self.current_index = 0
+        self.used_proxies = set()
+        self.failed_proxies = set()
+        self._lock = threading.Lock()
+
+        # Initialize with the first proxy from the shuffled list
+        self._session_proxy_info = self._get_proxy_info(self.proxies[0])
+        self.log.debug(
+            "Initialized ProxyRotator with %d proxies. Starting with %s",
+            len(self.proxies), self._session_proxy_info["url"])
 
     def _load_proxies(self, file_path):
-        """Load proxy URLs from a list"""
+        """Load proxy URLs from a file, ignoring comments and empty lines"""
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
-                # Filter out empty lines and comments
-                proxies = [
+                return [
                     line.strip() for line in f if line.strip() and not
                     line.strip().startswith('#')
                 ]
-                if not proxies:
-                    raise ValueError(
-                        "Proxy list is empty or contains only comments"
-                    )
-                random.shuffle(proxies)
-                return proxies
         except FileNotFoundError:
             raise FileNotFoundError(f"Proxy list not found: {file_path}")
 
     def _get_proxy_info(self, proxy_url):
-        """Determine proxy capabilities based on URL scheme
-
-        Args:
-            proxy_url: The proxy URL string
-
-        Returns:
-            dict: Information about the proxy including URL and
-            supported schemes
-        """
-        # Parse the proxy URL to get the scheme
+        """Determine proxy capabilities based on URL scheme"""
         scheme = urllib.parse.urlparse(proxy_url).scheme.lower()
-
-        # Map proxy types to supported protocols
         protocol_map = {
             "http": ["http"],
             "https": ["https"],
             "socks4": ["http", "https"],
             "socks5": ["http", "https"],
-            "socks5h": ["http", "https"],
-            "": ["http", "https"]  # Default for URLs without a scheme
+            "socks5h": ["http", "https"]
         }
-
-        return {
-            "url": proxy_url,
-            "schemes": protocol_map.get(scheme, ["http", "httpshttps"])
-        }
+        return {"url": proxy_url,
+                "schemes": protocol_map.get(scheme, ["http", "https"])}
 
     def get_proxy(self):
-        """Get the proxy for the current session."""
+        """Get the currently active proxy information"""
         with self._lock:
-            if self._session_proxy_info is None:
-                # For 'random' strategy, pick a new proxy for the session
-                proxy_url = random.choice(self.proxies)
-                self._session_proxy_info = self._get_proxy_info(proxy_url)
             return self._session_proxy_info
+
+    def mark_failed(self):
+        """
+        Mark the current proxy as failed and rotate to a new one.
+        Removes it from the pool for the current session.
+        """
+        with self._lock:
+            current_proxy_url = self._session_proxy_info["url"]
+            if current_proxy_url not in self.failed_proxies:
+                self.failed_proxies.add(current_proxy_url)
+                self.used_proxies.discard(current_proxy_url)
+                self.log.debug("Marking proxy as failed: %s. Total failed: %d",
+                               current_proxy_url, len(self.failed_proxies))
+            self._rotate()
 
     def rotate(self):
         """
-        Forces a new proxy to be chosen for the next session.
+        Rotate to the next available proxy.
         """
         with self._lock:
-            self._session_proxy_info = None
+            self._rotate()
+
+    def _rotate(self):
+        """Uses round-robin logic when rotating proxies"""
+        current_proxy_url = self._session_proxy_info["url"]
+        self.used_proxies.add(current_proxy_url)
+        available_proxies = []
+
+        for proxy in self.proxies:
+            if proxy not in self.failed_proxies:
+                available_proxies.append(proxy)
+
+        if not available_proxies:
+            self.log.warning(
+                "All proxies have failed. Resetting and shuffling.")
+            self.failed_proxies.clear()
+            self.used_proxies.clear()
+            random.shuffle(self.proxies)
+            available_proxies = self.proxies
+            if not available_proxies:
+                raise exception.NoAvailableProxyError(
+                    "No proxies available to rotate to.")
+
+        start_index = self.current_index
+        for i in range(len(self.proxies)):
+            self.current_index = (start_index + i + 1) % len(self.proxies)
+            next_proxy_url = self.proxies[self.current_index]
+
+            if next_proxy_url in self.failed_proxies:
+                continue
+
+            if next_proxy_url in self.used_proxies:
+                if self.used_proxies.issuperset(available_proxies):
+                    self.log.debug(
+                        "All available proxies used. Resetting usage tracker.")
+                    self.used_proxies.clear()
+                else:
+                    continue
+
+            self._session_proxy_info = self._get_proxy_info(next_proxy_url)
+            self.log.debug("Rotated to new proxy: %s", next_proxy_url)
+            return
+
+        raise exception.NoAvailableProxyError(
+            "Failed to find an available proxy to rotate to.")
 
 
 class RequestsAdapter(HTTPAdapter):
