@@ -301,6 +301,10 @@ class SankakuAPI():
                         ("unauthorized", "invalid-token", "invalid_token")):
                     _authenticate_impl.invalidate(self.username)
                     continue
+                try:
+                    code = f"'{code.rpartition('__')[2].replace('-', ' ')}'"
+                except Exception:
+                    pass
                 raise exception.AbortExtraction(code)
             return data
 
