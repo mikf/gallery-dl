@@ -33,9 +33,13 @@ class GirlygirlpicExtractor(Extractor):
         "type_tag": "Company",
         "search_keys_tag": ""
     }
+    
+    def _init(self):
+        self.root = text.root_from_url(self.url)
+        self.session.headers["Referer"] = self.root
 
     def _pagination(self, endpoint):
-        url = f"{text.root_from_url(self.url)}/api/{endpoint}"
+        url = f"{self.root}/api/{endpoint}"
         data = {"_extractor": GirlygirlpicAlbumExtractor}
         while True:
             json = self.request(url, method="POST", json=self.payload).json()
@@ -57,11 +61,11 @@ class GirlygirlpicAlbumExtractor(GirlygirlpicExtractor):
     example = "https://en.girlygirlpic.com/a/ALBUMID"
 
     def items(self):
-        url = f"{text.root_from_url(self.url)}/ax"
+        url = f"{self.root}/ax"
         payload = {"album_id": self.groups[0]}
         page = self.request(url, method="POST", json=payload).text
         extr = text.extract_from(page)
-        urls = list(text.extract_iter(page, "data-srcset=", ">"))
+        urls = list(text.extract_iter(page, "link-w><a href=", " class"))
         info = text.split_html(extr("<ul class=bar-breadcrumbs>", "</ul>"))
 
         data = {
