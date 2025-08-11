@@ -379,7 +379,9 @@ class FappicImageExtractor(ImagehostImageExtractor):
         url     , pos = text.extract(page, '<a href="#"><img src="', '"')
         filename, pos = text.extract(page, 'alt="', '"', pos)
 
-        if filename.startswith("Porn-Picture-"):
+        if filename.startswith("Porn Pics "):
+            filename = filename[10:]
+        elif filename.startswith("Porn-Picture-"):
             filename = filename[13:]
 
         return url, filename
