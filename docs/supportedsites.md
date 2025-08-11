@@ -417,7 +417,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Idol Complex</td>
-    <td>https://idol.sankakucomplex.com/</td>
+    <td>https://www.idolcomplex.com/</td>
     <td>Pools, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
