@@ -446,7 +446,6 @@ Default
     * ``"3.0-6.0"``
         ``bilibili``,
         ``exhentai``,
-        ``idolcomplex``,
         ``[reactor]``,
         ``readcomiconline``
     * ``"6.0-6.1"``
