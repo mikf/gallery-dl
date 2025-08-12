@@ -27,4 +27,16 @@ __tests__ = (
     "token"      : "98wxqcklyh8k",
 },
 
+{
+    "#url"     : "https://www.fappic.com/i/00133/qi2nplzmwq7d_t.jpg",
+    "#comment" : "thumbnail URL (#8013)",
+    "#category": ("imagehost", "fappic", "image"),
+    "#class"   : imagehosts.FappicImageExtractor,
+    "#results" : "https://fappic.com/img/lahcoyienda2ftjqkmgdzxiaykeddwewwzw27nbuje/1X08WLv-4q6_0090.jpeg",
+
+    "filename" : "1X08WLv-4q6_0090",
+    "extension": "jpeg",
+    "token"    : "qi2nplzmwq7d",
+},
+
 )

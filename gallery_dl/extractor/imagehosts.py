@@ -372,19 +372,24 @@ class ImgclickImageExtractor(ImagehostImageExtractor):
 class FappicImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from fappic.com"""
     category = "fappic"
-    pattern = r"(?:https?://)?((?:www\.)?fappic\.com/(\w+)/[^/?#]+)"
-    example = "https://fappic.com/abc123/NAME.EXT"
+    pattern = (r"(?:https?://)?(?:www\.|img\d+\.)?fappic\.com"
+               r"/(?:i/\d+/())?(\w{10,})(?:/|\.)\w+")
+    example = "https://fappic.com/abcde12345/NAME.EXT"
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+
+        thumb, token = self.groups
+        if thumb is not None and token.endswith("_t"):
+            self.token = token = token[:-2]
+        else:
+            self.token = token
+        self.page_url = f"https://fappic.com/{token}/pic.jpg"
 
     def get_info(self, page):
         url     , pos = text.extract(page, '<a href="#"><img src="', '"')
         filename, pos = text.extract(page, 'alt="', '"', pos)
-
-        if filename.startswith("Porn Pics "):
-            filename = filename[10:]
-        elif filename.startswith("Porn-Picture-"):
-            filename = filename[13:]
-
-        return url, filename
+        return url, text.re(r"^Porn[ -]Pic(?:s|ture)[ -]").sub("", filename)
 
 
 class PicstateImageExtractor(ImagehostImageExtractor):
