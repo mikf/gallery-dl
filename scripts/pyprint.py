@@ -21,15 +21,14 @@ def pyprint(obj, indent=0, sort=None, oneline=True, lmin=0, lmax=16):
         else:
             prefix = ""
 
+        quote_beg = quote_end = '"'
         if "\n" in obj:
-            quote = '"""'
+            quote_beg = '"""\\\n'
+            quote_end = '\\\n"""'
         elif '"' in obj:
             obj = re.sub(r'(?<!\\)"', '\\"', obj)
-            quote = '"'
-        else:
-            quote = '"'
 
-        return f'''{prefix}{quote}{obj}{quote}'''
+        return f'''{prefix}{quote_beg}{obj}{quote_end}'''
 
     if isinstance(obj, bytes):
         return f'''b"{str(obj)[2:-1]}"'''
