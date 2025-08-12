@@ -15,7 +15,7 @@ __tests__ = (
     "#class"   : girlygirlpic.GirlygirlpicAlbumExtractor,
     "#archive" : False,
     "#count"   : 75,
-    
+
     "title"    : "[Showman XiuRen] No.4480 Yang Chenchen",
     "model"    : "Yang Chenchen",
     "date"     : datetime.datetime,
