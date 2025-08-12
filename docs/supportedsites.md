@@ -952,7 +952,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Skeb</td>
     <td>https://skeb.jp/</td>
-    <td>Followed Creators, Followed Users, Posts, Search Results, User Profiles</td>
+    <td>Followed Creators, Followed Users, Posts, Search Results, Sent Requests, User Profiles, Works</td>
     <td></td>
 </tr>
 <tr>
