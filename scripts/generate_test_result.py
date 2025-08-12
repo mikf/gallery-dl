@@ -62,7 +62,7 @@ def generate_test_result(args):
     if opts:
         result = result[:-2] + pyprint(opts, oneline=ool, lmin=9)[1:]
     if meta:
-        result = result[:-1] + pyprint(meta)[1:]
+        result = result[:-1] + pyprint(meta, sort=sort_key)[1:]
     return result + ",\n\n"
 
 
@@ -106,7 +106,30 @@ def generate_opts(args, urls, exc=None):
 
 
 def generate_meta(args, data):
-    return {}
+    if not data:
+        return {}
+
+    for kwdict in data:
+        delete = ["category", "subcategory"]
+        for key in kwdict:
+            if not key or key[0] == "_":
+                delete.append(key)
+        for key in delete:
+            del kwdict[key]
+
+    return data[0]
+
+
+def sort_key(key, value):
+    if not value:
+        return 0
+    if isinstance(value, str) and "\n" in value:
+        return 7000
+    if isinstance(value, list):
+        return 8000
+    if isinstance(value, dict):
+        return 9000
+    return 0
 
 
 def insert_test_result(args, result, lines):
