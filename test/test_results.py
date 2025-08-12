@@ -324,6 +324,7 @@ class TestExtractorResults(unittest.TestCase):
                 self.assertEqual(test, value, msg=path)
         elif isinstance(test, str):
             if test.startswith("re:"):
+                self.assertIsInstance(value, str, msg=path)
                 self.assertRegex(value, test[3:], msg=path)
             elif test.startswith("dt:"):
                 self.assertIsInstance(value, datetime.datetime, msg=path)
