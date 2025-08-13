@@ -159,23 +159,16 @@ class DoujindesuChapterExtractor(DoujindesuExtractor, ChapterExtractor):
                 src = self.root.rstrip("/") + src
 
             url = self.safe_url(src)
-            ext = url.split("?")[0].rsplit(".", 1)[-1].lower()
-            ext = (
-                ext if ext in (
-                    "jpg", "jpeg", "png", "webp", "gif"
-                ) else "webp"
-            )
+            ext = src.rsplit('.', 1)[-1].lower()
 
             """Provide metadata keys used by format strings"""
-            item_meta = {
+            images.append((url, {
                 "_num": i,
                 "manga": manga,
                 "_chapter_suffix": info.get("_chapter_suffix", ""),
                 "_subfolder": info.get("_subfolder", ""),
                 "extension": ext,
-            }
-
-            images.append((url, item_meta))
+            }))
 
         return images
 
