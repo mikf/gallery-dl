@@ -37,6 +37,7 @@ CATEGORY_MAP = {
     "baraag"         : "baraag",
     "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
+    "booth"          : "BOOTH",
     "cien"           : "Ci-en",
     "cohost"         : "cohost!",
     "comicvine"      : "Comic Vine",
@@ -83,6 +84,7 @@ CATEGORY_MAP = {
     "imgbb"          : "ImgBB",
     "imgbox"         : "imgbox",
     "imagechest"     : "ImageChest",
+    "imgdrive"       : "ImgDrive.net",
     "imgkiwi"        : "IMG.Kiwi",
     "imgth"          : "imgth",
     "imgur"          : "imgur",
@@ -238,6 +240,7 @@ SUBCATEGORY_MAP = {
         "user-images": ("User Images", "Image Reactions"),
         "user-posts" : "User Posts",
         "user-videos": ("User Videos", "Video Reactions"),
+        "user-collections" : "User Collections",
         "generated": "Generated Files",
     },
     "coomer": {
@@ -377,6 +380,7 @@ SUBCATEGORY_MAP = {
     "skeb": {
         "following"      : "Followed Creators",
         "following-users": "Followed Users",
+        "sent-requests"  : "Sent Requests",
     },
     "smugmug": {
         "path": "Images from Users and Folders",

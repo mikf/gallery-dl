@@ -86,7 +86,7 @@ class ComickBase():
 class ComickChapterExtractor(ComickBase, ChapterExtractor):
     """Extractor for comick.io manga chapters"""
     archive_fmt = "{chapter_hid}_{page}"
-    pattern = BASE_PATTERN + r"/comic/([\w-]+)/(\w+-chapter-[^/?#]+)"
+    pattern = BASE_PATTERN + r"/comic/([\w-]+)/(\w+(?:-chapter-[^/?#]+)?)"
     example = "https://comick.io/comic/MANGA/ID-chapter-123-en"
 
     def metadata(self, page):
@@ -96,7 +96,12 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
 
         ch = props["chapter"]
         self._images = ch["md_images"]
-        chapter, sep, minor = ch["chap"].partition(".")
+
+        if chapter := ch["chap"]:
+            chapter, sep, minor = chapter.partition(".")
+        else:
+            chapter = 0
+            sep = minor = ""
 
         return {
             **manga,
@@ -137,14 +142,19 @@ class ComickMangaExtractor(ComickBase, MangaExtractor):
         manga = self._manga_info(slug)
 
         for ch in self.chapters(manga):
-            url = (f"{self.root}/comic/{slug}"
-                   f"/{ch['hid']}-chapter-{ch['chap']}-{ch['lang']}")
-
             ch.update(manga)
-            chapter, sep, minor = ch["chap"].partition(".")
-            ch["chapter"] = text.parse_int(chapter)
-            ch["chapter_minor"] = sep + minor
             ch["_extractor"] = ComickChapterExtractor
+
+            if chapter := ch["chap"]:
+                url = (f"{self.root}/comic/{slug}"
+                       f"/{ch['hid']}-chapter-{chapter}-{ch['lang']}")
+                chapter, sep, minor = chapter.partition(".")
+                ch["chapter"] = text.parse_int(chapter)
+                ch["chapter_minor"] = sep + minor
+            else:
+                url = f"{self.root}/comic/{slug}/{ch['hid']}"
+                ch["chapter"] = 0
+                ch["chapter_minor"] = ""
 
             yield Message.Queue, url, ch
 
@@ -160,8 +170,15 @@ class ComickMangaExtractor(ComickBase, MangaExtractor):
             "Sec-Fetch-Site": "same-site",
         }
 
-        query = text.parse_query(query)
-        params = {"lang": query.get("lang") or None}
+        query = text.parse_query_list(query, ("lang",))
+
+        if (lang := query.get("lang")) or (lang := self.config("lang")):
+            if not isinstance(lang, str):
+                lang = ",".join(lang)
+        else:
+            lang = None
+
+        params = {"lang": lang}
         params["page"] = page = text.parse_int(query.get("page"), 1)
 
         if date_order := query.get("date-order"):
@@ -172,7 +189,7 @@ class ComickMangaExtractor(ComickBase, MangaExtractor):
             params["chap-order"] = \
                 "0" if self.config("chapter-reverse", False) else "1"
 
-        group = query.get("group", None)
+        group = query.get("group")
         if group == "0":
             group = None
 

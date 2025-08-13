@@ -664,14 +664,18 @@ def build_parser():
     selection = parser.add_argument_group("Selection Options")
     selection.add_argument(
         "-A", "--abort",
-        dest="abort", metavar="N", type=int,
-        help=("Stop current extractor run "
-              "after N consecutive file downloads were skipped"),
+        dest="abort", metavar="N[:TARGET]",
+        help=("Stop current extractor(s) "
+              "after N consecutive file downloads were skipped. "
+              "Specify a TARGET to set how many levels to ascend or "
+              "to which subcategory to jump to. "
+              "Examples: '-A 3', '-A 3:2', '-A 3:manga'"),
     )
     selection.add_argument(
         "-T", "--terminate",
-        dest="terminate", metavar="N", type=int,
-        help=("Stop current and parent extractor runs "
+        dest="terminate", metavar="N",
+        help=("Stop current & parent extractors "
+              "and proceed with the next input URL "
               "after N consecutive file downloads were skipped"),
     )
     selection.add_argument(

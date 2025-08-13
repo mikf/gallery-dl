@@ -313,28 +313,51 @@ Type
     * ``string``
 Default
     ``true``
+Example
+    * ``"abort:5"``
+    * ``"abort:5:2"``
+    * ``"abort:5:manga"``
+    * ``"terminate:3"``
 Description
     Controls the behavior when downloading files that have been
     downloaded before, i.e. a file with the same filename already
     exists or its ID is in a `download archive <extractor.*.archive_>`__.
 
-    * ``true``: Skip downloads
-    * ``false``: Overwrite already existing files
+    ``true``
+        Skip downloads
+    ``false``
+        Overwrite already existing files
 
-    * ``"abort"``: Stop the current extractor run
-    * ``"abort:N"``: Skip downloads and stop the current extractor run
-      after ``N`` consecutive skips
+    ``"abort"``
+        Stop the current extractor
+    ``"abort:N"``
+        Skip downloads and
+        stop the current extractor after ``N`` consecutive skips
+    ``"abort:N:L"``
+        | Skip downloads and
+          stop the current extractor after ``N`` consecutive skips
+        | Ascend ``L`` levels in the extractor hierarchy
+    ``"abort:N:SC"``
+        | Skip downloads and
+          stop the current extractor after ``N`` consecutive skips
+        | Ascend to an extractor with subcategory ``SC`` in the extractor hierarchy
 
-    * ``"terminate"``: Stop the current extractor run, including parent extractors
-    * ``"terminate:N"``: Skip downloads and stop the current extractor run,
-      including parent extractors, after ``N`` consecutive skips
+    ``"terminate"``
+        Stop the current extractor, including parent extractors
+    ``"terminate:N"``
+        Skip downloads and
+        stop the current extractor, including parent extractors,
+        after ``N`` consecutive skips
 
-    * ``"exit"``: Exit the program altogether
-    * ``"exit:N"``: Skip downloads and exit the program
-      after ``N`` consecutive skips
+    ``"exit"``
+        Exit the program altogether
+    ``"exit:N"``
+        Skip downloads and
+        exit the program after ``N`` consecutive skips
 
-    * ``"enumerate"``: Add an enumeration index to the beginning of the
-      filename extension (``file.1.ext``, ``file.2.ext``, etc.)
+    ``"enumerate"``
+        Add an enumeration index to the beginning of the
+        filename extension (``file.1.ext``, ``file.2.ext``, etc.)
 
 
 extractor.*.skip-filter
@@ -386,6 +409,7 @@ Default
     * ``"0.5-1.5"``
         ``ao3``,
         ``arcalive``,
+        ``booth``,
         ``civitai``,
         ``[Danbooru]``,
         ``[E621]``,
@@ -422,7 +446,6 @@ Default
     * ``"3.0-6.0"``
         ``bilibili``,
         ``exhentai``,
-        ``idolcomplex``,
         ``[reactor]``,
         ``readcomiconline``
     * ``"6.0-6.1"``
@@ -672,11 +695,18 @@ Default
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/LATEST.0.0.0 Safari/537.36"``: ``instagram``
     * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``: otherwise
+Example
+    * ``"curl/8.14.1"``
+    * ``"browser"``
+    * ``"@chrome"``
 Description
     User-Agent header value used for HTTP requests.
 
     Setting this value to ``"browser"`` will try to automatically detect
     and use the ``User-Agent`` header of the system's default browser.
+
+    Setting this value to ``"@BROWSER"``, e.g. ``"@chrome"``, will try to automatically detect
+    and use the ``User-Agent`` header of this installed browser.
 
 
 extractor.*.browser
@@ -786,7 +816,7 @@ extractor.*.tls12
 Type
     ``bool``
 Default
-    * ``false``: ``artstation``, ``behance``
+    * ``false``: ``artstation``, ``behance``, ``vsco``
     * ``true``: otherwise
 Description
     Allow selecting TLS 1.2 cipher suites.
@@ -1743,6 +1773,23 @@ Description
     * ``tiny`` (144p)
 
 
+extractor.booth.strategy
+------------------------
+Type
+    ``string``
+Default
+    ``"webpage"``
+Description
+    Selects how to handle and extract file URLs.
+
+    ``"webpage"``
+        Retrieve the full HTML page
+        and extract file URLs from it
+    ``"fallback"``
+        Use `fallback <extractor.*.fallback_>`__ URLs
+        to `guess` each file's correct filename extension
+
+
 extractor.bunkr.endpoint
 ------------------------
 Type
@@ -1840,6 +1887,7 @@ Description
     * ``"user-posts"``
     * ``"user-images"``
     * ``"user-videos"``
+    * ``"user-collections"``
 
     It is possible to use ``"all"`` instead of listing all values separately.
 Note
@@ -1930,6 +1978,20 @@ Description
 
     Use ``+`` as first character to `add` the given options to the
     `quality <extractor.civitai.quality_>`__ ones.
+
+
+extractor.comick.lang
+---------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Example
+    * ``"en"``
+    * ``"fr,it,pl"``
+    * ``["fr", "it", "pl"]``
+Description
+    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language codes
+    to filter chapters by.
 
 
 extractor.cyberdrop.domain
@@ -2616,8 +2678,10 @@ Description
 
     Supported values are
 
+    * ``info``
     * ``avatar``
     * ``photos``
+    * ``albums``
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -2943,6 +3007,19 @@ Default
     ``false``
 Description
     Recursively download files from subfolders.
+
+
+extractor.hentaifoundry.descriptions
+------------------------------------
+Type
+    ``string``
+Default
+    ``"text"``
+Description
+    Controls the format of ``description`` metadata fields.
+
+    * ``"text"``: Plain text with HTML tags removed
+    * ``"html"``: Raw HTML content
 
 
 extractor.hentaifoundry.include
@@ -4667,6 +4744,28 @@ Default
     ``false``
 Description
     Download article images.
+
+
+extractor.skeb.include
+----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"works"``
+Example
+    * ``"works,sent-requests"``
+    * ``["works", "sent-requests"]``
+Description
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+
+    Possible values are
+
+    * ``"works"``
+    * ``"sent-requests"``
+
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.skeb.sent-requests
@@ -8203,8 +8302,8 @@ How To
 
       * choose a name
       * select "installed app"
-      * set ``http://localhost:6414/`` as "redirect uri"
-      * solve the "I'm not a robot" reCAPTCHA if needed
+      * set "redirect uri" to http://localhost:6414/
+      * solve the "I'm not a robot" challenge if needed
       * click "create app"
 
     * copy the client id (third line, under your application's name and
@@ -8226,10 +8325,15 @@ Type
     ``string``
 How To
     * login and `Apply for an API Key <https://api.smugmug.com/api/developer/apply>`__
-    * use a random name and description,
-      set "Type" to "Application", "Platform" to "All",
-      and "Use" to "Non-Commercial"
-    * fill out the two checkboxes at the bottom and click "Apply"
+    * fill out the form:
+
+      * choose a random name and description
+      * set "Type" to "Application"
+      * set "Platform" to "All"
+      * set "Use" to "Non-Commercial"
+      * tick the two checkboxes at the bottom
+      * click "Apply"
+
     * copy ``API Key`` and ``API Secret``
       and put them in your configuration file
       as ``"api-key"`` and ``"api-secret"``
@@ -8243,10 +8347,14 @@ How To
     * login and visit Tumblr's
       `Applications <https://www.tumblr.com/oauth/apps>`__ section
     * click "Register application"
-    * fill out the form: use a random name and description, set
-      https://example.org/ as "Application Website" and "Default
-      callback URL"
-    * solve Google's "I'm not a robot" challenge and click "Register"
+    * fill out the form:
+
+      * choose a random name and description
+      * set "Application Website" to https://example.org/
+      * set "Default callback URL" to https://example.org/
+      * solve the "I'm not a robot" challenge
+      * click "Register"
+
     * click "Show secret key" (below "OAuth Consumer Key")
     * copy your ``OAuth Consumer Key`` and ``Secret Key``
       and put them in your configuration file

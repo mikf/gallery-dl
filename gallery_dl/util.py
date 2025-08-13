@@ -512,15 +512,15 @@ def cookiestxt_store(fp, cookies):
             value = cookie.value
 
         domain = cookie.domain
-        fp.write("\t".join((
-            domain,
-            "TRUE" if domain and domain[0] == "." else "FALSE",
-            cookie.path,
-            "TRUE" if cookie.secure else "FALSE",
-            "0" if cookie.expires is None else str(cookie.expires),
-            name,
-            value + "\n",
-        )))
+        fp.write(
+            f"{domain}\t"
+            f"{'TRUE' if domain and domain[0] == '.' else 'FALSE'}\t"
+            f"{cookie.path}\t"
+            f"{'TRUE' if cookie.secure else 'FALSE'}\t"
+            f"{'0' if cookie.expires is None else str(cookie.expires)}\t"
+            f"{name}\t"
+            f"{value}\n"
+        )
 
 
 def code_to_language(code, default=None):

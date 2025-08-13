@@ -158,6 +158,12 @@ Consider all listed sites to potentially be NSFW.
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
+    <td>BOOTH</td>
+    <td>https://booth.pm/</td>
+    <td>Items, Shops</td>
+    <td></td>
+</tr>
+<tr>
     <td>Bunkr</td>
     <td>https://bunkr.si/</td>
     <td>Albums, Media Files</td>
@@ -184,7 +190,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Civitai</td>
     <td>https://www.civitai.com/</td>
-    <td>Generated Files, individual Images, Image Listings, Models, Model Listings, Posts, Post Listings, Image Searches, Model Searches, Tag Searches, User Profiles, User Images, Image Reactions, User Models, User Posts, User Videos, Video Reactions</td>
+    <td>Collections, Generated Files, individual Images, Image Listings, Models, Model Listings, Posts, Post Listings, Image Searches, Model Searches, Tag Searches, User Profiles, User Collections, User Images, Image Reactions, User Models, User Posts, User Videos, Video Reactions</td>
     <td></td>
 </tr>
 <tr>
@@ -274,7 +280,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Facebook</td>
     <td>https://www.facebook.com/</td>
-    <td>Avatars, Photos, Profile Photos, Sets, User Profiles, Videos</td>
+    <td>Albums, Avatars, User Profile Information, Photos, Profile Photos, Sets, User Profiles, Videos</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr>
@@ -417,7 +423,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr>
     <td>Idol Complex</td>
-    <td>https://idol.sankakucomplex.com/</td>
+    <td>https://www.idolcomplex.com/</td>
     <td>Pools, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
@@ -472,6 +478,12 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Imgclick</td>
     <td>http://imgclick.net/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>ImgDrive.net</td>
+    <td>https://imgdrive.net/</td>
     <td>individual Images</td>
     <td></td>
 </tr>
@@ -734,6 +746,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Picstate</td>
+    <td>https://picstate.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Pictoa</td>
     <td>https://pictoa.com/</td>
     <td>Albums, individual Images</td>
@@ -940,7 +958,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Skeb</td>
     <td>https://skeb.jp/</td>
-    <td>Followed Creators, Followed Users, Posts, Search Results, User Profiles</td>
+    <td>Followed Creators, Followed Users, Posts, Search Results, Sent Requests, User Profiles, Works</td>
     <td></td>
 </tr>
 <tr>
@@ -1040,7 +1058,7 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Tumblr</td>
     <td>https://www.tumblr.com/</td>
-    <td>Days, Likes, Posts, Search Results, Tag Searches, User Profiles</td>
+    <td>Days, Followers, Followed Users, Likes, Posts, Search Results, Tag Searches, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 <tr>
@@ -1173,6 +1191,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Wikifeetx</td>
     <td>https://www.wikifeetx.com/</td>
     <td>Galleries</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Xasiat</td>
+    <td>https://www.xasiat.com</td>
+    <td>Albums, Categories, Models, Tag Searches</td>
     <td></td>
 </tr>
 <tr>
@@ -1508,6 +1532,12 @@ Consider all listed sites to potentially be NSFW.
 <tr>
     <td>Misskey.design</td>
     <td>https://misskey.design/</td>
+    <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Misskey.art</td>
+    <td>https://misskey.art/</td>
     <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
     <td></td>
 </tr>

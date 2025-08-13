@@ -372,14 +372,48 @@ class ImgclickImageExtractor(ImagehostImageExtractor):
 class FappicImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from fappic.com"""
     category = "fappic"
-    pattern = r"(?:https?://)?((?:www\.)?fappic\.com/(\w+)/[^/?#]+)"
-    example = "https://fappic.com/abc123/NAME.EXT"
+    pattern = (r"(?:https?://)?(?:www\.|img\d+\.)?fappic\.com"
+               r"/(?:i/\d+/())?(\w{10,})(?:/|\.)\w+")
+    example = "https://fappic.com/abcde12345/NAME.EXT"
+
+    def __init__(self, match):
+        Extractor.__init__(self, match)
+
+        thumb, token = self.groups
+        if thumb is not None and token.endswith("_t"):
+            self.token = token = token[:-2]
+        else:
+            self.token = token
+        self.page_url = f"https://fappic.com/{token}/pic.jpg"
 
     def get_info(self, page):
         url     , pos = text.extract(page, '<a href="#"><img src="', '"')
         filename, pos = text.extract(page, 'alt="', '"', pos)
+        return url, text.re(r"^Porn[ -]Pic(?:s|ture)[ -]").sub("", filename)
 
-        if filename.startswith("Porn-Picture-"):
-            filename = filename[13:]
 
+class PicstateImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from picstate.com"""
+    category = "picstate"
+    pattern = r"(?:https?://)?((?:www\.)?picstate\.com/view/full/([^/?#]+))"
+    example = "https://picstate.com/view/full/123"
+
+    def get_info(self, page):
+        pos = page.index(' id="image_container"')
+        url     , pos = text.extract(page, '<img src="', '"', pos)
+        filename, pos = text.extract(page, 'alt="', '"', pos)
         return url, filename
+
+
+class ImgdriveImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgdrive.net"""
+    category = "imgdrive"
+    pattern = r"(?:https?://)?((?:www\.)?imgdrive\.net/img-(\w+)\.html)"
+    example = "https://imgdrive.net/img-0123456789abc.html"
+
+    def get_info(self, page):
+        title, pos = text.extract(
+            page, 'property="og:title" content="', '"')
+        url  , pos = text.extract(
+            page, 'property="og:image" content="', '"', pos)
+        return url.replace("/small/", "/big/"), title.rsplit(" | ", 2)[0]

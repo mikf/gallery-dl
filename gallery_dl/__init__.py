@@ -48,7 +48,7 @@ def main():
             if filename == "/O":
                 filename = "{filename}.{extension}"
             elif filename.startswith("\\f"):
-                filename = "\f" + filename[2:]
+                filename = f"\f{filename[2:]}"
             config.set((), "filename", filename)
         if args.directory is not None:
             config.set((), "base-directory", args.directory)
@@ -56,9 +56,9 @@ def main():
         if args.postprocessors:
             config.set((), "postprocessors", args.postprocessors)
         if args.abort:
-            config.set((), "skip", "abort:" + str(args.abort))
+            config.set((), "skip", f"abort:{args.abort}")
         if args.terminate:
-            config.set((), "skip", "terminate:" + str(args.terminate))
+            config.set((), "skip", f"terminate:{args.terminate}")
         if args.cookies_from_browser:
             browser, _, profile = args.cookies_from_browser.partition(":")
             browser, _, keyring = browser.partition("+")

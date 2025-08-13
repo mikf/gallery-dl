@@ -65,8 +65,8 @@ class ClientTransaction():
 
     @cache(maxage=36500*86400, keyarg=1)
     def _extract_indices(self, ondemand_s, extractor):
-        url = ("https://abs.twimg.com/responsive-web/client-web"
-               "/ondemand.s." + ondemand_s + "a.js")
+        url = (f"https://abs.twimg.com/responsive-web/client-web"
+               f"/ondemand.s.{ondemand_s}a.js")
         page = extractor.request(url).text
         pattern = util.re_compile(r"\(\w\[(\d\d?)\],\s*16\)")
         return [int(i) for i in pattern.findall(page)]

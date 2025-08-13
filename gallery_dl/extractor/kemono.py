@@ -102,10 +102,10 @@ class KemonoExtractor(Extractor):
                 post["username"] = creator["name"]
 
             if comments:
-                try:
-                    post["comments"] = self.api.creator_post_comments(
-                        service, creator_id, post["id"])
-                except exception.HttpError:
+                post["comments"] = cmts = self.api.creator_post_comments(
+                    service, creator_id, post["id"])
+                if not isinstance(cmts, list):
+                    self.log.debug("%s/%s: %s", creator_id, post["id"], cmts)
                     post["comments"] = ()
             if dms is not None:
                 if dms is True:
@@ -245,16 +245,15 @@ class KemonoExtractor(Extractor):
     def _revisions_post(self, post):
         post["revision_id"] = 0
 
-        try:
-            revs = self.api.creator_post_revisions(
-                post["service"], post["user"], post["id"])
-        except exception.HttpError:
+        revs = self.api.creator_post_revisions(
+            post["service"], post["user"], post["id"])
+        if not revs:
             post["revision_hash"] = self._revision_hash(post)
             post["revision_index"] = 1
             post["revision_count"] = 1
             return (post,)
-        revs.insert(0, post)
 
+        revs.insert(0, post)
         for rev in revs:
             rev["revision_hash"] = self._revision_hash(rev)
 
@@ -622,11 +621,11 @@ class KemonoAPI():
 
     def creator_post_comments(self, service, creator_id, post_id):
         endpoint = f"/{service}/user/{creator_id}/post/{post_id}/comments"
-        return self._call(endpoint)
+        return self._call(endpoint, fatal=False)
 
     def creator_post_revisions(self, service, creator_id, post_id):
         endpoint = f"/{service}/user/{creator_id}/post/{post_id}/revisions"
-        return self._call(endpoint)
+        return self._call(endpoint, fatal=False)
 
     def creator_profile(self, service, creator_id):
         endpoint = f"/{service}/user/{creator_id}/profile"
@@ -657,10 +656,9 @@ class KemonoAPI():
         params = {"type": type}
         return self._call(endpoint, params)
 
-    def _call(self, endpoint, params=None):
-        url = self.root + endpoint
-        response = self.extractor.request(url, params=params)
-        return response.json()
+    def _call(self, endpoint, params=None, fatal=True):
+        return self.extractor.request_json(
+            self.root + endpoint, params=params, fatal=fatal)
 
     def _pagination(self, endpoint, params, batch=50, key=False):
         offset = text.parse_int(params.get("o"))

@@ -572,6 +572,7 @@ __tests__ = (
     "#url"     : "https://sankaku.app/books?tags=aiue_oka",
     "#category": ("booru", "sankaku", "books"),
     "#class"   : sankaku.SankakuBooksExtractor,
+    "#auth"    : True,
     "#range"   : "1-20",
     "#count"   : 20,
 },

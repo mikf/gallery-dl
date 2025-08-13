@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import facebook
+from gallery_dl import exception
 import datetime
 
 
@@ -28,6 +29,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/facebook",
+    "#class"   : facebook.FacebookUserExtractor,
+    "#options" : {"include": "all"},
+    "#results" : [
+        "https://www.facebook.com/facebook/info",
+        "https://www.facebook.com/facebook/avatar",
+        "https://www.facebook.com/facebook/photos",
+        "https://www.facebook.com/facebook/photos_albums",
+    ],
+},
+
+{
     "#url"     : "https://www.facebook.com/facebook/photos",
     "#class"   : facebook.FacebookPhotosExtractor,
 
@@ -44,8 +57,32 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/profile.php?id=100074229772340/photos",
+    "#comment" : "pfbid user ID (#7953)",
+    "#class"   : facebook.FacebookPhotosExtractor,
+    "#range"   : "1",
+
+    "user_id"   : "100074229772340",
+    "user_pfbid": r"re:pfbid\w{64}",
+},
+
+{
     "#url"     : "https://www.facebook.com/facebook/photos_by",
     "#class"   : facebook.FacebookPhotosExtractor,
+},
+
+{
+    "#url"     : "https://www.facebook.com/brando.cha.3/photos",
+    "#comment" : "empty '/photos' page / missing 'set_id' value (#7962)",
+    "#class"   : facebook.FacebookPhotosExtractor,
+    "#count"   : 0,
+},
+
+{
+    "#url"      : "https://www.facebook.com/Forgetmen0w/photos",
+    "#comment"  : "'This content isn't available right now'",
+    "#class"    : facebook.FacebookPhotosExtractor,
+    "#exception": exception.AuthRequired,
 },
 
 {
@@ -66,6 +103,21 @@ __tests__ = (
     "url"      : str,
     "user_id"  : "100064860875397",
     "username" : "Facebook",
+},
+
+{
+    "#url"     : "https://www.facebook.com/brando.cha.3/avatar",
+    "#comment" : "empty '/photos_of' page (#7962)",
+    "#class"   : facebook.FacebookAvatarExtractor,
+    "#count"   : 1,
+
+    "date"      : "dt:2020-01-23 17:54:22",
+    "id"        : "104622291093002",
+    "set_id"    : "a.104622317759666",
+    "type"      : "avatar",
+    "user_id"   : "100046356937542",
+    "user_pfbid": r"re:pfbid\w{64}",
+    "username"  : "Throwaway Idk",
 },
 
 {
@@ -124,13 +176,42 @@ __tests__ = (
 
     "caption"  : "",
     "date"     : datetime.datetime(2014, 5, 3, 0, 44, 47),
-    "filename" : "10334445_10152716011076729_6502314875328401420_n",
+    "filename" : str,
     "extension": "png",
     "id"       : "10152716011076729",
     "set_id"   : "a.10152716010956729",
     "url"      : str,
     "user_id"  : "100064860875397",
+    "user_pfbid": "",
     "username" : "Facebook",
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo.php?fbid=1143447107814264&set=pb.100064469571787.-2207520000&type=3",
+    "#class"   : facebook.FacebookPhotoExtractor,
+    "#count"   : 1,
+
+    "caption"  : "Wanting to post a pic on Stories but it’s too small? 😡❌\n\nTry using Meta AI to make the pic fit your screen 😇✅\n\n(Available in most of the US)",
+    "date"     : "dt:2025-05-30 18:47:34",
+    "extension": "jpg",
+    "id"       : "1143447107814264",
+    "set_id"   : "a.596799269145720",
+    "user_id"  : "100064469571787",
+    "user_pfbid": "",
+    "username" : "Instagram",
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo/?fbid=221820450302279",
+    "#comment" : "pfbid user ID (#7953)",
+    "#class"   : facebook.FacebookPhotoExtractor,
+
+    "date"    : "dt:2023-02-05 22:41:02",
+    "id"      : "221820450302279",
+    "set_id"  : "a.109762038174788",
+    "user_id" : "100074229772340",
+    "user_pfbid": r"re:pfbid\w{64}",
+    "username": "Throwaway Kwon",
 },
 
 {
@@ -155,7 +236,7 @@ __tests__ = (
     "#count"   : 1,
 
     "date"     : datetime.datetime(2024, 4, 19, 17, 25, 48),
-    "filename" : "462125225_400524393116630_7457168924362807384_n",
+    "filename" : str,
     "id"       : "1165557851291824",
     "url"      : str,
     "user_id"  : "100064860875397",
@@ -173,6 +254,83 @@ __tests__ = (
     "url"      : str,
     "user_id"  : "100064860875397",
     "username" : "Facebook",
+},
+
+{
+    "#url"     : "https://www.facebook.com/facebook/photos_albums",
+    "#class"   : facebook.FacebookAlbumsExtractor,
+    "#pattern" : facebook.FacebookSetExtractor.pattern,
+    "#results" : (
+        "https://www.facebook.com/media/set/?set=a.736550598516963&type=3",
+        "https://www.facebook.com/media/set/?set=a.736550611850295&type=3",
+        "https://www.facebook.com/media/set/?set=a.1198986285606723&type=3",
+        "https://www.facebook.com/media/set/?set=a.1188430493328969&type=3",
+        "https://www.facebook.com/media/set/?set=a.1182920610546624&type=3",
+        "https://www.facebook.com/media/set/?set=a.1152503723588313&type=3",
+        "https://www.facebook.com/media/set/?set=a.912647394240615&type=3",
+        "https://www.facebook.com/media/set/?set=a.862611645910857&type=3",
+    ),
+
+    "id"       : r"re:\d+",
+    "thumbnail": {str, None},
+    "title"    : str,
+    "url"      : str,
+},
+
+{
+    "#url"     : "https://www.facebook.com/facebook/photos_albums/Mobile uploads",
+    "#class"   : facebook.FacebookAlbumsExtractor,
+    "#results" : (
+        "https://www.facebook.com/media/set/?set=a.736550611850295&type=3",
+    ),
+
+    "id"       : "736550611850295",
+    "thumbnail": str,
+    "title"    : "Mobile uploads",
+    "url"      : "https://www.facebook.com/media/set/?set=a.736550611850295&type=3",
+},
+
+{
+    "#url"     : "https://www.facebook.com/brando.cha.3/info",
+    "#class"   : facebook.FacebookInfoExtractor,
+    "#metadata": "post",
+
+    "id"            : "100046356937542",
+    "name"          : "Throwaway Idk",
+    "username"      : "brando.cha.3",
+    "url"           : "https://www.facebook.com/brando.cha.3",
+    "alternate_name": "",
+    "profile_video" : None,
+    "set_id"        : "",
+    "user_pfbid"    : r"re:pfbid\w{64}",
+    "profilePhoto"  : {
+        "id"          : "104622291093002",
+        "url"         : "https://www.facebook.com/photo/?fbid=104622291093002&set=a.104622317759666",
+        "viewer_image": {
+            "height": 1947,
+            "width" : 1928,
+        },
+    },
+    "profile_tabs"  : [
+        {
+            "id"      : "YXBwX3NlY3Rpb246MTAwMDQ2MzU2OTM3NTQyOjIzNTYzMTgzNDk=",
+            "name"    : "Friends",
+            "tracking": "friends",
+            "url"     : "https://www.facebook.com/brando.cha.3/friends",
+        },
+        {
+            "id"      : "YXBwX3NlY3Rpb246MTAwMDQ2MzU2OTM3NTQyOjIzMDUyNzI3MzI=",
+            "name"    : "Photos",
+            "tracking": "photos",
+            "url"     : "https://www.facebook.com/brando.cha.3/photos",
+        },
+        {
+            "id"      : "YXBwX3NlY3Rpb246MTAwMDQ2MzU2OTM3NTQyOjE1NjA2NTMzMDQxNzQ1MTQ=",
+            "name"    : "Videos",
+            "tracking": "user_videos",
+            "url"     : "https://www.facebook.com/brando.cha.3/videos",
+        },
+    ],
 },
 
 )

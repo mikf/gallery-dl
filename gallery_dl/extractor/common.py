@@ -142,9 +142,9 @@ class Extractor():
 
         return values
 
-    def request(self, url, method="GET", session=None,
-                retries=None, retry_codes=None, encoding=None,
-                fatal=True, notfound=None, **kwargs):
+    def request(self, url, method="GET", session=None, fatal=True,
+                retries=None, retry_codes=None, interval=True,
+                encoding=None, notfound=None, **kwargs):
         if session is None:
             session = self.session
         if retries is None:
@@ -170,7 +170,7 @@ class Extractor():
         response = challenge = None
         tries = 1
 
-        if self._interval:
+        if self._interval and interval:
             seconds = (self._interval() -
                        (time.time() - Extractor.request_timestamp))
             if seconds > 0.0:
@@ -464,7 +464,9 @@ class Extractor():
         if custom_ua is None or custom_ua == "auto":
             pass
         elif custom_ua == "browser":
-            headers["User-Agent"] = _browser_useragent()
+            headers["User-Agent"] = _browser_useragent(None)
+        elif custom_ua[0] == "@":
+            headers["User-Agent"] = _browser_useragent(custom_ua[1:])
         elif self.useragent is Extractor.useragent and not self.browser or \
                 custom_ua is not config.get(("extractor",), "user-agent"):
             headers["User-Agent"] = custom_ua
@@ -1042,19 +1044,31 @@ def _build_requests_adapter(
     return adapter
 
 
-@cache.cache(maxage=86400)
-def _browser_useragent():
+@cache.cache(maxage=86400, keyarg=0)
+def _browser_useragent(browser):
     """Get User-Agent header from default browser"""
     import webbrowser
-    import socket
+    try:
+        open = webbrowser.get(browser).open
+    except webbrowser.Error:
+        if not browser:
+            raise
+        import shutil
+        if not (browser := shutil.which(browser)):
+            raise
 
+        def open(url):
+            util.Popen((browser, url),
+                       start_new_session=False if util.WINDOWS else True)
+
+    import socket
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(("127.0.0.1", 0))
     server.listen(1)
 
     host, port = server.getsockname()
-    webbrowser.open(f"http://{host}:{port}/user-agent")
+    open(f"http://{host}:{port}/user-agent")
 
     client = server.accept()[0]
     server.close()

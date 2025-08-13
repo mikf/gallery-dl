@@ -217,6 +217,8 @@ class TwitterExtractor(Extractor):
                         "duration": video_info.get(
                             "duration_millis", 0) / 1000,
                     }
+                else:
+                    continue
             elif "media_url_https" in media:
                 url = media["media_url_https"]
                 if url[-4] == ".":

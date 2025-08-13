@@ -103,6 +103,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/users/173530/artworks",
+    "#comment" : "Invalid PHPSESSID cookie",
+    "#class"   : pixiv.PixivArtworksExtractor,
+    "#options" : {"cookies": {"PHPSESSID": "12345_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}},
+    "#sha1_url": "852c31ad83b6840bacbce824d85f2a997889efb7",
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/users/173530/artworks/%E6%89%8B%E3%81%B6%E3%82%8D",
     "#comment" : "illusts with specific tag",
     "#class"   : pixiv.PixivArtworksExtractor,
@@ -128,6 +136,7 @@ __tests__ = (
     "#comment" : "deleted account with a different error",
     "#class"   : pixiv.PixivArtworksExtractor,
     "#log"     : "'User has left pixiv or the user ID does not exist.'",
+    "#exception": exception.NotFoundError,
 },
 
 {
@@ -165,6 +174,13 @@ __tests__ = (
 {
     "#url"     : "https://phixiv.net/en/users/56514424/artworks",
     "#class"   : pixiv.PixivArtworksExtractor,
+},
+
+{
+    "#url"      : "https://www.pixiv.net/users/70060776/artworks",
+    "#comment"  : "suspended account (#7990)",
+    "#class"    : pixiv.PixivArtworksExtractor,
+    "#exception": exception.NotFoundError,
 },
 
 {
@@ -366,6 +382,13 @@ __tests__ = (
     "#options" : {"retries": 0},
     "#range"   : "4",
     "#sha1_content": "aa119c27fec0a36bbd06e7491987acf5f1be6293",
+},
+
+{
+    "#url"     : "https://www.pixiv.net/artworks/56360615",
+    "#comment" : "limit_unviewable_s / unavailable without cookies (#7940)",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#count"   : 11,
 },
 
 {
