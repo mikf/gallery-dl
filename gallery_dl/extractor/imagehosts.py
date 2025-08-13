@@ -408,33 +408,22 @@ class PicstateImageExtractor(ImagehostImageExtractor):
 class ImgdriveImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imgdrive.net"""
     category = "imgdrive"
-    pattern = r"(?:https?://)?((?:www\.)?imgdrive\.net/img-(\w+)\.html)"
+    pattern = (r"(?:https?://)?(?:www\.)?(img(drive|taxi|wallet)\.(?:com|net)"
+               r"/img-(\w+)\.html)")
     example = "https://imgdrive.net/img-0123456789abc.html"
+
+    def __init__(self, match):
+        path, category, self.token = match.groups()
+        self.page_url = f"https://{path}"
+        self.category = f"img{category}"
+        Extractor.__init__(self, match)
 
     def get_info(self, page):
         title, pos = text.extract(
             page, 'property="og:title" content="', '"')
-        url  , pos = text.extract(
+        image, pos = text.extract(
             page, 'property="og:image" content="', '"', pos)
-        return url.replace("/small/", "/big/"), title.rsplit(" | ", 2)[0]
-
-
-class ImgtaxiImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from imgtaxi.com"""
-    category = "imgtaxi"
-    pattern = r"(?:https?://)?((?:www\.)?imgtaxi\.com/img-(\w+)\.html)"
-    example = "https://imgtaxi.com/img-0123456789abc.html"
-
-    get_info = ImgdriveImageExtractor.get_info
-
-
-class ImgwalletImageExtractor(ImagehostImageExtractor):
-    """Extractor for single images from imgwallet.com"""
-    category = "imgwallet"
-    pattern = r"(?:https?://)?((?:www\.)?imgwallet\.com/img-(\w+)\.html)"
-    example = "https://imgwallet.com/img-0123456789abc.html"
-
-    get_info = ImgdriveImageExtractor.get_info
+        return image.replace("/small/", "/big/"), title.rsplit(" | ", 2)[0]
 
 
 class SilverpicImageExtractor(ImagehostImageExtractor):
@@ -447,7 +436,7 @@ class SilverpicImageExtractor(ImagehostImageExtractor):
     def get_info(self, page):
         url, pos = text.extract(page, '<img src="/img/', '"')
         alt, pos = text.extract(page, 'alt="', '"', pos)
-        return "https://silverpic.com/img/" + url, alt
+        return f"https://silverpic.com/img/{url}", alt
 
     def metadata(self, page):
         pos = page.find('<img src="/img/')

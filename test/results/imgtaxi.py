@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"     : "https://imgtaxi.com/img-61c71cea940d6.html",
     "#category": ("imagehost", "imgtaxi", "image"),
-    "#class"   : imagehosts.ImgtaxiImageExtractor,
+    "#class"   : imagehosts.ImgdriveImageExtractor,
     "#results" : "https://imgtaxi.com/images/big/2021/12/25/61c71cea940d5.jpg",
 
     "filename" : "SLn_0001",

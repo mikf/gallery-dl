@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"     : "https://imgwallet.com/img-62fd3045ceec6.html",
     "#category": ("imagehost", "imgwallet", "image"),
-    "#class"   : imagehosts.ImgwalletImageExtractor,
+    "#class"   : imagehosts.ImgdriveImageExtractor,
     "#results" : "https://imgwallet.com/images/big/2022/08/17/62fd3045ceec5.JPG",
 
     "filename" : "S0ph (1)",
