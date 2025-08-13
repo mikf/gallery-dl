@@ -32,9 +32,9 @@ class DoujindesuExtractor(Extractor):
     }
 
     EXCLUDED_PATHS = {
-        "/register/", "/login/",
-        "/logout.php", "/myaccount/",
-        "/privacy-policy/", "/terms/",
+        "/register", "/login",
+        "/member/logout.php", "/myaccount",
+        "/privacy-policy", "/terms",
     }
 
     @staticmethod
@@ -79,15 +79,18 @@ class DoujindesuExtractor(Extractor):
             data["manga"] = match.group(1).strip()
             data["chapter"] = text.parse_int(match.group(2))
             data["_has_chapter"] = True
-            data["_subfolder"] = f"c{data['chapter']:03d}"
-            data["_chapter_suffix"] = f"_c{data['chapter']:03d}"
             data["title"] = match.group(3) or ""
         else:
             data["manga"] = chapter_string
             data["_has_chapter"] = False
+            data["title"] = ""
+
+        if data.get("_has_chapter"):
+            data["_subfolder"] = f"c{data['chapter']:03d}"
+            data["_chapter_suffix"] = f"_c{data['chapter']:03d}"
+        else:
             data["_subfolder"] = ""
             data["_chapter_suffix"] = ""
-            data["title"] = ""
 
         data["lang"] = "id"
         data["language"] = "Indonesian"
@@ -115,14 +118,10 @@ class DoujindesuChapterExtractor(DoujindesuExtractor, ChapterExtractor):
             if chapter_str.isdigit():
                 data["chapter"] = int(chapter_str)
                 data["_has_chapter"] = True
-                data["_subfolder"] = f"c{data['chapter']:03d}"
-                data["_chapter_suffix"] = f"_c{data['chapter']:03d}"
 
         """Clean up: remove 'chapter' key when not a chapter."""
         if not data.get("_has_chapter"):
             data.pop("chapter", None)
-            data["_subfolder"] = ""
-            data["_chapter_suffix"] = ""
 
         return data
 
@@ -197,12 +196,12 @@ class DoujindesuMangaExtractor(DoujindesuExtractor, MangaExtractor):
             url = text.extr(item, 'href="', '"')
             title = text.extr(item, 'title="', '"') or url
 
-            if not url or any(p in url.lower() for p in self.EXCLUDED_PATHS):
+            if not url or any(url.startswith(path)
+                              for path in self.EXCLUDED_PATHS):
                 continue
 
-            full_url = text.urljoin(self.root, url)
             results.append((
-                full_url,
+                text.urljoin(self.root, url),
                 self.parse_chapter_string(title, base_data.copy())
             ))
 
