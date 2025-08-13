@@ -33,7 +33,7 @@ class GirlygirlpicExtractor(Extractor):
         "type_tag": "Company",
         "search_keys_tag": ""
     }
-    
+
     def _init(self):
         self.root = text.root_from_url(self.url)
         self.session.headers["Referer"] = self.root
