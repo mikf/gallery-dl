@@ -74,12 +74,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Acidimg</td>
-    <td>https://acidimg.cc/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
     <td>Adobe Portfolio</td>
     <td>https://www.myportfolio.com/</td>
     <td>Galleries</td>
@@ -302,12 +296,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Fappic</td>
-    <td>https://fappic.com/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
     <td>Flickr</td>
     <td>https://www.flickr.com/</td>
     <td>Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles</td>
@@ -440,24 +428,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Imagetwist</td>
-    <td>https://imagetwist.com/</td>
-    <td>Galleries, individual Images</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Imagevenue</td>
-    <td>https://www.imagevenue.com/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
-    <td>ImgAdult</td>
-    <td>https://imgadult.com/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
     <td>ImgBB</td>
     <td>https://imgbb.com/</td>
     <td>Albums, individual Images, User Profiles</td>
@@ -470,27 +440,9 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Imgclick</td>
-    <td>http://imgclick.net/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
     <td>ImgDrive.net</td>
     <td>https://imgdrive.net/</td>
-    <td>individual Images</td>
     <td></td>
-</tr>
-<tr>
-    <td>Imgspice</td>
-    <td>https://imgspice.com/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
-    <td>ImgTaxi.com</td>
-    <td>https://imgtaxi.com/</td>
-    <td>individual Images</td>
     <td></td>
 </tr>
 <tr>
@@ -503,18 +455,6 @@ Consider all listed sites to potentially be NSFW.
     <td>imgur</td>
     <td>https://imgur.com/</td>
     <td>Albums, Favorites, Favorites Folders, Galleries, individual Images, Personal Posts, Search Results, Subreddits, Tag Searches, User Profiles</td>
-    <td></td>
-</tr>
-<tr>
-    <td>ImgWallet.com</td>
-    <td>https://imgwallet.com/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Imxto</td>
-    <td>https://imx.to/</td>
-    <td>Galleries, individual Images</td>
     <td></td>
 </tr>
 <tr>
@@ -752,12 +692,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Picstate</td>
-    <td>https://picstate.com/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
     <td>Pictoa</td>
     <td>https://pictoa.com/</td>
     <td>Albums, individual Images</td>
@@ -785,12 +719,6 @@ Consider all listed sites to potentially be NSFW.
     <td>pixeldrain</td>
     <td>https://pixeldrain.com/</td>
     <td>Albums, Files, Filesystems</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Pixhost</td>
-    <td>https://pixhost.to/</td>
-    <td>Galleries, individual Images</td>
     <td></td>
 </tr>
 <tr>
@@ -845,12 +773,6 @@ Consider all listed sites to potentially be NSFW.
     <td>PornPics.com</td>
     <td>https://www.pornpics.com/</td>
     <td>Galleries, Search Results, Tag Searches</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Postimg</td>
-    <td>https://postimages.org/</td>
-    <td>Galleries, individual Images</td>
     <td></td>
 </tr>
 <tr>
@@ -953,12 +875,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Sex.com</td>
     <td>https://www.sex.com/</td>
     <td>Boards, Likes, Pins, User Pins, related Pins, Search Results</td>
-    <td></td>
-</tr>
-<tr>
-    <td>SilverPic.com</td>
-    <td>https://silverpic.com/</td>
-    <td>individual Images</td>
     <td></td>
 </tr>
 <tr>
@@ -1080,12 +996,6 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
-    <td>Turboimagehost</td>
-    <td>https://www.turboimagehost.com/</td>
-    <td>Galleries, individual Images</td>
-    <td></td>
-</tr>
-<tr>
     <td>Twibooru</td>
     <td>https://twibooru.org/</td>
     <td>Galleries, Posts, Search Results</td>
@@ -1120,12 +1030,6 @@ Consider all listed sites to potentially be NSFW.
     <td>https://vipergirls.to/</td>
     <td>Posts, Threads</td>
     <td>Supported</td>
-</tr>
-<tr>
-    <td>Vipr</td>
-    <td>https://vipr.im/</td>
-    <td>individual Images</td>
-    <td></td>
 </tr>
 <tr>
     <td>VK</td>
@@ -1993,6 +1897,112 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
     <td></td>
     <td>Albums</td>
+    <td></td>
+</tr>
+
+<tr>
+    <td colspan="4"><strong>Image Hosting Sites</strong></td>
+</tr>
+<tr>
+    <td>Acidimg</td>
+    <td>https://acidimg.cc/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Fappic.com</td>
+    <td>https://fappic.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>ImageTwist</td>
+    <td>https://imagetwist.com/</td>
+    <td>Galleries, individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Imagevenue</td>
+    <td>https://www.imagevenue.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>ImgAdult</td>
+    <td>https://imgadult.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Imgclick</td>
+    <td>http://imgclick.net/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>ImgDrive.net</td>
+    <td>https://imgdrive.net/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Imgspice</td>
+    <td>https://imgspice.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>ImgTaxi.com</td>
+    <td>https://imgtaxi.com/</td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>ImgWallet.com</td>
+    <td>https://imgwallet.com/</td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td>IMX.to</td>
+    <td>https://imx.to/</td>
+    <td>Galleries, individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>PicState</td>
+    <td>https://picstate.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>PiXhost</td>
+    <td>https://pixhost.to/</td>
+    <td>Galleries, individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Postimages</td>
+    <td>https://postimages.org/</td>
+    <td>Galleries, individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>SilverPic.com</td>
+    <td>https://silverpic.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>TurboImageHost.com</td>
+    <td>https://www.turboimagehost.com/</td>
+    <td>Galleries, individual Images</td>
+    <td></td>
+</tr>
+<tr>
+    <td>Vipr.im</td>
+    <td>https://vipr.im/</td>
+    <td>individual Images</td>
     <td></td>
 </tr>
 </tbody>
