@@ -236,7 +236,7 @@ BASE_PATTERN = DanbooruExtractor.update({
     },
     "aibooru": {
         "root": None,
-        "pattern": r"(?:safe\.)?aibooru\.online",
+        "pattern": r"(?:safe\.|general\.)?aibooru\.(?:online|download)",
     },
     "booruvar": {
         "root": "https://booru.borvar.art",

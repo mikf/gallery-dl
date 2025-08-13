@@ -541,6 +541,10 @@ class Extractor():
             try:
                 with open(path) as fp:
                     cookies = util.cookiestxt_load(fp)
+            except ValueError as exc:
+                self.log.warning("cookies: Invalid Netscape cookies.txt file "
+                                 "'%s' (%s: %s)",
+                                 cookies_source, exc.__class__.__name__, exc)
             except Exception as exc:
                 self.log.warning("cookies: Failed to load '%s' (%s: %s)",
                                  cookies_source, exc.__class__.__name__, exc)

@@ -13,13 +13,29 @@ __tests__ = (
     "#category": ("Danbooru", "aibooru", "tag"),
     "#class"   : danbooru.DanbooruTagExtractor,
     "#pattern" : r"https://cdn\.aibooru\.download/original/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
-    "#count"   : ">= 50",
+    "#count"   : range(160, 200),
+},
+
+{
+    "#url"     : "https://aibooru.download/posts?tags=center_frills",
+    "#category": ("Danbooru", "aibooru", "tag"),
+    "#class"   : danbooru.DanbooruTagExtractor,
+    "#pattern" : r"https://cdn\.aibooru\.download/original/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
+    "#count"   : range(160, 200),
 },
 
 {
     "#url"     : "https://safe.aibooru.online/posts?tags=center_frills",
     "#category": ("Danbooru", "aibooru", "tag"),
     "#class"   : danbooru.DanbooruTagExtractor,
+},
+
+{
+    "#url"     : "https://general.aibooru.online/posts?tags=center_frills",
+    "#category": ("Danbooru", "aibooru", "tag"),
+    "#class"   : danbooru.DanbooruTagExtractor,
+    "#pattern" : r"https://cdn\.aibooru\.download/original/[0-9a-f]{2}/[0-9a-f]{2}/[0-9a-f]{32}\.\w+",
+    "#count"   : range(100, 120),
 },
 
 {
@@ -32,7 +48,15 @@ __tests__ = (
     "#url"     : "https://aibooru.online/posts/1",
     "#category": ("Danbooru", "aibooru", "post"),
     "#class"   : danbooru.DanbooruPostExtractor,
+    "#results" : "https://cdn.aibooru.download/original/8b/af/8baf2d5bb3d6f45deeabf7e1e659f562.png",
     "#sha1_content": "54d548743cd67799a62c77cbae97cfa0fec1b7e9",
+},
+
+{
+    "#url"     : "https://aibooru.download/posts/1",
+    "#category": ("Danbooru", "aibooru", "post"),
+    "#class"   : danbooru.DanbooruPostExtractor,
+    "#results" : "https://cdn.aibooru.download/original/8b/af/8baf2d5bb3d6f45deeabf7e1e659f562.png",
 },
 
 {
