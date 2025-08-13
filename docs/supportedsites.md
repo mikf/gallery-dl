@@ -488,6 +488,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>ImgTaxi.com</td>
+    <td>https://imgtaxi.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>imgth</td>
     <td>https://imgth.com/</td>
     <td>Galleries</td>
