@@ -417,3 +417,12 @@ class ImgdriveImageExtractor(ImagehostImageExtractor):
         url  , pos = text.extract(
             page, 'property="og:image" content="', '"', pos)
         return url.replace("/small/", "/big/"), title.rsplit(" | ", 2)[0]
+
+
+class ImgtaxiImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgtaxi.com"""
+    category = "imgtaxi"
+    pattern = r"(?:https?://)?((?:www\.)?imgtaxi\.com/img-(\w+)\.html)"
+    example = "https://imgtaxi.com/img-0123456789abc.html"
+
+    get_info = ImgdriveImageExtractor.get_info
