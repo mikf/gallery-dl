@@ -89,6 +89,7 @@ CATEGORY_MAP = {
     "imgtaxi"        : "ImgTaxi.com",
     "imgth"          : "imgth",
     "imgur"          : "imgur",
+    "imgwallet"      : "ImgWallet.com",
     "imhentai"       : "IMHentai",
     "joyreactor"     : "JoyReactor",
     "itchio"         : "itch.io",
