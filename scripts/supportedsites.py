@@ -653,6 +653,12 @@ def build_extractor_list():
     default["wikifeetx"] = default["wikifeet"]
     domains["wikifeetx"] = "https://www.wikifeetx.com/"
 
+    # imgdrive / imgtaxi / imgwallet
+    default["imgtaxi"] = default["imgdrive"]
+    default["imgwallet"] = default["imgdrive"]
+    domains["imgtaxi"] = "https://imgtaxi.com/"
+    domains["imgwallet"] = "https://imgwallet.com/"
+
     # add extra e621 extractors
     categories["E621"]["e621"].extend(default.pop("e621", ()))
 
