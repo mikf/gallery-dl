@@ -426,3 +426,26 @@ class ImgtaxiImageExtractor(ImagehostImageExtractor):
     example = "https://imgtaxi.com/img-0123456789abc.html"
 
     get_info = ImgdriveImageExtractor.get_info
+
+
+class SilverpicImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from silverpic.com"""
+    category = "silverpic"
+    pattern = (r"(?:https?://)?((?:www\.)?silverpic\.com"
+               r"/([a-z0-9]{10,})/[\S]+\.html)")
+    example = "https://silverpic.com/a1b2c3d4f5g6/NAME.EXT.html"
+
+    def get_info(self, page):
+        url, pos = text.extract(page, '<img src="/img/', '"')
+        alt, pos = text.extract(page, 'alt="', '"', pos)
+        return "https://silverpic.com/img/" + url, alt
+
+    def metadata(self, page):
+        pos = page.find('<img src="/img/')
+        width = text.extract(page, 'width="', '"', pos)[0]
+        height = text.extract(page, 'height="', '"', pos)[0]
+
+        return {
+            "width" : text.parse_int(width),
+            "height": text.parse_int(height),
+        }
