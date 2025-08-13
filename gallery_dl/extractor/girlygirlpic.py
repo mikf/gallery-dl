@@ -58,7 +58,7 @@ class GirlygirlpicExtractor(Extractor):
 class GirlygirlpicAlbumExtractor(GirlygirlpicExtractor):
     subcategory = "album"
     pattern = BASE_PATTERN + r"/a/([a-z0-9]{10})"
-    example = "https://en.girlygirlpic.com/a/ALBUMID"
+    example = "https://en.girlygirlpic.com/a/albumid123"
 
     def items(self):
         url = f"{self.root}/ax"
@@ -89,7 +89,7 @@ class GirlygirlpicAlbumExtractor(GirlygirlpicExtractor):
 class GirlygirlpicModelExtractor(GirlygirlpicExtractor):
     subcategory = "model"
     pattern = BASE_PATTERN + r"/m/([a-z0-9]{7})"
-    example = "https://en.girlygirlpic.com/m/MODELID"
+    example = "https://en.girlygirlpic.com/m/modelid"
 
     def items(self):
         self.payload["model_id"] = self.groups[0]
@@ -99,7 +99,7 @@ class GirlygirlpicModelExtractor(GirlygirlpicExtractor):
 class GirlygirlpicStudioExtractor(GirlygirlpicExtractor):
     subcategory = "studio"
     pattern = BASE_PATTERN + r"/c/([a-z0-9]{7})"
-    example = "https://en.girlygirlpic.com/c/STUDIOID"
+    example = "https://en.girlygirlpic.com/c/studio0"
 
     def items(self):
         self.payload["company_id"] = self.groups[0]
@@ -109,7 +109,7 @@ class GirlygirlpicStudioExtractor(GirlygirlpicExtractor):
 class GirlygirlpicTagExtractor(GirlygirlpicExtractor):
     subcategory = "tag"
     pattern = BASE_PATTERN + r"/t/([a-z0-9]{7})"
-    example = "https://en.girlygirlpic.com/t/TAGID"
+    example = "https://en.girlygirlpic.com/t/tagid123"
 
     def items(self):
         self.payload["tag_id"] = self.groups[0]
@@ -119,7 +119,7 @@ class GirlygirlpicTagExtractor(GirlygirlpicExtractor):
 class GirlygirlpicRegionExtractor(GirlygirlpicExtractor):
     subcategory = "region"
     pattern = BASE_PATTERN + r"/l/([a-z0-9]{7})"
-    example = "https://en.girlygirlpic.com/l/REGIONID"
+    example = "https://en.girlygirlpic.com/l/region0"
 
     def items(self):
         self.payload["country_id"] = self.groups[0]
