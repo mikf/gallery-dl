@@ -950,6 +950,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>SilverPic.com</td>
+    <td>https://silverpic.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Simply Hentai</td>
     <td>https://www.simply-hentai.com/</td>
     <td>Galleries, individual Images, Videos</td>
