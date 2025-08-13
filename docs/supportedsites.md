@@ -416,6 +416,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>Hotleakstv</td>
+    <td>https://hotleaks.tv/</td>
+    <td>Categories, Creators, Posts, Search Results</td>
+    <td></td>
+</tr>
+<tr>
     <td>Idol Complex</td>
     <td>https://www.idolcomplex.com/</td>
     <td>Pools, Posts, Tag Searches</td>
