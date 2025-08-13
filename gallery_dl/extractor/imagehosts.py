@@ -428,6 +428,15 @@ class ImgtaxiImageExtractor(ImagehostImageExtractor):
     get_info = ImgdriveImageExtractor.get_info
 
 
+class ImgwalletImageExtractor(ImagehostImageExtractor):
+    """Extractor for single images from imgwallet.com"""
+    category = "imgwallet"
+    pattern = r"(?:https?://)?((?:www\.)?imgwallet\.com/img-(\w+)\.html)"
+    example = "https://imgwallet.com/img-0123456789abc.html"
+
+    get_info = ImgdriveImageExtractor.get_info
+
+
 class SilverpicImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from silverpic.com"""
     category = "silverpic"

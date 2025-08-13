@@ -506,6 +506,12 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr>
+    <td>ImgWallet.com</td>
+    <td>https://imgwallet.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr>
     <td>Imxto</td>
     <td>https://imx.to/</td>
     <td>Galleries, individual Images</td>
