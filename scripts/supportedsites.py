@@ -54,6 +54,7 @@ CATEGORY_MAP = {
     "exhentai"       : "ExHentai",
     "fallenangels"   : "Fallen Angels Scans",
     "fanbox"         : "pixivFANBOX",
+    "fappic"         : "Fappic.com",
     "fashionnova"    : "Fashion Nova",
     "furaffinity"    : "Fur Affinity",
     "furry34"        : "Furry 34 com",
@@ -80,6 +81,7 @@ CATEGORY_MAP = {
     "imagebam"       : "ImageBam",
     "imagefap"       : "ImageFap",
     "imagepond"      : "ImagePond",
+    "imagetwist"     : "ImageTwist",
     "imgadult"       : "ImgAdult",
     "imgbb"          : "ImgBB",
     "imgbox"         : "imgbox",
@@ -91,6 +93,7 @@ CATEGORY_MAP = {
     "imgur"          : "imgur",
     "imgwallet"      : "ImgWallet.com",
     "imhentai"       : "IMHentai",
+    "imxto"          : "IMX.to",
     "joyreactor"     : "JoyReactor",
     "itchio"         : "itch.io",
     "jpgfish"        : "JPG Fish",
@@ -126,13 +129,16 @@ CATEGORY_MAP = {
     "nudostar"       : "NudoStar.TV",
     "paheal"         : "Rule 34",
     "photovogue"     : "PhotoVogue",
+    "picstate"       : "PicState",
     "pidgiwiki"      : "PidgiWiki",
     "pixeldrain"     : "pixeldrain",
+    "pixhost"        : "PiXhost",
     "pixiv"          : "[pixiv]",
     "pixiv-novel"    : "[pixiv] Novels",
     "pornimage"      : "Porn Image",
     "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
+    "postimg"        : "Postimages",
     "readcomiconline": "Read Comic Online",
     "redbust"        : "RedBust",
     "rbt"            : "RebeccaBlackTech",
@@ -166,9 +172,11 @@ CATEGORY_MAP = {
     "tiktok"         : "TikTok",
     "tmohentai"      : "TMOHentai",
     "tumblrgallery"  : "TumblrGallery",
+    "turboimagehost" : "TurboImageHost.com",
     "vanillarock"    : "もえぴりあ",
     "vidyart2"       : "/v/idyart2",
     "vidyapics"      : "Vidya Booru",
+    "vipr"           : "Vipr.im",
     "visuabusters"   : "VISUABUSTERS",
     "vk"             : "VK",
     "vsco"           : "VSCO",
@@ -440,6 +448,7 @@ BASE_MAP = {
     "gelbooru_v01": "Gelbooru Beta 0.1.11",
     "gelbooru_v02": "Gelbooru Beta 0.2",
     "hentaicosplays": "Hentai Cosplay Instances",
+    "imagehost"   : "Image Hosting Sites",
     "IMHentai"    : "IMHentai and Mirror Sites",
     "jschan"      : "jschan Imageboards",
     "lolisafe"    : "lolisafe and chibisafe",
@@ -614,7 +623,11 @@ def build_extractor_list():
         if category in IGNORE_LIST:
             continue
         if category:
-            default[category].append(extr.subcategory)
+            if extr.basecategory == "imagehost":
+                base = categories[extr.basecategory]
+            else:
+                base = default
+            base[category].append(extr.subcategory)
             if category not in domains:
                 domains[category] = domain(extr)
         else:
@@ -654,8 +667,10 @@ def build_extractor_list():
     domains["wikifeetx"] = "https://www.wikifeetx.com/"
 
     # imgdrive / imgtaxi / imgwallet
-    default["imgtaxi"] = default["imgdrive"]
-    default["imgwallet"] = default["imgdrive"]
+    base = categories["imagehost"]
+    base["imgtaxi"] = default["imgdrive"]
+    base["imgwallet"] = default["imgdrive"]
+    categories["imagehost"] = {k: base[k] for k in sorted(base)}
     domains["imgtaxi"] = "https://imgtaxi.com/"
     domains["imgwallet"] = "https://imgwallet.com/"
 
@@ -689,7 +704,6 @@ def generate_output(columns, categories, domains):
 
     tbody = []
     for bcat, base in categories.items():
-
         if bcat and base:
             name = BASE_MAP.get(bcat) or (bcat.capitalize() + " Instances")
             tbody.append(f"""
