@@ -25,6 +25,7 @@ CATEGORY_MAP = {
     "35photo"        : "35PHOTO",
     "adultempire"    : "Adult Empire",
     "agnph"          : "AGNPH",
+    "aibooru"        : "AIBooru",
     "allgirlbooru"   : "All girl",
     "ao3"            : "Archive of Our Own",
     "archivedmoe"    : "Archived.Moe",
@@ -473,11 +474,6 @@ _APIKEY_WH = ('<a href="https://gdl-org.github.io/docs/configuration.html'
               '#extractor-wallhaven-api-key">API Key</a>')
 _APIKEY_WY = ('<a href="https://gdl-org.github.io/docs/configuration.html'
               '#extractor-weasyl-api-key">API Key</a>')
-_TIKTOK_MORE_INFO = '''
-    <br /><span title="Pass `-o videos` to download photos only, and
-    `-o tiktok-range=a-yt-dlp-range` to tell yt-dlp to only extract XYZ links
-    when scraping a user profile. Also note that profile avatars will only be
-    downloaded when downloading a User Profile.">Hover for more info</span>'''
 
 AUTH_MAP = {
     "aibooru"        : "Supported",
@@ -522,6 +518,7 @@ AUTH_MAP = {
     "pillowfort"     : "Supported",
     "pinterest"      : _COOKIES,
     "pixiv"          : _OAUTH,
+    "pixiv-novel"    : _OAUTH,
     "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
     "rule34xyz"      : "Supported",
@@ -531,7 +528,7 @@ AUTH_MAP = {
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
     "tapas"          : "Supported",
-    "tiktok"         : _COOKIES + _TIKTOK_MORE_INFO,
+    "tiktok"         : _COOKIES,
     "tsumino"        : "Supported",
     "tumblr"         : _OAUTH,
     "twitter"        : "Supported",
@@ -707,7 +704,7 @@ def generate_output(columns, categories, domains):
         if bcat and base:
             name = BASE_MAP.get(bcat) or (bcat.capitalize() + " Instances")
             tbody.append(f"""
-<tr>
+<tr id="{bcat}" title="{bcat}">
     <td colspan="4"><strong>{name}</strong></td>
 </tr>\
 """)
@@ -716,7 +713,7 @@ def generate_output(columns, categories, domains):
             clist = sorted(base.items(), key=category_key)
 
         for category, subcategories in clist:
-            tbody.append("<tr>")
+            tbody.append(f"""<tr id="{category}" title="{category}">""")
             for column in columns:
                 domain = domains[category]
                 content = column[2](bcat, category, subcategories, domain)
