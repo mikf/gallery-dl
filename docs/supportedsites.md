@@ -13,1968 +13,1992 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 </thead>
 <tbody valign="top">
-<tr>
+<tr id="2ch" title="2ch">
     <td>2ch</td>
     <td>https://2ch.hk/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="2chen" title="2chen">
     <td>2chen</td>
     <td>https://sturdychan.help/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="35photo" title="35photo">
     <td>35PHOTO</td>
     <td>https://35photo.pro/</td>
     <td>Genres, individual Images, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="3dbooru" title="3dbooru">
     <td>3dbooru</td>
     <td>http://behoimi.org/</td>
     <td>Pools, Popular Images, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="4archive" title="4archive">
     <td>4archive</td>
     <td>https://4archive.org/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="4chan" title="4chan">
     <td>4chan</td>
     <td>https://www.4chan.org/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="4chanarchives" title="4chanarchives">
     <td>4chanarchives</td>
     <td>https://4chanarchives.com/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="500px" title="500px">
     <td>500px</td>
     <td>https://500px.com/</td>
     <td>Favorites, Galleries, individual Images, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="8chan" title="8chan">
     <td>8chan</td>
     <td>https://8chan.moe/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="8muses" title="8muses">
     <td>8muses</td>
     <td>https://comics.8muses.com/</td>
     <td>Albums</td>
     <td></td>
 </tr>
-<tr>
-    <td>Acidimg</td>
-    <td>https://acidimg.cc/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
+<tr id="myportfolio" title="myportfolio">
     <td>Adobe Portfolio</td>
     <td>https://www.myportfolio.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="adultempire" title="adultempire">
     <td>Adult Empire</td>
     <td>https://www.adultempire.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="agnph" title="agnph">
     <td>AGNPH</td>
     <td>https://agn.ph/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="arcalive" title="arcalive">
     <td>Arcalive</td>
     <td>https://arca.live/</td>
     <td>Boards, Posts, User Posts</td>
     <td></td>
 </tr>
-<tr>
+<tr id="architizer" title="architizer">
     <td>Architizer</td>
     <td>https://architizer.com/</td>
     <td>Firms, Projects</td>
     <td></td>
 </tr>
-<tr>
+<tr id="ao3" title="ao3">
     <td>Archive of Our Own</td>
     <td>https://archiveofourown.org/</td>
     <td>Search Results, Series, Subscriptions, Tag Searches, User Profiles, Bookmarks, Works</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="artstation" title="artstation">
     <td>ArtStation</td>
     <td>https://www.artstation.com/</td>
     <td>Albums, Artwork Listings, Challenges, Collections, Followed Users, individual Images, Likes, Search Results, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="batoto" title="batoto">
     <td>BATO.TO</td>
     <td>https://bato.to/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="bbc" title="bbc">
     <td>BBC</td>
     <td>https://bbc.co.uk/</td>
     <td>Galleries, Programmes</td>
     <td></td>
 </tr>
-<tr>
+<tr id="behance" title="behance">
     <td>Behance</td>
     <td>https://www.behance.net/</td>
     <td>Collections, Galleries, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="bilibili" title="bilibili">
     <td>Bilibili</td>
     <td>https://www.bilibili.com/</td>
     <td>Articles, User Articles, User Article Favorites</td>
     <td></td>
 </tr>
-<tr>
+<tr id="bluesky" title="bluesky">
     <td>Bluesky</td>
     <td>https://bsky.app/</td>
     <td>Avatars, Backgrounds, Feeds, Followed Users, Hashtags, User Profile Information, Likes, Lists, Media Files, Posts, Replies, Search Results, User Profiles, Videos</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="boosty" title="boosty">
     <td>Boosty</td>
     <td>https://www.boosty.to/</td>
     <td>DMs, Subscriptions Feed, Followed Users, Media Files, Posts, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
-<tr>
+<tr id="booth" title="booth">
     <td>BOOTH</td>
     <td>https://booth.pm/</td>
     <td>Items, Shops</td>
     <td></td>
 </tr>
-<tr>
+<tr id="bunkr" title="bunkr">
     <td>Bunkr</td>
     <td>https://bunkr.si/</td>
     <td>Albums, Media Files</td>
     <td></td>
 </tr>
-<tr>
+<tr id="catbox" title="catbox">
     <td>Catbox</td>
     <td>https://catbox.moe/</td>
     <td>Albums, Files</td>
     <td></td>
 </tr>
-<tr>
+<tr id="naver-chzzk" title="naver-chzzk">
     <td>CHZZK</td>
     <td>https://chzzk.naver.com/</td>
     <td>Comments, Communities</td>
     <td></td>
 </tr>
-<tr>
+<tr id="cien" title="cien">
     <td>Ci-en</td>
     <td>https://ci-en.net/</td>
     <td>Articles, Creators, Followed Users, Recent Images</td>
     <td></td>
 </tr>
-<tr>
+<tr id="civitai" title="civitai">
     <td>Civitai</td>
     <td>https://www.civitai.com/</td>
     <td>Collections, Generated Files, individual Images, Image Listings, Models, Model Listings, Posts, Post Listings, Image Searches, Model Searches, Tag Searches, User Profiles, User Collections, User Images, Image Reactions, User Models, User Posts, User Videos, Video Reactions</td>
     <td></td>
 </tr>
-<tr>
+<tr id="comicvine" title="comicvine">
     <td>Comic Vine</td>
     <td>https://comicvine.gamespot.com/</td>
     <td>Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="comick" title="comick">
     <td>Comick</td>
     <td>https://comick.io/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="coomer" title="coomer">
     <td>Coomer</td>
     <td>https://coomer.st/</td>
     <td>Artists, Favorites, Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="cyberdrop" title="cyberdrop">
     <td>Cyberdrop</td>
     <td>https://cyberdrop.me/</td>
     <td>Albums, Media Files</td>
     <td></td>
 </tr>
-<tr>
+<tr id="dankefuerslesen" title="dankefuerslesen">
     <td>Danke fürs Lesen</td>
     <td>https://danke.moe/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="desktopography" title="desktopography">
     <td>Desktopography</td>
     <td>https://desktopography.net/</td>
     <td>Entries, Exhibitions</td>
     <td></td>
 </tr>
-<tr>
+<tr id="deviantart" title="deviantart">
     <td>DeviantArt</td>
     <td>https://www.deviantart.com/</td>
     <td>Avatars, Backgrounds, Collections, Deviations, Favorites, Folders, Followed Users, Galleries, Gallery Searches, Journals, Scraps, Search Results, Sta.sh, Status Updates, Tag Searches, User Profiles, Watches</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
-<tr>
+<tr id="discord" title="discord">
     <td>Discord</td>
     <td>https://discord.com/</td>
     <td>Channels, DMs, Messages, Servers</td>
     <td></td>
 </tr>
-<tr>
+<tr id="dynastyscans" title="dynastyscans">
     <td>Dynasty Reader</td>
     <td>https://dynasty-scans.com/</td>
     <td>Anthologies, Chapters, individual Images, Manga, Search Results</td>
     <td></td>
 </tr>
-<tr>
+<tr id="e-hentai" title="e-hentai">
     <td>E-Hentai</td>
     <td>https://e-hentai.org/</td>
     <td>Favorites, Galleries, Search Results</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="aryion" title="aryion">
     <td>Eka's Portal</td>
     <td>https://aryion.com/</td>
     <td>Favorites, Galleries, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="erome" title="erome">
     <td>EroMe</td>
     <td>https://www.erome.com/</td>
     <td>Albums, Search Results, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="everia" title="everia">
     <td>EVERIA.CLUB</td>
     <td>https://everia.club</td>
     <td>Categories, Dates, Posts, Search Results, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="exhentai" title="exhentai">
     <td>ExHentai</td>
     <td>https://exhentai.org/</td>
     <td>Favorites, Galleries, Search Results</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="facebook" title="facebook">
     <td>Facebook</td>
     <td>https://www.facebook.com/</td>
     <td>Albums, Avatars, User Profile Information, Photos, Profile Photos, Sets, User Profiles, Videos</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
-<tr>
+<tr id="fantia" title="fantia">
     <td>Fantia</td>
     <td>https://fantia.jp/</td>
     <td>Creators, Posts</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
-<tr>
+<tr id="fapachi" title="fapachi">
     <td>Fapachi</td>
     <td>https://fapachi.com/</td>
     <td>Posts, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="fapello" title="fapello">
     <td>Fapello</td>
     <td>https://fapello.com/</td>
     <td>Models, Videos, Trending Posts, Popular Videos, Top Models, Posts</td>
     <td></td>
 </tr>
-<tr>
-    <td>Fappic</td>
-    <td>https://fappic.com/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
+<tr id="flickr" title="flickr">
     <td>Flickr</td>
     <td>https://www.flickr.com/</td>
     <td>Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
-<tr>
+<tr id="furaffinity" title="furaffinity">
     <td>Fur Affinity</td>
     <td>https://www.furaffinity.net/</td>
     <td>Favorites, Folders, Followed Users, Galleries, Posts, Scraps, Search Results, New Submissions, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
-<tr>
+<tr id="furry34" title="furry34">
     <td>Furry 34 com</td>
     <td>https://furry34.com/</td>
     <td>Playlists, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="fuskator" title="fuskator">
     <td>Fuskator</td>
     <td>https://fuskator.com/</td>
     <td>Galleries, Search Results</td>
     <td></td>
 </tr>
-<tr>
+<tr id="2chan" title="2chan">
     <td>Futaba Channel</td>
     <td>https://www.2chan.net/</td>
     <td>Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="gelbooru" title="gelbooru">
     <td>Gelbooru</td>
     <td>https://gelbooru.com/</td>
     <td>Favorites, Pools, Posts, Redirects, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="girlswithmuscle" title="girlswithmuscle">
     <td>Girls with Muscle</td>
     <td>https://www.girlswithmuscle.com/</td>
     <td>Posts, Search Results</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="girlsreleased" title="girlsreleased">
     <td>Girlsreleased</td>
     <td>https://girlsreleased.com/</td>
     <td>Models, Sets, Sites</td>
     <td></td>
 </tr>
-<tr>
+<tr id="gofile" title="gofile">
     <td>Gofile</td>
     <td>https://gofile.io/</td>
     <td>Folders</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hatenablog" title="hatenablog">
     <td>HatenaBlog</td>
     <td>https://hatenablog.com</td>
     <td>Archive, Individual Posts, Home Feed, Search Results</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hentaifoundry" title="hentaifoundry">
     <td>Hentai Foundry</td>
     <td>https://www.hentai-foundry.com/</td>
     <td>Favorites, individual Images, Pictures, Popular Images, Recent Images, Scraps, Stories, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hentai2read" title="hentai2read">
     <td>Hentai2Read</td>
     <td>https://hentai2read.com/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hentaihand" title="hentaihand">
     <td>HentaiHand</td>
     <td>https://hentaihand.com/</td>
     <td>Galleries, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hentaihere" title="hentaihere">
     <td>HentaiHere</td>
     <td>https://hentaihere.com/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hentainexus" title="hentainexus">
     <td>HentaiNexus</td>
     <td>https://hentainexus.com/</td>
     <td>Galleries, Search Results</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hiperdex" title="hiperdex">
     <td>HiperDEX</td>
     <td>https://hiperdex.com/</td>
     <td>Artists, Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hitomi" title="hitomi">
     <td>Hitomi.la</td>
     <td>https://hitomi.la/</td>
     <td>Galleries, Site Index, Search Results, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hotleak" title="hotleak">
     <td>Hotleak</td>
     <td>https://hotleak.vip/</td>
     <td>Categories, Creators, Posts, Search Results</td>
     <td></td>
 </tr>
-<tr>
+<tr id="idolcomplex" title="idolcomplex">
     <td>Idol Complex</td>
     <td>https://www.idolcomplex.com/</td>
     <td>Pools, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="imagebam" title="imagebam">
     <td>ImageBam</td>
     <td>https://www.imagebam.com/</td>
     <td>Galleries, individual Images</td>
     <td></td>
 </tr>
-<tr>
+<tr id="imagechest" title="imagechest">
     <td>ImageChest</td>
     <td>https://imgchest.com/</td>
     <td>Galleries, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="imagefap" title="imagefap">
     <td>ImageFap</td>
     <td>https://www.imagefap.com/</td>
     <td>Folders, Galleries, individual Images, User Profiles</td>
     <td></td>
 </tr>
-<tr>
-    <td>Imagetwist</td>
-    <td>https://imagetwist.com/</td>
-    <td>Galleries, individual Images</td>
-    <td></td>
-</tr>
-<tr>
-    <td>Imagevenue</td>
-    <td>https://www.imagevenue.com/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
-    <td>ImgAdult</td>
-    <td>https://imgadult.com/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
+<tr id="imgbb" title="imgbb">
     <td>ImgBB</td>
     <td>https://imgbb.com/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="imgbox" title="imgbox">
     <td>imgbox</td>
     <td>https://imgbox.com/</td>
     <td>Galleries, individual Images</td>
     <td></td>
 </tr>
-<tr>
-    <td>Imgclick</td>
-    <td>http://imgclick.net/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
+<tr id="imgdrive" title="imgdrive">
     <td>ImgDrive.net</td>
     <td>https://imgdrive.net/</td>
-    <td>individual Images</td>
+    <td></td>
     <td></td>
 </tr>
-<tr>
-    <td>Imgspice</td>
-    <td>https://imgspice.com/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
+<tr id="imgth" title="imgth">
     <td>imgth</td>
     <td>https://imgth.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="imgur" title="imgur">
     <td>imgur</td>
     <td>https://imgur.com/</td>
     <td>Albums, Favorites, Favorites Folders, Galleries, individual Images, Personal Posts, Search Results, Subreddits, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
-<tr>
-    <td>Imxto</td>
-    <td>https://imx.to/</td>
-    <td>Galleries, individual Images</td>
-    <td></td>
-</tr>
-<tr>
+<tr id="inkbunny" title="inkbunny">
     <td>Inkbunny</td>
     <td>https://inkbunny.net/</td>
     <td>Favorites, Followed Users, Pools, Posts, Search Results, Unread Submissions, User Profiles</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="instagram" title="instagram">
     <td>Instagram</td>
     <td>https://www.instagram.com/</td>
     <td>Avatars, Collections, Followers, Followed Users, Guides, Highlights, User Profile Information, Posts, Reels, Saved Posts, Stories, Tag Searches, Tagged Posts, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
-<tr>
+<tr id="issuu" title="issuu">
     <td>Issuu</td>
     <td>https://issuu.com/</td>
     <td>Publications, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="itaku" title="itaku">
     <td>Itaku</td>
     <td>https://itaku.ee/</td>
     <td>Bookmarks, Followers, Followed Users, Galleries, individual Images, Posts, Search Results, Stars, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="itchio" title="itchio">
     <td>itch.io</td>
     <td>https://itch.io/</td>
     <td>Games</td>
     <td></td>
 </tr>
-<tr>
+<tr id="iwara" title="iwara">
     <td>Iwara</td>
     <td>https://www.iwara.tv/</td>
     <td>Favorites, Followers, Followed Users, individual Images, Playlists, Search Results, Tag Searches, User Profiles, User Images, User Playlists, User Videos, Videos</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="keenspot" title="keenspot">
     <td>Keenspot</td>
     <td>http://www.keenspot.com/</td>
     <td>Comics</td>
     <td></td>
 </tr>
-<tr>
+<tr id="kemono" title="kemono">
     <td>Kemono</td>
     <td>https://kemono.cr/</td>
     <td>Artists, Discord Servers, Favorites, Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="khinsider" title="khinsider">
     <td>Khinsider</td>
     <td>https://downloads.khinsider.com/</td>
     <td>Soundtracks</td>
     <td></td>
 </tr>
-<tr>
+<tr id="komikcast" title="komikcast">
     <td>Komikcast</td>
     <td>https://komikcast.li/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="leakgallery" title="leakgallery">
     <td>Leak Gallery</td>
     <td>https://leakgallery.com</td>
     <td>Most Liked Posts, Posts, Trending Medias, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="lensdump" title="lensdump">
     <td>Lensdump</td>
     <td>https://lensdump.com/</td>
     <td>Albums, individual Images</td>
     <td></td>
 </tr>
-<tr>
+<tr id="lexica" title="lexica">
     <td>Lexica</td>
     <td>https://lexica.art/</td>
     <td>Search Results</td>
     <td></td>
 </tr>
-<tr>
+<tr id="lightroom" title="lightroom">
     <td>Lightroom</td>
     <td>https://lightroom.adobe.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="livedoor" title="livedoor">
     <td>livedoor Blog</td>
     <td>http://blog.livedoor.jp/</td>
     <td>Blogs, Posts</td>
     <td></td>
 </tr>
-<tr>
+<tr id="lofter" title="lofter">
     <td>LOFTER</td>
     <td>https://www.lofter.com/</td>
     <td>Blog Posts, Posts</td>
     <td></td>
 </tr>
-<tr>
+<tr id="luscious" title="luscious">
     <td>Luscious</td>
     <td>https://members.luscious.net/</td>
     <td>Albums, Search Results</td>
     <td></td>
 </tr>
-<tr>
+<tr id="madokami" title="madokami">
     <td>Madokami</td>
     <td>https://manga.madokami.al/</td>
     <td>Manga</td>
     <td>Required</td>
 </tr>
-<tr>
+<tr id="mangafox" title="mangafox">
     <td>Manga Fox</td>
     <td>https://fanfox.net/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="mangahere" title="mangahere">
     <td>Manga Here</td>
     <td>https://www.mangahere.cc/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="mangadex" title="mangadex">
     <td>MangaDex</td>
     <td>https://mangadex.org/</td>
     <td>Authors, Chapters, Updates Feed, Library, MDLists, Manga</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="mangapark" title="mangapark">
     <td>MangaPark</td>
     <td>https://mangapark.net/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="mangaread" title="mangaread">
     <td>MangaRead</td>
     <td>https://mangaread.org/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="mangoxo" title="mangoxo">
     <td>Mangoxo</td>
     <td>https://www.mangoxo.com/</td>
     <td>Albums, Channels</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="motherless" title="motherless">
     <td>Motherless</td>
     <td>https://motherless.com/</td>
     <td>Galleries, Groups, Media Files</td>
     <td></td>
 </tr>
-<tr>
+<tr id="myhentaigallery" title="myhentaigallery">
     <td>My Hentai Gallery</td>
     <td>https://myhentaigallery.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="naver-blog" title="naver-blog">
     <td>Naver Blog</td>
     <td>https://blog.naver.com/</td>
     <td>Blogs, Posts</td>
     <td></td>
 </tr>
-<tr>
+<tr id="naver-webtoon" title="naver-webtoon">
     <td>Naver Webtoon</td>
     <td>https://comic.naver.com/</td>
     <td>Comics, Episodes</td>
     <td></td>
 </tr>
-<tr>
+<tr id="nekohouse" title="nekohouse">
     <td>Nekohouse</td>
     <td>https://nekohouse.su/</td>
     <td>Posts, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="newgrounds" title="newgrounds">
     <td>Newgrounds</td>
     <td>https://www.newgrounds.com/</td>
     <td>Art, Audio, Favorites, Followed Users, Games, individual Images, Media Files, Movies, Search Results, User Profiles</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="nhentai" title="nhentai">
     <td>nhentai</td>
     <td>https://nhentai.net/</td>
     <td>Favorites, Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="seiga" title="seiga">
     <td>Niconico Seiga</td>
     <td>https://seiga.nicovideo.jp/</td>
     <td>individual Images, User Profiles</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="nozomi" title="nozomi">
     <td>Nozomi.la</td>
     <td>https://nozomi.la/</td>
     <td>Site Index, Posts, Search Results, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="nsfwalbum" title="nsfwalbum">
     <td>NSFWalbum.com</td>
     <td>https://nsfwalbum.com/</td>
     <td>Albums</td>
     <td></td>
 </tr>
-<tr>
+<tr id="nudostar" title="nudostar">
     <td>NudoStar.TV</td>
     <td>https://nudostar.tv/</td>
     <td>individual Images, Models</td>
     <td></td>
 </tr>
-<tr>
+<tr id="patreon" title="patreon">
     <td>Patreon</td>
     <td>https://www.patreon.com/</td>
     <td>Creators, Posts, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
-<tr>
+<tr id="pexels" title="pexels">
     <td>Pexels</td>
     <td>https://pexels.com/</td>
     <td>Collections, individual Images, Search Results, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="photovogue" title="photovogue">
     <td>PhotoVogue</td>
     <td>https://www.vogue.com/photovogue/</td>
     <td>User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="picarto" title="picarto">
     <td>Picarto</td>
     <td>https://picarto.tv/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
-    <td>Picstate</td>
-    <td>https://picstate.com/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
+<tr id="pictoa" title="pictoa">
     <td>Pictoa</td>
     <td>https://pictoa.com/</td>
     <td>Albums, individual Images</td>
     <td></td>
 </tr>
-<tr>
+<tr id="piczel" title="piczel">
     <td>Piczel</td>
     <td>https://piczel.tv/</td>
     <td>Folders, individual Images, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="pillowfort" title="pillowfort">
     <td>Pillowfort</td>
     <td>https://www.pillowfort.social/</td>
     <td>Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="pinterest" title="pinterest">
     <td>Pinterest</td>
     <td>https://www.pinterest.com/</td>
     <td>All Pins, Created Pins, Pins, pin.it Links, related Pins, Search Results, Sections, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
-<tr>
+<tr id="pixeldrain" title="pixeldrain">
     <td>pixeldrain</td>
     <td>https://pixeldrain.com/</td>
     <td>Albums, Files, Filesystems</td>
     <td></td>
 </tr>
-<tr>
-    <td>Pixhost</td>
-    <td>https://pixhost.to/</td>
-    <td>Galleries, individual Images</td>
-    <td></td>
-</tr>
-<tr>
+<tr id="pixiv" title="pixiv">
     <td>[pixiv]</td>
     <td>https://www.pixiv.net/</td>
     <td>Artworks, Avatars, Backgrounds, Favorites, Follows, pixiv.me Links, pixivision, Rankings, Search Results, Series, Sketch, Unlisted Works, User Profiles, individual Images</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
-<tr>
+<tr id="pixiv-novel" title="pixiv-novel">
     <td>[pixiv] Novels</td>
     <td>https://www.pixiv.net/novel</td>
     <td>Bookmarks, Novels, Series, User Profiles</td>
-    <td></td>
+    <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
-<tr>
+<tr id="fanbox" title="fanbox">
     <td>pixivFANBOX</td>
     <td>https://www.fanbox.cc/</td>
     <td>Creators, Home Feed, Posts, Pixiv Redirects, Supported User Feed</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
-<tr>
+<tr id="pixnet" title="pixnet">
     <td>Pixnet</td>
     <td>https://www.pixnet.net/</td>
     <td>Folders, individual Images, Sets, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="plurk" title="plurk">
     <td>Plurk</td>
     <td>https://www.plurk.com/</td>
     <td>Posts, Timelines</td>
     <td></td>
 </tr>
-<tr>
+<tr id="poipiku" title="poipiku">
     <td>Poipiku</td>
     <td>https://poipiku.com/</td>
     <td>Posts, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="poringa" title="poringa">
     <td>Poringa</td>
     <td>http://www.poringa.net/</td>
     <td>Posts Images, Search Results, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="pornhub" title="pornhub">
     <td>Pornhub</td>
     <td>https://www.pornhub.com/</td>
     <td>Galleries, Gifs, Photos, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="pornpics" title="pornpics">
     <td>PornPics.com</td>
     <td>https://www.pornpics.com/</td>
     <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
-    <td>Postimg</td>
-    <td>https://postimages.org/</td>
-    <td>Galleries, individual Images</td>
-    <td></td>
-</tr>
-<tr>
+<tr id="rule34vault" title="rule34vault">
     <td>R34 Vault</td>
     <td>https://rule34vault.com/</td>
     <td>Playlists, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="rawkuma" title="rawkuma">
     <td>Rawkuma</td>
     <td>https://rawkuma.net/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="readcomiconline" title="readcomiconline">
     <td>Read Comic Online</td>
     <td>https://readcomiconline.li/</td>
     <td>Comic Issues, Comics</td>
     <td></td>
 </tr>
-<tr>
+<tr id="realbooru" title="realbooru">
     <td>Realbooru</td>
     <td>https://realbooru.com/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="redbust" title="redbust">
     <td>RedBust</td>
     <td>https://redbust.com/</td>
     <td>Archives, Galleries, Categories, individual Images, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="reddit" title="reddit">
     <td>Reddit</td>
     <td>https://www.reddit.com/</td>
     <td>Home Feed, individual Images, Redirects, Submissions, Subreddits, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
-<tr>
+<tr id="redgifs" title="redgifs">
     <td>RedGIFs</td>
     <td>https://redgifs.com/</td>
     <td>Collections, individual Images, Niches, Search Results, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="paheal" title="paheal">
     <td>Rule 34</td>
     <td>https://rule34.paheal.net/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="rule34us" title="rule34us">
     <td>Rule 34</td>
     <td>https://rule34.us/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="rule34xyz" title="rule34xyz">
     <td>Rule 34 XYZ</td>
     <td>https://rule34.xyz/</td>
     <td>Playlists, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="saint" title="saint">
     <td>Saint</td>
     <td>https://saint2.su/</td>
     <td>Albums, Media Files</td>
     <td></td>
 </tr>
-<tr>
+<tr id="sankaku" title="sankaku">
     <td>Sankaku Channel</td>
     <td>https://sankaku.app/</td>
     <td>Book Searches, Pools, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="sankakucomplex" title="sankakucomplex">
     <td>Sankaku Complex</td>
     <td>https://news.sankakucomplex.com/</td>
     <td>Articles, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="schalenetwork" title="schalenetwork">
     <td>Schale Network</td>
     <td>https://niyaniya.moe/</td>
     <td>Favorites, Galleries, Search Results</td>
     <td></td>
 </tr>
-<tr>
+<tr id="scrolller" title="scrolller">
     <td>Scrolller</td>
     <td>https://scrolller.com/</td>
     <td>Followed Subreddits, Posts, Subreddits</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="senmanga" title="senmanga">
     <td>Sen Manga</td>
     <td>https://raw.senmanga.com/</td>
     <td>Chapters</td>
     <td></td>
 </tr>
-<tr>
+<tr id="sexcom" title="sexcom">
     <td>Sex.com</td>
     <td>https://www.sex.com/</td>
     <td>Boards, Likes, Pins, User Pins, related Pins, Search Results</td>
     <td></td>
 </tr>
-<tr>
+<tr id="simplyhentai" title="simplyhentai">
     <td>Simply Hentai</td>
     <td>https://www.simply-hentai.com/</td>
     <td>Galleries, individual Images, Videos</td>
     <td></td>
 </tr>
-<tr>
+<tr id="skeb" title="skeb">
     <td>Skeb</td>
     <td>https://skeb.jp/</td>
     <td>Followed Creators, Followed Users, Posts, Search Results, Sent Requests, User Profiles, Works</td>
     <td></td>
 </tr>
-<tr>
+<tr id="slickpic" title="slickpic">
     <td>SlickPic</td>
     <td>https://www.slickpic.com/</td>
     <td>Albums, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="slideshare" title="slideshare">
     <td>SlideShare</td>
     <td>https://www.slideshare.net/</td>
     <td>Presentations</td>
     <td></td>
 </tr>
-<tr>
+<tr id="smugmug" title="smugmug">
     <td>SmugMug</td>
     <td>https://www.smugmug.com/</td>
     <td>Albums, individual Images, Images from Users and Folders</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
-<tr>
+<tr id="soundgasm" title="soundgasm">
     <td>Soundgasm</td>
     <td>https://soundgasm.net/</td>
     <td>Audio, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="speakerdeck" title="speakerdeck">
     <td>Speaker Deck</td>
     <td>https://speakerdeck.com/</td>
     <td>Presentations</td>
     <td></td>
 </tr>
-<tr>
+<tr id="steamgriddb" title="steamgriddb">
     <td>SteamGridDB</td>
     <td>https://www.steamgriddb.com</td>
     <td>Individual Assets, Grids, Heroes, Icons, Logos</td>
     <td></td>
 </tr>
-<tr>
+<tr id="subscribestar" title="subscribestar">
     <td>SubscribeStar</td>
     <td>https://www.subscribestar.com/</td>
     <td>Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="tapas" title="tapas">
     <td>Tapas</td>
     <td>https://tapas.io/</td>
     <td>Creators, Episodes, Series</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="tcbscans" title="tcbscans">
     <td>TCB Scans</td>
     <td>https://tcbscans.me/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="telegraph" title="telegraph">
     <td>Telegraph</td>
     <td>https://telegra.ph/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="tenor" title="tenor">
     <td>Tenor</td>
     <td>https://tenor.com/</td>
     <td>individual Images, Search Results, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="tiktok" title="tiktok">
     <td>TikTok</td>
     <td>https://www.tiktok.com/</td>
     <td>Posts, User Profiles, VM Posts</td>
-    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a>
-    <br /><span title="Pass `-o videos` to download photos only, and
-    `-o tiktok-range=a-yt-dlp-range` to tell yt-dlp to only extract XYZ links
-    when scraping a user profile. Also note that profile avatars will only be
-    downloaded when downloading a User Profile.">Hover for more info</span></td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
-<tr>
+<tr id="tmohentai" title="tmohentai">
     <td>TMOHentai</td>
     <td>https://tmohentai.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="toyhouse" title="toyhouse">
     <td>Toyhouse</td>
     <td>https://toyhou.se/</td>
     <td>Art, individual Images</td>
     <td></td>
 </tr>
-<tr>
+<tr id="tsumino" title="tsumino">
     <td>Tsumino</td>
     <td>https://www.tsumino.com/</td>
     <td>Galleries, Search Results</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="tumblr" title="tumblr">
     <td>Tumblr</td>
     <td>https://www.tumblr.com/</td>
     <td>Days, Followers, Followed Users, Likes, Posts, Search Results, Tag Searches, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
-<tr>
+<tr id="tumblrgallery" title="tumblrgallery">
     <td>TumblrGallery</td>
     <td>https://tumblrgallery.xyz/</td>
     <td>Posts, Search Results, Tumblrblogs</td>
     <td></td>
 </tr>
-<tr>
-    <td>Turboimagehost</td>
-    <td>https://www.turboimagehost.com/</td>
-    <td>Galleries, individual Images</td>
-    <td></td>
-</tr>
-<tr>
+<tr id="twibooru" title="twibooru">
     <td>Twibooru</td>
     <td>https://twibooru.org/</td>
     <td>Galleries, Posts, Search Results</td>
     <td></td>
 </tr>
-<tr>
+<tr id="twitter" title="twitter">
     <td>Twitter</td>
     <td>https://x.com/</td>
     <td>Avatars, Backgrounds, Bookmarks, Communities, Events, Followers, Followed Users, Hashtags, individual Images, User Profile Information, Likes, Lists, List Members, Media Timelines, Quotes, Search Results, Timelines, Tweets, User Profiles</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="unsplash" title="unsplash">
     <td>Unsplash</td>
     <td>https://unsplash.com/</td>
     <td>Collections, Favorites, individual Images, Search Results, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="uploadir" title="uploadir">
     <td>Uploadir</td>
     <td>https://uploadir.com/</td>
     <td>Files</td>
     <td></td>
 </tr>
-<tr>
+<tr id="urlgalleries" title="urlgalleries">
     <td>Urlgalleries</td>
     <td>https://urlgalleries.net/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="vipergirls" title="vipergirls">
     <td>Vipergirls</td>
     <td>https://vipergirls.to/</td>
     <td>Posts, Threads</td>
     <td>Supported</td>
 </tr>
-<tr>
-    <td>Vipr</td>
-    <td>https://vipr.im/</td>
-    <td>individual Images</td>
-    <td></td>
-</tr>
-<tr>
+<tr id="vk" title="vk">
     <td>VK</td>
     <td>https://vk.com/</td>
     <td>Albums, Photos, Tagged Photos</td>
     <td></td>
 </tr>
-<tr>
+<tr id="vsco" title="vsco">
     <td>VSCO</td>
     <td>https://vsco.co/</td>
     <td>Avatars, Collections, Galleries, individual Images, Spaces, User Profiles, Videos</td>
     <td></td>
 </tr>
-<tr>
+<tr id="wallhaven" title="wallhaven">
     <td>Wallhaven</td>
     <td>https://wallhaven.cc/</td>
     <td>Collections, individual Images, Search Results, User Profiles</td>
     <td><a href="https://gdl-org.github.io/docs/configuration.html#extractor-wallhaven-api-key">API Key</a></td>
 </tr>
-<tr>
+<tr id="wallpapercave" title="wallpapercave">
     <td>Wallpaper Cave</td>
     <td>https://wallpapercave.com/</td>
     <td>individual Images, Search Results</td>
     <td></td>
 </tr>
-<tr>
+<tr id="warosu" title="warosu">
     <td>Warosu</td>
     <td>https://warosu.org/</td>
     <td>Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="weasyl" title="weasyl">
     <td>Weasyl</td>
     <td>https://www.weasyl.com/</td>
     <td>Favorites, Folders, Journals, Submissions</td>
     <td><a href="https://gdl-org.github.io/docs/configuration.html#extractor-weasyl-api-key">API Key</a></td>
 </tr>
-<tr>
+<tr id="webmshare" title="webmshare">
     <td>webmshare</td>
     <td>https://webmshare.com/</td>
     <td>Videos</td>
     <td></td>
 </tr>
-<tr>
+<tr id="webtoons" title="webtoons">
     <td>WEBTOON</td>
     <td>https://www.webtoons.com/</td>
     <td>Artists, Comics, Episodes</td>
     <td></td>
 </tr>
-<tr>
+<tr id="weebcentral" title="weebcentral">
     <td>Weeb Central</td>
     <td>https://weebcentral.com/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="weibo" title="weibo">
     <td>Weibo</td>
     <td>https://www.weibo.com/</td>
     <td>Albums, Articles, Feeds, Images from Statuses, User Profiles, Videos</td>
     <td></td>
 </tr>
-<tr>
+<tr id="wikiart" title="wikiart">
     <td>WikiArt.org</td>
     <td>https://www.wikiart.org/</td>
     <td>Artists, Artist Listings, Artworks, individual Images</td>
     <td></td>
 </tr>
-<tr>
+<tr id="wikifeet" title="wikifeet">
     <td>Wikifeet</td>
     <td>https://www.wikifeet.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="wikifeetx" title="wikifeetx">
     <td>Wikifeetx</td>
     <td>https://www.wikifeetx.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="xasiat" title="xasiat">
     <td>Xasiat</td>
     <td>https://www.xasiat.com</td>
     <td>Albums, Categories, Models, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="xfolio" title="xfolio">
     <td>Xfolio</td>
     <td>https://xfolio.jp/</td>
     <td>Series, User Profiles, Works</td>
     <td></td>
 </tr>
-<tr>
+<tr id="xhamster" title="xhamster">
     <td>xHamster</td>
     <td>https://xhamster.com/</td>
     <td>Galleries, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="xvideos" title="xvideos">
     <td>XVideos</td>
     <td>https://www.xvideos.com/</td>
     <td>Galleries, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="yiffverse" title="yiffverse">
     <td>Yiff verse</td>
     <td>https://yiffverse.com/</td>
     <td>Playlists, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="zerochan" title="zerochan">
     <td>Zerochan</td>
     <td>https://www.zerochan.net/</td>
     <td>individual Images, Tag Searches</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="zzup" title="zzup">
     <td>Zzup</td>
     <td>https://zzup.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="kabeuchi" title="kabeuchi">
     <td>かべうち</td>
     <td>https://kabe-uchiroom.com/</td>
     <td>User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="vanillarock" title="vanillarock">
     <td>もえぴりあ</td>
     <td>https://vanilla-rock.com/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="blogger" title="blogger">
     <td colspan="4"><strong>Blogger Instances</strong></td>
 </tr>
-<tr>
+<tr id="blogspot" title="blogspot">
     <td>Blogspot</td>
     <td>https://www.blogger.com/</td>
     <td>Blogs, Labels, Posts, Search Results</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="chevereto" title="chevereto">
     <td colspan="4"><strong>Chevereto Instances</strong></td>
 </tr>
-<tr>
+<tr id="jpgfish" title="jpgfish">
     <td>JPG Fish</td>
     <td>https://jpg5.su/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="imgkiwi" title="imgkiwi">
     <td>IMG.Kiwi</td>
     <td>https://img.kiwi/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="imagepond" title="imagepond">
     <td>ImagePond</td>
     <td>https://imagepond.net/</td>
     <td>Albums, individual Images, User Profiles</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="Danbooru" title="Danbooru">
     <td colspan="4"><strong>Danbooru Instances</strong></td>
 </tr>
-<tr>
+<tr id="danbooru" title="danbooru">
     <td>Danbooru</td>
     <td>https://danbooru.donmai.us/</td>
     <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="atfbooru" title="atfbooru">
     <td>ATFBooru</td>
     <td>https://booru.allthefallen.moe/</td>
     <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
-<tr>
-    <td>Aibooru</td>
+<tr id="aibooru" title="aibooru">
+    <td>AIBooru</td>
     <td>https://aibooru.online/</td>
     <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="booruvar" title="booruvar">
     <td>Booruvar</td>
     <td>https://booru.borvar.art/</td>
     <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 
-<tr>
+<tr id="E621" title="E621">
     <td colspan="4"><strong>e621 Instances</strong></td>
 </tr>
-<tr>
+<tr id="e621" title="e621">
     <td>e621</td>
     <td>https://e621.net/</td>
     <td>Favorites, Pools, Popular Images, Posts, Tag Searches, Frontends</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="e926" title="e926">
     <td>e926</td>
     <td>https://e926.net/</td>
     <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
-<tr>
+<tr id="e6ai" title="e6ai">
     <td>e6AI</td>
     <td>https://e6ai.net/</td>
     <td>Favorites, Pools, Popular Images, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 
-<tr>
+<tr id="gelbooru_v01" title="gelbooru_v01">
     <td colspan="4"><strong>Gelbooru Beta 0.1.11</strong></td>
 </tr>
-<tr>
+<tr id="thecollection" title="thecollection">
     <td>The /co/llection</td>
     <td>https://the-collection.booru.org/</td>
     <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="illusioncardsbooru" title="illusioncardsbooru">
     <td>Illusion Game Cards</td>
     <td>https://illusioncards.booru.org/</td>
     <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="allgirlbooru" title="allgirlbooru">
     <td>All girl</td>
     <td>https://allgirl.booru.org/</td>
     <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="drawfriends" title="drawfriends">
     <td>Draw Friends</td>
     <td>https://drawfriends.booru.org/</td>
     <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="vidyart2" title="vidyart2">
     <td>/v/idyart2</td>
     <td>https://vidyart2.booru.org/</td>
     <td>Favorites, Posts, Tag Searches</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="gelbooru_v02" title="gelbooru_v02">
     <td colspan="4"><strong>Gelbooru Beta 0.2</strong></td>
 </tr>
-<tr>
+<tr id="rule34" title="rule34">
     <td>Rule 34</td>
     <td>https://rule34.xxx/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="safebooru" title="safebooru">
     <td>Safebooru</td>
     <td>https://safebooru.org/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="tbib" title="tbib">
     <td>The Big ImageBoard</td>
     <td>https://tbib.org/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hypnohub" title="hypnohub">
     <td>Hypnohub</td>
     <td>https://hypnohub.net/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="xbooru" title="xbooru">
     <td>Xbooru</td>
     <td>https://xbooru.com/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="hentaicosplays" title="hentaicosplays">
     <td colspan="4"><strong>Hentai Cosplay Instances</strong></td>
 </tr>
-<tr>
+<tr id="hentaicosplay" title="hentaicosplay">
     <td>Hentai Cosplay</td>
     <td>https://hentai-cosplay-xxx.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hentaiimg" title="hentaiimg">
     <td>Hentai Image</td>
     <td>https://hentai-img-xxx.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
-<tr>
+<tr id="pornimage" title="pornimage">
     <td>Porn Image</td>
     <td>https://porn-image.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="IMHentai" title="IMHentai">
     <td colspan="4"><strong>IMHentai and Mirror Sites</strong></td>
 </tr>
-<tr>
+<tr id="imhentai" title="imhentai">
     <td>IMHentai</td>
     <td>https://imhentai.xxx/</td>
     <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hentaiera" title="hentaiera">
     <td>HentaiEra</td>
     <td>https://hentaiera.com/</td>
     <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hentairox" title="hentairox">
     <td>HentaiRox</td>
     <td>https://hentairox.com/</td>
     <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hentaifox" title="hentaifox">
     <td>HentaiFox</td>
     <td>https://hentaifox.com/</td>
     <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hentaienvy" title="hentaienvy">
     <td>HentaiEnvy</td>
     <td>https://hentaienvy.com/</td>
     <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="hentaizap" title="hentaizap">
     <td>HentaiZap</td>
     <td>https://hentaizap.com/</td>
     <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="jschan" title="jschan">
     <td colspan="4"><strong>jschan Imageboards</strong></td>
 </tr>
-<tr>
+<tr id="94chan" title="94chan">
     <td>94chan</td>
     <td>https://94chan.org/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="lynxchan" title="lynxchan">
     <td colspan="4"><strong>LynxChan Imageboards</strong></td>
 </tr>
-<tr>
+<tr id="bbw-chan" title="bbw-chan">
     <td>Bbw-chan</td>
     <td>https://bbw-chan.link/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="kohlchan" title="kohlchan">
     <td>Kohlchan</td>
     <td>https://kohlchan.net/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="endchan" title="endchan">
     <td>Endchan</td>
     <td>https://endchan.org/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="manganelo" title="manganelo">
     <td colspan="4"><strong>MangaNelo and Mirror Sites</strong></td>
 </tr>
-<tr>
+<tr id="nelomanga" title="nelomanga">
     <td>MangaNelo</td>
     <td>https://www.nelomanga.net/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="natomanga" title="natomanga">
     <td>MangaNato</td>
     <td>https://www.natomanga.com/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="manganato" title="manganato">
     <td>MangaNato</td>
     <td>https://www.manganato.gg/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr>
+<tr id="mangakakalot" title="mangakakalot">
     <td>MangaKakalot</td>
     <td>https://www.mangakakalot.gg/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="misskey" title="misskey">
     <td colspan="4"><strong>Misskey Instances</strong></td>
 </tr>
-<tr>
+<tr id="misskey.io" title="misskey.io">
     <td>Misskey.io</td>
     <td>https://misskey.io/</td>
     <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="misskey.design" title="misskey.design">
     <td>Misskey.design</td>
     <td>https://misskey.design/</td>
     <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="misskey.art" title="misskey.art">
     <td>Misskey.art</td>
     <td>https://misskey.art/</td>
     <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="lesbian.energy" title="lesbian.energy">
     <td>Lesbian.energy</td>
     <td>https://lesbian.energy/</td>
     <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="sushi.ski" title="sushi.ski">
     <td>Sushi.ski</td>
     <td>https://sushi.ski/</td>
     <td>Avatars, Backgrounds, Favorites, Followed Users, User Profile Information, Notes, User Notes, User Profiles</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="Nijie" title="Nijie">
     <td colspan="4"><strong>Nijie Instances</strong></td>
 </tr>
-<tr>
+<tr id="nijie" title="nijie">
     <td>nijie</td>
     <td>https://nijie.info/</td>
     <td>Doujin, Favorites, Feeds, Followed Users, Illustrations, individual Images, Nuita History, User Profiles</td>
     <td>Required</td>
 </tr>
-<tr>
+<tr id="horne" title="horne">
     <td>horne</td>
     <td>https://horne.red/</td>
     <td>Doujin, Favorites, Feeds, Followeds, Illustrations, individual Images, Nuitas, User Profiles</td>
     <td>Required</td>
 </tr>
 
-<tr>
+<tr id="nitter" title="nitter">
     <td colspan="4"><strong>Nitter Instances</strong></td>
 </tr>
-<tr>
+<tr id="" title="">
     <td></td>
     <td></td>
     <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="philomena" title="philomena">
     <td colspan="4"><strong>Philomena Instances</strong></td>
 </tr>
-<tr>
+<tr id="derpibooru" title="derpibooru">
     <td>Derpibooru</td>
     <td>https://derpibooru.org/</td>
     <td>Galleries, Posts, Search Results</td>
     <td><a href="https://gdl-org.github.io/docs/configuration.html#extractor-derpibooru-api-key">API Key</a></td>
 </tr>
-<tr>
+<tr id="ponybooru" title="ponybooru">
     <td>Ponybooru</td>
     <td>https://ponybooru.org/</td>
     <td>Galleries, Posts, Search Results</td>
     <td>API Key</td>
 </tr>
-<tr>
+<tr id="furbooru" title="furbooru">
     <td>Furbooru</td>
     <td>https://furbooru.org/</td>
     <td>Galleries, Posts, Search Results</td>
     <td>API Key</td>
 </tr>
 
-<tr>
+<tr id="postmill" title="postmill">
     <td colspan="4"><strong>Postmill Instances</strong></td>
 </tr>
-<tr>
+<tr id="raddle" title="raddle">
     <td>Raddle</td>
     <td>https://raddle.me/</td>
     <td>Forums, Home Feed, Individual Posts, Search Results, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="reactor" title="reactor">
     <td colspan="4"><strong>Reactor Instances</strong></td>
 </tr>
-<tr>
+<tr id="reactor" title="reactor">
     <td>Reactor</td>
     <td>http://reactor.cc/</td>
     <td>Posts, Search Results, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="joyreactor" title="joyreactor">
     <td>JoyReactor</td>
     <td>http://joyreactor.cc/</td>
     <td>Posts, Search Results, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="pornreactor" title="pornreactor">
     <td>PornReactor</td>
     <td>http://pornreactor.cc/</td>
     <td>Posts, Search Results, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
-<tr>
+<tr id="thatpervert" title="thatpervert">
     <td>ThatPervert</td>
     <td>http://thatpervert.com/</td>
     <td>Posts, Search Results, Tag Searches, User Profiles</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="shimmie2" title="shimmie2">
     <td colspan="4"><strong>Shimmie2 Instances</strong></td>
 </tr>
-<tr>
+<tr id="giantessbooru" title="giantessbooru">
     <td>Giantessbooru</td>
     <td>https://sizechangebooru.com/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="cavemanon" title="cavemanon">
     <td>Cavemanon</td>
     <td>https://booru.cavemanon.xyz/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="rule34hentai" title="rule34hentai">
     <td>Rule34Hentai</td>
     <td>https://rule34hentai.net/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="vidyapics" title="vidyapics">
     <td>Vidya Booru</td>
     <td>https://vidya.pics/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="szurubooru" title="szurubooru">
     <td colspan="4"><strong>szurubooru Instances</strong></td>
 </tr>
-<tr>
+<tr id="bcbnsfw" title="bcbnsfw">
     <td>Bcbnsfw</td>
     <td>https://booru.bcbnsfw.space/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="snootbooru" title="snootbooru">
     <td>Snootbooru</td>
     <td>https://snootbooru.com/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="visuabusters" title="visuabusters">
     <td>VISUABUSTERS</td>
     <td>https://www.visuabusters.com/booru/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="urlshortener" title="urlshortener">
     <td colspan="4"><strong>URL Shorteners</strong></td>
 </tr>
-<tr>
+<tr id="bitly" title="bitly">
     <td>Bitly</td>
     <td>https://bit.ly/</td>
     <td>Links</td>
     <td></td>
 </tr>
-<tr>
+<tr id="tco" title="tco">
     <td>Twitter t.co</td>
     <td>https://t.co/</td>
     <td>Links</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="vichan" title="vichan">
     <td colspan="4"><strong>vichan Imageboards</strong></td>
 </tr>
-<tr>
+<tr id="8kun" title="8kun">
     <td>8kun</td>
     <td>https://8kun.top/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="smugloli" title="smugloli">
     <td>Smugloli</td>
     <td>https://smuglo.li/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="wikimedia" title="wikimedia">
     <td colspan="4"><strong>Wikimedia Instances</strong></td>
 </tr>
-<tr>
+<tr id="wikimedia" title="wikimedia">
     <td>Wikimedia</td>
     <td>https://www.wikimedia.org/</td>
     <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
-<tr>
+<tr id="wikispecies" title="wikispecies">
     <td>Wikispecies</td>
     <td>https://species.wikimedia.org/</td>
     <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
-<tr>
+<tr id="wikimediacommons" title="wikimediacommons">
     <td>Wikimedia Commons</td>
     <td>https://commons.wikimedia.org/</td>
     <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
-<tr>
+<tr id="mediawiki" title="mediawiki">
     <td>MediaWiki</td>
     <td>https://www.mediawiki.org/</td>
     <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
-<tr>
+<tr id="fandom" title="fandom">
     <td>Fandom</td>
     <td>https://www.fandom.com/</td>
     <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
-<tr>
+<tr id="wikigg" title="wikigg">
     <td>wiki.gg</td>
     <td>https://www.wiki.gg/</td>
     <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
-<tr>
+<tr id="mariowiki" title="mariowiki">
     <td>Super Mario Wiki</td>
     <td>https://www.mariowiki.com/</td>
     <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
-<tr>
+<tr id="bulbapedia" title="bulbapedia">
     <td>Bulbapedia</td>
     <td>https://bulbapedia.bulbagarden.net/</td>
     <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
-<tr>
+<tr id="pidgiwiki" title="pidgiwiki">
     <td>PidgiWiki</td>
     <td>https://www.pidgi.net/</td>
     <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
-<tr>
+<tr id="azurlanewiki" title="azurlanewiki">
     <td>Azur Lane Wiki</td>
     <td>https://azurlane.koumakan.jp/</td>
     <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="moebooru" title="moebooru">
     <td colspan="4"><strong>Moebooru and MyImouto</strong></td>
 </tr>
-<tr>
+<tr id="yandere" title="yandere">
     <td>yande.re</td>
     <td>https://yande.re/</td>
     <td>Pools, Popular Images, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="konachan" title="konachan">
     <td>Konachan</td>
     <td>https://konachan.com/</td>
     <td>Pools, Popular Images, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="sakugabooru" title="sakugabooru">
     <td>Sakugabooru</td>
     <td>https://www.sakugabooru.com/</td>
     <td>Pools, Popular Images, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr>
+<tr id="lolibooru" title="lolibooru">
     <td>Lolibooru</td>
     <td>https://lolibooru.moe/</td>
     <td>Pools, Popular Images, Posts, Tag Searches</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="foolfuuka" title="foolfuuka">
     <td colspan="4"><strong>FoolFuuka 4chan Archives</strong></td>
 </tr>
-<tr>
+<tr id="4plebs" title="4plebs">
     <td>4plebs</td>
     <td>https://archive.4plebs.org/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="archivedmoe" title="archivedmoe">
     <td>Archived.Moe</td>
     <td>https://archived.moe/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="archiveofsins" title="archiveofsins">
     <td>Archive of Sins</td>
     <td>https://archiveofsins.com/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="b4k" title="b4k">
     <td>arch.b4k.dev</td>
     <td>https://arch.b4k.dev/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="desuarchive" title="desuarchive">
     <td>Desuarchive</td>
     <td>https://desuarchive.org/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="fireden" title="fireden">
     <td>Fireden</td>
     <td>https://boards.fireden.net/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="palanq" title="palanq">
     <td>Palanq</td>
     <td>https://archive.palanq.win/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="rbt" title="rbt">
     <td>RebeccaBlackTech</td>
     <td>https://rbt.asia/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
-<tr>
+<tr id="thebarchive" title="thebarchive">
     <td>The /b/ Archive</td>
     <td>https://thebarchive.com/</td>
     <td>Boards, Galleries, Search Results, Threads</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="foolslide" title="foolslide">
     <td colspan="4"><strong>FoOlSlide Instances</strong></td>
 </tr>
-<tr>
+<tr id="" title="">
     <td></td>
     <td></td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="mastodon" title="mastodon">
     <td colspan="4"><strong>Mastodon Instances</strong></td>
 </tr>
-<tr>
+<tr id="mastodon.social" title="mastodon.social">
     <td>mastodon.social</td>
     <td>https://mastodon.social/</td>
     <td>Bookmarks, Favorites, Followed Users, Hashtags, Lists, Images from Statuses, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
-<tr>
+<tr id="pawoo" title="pawoo">
     <td>Pawoo</td>
     <td>https://pawoo.net/</td>
     <td>Bookmarks, Favorites, Followed Users, Hashtags, Lists, Images from Statuses, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
-<tr>
+<tr id="baraag" title="baraag">
     <td>baraag</td>
     <td>https://baraag.net/</td>
     <td>Bookmarks, Favorites, Followed Users, Hashtags, Lists, Images from Statuses, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
 
-<tr>
+<tr id="shopify" title="shopify">
     <td colspan="4"><strong>Shopify Instances</strong></td>
 </tr>
-<tr>
+<tr id="chelseacrew" title="chelseacrew">
     <td>Chelseacrew</td>
     <td>https://chelseacrew.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
-<tr>
+<tr id="fashionnova" title="fashionnova">
     <td>Fashion Nova</td>
     <td>https://www.fashionnova.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
-<tr>
+<tr id="loungeunderwear" title="loungeunderwear">
     <td>Loungeunderwear</td>
     <td>https://loungeunderwear.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
-<tr>
+<tr id="michaelscameras" title="michaelscameras">
     <td>Michaelscameras</td>
     <td>https://michaels.com.au/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
-<tr>
+<tr id="modcloth" title="modcloth">
     <td>Modcloth</td>
     <td>https://modcloth.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
-<tr>
+<tr id="ohpolly" title="ohpolly">
     <td>Oh Polly</td>
     <td>https://www.ohpolly.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
-<tr>
+<tr id="omgmiamiswimwear" title="omgmiamiswimwear">
     <td>Omg Miami Swimwear</td>
     <td>https://www.omgmiamiswimwear.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
-<tr>
+<tr id="pinupgirlclothing" title="pinupgirlclothing">
     <td>Pinupgirlclothing</td>
     <td>https://pinupgirlclothing.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
-<tr>
+<tr id="raidlondon" title="raidlondon">
     <td>Raidlondon</td>
     <td>https://www.raidlondon.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
-<tr>
+<tr id="unique-vintage" title="unique-vintage">
     <td>Unique-vintage</td>
     <td>https://www.unique-vintage.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
-<tr>
+<tr id="windsorstore" title="windsorstore">
     <td>Windsorstore</td>
     <td>https://www.windsorstore.com/</td>
     <td>Collections, Products</td>
     <td></td>
 </tr>
 
-<tr>
+<tr id="lolisafe" title="lolisafe">
     <td colspan="4"><strong>lolisafe and chibisafe</strong></td>
 </tr>
-<tr>
+<tr id="" title="">
     <td></td>
     <td></td>
     <td>Albums</td>
+    <td></td>
+</tr>
+
+<tr id="imagehost" title="imagehost">
+    <td colspan="4"><strong>Image Hosting Sites</strong></td>
+</tr>
+<tr id="acidimg" title="acidimg">
+    <td>Acidimg</td>
+    <td>https://acidimg.cc/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr id="fappic" title="fappic">
+    <td>Fappic.com</td>
+    <td>https://fappic.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr id="imagetwist" title="imagetwist">
+    <td>ImageTwist</td>
+    <td>https://imagetwist.com/</td>
+    <td>Galleries, individual Images</td>
+    <td></td>
+</tr>
+<tr id="imagevenue" title="imagevenue">
+    <td>Imagevenue</td>
+    <td>https://www.imagevenue.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr id="imgadult" title="imgadult">
+    <td>ImgAdult</td>
+    <td>https://imgadult.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr id="imgclick" title="imgclick">
+    <td>Imgclick</td>
+    <td>http://imgclick.net/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr id="imgdrive" title="imgdrive">
+    <td>ImgDrive.net</td>
+    <td>https://imgdrive.net/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr id="imgspice" title="imgspice">
+    <td>Imgspice</td>
+    <td>https://imgspice.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr id="imgtaxi" title="imgtaxi">
+    <td>ImgTaxi.com</td>
+    <td>https://imgtaxi.com/</td>
+    <td></td>
+    <td></td>
+</tr>
+<tr id="imgwallet" title="imgwallet">
+    <td>ImgWallet.com</td>
+    <td>https://imgwallet.com/</td>
+    <td></td>
+    <td></td>
+</tr>
+<tr id="imxto" title="imxto">
+    <td>IMX.to</td>
+    <td>https://imx.to/</td>
+    <td>Galleries, individual Images</td>
+    <td></td>
+</tr>
+<tr id="picstate" title="picstate">
+    <td>PicState</td>
+    <td>https://picstate.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr id="pixhost" title="pixhost">
+    <td>PiXhost</td>
+    <td>https://pixhost.to/</td>
+    <td>Galleries, individual Images</td>
+    <td></td>
+</tr>
+<tr id="postimg" title="postimg">
+    <td>Postimages</td>
+    <td>https://postimages.org/</td>
+    <td>Galleries, individual Images</td>
+    <td></td>
+</tr>
+<tr id="silverpic" title="silverpic">
+    <td>SilverPic.com</td>
+    <td>https://silverpic.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr id="turboimagehost" title="turboimagehost">
+    <td>TurboImageHost.com</td>
+    <td>https://www.turboimagehost.com/</td>
+    <td>Galleries, individual Images</td>
+    <td></td>
+</tr>
+<tr id="vipr" title="vipr">
+    <td>Vipr.im</td>
+    <td>https://vipr.im/</td>
+    <td>individual Images</td>
     <td></td>
 </tr>
 </tbody>

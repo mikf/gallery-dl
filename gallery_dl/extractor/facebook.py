@@ -80,6 +80,8 @@ class FacebookExtractor(Extractor):
             directory["user_id"] = (
                 text.extr(
                     set_page, '"actors":[{"__typename":"User","id":"', '"') or
+                text.extr(
+                    set_page, '"userID":"', '"') or
                 directory["set_id"].split(".")[1])
 
         return directory
