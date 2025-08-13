@@ -1,8 +1,38 @@
 # String Formatting
 
+
+## Table of Contents
+
+* [Basics](#basics)
+* [Field Names](#field-names)
+* [Conversions](#conversions)
+* [Format Specifiers](#format-specifiers)
+* [Global Replacement Fields](#global-replacement-fields)
+* [Special Type Format Strings](#special-type-format-strings)
+
+
+## Basics
+
 Format strings in gallery-dl follow the general rules of [`str.format()`](https://docs.python.org/3/library/string.html#format-string-syntax) ([PEP 3101](https://www.python.org/dev/peps/pep-3101/)) plus several extras.
 
-The syntax for replacement fields is `{<field-name>!<conversion>:<format-specifiers>}`, where `!<conversion>` and `:<format-specifiers>` are both optional and can be used to specify how the value selected by `<field-name>` should be transformed.
+The syntax for replacement fields is
+```
+{<field-name>!<conversion>:<format-specifiers>}
+```
+where
+[`<field-name>`](#field-names)
+selects a value
+<br>
+and the optional
+[`!<conversion>`](#conversions)
+&amp;
+[`:<format-specifiers>`](#format-specifiers)
+specify how to transform it.
+
+Examples:
+* `{title}`
+* `{content!W}`
+* `{date:Olocal/%Y%m%d %H%M}`
 
 
 ## Field Names
@@ -62,7 +92,8 @@ While simple names are usually enough, more complex forms like accessing values 
 </tbody>
 </table>
 
-All of these methods can be combined as needed.
+All of these methods can be combined.
+<br>
 For example `{title[24]|empty|extractor.url[15:-1]}` would result in `.org`.
 
 
@@ -178,19 +209,19 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
 </tr>
 <tr>
     <td align="center"><code>S</code></td>
-    <td>Convert value to <code>str</code> while providing a human-readable representation for lists</td>
+    <td>Convert value to <a href="https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str" rel="nofollow"><code>str</code></a> while providing a human-readable representation for lists</td>
     <td><code>{tags!S}</code></td>
     <td><code>sun, tree, water</code></td>
 </tr>
 <tr>
     <td align="center"><code>r</code></td>
-    <td>Convert value to <code>str</code> using <a href="https://docs.python.org/3/library/functions.html#repr" rel="nofollow"><code>repr()</code></a></td>
+    <td>Convert value to <a href="https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str" rel="nofollow"><code>str</code></a> using <a href="https://docs.python.org/3/library/functions.html#repr" rel="nofollow"><code>repr()</code></a></td>
     <td></td>
     <td></td>
 </tr>
 <tr>
     <td align="center"><code>a</code></td>
-    <td>Convert value to <code>str</code> using <a href="https://docs.python.org/3/library/functions.html#ascii" rel="nofollow"><code>ascii()</code></a></td>
+    <td>Convert value to <a href="https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str" rel="nofollow"><code>str</code></a> using <a href="https://docs.python.org/3/library/functions.html#ascii" rel="nofollow"><code>ascii()</code></a></td>
     <td></td>
     <td></td>
 </tr>
@@ -309,10 +340,14 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>2010-01-01 00:00:00</code></td>
 </tr>
 <tr>
-    <td><code>O&lt;offset&gt;/</code></td>
-    <td>Apply <code>&lt;offset&gt;</code> to a <code>datetime</code> object, either as <code>±HH:MM</code> or <code>local</code> for local UTC offset</td>
+    <td rowspan="2"><code>O&lt;offset&gt;/</code></td>
+    <td rowspan="2">Apply <code>&lt;offset&gt;</code> to a <code>datetime</code> object, either as <code>±HH:MM</code> or <code>local</code> for local UTC offset</td>
     <td><code>{date:O-06:30/}</code></td>
     <td><code>2009-12-31 17:30:00</code></td>
+</tr>
+<tr>
+    <td><code>{date:Olocal/}</code></td>
+    <td><code>2010-01-01 01:00:00</code></td>
 </tr>
 </tbody>
 </table>
@@ -400,7 +435,7 @@ Starting a format string with `\f<Type> ` allows to set a different format strin
 <tr>
     <td align="center"><code>J</code></td>
     <td>A <a href="https://jinja.palletsprojects.com/">Jinja</a> template</td>
-    <td><code>\fJ '{{title | trim}}' by {{artist | capitalize}}</code></td>
+    <td><code>\fJ '&#123;&#123;title | trim&#125;&#125;' by &#123;&#123;artist | capitalize&#125;&#125;</code></td>
 </tr>
 <tr>
     <td align="center"><code>T</code></td>
