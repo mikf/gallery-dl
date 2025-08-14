@@ -90,6 +90,7 @@ class PathFormat():
 
         restrict = config("path-restrict", "auto")
         replace = config("path-replace", "_")
+        conv = config("path-convert")
         if restrict == "auto":
             restrict = "\\\\|/<>:\"?*" if WINDOWS else "/"
         elif restrict == "unix":
@@ -100,10 +101,10 @@ class PathFormat():
             restrict = "^0-9A-Za-z_."
         elif restrict == "ascii+":
             restrict = "^0-9@-[\\]-{ #-)+-.;=!}~"
-        self.clean_segment = self._build_cleanfunc(restrict, replace)
+        self.clean_segment = _build_cleanfunc(restrict, replace, conv)
 
         remove = config("path-remove", "\x00-\x1f\x7f")
-        self.clean_path = self._build_cleanfunc(remove, "")
+        self.clean_path = _build_cleanfunc(remove, "")
 
         strip = config("path-strip", "auto")
         if strip == "auto":
@@ -132,37 +133,6 @@ class PathFormat():
                     basedir += sep
             basedir = self.clean_path(basedir)
         self.basedirectory = basedir
-
-    def _build_cleanfunc(self, chars, repl):
-        if not chars:
-            return util.identity
-        elif isinstance(chars, dict):
-            if 0 not in chars:
-                chars = self._process_repl_dict(chars)
-                chars[0] = None
-
-            def func(x, table=str.maketrans(chars)):
-                return x.translate(table)
-        elif len(chars) == 1:
-            def func(x, c=chars, r=repl):
-                return x.replace(c, r)
-        else:
-            return functools.partial(util.re(f"[{chars}]").sub, repl)
-        return func
-
-    def _process_repl_dict(self, chars):
-        # can't modify 'chars' while *directly* iterating over its keys
-        for char in [c for c in chars if len(c) > 1]:
-            if len(char) == 3 and char[1] == "-":
-                citer = range(ord(char[0]), ord(char[2])+1)
-            else:
-                citer = char
-
-            repl = chars.pop(char)
-            for c in citer:
-                chars[c] = repl
-
-        return chars
 
     def open(self, mode="wb"):
         """Open file and return a corresponding file object"""
@@ -382,3 +352,51 @@ class PathFormat():
                 break
 
         self.set_mtime()
+
+
+def _build_convertfunc(func, conv):
+    if len(conv) <= 1:
+        conv = formatter._CONVERSIONS[conv]
+        return lambda x: conv(func(x))
+
+    def convert_many(x):
+        x = func(x)
+        for conv in convs:
+            x = conv(x)
+        return x
+    convs = [formatter._CONVERSIONS[c] for c in conv]
+    return convert_many
+
+
+def _build_cleanfunc(chars, repl, conv=None):
+    if not chars:
+        func = util.identity
+    elif isinstance(chars, dict):
+        if 0 not in chars:
+            chars = _process_repl_dict(chars)
+            chars[0] = None
+
+        def func(x):
+            return x.translate(table)
+        table = str.maketrans(chars)
+    elif len(chars) == 1:
+        def func(x):
+            return x.replace(chars, repl)
+    else:
+        func = functools.partial(util.re(f"[{chars}]").sub, repl)
+    return _build_convertfunc(func, conv) if conv else func
+
+
+def _process_repl_dict(chars):
+    # can't modify 'chars' while *directly* iterating over its keys
+    for char in [c for c in chars if len(c) > 1]:
+        if len(char) == 3 and char[1] == "-":
+            citer = range(ord(char[0]), ord(char[2])+1)
+        else:
+            citer = char
+
+        repl = chars.pop(char)
+        for c in citer:
+            chars[c] = repl
+
+    return chars

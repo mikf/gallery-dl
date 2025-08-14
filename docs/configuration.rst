@@ -277,6 +277,19 @@ Description
     * ``"windows"``: ``". "``
 
 
+extractor.*.path-convert
+------------------------
+Type
+    `Conversion(s)`_
+Example
+    * ``"g"``
+    * ``"Wl"``
+Description
+    `Conversion(s)`_ to apply to each path segment after
+    `path-restrict <extractor.*.path-restrict_>`__
+    replacements.
+
+
 extractor.*.path-extended
 -------------------------
 Type
@@ -8674,6 +8687,7 @@ Description
 .. _download archive: `extractor.*.archive`_
 .. _Action(s): Action_
 
+.. _Conversion(s):      https://gdl-org.github.io/docs/formatting.html#conversions
 .. _.netrc:             https://stackoverflow.com/tags/.netrc/info
 .. _Last-Modified:      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
 .. _datetime:           https://docs.python.org/3/library/datetime.html#datetime-objects
