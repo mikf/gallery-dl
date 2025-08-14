@@ -19,7 +19,7 @@ class VkExtractor(Extractor):
     category = "vk"
     directory_fmt = ("{category}", "{user[name]|user[id]}")
     filename_fmt = "{id}.{extension}"
-    archive_fmt = "{id}"
+    archive_fmt = "{user[id]}_{id}"
     root = "https://vk.com"
     request_interval = (0.5, 1.5)
 
