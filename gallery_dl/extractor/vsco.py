@@ -371,7 +371,8 @@ class VscoJournalExtractor(VscoExtractor):
                                     "_id": img["id"],
                                     "is_video": False,
                                     "grid_name": "",
-                                    "upload_date": article.get("created_at", 0),
+                                    "upload_date": article.get(
+                                        "created_at", 0),
                                     "responsive_url": img["responsive_url"],
                                     "width": img.get("width", 0),
                                     "height": img.get("height", 0),
