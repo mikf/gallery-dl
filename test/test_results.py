@@ -348,6 +348,21 @@ class TestExtractorResults(unittest.TestCase):
                     for _ in value:
                         len_value += 1
                 self.assertEqual(int(length), len_value, msg=path)
+            elif test.startswith("iso:"):
+                iso = test[4:]
+                if iso in ("dt", "datetime", "8601"):
+                    msg = f"{path} / ISO 8601"
+                    try:
+                        dt = datetime.datetime.fromisoformat(value)
+                    except Exception as exc:
+                        self.fail(f"Invalid datetime '{value}': {exc} {msg}")
+                    self.assertIsInstance(dt, datetime.datetime, msg=msg)
+                elif iso in ("lang", "639", "639-1"):
+                    msg = f"{path} / ISO 639-1"
+                    self.assertIsInstance(value, str, msg=msg)
+                    self.assertRegex(value, r"^[a-z]{2}(-\w+)?$", msg=msg)
+                else:
+                    self.fail(f"Unsupported ISO test '{test}'")
             else:
                 self.assertEqual(test, value, msg=path)
         else:
