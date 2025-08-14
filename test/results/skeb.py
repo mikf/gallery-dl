@@ -39,7 +39,7 @@ __tests__ = (
     "original"        : {
         "byte_size" : int,
         "duration"  : None,
-        "extension" : r"re:psd|png",
+        "extension" : {"psd", "png"},
         "frame_rate": None,
         "height"    : 3727,
         "is_movie"  : False,
@@ -69,7 +69,7 @@ __tests__ = (
     "#options" : {"include": "all"},
     "#results" : (
         "https://skeb.jp/@kanade_cocotte/works",
-        "https://skeb.jp/@kanade_cocotte/sent-requests",
+        "https://skeb.jp/@kanade_cocotte/sentrequests",
     ),
 },
 
@@ -79,7 +79,7 @@ __tests__ = (
     "#options" : {"sent-requests": True},
     "#results" : (
         "https://skeb.jp/@kanade_cocotte/works",
-        "https://skeb.jp/@kanade_cocotte/sent-requests",
+        "https://skeb.jp/@kanade_cocotte/sentrequests",
     ),
 },
 
@@ -105,12 +105,12 @@ __tests__ = (
 
 {
     "#url"     : "https://skeb.jp/@kanade_cocotte/sent-requests",
-    "#class"   : skeb.SkebSentRequestsExtractor,
+    "#class"   : skeb.SkebSentrequestsExtractor,
 },
 
 {
     "#url"     : "https://skeb.jp/@4ra_su4/sentrequests",
-    "#class"   : skeb.SkebSentRequestsExtractor,
+    "#class"   : skeb.SkebSentrequestsExtractor,
     "#pattern" : (
         r"https://si.imgix.net/4e44b668/uploads/origins/e42cbd8e-44af-4aaa-a11b-6a174f42202c\?bg=%23fff&auto=format&fm=webp&w=800&s=\w+",
         r"https://si.imgix.net/4d30e75e/uploads/origins/6d3bb612-3f45-4d8e-9d31-49dceb3dab11\?bg=%23fff&auto=format&fm=webp&w=800&s=\w+",
