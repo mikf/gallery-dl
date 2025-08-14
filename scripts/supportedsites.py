@@ -392,7 +392,7 @@ SUBCATEGORY_MAP = {
     "skeb": {
         "following"      : "Followed Creators",
         "following-users": "Followed Users",
-        "sent-requests"  : "Sent Requests",
+        "sentrequests"   : "Sent Requests",
     },
     "smugmug": {
         "path": "Images from Users and Folders",

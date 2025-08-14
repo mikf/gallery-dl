@@ -4741,10 +4741,12 @@ Type
     * ``string``
     * ``list`` of ``strings``
 Default
-    ``"works"``
+    * ``["works", "sentrequests"]``
+      if `sent-requests <extractor.skeb.sent-requests_>`__ are enabled
+    * ``["works"]`` otherwise
 Example
-    * ``"works,sent-requests"``
-    * ``["works", "sent-requests"]``
+    * ``"works,sentrequests"``
+    * ``["works", "sentrequests"]``
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
@@ -4752,7 +4754,7 @@ Description
     Possible values are
 
     * ``"works"``
-    * ``"sent-requests"``
+    * ``"sentrequests"``
 
     It is possible to use ``"all"`` instead of listing all values separately.
 

@@ -213,11 +213,11 @@ class SkebWorksExtractor(SkebExtractor):
         return self._pagination(url, params)
 
 
-class SkebSentRequestsExtractor(SkebExtractor):
+class SkebSentrequestsExtractor(SkebExtractor):
     """Extractor for a skeb user's sent requests"""
-    subcategory = "sent-requests"
+    subcategory = "sentrequests"
     pattern = USER_PATTERN + r"/sent[ _-]?requests"
-    example = "https://skeb.jp/@USER/sent-requests"
+    example = "https://skeb.jp/@USER/sentrequests"
 
     def posts(self):
         url = f"{self.root}/api/users/{self.groups[0]}/works"
@@ -232,14 +232,14 @@ class SkebUserExtractor(Dispatch, SkebExtractor):
 
     def items(self):
         if self.config("sent-requests", False):
-            default = ("works", "sent-requests")
+            default = ("works", "sentrequests")
         else:
             default = ("works",)
 
         base = f"{self.root}/@{self.groups[0]}/"
         return self._dispatch_extractors((
             (SkebWorksExtractor       , base + "works"),
-            (SkebSentRequestsExtractor, base + "sent-requests"),
+            (SkebSentrequestsExtractor, base + "sentrequests"),
         ), default)
 
 
