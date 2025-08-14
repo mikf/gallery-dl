@@ -143,7 +143,7 @@ class VscoUserExtractor(Dispatch, VscoExtractor):
             (VscoGalleryExtractor   , base + "gallery"),
             (VscoSpacesExtractor    , base + "spaces"),
             (VscoCollectionExtractor, base + "collection"),
-            (VscoJournalExtractor  , base + "journal"), 
+            (VscoJournalExtractor, base + "journal"),
         ), ("gallery",))
 
 
@@ -337,8 +337,8 @@ class VscoVideoExtractor(VscoExtractor):
             "height"        : media["height"],
             "description"   : media["description"],
         },)
-        
-        
+
+
 class VscoJournalExtractor(VscoExtractor):
     """Extractor for a vsco user's journal articles"""
     subcategory = "journal"
