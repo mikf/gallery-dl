@@ -319,7 +319,12 @@ class TestExtractorResults(unittest.TestCase):
                 if isinstance(item, dict):
                     subtest = True
                     subpath = "{}[{}]".format(path, idx)
-                    self._test_kwdict(value[idx], item, subpath)
+                    try:
+                        obj = value[idx]
+                    except Exception as exc:
+                        self.fail(f"'{exc.__class__.__name__}: {exc}' "
+                                  f"when accessing {subpath}")
+                    self._test_kwdict(obj, item, subpath)
             if not subtest:
                 self.assertEqual(test, value, msg=path)
         elif isinstance(test, str):
