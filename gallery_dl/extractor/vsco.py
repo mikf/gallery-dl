@@ -189,8 +189,7 @@ class VscoCollectionExtractor(VscoExtractor):
         params = {"page": 2, "size": "20"}
         return self._pagination(url, params, tkn, "medias", (
             data["medias"]["byId"][mid["id"]]["media"]
-            for mid in data
-            ["collections"]["byId"][cid]["1"]["collection"]
+            for mid in data["collections"]["byId"][cid]["1"]["collection"]
         ))
 
 
