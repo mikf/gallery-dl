@@ -111,6 +111,7 @@ def build_setuptools():
             "extra": [
                 "requests[socks]",
                 "yt-dlp[default]",
+                "jinja2",
                 "pyyaml",
                 "toml; python_version < '3.11'",
                 "truststore; python_version >= '3.10'",
