@@ -111,10 +111,6 @@ class KemonoExtractor(Extractor):
                 if dms is True:
                     dms = self.api.creator_dms(
                         post["service"], post["user"])
-                    try:
-                        dms = dms["props"]["dms"]
-                    except Exception:
-                        dms = ()
                 post["dms"] = dms
             if announcements is not None:
                 if announcements is True:
@@ -329,8 +325,6 @@ class KemonoUserExtractor(KemonoExtractor):
         endpoint = self.config("endpoint")
         if endpoint == "legacy+":
             endpoint = self._posts_legacy_plus
-        elif endpoint == "legacy" or tag:
-            endpoint = self.api.creator_posts_legacy
         else:
             endpoint = self.api.creator_posts
 
@@ -339,7 +333,7 @@ class KemonoUserExtractor(KemonoExtractor):
 
     def _posts_legacy_plus(self, service, creator_id,
                            offset=0, query=None, tags=None):
-        for post in self.api.creator_posts_legacy(
+        for post in self.api.creator_posts(
                 service, creator_id, offset, query, tags):
             yield self.api.creator_post(
                 service, creator_id, post["id"])["post"]
@@ -593,15 +587,9 @@ class KemonoAPI():
 
     def creator_posts(self, service, creator_id,
                       offset=0, query=None, tags=None):
-        endpoint = f"/{service}/user/{creator_id}"
-        params = {"q": query, "tag": tags, "o": offset}
-        return self._pagination(endpoint, params, 50)
-
-    def creator_posts_legacy(self, service, creator_id,
-                             offset=0, query=None, tags=None):
-        endpoint = f"/{service}/user/{creator_id}/posts-legacy"
+        endpoint = f"/{service}/user/{creator_id}/posts"
         params = {"o": offset, "tag": tags, "q": query}
-        return self._pagination(endpoint, params, 50, "results")
+        return self._pagination(endpoint, params, 50)
 
     def creator_announcements(self, service, creator_id):
         endpoint = f"/{service}/user/{creator_id}/announcements"
@@ -658,16 +646,16 @@ class KemonoAPI():
 
     def _call(self, endpoint, params=None, fatal=True):
         return self.extractor.request_json(
-            self.root + endpoint, params=params, fatal=fatal)
+            self.root + endpoint, params=params, encoding="utf-8", fatal=fatal)
 
-    def _pagination(self, endpoint, params, batch=50, key=False):
+    def _pagination(self, endpoint, params, batch=50, key=None):
         offset = text.parse_int(params.get("o"))
         params["o"] = offset - offset % batch
 
         while True:
             data = self._call(endpoint, params)
 
-            if key:
+            if key is not None:
                 data = data.get(key)
             if not data:
                 return
