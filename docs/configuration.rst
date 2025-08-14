@@ -3395,22 +3395,11 @@ Default
 Description
     API endpoint to use for retrieving creator posts.
 
-    ``"legacy"``
-        | Use the results from
-          `/v1/{service}/user/{creator_id}/posts-legacy <https://kemono.su/documentation/api#operations-default-get_v1__service__user__creator_id__posts_legacy>`__
-        | Provides less metadata, but is more reliable at returning all posts.
-        | Supports filtering results by ``tag`` query parameter.
-    ``"legacy+"``
-        | Use the results from
-          `/v1/{service}/user/{creator_id}/posts-legacy <https://kemono.su/documentation/api#operations-default-get_v1__service__user__creator_id__posts_legacy>`__
-          to retrieve post IDs
-        | and one request to
-          `/v1/{service}/user/{creator_id}/post/{post_id} <https://kemono.su/documentation/api#operations-Posts-get_v1__service__user__creator_id__post__post_id_>`__
-          to get a full set of metadata for each.
-    ``"posts"``
-        | Use the results from
-          `/v1/{service}/user/{creator_id} <https://kemono.su/documentation/api#operations-Posts-get_v1__service__user__creator_id_>`__
-        | Provides more metadata, but might not return a creator's first/last posts.
+    ``"posts"`` | ``"legacy"``
+        Provides only limited metadata.
+    ``"posts+"`` | ``"legacy+"``
+        Provides full metadata,
+        but requires an additional API request for each post.
 
 
 extractor.kemono.favorites

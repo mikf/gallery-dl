@@ -320,23 +320,14 @@ class KemonoUserExtractor(KemonoExtractor):
     def posts(self):
         _, _, service, creator_id, query = self.groups
         params = text.parse_query(query)
-        tag = params.get("tag")
 
-        endpoint = self.config("endpoint")
-        if endpoint == "legacy+":
-            endpoint = self._posts_legacy_plus
+        if self.config("endpoint") in ("posts+", "legacy+"):
+            endpoint = self.api.creator_posts_expand
         else:
             endpoint = self.api.creator_posts
 
         return endpoint(service, creator_id,
-                        params.get("o"), params.get("q"), tag)
-
-    def _posts_legacy_plus(self, service, creator_id,
-                           offset=0, query=None, tags=None):
-        for post in self.api.creator_posts(
-                service, creator_id, offset, query, tags):
-            yield self.api.creator_post(
-                service, creator_id, post["id"])["post"]
+                        params.get("o"), params.get("q"), params.get("tag"))
 
 
 class KemonoPostsExtractor(KemonoExtractor):
@@ -590,6 +581,13 @@ class KemonoAPI():
         endpoint = f"/{service}/user/{creator_id}/posts"
         params = {"o": offset, "tag": tags, "q": query}
         return self._pagination(endpoint, params, 50)
+
+    def creator_posts_expand(self, service, creator_id,
+                             offset=0, query=None, tags=None):
+        for post in self.creator_posts(
+                service, creator_id, offset, query, tags):
+            yield self.creator_post(
+                service, creator_id, post["id"])["post"]
 
     def creator_announcements(self, service, creator_id):
         endpoint = f"/{service}/user/{creator_id}/announcements"
