@@ -643,8 +643,14 @@ class KemonoAPI():
         return self._call(endpoint, params)
 
     def _call(self, endpoint, params=None, fatal=True):
-        return self.extractor.request_json(
-            self.root + endpoint, params=params, encoding="utf-8", fatal=fatal)
+        url = self.root + endpoint
+        headers = {"Accept": "text/css"}
+        response = self.extractor.request(url, params=params, headers=headers, fatal=fatal)
+        
+        try:
+            return response.json()  # Try JSON first
+        except ValueError:
+            return {"error": "Non-JSON response", "content": response.text}  # Fallback
 
     def _pagination(self, endpoint, params, batch=50, key=None):
         offset = text.parse_int(params.get("o"))
