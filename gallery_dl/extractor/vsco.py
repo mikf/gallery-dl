@@ -180,11 +180,13 @@ class VscoCollectionExtractor(VscoExtractor):
     def images(self):
         url = f"{self.root}/{self.user}/collection/1"
         data = self._extract_preload_state(url)
-    
+
         tkn = data["users"]["currentUser"]["tkn"]
-        site_data = data["sites"]["siteByUsername"][self.user]
-        cid = site_data["site"]["siteCollectionId"]
-    
+        cid = (
+            data["sites"]["siteByUsername"][self.user]
+            ["site"]["siteCollectionId"]
+        )
+
         url = f"{self.root}/api/2.0/collections/{cid}/medias"
         params = {"page": 2, "size": "20"}
         collection_data = data["collections"]["byId"][cid]["1"]["collection"]
