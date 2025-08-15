@@ -351,7 +351,8 @@ def parse_duration(duration_string, default=None):
         parsed_values = {unit: 0 for unit in patterns}
 
         for unit, pattern in patterns.items():
-            match = re_module.search(pattern, duration_string, re_module.IGNORECASE)
+            match = re_module.search(
+                pattern, duration_string, re_module.IGNORECASE)
             if match:
                 parsed_values[unit] = int(match.group(1))
 
