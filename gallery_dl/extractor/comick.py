@@ -207,7 +207,7 @@ class ComickMangaExtractor(ComickBase, MangaExtractor):
                 yield from data["chapters"]
             else:
                 for ch in data["chapters"]:
-                    if group in ch["group_name"]:
+                    if (groups := ch["group_name"]) and group in groups:
                         yield ch
 
             if data["total"] <= limit * page:
