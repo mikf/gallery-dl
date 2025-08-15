@@ -148,7 +148,7 @@ __tests__ = (
     "#comment" : "pfbid user ID; 'This content isn't available right now' profile",
     "#class"   : facebook.FacebookSetExtractor,
     "#metadata": "post",
-    "#range"   : 0,
+    "#range"   : "0",
 
     "caption"   : "Amarte es mi hábito favorito",
     "date"      : "dt:2025-05-03 03:42:52",
