@@ -234,4 +234,12 @@ __tests__ = (
     "lang"   : "es-419",
 },
 
+{
+    "#url"     : "https://comick.io/comic/fate-type-redline?lang=en&group=BananaShiki",
+    "#comment" : "'group_name' is None for some chapters (#8045)",
+    "#class"   : comick.ComickMangaExtractor,
+    "#pattern" : comick.ComickChapterExtractor.pattern,
+    "#count"   : range(50, 100),
+},
+
 )
