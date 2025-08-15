@@ -573,8 +573,9 @@ class KemonoAPI():
         return self._call(endpoint)
 
     def creators(self):
-        endpoint = "/creators.txt"
-        return self._call(endpoint)
+        endpoint = "/creators"
+        headers = {"Accept": "text/css"}
+        return self._call(endpoint, headers=headers)
 
     def creator_posts(self, service, creator_id,
                       offset=0, query=None, tags=None):
@@ -642,9 +643,10 @@ class KemonoAPI():
         params = {"type": type}
         return self._call(endpoint, params)
 
-    def _call(self, endpoint, params=None, fatal=True):
+    def _call(self, endpoint, params=None, headers=None, fatal=True):
         return self.extractor.request_json(
-            self.root + endpoint, params=params, encoding="utf-8", fatal=fatal)
+            f"{self.root}{endpoint}", params=params, headers=headers,
+            encoding="utf-8", fatal=fatal)
 
     def _pagination(self, endpoint, params, batch=50, key=None):
         offset = text.parse_int(params.get("o"))
