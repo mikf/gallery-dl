@@ -92,6 +92,8 @@
                                 (e.g. 2.7 or 2.0-3.5)
     --sleep-request SECONDS     Number of seconds to wait between HTTP requests
                                 during data extraction
+    --sleep-429 SECONDS         Number of seconds to wait when receiving a '429
+                                Too Many Requests' response
     --sleep-extractor SECONDS   Number of seconds to wait before starting data
                                 extraction for an input URL
     --no-part                   Do not use .part files
@@ -126,10 +128,14 @@
                                 container (default), 'all' for all containers)
 
 ## Selection Options:
-    -A, --abort N               Stop current extractor run after N consecutive
+    -A, --abort N[:TARGET]      Stop current extractor(s) after N consecutive
+                                file downloads were skipped. Specify a TARGET
+                                to set how many levels to ascend or to which
+                                subcategory to jump to. Examples: '-A 3', '-A
+                                3:2', '-A 3:manga'
+    -T, --terminate N           Stop current & parent extractors and proceed
+                                with the next input URL after N consecutive
                                 file downloads were skipped
-    -T, --terminate N           Stop current and parent extractor runs after N
-                                consecutive file downloads were skipped
     --filesize-min SIZE         Do not download files smaller than SIZE (e.g.
                                 500k or 2.5M)
     --filesize-max SIZE         Do not download files larger than SIZE (e.g.

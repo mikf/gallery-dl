@@ -16,7 +16,7 @@ Exception
       │    ├── HttpError
       │    │    └── ChallengeError
       │    ├── AuthorizationError
-      │    │    └── LoginRequired
+      │    │    └── AuthRequired
       │    ├── AuthenticationError
       │    └── NotFoundError
       ├── InputError
@@ -93,12 +93,25 @@ class AuthenticationError(ExtractionError):
 
 class AuthorizationError(ExtractionError):
     """Insufficient privileges to access a resource"""
-    default = "Insufficient privileges to access the specified resource"
+    default = "Insufficient privileges to access this resource"
     code = 16
 
 
-class LoginRequired(AuthorizationError):
-    default = "Account credentials or cookies required"
+class AuthRequired(AuthorizationError):
+    default = "Account credentials required"
+
+    def __init__(self, auth=None, resource="resource", message=None):
+        if auth:
+            if not isinstance(auth, str):
+                auth = " or ".join(auth)
+            if " " not in resource:
+                resource = "this " + resource
+            if message is None:
+                message = (f"{auth} needed to access {resource}")
+            else:
+                message = (f"{auth} needed to access {resource} "
+                           f"('{message}')")
+        AuthorizationError.__init__(self, message)
 
 
 class NotFoundError(ExtractionError):
@@ -151,6 +164,22 @@ class ControlException(GalleryDLException):
 
 class StopExtraction(ControlException):
     """Stop data extraction"""
+
+    def __init__(self, target=None):
+        ControlException.__init__(self)
+
+        if target is None:
+            self.target = None
+            self.depth = 1
+        elif isinstance(target, int):
+            self.target = None
+            self.depth = target
+        elif target.isdecimal():
+            self.target = None
+            self.depth = int(target)
+        else:
+            self.target = target
+            self.depth = 128
 
 
 class AbortExtraction(ExtractionError, ControlException):

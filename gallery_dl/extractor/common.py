@@ -136,16 +136,15 @@ class Extractor():
             if first:
                 first = False
                 values = config.accumulate(extr + path, key)
-            else:
-                conf = config.get(extr, path[0])
-                if conf:
-                    values[:0] = config.accumulate(
-                        (self.subcategory,), key, conf=conf)
+            elif conf := config.get(extr, path[0]):
+                values[:0] = config.accumulate(
+                    (self.subcategory,), key, conf=conf)
+
         return values
 
-    def request(self, url, method="GET", session=None,
-                retries=None, retry_codes=None, encoding=None,
-                fatal=True, notfound=None, **kwargs):
+    def request(self, url, method="GET", session=None, fatal=True,
+                retries=None, retry_codes=None, interval=True,
+                encoding=None, notfound=None, **kwargs):
         if session is None:
             session = self.session
         if retries is None:
@@ -171,7 +170,7 @@ class Extractor():
         response = challenge = None
         tries = 1
 
-        if self._interval:
+        if self._interval and interval:
             seconds = (self._interval() -
                        (time.time() - Extractor.request_timestamp))
             if seconds > 0.0:
@@ -455,8 +454,7 @@ class Extractor():
         if ZSTD:
             headers["Accept-Encoding"] += ", zstd"
 
-        referer = self.config("referer", self.referer)
-        if referer:
+        if referer := self.config("referer", self.referer):
             if isinstance(referer, str):
                 headers["Referer"] = referer
             elif self.root:
@@ -466,13 +464,14 @@ class Extractor():
         if custom_ua is None or custom_ua == "auto":
             pass
         elif custom_ua == "browser":
-            headers["User-Agent"] = _browser_useragent()
+            headers["User-Agent"] = _browser_useragent(None)
+        elif custom_ua[0] == "@":
+            headers["User-Agent"] = _browser_useragent(custom_ua[1:])
         elif self.useragent is Extractor.useragent and not self.browser or \
                 custom_ua is not config.get(("extractor",), "user-agent"):
             headers["User-Agent"] = custom_ua
 
-        custom_headers = self.config("headers")
-        if custom_headers:
+        if custom_headers := self.config("headers"):
             if isinstance(custom_headers, str):
                 if custom_headers in HEADERS:
                     custom_headers = HEADERS[custom_headers]
@@ -482,8 +481,7 @@ class Extractor():
                     custom_headers = ()
             headers.update(custom_headers)
 
-        custom_ciphers = self.config("ciphers")
-        if custom_ciphers:
+        if custom_ciphers := self.config("ciphers"):
             if isinstance(custom_ciphers, list):
                 ssl_ciphers = ":".join(custom_ciphers)
             elif custom_ciphers in CIPHERS:
@@ -491,8 +489,7 @@ class Extractor():
             else:
                 ssl_ciphers = custom_ciphers
 
-        source_address = self.config("source-address")
-        if source_address:
+        if source_address := self.config("source-address"):
             if isinstance(source_address, str):
                 source_address = (source_address, 0)
             else:
@@ -526,10 +523,8 @@ class Extractor():
         if self.cookies_domain is None:
             return
 
-        cookies = self.config("cookies")
-        if cookies:
-            select = self.config("cookies-select")
-            if select:
+        if cookies := self.config("cookies"):
+            if select := self.config("cookies-select"):
                 if select == "rotate":
                     cookies = cookies[self.cookies_index % len(cookies)]
                     Extractor.cookies_index += 1
@@ -546,6 +541,10 @@ class Extractor():
             try:
                 with open(path) as fp:
                     cookies = util.cookiestxt_load(fp)
+            except ValueError as exc:
+                self.log.warning("cookies: Invalid Netscape cookies.txt file "
+                                 "'%s' (%s: %s)",
+                                 cookies_source, exc.__class__.__name__, exc)
             except Exception as exc:
                 self.log.warning("cookies: Failed to load '%s' (%s: %s)",
                                  cookies_source, exc.__class__.__name__, exc)
@@ -975,8 +974,7 @@ class BaseExtractor(Extractor):
 
     @classmethod
     def update(cls, instances):
-        extra_instances = config.get(("extractor",), cls.basecategory)
-        if extra_instances:
+        if extra_instances := config.get(("extractor",), cls.basecategory):
             for category, info in extra_instances.items():
                 if isinstance(info, dict) and "root" in info:
                     instances[category] = info
@@ -984,8 +982,7 @@ class BaseExtractor(Extractor):
         pattern_list = []
         instance_list = cls.instances = []
         for category, info in instances.items():
-            root = info["root"]
-            if root:
+            if root := info["root"]:
                 root = root.rstrip("/")
             instance_list.append((category, root, info))
 
@@ -1051,19 +1048,31 @@ def _build_requests_adapter(
     return adapter
 
 
-@cache.cache(maxage=86400)
-def _browser_useragent():
+@cache.cache(maxage=86400, keyarg=0)
+def _browser_useragent(browser):
     """Get User-Agent header from default browser"""
     import webbrowser
-    import socket
+    try:
+        open = webbrowser.get(browser).open
+    except webbrowser.Error:
+        if not browser:
+            raise
+        import shutil
+        if not (browser := shutil.which(browser)):
+            raise
 
+        def open(url):
+            util.Popen((browser, url),
+                       start_new_session=False if util.WINDOWS else True)
+
+    import socket
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(("127.0.0.1", 0))
     server.listen(1)
 
     host, port = server.getsockname()
-    webbrowser.open(f"http://{host}:{port}/user-agent")
+    open(f"http://{host}:{port}/user-agent")
 
     client = server.accept()[0]
     server.close()

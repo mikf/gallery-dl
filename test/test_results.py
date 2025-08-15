@@ -94,6 +94,7 @@ class TestExtractorResults(unittest.TestCase):
     def assertLogEqual(self, expected, output):
         if isinstance(expected, str):
             expected = (expected,)
+        self.assertEqual(len(expected), len(output), "#log/count")
 
         for exp, out in zip(expected, output):
             level, name, message = out.split(":", 2)
@@ -144,7 +145,8 @@ class TestExtractorResults(unittest.TestCase):
                 config.set((), key, None)
 
         if auth and not any(extr.config(key) for key in AUTH_KEYS):
-            return self._skipped.append((result["#url"], "no auth"))
+            self._skipped.append((result["#url"], "no auth"))
+            self.skipTest("no auth")
 
         if "#options" in result:
             for key, value in result["#options"].items():
@@ -154,18 +156,22 @@ class TestExtractorResults(unittest.TestCase):
             config.set((), "image-range"  , result["#range"])
             config.set((), "chapter-range", result["#range"])
 
-        tjob = ResultJob(extr, content=("#sha1_content" in result))
+        tjob = ResultJob(extr,
+                         content=("#sha1_content" in result),
+                         format=(result.get("#metadata") != "post"))
 
         if "#exception" in result:
-            with self.assertRaises(result["#exception"], msg="#exception"):
+            with self.assertRaises(result["#exception"], msg="#exception"), \
+                    self.assertLogs() as log_info:
                 tjob.run()
+            if "#log" in result:
+                self.assertLogEqual(result["#log"], log_info.output)
             return
 
         try:
             if "#log" in result:
                 with self.assertLogs() as log_info:
                     tjob.run()
-                self.assertLogEqual(result["#log"], log_info.output)
             else:
                 tjob.run()
         except exception.StopExtraction:
@@ -177,6 +183,9 @@ class TestExtractorResults(unittest.TestCase):
                 self._skipped.append((result["#url"], exc))
                 self.skipTest(exc)
             raise
+
+        if "#log" in result:
+            self.assertLogEqual(result["#log"], log_info.output)
 
         if result.get("#archive", True):
             self.assertEqual(
@@ -225,7 +234,7 @@ class TestExtractorResults(unittest.TestCase):
             if isinstance(count, str):
                 self.assertRegex(
                     count, r"^ *(==|!=|<|<=|>|>=) *\d+ *$", msg="#count")
-                expr = "{} {}".format(len_urls, count)
+                expr = f"{len_urls} {count}"
                 self.assertTrue(eval(expr), msg=expr)
             elif isinstance(count, range):
                 self.assertRange(len_urls, count, msg="#count")
@@ -254,7 +263,11 @@ class TestExtractorResults(unittest.TestCase):
 
         metadata = {k: v for k, v in result.items() if k[0] != "#"}
         if metadata:
-            for kwdict in tjob.kwdict_list:
+            if result.get("#metadata") == "post":
+                kwdicts = tjob.kwdict_post
+            else:
+                kwdicts = tjob.kwdict_list
+            for kwdict in kwdicts:
                 self._test_kwdict(kwdict, metadata)
 
     def _test_kwdict(self, kwdict, tests, parent=None):
@@ -271,7 +284,7 @@ class TestExtractorResults(unittest.TestCase):
             else:
                 subtest = False
 
-            path = "{}.{}".format(parent, key) if parent else key
+            path = f"{parent}.{key}" if parent else key
 
             if key.startswith("!"):
                 self.assertNotIn(key[1:], kwdict, msg=path)
@@ -283,7 +296,7 @@ class TestExtractorResults(unittest.TestCase):
             if subtest:
                 self.assertNotIsInstance(value, str, msg=path)
                 for idx, item in enumerate(value):
-                    subpath = "{}[{}]".format(path, idx)
+                    subpath = f"{path}[{idx}]"
                     self._test_kwdict_value(item, test, subpath)
             else:
                 self._test_kwdict_value(value, test, path)
@@ -305,12 +318,18 @@ class TestExtractorResults(unittest.TestCase):
             for idx, item in enumerate(test):
                 if isinstance(item, dict):
                     subtest = True
-                    subpath = "{}[{}]".format(path, idx)
-                    self._test_kwdict(value[idx], item, subpath)
+                    subpath = f"{path}[{idx}]"
+                    try:
+                        obj = value[idx]
+                    except Exception as exc:
+                        self.fail(f"'{exc.__class__.__name__}: {exc}' "
+                                  f"when accessing {subpath}")
+                    self._test_kwdict(obj, item, subpath)
             if not subtest:
                 self.assertEqual(test, value, msg=path)
         elif isinstance(test, str):
             if test.startswith("re:"):
+                self.assertIsInstance(value, str, msg=path)
                 self.assertRegex(value, test[3:], msg=path)
             elif test.startswith("dt:"):
                 self.assertIsInstance(value, datetime.datetime, msg=path)
@@ -321,8 +340,29 @@ class TestExtractorResults(unittest.TestCase):
                 cls, _, length = test[4:].rpartition(":")
                 if cls:
                     self.assertEqual(
-                        cls, type(value).__name__, msg=path + "/type")
-                self.assertEqual(int(length), len(value), msg=path)
+                        cls, type(value).__name__, msg=f"{path}/type")
+                try:
+                    len_value = len(value)
+                except Exception:
+                    len_value = 0
+                    for _ in value:
+                        len_value += 1
+                self.assertEqual(int(length), len_value, msg=path)
+            elif test.startswith("iso:"):
+                iso = test[4:]
+                if iso in ("dt", "datetime", "8601"):
+                    msg = f"{path} / ISO 8601"
+                    try:
+                        dt = datetime.datetime.fromisoformat(value)
+                    except Exception as exc:
+                        self.fail(f"Invalid datetime '{value}': {exc} {msg}")
+                    self.assertIsInstance(dt, datetime.datetime, msg=msg)
+                elif iso in ("lang", "639", "639-1"):
+                    msg = f"{path} / ISO 639-1"
+                    self.assertIsInstance(value, str, msg=msg)
+                    self.assertRegex(value, r"^[a-z]{2}(-\w+)?$", msg=msg)
+                else:
+                    self.fail(f"Unsupported ISO test '{test}'")
             else:
                 self.assertEqual(test, value, msg=path)
         else:
@@ -332,7 +372,7 @@ class TestExtractorResults(unittest.TestCase):
 class ResultJob(job.DownloadJob):
     """Generate test-results for extractor runs"""
 
-    def __init__(self, url, parent=None, content=False):
+    def __init__(self, url, parent=None, content=False, format=True):
         job.DownloadJob.__init__(self, url, parent)
         self.queue = False
         self.content = content
@@ -340,6 +380,7 @@ class ResultJob(job.DownloadJob):
         self.url_list = []
         self.url_hash = hashlib.sha1()
         self.kwdict_list = []
+        self.kwdict_post = []
         self.kwdict_hash = hashlib.sha1()
         self.archive_list = []
         self.archive_hash = hashlib.sha1()
@@ -350,12 +391,17 @@ class ResultJob(job.DownloadJob):
         else:
             self._update_content = lambda url, kwdict: None
 
-        self.format_directory = TestFormatter(
-            "".join(self.extractor.directory_fmt)).format_map
-        self.format_filename = TestFormatter(
-            self.extractor.filename_fmt).format_map
-        self.format_archive = TestFormatter(
-            self.extractor.archive_fmt).format_map
+        if format:
+            self.format_directory = TestFormatter(
+                "".join(self.extractor.directory_fmt)).format_map
+            self.format_filename = TestFormatter(
+                self.extractor.filename_fmt).format_map
+            self.format_archive = TestFormatter(
+                self.extractor.archive_fmt).format_map
+        else:
+            self.format_directory = \
+                self.format_filename = \
+                self.format_archive = lambda kwdict: ""
 
     def run(self):
         self._init()
@@ -388,6 +434,8 @@ class ResultJob(job.DownloadJob):
     def _update_kwdict(self, kwdict, to_list=True):
         if to_list:
             self.kwdict_list.append(kwdict.copy())
+        else:
+            self.kwdict_post.append(kwdict.copy())
         kwdict = util.filter_dict(kwdict)
         self.kwdict_hash.update(
             json.dumps(kwdict, sort_keys=True, default=str).encode())
@@ -486,8 +534,7 @@ def load_test_config():
     except FileNotFoundError:
         pass
     except Exception as exc:
-        sys.exit("Error when loading {}: {}: {}".format(
-            path, exc.__class__.__name__, exc))
+        sys.exit(f"Error when loading {path}: {exc.__class__.__name__}: {exc}")
 
 
 def result_categories(result):
@@ -550,12 +597,12 @@ def generate_tests():
     enum = collections.defaultdict(int)
     for result in tests:
         base, cat, sub = result_categories(result)
-        name = "{}_{}".format(cat, sub)
+        name = f"{cat}_{sub}"
         enum[name] += 1
 
         method = _generate_method(result)
         method.__doc__ = result["#url"]
-        method.__name__ = "test_{}_{}".format(name, enum[name])
+        method.__name__ = f"test_{name}_{enum[name]}"
         setattr(TestExtractorResults, method.__name__, method)
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2025 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,7 @@
 import re
 
 
-def pyprint(obj, indent=0, lmin=9, lmax=16):
+def pyprint(obj, indent=0, sort=None, oneline=True, lmin=0, lmax=16):
 
     if isinstance(obj, str):
         if obj.startswith("lit:"):
@@ -21,15 +21,14 @@ def pyprint(obj, indent=0, lmin=9, lmax=16):
         else:
             prefix = ""
 
+        quote_beg = quote_end = '"'
         if "\n" in obj:
-            quote = '"""'
+            quote_beg = '"""\\\n'
+            quote_end = '\\\n"""'
         elif '"' in obj:
             obj = re.sub(r'(?<!\\)"', '\\"', obj)
-            quote = '"'
-        else:
-            quote = '"'
 
-        return f'''{prefix}{quote}{obj}{quote}'''
+        return f'''{prefix}{quote_beg}{obj}{quote_end}'''
 
     if isinstance(obj, bytes):
         return f'''b"{str(obj)[2:-1]}"'''
@@ -46,56 +45,82 @@ def pyprint(obj, indent=0, lmin=9, lmax=16):
     if isinstance(obj, dict):
         if not obj:
             return "{}"
+        if len(obj) == 1 and oneline:
+            key, value = next(iter(obj.items()))
+            return f'''{{"{key}": {pyprint(value, indent, sort)}}}'''
 
-        if len(obj) >= 2 or not indent:
-            ws = " " * indent
+        if sort:
+            if callable(sort):
+                lst = [(sort(key, value), key, value)
+                       for key, value in obj.items()]
+                lst.sort()
+                obj = {key: value for _, key, value in lst}
+            else:
+                keys = list(obj)
+                keys.sort()
+                obj = {key: obj[key] for key in keys}
 
-            lkey = max(map(len, obj))
-            if not indent:
-                if lkey < lmin:
-                    lkey = lmin
-                elif lkey > lmax:
-                    lkey = lmax
+        try:
+            keylen = max(kl for kl in map(len, obj) if kl <= lmax)
+        except Exception:
+            keylen = lmin
+        if keylen < lmin:
+            keylen = lmin
+        ws = " " * indent
 
-            lines = []
-            lines.append("{")
-            for key, value in obj.items():
-                if key.startswith("#blank-"):
-                    lines.append("")
-                else:
-                    lines.append(
-                        f'''{ws}    "{key}"'''
-                        f'''{' '*(lkey - len(key))}: '''
-                        f'''{pyprint(value, indent+4)},'''
-                    )
-            lines.append(f'''{ws}}}''')
-            return "\n".join(lines)
-        else:
-            key, value = obj.popitem()
-            return f'''{{"{key}": {pyprint(value)}}}'''
+        lines = ["{"]
+        for key, value in obj.items():
+            if key.startswith("#blank-"):
+                lines.append("")
+            else:
+                lines.append(
+                    f'''{ws}    "{key}"'''
+                    f'''{' '*(keylen - len(key))}: '''
+                    f'''{pyprint(value, indent+4, sort)},'''
+                )
+        lines.append(f'''{ws}}}''')
+        return "\n".join(lines)
 
     if isinstance(obj, list):
         if not obj:
             return "[]"
+        if len(obj) == 1 and oneline:
+            return f'''[{pyprint(obj[0], indent, sort)}]'''
 
-        if len(obj) >= 2:
-            ws = " " * indent
-
-            lines = []
-            lines.append("[")
-            lines.extend(
-                f'''{ws}    {pyprint(value, indent+4)},'''
-                for value in obj
-            )
-            lines.append(f'''{ws}]''')
-            return "\n".join(lines)
-        else:
-            return f'''[{pyprint(obj[0])}]'''
+        ws = " " * indent
+        lines = ["["]
+        for value in obj:
+            lines.append(f'''{ws}    {pyprint(value, indent+4, sort)},''')
+        lines.append(f'''{ws}]''')
+        return "\n".join(lines)
 
     if isinstance(obj, tuple):
+        if not obj:
+            return "()"
         if len(obj) == 1:
-            return f'''({pyprint(obj[0], indent+4)},)'''
-        return f'''({", ".join(pyprint(v, indent+4) for v in obj)})'''
+            return f'''({pyprint(obj[0], indent, sort)},)'''
 
-    else:
-        return f'''{obj}'''
+        result = f'''({", ".join(pyprint(v, indent+4, sort) for v in obj)})'''
+        if len(result) < 80:
+            return result
+
+        ws = " " * indent
+        lines = ["("]
+        for value in obj:
+            lines.append(f'''{ws}    {pyprint(value, indent+4, sort)},''')
+        lines.append(f'''{ws})''')
+        return "\n".join(lines)
+
+    if isinstance(obj, set):
+        if not obj:
+            return "set()"
+        return f'''{{{", ".join(pyprint(v, indent+4, sort) for v in obj)}}}'''
+
+    if obj.__class__.__name__ == "datetime":
+        if (off := obj.utcoffset()) is not None:
+            obj = obj.replace(tzinfo=None, microsecond=0) - off
+        elif obj.microsecond:
+            obj = obj.replace(microsecond=0)
+        return f'''"dt:{obj}"'''
+
+    return f'''{obj}'''

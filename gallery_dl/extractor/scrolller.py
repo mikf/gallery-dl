@@ -20,7 +20,7 @@ class ScrolllerExtractor(Extractor):
     category = "scrolller"
     root = "https://scrolller.com"
     directory_fmt = ("{category}", "{subredditTitle}")
-    filename_fmt = "{id}{num:?_//>03}{title:? //}.{extension}"
+    filename_fmt = "{id}{num:?_//>03}{title:? //[:230]}.{extension}"
     archive_fmt = "{id}_{num}"
     request_interval = (0.5, 1.5)
 
@@ -115,7 +115,7 @@ class ScrolllerExtractor(Extractor):
         )["data"]
 
     def _pagination(self, opname, variables, data=None):
-        if data is None:
+        if data is None or not data.get("items"):
             data = self._request_graphql(opname, variables)
 
         while True:

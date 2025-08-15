@@ -87,8 +87,7 @@ class HttpDownloader(DownloaderBase):
             self.chunk_size = chunk_size
         if self.rate:
             func = util.build_selection_func(self.rate, 0, text.parse_bytes)
-            rmax = func.args[1] if hasattr(func, "args") else func()
-            if rmax:
+            if rmax := func.args[1] if hasattr(func, "args") else func():
                 if rmax < self.chunk_size:
                     # reduce chunk_size to allow for one iteration each second
                     self.chunk_size = rmax
@@ -157,15 +156,13 @@ class HttpDownloader(DownloaderBase):
             # collect HTTP headers
             headers = {"Accept": "*/*"}
             #   file-specific headers
-            extra = kwdict.get("_http_headers")
-            if extra:
+            if extra := kwdict.get("_http_headers"):
                 headers.update(extra)
             #   general headers
             if self.headers:
                 headers.update(self.headers)
             #   partial content
-            file_size = pathfmt.part_size()
-            if file_size:
+            if file_size := pathfmt.part_size():
                 headers["Range"] = f"bytes={file_size}-"
 
             # connect to (remote) source
@@ -462,8 +459,7 @@ class HttpDownloader(DownloaderBase):
         if mtype in MIME_TYPES:
             return MIME_TYPES[mtype]
 
-        ext = mimetypes.guess_extension(mtype, strict=False)
-        if ext:
+        if ext := mimetypes.guess_extension(mtype, strict=False):
             return ext[1:]
 
         self.log.warning("Unknown MIME type '%s'", mtype)

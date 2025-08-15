@@ -19,7 +19,7 @@ class VkExtractor(Extractor):
     category = "vk"
     directory_fmt = ("{category}", "{user[name]|user[id]}")
     filename_fmt = "{id}.{extension}"
-    archive_fmt = "{id}"
+    archive_fmt = "{user[id]}_{id}"
     root = "https://vk.com"
     request_interval = (0.5, 1.5)
 
@@ -112,8 +112,7 @@ class VkExtractor(Extractor):
             if offset_next >= total:
                 # the last chunk of photos also contains the first few photos
                 # again if 'total' is not a multiple of 10
-                extra = total - offset_next
-                if extra:
+                if extra := total - offset_next:
                     del photos[extra:]
 
                 yield from photos

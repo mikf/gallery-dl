@@ -12,7 +12,6 @@ import datetime
 __tests__ = (
 {
     "#url"     : "https://mangadex.org/chapter/f946ac53-0b71-4b5d-aeb2-7931b13c4aaa",
-    "#category": ("", "mangadex", "chapter"),
     "#class"   : mangadex.MangadexChapterExtractor,
     "#sha1_metadata": "e86128a79ebe7201b648f1caa828496a2878dc8f",
 },
@@ -20,7 +19,6 @@ __tests__ = (
 {
     "#url"     : "https://mangadex.org/chapter/61a88817-9c29-4281-bdf1-77b3c1be9831",
     "#comment" : "oneshot",
-    "#category": ("", "mangadex", "chapter"),
     "#class"   : mangadex.MangadexChapterExtractor,
     "#count"        : 64,
     "#sha1_metadata": "d11ed057a919854696853362be35fc0ba7dded4c",
@@ -29,23 +27,20 @@ __tests__ = (
 {
     "#url"     : "https://mangadex.org/chapter/74149a55-e7c4-44ea-8a37-98e879c1096f",
     "#comment" : "MANGA Plus (#1154)",
-    "#category": ("", "mangadex", "chapter"),
     "#class"   : mangadex.MangadexChapterExtractor,
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AbortExtraction,
 },
 
 {
     "#url"     : "https://mangadex.org/chapter/364728a4-6909-4164-9eea-6b56354f7c78",
-    "#comment" : "'externalUrl', but still downloadable / 404 (#2503)",
-    "#category": ("", "mangadex", "chapter"),
+    "#comment" : "'externalUrl', but *was* still downloadable, now 404 (#2503)",
     "#class"   : mangadex.MangadexChapterExtractor,
-    "#count"   : 0,
+    "#exception": exception.AbortExtraction,
 },
 
 {
     "#url"     : "https://mangadex.org/title/f90c4398-8aad-4f51-8a1f-024ca09fdcbc",
     "#comment" : "mutliple values for 'lang' (#4093)",
-    "#category": ("", "mangadex", "manga"),
     "#class"   : mangadex.MangadexMangaExtractor,
     "#count"   : ">= 5",
 
@@ -75,7 +70,6 @@ __tests__ = (
 {
     "#url"     : "https://mangadex.org/title/f90c4398-8aad-4f51-8a1f-024ca09fdcbc",
     "#comment" : "mutliple values for 'lang' (#4093)",
-    "#category": ("", "mangadex", "manga"),
     "#class"   : mangadex.MangadexMangaExtractor,
     "#options" : {"lang": "fr,it"},
     "#count"   : 2,
@@ -87,22 +81,20 @@ __tests__ = (
 
 {
     "#url"     : "https://mangadex.cc/manga/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a/",
-    "#category": ("", "mangadex", "manga"),
+    "#comment" : "removed",
     "#class"   : mangadex.MangadexMangaExtractor,
     "#options" : {"lang": "en"},
-    "#count"   : ">= 100",
+    "#count"   : 0,
 },
 
 {
     "#url"     : "https://mangadex.org/title/7c1e2742-a086-4fd3-a3be-701fd6cf0be9",
-    "#category": ("", "mangadex", "manga"),
     "#class"   : mangadex.MangadexMangaExtractor,
     "#count"   : ">= 25",
 },
 
 {
     "#url"     : "https://mangadex.org/title/584ef094-b2ab-40ce-962c-bce341fb9d10",
-    "#category": ("", "mangadex", "manga"),
     "#class"   : mangadex.MangadexMangaExtractor,
     "#count"   : ">= 20",
 },
@@ -137,7 +129,6 @@ __tests__ = (
 
 {
     "#url"     : "https://mangadex.org/list/3a0982c5-65aa-4de2-8a4a-2175be7383ab/test",
-    "#category": ("", "mangadex", "list"),
     "#class"   : mangadex.MangadexListExtractor,
     "#results" : (
         "https://mangadex.org/title/cba4e5d6-67a0-47a0-b37a-c06e9bf25d93",
@@ -147,7 +138,6 @@ __tests__ = (
 
 {
     "#url"     : "https://mangadex.org/list/3a0982c5-65aa-4de2-8a4a-2175be7383ab/test?tab=titles",
-    "#category": ("", "mangadex", "list"),
     "#class"   : mangadex.MangadexListExtractor,
 },
 
@@ -165,15 +155,8 @@ __tests__ = (
 {
     "#url"     : "https://mangadex.org/author/7222d0d5-836c-4bf3-9174-72bceade8c87/kotoyama",
     "#class"   : mangadex.MangadexAuthorExtractor,
-    "#results" : (
-        "https://mangadex.org/title/ef4ead73-57a7-4d10-95b3-de73cfdd2670",
-        "https://mangadex.org/title/259dfd8a-f06a-4825-8fa6-a2dcd7274230",
-        "https://mangadex.org/title/d0c88e3b-ea64-4e07-9841-c1d2ac982f4a",
-        "https://mangadex.org/title/f48bbb5f-8a23-4dea-8177-eb2dbbcbf4fa",
-        "https://mangadex.org/title/00b68132-4e69-4ff9-ad4b-29138b377dc8",
-        "https://mangadex.org/title/f1b70bba-3873-4c22-afa3-1d1c78299cd9",
-        "https://mangadex.org/title/41cd6fa7-3e53-4900-88e6-4a06cd7df9ad",
-    ),
+    "#pattern" : mangadex.MangadexMangaExtractor.pattern,
+    "#count"   : 8,
 },
 
 {

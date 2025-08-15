@@ -246,8 +246,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     def metadata_from_page(self, page):
         extr = text.extract_from(page)
 
-        api_url = extr('var api_url = "', '"')
-        if api_url:
+        if api_url := extr('var api_url = "', '"'):
             self.api_url = api_url
 
         data = {
@@ -419,8 +418,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     def _validate_signature(self, signature):
         """Return False if all file signature bytes are zero"""
         if signature:
-            byte = signature[0]
-            if byte:
+            if byte := signature[0]:
                 # 60 == b"<"
                 if byte == 60 and b"<!doctype html".startswith(
                         signature[:14].lower()):

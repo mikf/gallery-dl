@@ -80,8 +80,7 @@ class YoutubeDLDownloader(DownloaderBase):
         if not info_dict:
             url = url[5:]
             try:
-                manifest = kwdict.pop("_ytdl_manifest", None)
-                if manifest:
+                if manifest := kwdict.pop("_ytdl_manifest", None):
                     info_dict = self._extract_manifest(
                         ytdl_instance, url, manifest,
                         kwdict.pop("_ytdl_manifest_data", None),
@@ -103,15 +102,18 @@ class YoutubeDLDownloader(DownloaderBase):
             else:
                 info_dict = info_dict["entries"][index]
 
-        extra = kwdict.get("_ytdl_extra")
-        if extra:
+        if extra := kwdict.get("_ytdl_extra"):
             info_dict.update(extra)
 
         return self._download_video(ytdl_instance, pathfmt, info_dict)
 
     def _download_video(self, ytdl_instance, pathfmt, info_dict):
         if "url" in info_dict:
-            text.nameext_from_url(info_dict["url"], pathfmt.kwdict)
+            if "filename" in pathfmt.kwdict:
+                pathfmt.kwdict["extension"] = \
+                    text.ext_from_url(info_dict["url"])
+            else:
+                text.nameext_from_url(info_dict["url"], pathfmt.kwdict)
 
         formats = info_dict.get("requested_formats")
         if formats and not compatible_formats(formats):

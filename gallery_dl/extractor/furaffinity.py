@@ -51,8 +51,7 @@ class FuraffinityExtractor(Extractor):
     def items(self):
         metadata = self.metadata()
         for post_id in util.advance(self.posts(), self.offset):
-            post = self._parse_post(post_id)
-            if post:
+            if post := self._parse_post(post_id):
                 if metadata:
                     post.update(metadata)
                 yield Message.Directory, post
@@ -117,8 +116,7 @@ class FuraffinityExtractor(Extractor):
             data["folders"] = folders = []
             for folder in extr(
                     "<h3>Listed in Folders</h3>", "</section>").split("</a>"):
-                folder = rh(folder)
-                if folder:
+                if folder := rh(folder):
                     folders.append(folder)
         else:
             # old site layout
@@ -280,8 +278,7 @@ class FuraffinityFavoriteExtractor(FuraffinityExtractor):
         return self._pagination_favorites()
 
     def _parse_post(self, post_id):
-        post = FuraffinityExtractor._parse_post(self, post_id)
-        if post:
+        if post := FuraffinityExtractor._parse_post(self, post_id):
             post["favorite_id"] = self._favorite_id
         return post
 

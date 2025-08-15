@@ -14,7 +14,7 @@ from gallery_dl import text, extractor
 def read(fname):
     path = util.path("docs", fname)
     try:
-        with open(path) as fp:
+        with util.open(path) as fp:
             return fp.read()
     except Exception as exc:
         sys.exit("Unable to read {} ({}: {})".format(
@@ -110,7 +110,7 @@ def sleeprequest():
                 continue
 
         min, _, max = value.partition("-")
-        tup = (float(min), float(max))
+        tup = (float(min), float(max)) if max else float(min)
         if tup != extr.request_interval:
             result[category] = extr.request_interval
     return result

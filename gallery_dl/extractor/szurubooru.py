@@ -26,10 +26,8 @@ class SzurubooruExtractor(booru.BooruExtractor):
             "Content-Type": "application/json",
         }
 
-        username = self.config("username")
-        if username:
-            token = self.config("token")
-            if token:
+        if username := self.config("username"):
+            if token := self.config("token"):
                 value = username + ":" + token
                 self.headers["Authorization"] = "Token " + \
                     binascii.b2a_base64(value.encode())[:-1].decode()

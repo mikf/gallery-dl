@@ -26,8 +26,7 @@ class BlueskyExtractor(Extractor):
     root = "https://bsky.app"
 
     def _init(self):
-        meta = self.config("metadata") or ()
-        if meta:
+        if meta := self.config("metadata") or ():
             if isinstance(meta, str):
                 meta = meta.replace(" ", "").split(",")
             elif not isinstance(meta, (list, tuple)):

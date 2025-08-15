@@ -145,8 +145,7 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
             yield Message.Queue, url, data
 
     def chapters(self):
-        source = self.config("source")
-        if source:
+        if source := self.config("source"):
             source_id = self._select_source(source)
             self.log.debug("Requesting chapters for source_id %s", source_id)
             chapters = self._extract_chapters_source(source_id)

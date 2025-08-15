@@ -7,15 +7,24 @@
 import os
 import io
 import sys
+import builtins
 
 ROOTDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.realpath(ROOTDIR))
 
 
-def path(*segments, join=os.path.join):
-    result = join(ROOTDIR, *segments)
+def path(*segments):
+    result = os.path.join(ROOTDIR, *segments)
     os.makedirs(os.path.dirname(result), exist_ok=True)
     return result
+
+
+def trim(path):
+    return path[len(ROOTDIR)+1:]
+
+
+def open(path, mode="r"):
+    return builtins.open(path, mode, encoding="utf-8", newline="\n")
 
 
 class lazy():
@@ -30,7 +39,7 @@ class lazy():
     def __exit__(self, exc_type, exc_value, traceback):
         # get content of old file
         try:
-            with open(self.path, encoding="utf-8") as fp:
+            with builtins.open(self.path, encoding="utf-8", newline="") as fp:
                 old = fp.read()
         except Exception:
             old = None
@@ -40,7 +49,8 @@ class lazy():
 
         if new != old:
             # rewrite entire file
-            with open(self.path, "w", encoding="utf-8") as fp:
+            with builtins.open(
+                    self.path, "w", encoding="utf-8", newline="") as fp:
                 fp.write(new)
         else:
             # only update atime and mtime

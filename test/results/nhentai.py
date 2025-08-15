@@ -55,6 +55,8 @@ __tests__ = (
     "#pattern" : nhentai.NhentaiGalleryExtractor.pattern,
     "#range"   : "1-30",
     "#count"   : 30,
+
+    "gallery_id": int,
 },
 
 {

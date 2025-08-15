@@ -25,6 +25,7 @@ CATEGORY_MAP = {
     "35photo"        : "35PHOTO",
     "adultempire"    : "Adult Empire",
     "agnph"          : "AGNPH",
+    "aibooru"        : "AIBooru",
     "allgirlbooru"   : "All girl",
     "ao3"            : "Archive of Our Own",
     "archivedmoe"    : "Archived.Moe",
@@ -37,6 +38,7 @@ CATEGORY_MAP = {
     "baraag"         : "baraag",
     "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
+    "booth"          : "BOOTH",
     "cien"           : "Ci-en",
     "cohost"         : "cohost!",
     "comicvine"      : "Comic Vine",
@@ -53,6 +55,7 @@ CATEGORY_MAP = {
     "exhentai"       : "ExHentai",
     "fallenangels"   : "Fallen Angels Scans",
     "fanbox"         : "pixivFANBOX",
+    "fappic"         : "Fappic.com",
     "fashionnova"    : "Fashion Nova",
     "furaffinity"    : "Fur Affinity",
     "furry34"        : "Furry 34 com",
@@ -79,18 +82,25 @@ CATEGORY_MAP = {
     "imagebam"       : "ImageBam",
     "imagefap"       : "ImageFap",
     "imagepond"      : "ImagePond",
+    "imagetwist"     : "ImageTwist",
+    "imgadult"       : "ImgAdult",
     "imgbb"          : "ImgBB",
     "imgbox"         : "imgbox",
     "imagechest"     : "ImageChest",
+    "imgdrive"       : "ImgDrive.net",
     "imgkiwi"        : "IMG.Kiwi",
+    "imgtaxi"        : "ImgTaxi.com",
     "imgth"          : "imgth",
     "imgur"          : "imgur",
+    "imgwallet"      : "ImgWallet.com",
     "imhentai"       : "IMHentai",
+    "imxto"          : "IMX.to",
     "joyreactor"     : "JoyReactor",
     "itchio"         : "itch.io",
     "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
     "schalenetwork"  : "Schale Network",
+    "leakgallery"    : "Leak Gallery",
     "livedoor"       : "livedoor Blog",
     "lofter"         : "LOFTER",
     "ohpolly"        : "Oh Polly",
@@ -120,13 +130,16 @@ CATEGORY_MAP = {
     "nudostar"       : "NudoStar.TV",
     "paheal"         : "Rule 34",
     "photovogue"     : "PhotoVogue",
+    "picstate"       : "PicState",
     "pidgiwiki"      : "PidgiWiki",
     "pixeldrain"     : "pixeldrain",
+    "pixhost"        : "PiXhost",
     "pixiv"          : "[pixiv]",
     "pixiv-novel"    : "[pixiv] Novels",
     "pornimage"      : "Porn Image",
     "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
+    "postimg"        : "Postimages",
     "readcomiconline": "Read Comic Online",
     "redbust"        : "RedBust",
     "rbt"            : "RebeccaBlackTech",
@@ -143,6 +156,7 @@ CATEGORY_MAP = {
     "senmanga"       : "Sen Manga",
     "sensescans"     : "Sense-Scans",
     "sexcom"         : "Sex.com",
+    "silverpic"      : "SilverPic.com",
     "simplyhentai"   : "Simply Hentai",
     "slickpic"       : "SlickPic",
     "slideshare"     : "SlideShare",
@@ -159,9 +173,11 @@ CATEGORY_MAP = {
     "tiktok"         : "TikTok",
     "tmohentai"      : "TMOHentai",
     "tumblrgallery"  : "TumblrGallery",
+    "turboimagehost" : "TurboImageHost.com",
     "vanillarock"    : "もえぴりあ",
     "vidyart2"       : "/v/idyart2",
     "vidyapics"      : "Vidya Booru",
+    "vipr"           : "Vipr.im",
     "visuabusters"   : "VISUABUSTERS",
     "vk"             : "VK",
     "vsco"           : "VSCO",
@@ -236,6 +252,8 @@ SUBCATEGORY_MAP = {
         "user-images": ("User Images", "Image Reactions"),
         "user-posts" : "User Posts",
         "user-videos": ("User Videos", "Video Reactions"),
+        "user-collections" : "User Collections",
+        "generated": "Generated Files",
     },
     "coomer": {
         "discord"       : "",
@@ -257,6 +275,9 @@ SUBCATEGORY_MAP = {
     },
     "discord": {
         "direct-message" : "",
+    },
+    "facebook": {
+        "photos" : "Profile Photos",
     },
     "fanbox": {
         "supporting": "Supported User Feed",
@@ -287,6 +308,9 @@ SUBCATEGORY_MAP = {
         "saved": "Saved Posts",
         "tagged": "Tagged Posts",
     },
+    "itaku": {
+        "posts": "",
+    },
     "iwara": {
         "user-images": "User Images",
         "user-videos": "User Videos",
@@ -296,6 +320,10 @@ SUBCATEGORY_MAP = {
         "discord"       : "Discord Servers",
         "discord-server": "",
         "posts"         : "",
+    },
+    "leakgallery": {
+        "trending" : "Trending Medias",
+        "mostliked": "Most Liked Posts",
     },
     "lensdump": {
         "albums": "",
@@ -364,6 +392,7 @@ SUBCATEGORY_MAP = {
     "skeb": {
         "following"      : "Followed Creators",
         "following-users": "Followed Users",
+        "sentrequests"   : "Sent Requests",
     },
     "smugmug": {
         "path": "Images from Users and Folders",
@@ -420,6 +449,7 @@ BASE_MAP = {
     "gelbooru_v01": "Gelbooru Beta 0.1.11",
     "gelbooru_v02": "Gelbooru Beta 0.2",
     "hentaicosplays": "Hentai Cosplay Instances",
+    "imagehost"   : "Image Hosting Sites",
     "IMHentai"    : "IMHentai and Mirror Sites",
     "jschan"      : "jschan Imageboards",
     "lolisafe"    : "lolisafe and chibisafe",
@@ -444,11 +474,6 @@ _APIKEY_WH = ('<a href="https://gdl-org.github.io/docs/configuration.html'
               '#extractor-wallhaven-api-key">API Key</a>')
 _APIKEY_WY = ('<a href="https://gdl-org.github.io/docs/configuration.html'
               '#extractor-weasyl-api-key">API Key</a>')
-_TIKTOK_MORE_INFO = '''
-    <br /><span title="Pass `-o videos` to download photos only, and
-    `-o tiktok-range=a-yt-dlp-range` to tell yt-dlp to only extract XYZ links
-    when scraping a user profile. Also note that profile avatars will only be
-    downloaded when downloading a User Profile.">Hover for more info</span>'''
 
 AUTH_MAP = {
     "aibooru"        : "Supported",
@@ -493,6 +518,7 @@ AUTH_MAP = {
     "pillowfort"     : "Supported",
     "pinterest"      : _COOKIES,
     "pixiv"          : _OAUTH,
+    "pixiv-novel"    : _OAUTH,
     "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
     "rule34xyz"      : "Supported",
@@ -502,7 +528,7 @@ AUTH_MAP = {
     "smugmug"        : _OAUTH,
     "subscribestar"  : "Supported",
     "tapas"          : "Supported",
-    "tiktok"         : _COOKIES + _TIKTOK_MORE_INFO,
+    "tiktok"         : _COOKIES,
     "tsumino"        : "Supported",
     "tumblr"         : _OAUTH,
     "twitter"        : "Supported",
@@ -594,7 +620,11 @@ def build_extractor_list():
         if category in IGNORE_LIST:
             continue
         if category:
-            default[category].append(extr.subcategory)
+            if extr.basecategory == "imagehost":
+                base = categories[extr.basecategory]
+            else:
+                base = default
+            base[category].append(extr.subcategory)
             if category not in domains:
                 domains[category] = domain(extr)
         else:
@@ -625,13 +655,21 @@ def build_extractor_list():
     default["e-hentai"] = default["exhentai"]
     domains["e-hentai"] = domains["exhentai"].replace("x", "-")
 
-    # add coomer.su
+    # add coomer.st
     default["coomer"] = default["kemono"]
-    domains["coomer"] = domains["kemono"].replace("kemono", "coomer")
+    domains["coomer"] = "https://coomer.st/"
 
     # add wikifeetx.com
     default["wikifeetx"] = default["wikifeet"]
     domains["wikifeetx"] = "https://www.wikifeetx.com/"
+
+    # imgdrive / imgtaxi / imgwallet
+    base = categories["imagehost"]
+    base["imgtaxi"] = base["imgdrive"]
+    base["imgwallet"] = base["imgdrive"]
+    categories["imagehost"] = {k: base[k] for k in sorted(base)}
+    domains["imgtaxi"] = "https://imgtaxi.com/"
+    domains["imgwallet"] = "https://imgwallet.com/"
 
     # add extra e621 extractors
     categories["E621"]["e621"].extend(default.pop("e621", ()))
@@ -656,52 +694,49 @@ COLUMNS = (
 def generate_output(columns, categories, domains):
 
     thead = []
-    append = thead.append
-    append("<tr>")
+    thead.append("<tr>")
     for column in columns:
-        append("    <th>" + column[0] + "</th>")
-    append("</tr>")
+        thead.append(f"    <th>{column[0]}</th>")
+    thead.append("</tr>")
 
     tbody = []
-    append = tbody.append
-
     for bcat, base in categories.items():
-
         if bcat and base:
             name = BASE_MAP.get(bcat) or (bcat.capitalize() + " Instances")
-            append('\n<tr>\n    <td colspan="4"><strong>' +
-                   name + '</strong></td>\n</tr>')
+            tbody.append(f"""
+<tr id="{bcat}" title="{bcat}">
+    <td colspan="4"><strong>{name}</strong></td>
+</tr>\
+""")
             clist = base.items()
         else:
             clist = sorted(base.items(), key=category_key)
 
         for category, subcategories in clist:
-            append("<tr>")
+            tbody.append(f"""<tr id="{category}" title="{category}">""")
             for column in columns:
                 domain = domains[category]
                 content = column[2](bcat, category, subcategories, domain)
-                append("    <td>" + content + "</td>")
-            append("</tr>")
+                tbody.append(f"    <td>{content}</td>")
+            tbody.append("</tr>")
 
-    TEMPLATE = """# Supported Sites
+    NL = "\n"
+    GENERATOR = "/".join(os.path.normpath(__file__).split(os.sep)[-2:])
+    return f"""\
+# Supported Sites
 
-<!-- auto-generated by {} -->
+<!-- auto-generated by {GENERATOR} -->
 Consider all listed sites to potentially be NSFW.
 
 <table>
 <thead valign="bottom">
-{}
+{NL.join(thead)}
 </thead>
 <tbody valign="top">
-{}
+{NL.join(tbody)}
 </tbody>
 </table>
 """
-    return TEMPLATE.format(
-        "/".join(os.path.normpath(__file__).split(os.sep)[-2:]),
-        "\n".join(thead),
-        "\n".join(tbody),
-    )
 
 
 categories, domains = build_extractor_list()

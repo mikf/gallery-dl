@@ -40,8 +40,7 @@ class _2chThreadExtractor(Extractor):
 
         yield Message.Directory, thread
         for post in posts:
-            files = post.get("files")
-            if files:
+            if files := post.get("files"):
                 post["post_name"] = post["name"]
                 post["date"] = text.parse_timestamp(post["timestamp"])
                 del post["files"]

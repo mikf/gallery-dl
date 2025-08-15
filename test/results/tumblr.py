@@ -403,4 +403,28 @@ __tests__ = (
     "#class"   : tumblr.TumblrSearchExtractor,
 },
 
+{
+    "#url"     : "https://www.tumblr.com/mikf123/following",
+    "#class"   : tumblr.TumblrFollowingExtractor,
+    "#results" : (
+        "https://smarties-art.tumblr.com/",
+        "https://demo.tumblr.com/",
+    ),
+
+    "can_show_badges": True,
+    "description"    : str,
+    "name"           : str,
+    "title"          : str,
+    "tumblrmart_accessories": {},
+    "updated"        : int,
+    "url"            : str,
+    "uuid"           : str,
+},
+
+{
+    "#url"      : "https://www.tumblr.com/mikf123/followers",
+    "#class"    : tumblr.TumblrFollowersExtractor,
+    "#exception": exception.AuthorizationError,
+},
+
 )

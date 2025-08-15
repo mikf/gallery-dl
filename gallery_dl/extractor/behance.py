@@ -17,6 +17,7 @@ class BehanceExtractor(Extractor):
     category = "behance"
     root = "https://www.behance.net"
     request_interval = (2.0, 4.0)
+    browser = "firefox"
     tls12 = False
 
     def _init(self):
@@ -50,10 +51,10 @@ class BehanceExtractor(Extractor):
 
     def _update(self, data):
         # compress data to simple lists
-        if data.get("fields") and isinstance(data["fields"][0], dict):
+        if (fields := data.get("fields")) and isinstance(fields[0], dict):
             data["fields"] = [
                 field.get("name") or field.get("label")
-                for field in data["fields"]
+                for field in fields
             ]
 
         data["owners"] = [
@@ -68,6 +69,9 @@ class BehanceExtractor(Extractor):
 
         data["date"] = text.parse_timestamp(
             data.get("publishedOn") or data.get("conceived_on") or 0)
+
+        if creator := data.get("creator"):
+            creator["name"] = creator["url"].rpartition("/")[2]
 
         # backwards compatibility
         data["gallery_id"] = data["id"]
@@ -93,8 +97,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
     def _init(self):
         BehanceExtractor._init(self)
 
-        modules = self.config("modules")
-        if modules:
+        if modules := self.config("modules"):
             if isinstance(modules, str):
                 modules = modules.split(",")
             self.modules = set(modules)
@@ -208,8 +211,8 @@ class BehanceGalleryExtractor(BehanceExtractor):
                             break
 
             elif mtype == "embed":
-                embed = module.get("originalEmbed") or module.get("fluidEmbed")
-                if embed:
+                if embed := (module.get("originalEmbed") or
+                             module.get("fluidEmbed")):
                     embed = text.unescape(text.extr(embed, 'src="', '"'))
                     module["extension"] = "mp4"
                     results.append(("ytdl:" + embed, module))

@@ -52,17 +52,19 @@ class CienArticleExtractor(CienExtractor):
     example = "https://ci-en.net/creator/123/article/12345"
 
     def items(self):
-        url = f"{self.root}/creator/{self.groups[0]}/article/{self.groups[1]}"
+        author_id, post_id = self.groups
+        url = f"{self.root}/creator/{author_id}/article/{post_id}"
         page = self.request(url, notfound="article").text
 
         files = self._extract_files(page)
         post = self._extract_jsonld(page)[0]
         post["post_url"] = url
-        post["post_id"] = text.parse_int(self.groups[1])
+        post["post_id"] = text.parse_int(post_id)
         post["count"] = len(files)
         post["date"] = text.parse_datetime(post["datePublished"])
 
         try:
+            post["author"]["id"] = text.parse_int(author_id)
             del post["publisher"]
             del post["sameAs"]
         except Exception:

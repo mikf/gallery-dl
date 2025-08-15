@@ -39,6 +39,8 @@ class PatreonExtractor(Extractor):
             self._images_fmt = format_images
             self._images_url = self._images_url_fmt
 
+        self._cursor = None
+
     def items(self):
         generators = self._build_file_generators(self.config("files"))
 
@@ -70,6 +72,11 @@ class PatreonExtractor(Extractor):
                     yield Message.Url, url, post
                 else:
                     self.log.debug("skipping %s (%s %s)", url, fhash, kind)
+
+    def finalize(self):
+        if self._cursor:
+            self.log.info("Use '-o cursor=%s' to continue downloading "
+                          "from the current position", self._cursor)
 
     def _postfile(self, post):
         if postfile := post.get("post_file"):
@@ -130,6 +137,7 @@ class PatreonExtractor(Extractor):
         }
 
         while url:
+            self._update_cursor(url)
             url = text.ensure_http_scheme(url)
             posts = self.request_json(url, headers=headers)
 
@@ -139,8 +147,23 @@ class PatreonExtractor(Extractor):
                     yield self._process(post, included)
 
             if "links" not in posts:
-                return
+                break
             url = posts["links"].get("next")
+
+        self._update_cursor("")
+
+    def _init_cursor(self):
+        if cursor := self.config("cursor", True):
+            return "" if cursor is True else cursor
+        self._update_cursor = util.identity
+        return ""
+
+    def _update_cursor(self, url):
+        params = text.parse_query(url.partition("?")[2])
+        self._cursor = cursor = params.get("page[cursor]")
+        if cursor:
+            self.log.debug("Cursor: %s", cursor)
+        return cursor
 
     def _process(self, post, included):
         """Process and extend a 'post' object"""
@@ -255,7 +278,10 @@ class PatreonExtractor(Extractor):
             "&fields[media]=id,image_urls,download_url,metadata,file_name"
             "&fields[native_video_insights]=average_view_duration,"
             "average_view_pct,has_preview,id,last_updated_at,num_views,"
-            f"preview_views,video_duration{query}"
+            "preview_views,video_duration"
+
+            f"&page[cursor]={self._init_cursor()}"
+            f"{query}"
 
             "&json-api-version=1.0"
         )
@@ -295,12 +321,10 @@ class PatreonExtractor(Extractor):
         if bootstrap:
             return util.json_loads(bootstrap + "}")
 
-        bootstrap = text.extr(page, "window.patreon.bootstrap,", "});")
-        if bootstrap:
+        if bootstrap := text.extr(page, "window.patreon.bootstrap,", "});"):
             return util.json_loads(bootstrap + "}")
 
-        data = text.extr(page, "window.patreon = {", "};\n")
-        if data:
+        if data := text.extr(page, "window.patreon = {", "};\n"):
             try:
                 return util.json_loads(f"{{{data}}}")["bootstrap"]
             except Exception:
@@ -322,29 +346,27 @@ class PatreonCreatorExtractor(PatreonExtractor):
     def posts(self):
         creator, query = self.groups
 
-        query = text.parse_query(query)
-        campaign_id = self._get_campaign_id(creator, query)
-        filters = self._get_filters(query)
-
+        params = text.parse_query(query)
+        campaign_id = self._get_campaign_id(creator, params)
         self.log.debug("campaign_id: %s", campaign_id)
 
         url = self._build_url("posts", (
             f"&filter[campaign_id]={campaign_id}"
             "&filter[contains_exclusive_posts]=true"
             "&filter[is_draft]=false"
-            f"{filters}&sort={query.get('sort', '-published_at')}"
+            f"{self._get_filters(params)}"
+            f"&sort={params.get('sort', '-published_at')}"
         ))
         return self._pagination(url)
 
-    def _get_campaign_id(self, creator, query):
+    def _get_campaign_id(self, creator, params):
         if creator and creator.startswith("id:"):
             return creator[3:]
 
-        campaign_id = query.get("c") or query.get("campaign_id")
-        if campaign_id:
+        if campaign_id := params.get("c") or params.get("campaign_id"):
             return campaign_id
 
-        if user_id := query.get("u"):
+        if user_id := params.get("u"):
             url = f"{self.root}/user?u={user_id}"
         else:
             url = f"{self.root}/{creator}"
@@ -370,10 +392,10 @@ class PatreonCreatorExtractor(PatreonExtractor):
 
         raise exception.AbortExtraction("Failed to extract campaign ID")
 
-    def _get_filters(self, query):
+    def _get_filters(self, params):
         return "".join(
             f"&filter[{key[8:]}={text.escape(value)}"
-            for key, value in query.items()
+            for key, value in params.items()
             if key.startswith("filters[")
         )
 
@@ -385,8 +407,12 @@ class PatreonUserExtractor(PatreonExtractor):
     example = "https://www.patreon.com/home"
 
     def posts(self):
+        if date_max := self._get_date_min_max(None, None)[1]:
+            self._cursor = cursor = \
+                util.datetime_from_timestamp(date_max).isoformat()
+            self._init_cursor = lambda: cursor
+
         url = self._build_url("stream", (
-            "&page[cursor]=null"
             "&filter[is_following]=true"
             "&json-api-use-default-includes=false"
         ))

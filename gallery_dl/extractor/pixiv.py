@@ -89,8 +89,7 @@ class PixivExtractor(Extractor):
                                          if tag["is_registered"]]
             if self.meta_captions and not work.get("caption") and \
                     not work.get("_mypixiv") and not work.get("_ajax"):
-                body = self._request_ajax("/illust/" + str(work["id"]))
-                if body:
+                if body := self._request_ajax("/illust/" + str(work["id"])):
                     work["caption"] = self._sanitize_ajax_caption(
                         body["illustComment"])
 
@@ -233,7 +232,14 @@ class PixivExtractor(Extractor):
     def _request_ajax(self, endpoint):
         url = f"{self.root}/ajax{endpoint}"
         try:
-            return self.request_json(url, headers=self.headers_web)["body"]
+            data = self.request_json(
+                url, headers=self.headers_web, fatal=False)
+            if not data.get("error"):
+                return data["body"]
+
+            self.log.debug("Server response: %s", util.json_dumps(data))
+            return self.log.error(
+                "'%s'", data.get("message") or "General Error")
         except Exception:
             return None
 
@@ -293,8 +299,7 @@ class PixivExtractor(Extractor):
 
     def _extract_ajax_url(self, body):
         try:
-            original = body["urls"]["original"]
-            if original:
+            if original := body["urls"]["original"]:
                 return original
         except Exception:
             pass
@@ -303,7 +308,12 @@ class PixivExtractor(Extractor):
             square1200 = body["userIllusts"][body["id"]]["url"]
         except Exception:
             return
+
         parts = square1200.rpartition("_p0")[0].split("/")
+        if len(parts) < 6:
+            return self.log.warning(
+                "%s: %s", body["id"], square1200.rpartition("/")[2])
+
         del parts[3:5]
         parts[3] = "img-original"
         base = "/".join(parts)
@@ -419,14 +429,11 @@ class PixivArtworksExtractor(PixivExtractor):
         self.user_id = u1 or u2
         self.tag = t1 or t2
 
-        if self.sanity_workaround:
-            self.cookies_domain = domain = ".pixiv.net"
-            self._init_cookies()
-            if self._warn_phpsessid:
-                PixivArtworksExtractor._warn_phpsessid = False
-                if not self.cookies.get("PHPSESSID", domain=domain):
-                    self.log.warning("No 'PHPSESSID' cookie set. Can detect on"
-                                     "ly non R-18 'limit_sanity_level' works.")
+        if self.sanity_workaround and self._warn_phpsessid:
+            PixivArtworksExtractor._warn_phpsessid = False
+            if not self.cookies.get("PHPSESSID", domain=self.cookies_domain):
+                self.log.warning("No 'PHPSESSID' cookie set. Can detect only "
+                                 "non R-18 'limit_sanity_level' works.")
 
     def metadata(self):
         if self.config("metadata"):
@@ -436,17 +443,16 @@ class PixivArtworksExtractor(PixivExtractor):
     def works(self):
         works = self.api.user_illusts(self.user_id)
 
-        if self.sanity_workaround:
-            body = self._request_ajax(
-                f"/user/{self.user_id}/profile/all")
+        if self.sanity_workaround and (body := self._request_ajax(
+                f"/user/{self.user_id}/profile/all")):
             try:
                 ajax_ids = list(map(int, body["illusts"]))
                 ajax_ids.extend(map(int, body["manga"]))
                 ajax_ids.sort()
             except Exception as exc:
+                self.log.debug("", exc_info=exc)
                 self.log.warning("u%s: Failed to collect artwork IDs "
-                                 "using AJAX API (%s: %s)",
-                                 self.user_id, exc.__class__.__name__, exc)
+                                 "using AJAX API", self.user_id)
             else:
                 works = self._extend_sanity(works, ajax_ids)
 
@@ -699,8 +705,7 @@ class PixivRankingExtractor(PixivExtractor):
         except KeyError:
             raise exception.AbortExtraction(f"Invalid mode '{mode}'")
 
-        date = query.get("date")
-        if date:
+        if date := query.get("date"):
             if len(date) == 8 and date.isdecimal():
                 date = f"{date[0:4]}-{date[4:6]}-{date[6:8]}"
             else:
@@ -1256,7 +1261,7 @@ class PixivAppAPI():
 
     def user_illusts(self, user_id):
         params = {"user_id": user_id}
-        return self._pagination("/v1/user/illusts", params)
+        return self._pagination("/v1/user/illusts", params, user_data="user")
 
     def user_novels(self, user_id):
         params = {"user_id": user_id}
@@ -1291,22 +1296,29 @@ class PixivAppAPI():
                 self.extractor.wait(seconds=300)
                 continue
 
-            raise exception.AbortExtraction(f"API request failed: {error}")
+            msg = (f"'{msg}'" if (msg := error.get("user_message")) else
+                   f"'{msg}'" if (msg := error.get("message")) else
+                   error)
+            raise exception.AbortExtraction(f"API request failed: {msg}")
 
     def _pagination(self, endpoint, params,
-                    key_items="illusts", key_data=None):
-        while True:
-            data = self._call(endpoint, params)
+                    key_items="illusts", key_data=None, user_data=None):
+        data = self._call(endpoint, params)
 
-            if key_data:
-                self.data = data.get(key_data)
-                key_data = None
+        if key_data is not None:
+            self.data = data.get(key_data)
+        if user_data is not None:
+            if not data[user_data].get("id"):
+                raise exception.NotFoundError("user")
+
+        while True:
             yield from data[key_items]
 
             if not data["next_url"]:
                 return
             query = data["next_url"].rpartition("?")[2]
             params = text.parse_query(query)
+            data = self._call(endpoint, params)
 
 
 @cache(maxage=36500*86400, keyarg=0)

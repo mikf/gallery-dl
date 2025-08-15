@@ -55,8 +55,7 @@ class MetadataPP(PostProcessor):
             self._json_encode = self._make_encoder(options, 4).encode
             ext = "json"
 
-        base_directory = options.get("base-directory")
-        if base_directory:
+        if base_directory := options.get("base-directory"):
             if base_directory is True:
                 self._base = lambda p: p.basedirectory
             else:
@@ -181,8 +180,7 @@ class MetadataPP(PostProcessor):
         try:
             pathfmt.directory_formatters = self._directory_formatters
             pathfmt.directory_conditions = ()
-            segments = pathfmt.build_directory(pathfmt.kwdict)
-            if segments:
+            if segments := pathfmt.build_directory(pathfmt.kwdict):
                 directory = pathfmt.clean_path(os.sep.join(segments) + os.sep)
             else:
                 directory = "." + os.sep
@@ -244,8 +242,7 @@ class MetadataPP(PostProcessor):
         fp.write(self._json_encode(kwdict) + "\n")
 
     def _make_filter(self, options):
-        include = options.get("include")
-        if include:
+        if include := options.get("include"):
             if isinstance(include, str):
                 include = include.split(",")
             return lambda d: {k: d[k] for k in include if k in d}

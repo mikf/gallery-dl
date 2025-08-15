@@ -75,8 +75,7 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
             paths += findall(page)
             pos = page.find('rel="next" aria-label="Next')
             if pos > 0:
-                url = text.rextr(page, 'href="', '"', pos)
-                if url:
+                if url := text.rextr(page, 'href="', '"', pos):
                     page = self.request(url).text
                     continue
             return paths

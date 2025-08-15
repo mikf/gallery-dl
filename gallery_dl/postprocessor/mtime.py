@@ -17,8 +17,7 @@ class MtimePP(PostProcessor):
 
     def __init__(self, job, options):
         PostProcessor.__init__(self, job)
-        value = options.get("value")
-        if value:
+        if value := options.get("value"):
             self._get = formatter.parse(value, None, util.identity).format_map
         else:
             key = options.get("key", "date")

@@ -21,8 +21,7 @@ class DownloaderBase():
         extractor = job.extractor
         self.log = job.get_logger("downloader." + self.scheme)
 
-        opts = self._extractor_config(extractor)
-        if opts:
+        if opts := self._extractor_config(extractor):
             self.opts = opts
             self.config = self.config_opts
 
@@ -60,8 +59,7 @@ class DownloaderBase():
 
         opts = {}
         for cat, sub in reversed(path):
-            popts = self._extractor_opts(cat, sub)
-            if popts:
+            if popts := self._extractor_opts(cat, sub):
                 opts.update(popts)
         return opts
 
@@ -70,12 +68,10 @@ class DownloaderBase():
         if not cfg:
             return None
 
-        copts = cfg.get(self.scheme)
-        if copts:
+        if copts := cfg.get(self.scheme):
             if subcategory in cfg:
                 try:
-                    sopts = cfg[subcategory].get(self.scheme)
-                    if sopts:
+                    if sopts := cfg[subcategory].get(self.scheme):
                         opts = copts.copy()
                         opts.update(sopts)
                         return opts

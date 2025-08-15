@@ -15,7 +15,7 @@
 # https://forum.snapcraft.io/c/snapcraft
 name: gallery-dl
 license: GPL-2.0
-base: core18
+base: core22
 summary: Download image-galleries and -collections from several image hosting sites
 description: |
   `gallery-dl` is a command-line program to download image-galleries and -collections from several image hosting sites (see [Supported Sites][1]). It is a cross-platform tool with many configuration options and powerful filenaming capabilities.
@@ -26,21 +26,8 @@ adopt-info: gallery-dl
 confinement: strict
 grade: stable
 
+# Configuration access
 plugs:
-  # For `xdg-open` command access for opening OAuth authentication webpages
-  desktop:
-
-  # Storage access
-  home:
-  removable-media: # Non-A/C
-
-  # Network access
-  network:
-
-  # For network service for receiving OAuth callback tokens
-  network-bind:
-
-  # Configuration access
   config-gallery-dl:
     interface: personal-files
     read:
@@ -63,42 +50,28 @@ parts:
     organize:
       '*': bin/
 
-  # Check out the tagged release revision if it isn't promoted to the stable channel
-  # https://forum.snapcraft.io/t/selective-checkout-check-out-the-tagged-release-revision-if-it-isnt-promoted-to-the-stable-channel/10617
-  selective-checkout:
-    source: https://github.com/Lin-Buo-Ren/selective-checkout.git
-    source-tag: v2.0.0
-    plugin: dump
-    build-packages:
-    # Scriptlet dependencies
-    - curl
-    - git
-    - jq
-    - sed
-    stage:
-    - scriptlets/selective-checkout
-    prime:
-    - -*
-
   gallery-dl:
-    after:
-    - selective-checkout
-
     source: .
     override-pull: |
-      snapcraftctl pull
-      $SNAPCRAFT_STAGE/scriptlets/selective-checkout
+      craftctl default
+      ${CRAFT_PROJECT_DIR}/snap/local/scriptlets/selective-checkout
 
     plugin: python
     build-packages:
     - make
+
+    # selective-checkout scriptlet dependencies
+    - curl
+    - git
+    - jq
+    - sed
     python-packages:
-    - youtube_dl
+    - yt-dlp[default]
     override-build: |
       # build manpages and bash completion
       make man completion
 
-      snapcraftctl build
+      craftctl default
 
   ffmpeg:
     plugin: nil
@@ -108,14 +81,23 @@ parts:
 
 apps:
   gallery-dl:
-    adapter: full
     command-chain:
     - bin/gallery-dl-launch
     command: bin/gallery-dl
     completer: share/bash-completion/completions/gallery-dl
+    plugs:
+      # For `xdg-open` command access for opening OAuth authentication webpages
+      - desktop
+      # Storage access
+      - home
+      - removable-media
+      # Network access
+      - network
+      # For network service for receiving OAuth callback tokens
+      - network-bind
     environment:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
 
       # Satisfy FFmpeg's libpulsecommon dependency
-      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio
+      LD_LIBRARY_PATH: $LD_LIBRARY_PATH:$SNAP/usr/lib/$CRAFT_ARCH_TRIPLET_BUILD_FOR/pulseaudio

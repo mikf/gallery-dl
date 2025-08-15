@@ -52,7 +52,7 @@ class EveriaPostExtractor(EveriaExtractor):
         url = self.root + self.groups[0] + "/"
         page = self.request(url).text
         content = text.extr(page, 'itemprop="text">', "<h3")
-        urls = util.re(r'img.*?src="([^"]+)').findall(content)
+        urls = util.re(r'img.*?lazy-src="([^"]+)').findall(content)
 
         data = {
             "title": text.unescape(

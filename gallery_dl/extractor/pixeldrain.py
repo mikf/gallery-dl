@@ -21,8 +21,7 @@ class PixeldrainExtractor(Extractor):
     archive_fmt = "{id}"
 
     def _init(self):
-        api_key = self.config("api-key")
-        if api_key:
+        if api_key := self.config("api-key"):
             self.session.auth = util.HTTPBasicAuth("", api_key)
 
     def parse_datetime(self, date_string):

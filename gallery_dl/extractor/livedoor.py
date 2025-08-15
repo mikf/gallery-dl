@@ -26,8 +26,7 @@ class LivedoorExtractor(Extractor):
 
     def items(self):
         for post in self.posts():
-            images = self._images(post)
-            if images:
+            if images := self._images(post):
                 yield Message.Directory, {"post": post}
                 for image in images:
                     yield Message.Url, image["url"], image

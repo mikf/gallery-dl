@@ -11,7 +11,6 @@
 from .common import Extractor, ChapterExtractor, MangaExtractor
 from .. import text, exception
 import binascii
-import re
 
 BASE_PATTERN = r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.(?:li|to)"
 
@@ -48,12 +47,8 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/[^/?#]+\?)([^#]+)"
     example = "https://readcomiconline.li/Comic/TITLE/Issue-123?id=12345"
 
-    def __init__(self, match):
-        ChapterExtractor.__init__(self, match)
-        self.params = match[2]
-
     def _init(self):
-        params = text.parse_query(self.params)
+        params = text.parse_query(self.groups[1])
         quality = self.config("quality")
 
         if quality is None or quality == "auto":
@@ -61,14 +56,15 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
                 params["quality"] = "hq"
         else:
             params["quality"] = str(quality)
+        params["readType"] = "0"  # force "One page" Reading mode (#7890)
 
-        self.page_url += "&".join(k + "=" + v for k, v in params.items())
+        self.page_url += "&".join(f"{k}={v}" for k, v in params.items())
         self.issue_id = params.get("id")
 
     def metadata(self, page):
         comic, pos = text.extract(page, "   - Read\r\n    ", "\r\n")
         iinfo, pos = text.extract(page, "    ", "\r\n", pos)
-        match = re.match(r"(?:Issue )?#(\d+)|(.+)", iinfo)
+        match = text.re(r"(?:Issue )?#(\d+)|(.+)").match(iinfo)
         return {
             "comic": comic,
             "issue": match[1] or match[2],
@@ -84,8 +80,8 @@ class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
         _   , pos = text.extract(page, "var pth = '", "", pos)
         var , pos = text.extract(page, "var ", "= '", pos)
 
-        replacements = re.findall(
-            r"l = l\.replace\(/([^/]+)/g, [\"']([^\"']*)", page)
+        replacements = text.re(
+            r"l = l\.replace\(/([^/]+)/g, [\"']([^\"']*)").findall(page)
 
         for path in page.split(var)[2:]:
             path = text.extr(path, "= '", "'")

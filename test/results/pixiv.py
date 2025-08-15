@@ -37,6 +37,76 @@ __tests__ = (
 {
     "#url"     : "https://www.pixiv.net/en/users/173530/artworks",
     "#class"   : pixiv.PixivArtworksExtractor,
+    "#options" : {"metadata": True},
+    "#sha1_url": "852c31ad83b6840bacbce824d85f2a997889efb7",
+
+    "profile": {
+        "address_id": 0,
+        "background_image_url": None,
+        "birth": "",
+        "birth_day": "",
+        "birth_year": 0,
+        "country_code": "",
+        "gender": "male",
+        "is_premium": False,
+        "is_using_custom_profile_image": True,
+        "job": "",
+        "job_id": 0,
+        "pawoo_url": None,
+        "region": "",
+        "total_follow_users": 16,
+        "total_illust_bookmarks_public": range(5, 20),
+        "total_illust_series": 0,
+        "total_illusts": 17,
+        "total_manga": 0,
+        "total_mypixiv_users": 0,
+        "total_novel_series": 0,
+        "total_novels": 0,
+        "twitter_account": "",
+        "twitter_url": None,
+        "webpage": None,
+    },
+    "profile_publicity": {
+        "birth_day": "public",
+        "birth_year": "public",
+        "gender": "public",
+        "job": "public",
+        "pawoo": True,
+        "region": "public",
+    },
+    "user": {
+        "account": "del_shannon",
+        "comment": "基本　お絵かき掲示板で書いたものＵＰしております。\r\nVistaとの相性最悪で泣きそうな毎日です。\r\nメモリは大幅増で一般使用はサクサクなだけに・・・。orz",
+        "id": 173530,
+        "is_access_blocking_user": False,
+        "is_followed": False,
+        "name": "syuri",
+        "profile_image_urls": {
+            "medium": "https://i.pximg.net/user-profile/img/2008/06/17/01/28/01/171098_fc06efd15628e2ee252941ae5298b5ff_170.jpg",
+        },
+    },
+    "workspace": {
+        "chair": "",
+        "comment": "",
+        "desk": "",
+        "desktop": "",
+        "monitor": "",
+        "mouse": "",
+        "music": "古い陸軍行進曲「ジェッディン・デデン」",
+        "pc": "",
+        "printer": "",
+        "scanner": "",
+        "tablet": "わこむ",
+        "tool": "",
+        "workspace_image_url": None,
+    },
+},
+
+{
+    "#url"     : "https://www.pixiv.net/en/users/173530/artworks",
+    "#comment" : "Invalid PHPSESSID cookie",
+    "#class"   : pixiv.PixivArtworksExtractor,
+    "#options" : {"cookies": {"PHPSESSID": "12345_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}},
     "#sha1_url": "852c31ad83b6840bacbce824d85f2a997889efb7",
 },
 
@@ -58,6 +128,14 @@ __tests__ = (
     "#comment" : "deleted account",
     "#class"   : pixiv.PixivArtworksExtractor,
     "#options"  : {"metadata": True},
+    "#exception": exception.NotFoundError,
+},
+
+{
+    "#url"     : "https://www.pixiv.net/users/91306124/artworks",
+    "#comment" : "deleted account with a different error",
+    "#class"   : pixiv.PixivArtworksExtractor,
+    "#log"     : "'User has left pixiv or the user ID does not exist.'",
     "#exception": exception.NotFoundError,
 },
 
@@ -96,6 +174,13 @@ __tests__ = (
 {
     "#url"     : "https://phixiv.net/en/users/56514424/artworks",
     "#class"   : pixiv.PixivArtworksExtractor,
+},
+
+{
+    "#url"      : "https://www.pixiv.net/users/70060776/artworks",
+    "#comment"  : "suspended account (#7990)",
+    "#class"    : pixiv.PixivArtworksExtractor,
+    "#exception": exception.NotFoundError,
 },
 
 {
@@ -275,6 +360,10 @@ __tests__ = (
     "#comment" : "deleted limit_sanity_level_360.png work (#6339)",
     "#class"   : pixiv.PixivWorkExtractor,
     "#count"   : 0,
+    "#log"     : (
+        ("warning", "104582860: 'limit_sanity_level' warning"),
+        ("error"  , "'General Error'"),
+    ),
 },
 
 {
@@ -293,6 +382,13 @@ __tests__ = (
     "#options" : {"retries": 0},
     "#range"   : "4",
     "#sha1_content": "aa119c27fec0a36bbd06e7491987acf5f1be6293",
+},
+
+{
+    "#url"     : "https://www.pixiv.net/artworks/56360615",
+    "#comment" : "limit_unviewable_s / unavailable without cookies (#7940)",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#count"   : 11,
 },
 
 {
@@ -353,11 +449,16 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/en/users/173530/bookmarks/artworks",
     "#class"   : pixiv.PixivFavoriteExtractor,
     "#results" : (
+        "https://i.pximg.net/img-original/img/2025/06/25/02/06/58/131943241_p0.png",
+        "https://i.pximg.net/img-original/img/2025/07/02/03/22/51/132200601_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/10/31/17/54/01/2005108_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/09/27/12/22/40/1719386_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/04/15/01/43/46/669358_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/06/19/21/52/15/1005851_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/06/17/22/16/54/994965_p0.jpg",
+    ),
+    "#log": (
+        ("warning", "1679677: 'My pixiv' locked"),
     ),
 },
 
@@ -365,11 +466,16 @@ __tests__ = (
     "#url"     : "https://www.pixiv.net/bookmark.php?id=173530",
     "#class"   : pixiv.PixivFavoriteExtractor,
     "#results" : (
+        "https://i.pximg.net/img-original/img/2025/06/25/02/06/58/131943241_p0.png",
+        "https://i.pximg.net/img-original/img/2025/07/02/03/22/51/132200601_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/10/31/17/54/01/2005108_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/09/27/12/22/40/1719386_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/04/15/01/43/46/669358_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/06/19/21/52/15/1005851_p0.jpg",
         "https://i.pximg.net/img-original/img/2008/06/17/22/16/54/994965_p0.jpg",
+    ),
+    "#log": (
+        ("warning", "1679677: 'My pixiv' locked"),
     ),
 },
 
@@ -464,7 +570,7 @@ __tests__ = (
 {
     "#url"     : "https://www.pixiv.net/ranking.php?mode=unknown",
     "#class"   : pixiv.PixivRankingExtractor,
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AbortExtraction,
 },
 
 {
@@ -477,19 +583,19 @@ __tests__ = (
 {
     "#url"     : "https://pixiv.net/en/tags/foo/artworks?order=week&s_mode=s_tag",
     "#class"   : pixiv.PixivSearchExtractor,
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AbortExtraction,
 },
 
 {
     "#url"     : "https://pixiv.net/en/tags/foo/artworks?order=date&s_mode=tag",
     "#class"   : pixiv.PixivSearchExtractor,
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AbortExtraction,
 },
 
 {
     "#url"     : "https://www.pixiv.net/search.php?s_mode=s_tag&name=Original",
     "#class"   : pixiv.PixivSearchExtractor,
-    "#exception": exception.StopExtraction,
+    "#exception": exception.AbortExtraction,
 },
 
 {

@@ -21,8 +21,7 @@ class ComparePP(PostProcessor):
             self._compare = self._compare_size
         self._equal_exc = self._equal_cnt = 0
 
-        equal = options.get("equal")
-        if equal:
+        if equal := options.get("equal"):
             equal, _, emax = equal.partition(":")
             self._equal_max = text.parse_int(emax)
             if equal == "abort":

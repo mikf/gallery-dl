@@ -30,8 +30,7 @@ class NitterExtractor(BaseExtractor):
 
     def items(self):
         retweets = self.config("retweets", False)
-        videos = self.config("videos", True)
-        if videos:
+        if videos := self.config("videos", True):
             ytdl = (videos == "ytdl")
             videos = True
             self.cookies.set("hlsPlayback", "on", domain=self.cookies_domain)
@@ -42,8 +41,7 @@ class NitterExtractor(BaseExtractor):
                 self.log.debug("Skipping %s (retweet)", tweet["tweet_id"])
                 continue
 
-            attachments = tweet.pop("_attach", "")
-            if attachments:
+            if attachments := tweet.pop("_attach", ""):
                 files = []
                 for url in text.extract_iter(
                         attachments, 'href="', '"'):

@@ -66,6 +66,11 @@ def slugify(value):
     return re(r"[-\s]+").sub("-", value).strip("-_")
 
 
+def sanitize_whitespace(value):
+    """Replace all whitespace characters with a single space"""
+    return re(r"\s+").sub(" ", value.strip())
+
+
 def ensure_http_scheme(url, scheme="https://"):
     """Prepend 'scheme' to 'url' if it doesn't have one"""
     if url and not url.startswith(("https://", "http://")):
