@@ -348,10 +348,10 @@ def parse_duration(duration_string, default=None):
             'minutes': r'(\d+)\s*m(in(ute)?(s)?)?',
             'seconds': r'(\d+)\s*s(ec(ond)?(s)?)?'
         }
-        parsed_values = {unit: 0 for unit in patterns.keys()}
+        parsed_values = {unit: 0 for unit in patterns}
 
         for unit, pattern in patterns.items():
-            match = re.search(pattern, duration_string, re.IGNORECASE)
+            match = re_module.search(pattern, duration_string, re_module.IGNORECASE)
             if match:
                 parsed_values[unit] = int(match.group(1))
 
