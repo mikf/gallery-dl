@@ -439,12 +439,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries, individual Images</td>
     <td></td>
 </tr>
-<tr id="imgdrive" title="imgdrive">
-    <td>ImgDrive.net</td>
-    <td>https://imgdrive.net/</td>
-    <td></td>
-    <td></td>
-</tr>
 <tr id="imgth" title="imgth">
     <td>imgth</td>
     <td>https://imgth.com/</td>
@@ -1950,13 +1944,13 @@ Consider all listed sites to potentially be NSFW.
 <tr id="imgtaxi" title="imgtaxi">
     <td>ImgTaxi.com</td>
     <td>https://imgtaxi.com/</td>
-    <td></td>
+    <td>individual Images</td>
     <td></td>
 </tr>
 <tr id="imgwallet" title="imgwallet">
     <td>ImgWallet.com</td>
     <td>https://imgwallet.com/</td>
-    <td></td>
+    <td>individual Images</td>
     <td></td>
 </tr>
 <tr id="imxto" title="imxto">

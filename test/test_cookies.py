@@ -158,7 +158,7 @@ class TestCookieUtils(unittest.TestCase):
         extr.cookies.set("cd_a", "1", domain=extr.cookies_domain)
         self.assertTrue(extr.cookies_check(("cd_a",)))
 
-        extr.cookies.set("wd_a", "1", domain="www" + extr.cookies_domain)
+        extr.cookies.set("wd_a", "1", domain=f"www{extr.cookies_domain}")
         self.assertFalse(extr.cookies_check(("wd_a",)))
         self.assertEqual(len(extr.cookies), 3)
 
@@ -183,7 +183,7 @@ class TestCookieUtils(unittest.TestCase):
         extr.cookies.set("cd_a", "1", domain=extr.cookies_domain)
         self.assertTrue(extr.cookies_check(("cd_a",), subdomains=True))
 
-        extr.cookies.set("wd_a", "1", domain="www" + extr.cookies_domain)
+        extr.cookies.set("wd_a", "1", domain=f"www{extr.cookies_domain}")
         self.assertTrue(extr.cookies_check(("wd_a",), subdomains=True))
 
         extr.cookies.set("cd_b", "2", domain=extr.cookies_domain)

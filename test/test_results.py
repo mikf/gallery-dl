@@ -234,7 +234,7 @@ class TestExtractorResults(unittest.TestCase):
             if isinstance(count, str):
                 self.assertRegex(
                     count, r"^ *(==|!=|<|<=|>|>=) *\d+ *$", msg="#count")
-                expr = "{} {}".format(len_urls, count)
+                expr = f"{len_urls} {count}"
                 self.assertTrue(eval(expr), msg=expr)
             elif isinstance(count, range):
                 self.assertRange(len_urls, count, msg="#count")
@@ -284,7 +284,7 @@ class TestExtractorResults(unittest.TestCase):
             else:
                 subtest = False
 
-            path = "{}.{}".format(parent, key) if parent else key
+            path = f"{parent}.{key}" if parent else key
 
             if key.startswith("!"):
                 self.assertNotIn(key[1:], kwdict, msg=path)
@@ -296,7 +296,7 @@ class TestExtractorResults(unittest.TestCase):
             if subtest:
                 self.assertNotIsInstance(value, str, msg=path)
                 for idx, item in enumerate(value):
-                    subpath = "{}[{}]".format(path, idx)
+                    subpath = f"{path}[{idx}]"
                     self._test_kwdict_value(item, test, subpath)
             else:
                 self._test_kwdict_value(value, test, path)
@@ -318,8 +318,13 @@ class TestExtractorResults(unittest.TestCase):
             for idx, item in enumerate(test):
                 if isinstance(item, dict):
                     subtest = True
-                    subpath = "{}[{}]".format(path, idx)
-                    self._test_kwdict(value[idx], item, subpath)
+                    subpath = f"{path}[{idx}]"
+                    try:
+                        obj = value[idx]
+                    except Exception as exc:
+                        self.fail(f"'{exc.__class__.__name__}: {exc}' "
+                                  f"when accessing {subpath}")
+                    self._test_kwdict(obj, item, subpath)
             if not subtest:
                 self.assertEqual(test, value, msg=path)
         elif isinstance(test, str):
@@ -335,7 +340,7 @@ class TestExtractorResults(unittest.TestCase):
                 cls, _, length = test[4:].rpartition(":")
                 if cls:
                     self.assertEqual(
-                        cls, type(value).__name__, msg=path + "/type")
+                        cls, type(value).__name__, msg=f"{path}/type")
                 try:
                     len_value = len(value)
                 except Exception:
@@ -343,6 +348,21 @@ class TestExtractorResults(unittest.TestCase):
                     for _ in value:
                         len_value += 1
                 self.assertEqual(int(length), len_value, msg=path)
+            elif test.startswith("iso:"):
+                iso = test[4:]
+                if iso in ("dt", "datetime", "8601"):
+                    msg = f"{path} / ISO 8601"
+                    try:
+                        dt = datetime.datetime.fromisoformat(value)
+                    except Exception as exc:
+                        self.fail(f"Invalid datetime '{value}': {exc} {msg}")
+                    self.assertIsInstance(dt, datetime.datetime, msg=msg)
+                elif iso in ("lang", "639", "639-1"):
+                    msg = f"{path} / ISO 639-1"
+                    self.assertIsInstance(value, str, msg=msg)
+                    self.assertRegex(value, r"^[a-z]{2}(-\w+)?$", msg=msg)
+                else:
+                    self.fail(f"Unsupported ISO test '{test}'")
             else:
                 self.assertEqual(test, value, msg=path)
         else:
@@ -514,8 +534,7 @@ def load_test_config():
     except FileNotFoundError:
         pass
     except Exception as exc:
-        sys.exit("Error when loading {}: {}: {}".format(
-            path, exc.__class__.__name__, exc))
+        sys.exit(f"Error when loading {path}: {exc.__class__.__name__}: {exc}")
 
 
 def result_categories(result):
@@ -578,12 +597,12 @@ def generate_tests():
     enum = collections.defaultdict(int)
     for result in tests:
         base, cat, sub = result_categories(result)
-        name = "{}_{}".format(cat, sub)
+        name = f"{cat}_{sub}"
         enum[name] += 1
 
         method = _generate_method(result)
         method.__doc__ = result["#url"]
-        method.__name__ = "test_{}_{}".format(name, enum[name])
+        method.__name__ = f"test_{name}_{enum[name]}"
         setattr(TestExtractorResults, method.__name__, method)
 
 

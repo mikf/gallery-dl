@@ -392,7 +392,7 @@ SUBCATEGORY_MAP = {
     "skeb": {
         "following"      : "Followed Creators",
         "following-users": "Followed Users",
-        "sent-requests"  : "Sent Requests",
+        "sentrequests"   : "Sent Requests",
     },
     "smugmug": {
         "path": "Images from Users and Folders",
@@ -665,8 +665,8 @@ def build_extractor_list():
 
     # imgdrive / imgtaxi / imgwallet
     base = categories["imagehost"]
-    base["imgtaxi"] = default["imgdrive"]
-    base["imgwallet"] = default["imgdrive"]
+    base["imgtaxi"] = base["imgdrive"]
+    base["imgwallet"] = base["imgdrive"]
     categories["imagehost"] = {k: base[k] for k in sorted(base)}
     domains["imgtaxi"] = "https://imgtaxi.com/"
     domains["imgwallet"] = "https://imgwallet.com/"

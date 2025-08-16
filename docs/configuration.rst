@@ -277,6 +277,19 @@ Description
     * ``"windows"``: ``". "``
 
 
+extractor.*.path-convert
+------------------------
+Type
+    `Conversion(s)`_
+Example
+    * ``"g"``
+    * ``"Wl"``
+Description
+    `Conversion(s)`_ to apply to each path segment after
+    `path-restrict <extractor.*.path-restrict_>`__
+    replacements.
+
+
 extractor.*.path-extended
 -------------------------
 Type
@@ -3395,22 +3408,11 @@ Default
 Description
     API endpoint to use for retrieving creator posts.
 
-    ``"legacy"``
-        | Use the results from
-          `/v1/{service}/user/{creator_id}/posts-legacy <https://kemono.su/documentation/api#operations-default-get_v1__service__user__creator_id__posts_legacy>`__
-        | Provides less metadata, but is more reliable at returning all posts.
-        | Supports filtering results by ``tag`` query parameter.
-    ``"legacy+"``
-        | Use the results from
-          `/v1/{service}/user/{creator_id}/posts-legacy <https://kemono.su/documentation/api#operations-default-get_v1__service__user__creator_id__posts_legacy>`__
-          to retrieve post IDs
-        | and one request to
-          `/v1/{service}/user/{creator_id}/post/{post_id} <https://kemono.su/documentation/api#operations-Posts-get_v1__service__user__creator_id__post__post_id_>`__
-          to get a full set of metadata for each.
-    ``"posts"``
-        | Use the results from
-          `/v1/{service}/user/{creator_id} <https://kemono.su/documentation/api#operations-Posts-get_v1__service__user__creator_id_>`__
-        | Provides more metadata, but might not return a creator's first/last posts.
+    ``"posts"`` | ``"legacy"``
+        Provides only limited metadata.
+    ``"posts+"`` | ``"legacy+"``
+        Provides full metadata,
+        but requires an additional API request for each post.
 
 
 extractor.kemono.favorites
@@ -4752,10 +4754,12 @@ Type
     * ``string``
     * ``list`` of ``strings``
 Default
-    ``"works"``
+    * ``["works", "sentrequests"]``
+      if `sent-requests <extractor.skeb.sent-requests_>`__ are enabled
+    * ``["works"]`` otherwise
 Example
-    * ``"works,sent-requests"``
-    * ``["works", "sent-requests"]``
+    * ``"works,sentrequests"``
+    * ``["works", "sentrequests"]``
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
@@ -4763,7 +4767,7 @@ Description
     Possible values are
 
     * ``"works"``
-    * ``"sent-requests"``
+    * ``"sentrequests"``
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -8683,6 +8687,7 @@ Description
 .. _download archive: `extractor.*.archive`_
 .. _Action(s): Action_
 
+.. _Conversion(s):      https://gdl-org.github.io/docs/formatting.html#conversions
 .. _.netrc:             https://stackoverflow.com/tags/.netrc/info
 .. _Last-Modified:      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
 .. _datetime:           https://docs.python.org/3/library/datetime.html#datetime-objects

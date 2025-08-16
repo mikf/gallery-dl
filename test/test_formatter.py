@@ -73,8 +73,8 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{u!H}", "'< / >'")
         self._run_test("{n!H}", "")
         self._run_test("{a!s}", self.kwdict["a"])
-        self._run_test("{a!r}", "'" + self.kwdict["a"] + "'")
-        self._run_test("{a!a}", "'" + self.kwdict["a"] + "'")
+        self._run_test("{a!r}", f"'{self.kwdict['a']}'")
+        self._run_test("{a!a}", f"'{self.kwdict['a']}'")
         self._run_test("{b!a}", "'\\xe4\\xf6\\xfc'")
         self._run_test("{a!S}", self.kwdict["a"])
         self._run_test("{l!S}", "a, b, c")
@@ -139,7 +139,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{missing}"     , replacement, default)
         self._run_test("{missing.attr}", replacement, default)
         self._run_test("{missing[key]}", replacement, default)
-        self._run_test("{missing:?a//}", "a" + default, default)
+        self._run_test("{missing:?a//}", f"a{default}", default)
 
     def test_fmt_func(self):
         self._run_test("{t}" , self.kwdict["t"] , None, int)
@@ -444,11 +444,11 @@ class TestFormatter(unittest.TestCase):
 
             with open(path1, "w") as fp:
                 fp.write("{a}")
-            fmt1 = formatter.parse("\fT " + path1)
+            fmt1 = formatter.parse(f"\fT {path1}")
 
             with open(path2, "w") as fp:
                 fp.write("{a!u:Rh/C/}\nFooBar")
-            fmt2 = formatter.parse("\fT " + path2)
+            fmt2 = formatter.parse(f"\fT {path2}")
 
         self.assertEqual(fmt1.format_map(self.kwdict), self.kwdict["a"])
         self.assertEqual(fmt2.format_map(self.kwdict), "HELLO WORLD\nFooBar")
@@ -458,15 +458,18 @@ class TestFormatter(unittest.TestCase):
 
     def test_expression(self):
         self._run_test("\fE a", self.kwdict["a"])
-        self._run_test("\fE name * 2 + ' ' + a", "{}{} {}".format(
-            self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
+        self._run_test(
+            "\fE name * 2 + ' ' + a",
+            f"{self.kwdict['name']}{self.kwdict['name']} {self.kwdict['a']}")
 
     def test_fstring(self):
         self._run_test("\fF {a}", self.kwdict["a"])
-        self._run_test("\fF {name}{name} {a}", "{}{} {}".format(
-            self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
-        self._run_test("\fF foo-'\"{a.upper()}\"'-bar",
-                       """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+        self._run_test(
+            "\fF {name}{name} {a}",
+            f"{self.kwdict['name']}{self.kwdict['name']} {self.kwdict['a']}")
+        self._run_test(
+            "\fF foo-'\"{a.upper()}\"'-bar",
+            f"""foo-'"{self.kwdict['a'].upper()}"'-bar""")
 
     def test_template_fstring(self):
         with tempfile.TemporaryDirectory() as tmpdirname:
@@ -475,15 +478,15 @@ class TestFormatter(unittest.TestCase):
 
             with open(path1, "w") as fp:
                 fp.write("{a}")
-            fmt1 = formatter.parse("\fTF " + path1)
+            fmt1 = formatter.parse(f"\fTF {path1}")
 
             with open(path2, "w") as fp:
                 fp.write("foo-'\"{a.upper()}\"'-bar")
-            fmt2 = formatter.parse("\fTF " + path2)
+            fmt2 = formatter.parse(f"\fTF {path2}")
 
         self.assertEqual(fmt1.format_map(self.kwdict), self.kwdict["a"])
         self.assertEqual(fmt2.format_map(self.kwdict),
-                         """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+                         f"""foo-'"{self.kwdict['a'].upper()}"'-bar""")
 
         with self.assertRaises(OSError):
             formatter.parse("\fTF /")
@@ -493,10 +496,12 @@ class TestFormatter(unittest.TestCase):
         formatter.JinjaFormatter.env = None
 
         self._run_test("\fJ {{a}}", self.kwdict["a"])
-        self._run_test("\fJ {{name}}{{name}} {{a}}", "{}{} {}".format(
-            self.kwdict["name"], self.kwdict["name"], self.kwdict["a"]))
-        self._run_test("\fJ foo-'\"{{a | upper}}\"'-bar",
-                       """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+        self._run_test(
+            "\fJ {{name}}{{name}} {{a}}",
+            f"{self.kwdict['name']}{self.kwdict['name']} {self.kwdict['a']}")
+        self._run_test(
+            "\fJ foo-'\"{{a | upper}}\"'-bar",
+            f"""foo-'"{self.kwdict['a'].upper()}"'-bar""")
 
     @unittest.skipIf(jinja2 is None, "no jinja2")
     def test_template_jinja(self):
@@ -508,15 +513,15 @@ class TestFormatter(unittest.TestCase):
 
             with open(path1, "w") as fp:
                 fp.write("{{a}}")
-            fmt1 = formatter.parse("\fTJ " + path1)
+            fmt1 = formatter.parse(f"\fTJ {path1}")
 
             with open(path2, "w") as fp:
                 fp.write("foo-'\"{{a | upper}}\"'-bar")
-            fmt2 = formatter.parse("\fTJ " + path2)
+            fmt2 = formatter.parse(f"\fTJ {path2}")
 
         self.assertEqual(fmt1.format_map(self.kwdict), self.kwdict["a"])
         self.assertEqual(fmt2.format_map(self.kwdict),
-                         """foo-'"{}"'-bar""".format(self.kwdict["a"].upper()))
+                         f"""foo-'"{self.kwdict['a'].upper()}"'-bar""")
 
         with self.assertRaises(OSError):
             formatter.parse("\fTJ /")
@@ -562,7 +567,7 @@ Present Time is ((( dt | dt_fmt("%H:%M:%S") )))
 Hello ((( s | sanitize_whitespace ))).
 I hope there is enough "(((S|sanitize_whitespace)))" for you.
 """)
-            fmt = formatter.parse("\fTJ " + path_template)
+            fmt = formatter.parse(f"\fTJ {path_template}")
 
         self.assertEqual(fmt.format_map(self.kwdict), """\
 Present Day  is January 01, 2010
@@ -607,8 +612,8 @@ def noarg():
             finally:
                 sys.path.pop(0)
 
-            fmt3 = formatter.parse("\fM " + path + ":gentext")
-            fmt4 = formatter.parse("\fM " + path + ":lengths")
+            fmt3 = formatter.parse(f"\fM {path}:gentext")
+            fmt4 = formatter.parse(f"\fM {path}:lengths")
 
         self.assertEqual(fmt1.format_map(self.kwdict), "'Title' by Name")
         self.assertEqual(fmt2.format_map(self.kwdict), "168")

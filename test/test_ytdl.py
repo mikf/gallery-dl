@@ -23,8 +23,8 @@ class Test_CommandlineArguments(unittest.TestCase):
         try:
             cls.module = __import__(cls.module_name)
         except (ImportError, SyntaxError):
-            raise unittest.SkipTest("cannot import module '{}'".format(
-                cls.module_name))
+            raise unittest.SkipTest(
+                f"cannot import module '{cls.module_name}'")
         cls.default = ytdl.parse_command_line(cls.module, [])
         cls.ytdlp = hasattr(cls.module, "cookies")
 

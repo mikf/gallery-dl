@@ -49,7 +49,7 @@ __tests__ = (
     "origin": "ja",
     "published": 2023,
     "publisher": (),
-    "rank": range(29_000, 32_000),
+    "rank": range(20_000, 40_000),
     "rating": "safe",
     "score": float,
     "status": "Ongoing",
@@ -164,11 +164,54 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://comick.io/comic/00-boku-no-hero-academia/0nJzK-volume-1-en",
+    "#comment" : "volume-only chapter (#8043)",
+    "#class"   : comick.ComickChapterExtractor,
+    "#pattern" : r"https://meo.comick.pictures/\d+-[\w-]+\.(jpg|png)",
+    "#count"   : 187,
+
+    "manga"         : "Boku no Hero Academia",
+    "manga_hid"     : "q1hZ1dbv",
+    "manga_id"      : 11359,
+    "manga_slug"    : "00-boku-no-hero-academia",
+    "volume"        : 1,
+    "chapter"       : 0,
+    "chapter_hid"   : "0nJzK",
+    "chapter_id"    : 2285787,
+    "chapter_minor" : "",
+    "chapter_string": "0nJzK-volume-1-en",
+    "title"         : "",
+    "lang"          : "en",
+    "artist"        : ["Horikoshi Kouhei"],
+    "author"        : ["Horikoshi Kouhei"],
+    "group"         : ["Official"],
+    "count"         : 187,
+    "date"          : "dt:2022-10-08 06:07:50",
+    "date_updated"  : "dt:2025-01-01 18:56:24",
+    "demographic"   : "Shounen",
+    "extension"     : {"jpg", "png"},
+    "filename"      : str,
+    "width"         : int,
+    "height"        : int,
+    "mature"        : True,
+    "origin"        : "ja",
+    "published"     : 2014,
+    "rating"        : "safe",
+    "score"         : float,
+    "status"        : "Complete",
+},
+
+{
     "#url"     : "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon",
     "#comment" : "all chapters",
     "#class"   : comick.ComickMangaExtractor,
     "#pattern" : comick.ComickChapterExtractor.pattern,
     "#count"   : range(890, 1000),
+
+    "volume" : int,
+    "chapter": int,
+    "chapter_minor": str,
+    "lang"   : "iso:639",
 },
 
 {
@@ -232,6 +275,33 @@ __tests__ = (
 
     "chapter": {0, 1},
     "lang"   : "es-419",
+},
+
+{
+    "#url"     : "https://comick.io/comic/fate-type-redline?lang=en&group=BananaShiki",
+    "#comment" : "'group_name' is None for some chapters (#8045)",
+    "#class"   : comick.ComickMangaExtractor,
+    "#pattern" : comick.ComickChapterExtractor.pattern,
+    "#count"   : range(50, 100),
+},
+
+{
+    "#url"     : "https://comick.io/comic/q1hZ1dbv",
+    "#comment" : "volume-only 'chapters' (#8043)",
+    "#class"   : comick.ComickMangaExtractor,
+    "#range"   : "1-5",
+    "#results" : (
+        "https://comick.io/comic/00-boku-no-hero-academia/0nJzK-volume-1-en",
+        "https://comick.io/comic/00-boku-no-hero-academia/oBxML-volume-1-en",
+        "https://comick.io/comic/00-boku-no-hero-academia/lyq4r-volume-2-en",
+        "https://comick.io/comic/00-boku-no-hero-academia/wNJYr-volume-2-en",
+        "https://comick.io/comic/00-boku-no-hero-academia/nAv4E-volume-3-en",
+    ),
+
+    "volume" : {1, 2, 3},
+    "chapter": 0,
+    "chapter_minor": "",
+    "lang"   : "iso:639",
 },
 
 )

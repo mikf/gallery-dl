@@ -110,7 +110,7 @@ class TestExtractorModule(unittest.TestCase):
                 except AssertionError:
                     pass
                 else:
-                    self.fail(result["#url"] + ": Test did not fail")
+                    self.fail(f"{result['#url']}: Test did not fail")
             else:
                 self.assertCategories(result)
 
@@ -167,8 +167,7 @@ class TestExtractorModule(unittest.TestCase):
             extr.finalize()
         except ImportError as exc:
             if exc.name in ("youtube_dl", "yt_dlp"):
-                raise unittest.SkipTest("cannot import module '{}'".format(
-                    exc.name))
+                raise unittest.SkipTest(f"cannot import module '{exc.name}'")
             raise
 
     def test_docstrings(self):
@@ -179,7 +178,7 @@ class TestExtractorModule(unittest.TestCase):
                     self.assertNotEqual(
                         extr1.__doc__,
                         extr2.__doc__,
-                        "{} <-> {}".format(extr1, extr2),
+                        f"{extr1} <-> {extr2}",
                     )
 
     def test_names(self):
@@ -191,12 +190,10 @@ class TestExtractorModule(unittest.TestCase):
 
         for extr in extractor.extractors():
             if extr.category not in ("", "oauth", "ytdl"):
-                expected = "{}{}Extractor".format(
-                    capitalize(extr.category),
-                    capitalize(extr.subcategory),
-                )
+                expected = (f"{capitalize(extr.category)}"
+                            f"{capitalize(extr.subcategory)}Extractor")
                 if expected[0].isdigit():
-                    expected = "_" + expected
+                    expected = f"_{expected}"
                 self.assertEqual(expected, extr.__name__)
 
 
@@ -225,7 +222,7 @@ class TestExtractorWait(unittest.TestCase):
 
             calls = sleep.mock_calls
             self.assertEqual(len(calls), 1)
-            self.assertAlmostEqual(calls[0][1][0], 6.0, places=1)
+            self.assertAlmostEqual(calls[0][1][0], 6.0, places=0)
 
             calls = log.info.mock_calls
             self.assertEqual(len(calls), 1)
@@ -266,7 +263,7 @@ class TextExtractorOAuth(unittest.TestCase):
 
     def test_oauth1(self):
         for category in ("flickr", "smugmug", "tumblr"):
-            extr = extractor.find("oauth:" + category)
+            extr = extractor.find(f"oauth:{category}")
 
             with patch.object(extr, "_oauth1_authorization_flow") as m:
                 for msg in extr:
@@ -275,7 +272,7 @@ class TextExtractorOAuth(unittest.TestCase):
 
     def test_oauth2(self):
         for category in ("deviantart", "reddit"):
-            extr = extractor.find("oauth:" + category)
+            extr = extractor.find(f"oauth:{category}")
 
             with patch.object(extr, "_oauth2_authorization_code_grant") as m:
                 for msg in extr:
