@@ -134,6 +134,9 @@ class PathFormat():
             basedir = self.clean_path(basedir)
         self.basedirectory = basedir
 
+    def __str__(self):
+        return self.realpath
+
     def open(self, mode="wb"):
         """Open file and return a corresponding file object"""
         try:
