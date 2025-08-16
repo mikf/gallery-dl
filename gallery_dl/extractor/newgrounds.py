@@ -224,6 +224,10 @@ class NewgroundsExtractor(Extractor):
             "width"      : text.parse_int(full('width="', '"')),
             "height"     : text.parse_int(full('height="', '"')),
         }
+
+        if not data["url"]:
+            data["url"] = extr('<a href="', '"')
+
         index = data["url"].rpartition("/")[2].partition("_")[0]
         data["index"] = text.parse_int(index)
         data["_index"] = index
