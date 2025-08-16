@@ -899,10 +899,10 @@ class CivitaiSearchAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.root = "https://search.civitai.com"
+        self.root = "https://search-new.civitai.com"
         self.headers = {
-            "Authorization": "Bearer ab8565e5ab8dc2d8f0d4256d204781cb63fe8b031"
-                             "eb3779cbbed38a7b5308e5c",
+            "Authorization": "Bearer 8c46eb2508e21db1e9828a97968d91ab1ca1caa5f"
+                             "70a00e88a2ba1e286603b61",
             "Content-Type": "application/json",
             "X-Meilisearch-Client": "Meilisearch instant-meilisearch (v0.13.5)"
                                     " ; Meilisearch JavaScript (v0.34.0)",
