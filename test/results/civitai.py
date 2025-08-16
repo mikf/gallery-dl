@@ -389,6 +389,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://civitai.com/videos",
+    "#class"   : civitai.CivitaiVideosExtractor,
+},
+
+{
+    "#url"     : "https://civitai.com/videos?tags=5169",
+    "#class"   : civitai.CivitaiVideosExtractor,
+},
+
+{
     "#url"  : "https://civitai.com/models",
     "#class": civitai.CivitaiModelsExtractor,
 },
