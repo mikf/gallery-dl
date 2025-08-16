@@ -463,6 +463,17 @@ class CivitaiImagesExtractor(CivitaiExtractor):
         return self.api.images(params)
 
 
+class CivitaiVideosExtractor(CivitaiExtractor):
+    subcategory = "videos"
+    pattern = BASE_PATTERN + r"/videos(?:/?\?([^#]+))?(?:$|#)"
+    example = "https://civitai.com/videos"
+
+    def images(self):
+        params = self._parse_query(self.groups[0])
+        params["types"] = ("video",)
+        return self.api.images(params)
+
+
 class CivitaiPostsExtractor(CivitaiExtractor):
     subcategory = "posts"
     pattern = BASE_PATTERN + r"/posts(?:/?\?([^#]+))?(?:$|#)"

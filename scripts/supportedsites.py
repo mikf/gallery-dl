@@ -245,6 +245,7 @@ SUBCATEGORY_MAP = {
     "civitai": {
         "models": "Model Listings",
         "images": "Image Listings",
+        "videos": "Video Listings",
         "posts" : "Post Listings",
         "search-models": "Model Searches",
         "search-images": "Image Searches",
