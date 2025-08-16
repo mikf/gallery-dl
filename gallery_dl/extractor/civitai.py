@@ -459,6 +459,7 @@ class CivitaiImagesExtractor(CivitaiExtractor):
 
     def images(self):
         params = self._parse_query(self.groups[0])
+        params["types"] = ("image",)
         return self.api.images(params)
 
 
@@ -521,6 +522,7 @@ class CivitaiUserImagesExtractor(CivitaiExtractor):
     def __init__(self, match):
         user, query = match.groups()
         self.params = self._parse_query(query)
+        self.params["types"] = ("image",)
         if self.params.get("section") == "reactions":
             self.subcategory = "reactions-images"
             self.images = self._image_reactions
@@ -708,7 +710,6 @@ class CivitaiTrpcAPI():
                 "useIndex"     : True,
                 "period"       : "AllTime",
                 "sort"         : "Newest",
-                "types"        : ("image",),
                 "withMeta"     : False,  # Metadata Only
                 "fromPlatform" : False,  # Made On-Site
                 "browsingLevel": self.nsfw,
