@@ -25,6 +25,7 @@ __tests__ = (
     "index"      : 1993615,
     "rating"     : "e",
     "score"      : float,
+    "slug"       : "ryu-is-hawt",
     "tags"       : [
         "ryu",
         "streetfighter",
@@ -40,6 +41,9 @@ __tests__ = (
     "#category": ("", "newgrounds", "image"),
     "#class"   : newgrounds.NewgroundsImageExtractor,
     "#results" : "https://art.ngfiles.com/images/1993000/1993615_4474_tomfulp_ryu-is-hawt.44f81090378ae9c257a5e46a8e17cc4d.gif?f1695674895",
+
+    "slug" : "ryu-is-hawt",
+    "title": "Ryu is Hawt",
 },
 
 {
@@ -51,6 +55,9 @@ __tests__ = (
         "https://art.ngfiles.com/images/1438000/1438673_sailoryon_yon-dream-buster.jpg?f1601058173",
         "https://art.ngfiles.com/comments/172000/iu_172374_7112211.jpg",
     ),
+
+    "slug" : "yon-dream-buster",
+    "title": "Yon Dream Buster!",
 },
 
 {
@@ -116,6 +123,16 @@ __tests__ = (
     "#class"   : newgrounds.NewgroundsImageExtractor,
     "#options" : {"username": None},
     "#count"   : 0,
+},
+
+{
+    "#url"     : "https://www.newgrounds.com/art/view/shamfoo/arigatou-ke-xue-zhe69",
+    "#comment" : "japanese title, ascii slug (#8064)",
+    "#class"   : newgrounds.NewgroundsImageExtractor,
+    "#results" : "https://art.ngfiles.com/images/878000/878868_shamfoo_arigatou-ke-xue-zhe69.png?f1555537672",
+
+    "slug" : "arigatou-ke-xue-zhe69",
+    "title": "ありがとう科学者69",
 },
 
 {
