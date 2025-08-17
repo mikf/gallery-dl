@@ -184,6 +184,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/users/84930793/artworks",
+    "#comment" : "empty profile (#8066)",
+    "#class"   : pixiv.PixivArtworksExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/users/173530/avatar",
     "#class"   : pixiv.PixivAvatarExtractor,
     "#sha1_content": "4e57544480cc2036ea9608103e8f024fa737fe66",
