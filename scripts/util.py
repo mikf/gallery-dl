@@ -32,6 +32,7 @@ def git(command, *args):
     return subprocess.Popen(
         ["git", command, *args],
         stdout=subprocess.PIPE,
+        cwd=ROOTDIR,
     ).communicate()[0].strip().decode()
 
 
