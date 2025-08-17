@@ -206,6 +206,7 @@ class NewgroundsExtractor(Extractor):
 
         data["tags"].sort()
         data["user"] = self.user or data["artist"][0]
+        data["slug"] = post_url[post_url.rfind("/")+1:]
         data["post_url"] = post_url
         return data
 
