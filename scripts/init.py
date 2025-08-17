@@ -52,6 +52,8 @@ def init_extractor(args):
             if func(args, lines):
                 with util.lazy(path) as fp:
                     fp.writelines(lines)
+            else:
+                LOG.warning("'%s' already present", category)
         else:
             try:
                 with util.open(path, args.open_mode) as fp:
@@ -60,6 +62,9 @@ def init_extractor(args):
                 LOG.warning("File already present")
             except Exception as exc:
                 LOG.error("%s: %s", exc.__class__.__name__, exc, exc_info=exc)
+
+        if args.git:
+            util.git("add", path)
 
 
 ###############################################################################
@@ -308,6 +313,9 @@ def parse_args(args=None):
     parser.add_argument(
         "-F", "--force",
         dest="open_mode", action="store_const", const="w", default="x")
+    parser.add_argument(
+        "-g", "--git",
+        dest="git", action="store_true")
     parser.add_argument(
         "-M", "--no-module",
         dest="init_module", action="store_false")
