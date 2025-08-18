@@ -47,8 +47,9 @@ class TwitterExtractor(Extractor):
         self.cards_blacklist = self.config("cards-blacklist")
 
         if not self.config("transform", True):
-            self._transform_user = util.identity
-            self._transform_tweet = util.identity
+            self._transform_community = \
+                self._transform_tweet = \
+                self._transform_user = util.identity
 
         self._cursor = None
         self._user = None
@@ -412,6 +413,11 @@ class TwitterExtractor(Extractor):
             content = tget("full_text") or tget("text") or ""
             entities = legacy["entities"]
 
+        if "author_community_relationship" in tweet:
+            tdata["community"] = self._transform_community(
+                tweet["author_community_relationship"]
+                ["community_results"]["result"])
+
         if hashtags := entities.get("hashtags"):
             tdata["hashtags"] = [t["text"] for t in hashtags]
 
@@ -452,6 +458,36 @@ class TwitterExtractor(Extractor):
                 ((tdata["retweet_id"] >> 22) + 1288834974657) // 1000)
 
         return tdata
+
+    def _transform_community(self, com):
+        try:
+            cid = com.get("id_str") or com["rest_id"]
+        except KeyError:
+            return {}
+
+        try:
+            return self._user_cache[f"C#{cid}"]
+        except KeyError:
+            pass
+
+        self._user_cache[f"C#{cid}"] = cdata = {
+            "id": text.parse_int(cid),
+            "name": com["name"],
+            "description": com["description"],
+            "date": text.parse_timestamp(com["created_at"] // 1000),
+            "nsfw": com["is_nsfw"],
+            "role": com["role"],
+            "member_count": com["member_count"],
+            "rules": [rule["name"] for rule in com["rules"]],
+            "admin": (admin := com.get("admin_results")) and
+                admin["result"]["core"]["screen_name"],  # noqa: E131
+            "creator": (creator := com.get("creator_results")) and
+                creator["result"]["core"]["screen_name"],  # noqa: E131
+            "banner": (banner := com.get("custom_banner_media")) and
+                banner["media_info"]["original_img_url"],  # noqa: E131
+        }
+
+        return cdata
 
     def _transform_user(self, user):
         try:
@@ -873,6 +909,9 @@ class TwitterHashtagExtractor(TwitterExtractor):
 class TwitterCommunityExtractor(TwitterExtractor):
     """Extractor for a Twitter community"""
     subcategory = "community"
+    directory_fmt = ("{category}", "Communities",
+                     "{community[name]} ({community[id]})")
+    archive_fmt = "C_{community[id]}_{tweet_id}_{num}"
     pattern = BASE_PATTERN + r"/i/communities/(\d+)"
     example = "https://x.com/i/communities/12345"
 
@@ -885,6 +924,8 @@ class TwitterCommunityExtractor(TwitterExtractor):
 class TwitterCommunitiesExtractor(TwitterExtractor):
     """Extractor for followed Twitter communities"""
     subcategory = "communities"
+    directory_fmt = TwitterCommunityExtractor.directory_fmt
+    archive_fmt = TwitterCommunityExtractor.archive_fmt
     pattern = BASE_PATTERN + r"/([^/?#]+)/communities/?$"
     example = "https://x.com/i/communities"
 
@@ -1366,6 +1407,20 @@ class TwitterAPI():
         return self._pagination_tweets(
             endpoint, variables,
             ("search_by_raw_query", "search_timeline", "timeline"))
+
+    def community_query(self, community_id):
+        endpoint = "/graphql/2W09l7nD7ZbxGQHXvfB22w/CommunityQuery"
+        params = {
+            "variables": self._json_dumps({
+                "communityId": community_id,
+            }),
+            "features": self._json_dumps({
+                "c9s_list_members_action_api_enabled": False,
+                "c9s_superc9s_indication_enabled": False,
+            }),
+        }
+        return (self._call(endpoint, params)
+                ["data"]["communityResults"]["result"])
 
     def community_tweets_timeline(self, community_id):
         endpoint = "/graphql/Nyt-88UX4-pPCImZNUl9RQ/CommunityTweetsTimeline"
