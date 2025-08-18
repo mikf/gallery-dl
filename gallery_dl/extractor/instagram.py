@@ -166,6 +166,7 @@ class InstagramExtractor(Extractor):
             else:
                 post_url = f"{self.root}/stories/highlights/{reel_id}/"
             data = {
+                "user"   : post.get("user"),
                 "expires": text.parse_timestamp(expires),
                 "post_id": reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
