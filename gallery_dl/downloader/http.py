@@ -432,6 +432,9 @@ class HttpDownloader(DownloaderBase):
         if not SIGNATURE_CHECKS[pathfmt.extension](file_header):
             for ext, check in SIGNATURE_CHECKS.items():
                 if check(file_header):
+                    self.log.debug(
+                        "Adjusting filename extension of '%s' to '%s'",
+                        pathfmt.filename, ext)
                     pathfmt.set_extension(ext)
                     pathfmt.build_path()
                     return True
