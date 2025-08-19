@@ -649,18 +649,19 @@ class TwitterUserExtractor(Dispatch, TwitterExtractor):
     def items(self):
         user, user_id = self.groups
         if user_id is not None:
-            user = "id:" + user_id
+            user = f"id:{user_id}"
 
         base = f"{self.root}/{user}/"
         return self._dispatch_extractors((
-            (TwitterInfoExtractor      , base + "info"),
-            (TwitterAvatarExtractor    , base + "photo"),
-            (TwitterBackgroundExtractor, base + "header_photo"),
-            (TwitterTimelineExtractor  , base + "timeline"),
-            (TwitterTweetsExtractor    , base + "tweets"),
-            (TwitterMediaExtractor     , base + "media"),
-            (TwitterRepliesExtractor   , base + "with_replies"),
-            (TwitterLikesExtractor     , base + "likes"),
+            (TwitterInfoExtractor      , f"{base}info"),
+            (TwitterAvatarExtractor    , f"{base}photo"),
+            (TwitterBackgroundExtractor, f"{base}header_photo"),
+            (TwitterTimelineExtractor  , f"{base}timeline"),
+            (TwitterTweetsExtractor    , f"{base}tweets"),
+            (TwitterMediaExtractor     , f"{base}media"),
+            (TwitterRepliesExtractor   , f"{base}with_replies"),
+            (TwitterHighlightsExtractor, f"{base}highlights"),
+            (TwitterLikesExtractor     , f"{base}likes"),
         ), ("timeline",))
 
 
@@ -779,6 +780,16 @@ class TwitterRepliesExtractor(TwitterExtractor):
 
     def tweets(self):
         return self.api.user_tweets_and_replies(self.user)
+
+
+class TwitterHighlightsExtractor(TwitterExtractor):
+    """Extractor for Tweets from a user's highlights timeline"""
+    subcategory = "highlights"
+    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/highlights(?!\w)"
+    example = "https://x.com/USER/highlights"
+
+    def tweets(self):
+        return self.api.user_highlights(self.user)
 
 
 class TwitterMediaExtractor(TwitterExtractor):
@@ -1346,6 +1357,20 @@ class TwitterAPI():
             "count": 100,
             "includePromotedContent": False,
             "withCommunity": True,
+            "withVoice": True,
+        }
+        field_toggles = {
+            "withArticlePlainText": False,
+        }
+        return self._pagination_tweets(
+            endpoint, variables, field_toggles=field_toggles)
+
+    def user_highlights(self, screen_name):
+        endpoint = "/graphql/gmHw9geMTncZ7jeLLUUNOw/UserHighlightsTweets"
+        variables = {
+            "userId": self._user_id_by_screen_name(screen_name),
+            "count": 100,
+            "includePromotedContent": False,
             "withVoice": True,
         }
         field_toggles = {

@@ -5422,14 +5422,16 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"info"``,
-    ``"avatar"``,
-    ``"background"``,
-    ``"timeline"``,
-    ``"tweets"``,
-    ``"media"``,
-    ``"replies"``,
-    ``"likes"``.
+
+    * ``"info"``
+    * ``"avatar"``
+    * ``"background"``
+    * ``"timeline"``
+    * ``"tweets"``
+    * ``"media"``
+    * ``"replies"``
+    * ``"highlights"``
+    * ``"likes"``
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
