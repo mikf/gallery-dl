@@ -364,6 +364,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://civitai.com/posts/20403514",
+    "#comment" : "mixed image & video (#8053)",
+    "#class"   : civitai.CivitaiPostExtractor,
+    "#results" : (
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/62dbebbe-48e9-4232-b4da-33c70d19683d/original=true/91967659.png",
+        "https://image.civitai.com/xG1nkqKTMzGDvpLrqFT7WA/e5786ddc-29b3-4a69-aec9-fba4dc2c78b5/quality=100/91967639.webm",
+    ),
+},
+
+{
     "#url"  : "https://civitai.com/tag/mecha",
     "#class": civitai.CivitaiTagExtractor,
 },
@@ -376,6 +386,16 @@ __tests__ = (
 {
     "#url"  : "https://civitai.com/images?modelVersionId=786644",
     "#class": civitai.CivitaiImagesExtractor,
+},
+
+{
+    "#url"     : "https://civitai.com/videos",
+    "#class"   : civitai.CivitaiVideosExtractor,
+},
+
+{
+    "#url"     : "https://civitai.com/videos?tags=5169",
+    "#class"   : civitai.CivitaiVideosExtractor,
 },
 
 {

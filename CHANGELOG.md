@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.30.4 - 2025-08-16
+### Extractors
+#### Additions
+- [civitai] add 'videos' extractor ([#6644](https://github.com/mikf/gallery-dl/issues/6644))
+#### Fixes
+- [civitai] fix posts not returning video files ([#8053](https://github.com/mikf/gallery-dl/issues/8053))
+- [civitai] fix '403 Forbidden' errors for searches
+- [kemono] use 'Accept: text/css' for API requests ([#8047](https://github.com/mikf/gallery-dl/issues/8047) [#8057](https://github.com/mikf/gallery-dl/issues/8057))
+#### Improvements
+- [newgrounds] add fallback for images with empty 'full_image_text' 'src'
+### Miscellaneous
+- fix accessing methods through 'path-metadata' proxy ([#6582](https://github.com/mikf/gallery-dl/issues/6582))
+
 ## 1.30.3 - 2025-08-15
 ### Extractors
 #### Additions

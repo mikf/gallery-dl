@@ -166,6 +166,7 @@ class InstagramExtractor(Extractor):
             else:
                 post_url = f"{self.root}/stories/highlights/{reel_id}/"
             data = {
+                "user"   : post.get("user"),
                 "expires": text.parse_timestamp(expires),
                 "post_id": reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
@@ -223,8 +224,7 @@ class InstagramExtractor(Extractor):
         for num, item in enumerate(items, 1):
 
             try:
-                candidates = item["image_versions2"]["candidates"]
-                image = candidates[0]
+                image = item["image_versions2"]["candidates"][0]
             except Exception:
                 self.log.warning("Missing media in post %s",
                                  data["post_shortcode"])
@@ -240,12 +240,7 @@ class InstagramExtractor(Extractor):
                 video = None
                 media = image
 
-                if len(candidates) <= 3 and not post.get("__gdl_gen"):
-                    self.log.warning(
-                        "%s: Image candidate list possibly incomplete "
-                        "(%s items). Consider refreshing your cookies.",
-                        data["post_shortcode"], len(candidates))
-                elif image["width"] < item.get("original_width", 0) or \
+                if image["width"] < item.get("original_width", 0) or \
                         image["height"] < item.get("original_height", 0):
                     self.log.warning(
                         "%s: Available image resolutions lower than the "
@@ -711,7 +706,6 @@ class InstagramAvatarExtractor(InstagramExtractor):
             "caption"   : None,
             "like_count": 0,
             "image_versions2": {"candidates": (avatar,)},
-            "__gdl_gen" : True,
         },)
 
 

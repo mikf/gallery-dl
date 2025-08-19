@@ -1870,19 +1870,16 @@ class TwitterAPI():
                     continue
 
                 if "retweeted_status_result" in legacy:
-                    retweet = legacy["retweeted_status_result"]["result"]
-                    if "tweet" in retweet:
-                        retweet = retweet["tweet"]
-                    if original_retweets:
-                        try:
+                    try:
+                        retweet = legacy["retweeted_status_result"]["result"]
+                        if "tweet" in retweet:
+                            retweet = retweet["tweet"]
+                        if original_retweets:
                             retweet["legacy"]["retweeted_status_id_str"] = \
                                 retweet["rest_id"]
                             retweet["_retweet_id_str"] = tweet["rest_id"]
                             tweet = retweet
-                        except KeyError:
-                            continue
-                    else:
-                        try:
+                        else:
                             legacy["retweeted_status_id_str"] = \
                                 retweet["rest_id"]
                             tweet["author"] = \
@@ -1904,8 +1901,11 @@ class TwitterAPI():
                                     rtlegacy["withheld_scope"]
 
                             legacy["full_text"] = rtlegacy["full_text"]
-                        except KeyError:
-                            pass
+                    except Exception as exc:
+                        extr.log.debug(
+                            "%s:  %s: %s",
+                            tweet.get("rest_id"), exc.__class__.__name__, exc)
+                        continue
 
                 yield tweet
 

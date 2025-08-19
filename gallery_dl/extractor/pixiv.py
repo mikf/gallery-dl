@@ -1251,9 +1251,9 @@ class PixivAppAPI():
             "/v1/user/bookmark-tags/illust", params, "bookmark_tags")
 
     @memcache(keyarg=1)
-    def user_detail(self, user_id):
+    def user_detail(self, user_id, fatal=True):
         params = {"user_id": user_id}
-        return self._call("/v1/user/detail", params)
+        return self._call("/v1/user/detail", params, fatal=fatal)
 
     def user_following(self, user_id, restrict="public"):
         params = {"user_id": user_id, "restrict": restrict}
@@ -1261,7 +1261,7 @@ class PixivAppAPI():
 
     def user_illusts(self, user_id):
         params = {"user_id": user_id}
-        return self._pagination("/v1/user/illusts", params, user_data="user")
+        return self._pagination("/v1/user/illusts", params, key_user="user")
 
     def user_novels(self, user_id):
         params = {"user_id": user_id}
@@ -1271,7 +1271,7 @@ class PixivAppAPI():
         params = {"illust_id": illust_id}
         return self._call("/v1/ugoira/metadata", params)["ugoira_metadata"]
 
-    def _call(self, endpoint, params=None, parse=None):
+    def _call(self, endpoint, params=None, parse=None, fatal=True):
         url = "https://app-api.pixiv.net" + endpoint
 
         while True:
@@ -1283,7 +1283,7 @@ class PixivAppAPI():
             else:
                 data = response.json()
 
-            if "error" not in data:
+            if "error" not in data or not fatal:
                 return data
 
             self.log.debug(data)
@@ -1302,14 +1302,16 @@ class PixivAppAPI():
             raise exception.AbortExtraction(f"API request failed: {msg}")
 
     def _pagination(self, endpoint, params,
-                    key_items="illusts", key_data=None, user_data=None):
+                    key_items="illusts", key_data=None, key_user=None):
         data = self._call(endpoint, params)
 
         if key_data is not None:
             self.data = data.get(key_data)
-        if user_data is not None:
-            if not data[user_data].get("id"):
+        if key_user is not None and not data[key_user].get("id"):
+            user = self.user_detail(self.extractor.user_id, fatal=False)
+            if user.get("error"):
                 raise exception.NotFoundError("user")
+            return
 
         while True:
             yield from data[key_items]

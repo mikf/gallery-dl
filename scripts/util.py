@@ -27,6 +27,15 @@ def open(path, mode="r"):
     return builtins.open(path, mode, encoding="utf-8", newline="\n")
 
 
+def git(command, *args):
+    import subprocess
+    return subprocess.Popen(
+        ["git", command, *args],
+        stdout=subprocess.PIPE,
+        cwd=ROOTDIR,
+    ).communicate()[0].strip().decode()
+
+
 class lazy():
 
     def __init__(self, path):

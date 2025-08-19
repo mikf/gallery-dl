@@ -184,7 +184,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="civitai" title="civitai">
     <td>Civitai</td>
     <td>https://www.civitai.com/</td>
-    <td>Collections, Generated Files, individual Images, Image Listings, Models, Model Listings, Posts, Post Listings, Image Searches, Model Searches, Tag Searches, User Profiles, User Collections, User Images, Image Reactions, User Models, User Posts, User Videos, Video Reactions</td>
+    <td>Collections, Generated Files, individual Images, Image Listings, Models, Model Listings, Posts, Post Listings, Image Searches, Model Searches, Tag Searches, User Profiles, User Collections, User Images, Image Reactions, User Models, User Posts, User Videos, Video Reactions, Video Listings</td>
     <td></td>
 </tr>
 <tr id="comicvine" title="comicvine">

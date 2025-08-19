@@ -118,7 +118,7 @@ class PathfmtProxy():
 
     def __getattribute__(self, name):
         pathfmt = object.__getattribute__(self, "job").pathfmt
-        return pathfmt.__dict__.get(name) if pathfmt else None
+        return getattr(pathfmt, name, None) if pathfmt else None
 
     def __str__(self):
         if pathfmt := object.__getattribute__(self, "job").pathfmt:
