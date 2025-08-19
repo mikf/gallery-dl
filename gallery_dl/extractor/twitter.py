@@ -640,9 +640,23 @@ class TwitterExtractor(Extractor):
             return self.cookies_update(_login_impl(self, username, password))
 
 
+class TwitterHomeExtractor(TwitterExtractor):
+    """Extractor for Twitter home timelines"""
+    subcategory = "home"
+    pattern = (BASE_PATTERN +
+               r"/(?:home(?:/fo(?:llowing|r[-_ ]?you()))?|i/timeline)/?$")
+    example = "https://x.com/home"
+
+    def tweets(self):
+        if self.groups[0] is None:
+            return self.api.home_latest_timeline()
+        return self.api.home_timeline()
+
+
 class TwitterUserExtractor(Dispatch, TwitterExtractor):
     """Extractor for a Twitter user"""
-    pattern = (BASE_PATTERN + r"/(?!search)(?:([^/?#]+)/?(?:$|[?#])"
+    pattern = (BASE_PATTERN + r"/(?!search\b|home\b|i/timeline)(?:"
+               r"([^/?#]+)/?(?:$|\?|#)"
                r"|i(?:/user/|ntent/user\?user_id=)(\d+))")
     example = "https://x.com/USER"
 
@@ -668,7 +682,8 @@ class TwitterUserExtractor(Dispatch, TwitterExtractor):
 class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for a Twitter user timeline"""
     subcategory = "timeline"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/timeline(?!\w)"
+    pattern = (BASE_PATTERN +
+               r"/(?!search\b|home\b|i\b)([^/?#]+)/timeline(?!\w)")
     example = "https://x.com/USER/timeline"
 
     def _init_cursor(self):
@@ -1483,6 +1498,27 @@ class TwitterAPI():
         return self._pagination_tweets(
             endpoint, variables,
             ("viewer", "communities_timeline", "timeline"))
+
+    def home_timeline(self):
+        endpoint = "/graphql/DXmgQYmIft1oLP6vMkJixw/HomeTimeline"
+        variables = {
+            "count": 100,
+            "includePromotedContent": False,
+            "latestControlAvailable": True,
+            "withCommunity": True,
+        }
+        return self._pagination_tweets(
+            endpoint, variables, ("home", "home_timeline_urt"))
+
+    def home_latest_timeline(self):
+        endpoint = "/graphql/SFxmNKWfN9ySJcXG_tjX8g/HomeLatestTimeline"
+        variables = {
+            "count": 100,
+            "includePromotedContent": False,
+            "latestControlAvailable": True,
+        }
+        return self._pagination_tweets(
+            endpoint, variables, ("home", "home_timeline_urt"))
 
     def live_event_timeline(self, event_id):
         endpoint = f"/2/live_event/timeline/{event_id}.json"
