@@ -445,6 +445,7 @@ Default
         ``zerochan``
     * ``"1.0"``
         ``furaffinity``
+        ``rule34``
     * ``"1.0-2.0"``
         ``flickr``,
         ``pexels``,
@@ -4650,8 +4651,25 @@ Description
     restrict it to only one possible format.
 
 
+extractor.rule34.api-key & .user-id
+-----------------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Values from the `API Access Credentials` section
+    found near the bottom of your account's
+    `Options <https://rule34.xxx/index.php?page=account&s=options>`__
+    page.
+
+    Enable `Generate New Key?` and click `Save`
+    if the value after ``&api_key=`` is empty,
+    e.g. ``&api_key=&user_id=12345``
+
+
 extractor.rule34xyz.format
----------------------------
+--------------------------
 Type
     * ``string``
     * ``list`` of ``strings``
