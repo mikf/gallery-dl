@@ -185,13 +185,13 @@ def remap_categories():
             opts[new] = opts[old]
 
 
-def load(files=None, strict=False, loads=util.json_loads):
+def load(files=None, strict=False, loads=util.json_loads, conf=_config):
     """Load JSON configuration files"""
     for pathfmt in files or _default_configs:
         path = util.expand_path(pathfmt)
         try:
             with open(path, encoding="utf-8") as fp:
-                conf = loads(fp.read())
+                _conf = loads(fp.read())
         except OSError as exc:
             if strict:
                 log.error(exc)
@@ -202,17 +202,17 @@ def load(files=None, strict=False, loads=util.json_loads):
             if strict:
                 raise SystemExit(2)
         else:
-            if not _config:
-                _config.update(conf)
+            if not conf:
+                conf.update(_conf)
             else:
-                util.combine_dict(_config, conf)
+                util.combine_dict(conf, _conf)
             _files.append(pathfmt)
 
-            if "subconfigs" in conf:
-                if subconfigs := conf["subconfigs"]:
+            if "subconfigs" in _conf:
+                if subconfigs := _conf["subconfigs"]:
                     if isinstance(subconfigs, str):
                         subconfigs = (subconfigs,)
-                    load(subconfigs, strict, loads)
+                    load(subconfigs, strict, loads, conf)
 
 
 def clear():
