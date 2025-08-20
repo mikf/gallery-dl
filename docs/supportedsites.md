@@ -1627,6 +1627,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Boards, Threads</td>
     <td></td>
 </tr>
+<tr id="gurochan" title="gurochan">
+    <td>Gurochan</td>
+    <td>https://boards.guro.cx/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
 
 <tr id="wikimedia" title="wikimedia">
     <td colspan="4"><strong>Wikimedia Instances</strong></td>
