@@ -381,26 +381,31 @@ __tests__ = (
 
 {
     "#url"     : "https://www.tumblr.com/search/nathan fielder",
-    "#category": ("", "tumblr", "search"),
     "#class"   : tumblr.TumblrSearchExtractor,
 },
 
 {
     "#url"     : "https://www.tumblr.com/search/nathan fielder/recent/quote?src=typed_query",
-    "#category": ("", "tumblr", "search"),
     "#class"   : tumblr.TumblrSearchExtractor,
 },
 
 {
     "#url"     : "https://www.tumblr.com/search/nathan%20fielder?t=90",
-    "#category": ("", "tumblr", "search"),
     "#class"   : tumblr.TumblrSearchExtractor,
 },
 
 {
     "#url"     : "https://tumblr.com/search/nathan%20fielder?t=90",
-    "#category": ("", "tumblr", "search"),
     "#class"   : tumblr.TumblrSearchExtractor,
+},
+
+{
+    "#url"     : "https://www.tumblr.com/search/Sonic?src=typed_query",
+    "#class"   : tumblr.TumblrSearchExtractor,
+    "#options" : {"original": False},
+    "#pattern" : r"https://\w+\.media\.tumblr\.com/.{10,}.\w+",
+    "#range"   : "1-10",
+    "count"    : range(1, 10),
 },
 
 {
