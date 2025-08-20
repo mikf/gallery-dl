@@ -26,6 +26,10 @@ BASE_PATTERN = VichanExtractor.update({
         "root": None,
         "pattern": r"smuglo(?:\.li|li\.net)",
     },
+    "gurochan": {
+        "root": "https://boards.guro.cx",
+        "pattern": r"boards\.guro\.cx",
+    },
 })
 
 
