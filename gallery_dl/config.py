@@ -191,7 +191,7 @@ def load(files=None, strict=False, loads=util.json_loads, conf=_config):
         path = util.expand_path(pathfmt)
         try:
             with open(path, encoding="utf-8") as fp:
-                _conf = loads(fp.read())
+                config = loads(fp.read())
         except OSError as exc:
             if strict:
                 log.error(exc)
@@ -203,13 +203,13 @@ def load(files=None, strict=False, loads=util.json_loads, conf=_config):
                 raise SystemExit(2)
         else:
             if not conf:
-                conf.update(_conf)
+                conf.update(config)
             else:
-                util.combine_dict(conf, _conf)
+                util.combine_dict(conf, config)
             _files.append(pathfmt)
 
-            if "subconfigs" in _conf:
-                if subconfigs := _conf["subconfigs"]:
+            if "subconfigs" in config:
+                if subconfigs := config["subconfigs"]:
                     if isinstance(subconfigs, str):
                         subconfigs = (subconfigs,)
                     load(subconfigs, strict, loads, conf)
