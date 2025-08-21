@@ -39,6 +39,7 @@ class InstagramExtractor(Extractor):
         self.www_claim = "0"
         self.csrf_token = util.generate_token()
         self._find_tags = util.re(r"#\w+").findall
+        self._warn_video_ua = True
         self._logged_in = True
         self._cursor = None
         self._user = None
@@ -236,6 +237,15 @@ class InstagramExtractor(Extractor):
                     key=lambda x: (x["width"], x["height"], x["type"]),
                 )
                 media = video
+
+                if self._warn_video_ua:
+                    self._warn_video_ua = False
+                    pattern = text.re(
+                        r"AppleWebKit/537\.36 \(KHTML, like Gecko\) "
+                        r"Chrome/\d+\.\d+\.\d+\.\d+ Safari/537\.36$")
+                    if not pattern.search(self.session.headers["User-Agent"]):
+                        self.log.warning("Potentially lowered video quality "
+                                         "due to non-Chrome User-Agent")
             else:
                 video = None
                 media = image
