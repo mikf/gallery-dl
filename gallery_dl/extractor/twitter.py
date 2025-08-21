@@ -1094,7 +1094,7 @@ class TwitterAvatarExtractor(TwitterExtractor):
     def tweets(self):
         self.api._user_id_by_screen_name(self.user)
         user = self._user_obj
-        url = user["legacy"]["profile_image_url_https"]
+        url = user["avatar"]["image_url"]
 
         if url == ("https://abs.twimg.com/sticky"
                    "/default_profile_images/default_profile_normal.png"):
