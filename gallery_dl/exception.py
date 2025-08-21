@@ -120,6 +120,11 @@ class NotFoundError(ExtractionError):
     default = "resource (gallery/image)"
 
 
+class NoAvailableProxyError(ExtractionError):
+    """No proxy from the list is available"""
+    default = "Proxy rotation error"
+
+
 ###############################################################################
 # User Input ##################################################################
 
