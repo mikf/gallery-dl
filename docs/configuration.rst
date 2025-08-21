@@ -2446,6 +2446,14 @@ Description
 
     | Each format is parsed as ``SIZE.EXT``.
     | Leave ``SIZE`` empty to download the regular, small avatar format.
+Note
+    | Consider updating
+      `archive-format <extractor.*.archive-format_>`__
+      for ``avatar`` results to
+    | ``"a_{_username}_{index}{title[6:]}.{extension}"``
+    | or similar when using an
+      `archive <extractor.*.archive_>`__
+      to be able to handle different formats.
 
 
 extractor.deviantart.folder.subfolders
