@@ -172,11 +172,19 @@ class YoutubeDLDownloader(DownloaderBase):
         pathfmt.build_path()
         self._set_outtmpl(ytdl_instance, pathfmt.realpath)
 
+        status = False
         for entry in info_dict["entries"]:
+            if not entry:
+                continue
             if self.rate_dyn is not None:
                 ytdl_instance.params["ratelimit"] = self.rate_dyn()
-            ytdl_instance.process_info(entry)
-        return True
+            try:
+                ytdl_instance.process_info(entry)
+                status = True
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.error("%s: %s", exc.__class__.__name__, exc)
+        return status
 
     def _extract_info(self, ytdl, url):
         return ytdl.extract_info(url, download=False)
