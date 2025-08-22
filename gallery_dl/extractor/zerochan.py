@@ -63,7 +63,7 @@ class ZerochanExtractor(BooruExtractor):
 
     def _parse_entry_html(self, entry_id):
         url = f"{self.root}/{entry_id}"
-        page = self.request(url).text
+        page = self.request(url, expected=(500,)).text
 
         try:
             jsonld = self._extract_jsonld(page)
@@ -191,7 +191,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
         metadata = self.config("metadata")
 
         while True:
-            page = self.request(url, params=params).text
+            page = self.request(url, params=params, expected=(500,)).text
             thumbs = text.extr(page, '<ul id="thumbs', '</ul>')
             extr = text.extract_from(thumbs)
 
