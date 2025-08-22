@@ -912,9 +912,16 @@ class CivitaiSearchAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.root = "https://search-new.civitai.com"
+
+        if auth := extractor.config("token"):
+            if " " not in auth:
+                auth = f"Bearer {auth}"
+        else:
+            auth = ("Bearer 8c46eb2508e21db1e9828a97968d"
+                    "91ab1ca1caa5f70a00e88a2ba1e286603b61")
+
         self.headers = {
-            "Authorization": "Bearer 8c46eb2508e21db1e9828a97968d91ab1ca1caa5f"
-                             "70a00e88a2ba1e286603b61",
+            "Authorization": auth,
             "Content-Type": "application/json",
             "X-Meilisearch-Client": "Meilisearch instant-meilisearch (v0.13.5)"
                                     " ; Meilisearch JavaScript (v0.34.0)",
