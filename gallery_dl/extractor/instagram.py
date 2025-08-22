@@ -236,6 +236,7 @@ class InstagramExtractor(Extractor):
                     video_versions,
                     key=lambda x: (x["width"], x["height"], x["type"]),
                 )
+                manifest = item.get("video_dash_manifest")
                 media = video
 
                 if self._warn_video_ua:
@@ -247,7 +248,7 @@ class InstagramExtractor(Extractor):
                         self.log.warning("Potentially lowered video quality "
                                          "due to non-Chrome User-Agent")
             else:
-                video = None
+                video = manifest = None
                 media = image
 
                 if image["width"] < item.get("original_width", 0) or \
@@ -273,9 +274,14 @@ class InstagramExtractor(Extractor):
                 "video_url"  : video["url"] if video else None,
                 "width"      : media["width"],
                 "height"     : media["height"],
-                "_ytdl_manifest_data": item.get("video_dash_manifest"),
             }
 
+            if manifest is not None:
+                media["_ytdl_manifest_data"] = manifest
+            if "owner" in item:
+                media["owner2"] = item["owner"]
+            if "reshared_story_media_author" in item:
+                media["author"] = item["reshared_story_media_author"]
             if "expiring_at" in item:
                 media["expires"] = text.parse_timestamp(post["expiring_at"])
 
