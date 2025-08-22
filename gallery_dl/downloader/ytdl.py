@@ -168,9 +168,12 @@ class YoutubeDLDownloader(DownloaderBase):
         return True
 
     def _download_playlist(self, ytdl_instance, pathfmt, info_dict):
-        pathfmt.set_extension("%(playlist_index)s.%(ext)s")
-        pathfmt.build_path()
-        self._set_outtmpl(ytdl_instance, pathfmt.realpath)
+        pathfmt.kwdict["extension"] = pathfmt.prefix
+        filename = pathfmt.build_filename(pathfmt.kwdict)
+        pathfmt.kwdict["extension"] = pathfmt.extension
+        path = pathfmt.realdirectory + filename
+        path = path.replace("%", "%%") + "%(playlist_index)s.%(ext)s"
+        self._set_outtmpl(ytdl_instance, path)
 
         status = False
         for entry in info_dict["entries"]:
