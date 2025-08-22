@@ -1994,6 +1994,18 @@ Description
     `quality <extractor.civitai.quality_>`__ ones.
 
 
+extractor.civitai.search-models.token
+-------------------------------------
+extractor.civitai.search-images.token
+-------------------------------------
+Type
+    ``string``
+Default
+    ``"8c46eb2508e21db1e9828a97968d91ab1ca1caa5f70a00e88a2ba1e286603b61"``
+Description
+    ``Authorization`` header value used for `/multi-search` queries.
+
+
 extractor.comick.lang
 ---------------------
 Type
