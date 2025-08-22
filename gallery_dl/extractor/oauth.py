@@ -60,9 +60,23 @@ class OAuthBase(Extractor):
                 pass
         server.close()
 
-        data = self.client.recv(1024).decode()
-        path = data.split(" ", 2)[1]
-        return text.parse_query(path.partition("?")[2])
+        data = None
+        try:
+            data = self.client.recv(1024).decode()
+            path = data.split(" ", 2)[1]
+            return text.parse_query(path.partition("?")[2])
+        except Exception as exc:
+            if data is None:
+                msg = "Failed to receive"
+            elif not data:
+                exc = ""
+                msg = "Received empty"
+            else:
+                self.log.warning("Response: %r", data)
+                msg = "Received invalid"
+            if exc:
+                exc = f" ({exc.__class__.__name__}: {exc})"
+            raise exception.AbortExtraction(f"{msg} OAuth response{exc}")
 
     def send(self, msg):
         """Send 'msg' to the socket opened in 'recv()'"""
