@@ -1573,6 +1573,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr id="nozrip" title="nozrip">
+    <td>GaryC Booru</td>
+    <td>https://noz.rip/booru/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr id="szurubooru" title="szurubooru">
     <td colspan="4"><strong>szurubooru Instances</strong></td>
