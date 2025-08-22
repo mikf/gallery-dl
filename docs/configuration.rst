@@ -2965,8 +2965,9 @@ Type
 Default
     ``null``
 Description
-    Values from the API Access Credentials section found at the bottom of your
-    `Account Options <https://gelbooru.com/index.php?page=account&s=options>`__
+    Values from the `API Access Credentials` section
+    found at the bottom of your account's
+    `Options <https://gelbooru.com/index.php?page=account&s=options>`__
     page.
 
 
