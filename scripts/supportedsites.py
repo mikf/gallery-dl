@@ -126,6 +126,7 @@ CATEGORY_MAP = {
     "nhentai"        : "nhentai",
     "nijie"          : "nijie",
     "nozomi"         : "Nozomi.la",
+    "nozrip"         : "GaryC Booru",
     "nsfwalbum"      : "NSFWalbum.com",
     "nudostar"       : "NudoStar.TV",
     "paheal"         : "Rule 34",

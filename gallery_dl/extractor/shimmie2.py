@@ -85,6 +85,11 @@ BASE_PATTERN = Shimmie2Extractor.update({
         "root": "https://vidya.pics",
         "pattern": r"vidya\.pics",
     },
+    "nozrip": {
+        "root": "https://noz.rip/booru",
+        "base": "https://noz.rip",
+        "pattern": r"noz\.rip/booru",
+    },
 }) + r"/(?:index\.php\?q=/?)?"
 
 
@@ -196,13 +201,14 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
         url = f"{self.root}/post/view/{post_id}"
         page = self.request(url).text
         extr = text.extract_from(page)
+        base = self.config_instance("base", self.root)
         qt = self._quote_type(page)
 
         post = {
             "id"      : post_id,
             "tags"    : extr(": ", "<").partition(" - ")[0].rstrip(")"),
             "md5"     : extr("/_thumbs/", "/"),
-            "file_url": self.root + (
+            "file_url": base + (
                 extr(f"id={qt}main_image{qt} src={qt}", qt) or
                 extr("<source src="+qt, qt)).lstrip("."),
             "width"   : extr("data-width=", " ").strip("\"'"),
