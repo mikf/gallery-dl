@@ -27,6 +27,7 @@ class YoutubeDLDownloader(DownloaderBase):
             "socket_timeout": self.config("timeout", extractor._timeout),
             "nocheckcertificate": not self.config("verify", extractor._verify),
             "proxy": self.proxies.get("http") if self.proxies else None,
+            "ignoreerrors": True,
         }
 
         self.ytdl_instance = None
