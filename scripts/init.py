@@ -47,13 +47,9 @@ def init_extractor(args):
         LOG.info(util.trim(path))
 
         if lines:
-            with util.open(path) as fp:
-                lines = fp.readlines()
-            if func(args, lines):
-                with util.lazy(path) as fp:
-                    fp.writelines(lines)
-            else:
-                LOG.warning("'%s' already present", category)
+            with util.lines(path) as lines:
+                if not func(args, lines):
+                    LOG.warning("'%s' already present", category)
         else:
             try:
                 with util.open(path, args.open_mode) as fp:
