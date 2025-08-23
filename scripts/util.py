@@ -64,3 +64,21 @@ class lazy():
         else:
             # only update atime and mtime
             os.utime(self.path)
+
+
+class lines():
+
+    def __init__(self, path, lazy=True):
+        self.path = path
+        self.lazy = lazy
+        self.lines = ()
+
+    def __enter__(self):
+        with open(self.path) as fp:
+            self.lines = lines = fp.readlines()
+        return lines
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        ctx = lazy(self.path) if self.lazy else open(self.path, "w")
+        with ctx as fp:
+            fp.writelines(self.lines)
