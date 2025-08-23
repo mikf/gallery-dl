@@ -1135,12 +1135,6 @@ Consider all listed sites to potentially be NSFW.
     <td>individual Images, Tag Searches</td>
     <td>Supported</td>
 </tr>
-<tr id="zzup" title="zzup">
-    <td>Zzup</td>
-    <td>https://zzup.com/</td>
-    <td>Galleries</td>
-    <td></td>
-</tr>
 <tr id="kabeuchi" title="kabeuchi">
     <td>かべうち</td>
     <td>https://kabe-uchiroom.com/</td>
