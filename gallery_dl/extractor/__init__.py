@@ -217,7 +217,6 @@ modules = [
     "xvideos",
     "yiffverse",
     "zerochan",
-    "zzup",
     "booru",
     "moebooru",
     "foolfuuka",
