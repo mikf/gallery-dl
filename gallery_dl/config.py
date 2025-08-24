@@ -169,6 +169,7 @@ def remap_categories():
         cmap = (
             ("coomerparty" , "coomer"),
             ("kemonoparty" , "kemono"),
+            ("giantessbooru", "sizebooru"),
             ("koharu"      , "schalenetwork"),
             ("naver"       , "naver-blog"),
             ("chzzk"       , "naver-chzzk"),

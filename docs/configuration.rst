@@ -436,6 +436,7 @@ Default
         ``pornpics``,
         ``schalenetwork``,
         ``scrolller``,
+        ``sizebooru``,
         ``soundgasm``,
         ``urlgalleries``,
         ``vk``,
@@ -4777,6 +4778,28 @@ Description
     Download animated images as ``.gif`` instead of ``.webp``
 
 
+extractor.sizebooru.metadata
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata:
+
+    * ``approver``
+    * ``artist``
+    * ``date``
+    * ``date_approved``
+    * ``favorite``
+    * ``source``
+    * ``tags``
+    * ``uploader``
+    * ``views``
+Note
+    This requires 1 additional HTTP request per post.
+
+
 extractor.skeb.article
 ----------------------
 Type
@@ -8074,20 +8097,21 @@ Default
     .. code:: json
 
         {
-            "coomerparty" : "coomer",
-            "kemonoparty" : "kemono",
-            "koharu"      : "schalenetwork",
-            "chzzk"       : "naver-chzzk",
-            "naver"       : "naver-blog",
-            "naverwebtoon": "naver-webtoon",
-            "pixiv"       : "pixiv-novel"
+            "coomerparty"  : "coomer",
+            "kemonoparty"  : "kemono",
+            "giantessbooru": "sizebooru",
+            "koharu"       : "schalenetwork",
+            "chzzk"        : "naver-chzzk",
+            "naver"        : "naver-blog",
+            "naverwebtoon" : "naver-webtoon",
+            "pixiv"        : "pixiv-novel"
         }
 Description
     Duplicate the configuration settings of extractor `categories`
     to other names.
 
     For example, a ``"naver": "naver-blog"`` key-value pair will make all
-    ``naver`` config settings available for ´´naver-blog´´ extractors as well.
+    ``naver`` config settings available for ``naver-blog`` extractors as well.
 
 
 jinja.environment
