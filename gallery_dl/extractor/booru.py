@@ -52,7 +52,8 @@ class BooruExtractor(BaseExtractor):
                 if notes:
                     self._notes(post, html)
 
-            text.nameext_from_url(url, post)
+            if "extension" not in post:
+                text.nameext_from_url(url, post)
             post.update(data)
             self._prepare(post)
 

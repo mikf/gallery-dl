@@ -159,6 +159,7 @@ CATEGORY_MAP = {
     "sexcom"         : "Sex.com",
     "silverpic"      : "SilverPic.com",
     "simplyhentai"   : "Simply Hentai",
+    "sizebooru"      : "Size Booru",
     "slickpic"       : "SlickPic",
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
@@ -390,6 +391,9 @@ SUBCATEGORY_MAP = {
     },
     "sexcom": {
         "pins": "User Pins",
+    },
+    "sizebooru": {
+        "user": "User Uploads",
     },
     "skeb": {
         "following"      : "Followed Creators",

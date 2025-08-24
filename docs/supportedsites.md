@@ -877,6 +877,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries, individual Images, Videos</td>
     <td></td>
 </tr>
+<tr id="sizebooru" title="sizebooru">
+    <td>Size Booru</td>
+    <td>https://sizebooru.com/</td>
+    <td>Favorites, Galleries, Posts, Tag Searches, User Uploads</td>
+    <td></td>
+</tr>
 <tr id="skeb" title="skeb">
     <td>Skeb</td>
     <td>https://skeb.jp/</td>

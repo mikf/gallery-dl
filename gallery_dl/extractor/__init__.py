@@ -170,6 +170,7 @@ modules = [
     "sexcom",
     "shimmie2",
     "simplyhentai",
+    "sizebooru",
     "skeb",
     "slickpic",
     "slideshare",
