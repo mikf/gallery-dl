@@ -1543,12 +1543,6 @@ Consider all listed sites to potentially be NSFW.
 <tr id="shimmie2" title="shimmie2">
     <td colspan="4"><strong>Shimmie2 Instances</strong></td>
 </tr>
-<tr id="giantessbooru" title="giantessbooru">
-    <td>Giantessbooru</td>
-    <td>https://sizechangebooru.com/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
-</tr>
 <tr id="cavemanon" title="cavemanon">
     <td>Cavemanon</td>
     <td>https://booru.cavemanon.xyz/</td>
