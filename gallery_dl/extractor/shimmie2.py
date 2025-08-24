@@ -79,7 +79,6 @@ BASE_PATTERN = Shimmie2Extractor.update({
     },
     "nozrip": {
         "root": "https://noz.rip/booru",
-        "base": "https://noz.rip",
         "pattern": r"noz\.rip/booru",
     },
 }) + r"/(?:index\.php\?q=/?)?"
@@ -160,10 +159,12 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
 
     def posts(self):
         post_id = self.groups[-1]
-        url = f"{self.root}/post/view/{post_id}"
+        root = self.root
+        base = root if (pos := root.find("/", 8)) < 0 else root[:pos]
+
+        url = f"{root}/post/view/{post_id}"
         page = self.request(url).text
         extr = text.extract_from(page)
-        base = self.config_instance("base", self.root)
         qt = self._quote_type(page)
 
         post = {
