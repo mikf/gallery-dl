@@ -55,7 +55,8 @@ class ZerochanExtractor(BooruExtractor):
             "login"   : "Login",
         }
 
-        response = self.request(url, method="POST", headers=headers, data=data)
+        response = self.request(
+            url, method="POST", headers=headers, data=data, expected=(500,))
         if not response.history:
             raise exception.AuthenticationError()
 
