@@ -800,6 +800,12 @@ def build_parser():
               "selected by NAME. Examples: 'date' or 'status[date]'"),
     )
     postprocessor.add_argument(
+        "--dirmtime",
+        dest="postprocessors", metavar="NAME", action=DirmtimeAction,
+        help=("Set folder modification times according to metadata "
+              "selected by NAME. Examples: 'date' or 'status[date]'"),
+    )
+    postprocessor.add_argument(
         "--mtime-from-date",
         dest="postprocessors", nargs=0, action=MtimeAction,
         const="date|status[date]",
