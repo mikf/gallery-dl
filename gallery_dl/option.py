@@ -74,6 +74,7 @@ class MtimeAction(argparse.Action):
             "value": f"{{{self.const or value}}}",
         })
 
+
 class DirmtimeAction(argparse.Action):
     """Configure dirmtime post processors"""
     def __call__(self, parser, namespace, value, option_string=None):
