@@ -1356,7 +1356,8 @@ class DeviantartSearchExtractor(DeviantartExtractor):
 
     def _search_html(self, params):
         url = self.root + "/search"
-
+        find = text.re(r'''href="https://www.deviantart.com/([^/?#]+)'''
+                       r'''/(art|journal)/(?:[^"]+-)?(\d+)''').findall
         while True:
             response = self.request(url, params=params)
 
@@ -1364,12 +1365,11 @@ class DeviantartSearchExtractor(DeviantartExtractor):
                 raise exception.AbortExtraction("HTTP redirect to login page")
             page = response.text
 
-            for dev in DeviantartDeviationExtractor.pattern.findall(
-                    page)[2::3]:
+            for user, type, did in find(page)[:-3:3]:
                 yield {
-                    "deviationId": dev[3],
-                    "author": {"username": dev[0]},
-                    "isJournal": dev[2] == "journal",
+                    "deviationId": did,
+                    "author": {"username": user},
+                    "isJournal": type == "journal",
                 }
 
             cursor = text.extr(page, r'\"cursor\":\"', '\\',)
