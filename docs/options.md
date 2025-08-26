@@ -11,7 +11,7 @@
     -d, --destination PATH      Target location for file downloads
     -D, --directory PATH        Exact location for file downloads
     -X, --extractors PATH       Load external extractors from PATH
-    --user-agent UA             User-Agent request header
+    -a, --user-agent UA         User-Agent request header
     --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
                                 MODULE (ALL to delete everything)
     --compat                    Restore legacy 'category' names
