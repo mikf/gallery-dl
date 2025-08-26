@@ -202,6 +202,12 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
     <td><code>foo &amp; bar</code></td>
 </tr>
 <tr>
+    <td align="center"><code>R</code></td>
+    <td>Extract URLs</td>
+    <td><code>{lorem!R}</code></td>
+    <td><code>["https://example.org/"]</code></td>
+</tr>
+<tr>
     <td align="center"><code>s</code></td>
     <td>Convert value to <a href="https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str" rel="nofollow"><code>str</code></a></td>
     <td><code>{tags!s}</code></td>
