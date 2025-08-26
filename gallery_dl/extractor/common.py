@@ -462,7 +462,7 @@ class Extractor():
                 headers["Referer"] = self.root + "/"
 
         custom_ua = self.config("user-agent")
-        if custom_ua is None or custom_ua == "auto":
+        if not custom_ua or custom_ua == "auto":
             pass
         elif custom_ua == "browser":
             headers["User-Agent"] = _browser_useragent(None)
