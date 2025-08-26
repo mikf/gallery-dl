@@ -43,8 +43,29 @@ __tests__ = (
     "#category": ("", "erome", "user"),
     "#class"   : erome.EromeUserExtractor,
     "#pattern" : erome.EromeAlbumExtractor.pattern,
-    "#range"   : "1-25",
-    "#count"   : 25,
+    "#count"   : 88,
+},
+
+{
+    "#url"     : "https://www.erome.com/yYgWBZw8o8qsMzM?t=reposts",
+    "#class"   : erome.EromeUserExtractor,
+    "#count"   : 0,
+},
+
+{
+    "#url"     : "https://www.erome.com/john3884",
+    "#class"   : erome.EromeUserExtractor,
+    "#count"   : 0,
+},
+
+{
+    "#url"     : "https://www.erome.com/john3884",
+    "#class"   : erome.EromeUserExtractor,
+    "#options" : {"reposts": True},
+    "#results" : (
+        "https://www.erome.com/a/NQgdlWvk",
+        "https://www.erome.com/a/TdbZ4ogi",
+    ),
 },
 
 {
