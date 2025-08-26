@@ -48,10 +48,13 @@ class EromeExtractor(Extractor):
             self.sleep(5.0, "check")
 
     def _pagination(self, url, params):
-        for params["page"] in itertools.count(1):
+        find_albums = EromeAlbumExtractor.pattern.findall
+
+        for params["page"] in itertools.count(
+                text.parse_int(params.get("page"), 1)):
             page = self.request(url, params=params).text
 
-            album_ids = EromeAlbumExtractor.pattern.findall(page)[::2]
+            album_ids = find_albums(page)[::2]
             yield from album_ids
 
             if len(album_ids) < 36:
@@ -114,12 +117,18 @@ class EromeAlbumExtractor(EromeExtractor):
 
 class EromeUserExtractor(EromeExtractor):
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!a/|search\?)([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?!a/|search\?)([^/?#]+)(?:/?\?([^#]+))?"
     example = "https://www.erome.com/USER"
 
     def albums(self):
-        url = f"{self.root}/{self.groups[0]}"
-        return self._pagination(url, {})
+        user, qs = self.groups
+        url = f"{self.root}/{user}"
+
+        params = text.parse_query(qs)
+        if "t" not in params and not self.config("reposts", False):
+            params["t"] = "posts"
+
+        return self._pagination(url, params)
 
 
 class EromeSearchExtractor(EromeExtractor):
@@ -128,7 +137,7 @@ class EromeSearchExtractor(EromeExtractor):
     example = "https://www.erome.com/search?q=QUERY"
 
     def albums(self):
-        url = self.root + "/search"
+        url = f"{self.root}/search"
         params = text.parse_query(self.groups[0])
         return self._pagination(url, params)
 

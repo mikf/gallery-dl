@@ -2557,6 +2557,16 @@ Description
     batch. The value cannot be less than 1.
 
 
+extractor.erome.user.reposts
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Include reposts when extracting albums from a user profile.
+
+
 extractor.exhentai.domain
 -------------------------
 Type
