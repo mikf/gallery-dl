@@ -32,13 +32,15 @@ LICENSE = """\
 def init_extractor(args):
     category = args.category
 
-    files = [(util.path("test", "results", f"{category}.py"),
-              generate_test, False)]
+    files = []
     if args.init_module:
         files.append((util.path("gallery_dl", "extractor", f"{category}.py"),
                       generate_module, False))
         files.append((util.path("gallery_dl", "extractor", "__init__.py"),
                       insert_into_modules_list, True))
+    if args.init_test:
+        files.append((util.path("test", "results", f"{category}.py"),
+                      generate_test, False))
     if args.site_name:
         files.append((util.path("scripts", "supportedsites.py"),
                       insert_into_supportedsites, True))
@@ -334,6 +336,9 @@ def parse_args(args=None):
     parser.add_argument(
         "-M", "--no-module",
         dest="init_module", action="store_false")
+    parser.add_argument(
+        "-T", "--no-test",
+        dest="init_test", action="store_false")
     parser.add_argument(
         "-t", "--type",
         dest="type", metavar="TYPE")
