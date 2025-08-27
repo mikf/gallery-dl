@@ -89,18 +89,34 @@ def generate_module(args):
 
 def generate_extractors_basic(args):
     cat = args.category
+    ccat = cat.capitalize()
 
-    return f'''\
+    result = f'''\
 from .common import Extractor, Message
 from .. import text
 
 {build_base_pattern(args)}
 
-class {cat.capitalize()}Extractor(Extractor):
+class {ccat}Extractor(Extractor):
     """Base class for {cat} extractors"""
     category = "{cat}"
     root = "{args.root}"
 '''
+
+    for subcat in args.subcategories:
+        subcat = subcat.lower()
+        result = f'''{result}
+
+class {ccat}{subcat.capitalize()}Extractor({ccat}Extractor):
+    subcategory = "{subcat}"
+    pattern = rf"{{BASE_PATTERN}}/PATH"
+    example = "{args.root}/..."
+
+    def items(self):
+        pass
+'''
+
+    return result
 
 
 def generate_extractors_manga(args):
@@ -298,11 +314,14 @@ def parse_args(args=None):
     parser = argparse.ArgumentParser(args)
 
     parser.add_argument(
-        "-s", "--site",
+        "-s", "--subcategory",
+        dest="subcategories", metavar="SUBCaT", action="append")
+    parser.add_argument(
+        "-n", "--name",
         dest="site_name", metavar="TITLE")
     parser.add_argument(
         "-c", "--copyright",
-        dest="copyright", metavar="NAME")
+        dest="copyright", metavar="NAME", default="")
     parser.add_argument(
         "-C",
         dest="copyright", action="store_const", const="Mike Fährmann")
