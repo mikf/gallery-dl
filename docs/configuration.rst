@@ -4517,6 +4517,32 @@ Description
     or ``"hq"`` if not present.
 
 
+extractor.reddit.api
+--------------------
+Type
+    ``string``
+Default
+    ``"oauth"``
+Description
+    Selects which API endpoints to use.
+
+    ``"oauth"``
+        Use the OAuth API at ``https://oauth.reddit.com``
+
+        Requires
+        `client-id & user-agent <extractor.reddit.client-id & .user-agent_>`__
+        and uses a
+        `refresh token <extractor.reddit.refresh-token_>`__
+        for authentication.
+
+    ``"rest"``
+        Use the REST API at ``https://www.reddit.com``
+
+        Uses
+        `cookies <extractor.*.cookies_>`__
+        for authentication.
+
+
 extractor.reddit.comments
 -------------------------
 Type

@@ -361,6 +361,7 @@ class RedditAPI():
 
     Ref: https://www.reddit.com/dev/api/
     """
+    ROOT = "https://oauth.reddit.com"
     CLIENT_ID = "6N9uN0krSDE-ig"
     USER_AGENT = "Python:gallery-dl:0.8.4 (by /u/mikf1)"
 
@@ -369,41 +370,50 @@ class RedditAPI():
         self.log = extractor.log
 
         config = extractor.config
+
         self.comments = text.parse_int(config("comments", 0))
         self.morecomments = config("morecomments", False)
+        self._warn_429 = False
 
-        client_id = config("client-id")
-        if client_id is None:
-            self.client_id = self.CLIENT_ID
-            self.headers = {"User-Agent": self.USER_AGENT}
+        if config("api") == "rest":
+            self.root = "https://www.reddit.com"
+            self.headers = None
+            self.authenticate = util.noop
+            self.log.debug("Using REST API")
         else:
-            self.client_id = client_id
-            self.headers = {"User-Agent": config("user-agent")}
+            self.root = self.ROOT
 
-        if self.client_id == self.CLIENT_ID:
-            client_id = self.client_id
-            self._warn_429 = True
-            kind = "default"
-        else:
-            client_id = client_id[:5] + "*" * (len(client_id)-5)
-            self._warn_429 = False
-            kind = "custom"
+            client_id = config("client-id")
+            if client_id is None:
+                self.client_id = self.CLIENT_ID
+                self.headers = {"User-Agent": self.USER_AGENT}
+            else:
+                self.client_id = client_id
+                self.headers = {"User-Agent": config("user-agent")}
 
-        self.log.debug(
-            "Using %s API credentials (client-id %s)", kind, client_id)
+            if self.client_id == self.CLIENT_ID:
+                client_id = self.client_id
+                self._warn_429 = True
+                kind = "default"
+            else:
+                client_id = client_id[:5] + "*" * (len(client_id)-5)
+                kind = "custom"
 
-        token = config("refresh-token")
-        if token is None or token == "cache":
-            key = "#" + self.client_id
-            self.refresh_token = _refresh_token_cache(key)
-        else:
-            self.refresh_token = token
+            self.log.debug(
+                "Using %s API credentials (client-id %s)", kind, client_id)
 
-        if not self.refresh_token:
-            # allow downloading from quarantined subreddits (#2180)
-            extractor.cookies.set(
-                "_options", '%7B%22pref_quarantine_optin%22%3A%20true%7D',
-                domain=extractor.cookies_domain)
+            token = config("refresh-token")
+            if token is None or token == "cache":
+                key = "#" + self.client_id
+                self.refresh_token = _refresh_token_cache(key)
+            else:
+                self.refresh_token = token
+
+            if not self.refresh_token:
+                # allow downloading from quarantined subreddits (#2180)
+                extractor.cookies.set(
+                    "_options", '%7B%22pref_quarantine_optin%22%3A%20true%7D',
+                    domain=extractor.cookies_domain)
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
@@ -477,7 +487,7 @@ class RedditAPI():
         return "Bearer " + data["access_token"]
 
     def _call(self, endpoint, params):
-        url = "https://oauth.reddit.com" + endpoint
+        url = f"{self.root}{endpoint}"
         params["raw_json"] = "1"
 
         while True:
