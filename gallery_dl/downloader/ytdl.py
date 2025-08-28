@@ -27,6 +27,7 @@ class YoutubeDLDownloader(DownloaderBase):
             "socket_timeout": self.config("timeout", extractor._timeout),
             "nocheckcertificate": not self.config("verify", extractor._verify),
             "proxy": self.proxies.get("http") if self.proxies else None,
+            "ignoreerrors": True,
         }
 
         self.ytdl_instance = None
@@ -168,15 +169,26 @@ class YoutubeDLDownloader(DownloaderBase):
         return True
 
     def _download_playlist(self, ytdl_instance, pathfmt, info_dict):
-        pathfmt.set_extension("%(playlist_index)s.%(ext)s")
-        pathfmt.build_path()
-        self._set_outtmpl(ytdl_instance, pathfmt.realpath)
+        pathfmt.kwdict["extension"] = pathfmt.prefix
+        filename = pathfmt.build_filename(pathfmt.kwdict)
+        pathfmt.kwdict["extension"] = pathfmt.extension
+        path = pathfmt.realdirectory + filename
+        path = path.replace("%", "%%") + "%(playlist_index)s.%(ext)s"
+        self._set_outtmpl(ytdl_instance, path)
 
+        status = False
         for entry in info_dict["entries"]:
+            if not entry:
+                continue
             if self.rate_dyn is not None:
                 ytdl_instance.params["ratelimit"] = self.rate_dyn()
-            ytdl_instance.process_info(entry)
-        return True
+            try:
+                ytdl_instance.process_info(entry)
+                status = True
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.error("%s: %s", exc.__class__.__name__, exc)
+        return status
 
     def _extract_info(self, ytdl, url):
         return ytdl.extract_info(url, download=False)

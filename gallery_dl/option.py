@@ -276,7 +276,7 @@ def build_parser():
         help="Load external extractors from PATH",
     )
     general.add_argument(
-        "--user-agent",
+        "-a", "--user-agent",
         dest="user-agent", metavar="UA", action=ConfigAction,
         help="User-Agent request header",
     )

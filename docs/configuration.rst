@@ -436,6 +436,7 @@ Default
         ``pornpics``,
         ``schalenetwork``,
         ``scrolller``,
+        ``sizebooru``,
         ``soundgasm``,
         ``urlgalleries``,
         ``vk``,
@@ -445,6 +446,7 @@ Default
         ``zerochan``
     * ``"1.0"``
         ``furaffinity``
+        ``rule34``
     * ``"1.0-2.0"``
         ``flickr``,
         ``pexels``,
@@ -1993,6 +1995,18 @@ Description
     `quality <extractor.civitai.quality_>`__ ones.
 
 
+extractor.civitai.search-models.token
+-------------------------------------
+extractor.civitai.search-images.token
+-------------------------------------
+Type
+    ``string``
+Default
+    ``"8c46eb2508e21db1e9828a97968d91ab1ca1caa5f70a00e88a2ba1e286603b61"``
+Description
+    ``Authorization`` header value used for `/multi-search` queries.
+
+
 extractor.comick.lang
 ---------------------
 Type
@@ -2445,6 +2459,14 @@ Description
 
     | Each format is parsed as ``SIZE.EXT``.
     | Leave ``SIZE`` empty to download the regular, small avatar format.
+Note
+    | Consider updating
+      `archive-format <extractor.*.archive-format_>`__
+      for ``avatar`` results to
+    | ``"a_{_username}_{index}{title[6:]}.{extension}"``
+    | or similar when using an
+      `archive <extractor.*.archive_>`__
+      to be able to handle different formats.
 
 
 extractor.deviantart.folder.subfolders
@@ -2533,6 +2555,16 @@ Description
     Note: Changing this setting is normally not necessary. When the value is
     greater than the per-page limit, gallery-dl will stop after the first
     batch. The value cannot be less than 1.
+
+
+extractor.erome.user.reposts
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Include reposts when extracting albums from a user profile.
 
 
 extractor.exhentai.domain
@@ -2956,8 +2988,9 @@ Type
 Default
     ``null``
 Description
-    Values from the API Access Credentials section found at the bottom of your
-    `Account Options <https://gelbooru.com/index.php?page=account&s=options>`__
+    Values from the `API Access Credentials` section
+    found at the bottom of your account's
+    `Options <https://gelbooru.com/index.php?page=account&s=options>`__
     page.
 
 
@@ -4650,8 +4683,25 @@ Description
     restrict it to only one possible format.
 
 
+extractor.rule34.api-key & .user-id
+-----------------------------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    Values from the `API Access Credentials` section
+    found near the bottom of your account's
+    `Options <https://rule34.xxx/index.php?page=account&s=options>`__
+    page.
+
+    Enable `Generate New Key?` and click `Save`
+    if the value after ``&api_key=`` is empty,
+    e.g. ``&api_key=&user_id=12345``
+
+
 extractor.rule34xyz.format
----------------------------
+--------------------------
 Type
     * ``string``
     * ``list`` of ``strings``
@@ -4736,6 +4786,28 @@ Default
     ``true``
 Description
     Download animated images as ``.gif`` instead of ``.webp``
+
+
+extractor.sizebooru.metadata
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata:
+
+    * ``approver``
+    * ``artist``
+    * ``date``
+    * ``date_approved``
+    * ``favorite``
+    * ``source``
+    * ``tags``
+    * ``uploader``
+    * ``views``
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.skeb.article
@@ -5422,14 +5494,16 @@ Description
     when processing a user profile.
 
     Possible values are
-    ``"info"``,
-    ``"avatar"``,
-    ``"background"``,
-    ``"timeline"``,
-    ``"tweets"``,
-    ``"media"``,
-    ``"replies"``,
-    ``"likes"``.
+
+    * ``"info"``
+    * ``"avatar"``
+    * ``"background"``
+    * ``"timeline"``
+    * ``"tweets"``
+    * ``"media"``
+    * ``"replies"``
+    * ``"highlights"``
+    * ``"likes"``
 
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -8067,20 +8141,21 @@ Default
     .. code:: json
 
         {
-            "coomerparty" : "coomer",
-            "kemonoparty" : "kemono",
-            "koharu"      : "schalenetwork",
-            "chzzk"       : "naver-chzzk",
-            "naver"       : "naver-blog",
-            "naverwebtoon": "naver-webtoon",
-            "pixiv"       : "pixiv-novel"
+            "coomerparty"  : "coomer",
+            "kemonoparty"  : "kemono",
+            "giantessbooru": "sizebooru",
+            "koharu"       : "schalenetwork",
+            "chzzk"        : "naver-chzzk",
+            "naver"        : "naver-blog",
+            "naverwebtoon" : "naver-webtoon",
+            "pixiv"        : "pixiv-novel"
         }
 Description
     Duplicate the configuration settings of extractor `categories`
     to other names.
 
     For example, a ``"naver": "naver-blog"`` key-value pair will make all
-    ``naver`` config settings available for ´´naver-blog´´ extractors as well.
+    ``naver`` config settings available for ``naver-blog`` extractors as well.
 
 
 jinja.environment

@@ -459,6 +459,18 @@ class CivitaiImagesExtractor(CivitaiExtractor):
 
     def images(self):
         params = self._parse_query(self.groups[0])
+        params["types"] = ("image",)
+        return self.api.images(params)
+
+
+class CivitaiVideosExtractor(CivitaiExtractor):
+    subcategory = "videos"
+    pattern = BASE_PATTERN + r"/videos(?:/?\?([^#]+))?(?:$|#)"
+    example = "https://civitai.com/videos"
+
+    def images(self):
+        params = self._parse_query(self.groups[0])
+        params["types"] = ("video",)
         return self.api.images(params)
 
 
@@ -521,6 +533,7 @@ class CivitaiUserImagesExtractor(CivitaiExtractor):
     def __init__(self, match):
         user, query = match.groups()
         self.params = self._parse_query(query)
+        self.params["types"] = ("image",)
         if self.params.get("section") == "reactions":
             self.subcategory = "reactions-images"
             self.images = self._image_reactions
@@ -708,7 +721,6 @@ class CivitaiTrpcAPI():
                 "useIndex"     : True,
                 "period"       : "AllTime",
                 "sort"         : "Newest",
-                "types"        : ("image",),
                 "withMeta"     : False,  # Metadata Only
                 "fromPlatform" : False,  # Made On-Site
                 "browsingLevel": self.nsfw,
@@ -899,10 +911,17 @@ class CivitaiSearchAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.root = "https://search.civitai.com"
+        self.root = "https://search-new.civitai.com"
+
+        if auth := extractor.config("token"):
+            if " " not in auth:
+                auth = f"Bearer {auth}"
+        else:
+            auth = ("Bearer 8c46eb2508e21db1e9828a97968d"
+                    "91ab1ca1caa5f70a00e88a2ba1e286603b61")
+
         self.headers = {
-            "Authorization": "Bearer ab8565e5ab8dc2d8f0d4256d204781cb63fe8b031"
-                             "eb3779cbbed38a7b5308e5c",
+            "Authorization": auth,
             "Content-Type": "application/json",
             "X-Meilisearch-Client": "Meilisearch instant-meilisearch (v0.13.5)"
                                     " ; Meilisearch JavaScript (v0.34.0)",

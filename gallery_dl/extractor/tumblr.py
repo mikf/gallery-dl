@@ -382,7 +382,7 @@ class TumblrSearchExtractor(TumblrExtractor):
     example = "https://www.tumblr.com/search/QUERY"
 
     def posts(self):
-        _, _, _, search, mode, post_type, query = self.groups
+        search, mode, post_type, query = self.groups
         params = text.parse_query(query)
         return self.api.search(text.unquote(search), params, mode, post_type)
 

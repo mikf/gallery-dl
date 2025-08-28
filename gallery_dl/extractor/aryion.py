@@ -95,7 +95,7 @@ class AryionExtractor(Extractor):
                 cnt += 1
                 yield post_id
 
-            if cnt < 40:
+            if cnt < 40 and ">Next &gt;&gt;<" not in page:
                 return
             params["p"] += 1
 

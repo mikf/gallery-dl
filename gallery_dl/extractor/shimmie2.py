@@ -26,9 +26,6 @@ class Shimmie2Extractor(BaseExtractor):
         if file_url := self.config_instance("file_url"):
             self.file_url_fmt = file_url
 
-        if self.category == "giantessbooru":
-            self.posts = self._posts_giantessbooru
-
     def items(self):
         data = self.metadata()
 
@@ -67,11 +64,6 @@ class Shimmie2Extractor(BaseExtractor):
 
 
 BASE_PATTERN = Shimmie2Extractor.update({
-    "giantessbooru": {
-        "root": "https://sizechangebooru.com",
-        "pattern": r"(?:sizechange|giantess)booru\.com",
-        "cookies": {"agreed": "true"},
-    },
     "cavemanon": {
         "root": "https://booru.cavemanon.xyz",
         "pattern": r"booru\.cavemanon\.xyz",
@@ -84,6 +76,10 @@ BASE_PATTERN = Shimmie2Extractor.update({
     "vidyapics": {
         "root": "https://vidya.pics",
         "pattern": r"vidya\.pics",
+    },
+    "nozrip": {
+        "root": "https://noz.rip/booru",
+        "pattern": r"noz\.rip/booru",
     },
 }) + r"/(?:index\.php\?q=/?)?"
 
@@ -154,36 +150,6 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
                 if not extr(f"/{pnum}'>{pnum}<", ">"):
                     return
 
-    def _posts_giantessbooru(self):
-        pnum = text.parse_int(self.groups[-1], 1)
-        file_url_fmt = (self.root + "/index.php?q=/image/{}.jpg").format
-
-        while True:
-            url = f"{self.root}/index.php?q=/post/list/{self.tags}/{pnum}"
-            extr = text.extract_from(self.request(url).text)
-
-            while True:
-                pid = extr("href='./index.php?q=/post/view/", "&")
-                if not pid:
-                    break
-
-                tags, dimensions, size = extr("title='", "'").split(" // ")
-                width, _, height = dimensions.partition("x")
-
-                yield {
-                    "file_url": file_url_fmt(pid),
-                    "id"      : pid,
-                    "md5"     : "",
-                    "tags"    : tags,
-                    "width"   : width,
-                    "height"  : height,
-                    "size"    : text.parse_bytes(size[:-1]),
-                }
-
-            pnum += 1
-            if not extr(f"/{pnum}'>{pnum}<", ">"):
-                return
-
 
 class Shimmie2PostExtractor(Shimmie2Extractor):
     """Extractor for single shimmie2 posts"""
@@ -193,7 +159,10 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
 
     def posts(self):
         post_id = self.groups[-1]
-        url = f"{self.root}/post/view/{post_id}"
+        root = self.root
+        base = root if (pos := root.find("/", 8)) < 0 else root[:pos]
+
+        url = f"{root}/post/view/{post_id}"
         page = self.request(url).text
         extr = text.extract_from(page)
         qt = self._quote_type(page)
@@ -202,7 +171,7 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
             "id"      : post_id,
             "tags"    : extr(": ", "<").partition(" - ")[0].rstrip(")"),
             "md5"     : extr("/_thumbs/", "/"),
-            "file_url": self.root + (
+            "file_url": base + (
                 extr(f"id={qt}main_image{qt} src={qt}", qt) or
                 extr("<source src="+qt, qt)).lstrip("."),
             "width"   : extr("data-width=", " ").strip("\"'"),
@@ -215,18 +184,3 @@ class Shimmie2PostExtractor(Shimmie2Extractor):
             post["md5"] = text.extr(post["file_url"], "/_images/", "/")
 
         return (post,)
-
-    def _posts_giantessbooru(self):
-        post_id = self.groups[-1]
-        url = f"{self.root}/index.php?q=/post/view/{post_id}"
-        extr = text.extract_from(self.request(url).text)
-
-        return ({
-            "id"      : post_id,
-            "tags"    : extr(": ", "<").partition(" - ")[0].rstrip(")"),
-            "md5"     : "",
-            "file_url": self.root + extr("id='main_image' src='.", "'"),
-            "width"   : extr("orig_width =", ";"),
-            "height"  : 0,
-            "size"    : 0,
-        },)

@@ -184,7 +184,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="civitai" title="civitai">
     <td>Civitai</td>
     <td>https://www.civitai.com/</td>
-    <td>Collections, Generated Files, individual Images, Image Listings, Models, Model Listings, Posts, Post Listings, Image Searches, Model Searches, Tag Searches, User Profiles, User Collections, User Images, Image Reactions, User Models, User Posts, User Videos, Video Reactions</td>
+    <td>Collections, Generated Files, individual Images, Image Listings, Models, Model Listings, Posts, Post Listings, Image Searches, Model Searches, Tag Searches, User Profiles, User Collections, User Images, Image Reactions, User Models, User Posts, User Videos, Video Reactions, Video Listings</td>
     <td></td>
 </tr>
 <tr id="comicvine" title="comicvine">
@@ -877,6 +877,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries, individual Images, Videos</td>
     <td></td>
 </tr>
+<tr id="sizebooru" title="sizebooru">
+    <td>Size Booru</td>
+    <td>https://sizebooru.com/</td>
+    <td>Favorites, Galleries, Posts, Tag Searches, User Uploads</td>
+    <td></td>
+</tr>
 <tr id="skeb" title="skeb">
     <td>Skeb</td>
     <td>https://skeb.jp/</td>
@@ -994,7 +1000,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="twitter" title="twitter">
     <td>Twitter</td>
     <td>https://x.com/</td>
-    <td>Avatars, Backgrounds, Bookmarks, Communities, Events, Followers, Followed Users, Hashtags, individual Images, User Profile Information, Likes, Lists, List Members, Media Timelines, Quotes, Search Results, Timelines, Tweets, User Profiles</td>
+    <td>Avatars, Backgrounds, Bookmarks, Communities, Events, Followers, Followed Users, Hashtags, Highlights, Home Feed, individual Images, User Profile Information, Likes, Lists, List Members, Media Timelines, Quotes, Search Results, Timelines, Tweets, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr id="unsplash" title="unsplash">
@@ -1134,12 +1140,6 @@ Consider all listed sites to potentially be NSFW.
     <td>https://www.zerochan.net/</td>
     <td>individual Images, Tag Searches</td>
     <td>Supported</td>
-</tr>
-<tr id="zzup" title="zzup">
-    <td>Zzup</td>
-    <td>https://zzup.com/</td>
-    <td>Galleries</td>
-    <td></td>
 </tr>
 <tr id="kabeuchi" title="kabeuchi">
     <td>かべうち</td>
@@ -1549,12 +1549,6 @@ Consider all listed sites to potentially be NSFW.
 <tr id="shimmie2" title="shimmie2">
     <td colspan="4"><strong>Shimmie2 Instances</strong></td>
 </tr>
-<tr id="giantessbooru" title="giantessbooru">
-    <td>Giantessbooru</td>
-    <td>https://sizechangebooru.com/</td>
-    <td>Posts, Tag Searches</td>
-    <td></td>
-</tr>
 <tr id="cavemanon" title="cavemanon">
     <td>Cavemanon</td>
     <td>https://booru.cavemanon.xyz/</td>
@@ -1570,6 +1564,12 @@ Consider all listed sites to potentially be NSFW.
 <tr id="vidyapics" title="vidyapics">
     <td>Vidya Booru</td>
     <td>https://vidya.pics/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr id="nozrip" title="nozrip">
+    <td>GaryC Booru</td>
+    <td>https://noz.rip/booru/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
@@ -1624,6 +1624,12 @@ Consider all listed sites to potentially be NSFW.
 <tr id="smugloli" title="smugloli">
     <td>Smugloli</td>
     <td>https://smuglo.li/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr id="gurochan" title="gurochan">
+    <td>Gurochan</td>
+    <td>https://boards.guro.cx/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>

@@ -126,6 +126,7 @@ CATEGORY_MAP = {
     "nhentai"        : "nhentai",
     "nijie"          : "nijie",
     "nozomi"         : "Nozomi.la",
+    "nozrip"         : "GaryC Booru",
     "nsfwalbum"      : "NSFWalbum.com",
     "nudostar"       : "NudoStar.TV",
     "paheal"         : "Rule 34",
@@ -158,6 +159,7 @@ CATEGORY_MAP = {
     "sexcom"         : "Sex.com",
     "silverpic"      : "SilverPic.com",
     "simplyhentai"   : "Simply Hentai",
+    "sizebooru"      : "Size Booru",
     "slickpic"       : "SlickPic",
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
@@ -245,6 +247,7 @@ SUBCATEGORY_MAP = {
     "civitai": {
         "models": "Model Listings",
         "images": "Image Listings",
+        "videos": "Video Listings",
         "posts" : "Post Listings",
         "search-models": "Model Searches",
         "search-images": "Image Searches",
@@ -388,6 +391,9 @@ SUBCATEGORY_MAP = {
     },
     "sexcom": {
         "pins": "User Pins",
+    },
+    "sizebooru": {
+        "user": "User Uploads",
     },
     "skeb": {
         "following"      : "Followed Creators",
@@ -739,8 +745,14 @@ Consider all listed sites to potentially be NSFW.
 """
 
 
-categories, domains = build_extractor_list()
-PATH = (sys.argv[1] if len(sys.argv) > 1 else
-        util.path("docs", "supportedsites.md"))
-with util.lazy(PATH) as fp:
-    fp.write(generate_output(COLUMNS, categories, domains))
+def main(path=None):
+    categories, domains = build_extractor_list()
+
+    if path is None:
+        path = util.path("docs", "supportedsites.md")
+    with util.lazy(path) as fp:
+        fp.write(generate_output(COLUMNS, categories, domains))
+
+
+if __name__ == "__main__":
+    main(sys.argv[1] if len(sys.argv) > 1 else None)

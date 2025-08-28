@@ -125,7 +125,7 @@ def sort_key(key, value):
         return 0
     if isinstance(value, str) and "\n" in value:
         return 7000
-    if isinstance(value, list):
+    if isinstance(value, list) and len(value) > 1:
         return 8000
     if isinstance(value, dict):
         return 9000
@@ -159,6 +159,7 @@ def parse_args(args=None):
     parser = argparse.ArgumentParser(args)
     parser.add_argument("-c", "--comment", default=None)
     parser.add_argument("-C", dest="comment", action="store_const", const="")
+    parser.add_argument("-g", "--git", action="store_true")
     parser.add_argument("-l", "--limit_urls", type=int, default=10)
     parser.add_argument("-m", "--metadata", action="store_true")
     parser.add_argument("-o", "--option", dest="options", action="append")
@@ -184,18 +185,18 @@ def main():
     args.sub = extr.subcategory
     args.base = extr.basecategory
 
-    path = util.path("test", "results", f"{args.cat}.py")
-    with util.open(path) as fp:
-        lines = fp.readlines()
-
     LOG.info("Collecting data for '%s'", args.url)
     result = generate_test_result(args)
 
-    LOG.info("Writing '%s' results to '%s'", args.url, util.trim(path))
-    insert_test_result(args, result, lines)
+    path = util.path("test", "results", f"{args.cat}.py")
+    path_tr = util.trim(path)
+    LOG.info("Writing '%s' results to '%s'", args.url, path_tr)
+    with util.lines(path) as lines:
+        insert_test_result(args, result, lines)
 
-    with util.lazy(path) as fp:
-        fp.writelines(lines)
+    if args.git:
+        LOG.info("git add %s", path_tr)
+        util.git("add", "--", path_tr)
 
 
 if __name__ == "__main__":
