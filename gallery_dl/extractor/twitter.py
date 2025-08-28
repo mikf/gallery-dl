@@ -473,13 +473,13 @@ class TwitterExtractor(Extractor):
 
         self._user_cache[f"C#{cid}"] = cdata = {
             "id": text.parse_int(cid),
-            "name": com["name"],
-            "description": com["description"],
-            "date": text.parse_timestamp(com["created_at"] // 1000),
-            "nsfw": com["is_nsfw"],
-            "role": com["role"],
-            "member_count": com["member_count"],
-            "rules": [rule["name"] for rule in com["rules"]],
+            "name": com.get("name"),
+            "description": com.get("description"),
+            "date": text.parse_timestamp(com.get("created_at", 0) // 1000),
+            "nsfw": com.get("is_nsfw"),
+            "role": com.get("role"),
+            "member_count": com.get("member_count"),
+            "rules": [rule["name"] for rule in com.get("rules", ())],
             "admin": (admin := com.get("admin_results")) and
                 admin["result"]["core"]["screen_name"],  # noqa: E131
             "creator": (creator := com.get("creator_results")) and
