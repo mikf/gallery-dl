@@ -991,6 +991,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Search Results, Tumblrblogs</td>
     <td></td>
 </tr>
+<tr id="tungsten" title="tungsten">
+    <td>Tungsten</td>
+    <td>https://tungsten.run/</td>
+    <td>Models, Posts</td>
+    <td></td>
+</tr>
 <tr id="twibooru" title="twibooru">
     <td>Twibooru</td>
     <td>https://twibooru.org/</td>
