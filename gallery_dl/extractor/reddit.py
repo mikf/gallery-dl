@@ -426,13 +426,11 @@ class RedditAPI():
     def submissions_subreddit(self, subreddit, params):
         """Collect all (submission, comments)-tuples of a subreddit"""
         endpoint = subreddit + "/.json"
-        params["limit"] = 100
         return self._pagination(endpoint, params)
 
     def submissions_user(self, user, params):
         """Collect all (submission, comments)-tuples posted by a user"""
         endpoint = "/user/" + user + "/.json"
-        params["limit"] = 100
         return self._pagination(endpoint, params)
 
     def morechildren(self, link_id, children):
@@ -531,6 +529,9 @@ class RedditAPI():
             self.log.debug("Ignoring 'id-max' setting \"zik0zj\"")
             id_max = float("inf")
         date_min, date_max = self.extractor._get_date_min_max(0, 253402210800)
+
+        if limit := self.extractor.config("limit"):
+            params["limit"] = limit
 
         while True:
             data = self._call(endpoint, params)["data"]

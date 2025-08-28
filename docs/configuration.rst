@@ -4605,6 +4605,22 @@ Description
     Ignore all submissions posted before/after the submission with this ID.
 
 
+extractor.reddit.limit
+----------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Number of results to return in a single API query.
+
+    This value specifies the ``limit`` parameter
+    used for API requests when retrieving paginated results.
+
+    ``null`` means not including this parameter at all
+    and letting Reddit chose a default.
+
+
 extractor.reddit.previews
 -------------------------
 Type
