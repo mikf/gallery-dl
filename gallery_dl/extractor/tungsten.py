@@ -93,7 +93,7 @@ class TungstenUserExtractor(TungstenExtractor):
     def posts(self):
         url = f"{self.root}/user/{self.groups[0]}"
         page = self.request(url).text
-        uuid_user = text.extr(page, '"uuid":"', '"')
+        uuid_user = text.extr(page, '"user":{"uuid":"', '"')
 
         url = f"https://api.tungsten.run/v1/users/{uuid_user}/posts"
         params = {"sort": "top_all_time"}
