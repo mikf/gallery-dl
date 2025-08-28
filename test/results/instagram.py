@@ -110,6 +110,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.instagram.com/stories/me/",
+    "#class"   : instagram.InstagramStoriesTrayExtractor,
+},
+
+{
     "#url"     : "https://www.instagram.com/s/aGlnaGxpZ2h0OjE4MDQyNTA5NDg4MTcwMDk1",
     "#category": ("", "instagram", "highlights"),
     "#class"   : instagram.InstagramStoriesExtractor,
