@@ -310,6 +310,7 @@ SUBCATEGORY_MAP = {
         "posts": "",
         "saved": "Saved Posts",
         "tagged": "Tagged Posts",
+        "stories-tray": "Stories Home Tray",
     },
     "itaku": {
         "posts": "",

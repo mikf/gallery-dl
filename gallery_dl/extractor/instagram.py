@@ -568,6 +568,20 @@ class InstagramCollectionExtractor(InstagramExtractor):
         return self.api.user_collection(self.collection_id)
 
 
+class InstagramStoriesTrayExtractor(InstagramExtractor):
+    """Extractor for your Instagram account's stories tray"""
+    subcategory = "stories-tray"
+    pattern = rf"{BASE_PATTERN}/stories/me/?$()"
+    example = "https://www.instagram.com/stories/me/"
+
+    def items(self):
+        base = f"{self.root}/stories/id:"
+        for story in self.api.reels_tray():
+            story["date"] = text.parse_timestamp(story["latest_reel_media"])
+            story["_extractor"] = InstagramStoriesExtractor
+            yield Message.Queue, f"{base}{story['id']}/", story
+
+
 class InstagramStoriesExtractor(InstagramExtractor):
     """Extractor for Instagram stories"""
     subcategory = "stories"
@@ -793,7 +807,11 @@ class InstagramRestAPI():
         try:
             return self._call(endpoint, params=params)["reels_media"]
         except KeyError:
-            raise exception.AuthorizationError("Login required")
+            raise exception.AuthRequired("authenticated cookies")
+
+    def reels_tray(self):
+        endpoint = "/v1/feed/reels_tray/"
+        return self._call(endpoint)["tray"]
 
     def tags_media(self, tag):
         for section in self.tags_sections(tag):

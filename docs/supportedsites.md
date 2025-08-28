@@ -460,7 +460,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="instagram" title="instagram">
     <td>Instagram</td>
     <td>https://www.instagram.com/</td>
-    <td>Avatars, Collections, Followers, Followed Users, Guides, Highlights, User Profile Information, Posts, Reels, Saved Posts, Stories, Tag Searches, Tagged Posts, User Profiles</td>
+    <td>Avatars, Collections, Followers, Followed Users, Guides, Highlights, User Profile Information, Posts, Reels, Saved Posts, Stories, Stories Home Tray, Tag Searches, Tagged Posts, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr id="issuu" title="issuu">
