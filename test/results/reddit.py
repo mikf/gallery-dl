@@ -268,6 +268,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.reddit.com/user/-frogchamp-/comments/1n260wh/osc_art_request_timelapsespeed_draw_so_far_flash/",
+    "#comment" : "video embed (#8139)",
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#options" : {"api": "rest"},
+    "#results" : "ytdl:https://v.redd.it/link/1n260wh/asset/8q50b220tplf1/DASHPlaylist.mpd?a=1759085227%2CYTU2NGJjNTlmNjBlOGE2NWUwYWI0MjRjZDYzZjllZjk4Nzc3Y2Y4Nzc1NDMzOTBkYTNkOWFjOGMzZjUzZDAzMQ%3D%3D&v=1&f=sd",
+},
+
+{
     "#url"     : "https://i.redd.it/upjtjcx2npzz.jpg",
     "#category": ("", "reddit", "image"),
     "#class"   : reddit.RedditImageExtractor,

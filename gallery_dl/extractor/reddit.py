@@ -84,6 +84,12 @@ class RedditExtractor(Extractor):
                             text.nameext_from_url(url, submission)
                             yield Message.Url, url, submission
 
+                    elif embeds and "media_metadata" in media:
+                        for embed in self._extract_embed(submission):
+                            submission["num"] += 1
+                            text.nameext_from_url(embed, submission)
+                            yield Message.Url, embed, submission
+
                     elif media["is_video"]:
                         if videos:
                             text.nameext_from_url(url, submission)
@@ -199,19 +205,26 @@ class RedditExtractor(Extractor):
             return
 
         for mid, data in meta.items():
-            if data["status"] != "valid" or "s" not in data:
+            if data["status"] != "valid":
                 self.log.warning(
                     "embed %s: skipping item %s (status: %s)",
                     submission["id"], mid, data.get("status"))
                 continue
-            src = data["s"]
-            if url := src.get("u") or src.get("gif") or src.get("mp4"):
-                yield url.partition("?")[0].replace("/preview.", "/i.", 1)
-            else:
-                self.log.error(
-                    "embed %s: unable to fetch download URL for item %s",
-                    submission["id"], mid)
-                self.log.debug(src)
+
+            if src := data.get("s"):
+                if url := src.get("u") or src.get("gif") or src.get("mp4"):
+                    yield url.partition("?")[0].replace("/preview.", "/i.", 1)
+                else:
+                    self.log.error(
+                        "embed %s: unable to fetch download URL for item %s",
+                        submission["id"], mid)
+                    self.log.debug(src)
+            elif url := data.get("dashUrl"):
+                submission["_ytdl_manifest"] = "dash"
+                yield f"ytdl:{url}"
+            elif url := data.get("hlsUrl"):
+                submission["_ytdl_manifest"] = "hls"
+                yield f"ytdl:{url}"
 
     def _extract_video_ytdl(self, submission):
         return "https://www.reddit.com" + submission["permalink"]
