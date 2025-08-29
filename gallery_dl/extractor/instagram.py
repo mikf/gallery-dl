@@ -242,8 +242,7 @@ class InstagramExtractor(Extractor):
                 if self._warn_video_ua:
                     self._warn_video_ua = False
                     pattern = text.re(
-                        r"AppleWebKit/537\.36 \(KHTML, like Gecko\) "
-                        r"Chrome/\d+\.\d+\.\d+\.\d+ Safari/537\.36$")
+                        r"Chrome/\d{3,}\.\d+\.\d+\.\d+(?!\d* Mobile)")
                     if not pattern.search(self.session.headers["User-Agent"]):
                         self.log.warning("Potentially lowered video quality "
                                          "due to non-Chrome User-Agent")
