@@ -471,6 +471,23 @@ class TwitterExtractor(Extractor):
         except KeyError:
             pass
 
+        admin = creator = banner = None
+        try:
+            if results := com.get("admin_results"):
+                admin = results["result"]["core"]["screen_name"]
+        except Exception:
+            pass
+        try:
+            if results := com.get("creator_results"):
+                creator = results["result"]["core"]["screen_name"]
+        except Exception:
+            pass
+        try:
+            if results := com.get("custom_banner_media"):
+                banner = results["media_info"]["original_img_url"]
+        except Exception:
+            pass
+
         self._user_cache[f"C#{cid}"] = cdata = {
             "id": text.parse_int(cid),
             "name": com.get("name"),
@@ -480,12 +497,9 @@ class TwitterExtractor(Extractor):
             "role": com.get("role"),
             "member_count": com.get("member_count"),
             "rules": [rule["name"] for rule in com.get("rules", ())],
-            "admin": (admin := com.get("admin_results")) and
-                admin["result"]["core"]["screen_name"],  # noqa: E131
-            "creator": (creator := com.get("creator_results")) and
-                creator["result"]["core"]["screen_name"],  # noqa: E131
-            "banner": (banner := com.get("custom_banner_media")) and
-                banner["media_info"]["original_img_url"],  # noqa: E131
+            "admin"  : admin,
+            "creator": creator,
+            "banner" : banner,
         }
 
         return cdata
