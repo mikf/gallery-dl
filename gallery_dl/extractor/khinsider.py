@@ -63,6 +63,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
             "date" : extr("Date Added: <b>", "<"),
             "type" : text.remove_html(extr("Album type: <b>", "</b>")),
             "uploader": text.remove_html(extr("Uploaded by: ", "</")),
+            "description": extr("<h2>Description</h2>", "<h2>").strip(),
         }}
 
     def _extract_tracks(self, page):
