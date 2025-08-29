@@ -17,7 +17,7 @@ class RedditExtractor(Extractor):
     """Base class for reddit extractors"""
     category = "reddit"
     directory_fmt = ("{category}", "{subreddit}")
-    filename_fmt = "{id}{num:? //>02} {title[:220]}.{extension}"
+    filename_fmt = "{id}{num:? //>02} {title|link_title:[:220]}.{extension}"
     archive_fmt = "{filename}"
     cookies_domain = ".reddit.com"
     request_interval = 0.6
@@ -102,6 +102,12 @@ class RedditExtractor(Extractor):
                         urls.append((url, submission))
 
                 if self.api.comments:
+                    if comments and not submission:
+                        submission = comments[0]
+                        submission.setdefault("num", 0)
+                        if not parentdir:
+                            yield Message.Directory, submission
+
                     for comment in comments:
                         html = comment["body_html"] or ""
                         href = (' href="' in html)
