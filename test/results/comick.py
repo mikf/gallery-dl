@@ -304,4 +304,49 @@ __tests__ = (
     "lang"   : "iso:639",
 },
 
+{
+    "#url"     : "https://comick.io/comic/neko-no-oshigoto/cover",
+    "#class"   : comick.ComickCoversExtractor,
+    "#results" : (
+        "https://meo.comick.pictures/l6wvkz.jpg",
+        "https://meo.comick.pictures/X8xRNp.jpg",
+    ),
+
+    "id"          : {45687770, 45687771},
+    "width"       : {1053, 1055},
+    "height"      : 1500,
+    "size"        : int,
+    "lang"        : "ja",
+    "extension"   : "jpg",
+    "manga"       : "Neko no Oshigoto",
+    "volume"      : range(1, 2),
+    "cover"       : {
+        "b2key"      : str,
+        "gpurl"      : str,
+        "h"          : int,
+        "id"         : int,
+        "is_primary" : bool,
+        "locale"     : "ja",
+        "md_comic_id": int,
+        "mdid"       : "iso:uuid",
+        "s"          : int,
+        "url"        : "iso:uuid",
+        "vol"        : str,
+        "w"          : int,
+    },
+},
+
+{
+    "#url"     : "https://comick.io/comic/01-sakamoto-days/cover",
+    "#class"   : comick.ComickCoversExtractor,
+    "#pattern" : r"https://meo\.comick\.pictures/\w+\.jpg",
+    "#count"   : range(50, 80),
+
+    "id"    : int,
+    "width" : int,
+    "height": int,
+    "volume": range(1, 30),
+    "lang"  : {"ja", "en", "fr", "pt-br"},
+},
+
 )
