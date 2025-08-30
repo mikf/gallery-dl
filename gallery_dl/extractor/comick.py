@@ -96,6 +96,13 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
         }
 
     def images(self, page):
+        if not self._images[0].get("b2key") and all(
+                not img.get("b2key") for img in self._images):
+            self.log.error(
+                "%s: Broken Chapter (missing 'b2key' for all pages)",
+                self.groups[1])
+            return ()
+
         return [
             (f"https://meo.comick.pictures/{img['b2key']}", {
                 "width"    : img["w"],
