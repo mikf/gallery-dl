@@ -8,7 +8,7 @@
 
 """Extractors for https://comick.io/"""
 
-from .common import ChapterExtractor, MangaExtractor, Message
+from .common import GalleryExtractor, ChapterExtractor, MangaExtractor, Message
 from .. import text
 from ..cache import memcache
 
@@ -19,6 +19,42 @@ class ComickBase():
     """Base class for comick.io extractors"""
     category = "comick"
     root = "https://comick.io"
+
+
+class ComickCoversExtractor(ComickBase, GalleryExtractor):
+    """Extractor for comick.io manga covers"""
+    subcategory = "covers"
+    directory_fmt = ("{category}", "{manga}", "Covers")
+    filename_fmt = "{volume:>02}_{lang}.{extension}"
+    archive_fmt = "c_{id}"
+    pattern = BASE_PATTERN + r"/comic/([\w-]+)/cover"
+    example = "https://comick.io/comic/MANGA/cover"
+
+    def metadata(self, page):
+        manga = _manga_info(self, self.groups[0])
+        self.slug = manga['manga_slug']
+        return manga
+
+    def images(self, page):
+        url = f"{self.root}/comic/{self.slug}/cover"
+        page = self.request(url).text
+        data = self._extract_nextdata(page)
+
+        covers = data["props"]["pageProps"]["comic"]["md_covers"]
+        covers.reverse()
+
+        return [
+            (f"https://meo.comick.pictures/{cover['b2key']}", {
+                "id"    : cover["id"],
+                "width" : cover["w"],
+                "height": cover["h"],
+                "size"  : cover["s"],
+                "lang"  : cover["locale"],
+                "volume": text.parse_int(cover["vol"]),
+                "cover" : cover,
+            })
+            for cover in covers
+        ]
 
 
 class ComickChapterExtractor(ComickBase, ChapterExtractor):
@@ -61,7 +97,7 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
 
     def images(self, page):
         return [
-            ("https://meo.comick.pictures/" + img["b2key"], {
+            (f"https://meo.comick.pictures/{img['b2key']}", {
                 "width"    : img["w"],
                 "height"   : img["h"],
                 "size"     : img["s"],
