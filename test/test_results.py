@@ -361,6 +361,12 @@ class TestExtractorResults(unittest.TestCase):
                     msg = f"{path} / ISO 639-1"
                     self.assertIsInstance(value, str, msg=msg)
                     self.assertRegex(value, r"^[a-z]{2}(-\w+)?$", msg=msg)
+                elif iso in ("uuid", "11578", "11578:1996", "4122"):
+                    msg = f"{path} / ISO 11578:1996"
+                    pat = (r"(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-"
+                           r"[0-9a-f]{4}-[0-9a-f]{12}")
+                    self.assertIsInstance(value, str, msg=msg)
+                    self.assertRegex(value, pat, msg=msg)
                 else:
                     self.fail(f"Unsupported ISO test '{test}'")
             else:
