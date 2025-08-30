@@ -202,6 +202,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://comick.io/comic/00-fate-extra/eE2wOoqb-chapter-35-en",
+    "#comment" : "missing page data (#8054)",
+    "#class"   : comick.ComickChapterExtractor,
+    "#count"   : 0,
+    "#log"     : "eE2wOoqb-chapter-35-en: Broken Chapter (missing 'b2key' for all pages)",
+},
+
+{
     "#url"     : "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon",
     "#comment" : "all chapters",
     "#class"   : comick.ComickMangaExtractor,
