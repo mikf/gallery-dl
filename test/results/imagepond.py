@@ -39,4 +39,11 @@ __tests__ = (
     "#count"   : 30,
 },
 
+{
+    "#url"     : "https://imagepond.net/ap000",
+    "#comment" : "username starting with 'a' (#8149)",
+    "#category": ("chevereto", "imagepond", "user"),
+    "#class"   : chevereto.CheveretoUserExtractor,
+},
+
 )
