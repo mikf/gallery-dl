@@ -15,7 +15,7 @@ from .. import text, util
 class CheveretoExtractor(BaseExtractor):
     """Base class for chevereto extractors"""
     basecategory = "chevereto"
-    directory_fmt = ("{category}", "{user}", "{album}",)
+    directory_fmt = ("{category}", "{user}", "{album}")
     archive_fmt = "{id}"
 
     def _init(self):
@@ -111,7 +111,7 @@ class CheveretoAlbumExtractor(CheveretoExtractor):
 class CheveretoUserExtractor(CheveretoExtractor):
     """Extractor for chevereto Users"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"(/(?!img|image|a(?:lbum)?)[^/?#]+(?:/albums)?)"
+    pattern = BASE_PATTERN + r"(/[^/?#]+(?:/albums)?)"
     example = "https://jpg2.su/USER"
 
     def items(self):
