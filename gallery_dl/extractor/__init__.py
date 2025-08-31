@@ -190,6 +190,7 @@ modules = [
     "tsumino",
     "tumblr",
     "tumblrgallery",
+    "tungsten",
     "twibooru",
     "twitter",
     "urlgalleries",

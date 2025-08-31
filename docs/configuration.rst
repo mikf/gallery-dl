@@ -4517,6 +4517,32 @@ Description
     or ``"hq"`` if not present.
 
 
+extractor.reddit.api
+--------------------
+Type
+    ``string``
+Default
+    ``"oauth"``
+Description
+    Selects which API endpoints to use.
+
+    ``"oauth"``
+        Use the OAuth API at ``https://oauth.reddit.com``
+
+        Requires
+        `client-id & user-agent <extractor.reddit.client-id & .user-agent_>`__
+        and uses a
+        `refresh token <extractor.reddit.refresh-token_>`__
+        for authentication.
+
+    ``"rest"``
+        Use the REST API at ``https://www.reddit.com``
+
+        Uses
+        `cookies <extractor.*.cookies_>`__
+        for authentication.
+
+
 extractor.reddit.comments
 -------------------------
 Type
@@ -4577,6 +4603,22 @@ Example
     ``"6kmzv2"``
 Description
     Ignore all submissions posted before/after the submission with this ID.
+
+
+extractor.reddit.limit
+----------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Number of results to return in a single API query.
+
+    This value specifies the ``limit`` parameter
+    used for API requests when retrieving paginated results.
+
+    ``null`` means not including this parameter at all
+    and letting Reddit chose a default.
 
 
 extractor.reddit.previews
