@@ -1175,7 +1175,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr id="jpgfish" title="jpgfish">
     <td>JPG Fish</td>
-    <td>https://jpg5.su/</td>
+    <td>https://jpg6.su/</td>
     <td>Albums, individual Images, User Profiles, Videos</td>
     <td></td>
 </tr>
