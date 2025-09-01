@@ -526,8 +526,8 @@ class TwitterExtractor(Extractor):
         entities = legacy["entities"]
         self._user_cache[uid] = udata = {
             "id"              : text.parse_int(uid),
-            "name"            : core["screen_name"],
-            "nick"            : core["name"],
+            "name"            : core.get("screen_name"),
+            "nick"            : core.get("name"),
             "location"        : user["location"]["location"],
             "date"            : text.parse_datetime(
                 core["created_at"], "%a %b %d %H:%M:%S %z %Y"),
