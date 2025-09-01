@@ -108,6 +108,10 @@ class VkExtractor(Extractor):
             total = payload[1]
             photos = payload[3]
 
+            for i in range(len(photos)):
+                photos[i]["num"] = self.offset + i + 1
+                photos[i]["count"] = total
+
             offset_next = self.offset + len(photos)
             if offset_next >= total:
                 # the last chunk of photos also contains the first few photos
@@ -128,7 +132,7 @@ class VkPhotosExtractor(VkExtractor):
     subcategory = "photos"
     pattern = (BASE_PATTERN + r"/(?:"
                r"(?:albums|photos|id)(-?\d+)"
-               r"|(?!(?:album|tag)-?\d+_?)([^/?#]+))")
+               r"|(?!(?:album|tag|wall)-?\d+_?)([^/?#]+))")
     example = "https://vk.com/id12345"
 
     def __init__(self, match):
@@ -209,3 +213,39 @@ class VkTaggedExtractor(VkExtractor):
 
     def metadata(self):
         return {"user": {"id": self.user_id}}
+
+class VkWallExtractor(VkExtractor):
+    """Extractor for a vk wall post"""
+    subcategory = "wall"
+    directory_fmt = ("{category}", "{user[id]}", "walls")
+    filename_fmt = "{wall[id]}_{num}.{extension}"
+    pattern = BASE_PATTERN + r"/wall(-?\d+)_(\d+)$"
+    example = "https://vk.com/wall12345_1"
+
+    def __init__(self, match):
+        VkExtractor.__init__(self, match)
+        self.user_id, self.wall_id = match.groups()
+
+    def photos(self):
+        return self._pagination(f"wall{self.user_id}_{self.wall_id}")
+
+    def metadata(self):
+        url = f"{self.root}/wall{self.user_id}_{self.wall_id}"
+        data = self._extract_wall(url)
+        return {
+            "user": {"id": self.user_id },
+            "wall": {
+                "id": self.wall_id,
+                "desc": data["desc"]
+            }
+        }
+
+    def _extract_wall(self, url):
+        page = self.request(url).text
+        extr = text.extract_from(page)
+        desc = text.unescape(extr(
+            "data-testid=\"post_description\">", "</div>"))
+        if desc == "":
+            desc = text.unescape(extr(
+                "name=\"description\" content=\"", "\""))
+        return { "desc": desc }
