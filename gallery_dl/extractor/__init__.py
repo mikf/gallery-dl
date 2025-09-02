@@ -56,6 +56,7 @@ modules = [
     "exhentai",
     "facebook",
     "fanbox",
+    "fansly",
     "fantia",
     "fapello",
     "fapachi",
