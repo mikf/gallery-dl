@@ -277,6 +277,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, Avatars, User Profile Information, Photos, Profile Photos, Sets, User Profiles, Videos</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
+<tr id="fansly" title="fansly">
+    <td>Fansly</td>
+    <td>https://fansly.com/</td>
+    <td>Creator-posts, Home Feed, Lists, Posts</td>
+    <td></td>
+</tr>
 <tr id="fantia" title="fantia">
     <td>Fantia</td>
     <td>https://fantia.jp/</td>

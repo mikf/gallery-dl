@@ -2811,6 +2811,18 @@ Description
     `fanbox.comments <extractor.fanbox.comments_>`__
 
 
+extractor.fansly.token
+----------------------
+Type
+    ``string``
+Example
+    ``"kX7pL9qW3zT2rY8mB5nJ4vC6xF1tA0hD8uE2wG9yR3sQ7iZ4oM5jN6cP8lV0bK2tU9aL1eW"``
+Description
+    ``authorization`` header value
+    used for requests to ``https://apiv3.fansly.com/api``
+    to access locked content.
+
+
 extractor.flickr.access-token & .access-token-secret
 ----------------------------------------------------
 Type
