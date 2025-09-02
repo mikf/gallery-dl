@@ -85,7 +85,8 @@ class YoutubeDLDownloader(DownloaderBase):
                     info_dict = self._extract_manifest(
                         ytdl_instance, url, manifest,
                         kwdict.pop("_ytdl_manifest_data", None),
-                        kwdict.pop("_ytdl_manifest_headers", None))
+                        kwdict.pop("_ytdl_manifest_headers", None),
+                        kwdict.pop("_ytdl_manifest_cookies", None))
                 else:
                     info_dict = self._extract_info(ytdl_instance, url)
             except Exception as exc:
@@ -194,9 +195,21 @@ class YoutubeDLDownloader(DownloaderBase):
         return ytdl.extract_info(url, download=False)
 
     def _extract_manifest(self, ytdl, url, manifest_type, manifest_data=None,
-                          headers=None):
+                          headers=None, cookies=None):
         extr = ytdl.get_info_extractor("Generic")
         video_id = extr._generic_id(url)
+
+        if cookies is not None:
+            if isinstance(cookies, dict):
+                cookies = cookies.items()
+            from http.cookiejar import Cookie
+            set_cookie = ytdl.cookiejar.set_cookie
+            for name, value in cookies:
+                set_cookie(Cookie(
+                    0, name, value, None, False,
+                    "", False, False, "/", False,
+                    False, None, False, None, None, {},
+                ))
 
         if manifest_type == "hls":
             if manifest_data is None:
