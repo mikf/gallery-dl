@@ -5277,7 +5277,8 @@ extractor.tumblr.pagination
 Type
     ``string``
 Default
-    ``"offset"``
+    * ``"before"`` if `date-max <extractor.tumblr.date-min & .date-max_>`__ is set
+    * ``"offset"`` otherwise
 Description
     Controls how to paginate over blog posts.
 
