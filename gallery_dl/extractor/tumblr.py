@@ -550,8 +550,11 @@ class TumblrAPI(oauth.OAuth1API):
             params["api_key"] = self.api_key
 
         strategy = self.extractor.config("pagination")
-        if not strategy and "offset" not in params:
-            strategy = "api"
+        if not strategy:
+            if params.get("before"):
+                strategy = "before"
+            elif "offset" not in params:
+                strategy = "api"
 
         while True:
             data = self._call(endpoint, params)
@@ -573,10 +576,9 @@ class TumblrAPI(oauth.OAuth1API):
                     endpoint = data["_links"]["next"]["href"]
                 except KeyError:
                     return
-
-                params = None
-                if self.api_key:
-                    endpoint += "&api_key=" + self.api_key
+                if params is not None and self.api_key:
+                    endpoint = f"{endpoint}&api_key={self.api_key}"
+                    params = None
 
             elif strategy == "before":
                 if not posts:
