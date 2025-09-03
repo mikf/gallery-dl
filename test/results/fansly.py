@@ -25,4 +25,19 @@ __tests__ = (
     "#class"   : fansly.FanslyCreatorPostsExtractor,
 },
 
+{
+    "#url"     : "https://fansly.com/home",
+    "#class"   : fansly.FanslyHomeExtractor,
+},
+
+{
+    "#url"     : "https://fansly.com/home/subscribed",
+    "#class"   : fansly.FanslyHomeExtractor,
+},
+
+{
+    "#url"     : "https://fansly.com/home/list/1234567890",
+    "#class"   : fansly.FanslyHomeExtractor,
+},
+
 )
