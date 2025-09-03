@@ -172,6 +172,7 @@ CATEGORY_MAP = {
     "thatpervert"    : "ThatPervert",
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
+    "thecollectionS" : "The /co/llection",
     "tiktok"         : "TikTok",
     "tmohentai"      : "TMOHentai",
     "tumblrgallery"  : "TumblrGallery",
