@@ -96,11 +96,18 @@ class FanslyPostExtractor(FanslyExtractor):
 
 class FanslyHomeExtractor(FanslyExtractor):
     subcategory = "home"
-    pattern = rf"{BASE_PATTERN}/home(?:/(subscribed|list/(\d+)))?"
+    pattern = rf"{BASE_PATTERN}/home(?:/(?:subscribed()|list/(\d+)))?"
     example = "https://fansly.com/home"
 
-    def items(self):
-        pass
+    def posts(self):
+        subscribed, list_id = self.groups
+        if subscribed is not None:
+            mode = "1"
+        elif list_id is not None:
+            mode = None
+        else:
+            mode = "0"
+        return self.api.timeline_home(mode, list_id)
 
 
 class FanslyListExtractor(FanslyExtractor):
@@ -148,6 +155,15 @@ class FanslyAPI():
         endpoint = "/v1/post"
         params = {"ids": post_id}
         return self._update_posts(self._call(endpoint, params))
+
+    def timeline_home(self, mode="0", list_id=None):
+        endpoint = "/v1/timeline/home"
+        params = {"before": "0", "after": "0"}
+        if list_id is None:
+            params["mode"] = mode
+        else:
+            params["listId"] = list_id
+        return self._pagination(endpoint, params)
 
     def timeline_new(self, account_id, wall_id):
         endpoint = f"/v1/timelinenew/{account_id}"
