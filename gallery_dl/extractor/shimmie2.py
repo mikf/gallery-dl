@@ -81,6 +81,10 @@ BASE_PATTERN = Shimmie2Extractor.update({
         "root": "https://noz.rip/booru",
         "pattern": r"noz\.rip/booru",
     },
+    "thecollectionS": {
+        "root": "https://co.llection.pics",
+        "pattern": r"co\.llection\.pics",
+    },
 }) + r"/(?:index\.php\?q=/?)?"
 
 
