@@ -116,7 +116,24 @@ class FanslyListExtractor(FanslyExtractor):
     example = "https://fansly.com/lists/1234567890"
 
     def items(self):
-        pass
+        base = f"{self.root}/"
+        for account in self.api.lists_itemsnew(self.groups[0]):
+            account["_extractor"] = FanslyCreatorPostsExtractor
+            url = f"{base}{account['username']}"
+            yield Message.Queue, url, account
+
+
+class FanslyListsExtractor(FanslyExtractor):
+    subcategory = "lists"
+    pattern = rf"{BASE_PATTERN}/lists"
+    example = "https://fansly.com/lists"
+
+    def items(self):
+        base = f"{self.root}/lists/"
+        for list in self.api.lists_account():
+            list["_extractor"] = FanslyListExtractor
+            url = f"{base}{list['id']}#{list['label']}"
+            yield Message.Queue, url, list
 
 
 class FanslyCreatorPostsExtractor(FanslyExtractor):
@@ -125,8 +142,12 @@ class FanslyCreatorPostsExtractor(FanslyExtractor):
     example = "https://fansly.com/CREATOR/posts"
 
     def posts(self):
-        account = self.api.account(self.groups[0])
-        wall_id = account["walls"][0]["id"]
+        creator = self.groups[0]
+        if creator.startswith("id:"):
+            pass
+        else:
+            account = self.api.account(self.groups[0])
+            wall_id = account["walls"][0]["id"]
         return self.api.timeline_new(account["id"], wall_id)
 
 
@@ -150,6 +171,31 @@ class FanslyAPI():
         endpoint = "/v1/account"
         params = {"usernames": username}
         return self._call(endpoint, params)["response"][0]
+
+    def account_by_id(self, account_id):
+        endpoint = "/v1/account"
+        params = {"ids": account_id}
+        return self._call(endpoint, params)["response"][0]
+
+    def accounts_by_id(self, account_ids):
+        endpoint = "/v1/account"
+        params = {"ids": ",".join(map(str, account_ids))}
+        return self._call(endpoint, params)["response"]
+
+    def lists_account(self):
+        endpoint = "/v1/lists/account"
+        params = {"itemId": ""}
+        return self._call(endpoint, params)["response"]
+
+    def lists_itemsnew(self, list_id, sort="3"):
+        endpoint = "/v1/lists/itemsnew"
+        params = {
+            "listId"  : list_id,
+            "limit"   : 50,
+            "after"   : None,
+            "sortMode": sort,
+        }
+        return self._pagination_items(endpoint, params)
 
     def post(self, post_id):
         endpoint = "/v1/post"
@@ -193,8 +239,8 @@ class FanslyAPI():
         posts = response["posts"]
         for post in posts:
             post["account"] = accounts[post.pop("accountId")]
-            att = []
 
+            att = []
             for attachment in post["attachments"]:
                 cid = attachment["contentId"]
                 if cid in media:
@@ -209,6 +255,14 @@ class FanslyAPI():
             post["attachments"] = att
         return posts
 
+    def _update_items(self, items):
+        ids = [item["id"] for item in items]
+        accounts = {
+            account["id"]: account
+            for account in self.accounts_by_id(ids)
+        }
+        return [accounts[id] for id in ids]
+
     def _call(self, endpoint, params):
         url = f"{self.ROOT}/api{endpoint}"
         params["ngsw-bypass"] = "true"
@@ -221,9 +275,20 @@ class FanslyAPI():
         while True:
             data = self._call(endpoint, params)
 
-            posts = self._update_posts(data)
+            posts = data["response"]
             if not posts:
                 return
-            yield from posts
+            yield from self._update_posts(data)
 
             params["before"] = min(p["id"] for p in posts)
+
+    def _pagination_items(self, endpoint, params):
+        while True:
+            data = self._call(endpoint, params)
+
+            items = data["response"]
+            if not items:
+                return
+            yield from self._update_items(items)
+
+            params["after"] = items[-1]["sortId"]
