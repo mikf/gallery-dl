@@ -9,7 +9,7 @@
 """Extractors for https://fansly.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, util
 import time
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?fansly\.com"
@@ -25,6 +25,7 @@ class FanslyExtractor(Extractor):
 
     def _init(self):
         self.api = FanslyAPI(self)
+        self.formats = self.config("format") or (303, 302, 1, 2, 4)
 
     def items(self):
         for post in self.posts():
@@ -40,49 +41,71 @@ class FanslyExtractor(Extractor):
 
     def _extract_files(self, post):
         files = []
-
         for attachment in post.pop("attachments"):
-            media = attachment["media"]
-            file = {
-                **media,
-                "date": text.parse_timestamp(media["createdAt"]),
-                "date_updated": text.parse_timestamp(media["updatedAt"]),
-            }
+            try:
+                self._extract_attachment(files, post, attachment)
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.error(
+                    "%s/%s, Failed to extract media (%s: %s)",
+                    post["id"], attachment.get("id"),
+                    exc.__class__.__name__, exc)
+        return files
 
-            width = 0
-            for variant in media["variants"]:
-                if variant["width"] > width:
-                    width = variant["width"]
-                    variant_max = variant
-                if variant["type"] == 303:
-                    break
-            else:
-                # image
-                file["type"] = "image"
-                files.append({
-                    "file": file,
-                    "url" : variant_max["locations"][0]["location"],
-                })
-                continue
+    def _extract_attachment(self, files, post, attachment):
+        media = attachment["media"]
+        variants = {
+            variant["type"]: variant
+            for variant in media.pop("variants", ())
+        }
+        variants[media["type"]] = media
 
-            # video
-            location = variant["locations"][0]
+        for fmt in self.formats:
+            if fmt in variants and (variant := variants[fmt]).get("locations"):
+                break
+        else:
+            return self.log.warning(
+                "%s/%s: Requested format not available",
+                post["id"], attachment["id"])
+
+        mime = variant["mimetype"]
+        location = variant.pop("locations")[0]
+        if "metadata" in variant:
+            try:
+                variant.update(util.json_loads(variant.pop("metadata")))
+            except Exception:
+                pass
+
+        file = {
+            **variant,
+            "format": fmt,
+            "date": text.parse_timestamp(media["createdAt"]),
+            "date_updated": text.parse_timestamp(media["updatedAt"]),
+        }
+
+        if "metadata" in location:
+            # manifest
             meta = location["metadata"]
 
             file["type"] = "video"
             files.append({
                 "file": file,
                 "url": f"ytdl:{location['location']}",
-                "_fallback": (media["locations"][0]["location"],),
-                "_ytdl_manifest": "dash",
+                #  "_fallback": (media["locations"][0]["location"],),
+                "_ytdl_manifest":
+                    "dash" if mime == "application/dash+xml" else "hls",
                 "_ytdl_manifest_cookies": (
                     ("CloudFront-Key-Pair-Id", meta["Key-Pair-Id"]),
                     ("CloudFront-Signature"  , meta["Signature"]),
                     ("CloudFront-Policy"     , meta["Policy"]),
                 ),
             })
-
-        return files
+        else:
+            file["type"] = "image" if mime.startswith("image/") else "video"
+            files.append({
+                "file": file,
+                "url" : location["location"],
+            })
 
 
 class FanslyPostExtractor(FanslyExtractor):
@@ -250,6 +273,7 @@ class FanslyAPI():
                     attachments.extend(
                         media[m["accountMediaId"]]
                         for m in bundle
+                        if m["accountMediaId"] in media
                     )
                 else:
                     self.extractor.log.warning(

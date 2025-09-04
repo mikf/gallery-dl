@@ -2811,6 +2811,18 @@ Description
     `fanbox.comments <extractor.fanbox.comments_>`__
 
 
+extractor.fansly.format
+-----------------------
+Type
+    ``list`` of ``integers``
+Default
+    ``[303, 302, 1, 2, 4]``
+Description
+    Selects the file format to extract.
+
+    When more than one format is given, the first available one is selected.
+
+
 extractor.fansly.token
 ----------------------
 Type
