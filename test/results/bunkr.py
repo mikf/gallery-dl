@@ -39,7 +39,10 @@ __tests__ = (
     "#results"     : (
         "https://mlk-bk.cdn.gigachad-cdn.ru/image-sZrQUeOx.jpg",
     ),
-    "#sha1_content": "55998743751dfe008d0e95605114fcbfa7dc4de8",
+    "#sha1_content": (
+        "55998743751dfe008d0e95605114fcbfa7dc4de8",
+        "caf7c3d3439d94e83b3c24ddaf5a3a48aa057519",
+    ),
 
     "album_id"   : "iXTTc1o2",
     "album_name" : "test2",
@@ -197,6 +200,42 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://bunkr.cr/a/z5Xt6NqH",
+    "#comment" : "filenames (#8150)",
+    "#category": ("lolisafe", "bunkr", "album"),
+    "#class"   : bunkr.BunkrAlbumExtractor,
+    "#results" : (
+        "https://beer.bunkr.ru/acba241d-c1e8-40c3-aa73-94daf75fcd13.jpg",
+        "https://cake.bunkr.ru/e997f757-61dc-45be-bd61-b6998d813beb.jpg",
+        "https://cake.bunkr.ru/72f1e20b-72a5-43b0-8ab2-472016e1d767.mp4",
+    ),
+
+    "album_id"  : "z5Xt6NqH",
+    "album_name": "filename",
+    "album_size": "1.82 MB",
+    "count"     : 3,
+    "date"      : "type:datetime",
+    "extension" : {"jpg", "mp4"},
+    "file"      : str,
+    "id"        : "",
+    "name"      : str,
+    "num"       : range(1, 3),
+    "id_url"    : {"53118207", "53118010", "53117871"},
+    "size"      : {490885, 727670, 687238},
+    "slug"      : {"Nzt1ID7lsgwR4", "Bu0e2k6gOB5di", "PwrDbEgQODSls"},
+    "filename"  : {
+        "'\"'",
+        "😃",
+        """filename: !"#$%&\'()*+,-.0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]""",
+    },
+    "uuid"      : {
+        "acba241d-c1e8-40c3-aa73-94daf75fcd13",
+        "e997f757-61dc-45be-bd61-b6998d813beb",
+        "72f1e20b-72a5-43b0-8ab2-472016e1d767",
+    },
+},
+
+{
     "#url"     : "https://bunkr.black/i/image-sZrQUeOx.jpg",
     "#category": ("lolisafe", "bunkr", "media"),
     "#class"   : bunkr.BunkrMediaExtractor,
@@ -275,6 +314,20 @@ __tests__ = (
     "id"       : "iEYVkLPQ",
     "id_url"   : "29682239",
     "name"     : "IMG_47272f2c698d257fd22f4300ae98ec35929b",
+},
+
+{
+    "#url"     : "https://bunkr.pk/f/Nzt1ID7lsgwR4",
+    "#category": ("lolisafe", "bunkr", "media"),
+    "#class"   : bunkr.BunkrMediaExtractor,
+    "#results" : "https://beer.bunkr.ru/acba241d-c1e8-40c3-aa73-94daf75fcd13.jpg",
+
+    "filename"   : "'\"'",
+    "id"         : "",
+    "id_url"     : "53118207",
+    "name"       : "'\"'",
+    "slug"       : "Nzt1ID7lsgwR4",
+    "uuid"       : "acba241d-c1e8-40c3-aa73-94daf75fcd13",
 },
 
 )
