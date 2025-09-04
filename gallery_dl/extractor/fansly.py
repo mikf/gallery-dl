@@ -119,7 +119,7 @@ class FanslyListExtractor(FanslyExtractor):
         base = f"{self.root}/"
         for account in self.api.lists_itemsnew(self.groups[0]):
             account["_extractor"] = FanslyCreatorPostsExtractor
-            url = f"{base}{account['username']}"
+            url = f"{base}{account['username']}/posts"
             yield Message.Queue, url, account
 
 
@@ -144,10 +144,10 @@ class FanslyCreatorPostsExtractor(FanslyExtractor):
     def posts(self):
         creator = self.groups[0]
         if creator.startswith("id:"):
-            pass
+            account = self.api.account_by_id(creator[3:])
         else:
-            account = self.api.account(self.groups[0])
-            wall_id = account["walls"][0]["id"]
+            account = self.api.account(creator)
+        wall_id = account["walls"][0]["id"]
         return self.api.timeline_new(account["id"], wall_id)
 
 
@@ -170,22 +170,22 @@ class FanslyAPI():
     def account(self, username):
         endpoint = "/v1/account"
         params = {"usernames": username}
-        return self._call(endpoint, params)["response"][0]
+        return self._call(endpoint, params)[0]
 
     def account_by_id(self, account_id):
         endpoint = "/v1/account"
         params = {"ids": account_id}
-        return self._call(endpoint, params)["response"][0]
+        return self._call(endpoint, params)[0]
 
     def accounts_by_id(self, account_ids):
         endpoint = "/v1/account"
         params = {"ids": ",".join(map(str, account_ids))}
-        return self._call(endpoint, params)["response"]
+        return self._call(endpoint, params)
 
     def lists_account(self):
         endpoint = "/v1/lists/account"
         params = {"itemId": ""}
-        return self._call(endpoint, params)["response"]
+        return self._call(endpoint, params)
 
     def lists_itemsnew(self, list_id, sort="3"):
         endpoint = "/v1/lists/itemsnew"
@@ -195,7 +195,7 @@ class FanslyAPI():
             "after"   : None,
             "sortMode": sort,
         }
-        return self._pagination_items(endpoint, params)
+        return self._pagination(endpoint, params)
 
     def post(self, post_id):
         endpoint = "/v1/post"
@@ -221,8 +221,7 @@ class FanslyAPI():
         }
         return self._pagination(endpoint, params)
 
-    def _update_posts(self, data):
-        response = data["response"]
+    def _update_posts(self, response):
         accounts = {
             account["id"]: account
             for account in response["accounts"]
@@ -240,19 +239,23 @@ class FanslyAPI():
         for post in posts:
             post["account"] = accounts[post.pop("accountId")]
 
-            att = []
+            attachments = []
             for attachment in post["attachments"]:
                 cid = attachment["contentId"]
                 if cid in media:
-                    att.append(media[cid])
+                    attachments.append(media[cid])
                 elif cid in bundles:
-                    content = bundles[cid]["bundleContent"]
-                    content.sort(key=lambda c: c["pos"])
-                    att.extend(
-                        media[c["accountMediaId"]]
-                        for c in content
+                    bundle = bundles[cid]["bundleContent"]
+                    bundle.sort(key=lambda c: c["pos"])
+                    attachments.extend(
+                        media[m["accountMediaId"]]
+                        for m in bundle
                     )
-            post["attachments"] = att
+                else:
+                    self.extractor.log.warning(
+                        "%s: Unhandled 'contentId' %s",
+                        post["id"], cid)
+            post["attachments"] = attachments
         return posts
 
     def _update_items(self, items):
@@ -269,26 +272,23 @@ class FanslyAPI():
         headers = self.headers.copy()
         headers["fansly-client-ts"] = str(int(time.time() * 1000))
 
-        return self.extractor.request_json(url, params=params, headers=headers)
+        data = self.extractor.request_json(
+            url, params=params, headers=headers)
+        return data["response"]
 
     def _pagination(self, endpoint, params):
         while True:
-            data = self._call(endpoint, params)
+            response = self._call(endpoint, params)
 
-            posts = data["response"]
-            if not posts:
-                return
-            yield from self._update_posts(data)
+            if isinstance(response, list):
+                if not response:
+                    return
+                yield from self._update_items(response)
+                params["after"] = response[-1]["sortId"]
 
-            params["before"] = min(p["id"] for p in posts)
-
-    def _pagination_items(self, endpoint, params):
-        while True:
-            data = self._call(endpoint, params)
-
-            items = data["response"]
-            if not items:
-                return
-            yield from self._update_items(items)
-
-            params["after"] = items[-1]["sortId"]
+            else:
+                if not response.get("posts"):
+                    return
+                posts = self._update_posts(response)
+                yield from posts
+                params["before"] = min(p["id"] for p in posts)
