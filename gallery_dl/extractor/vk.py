@@ -72,6 +72,8 @@ class VkExtractor(Extractor):
                 photo["width"] = photo["height"] = 0
 
             photo["id"] = photo["id"].rpartition("_")[2]
+            photo["date"] = text.parse_timestamp(text.extr(
+                photo["date"], 'data-date="', '"'))
             photo.update(data)
 
             text.nameext_from_url(url, photo)
