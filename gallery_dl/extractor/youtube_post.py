@@ -16,12 +16,9 @@ class YoutubePostExtractor(Extractor):
     category = "youtube"
     subcategory = "post"
     root = "https://www.youtube.com"
-    # single segment directory format must be a tuple
     directory_fmt = ("{category}",)
-    # Use synthetic filename pattern independent of remote URL basename
     filename_fmt = "{post_id}_{num}.{extension}"
     archive_fmt = "{post_id}_{num}"
-    # match normal community post URLs without trailing '='
     pattern = r"(?:https?://)?(?:www\.)?youtube\.com/post/(?P<post_id>[A-Za-z0-9_-]+)"
     example = "https://www.youtube.com/post/aB9_-Q3bT71kP2fGx8LmN3sR0YcUdVeWqZ5-"
 
@@ -63,7 +60,6 @@ class YoutubePostExtractor(Extractor):
         for i, img_url in enumerate(image_urls):
             modified_url = img_url + "s0?imgmax=0"
 
-            # Create data for this image; leave extension empty to let HTTP inference fill it
             img_data = data.copy()
             img_data.update(
                 {
