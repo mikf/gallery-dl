@@ -151,7 +151,8 @@ class KemonoExtractor(Extractor):
                     file["extension"] = ext
                 elif ext == "txt" and file["extension"] != "txt":
                     file["_http_validate"] = _validate
-                elif ext in exts_archive:
+                elif ext in exts_archive or \
+                        ext == "bin" and file["extension"] in exts_archive:
                     file["type"] = "archive"
                     if archives:
                         try:
