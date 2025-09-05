@@ -214,38 +214,34 @@ class VkTaggedExtractor(VkExtractor):
     def metadata(self):
         return {"user": {"id": self.user_id}}
 
-class VkWallExtractor(VkExtractor):
-    """Extractor for a vk wall post"""
-    subcategory = "wall"
-    directory_fmt = ("{category}", "{user[id]}", "walls")
-    filename_fmt = "{wall[id]}_{num}.{extension}"
-    pattern = BASE_PATTERN + r"/wall(-?\d+)_(\d+)$"
-    example = "https://vk.com/wall12345_1"
 
-    def __init__(self, match):
-        VkExtractor.__init__(self, match)
-        self.user_id, self.wall_id = match.groups()
+class VkWallPostExtractor(VkExtractor):
+    """Extractor for a vk wall post"""
+    subcategory = "wall-post"
+    directory_fmt = ("{category}", "{user[id]}", "wall")
+    filename_fmt = "{wall[id]}_{num}.{extension}"
+    pattern = BASE_PATTERN + r"/wall(-?\d+)_(\d+)"
+    example = "https://vk.com/wall12345_123"
 
     def photos(self):
-        return self._pagination(f"wall{self.user_id}_{self.wall_id}")
+        user_id, wall_id = self.groups
+        return self._pagination(f"wall{user_id}_{wall_id}")
 
     def metadata(self):
-        url = f"{self.root}/wall{self.user_id}_{self.wall_id}"
-        data = self._extract_wall(url)
-        return {
-            "user": {"id": self.user_id },
-            "wall": {
-                "id": self.wall_id,
-                "desc": data["desc"]
-            }
-        }
+        user_id, wall_id = self.groups
 
-    def _extract_wall(self, url):
+        url = f"{self.root}/wall{user_id}_{wall_id}"
         page = self.request(url).text
-        extr = text.extract_from(page)
-        desc = text.unescape(extr(
-            "data-testid=\"post_description\">", "</div>"))
-        if desc == "":
-            desc = text.unescape(extr(
-                "name=\"description\" content=\"", "\""))
-        return { "desc": desc }
+        desc = text.unescape(
+            text.extr(page, 'data-testid="post_description">', "</div>") or
+            text.extr(page, 'name="description" content="', '"'))
+
+        return {
+            "user": {
+                "id": user_id,
+            },
+            "wall": {
+                "id": wall_id,
+                "description": desc,
+            },
+        }
