@@ -513,6 +513,25 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.cr/patreon/user/108002999/post/136454591",
+    "#comment" : "'.zip' archive with '.bin' extension (#8156)",
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
+    "#range"   : "0",
+    "#metadata": "post",
+
+    "archives": [{
+        "extension": "zip",
+        "filename": "#5 Kitagawa Marin",
+        "hash": "46cc99d4114906524fe52a6f772c51ab59ca1c3c0f6a8a0d3588a861b0d59ced",
+        "name": "#5 Kitagawa Marin.zip",
+        "path": "/46/cc/46cc99d4114906524fe52a6f772c51ab59ca1c3c0f6a8a0d3588a861b0d59ced.bin",
+        "type": "archive",
+        "url": "https://kemono.cr/data/46/cc/46cc99d4114906524fe52a6f772c51ab59ca1c3c0f6a8a0d3588a861b0d59ced.bin"
+    }],
+},
+
+{
     "#url"     : "https://kemono.cr/discord/server/488668827274444803/608504710906904576",
     "#category": ("", "kemono", "discord"),
     "#class"   : kemono.KemonoDiscordExtractor,
