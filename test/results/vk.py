@@ -79,6 +79,20 @@ __tests__ = (
     "#category": ("", "vk", "album"),
     "#class"   : vk.VkAlbumExtractor,
     "#count"   : 12,
+    "#log"     : "-165740836_281339889: Failed to extract metadata ('Access denied')",
+
+    "album": {
+        "id"    : "281339889",
+        "!name" : str,
+        "!count": int,
+    },
+    "user": {
+        "id": "-165740836",
+        "!name" : str,
+        "!nick" : str,
+        "!group": bool,
+
+    },
 },
 
 {
@@ -94,6 +108,36 @@ __tests__ = (
     "#category": ("", "vk", "album"),
     "#class"   : vk.VkAlbumExtractor,
     "#exception": exception.AuthorizationError,
+},
+
+{
+    "#url"     : "https://vk.com/album-205150448_00",
+    "#class"   : vk.VkAlbumExtractor,
+    "#range"   : "1-25",
+    "#count"   : 25,
+
+    "id"           : r"re:\d+",
+    "width"        : range(100, 8_000),
+    "height"       : range(100, 8_000),
+    "filename"     : str,
+    "extension"    : {"jpg", "png"},
+    "date"         : "type:datetime",
+    "count"        : 826,
+    "num"          : range(1, 25),
+    "description"  : str,
+    "hash"         : r"re:[0-9a-f]{18}",
+    "likes"        : int,
+    "album"        : {
+        "id"   : "00",
+        "name" : "Community wall photos",
+        "count": 826,
+    },
+    "user"         : {
+        "id"   : "-205150448",
+        "name" : "otjareniy",
+        "nick" : "Отжареный Овощ(16+)",
+        "group": True,
+    },
 },
 
 {

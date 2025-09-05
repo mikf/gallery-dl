@@ -187,17 +187,40 @@ class VkAlbumExtractor(VkExtractor):
     pattern = BASE_PATTERN + r"/album(-?\d+)_(\d+)$"
     example = "https://vk.com/album12345_00"
 
-    def __init__(self, match):
-        VkExtractor.__init__(self, match)
-        self.user_id, self.album_id = match.groups()
-
     def photos(self):
-        return self._pagination(f"album{self.user_id}_{self.album_id}")
+        user_id, album_id = self.groups
+        return self._pagination(f"album{user_id}_{album_id}")
 
     def metadata(self):
+        user_id, album_id = self.groups
+
+        url = f"{self.root}/album{user_id}_{album_id}"
+        page = self.request(url).text
+        desc = text.extr(page, 'name="og:description" value="', '"')
+        try:
+            album_name, user_name, photos = desc.rsplit(" - ", 2)
+        except ValueError:
+            if msg := text.extr(
+                    page, '<div class="message_page_title">Error</div>',
+                    "</div>"):
+                msg = f" ('{text.remove_html(msg)[:-5]}')"
+            self.log.warning("%s_%s: Failed to extract metadata%s",
+                             user_id, album_id, msg)
+            return {"user": {"id": user_id}, "album": {"id": album_id}}
+
         return {
-            "user": {"id": self.user_id},
-            "album": {"id": self.album_id},
+            "user": {
+                "id"   : user_id,
+                "nick" : text.unescape(user_name),
+                "name" : text.unescape(text.extr(
+                    page, 'class="ui_crumb" href="/', '"')),
+                "group": user_id[0] == "-",
+            },
+            "album": {
+                "id"   : album_id,
+                "name" : text.unescape(album_name),
+                "count": text.parse_int(photos[:-7])
+            },
         }
 
 
