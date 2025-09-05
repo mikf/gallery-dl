@@ -11,6 +11,7 @@
 from .common import DownloaderBase
 from .. import ytdl, text
 from xml.etree import ElementTree
+from http.cookiejar import Cookie
 import os
 
 
@@ -202,7 +203,6 @@ class YoutubeDLDownloader(DownloaderBase):
         if cookies is not None:
             if isinstance(cookies, dict):
                 cookies = cookies.items()
-            from http.cookiejar import Cookie
             set_cookie = ytdl.cookiejar.set_cookie
             for name, value in cookies:
                 set_cookie(Cookie(
