@@ -108,6 +108,10 @@ class VkExtractor(Extractor):
             total = payload[1]
             photos = payload[3]
 
+            for i in range(len(photos)):
+                photos[i]["num"] = self.offset + i + 1
+                photos[i]["count"] = total
+
             offset_next = self.offset + len(photos)
             if offset_next >= total:
                 # the last chunk of photos also contains the first few photos
@@ -128,7 +132,7 @@ class VkPhotosExtractor(VkExtractor):
     subcategory = "photos"
     pattern = (BASE_PATTERN + r"/(?:"
                r"(?:albums|photos|id)(-?\d+)"
-               r"|(?!(?:album|tag)-?\d+_?)([^/?#]+))")
+               r"|(?!(?:album|tag|wall)-?\d+_?)([^/?#]+))")
     example = "https://vk.com/id12345"
 
     def __init__(self, match):
@@ -209,3 +213,35 @@ class VkTaggedExtractor(VkExtractor):
 
     def metadata(self):
         return {"user": {"id": self.user_id}}
+
+
+class VkWallPostExtractor(VkExtractor):
+    """Extractor for a vk wall post"""
+    subcategory = "wall-post"
+    directory_fmt = ("{category}", "{user[id]}", "wall")
+    filename_fmt = "{wall[id]}_{num}.{extension}"
+    pattern = BASE_PATTERN + r"/wall(-?\d+)_(\d+)"
+    example = "https://vk.com/wall12345_123"
+
+    def photos(self):
+        user_id, wall_id = self.groups
+        return self._pagination(f"wall{user_id}_{wall_id}")
+
+    def metadata(self):
+        user_id, wall_id = self.groups
+
+        url = f"{self.root}/wall{user_id}_{wall_id}"
+        page = self.request(url).text
+        desc = text.unescape(
+            text.extr(page, 'data-testid="post_description">', "</div>") or
+            text.extr(page, 'name="description" content="', '"'))
+
+        return {
+            "user": {
+                "id": user_id,
+            },
+            "wall": {
+                "id": wall_id,
+                "description": desc,
+            },
+        }

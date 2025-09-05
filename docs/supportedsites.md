@@ -1042,7 +1042,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="vk" title="vk">
     <td>VK</td>
     <td>https://vk.com/</td>
-    <td>Albums, Photos, Tagged Photos</td>
+    <td>Albums, Photos, Tagged Photos, individual Wall Posts</td>
     <td></td>
 </tr>
 <tr id="vsco" title="vsco">
