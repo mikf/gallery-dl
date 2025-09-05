@@ -422,6 +422,7 @@ SUBCATEGORY_MAP = {
     },
     "vk": {
         "tagged": "Tagged Photos",
+        "wall-post": "individual Wall Posts",
     },
     "vsco": {
         "spaces": "",
