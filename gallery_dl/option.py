@@ -222,10 +222,6 @@ class Formatter(argparse.HelpFormatter):
     def _format_usage(self, usage, actions, groups, prefix):
         return f"Usage: {self._prog} [OPTIONS] URL [URL...]\n"
 
-    def format_help(self):
-        return self._long_break_matcher.sub(
-            "\n\n", self._root_section.format_help())
-
 
 def _parse_option(opt):
     key, _, value = opt.partition("=")
