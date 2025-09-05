@@ -17,6 +17,7 @@ __tests__ = (
     "#count"   : ">= 35",
 
     "id"  : r"re:\d+",
+    "date": "type:datetime",
     "user": {
         "group": False,
         "id"  : "398982326",
@@ -33,6 +34,7 @@ __tests__ = (
     "#range"   : "15-25",
 
     "id"  : r"re:\d+",
+    "date": "type:datetime",
     "user": {
         "group": True,
         "id"  : "-165740836",
@@ -50,6 +52,8 @@ __tests__ = (
     "#pattern" : r"https://sun\d+-\d+\.userapi\.com/",
     "#range"   : "1-9",
     "#count"   : 9,
+
+    "date": "type:datetime",
 },
 
 {
@@ -96,7 +100,7 @@ __tests__ = (
     "#url"     : "https://vk.com/tag304303884",
     "#category": ("", "vk", "tagged"),
     "#class"   : vk.VkTaggedExtractor,
-    "#count"   : 44,
+    "#exception": exception.AuthorizationError,
 },
 
 {
