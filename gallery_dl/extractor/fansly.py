@@ -86,12 +86,17 @@ class FanslyExtractor(Extractor):
         if "metadata" in location:
             # manifest
             meta = location["metadata"]
-
             file["type"] = "video"
+
+            try:
+                fallback = (media["locations"][0]["location"],)
+            except Exception:
+                fallback = ()
+
             files.append({
                 "file": file,
                 "url": f"ytdl:{location['location']}",
-                #  "_fallback": (media["locations"][0]["location"],),
+                "_fallback": fallback,
                 "_ytdl_manifest":
                     "dash" if mime == "application/dash+xml" else "hls",
                 "_ytdl_manifest_cookies": (
