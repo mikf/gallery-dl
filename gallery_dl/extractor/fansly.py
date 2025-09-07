@@ -179,16 +179,17 @@ class FanslyAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-
-        token = extractor.config("token")
-        if not token:
-            self.extractor.log.warning("No 'token' provided")
-
         self.headers = {
             "fansly-client-ts": None,
             "Origin"          : extractor.root,
-            "authorization"   : token,
         }
+
+        if token := extractor.config("token"):
+            self.headers["authorization"] = token
+            self.extractor.log.debug(
+                "Using authorization 'token' %.5s...", token)
+        else:
+            self.extractor.log.warning("No 'token' provided")
 
     def account(self, username):
         endpoint = "/v1/account"
