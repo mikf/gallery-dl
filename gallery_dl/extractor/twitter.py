@@ -1447,7 +1447,8 @@ class TwitterAPI():
             "includePromotedContent": False,
         }
         return self._pagination_tweets(
-            endpoint, variables, ("bookmark_timeline_v2", "timeline"), False)
+            endpoint, variables, ("bookmark_timeline_v2", "timeline"),
+            stop_tweets=128)
 
     def search_timeline(self, query, product="Latest"):
         endpoint = "/graphql/4fpceYZ6-YQCx_JSl_Cn_A/SearchTimeline"
@@ -1460,7 +1461,8 @@ class TwitterAPI():
         }
         return self._pagination_tweets(
             endpoint, variables,
-            ("search_by_raw_query", "search_timeline", "timeline"))
+            ("search_by_raw_query", "search_timeline", "timeline"),
+            stop_tweets=3)
 
     def community_query(self, community_id):
         endpoint = "/graphql/2W09l7nD7ZbxGQHXvfB22w/CommunityQuery"
@@ -1870,11 +1872,12 @@ class TwitterAPI():
             params["cursor"] = extr._update_cursor(cursor)
 
     def _pagination_tweets(self, endpoint, variables,
-                           path=None, stop_tweets=True,
+                           path=None, stop_tweets=0,
                            features=None, field_toggles=None):
         extr = self.extractor
         original_retweets = (extr.retweets == "original")
         pinned_tweet = extr.pinned
+        stop_tweets_max = stop_tweets
 
         params = {"variables": None}
         if cursor := extr._init_cursor():
@@ -2067,8 +2070,15 @@ class TwitterAPI():
                             tweet.get("rest_id"))
                         continue
 
-            if stop_tweets and not tweet:
-                return extr._update_cursor(None)
+            if tweet:
+                stop_tweets = stop_tweets_max
+            else:
+                if stop_tweets <= 0:
+                    return extr._update_cursor(None)
+                self.log.debug(
+                    "No Tweet results (%s/%s)",
+                    stop_tweets_max - stop_tweets + 1, stop_tweets_max)
+                stop_tweets -= 1
             if not cursor or cursor == variables.get("cursor"):
                 return extr._update_cursor(None)
             variables["cursor"] = extr._update_cursor(cursor)
