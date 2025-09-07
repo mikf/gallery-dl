@@ -5631,6 +5631,22 @@ Description
     Logout and retry as guest when access to another user's Tweets is blocked.
 
 
+extractor.twitter.pagination-search
+-----------------------------------
+Type
+    ``string``
+Default
+    ``"cursor"``
+Description
+    Selects how to paginate over search results.
+
+    ``"cursor"``
+        Use ``cursor`` values provided by the API
+    ``"id"`` | ``"max_id"`` | ``"tweet_id"``
+        Update the ``max_id`` search query parameter
+        to the Tweet ID value of the last retrieved Tweet.
+
+
 extractor.twitter.pinned
 ------------------------
 Type
