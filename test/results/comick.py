@@ -79,6 +79,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://comick.io/comic/neko-no-oshigoto/L7TaJB4n-chapter-10.7-xy",
+    "#comment" : "redirect",
+    "#class"   : comick.ComickChapterExtractor,
+    "#pattern" : r"https://meo.comick.pictures/\d-\w+\.webp",
+
+    "volume"        : 1,
+    "chapter"       : 10,
+    "chapter_minor" : ".5",
+    "chapter_hid"   : "L7TaJB4n",
+    "chapter_id"    : 4105343,
+    "chapter_string": "L7TaJB4n-chapter-10.5-en",
+},
+
+{
     "#url"     : "https://comick.io/comic/koko-jidai-ni-gomandatta-jou-sama-to-no-dousei-seikatsu-wa-igaito-igokochi-ga-warukunai/aPu5CgJA-chapter-3-vi",
     "#class"   : comick.ComickChapterExtractor,
     "#pattern" : r"https://meo.comick.pictures/\d+-[\w-]+\.(jpg|png)",

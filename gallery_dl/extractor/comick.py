@@ -67,9 +67,19 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
     def metadata(self, page):
         slug, chstr = self.groups
         manga = _manga_info(self, slug)
-        props = _chapter_info(self, manga, chstr)
 
-        ch = props["chapter"]
+        while True:
+            props = _chapter_info(self, manga, chstr)
+
+            if "__N_REDIRECT" in props:
+                path = props["__N_REDIRECT"]
+                self.log.debug("Following redirect to %s", path)
+                _, slug, chstr = path.rsplit("/", 2)
+                continue
+
+            ch = props["chapter"]
+            break
+
         self._images = ch["md_images"]
 
         if chapter := ch["chap"]:
