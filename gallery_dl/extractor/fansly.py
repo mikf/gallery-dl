@@ -25,7 +25,11 @@ class FanslyExtractor(Extractor):
 
     def _init(self):
         self.api = FanslyAPI(self)
-        self.formats = self.config("format") or (303, 302, 1, 2, 4)
+
+        if fmts := self.config("formats"):
+            self.formats = set(fmts)
+        else:
+            self.formats = {1, 2, 3, 4, 302, 303}
 
     def items(self):
         for post in self.posts():
@@ -54,19 +58,23 @@ class FanslyExtractor(Extractor):
 
     def _extract_attachment(self, files, post, attachment):
         media = attachment["media"]
-        variants = {
-            variant["type"]: variant
-            for variant in media.pop("variants", ())
-        }
-        variants[media["type"]] = media
 
-        for fmt in self.formats:
-            if fmt in variants and (variant := variants[fmt]).get("locations"):
-                break
-        else:
-            return self.log.warning(
-                "%s/%s: Requested format not available",
-                post["id"], attachment["id"])
+        variants = media.pop("variants") or []
+        if media.get("locations"):
+            variants.append(media)
+
+        formats = [
+            (type > 256, variant["width"], type, variant)
+            for variant in variants
+            if variant.get("locations") and
+            (type := variant["type"]) in self.formats
+        ]
+
+        try:
+            variant = max(formats)[-1]
+        except Exception:
+            return self.log.warning("%s/%s: No format available",
+                                    post["id"], attachment["id"])
 
         mime = variant["mimetype"]
         location = variant.pop("locations")[0]
@@ -78,7 +86,7 @@ class FanslyExtractor(Extractor):
 
         file = {
             **variant,
-            "format": fmt,
+            "format": variant["type"],
             "date": text.parse_timestamp(media["createdAt"]),
             "date_updated": text.parse_timestamp(media["updatedAt"]),
         }
