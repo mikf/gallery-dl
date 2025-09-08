@@ -165,6 +165,27 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/photo.php/?fbid=10165113568399554&set=t.100064860875397",
+    "#class"   : facebook.FacebookPhotoExtractor,
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo?fbid=10165113568399554&set=t.100064860875397",
+    "#class"   : facebook.FacebookPhotoExtractor,
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo/?fbid=10165113568399554&set=t.100064860875397&type=3",
+    "#class"   : facebook.FacebookPhotoExtractor,
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo/?fbid=10165113568399554&set=t.100064860875397&type=3&setextract",
+    "#class"   : facebook.FacebookPhotoExtractor,
+    "#fail"    : "'setextract' query parameter",
+},
+
+{
     "#url"     : "https://www.facebook.com/photo/?fbid=10160743390456729",
     "#class"   : facebook.FacebookPhotoExtractor,
     "#count"   : 1,
