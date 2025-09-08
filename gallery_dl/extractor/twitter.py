@@ -1460,16 +1460,20 @@ class TwitterAPI():
             "withGrokTranslatedBio": False,
         }
 
-        if self.extractor.config("pagination-search") in (
-                "id", "tweet_id", "max_id"):
+        if self.extractor.config("search-pagination") in (
+                "max_id", "maxid", "id"):
             update_variables = self._update_variables_search
         else:
             update_variables = None
 
+        stop_tweets = self.extractor.config("search-stop")
+        if stop_tweets is None or stop_tweets == "auto":
+            stop_tweets = 3 if update_variables is None else 0
+
         return self._pagination_tweets(
             endpoint, variables,
             ("search_by_raw_query", "search_timeline", "timeline"),
-            stop_tweets=3, update_variables=update_variables)
+            stop_tweets=stop_tweets, update_variables=update_variables)
 
     def community_query(self, community_id):
         endpoint = "/graphql/2W09l7nD7ZbxGQHXvfB22w/CommunityQuery"

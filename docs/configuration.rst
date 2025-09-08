@@ -5631,22 +5631,6 @@ Description
     Logout and retry as guest when access to another user's Tweets is blocked.
 
 
-extractor.twitter.pagination-search
------------------------------------
-Type
-    ``string``
-Default
-    ``"cursor"``
-Description
-    Selects how to paginate over search results.
-
-    ``"cursor"``
-        Use ``cursor`` values provided by the API
-    ``"id"`` | ``"max_id"`` | ``"tweet_id"``
-        Update the ``max_id`` search query parameter
-        to the Tweet ID value of the last retrieved Tweet.
-
-
 extractor.twitter.pinned
 ------------------------
 Type
@@ -5741,6 +5725,34 @@ Description
 
     If this value is ``"original"``, metadata for these files
     will be taken from the original Tweets, not the Retweets.
+
+
+extractor.twitter.search-pagination
+-----------------------------------
+Type
+    ``string``
+Default
+    ``"cursor"``
+Description
+    Selects how to paginate over search results.
+
+    ``"cursor"``
+        Use ``cursor`` values provided by the API
+    ``"max_id"`` | ``"maxid"`` | ``"id"``
+        Update the ``max_id`` search query parameter
+        to the Tweet ID value of the last retrieved Tweet.
+
+
+extractor.twitter.search-stop
+-----------------------------
+Type
+    ``integer``
+Default
+    * ``3`` if `search-pagination <extractor.twitter.search-pagination_>`__ is set to ``"cursor"``
+    * ``0`` otherwise
+Description
+    Selects how many empty search result batches
+    to receive before stopping.
 
 
 extractor.twitter.timeline.strategy
