@@ -87,14 +87,17 @@ class TungstenModelExtractor(TungstenExtractor):
 
 class TungstenUserExtractor(TungstenExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/user/([^/?#]+)"
-    example = "https://tungsten.run/user/USER/posts"
+    pattern = rf"{BASE_PATTERN}/user/([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?"
+    example = "https://tungsten.run/user/USER"
 
     def posts(self):
-        url = f"{self.root}/user/{self.groups[0]}"
+        user, qs = self.groups
+        url = f"{self.root}/user/{user}"
         page = self.request(url).text
         uuid_user = text.extr(page, '"user":{"uuid":"', '"')
 
         url = f"https://api.tungsten.run/v1/users/{uuid_user}/posts"
-        params = {"sort": "top_all_time"}
+        params = text.parse_query(qs)
+        params.setdefault("sort", "top_all_time")
+        self.kwdict["search_tags"] = params.get("tag", "")
         return self._pagination(url, params)
