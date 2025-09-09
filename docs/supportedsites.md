@@ -211,6 +211,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, Media Files</td>
     <td></td>
 </tr>
+<tr id="cyberfile" title="cyberfile">
+    <td>CyberFile</td>
+    <td>https://cyberfile.me/</td>
+    <td>Files, Folders</td>
+    <td></td>
+</tr>
 <tr id="dankefuerslesen" title="dankefuerslesen">
     <td>Danke fürs Lesen</td>
     <td>https://danke.moe/</td>
