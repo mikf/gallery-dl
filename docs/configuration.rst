@@ -2036,6 +2036,20 @@ Description
     uses the same domain as a given input URL.
 
 
+extractor.cyberfile.password
+----------------------------
+Type
+    ``string``
+Default
+    ``""``
+Description
+    Password value used to access protected files and folders.
+
+    Note: Leave this value empty or undefined
+    to be interactively prompted for a password when needed
+    (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
+
+
 extractor.[Danbooru].external
 -----------------------------
 Type

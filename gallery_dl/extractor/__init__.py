@@ -44,6 +44,7 @@ modules = [
     "comick",
     "comicvine",
     "cyberdrop",
+    "cyberfile",
     "danbooru",
     "dankefuerslesen",
     "desktopography",
