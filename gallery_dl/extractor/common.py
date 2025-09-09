@@ -354,12 +354,11 @@ class Extractor():
             raise exception.AbortExtraction(
                 f"User input required ({prompt.strip(' :')})")
 
-    def _get_auth_info(self):
+    def _get_auth_info(self, password=None):
         """Return authentication information as (username, password) tuple"""
         username = self.config("username")
-        password = None
 
-        if username:
+        if username or password:
             password = self.config("password")
             if not password:
                 self._check_input_allowed("password")
