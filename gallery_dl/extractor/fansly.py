@@ -45,6 +45,19 @@ class FanslyExtractor(Extractor):
 
     def _extract_files(self, post):
         files = []
+
+        if "_extra" in post:
+            extra = post.pop("_extra", ())
+            media = {
+                media["id"]: media
+                for media in self.api.account_media(extra)
+            }
+            post["attachments"].extend(
+                media[mid]
+                for mid in extra
+                if mid in media
+            )
+
         for attachment in post.pop("attachments"):
             try:
                 self._extract_attachment(files, post, attachment)
@@ -219,6 +232,11 @@ class FanslyAPI():
         params = {"ids": ",".join(map(str, account_ids))}
         return self._call(endpoint, params)
 
+    def account_media(self, media_ids):
+        endpoint = "/v1/account/media"
+        params = {"ids": ",".join(map(str, media_ids))}
+        return self._call(endpoint, params)
+
     def lists_account(self):
         endpoint = "/v1/lists/account"
         params = {"itemId": ""}
@@ -276,6 +294,7 @@ class FanslyAPI():
         for post in posts:
             post["account"] = accounts[post.pop("accountId")]
 
+            extra = None
             attachments = []
             for attachment in post["attachments"]:
                 cid = attachment["contentId"]
@@ -284,16 +303,20 @@ class FanslyAPI():
                 elif cid in bundles:
                     bundle = bundles[cid]["bundleContent"]
                     bundle.sort(key=lambda c: c["pos"])
-                    attachments.extend(
-                        media[m["accountMediaId"]]
-                        for m in bundle
-                        if m["accountMediaId"] in media
-                    )
+                    for c in bundle:
+                        mid = c["accountMediaId"]
+                        if mid in media:
+                            attachments.append(media[mid])
+                        else:
+                            if extra is None:
+                                post["_extra"] = extra = []
+                            extra.append(mid)
                 else:
                     self.extractor.log.warning(
                         "%s: Unhandled 'contentId' %s",
                         post["id"], cid)
             post["attachments"] = attachments
+
         return posts
 
     def _update_items(self, items):
