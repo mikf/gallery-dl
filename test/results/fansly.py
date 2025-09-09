@@ -10,14 +10,22 @@ from gallery_dl.extractor import fansly
 __tests__ = (
 {
     "#url"     : "https://fansly.com/post/819035448046268416",
-    "#comment" : "video",
+    "#comment" : "1 video",
     "#class"   : fansly.FanslyPostExtractor,
 },
 
 {
     "#url"     : "https://fansly.com/post/815337432600821760",
-    "#comment" : "images",
+    "#comment" : "4 images",
     "#class"   : fansly.FanslyPostExtractor,
+},
+
+{
+    "#url"     : "https://fansly.com/post/800553913467023361",
+    "#comment" : "more than 5 files in an 'accountMediaBundles' entry",
+    "#class"   : fansly.FanslyPostExtractor,
+    "#auth"    : True,
+    "#count"   : 6,
 },
 
 {
@@ -36,7 +44,7 @@ __tests__ = (
     "#auth"    : False,
     "#log"     : (
         "No 'token' provided",
-        "543835794918354944/542560754868432896: Requested format not available",
+        "543835794918354944/542560754868432896: No format available",
     ),
 },
 
@@ -48,9 +56,9 @@ __tests__ = (
     "#auth"    : False,
     "#log"     : (
         "No 'token' provided",
-        "451349524175138816/451349523013316609: Requested format not available",
-        "451349524175138816/451349523000729600: Requested format not available",
-        "451349524175138816/451349523025899520: Requested format not available",
+        "451349524175138816/451349523013316609: No format available",
+        "451349524175138816/451349523000729600: No format available",
+        "451349524175138816/451349523025899520: No format available",
     ),
 },
 
