@@ -104,13 +104,16 @@ class AuthRequired(AuthorizationError):
         if auth:
             if not isinstance(auth, str):
                 auth = " or ".join(auth)
-            if " " not in resource:
-                resource = "this " + resource
-            if message is None:
-                message = (f"{auth} needed to access {resource}")
+
+            if resource:
+                if " " not in resource:
+                    resource = f"this {resource}"
+                resource = f" to access {resource}"
             else:
-                message = (f"{auth} needed to access {resource} "
-                           f"('{message}')")
+                resource = ""
+
+            message = f" ('{message}')" if message else ""
+            message = f"{auth} needed{resource}{message}"
         AuthorizationError.__init__(self, message)
 
 
