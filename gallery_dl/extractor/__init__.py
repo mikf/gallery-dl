@@ -171,6 +171,7 @@ modules = [
     "senmanga",
     "sexcom",
     "shimmie2",
+    "simpcity",
     "simplyhentai",
     "sizebooru",
     "skeb",
