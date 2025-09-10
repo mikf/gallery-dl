@@ -987,16 +987,21 @@ def build_proxy_map(proxies, log=None):
     if isinstance(proxies, str):
         if "://" not in proxies:
             proxies = "http://" + proxies.lstrip("/")
-        return {"http": proxies, "https": proxies}
-
-    if isinstance(proxies, dict):
+        proxies = {"http": proxies, "https": proxies}
+    elif isinstance(proxies, dict):
         for scheme, proxy in proxies.items():
             if "://" not in proxy:
                 proxies[scheme] = "http://" + proxy.lstrip("/")
-        return proxies
+    else:
+        proxies = None
 
     if log is not None:
-        log.warning("invalid proxy specifier: %s", proxies)
+        if proxies is None:
+            log.warning("Invalid proxy specifier: %r", proxies)
+        else:
+            log.debug("Proxy Map: %s", proxies)
+
+    return proxies
 
 
 def build_predicate(predicates):
