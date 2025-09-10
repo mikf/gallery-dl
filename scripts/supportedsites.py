@@ -126,6 +126,7 @@ CATEGORY_MAP = {
     "nhentai"        : "nhentai",
     "nijie"          : "nijie",
     "nozomi"         : "Nozomi.la",
+    "nozrip"         : "GaryC Booru",
     "nsfwalbum"      : "NSFWalbum.com",
     "nudostar"       : "NudoStar.TV",
     "paheal"         : "Rule 34",
@@ -158,6 +159,7 @@ CATEGORY_MAP = {
     "sexcom"         : "Sex.com",
     "silverpic"      : "SilverPic.com",
     "simplyhentai"   : "Simply Hentai",
+    "sizebooru"      : "Size Booru",
     "slickpic"       : "SlickPic",
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
@@ -170,6 +172,7 @@ CATEGORY_MAP = {
     "thatpervert"    : "ThatPervert",
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
+    "thecollectionS" : "The /co/llection",
     "tiktok"         : "TikTok",
     "tmohentai"      : "TMOHentai",
     "tumblrgallery"  : "TumblrGallery",
@@ -220,11 +223,6 @@ SUBCATEGORY_MAP = {
     "related-pin"    : "related Pins",
     "related-board"  : "",
 
-    "ao3": {
-        "user-works"   : "",
-        "user-series"  : "",
-        "user-bookmark": "Bookmarks",
-    },
     "arcalive": {
         "user": "User Posts",
     },
@@ -233,7 +231,6 @@ SUBCATEGORY_MAP = {
         "collections": "",
     },
     "bilibili": {
-        "user-articles": "User Articles",
         "user-articles-favorite": "User Article Favorites",
     },
     "bluesky": {
@@ -249,11 +246,8 @@ SUBCATEGORY_MAP = {
         "posts" : "Post Listings",
         "search-models": "Model Searches",
         "search-images": "Image Searches",
-        "user-models": "User Models",
         "user-images": ("User Images", "Image Reactions"),
-        "user-posts" : "User Posts",
         "user-videos": ("User Videos", "Video Reactions"),
-        "user-collections" : "User Collections",
         "generated": "Generated Files",
     },
     "coomer": {
@@ -262,14 +256,12 @@ SUBCATEGORY_MAP = {
         "posts"         : "",
     },
     "Danbooru": {
-        "artist-search": "Artist Searches",
         "favgroup": "Favorite Groups",
     },
     "desktopography": {
         "site": "",
     },
     "deviantart": {
-        "gallery-search": "Gallery Searches",
         "stash" : "Sta.sh",
         "status": "Status Updates",
         "watch-posts": "",
@@ -283,6 +275,9 @@ SUBCATEGORY_MAP = {
     "fanbox": {
         "supporting": "Supported User Feed",
         "redirect"  : "Pixiv Redirects",
+    },
+    "fansly": {
+        "lists": "Account Lists",
     },
     "fapello": {
         "path": ["Videos", "Trending Posts", "Popular Videos", "Top Models"],
@@ -308,14 +303,10 @@ SUBCATEGORY_MAP = {
         "posts": "",
         "saved": "Saved Posts",
         "tagged": "Tagged Posts",
+        "stories-tray": "Stories Home Tray",
     },
     "itaku": {
         "posts": "",
-    },
-    "iwara": {
-        "user-images": "User Images",
-        "user-videos": "User Videos",
-        "user-playlists": "User Playlists",
     },
     "kemono": {
         "discord"       : "Discord Servers",
@@ -329,16 +320,12 @@ SUBCATEGORY_MAP = {
     "lensdump": {
         "albums": "",
     },
-    "lofter": {
-        "blog-posts": "Blog Posts",
-    },
     "mangadex": {
         "feed": "Updates Feed",
         "following" : "Library",
         "list": "MDLists",
     },
     "misskey": {
-        "note" : "Notes",
         "notes": "User Notes",
     },
     "nijie": {
@@ -356,9 +343,6 @@ SUBCATEGORY_MAP = {
     },
     "pixiv": {
         "me"  : "pixiv.me Links",
-        "novel-bookmark": "Novel Bookmarks",
-        "novel-series": "Novel Series",
-        "novel-user": "",
         "pixivision": "pixivision",
         "sketch": "Sketch",
         "unlisted": "Unlisted Works",
@@ -390,6 +374,9 @@ SUBCATEGORY_MAP = {
     "sexcom": {
         "pins": "User Pins",
     },
+    "sizebooru": {
+        "user": "User Uploads",
+    },
     "skeb": {
         "following"      : "Followed Creators",
         "following-users": "Followed Users",
@@ -416,6 +403,7 @@ SUBCATEGORY_MAP = {
     },
     "vk": {
         "tagged": "Tagged Photos",
+        "wall-post": "individual Wall Posts",
     },
     "vsco": {
         "spaces": "",
@@ -592,11 +580,17 @@ def subcategory_text(bc, c, sc):
     if sc in SUBCATEGORY_MAP:
         return SUBCATEGORY_MAP[sc]
 
-    sc = sc.capitalize()
+    if "-" in sc:
+        sc = " ".join(s.capitalize() for s in sc.split("-"))
+    else:
+        sc = sc.capitalize()
+
     if sc.endswith("y"):
-        sc = sc[:-1] + "ies"
+        sc = f"{sc[:-1]}ies"
+    elif sc.endswith("h"):
+        sc = f"{sc}es"
     elif not sc.endswith("s"):
-        sc += "s"
+        sc = f"{sc}s"
     return sc
 
 
@@ -740,8 +734,14 @@ Consider all listed sites to potentially be NSFW.
 """
 
 
-categories, domains = build_extractor_list()
-PATH = (sys.argv[1] if len(sys.argv) > 1 else
-        util.path("docs", "supportedsites.md"))
-with util.lazy(PATH) as fp:
-    fp.write(generate_output(COLUMNS, categories, domains))
+def main(path=None):
+    categories, domains = build_extractor_list()
+
+    if path is None:
+        path = util.path("docs", "supportedsites.md")
+    with util.lazy(path) as fp:
+        fp.write(generate_output(COLUMNS, categories, domains))
+
+
+if __name__ == "__main__":
+    main(sys.argv[1] if len(sys.argv) > 1 else None)

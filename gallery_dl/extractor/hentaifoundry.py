@@ -136,8 +136,9 @@ class HentaifoundryExtractor(Extractor):
                 ">" + c + ":</span>", "<").replace(",", ""))
 
         data["description"] = text.unescape(extr(
-            "class='storyDescript'>", "<div"))
-        path = extr('href="', '"')
+            "class='storyDescript'>", '<div class="storyRead">')).replace(
+            "\r\n", "\n")
+        path = extr('class="pdfLink" href="', '"')
         data["src"] = self.root + path
         data["index"] = text.parse_int(path.rsplit("/", 2)[1])
         data["ratings"] = [text.unescape(r) for r in text.extract_iter(extr(

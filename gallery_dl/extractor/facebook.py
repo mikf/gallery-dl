@@ -376,34 +376,6 @@ class FacebookExtractor(Extractor):
         return user
 
 
-class FacebookSetExtractor(FacebookExtractor):
-    """Base class for Facebook Set extractors"""
-    subcategory = "set"
-    pattern = (
-        BASE_PATTERN +
-        r"/(?:(?:media/set|photo)/?\?(?:[^&#]+&)*set=([^&#]+)"
-        r"[^/?#]*(?<!&setextract)$"
-        r"|([^/?#]+/posts/[^/?#]+)"
-        r"|photo/\?(?:[^&#]+&)*fbid=([^/?&#]+)&set=([^/?&#]+)&setextract)"
-    )
-    example = "https://www.facebook.com/media/set/?set=SET_ID"
-
-    def items(self):
-        set_id = self.groups[0] or self.groups[3]
-        if path := self.groups[1]:
-            post_url = self.root + "/" + path
-            post_page = self.request(post_url).text
-            set_id = self.parse_post_page(post_page)["set_id"]
-
-        set_url = f"{self.root}/media/set/?set={set_id}"
-        set_page = self.request(set_url).text
-        set_data = self.parse_set_page(set_page)
-        if self.groups[2]:
-            set_data["first_photo_id"] = self.groups[2]
-
-        return self.extract_set(set_data)
-
-
 class FacebookPhotoExtractor(FacebookExtractor):
     """Base class for Facebook Photo extractors"""
     subcategory = "photo"
@@ -439,6 +411,34 @@ class FacebookPhotoExtractor(FacebookExtractor):
                 i += 1
                 comment_photo["num"] = i
                 yield Message.Url, comment_photo["url"], comment_photo
+
+
+class FacebookSetExtractor(FacebookExtractor):
+    """Base class for Facebook Set extractors"""
+    subcategory = "set"
+    pattern = (
+        BASE_PATTERN +
+        r"/(?:(?:media/set|photo)/?\?(?:[^&#]+&)*set=([^&#]+)"
+        r"[^/?#]*(?<!&setextract)$"
+        r"|([^/?#]+/posts/[^/?#]+)"
+        r"|photo/\?(?:[^&#]+&)*fbid=([^/?&#]+)&set=([^/?&#]+)&setextract)"
+    )
+    example = "https://www.facebook.com/media/set/?set=SET_ID"
+
+    def items(self):
+        set_id = self.groups[0] or self.groups[3]
+        if path := self.groups[1]:
+            post_url = self.root + "/" + path
+            post_page = self.request(post_url).text
+            set_id = self.parse_post_page(post_page)["set_id"]
+
+        set_url = f"{self.root}/media/set/?set={set_id}"
+        set_page = self.request(set_url).text
+        set_data = self.parse_set_page(set_page)
+        if self.groups[2]:
+            set_data["first_photo_id"] = self.groups[2]
+
+        return self.extract_set(set_data)
 
 
 class FacebookVideoExtractor(FacebookExtractor):

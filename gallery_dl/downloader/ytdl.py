@@ -11,6 +11,7 @@
 from .common import DownloaderBase
 from .. import ytdl, text
 from xml.etree import ElementTree
+from http.cookiejar import Cookie
 import os
 
 
@@ -27,6 +28,7 @@ class YoutubeDLDownloader(DownloaderBase):
             "socket_timeout": self.config("timeout", extractor._timeout),
             "nocheckcertificate": not self.config("verify", extractor._verify),
             "proxy": self.proxies.get("http") if self.proxies else None,
+            "ignoreerrors": True,
         }
 
         self.ytdl_instance = None
@@ -84,7 +86,8 @@ class YoutubeDLDownloader(DownloaderBase):
                     info_dict = self._extract_manifest(
                         ytdl_instance, url, manifest,
                         kwdict.pop("_ytdl_manifest_data", None),
-                        kwdict.pop("_ytdl_manifest_headers", None))
+                        kwdict.pop("_ytdl_manifest_headers", None),
+                        kwdict.pop("_ytdl_manifest_cookies", None))
                 else:
                     info_dict = self._extract_info(ytdl_instance, url)
             except Exception as exc:
@@ -168,23 +171,45 @@ class YoutubeDLDownloader(DownloaderBase):
         return True
 
     def _download_playlist(self, ytdl_instance, pathfmt, info_dict):
-        pathfmt.set_extension("%(playlist_index)s.%(ext)s")
-        pathfmt.build_path()
-        self._set_outtmpl(ytdl_instance, pathfmt.realpath)
+        pathfmt.kwdict["extension"] = pathfmt.prefix
+        filename = pathfmt.build_filename(pathfmt.kwdict)
+        pathfmt.kwdict["extension"] = pathfmt.extension
+        path = pathfmt.realdirectory + filename
+        path = path.replace("%", "%%") + "%(playlist_index)s.%(ext)s"
+        self._set_outtmpl(ytdl_instance, path)
 
+        status = False
         for entry in info_dict["entries"]:
+            if not entry:
+                continue
             if self.rate_dyn is not None:
                 ytdl_instance.params["ratelimit"] = self.rate_dyn()
-            ytdl_instance.process_info(entry)
-        return True
+            try:
+                ytdl_instance.process_info(entry)
+                status = True
+            except Exception as exc:
+                self.log.debug("", exc_info=exc)
+                self.log.error("%s: %s", exc.__class__.__name__, exc)
+        return status
 
     def _extract_info(self, ytdl, url):
         return ytdl.extract_info(url, download=False)
 
     def _extract_manifest(self, ytdl, url, manifest_type, manifest_data=None,
-                          headers=None):
+                          headers=None, cookies=None):
         extr = ytdl.get_info_extractor("Generic")
         video_id = extr._generic_id(url)
+
+        if cookies is not None:
+            if isinstance(cookies, dict):
+                cookies = cookies.items()
+            set_cookie = ytdl.cookiejar.set_cookie
+            for name, value in cookies:
+                set_cookie(Cookie(
+                    0, name, value, None, False,
+                    "", False, False, "/", False,
+                    False, None, False, None, None, {},
+                ))
 
         if manifest_type == "hls":
             if manifest_data is None:

@@ -39,6 +39,7 @@ class InstagramExtractor(Extractor):
         self.www_claim = "0"
         self.csrf_token = util.generate_token()
         self._find_tags = util.re(r"#\w+").findall
+        self._warn_video_ua = True
         self._logged_in = True
         self._cursor = None
         self._user = None
@@ -235,9 +236,18 @@ class InstagramExtractor(Extractor):
                     video_versions,
                     key=lambda x: (x["width"], x["height"], x["type"]),
                 )
+                manifest = item.get("video_dash_manifest")
                 media = video
+
+                if self._warn_video_ua:
+                    self._warn_video_ua = False
+                    pattern = text.re(
+                        r"Chrome/\d{3,}\.\d+\.\d+\.\d+(?!\d* Mobile)")
+                    if not pattern.search(self.session.headers["User-Agent"]):
+                        self.log.warning("Potentially lowered video quality "
+                                         "due to non-Chrome User-Agent")
             else:
-                video = None
+                video = manifest = None
                 media = image
 
                 if image["width"] < item.get("original_width", 0) or \
@@ -263,9 +273,14 @@ class InstagramExtractor(Extractor):
                 "video_url"  : video["url"] if video else None,
                 "width"      : media["width"],
                 "height"     : media["height"],
-                "_ytdl_manifest_data": item.get("video_dash_manifest"),
             }
 
+            if manifest is not None:
+                media["_ytdl_manifest_data"] = manifest
+            if "owner" in item:
+                media["owner2"] = item["owner"]
+            if "reshared_story_media_author" in item:
+                media["author"] = item["reshared_story_media_author"]
             if "expiring_at" in item:
                 media["expires"] = text.parse_timestamp(post["expiring_at"])
 
@@ -552,6 +567,20 @@ class InstagramCollectionExtractor(InstagramExtractor):
         return self.api.user_collection(self.collection_id)
 
 
+class InstagramStoriesTrayExtractor(InstagramExtractor):
+    """Extractor for your Instagram account's stories tray"""
+    subcategory = "stories-tray"
+    pattern = rf"{BASE_PATTERN}/stories/me/?$()"
+    example = "https://www.instagram.com/stories/me/"
+
+    def items(self):
+        base = f"{self.root}/stories/id:"
+        for story in self.api.reels_tray():
+            story["date"] = text.parse_timestamp(story["latest_reel_media"])
+            story["_extractor"] = InstagramStoriesExtractor
+            yield Message.Queue, f"{base}{story['id']}/", story
+
+
 class InstagramStoriesExtractor(InstagramExtractor):
     """Extractor for Instagram stories"""
     subcategory = "stories"
@@ -777,7 +806,11 @@ class InstagramRestAPI():
         try:
             return self._call(endpoint, params=params)["reels_media"]
         except KeyError:
-            raise exception.AuthorizationError("Login required")
+            raise exception.AuthRequired("authenticated cookies")
+
+    def reels_tray(self):
+        endpoint = "/v1/feed/reels_tray/"
+        return self._call(endpoint)["tray"]
 
     def tags_media(self, tag):
         for section in self.tags_sections(tag):

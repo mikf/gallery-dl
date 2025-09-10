@@ -35,9 +35,8 @@ class GelbooruBase():
             data = self.request_json(url, params=params)
         except exception.HttpError as exc:
             if exc.status == 401:
-                raise exception.AuthorizationError(
-                    f"'api-key' and 'user-id' required "
-                    f"({exc.status}: {exc.response.reason})")
+                raise exception.AuthRequired(
+                    "'api-key' & 'user-id'", "the API")
             raise
 
         if not key:

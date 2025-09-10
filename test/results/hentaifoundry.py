@@ -203,6 +203,48 @@ Sorry for the bad quality, I made it on after effect because Flash works like sh
 },
 
 {
+    "#url"     : "https://www.hentai-foundry.com/stories/user/Likelymouse",
+    "#class"   : hentaifoundry.HentaifoundryStoriesExtractor,
+    "#results" : "https://www.hentai-foundry.com/stories/user/Likelymouse/77892/The-Sweater-and-Scarf-Public-Investigators-Part-1.pdf",
+
+    "author"     : "Likelymouse",
+    "chapters"   : 4,
+    "comments"   : 0,
+    "date"       : "dt:2025-09-01 00:00:00",
+    "extension"  : "pdf",
+    "filename"   : "The-Sweater-and-Scarf-Public-Investigators-Part-1",
+    "index"      : 77892,
+    "rating"     : 0,
+    "src"        : "https://www.hentai-foundry.com/stories/user/Likelymouse/77892/The-Sweater-and-Scarf-Public-Investigators-Part-1.pdf",
+    "status"     : "Incomplete",
+    "title"      : "The Sweater and Scarf Public Investigators, Part 1",
+    "user"       : "Likelymouse",
+    "views"      : range(100, 10_000),
+    "words"      : 10661,
+    "description": """\
+<div style="text-align:center"><a href="https://imgur.com/a/uRDss5c"><img src="https://i.imgur.com/SCWI09e.jpeg" alt="135x240"/></a><br />
+<br />
+<a href="https://imgur.com/a/uRDss5c">Cover Page (Made by me)</a></div><br />
+Follow 22 y/o Puffy Penelope as she descends into degeneracy, mastering her new found succubi powers.<br />
+<div style="text-align:left"></div><br />
+<div style="text-align:left">MAJOR Kinks include: Exhibitionism and voyeurism, all fours nudity, pet play, cum play, free use, and hyper-sexuality.</div><br />
+<div style="text-align:left"></div><br />
+<br />
+<br />
+<div style="text-align:center"></div>\
+""",
+    "ratings"    : [
+        "Nudity",
+        "Violence",
+        "Profanity",
+        "Sexual content",
+        "Contains male nudity",
+        "Contains female nudity",
+        "Non-consensual/Rape/Forced",
+    ],
+},
+
+{
     "#url"     : "https://www.hentai-foundry.com/stories/user/SnowWolf35/26416/Overwatch-High-Chapter-Voting-Location",
     "#category": ("", "hentaifoundry", "story"),
     "#class"   : hentaifoundry.HentaifoundryStoryExtractor,

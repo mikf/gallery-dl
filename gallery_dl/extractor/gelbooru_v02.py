@@ -16,17 +16,33 @@ import collections
 class GelbooruV02Extractor(booru.BooruExtractor):
     basecategory = "gelbooru_v02"
 
+    def __init__(self, match):
+        booru.BooruExtractor.__init__(self, match)
+        self.request_interval = self.config_instance("request-interval", 0.0)
+        self.root_api = self.config_instance("root-api") or self.root
+
     def _init(self):
         self.api_key = self.config("api-key")
         self.user_id = self.config("user-id")
-        self.root_api = self.config_instance("root-api") or self.root
 
         if self.category == "rule34":
             self._file_url = self._file_url_rule34
 
     def _api_request(self, params):
+        params["api_key"] = self.api_key
+        params["user_id"] = self.user_id
+
         url = self.root_api + "/index.php?page=dapi&s=post&q=index"
-        return self.request_xml(url, params=params)
+        root = self.request_xml(url, params=params)
+
+        if root.tag == "error":
+            msg = root.text
+            if msg.lower().startswith("missing authentication"):
+                raise exception.AuthRequired(
+                    "'api-key' & 'user-id'", "the API", msg)
+            raise exception.AbortExtraction(f"'{msg}'")
+
+        return root
 
     def _pagination(self, params):
         params["pid"] = self.page_start
@@ -148,6 +164,7 @@ BASE_PATTERN = GelbooruV02Extractor.update({
     "rule34": {
         "root": "https://rule34.xxx",
         "root-api": "https://api.rule34.xxx",
+        "request-interval": 1.0,
         "pattern": r"(?:www\.)?rule34\.xxx",
     },
     "safebooru": {

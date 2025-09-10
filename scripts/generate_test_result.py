@@ -185,23 +185,18 @@ def main():
     args.sub = extr.subcategory
     args.base = extr.basecategory
 
-    path = util.path("test", "results", f"{args.cat}.py")
-    with util.open(path) as fp:
-        lines = fp.readlines()
-
     LOG.info("Collecting data for '%s'", args.url)
     result = generate_test_result(args)
 
-    LOG.info("Writing '%s' results to '%s'", args.url, util.trim(path))
-    insert_test_result(args, result, lines)
-
-    with util.lazy(path) as fp:
-        fp.writelines(lines)
+    path = util.path("test", "results", f"{args.cat}.py")
+    path_tr = util.trim(path)
+    LOG.info("Writing '%s' results to '%s'", args.url, path_tr)
+    with util.lines(path) as lines:
+        insert_test_result(args, result, lines)
 
     if args.git:
-        path = util.trim(path)
-        LOG.info("git add %s", path)
-        util.git("add", "--", path)
+        LOG.info("git add %s", path_tr)
+        util.git("add", "--", path_tr)
 
 
 if __name__ == "__main__":

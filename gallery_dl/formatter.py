@@ -565,6 +565,7 @@ _CONVERSIONS = {
     "U": text.unescape,
     "H": lambda s: text.unescape(text.remove_html(s)),
     "g": text.slugify,
+    "R": text.re(r"https?://[^\s\"']+").findall,
     "W": text.sanitize_whitespace,
     "S": util.to_string,
     "s": str,

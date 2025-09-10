@@ -17,7 +17,7 @@ class RedditExtractor(Extractor):
     """Base class for reddit extractors"""
     category = "reddit"
     directory_fmt = ("{category}", "{subreddit}")
-    filename_fmt = "{id}{num:? //>02} {title[:220]}.{extension}"
+    filename_fmt = "{id}{num:? //>02} {title|link_title:[:220]}.{extension}"
     archive_fmt = "{filename}"
     cookies_domain = ".reddit.com"
     request_interval = 0.6
@@ -84,6 +84,12 @@ class RedditExtractor(Extractor):
                             text.nameext_from_url(url, submission)
                             yield Message.Url, url, submission
 
+                    elif embeds and "media_metadata" in media:
+                        for embed in self._extract_embed(submission):
+                            submission["num"] += 1
+                            text.nameext_from_url(embed, submission)
+                            yield Message.Url, embed, submission
+
                     elif media["is_video"]:
                         if videos:
                             text.nameext_from_url(url, submission)
@@ -102,6 +108,12 @@ class RedditExtractor(Extractor):
                         urls.append((url, submission))
 
                 if self.api.comments:
+                    if comments and not submission:
+                        submission = comments[0]
+                        submission.setdefault("num", 0)
+                        if not parentdir:
+                            yield Message.Directory, submission
+
                     for comment in comments:
                         html = comment["body_html"] or ""
                         href = (' href="' in html)
@@ -193,19 +205,26 @@ class RedditExtractor(Extractor):
             return
 
         for mid, data in meta.items():
-            if data["status"] != "valid" or "s" not in data:
+            if data["status"] != "valid":
                 self.log.warning(
                     "embed %s: skipping item %s (status: %s)",
                     submission["id"], mid, data.get("status"))
                 continue
-            src = data["s"]
-            if url := src.get("u") or src.get("gif") or src.get("mp4"):
-                yield url.partition("?")[0].replace("/preview.", "/i.", 1)
-            else:
-                self.log.error(
-                    "embed %s: unable to fetch download URL for item %s",
-                    submission["id"], mid)
-                self.log.debug(src)
+
+            if src := data.get("s"):
+                if url := src.get("u") or src.get("gif") or src.get("mp4"):
+                    yield url.partition("?")[0].replace("/preview.", "/i.", 1)
+                else:
+                    self.log.error(
+                        "embed %s: unable to fetch download URL for item %s",
+                        submission["id"], mid)
+                    self.log.debug(src)
+            elif url := data.get("dashUrl"):
+                submission["_ytdl_manifest"] = "dash"
+                yield f"ytdl:{url}"
+            elif url := data.get("hlsUrl"):
+                submission["_ytdl_manifest"] = "hls"
+                yield f"ytdl:{url}"
 
     def _extract_video_ytdl(self, submission):
         return "https://www.reddit.com" + submission["permalink"]
@@ -361,6 +380,7 @@ class RedditAPI():
 
     Ref: https://www.reddit.com/dev/api/
     """
+    ROOT = "https://oauth.reddit.com"
     CLIENT_ID = "6N9uN0krSDE-ig"
     USER_AGENT = "Python:gallery-dl:0.8.4 (by /u/mikf1)"
 
@@ -369,41 +389,50 @@ class RedditAPI():
         self.log = extractor.log
 
         config = extractor.config
+
         self.comments = text.parse_int(config("comments", 0))
         self.morecomments = config("morecomments", False)
+        self._warn_429 = False
 
-        client_id = config("client-id")
-        if client_id is None:
-            self.client_id = self.CLIENT_ID
-            self.headers = {"User-Agent": self.USER_AGENT}
+        if config("api") == "rest":
+            self.root = "https://www.reddit.com"
+            self.headers = None
+            self.authenticate = util.noop
+            self.log.debug("Using REST API")
         else:
-            self.client_id = client_id
-            self.headers = {"User-Agent": config("user-agent")}
+            self.root = self.ROOT
 
-        if self.client_id == self.CLIENT_ID:
-            client_id = self.client_id
-            self._warn_429 = True
-            kind = "default"
-        else:
-            client_id = client_id[:5] + "*" * (len(client_id)-5)
-            self._warn_429 = False
-            kind = "custom"
+            client_id = config("client-id")
+            if client_id is None:
+                self.client_id = self.CLIENT_ID
+                self.headers = {"User-Agent": self.USER_AGENT}
+            else:
+                self.client_id = client_id
+                self.headers = {"User-Agent": config("user-agent")}
 
-        self.log.debug(
-            "Using %s API credentials (client-id %s)", kind, client_id)
+            if self.client_id == self.CLIENT_ID:
+                client_id = self.client_id
+                self._warn_429 = True
+                kind = "default"
+            else:
+                client_id = client_id[:5] + "*" * (len(client_id)-5)
+                kind = "custom"
 
-        token = config("refresh-token")
-        if token is None or token == "cache":
-            key = "#" + self.client_id
-            self.refresh_token = _refresh_token_cache(key)
-        else:
-            self.refresh_token = token
+            self.log.debug(
+                "Using %s API credentials (client-id %s)", kind, client_id)
 
-        if not self.refresh_token:
-            # allow downloading from quarantined subreddits (#2180)
-            extractor.cookies.set(
-                "_options", '%7B%22pref_quarantine_optin%22%3A%20true%7D',
-                domain=extractor.cookies_domain)
+            token = config("refresh-token")
+            if token is None or token == "cache":
+                key = "#" + self.client_id
+                self.refresh_token = _refresh_token_cache(key)
+            else:
+                self.refresh_token = token
+
+            if not self.refresh_token:
+                # allow downloading from quarantined subreddits (#2180)
+                extractor.cookies.set(
+                    "_options", '%7B%22pref_quarantine_optin%22%3A%20true%7D',
+                    domain=extractor.cookies_domain)
 
     def submission(self, submission_id):
         """Fetch the (submission, comments)=-tuple for a submission id"""
@@ -416,13 +445,11 @@ class RedditAPI():
     def submissions_subreddit(self, subreddit, params):
         """Collect all (submission, comments)-tuples of a subreddit"""
         endpoint = subreddit + "/.json"
-        params["limit"] = 100
         return self._pagination(endpoint, params)
 
     def submissions_user(self, user, params):
         """Collect all (submission, comments)-tuples posted by a user"""
         endpoint = "/user/" + user + "/.json"
-        params["limit"] = 100
         return self._pagination(endpoint, params)
 
     def morechildren(self, link_id, children):
@@ -477,7 +504,7 @@ class RedditAPI():
         return "Bearer " + data["access_token"]
 
     def _call(self, endpoint, params):
-        url = "https://oauth.reddit.com" + endpoint
+        url = f"{self.root}{endpoint}"
         params["raw_json"] = "1"
 
         while True:
@@ -521,6 +548,9 @@ class RedditAPI():
             self.log.debug("Ignoring 'id-max' setting \"zik0zj\"")
             id_max = float("inf")
         date_min, date_max = self.extractor._get_date_min_max(0, 253402210800)
+
+        if limit := self.extractor.config("limit"):
+            params["limit"] = limit
 
         while True:
             data = self._call(endpoint, params)["data"]

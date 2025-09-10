@@ -8,8 +8,8 @@
 
 """Extractors for https://comick.io/"""
 
-from .common import ChapterExtractor, MangaExtractor, Message
-from .. import text
+from .common import GalleryExtractor, ChapterExtractor, MangaExtractor, Message
+from .. import text, exception
 from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?comick\.io"
@@ -19,6 +19,42 @@ class ComickBase():
     """Base class for comick.io extractors"""
     category = "comick"
     root = "https://comick.io"
+
+
+class ComickCoversExtractor(ComickBase, GalleryExtractor):
+    """Extractor for comick.io manga covers"""
+    subcategory = "covers"
+    directory_fmt = ("{category}", "{manga}", "Covers")
+    filename_fmt = "{volume:>02}_{lang}.{extension}"
+    archive_fmt = "c_{id}"
+    pattern = BASE_PATTERN + r"/comic/([\w-]+)/cover"
+    example = "https://comick.io/comic/MANGA/cover"
+
+    def metadata(self, page):
+        manga = _manga_info(self, self.groups[0])
+        self.slug = manga['manga_slug']
+        return manga
+
+    def images(self, page):
+        url = f"{self.root}/comic/{self.slug}/cover"
+        page = self.request(url).text
+        data = self._extract_nextdata(page)
+
+        covers = data["props"]["pageProps"]["comic"]["md_covers"]
+        covers.reverse()
+
+        return [
+            (f"https://meo.comick.pictures/{cover['b2key']}", {
+                "id"    : cover["id"],
+                "width" : cover["w"],
+                "height": cover["h"],
+                "size"  : cover["s"],
+                "lang"  : cover["locale"],
+                "volume": text.parse_int(cover["vol"]),
+                "cover" : cover,
+            })
+            for cover in covers
+        ]
 
 
 class ComickChapterExtractor(ComickBase, ChapterExtractor):
@@ -31,9 +67,35 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
     def metadata(self, page):
         slug, chstr = self.groups
         manga = _manga_info(self, slug)
-        props = _chapter_info(self, manga, chstr)
 
-        ch = props["chapter"]
+        while True:
+            try:
+                props = _chapter_info(self, manga, chstr)
+            except exception.HttpError as exc:
+                if exc.response.status_code != 404:
+                    raise
+                if exc.response.headers.get(
+                        "Content-Type", "").startswith("text/html"):
+                    if locals().get("_retry_buildid"):
+                        raise
+                    self.log.debug("Updating Next.js build ID")
+                    _retry_buildid = True
+                    _manga_info.cache.clear()
+                    manga = _manga_info(self, slug)
+                    continue
+                if b'"notFound":true' in exc.response.content:
+                    raise exception.NotFoundError("chapter")
+                raise
+
+            if "__N_REDIRECT" in props:
+                path = props["__N_REDIRECT"]
+                self.log.debug("Following redirect to %s", path)
+                _, slug, chstr = path.rsplit("/", 2)
+                continue
+
+            ch = props["chapter"]
+            break
+
         self._images = ch["md_images"]
 
         if chapter := ch["chap"]:
@@ -60,8 +122,15 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
         }
 
     def images(self, page):
+        if not self._images[0].get("b2key") and all(
+                not img.get("b2key") for img in self._images):
+            self.log.error(
+                "%s: Broken Chapter (missing 'b2key' for all pages)",
+                self.groups[1])
+            return ()
+
         return [
-            ("https://meo.comick.pictures/" + img["b2key"], {
+            (f"https://meo.comick.pictures/{img['b2key']}", {
                 "width"    : img["w"],
                 "height"   : img["h"],
                 "size"     : img["s"],

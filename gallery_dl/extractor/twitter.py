@@ -16,6 +16,7 @@ import random
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
                 r"(?:(?:[fv]x)?twitter|(?:fix(?:up|v))?x)\.com")
+USER_PATTERN = rf"{BASE_PATTERN}/([^/?#]+)"
 
 
 class TwitterExtractor(Extractor):
@@ -470,21 +471,35 @@ class TwitterExtractor(Extractor):
         except KeyError:
             pass
 
+        admin = creator = banner = None
+        try:
+            if results := com.get("admin_results"):
+                admin = results["result"]["core"]["screen_name"]
+        except Exception:
+            pass
+        try:
+            if results := com.get("creator_results"):
+                creator = results["result"]["core"]["screen_name"]
+        except Exception:
+            pass
+        try:
+            if results := com.get("custom_banner_media"):
+                banner = results["media_info"]["original_img_url"]
+        except Exception:
+            pass
+
         self._user_cache[f"C#{cid}"] = cdata = {
             "id": text.parse_int(cid),
-            "name": com["name"],
-            "description": com["description"],
-            "date": text.parse_timestamp(com["created_at"] // 1000),
-            "nsfw": com["is_nsfw"],
-            "role": com["role"],
-            "member_count": com["member_count"],
-            "rules": [rule["name"] for rule in com["rules"]],
-            "admin": (admin := com.get("admin_results")) and
-                admin["result"]["core"]["screen_name"],  # noqa: E131
-            "creator": (creator := com.get("creator_results")) and
-                creator["result"]["core"]["screen_name"],  # noqa: E131
-            "banner": (banner := com.get("custom_banner_media")) and
-                banner["media_info"]["original_img_url"],  # noqa: E131
+            "name": com.get("name"),
+            "description": com.get("description"),
+            "date": text.parse_timestamp(com.get("created_at", 0) // 1000),
+            "nsfw": com.get("is_nsfw"),
+            "role": com.get("role"),
+            "member_count": com.get("member_count"),
+            "rules": [rule["name"] for rule in com.get("rules", ())],
+            "admin"  : admin,
+            "creator": creator,
+            "banner" : banner,
         }
 
         return cdata
@@ -511,8 +526,8 @@ class TwitterExtractor(Extractor):
         entities = legacy["entities"]
         self._user_cache[uid] = udata = {
             "id"              : text.parse_int(uid),
-            "name"            : core["screen_name"],
-            "nick"            : core["name"],
+            "name"            : core.get("screen_name"),
+            "nick"            : core.get("name"),
             "location"        : user["location"]["location"],
             "date"            : text.parse_datetime(
                 core["created_at"], "%a %b %d %H:%M:%S %z %Y"),
@@ -653,9 +668,52 @@ class TwitterHomeExtractor(TwitterExtractor):
         return self.api.home_timeline()
 
 
+class TwitterSearchExtractor(TwitterExtractor):
+    """Extractor for Twitter search results"""
+    subcategory = "search"
+    pattern = BASE_PATTERN + r"/search/?\?(?:[^&#]+&)*q=([^&#]+)"
+    example = "https://x.com/search?q=QUERY"
+
+    def metadata(self):
+        return {"search": text.unquote(self.user)}
+
+    def tweets(self):
+        query = text.unquote(self.user.replace("+", " "))
+
+        user = None
+        for item in query.split():
+            item = item.strip("()")
+            if item.startswith("from:"):
+                if user:
+                    user = None
+                    break
+                else:
+                    user = item[5:]
+
+        if user is not None:
+            try:
+                self._assign_user(self.api.user_by_screen_name(user))
+            except KeyError:
+                pass
+
+        return self.api.search_timeline(query)
+
+
+class TwitterHashtagExtractor(TwitterExtractor):
+    """Extractor for Twitter hashtags"""
+    subcategory = "hashtag"
+    pattern = BASE_PATTERN + r"/hashtag/([^/?#]+)"
+    example = "https://x.com/hashtag/NAME"
+
+    def items(self):
+        url = f"{self.root}/search?q=%23{self.user}"
+        data = {"_extractor": TwitterSearchExtractor}
+        yield Message.Queue, url, data
+
+
 class TwitterUserExtractor(Dispatch, TwitterExtractor):
     """Extractor for a Twitter user"""
-    pattern = (BASE_PATTERN + r"/(?!search\b|home\b|i/timeline)(?:"
+    pattern = (BASE_PATTERN + r"/(?:"
                r"([^/?#]+)/?(?:$|\?|#)"
                r"|i(?:/user/|ntent/user\?user_id=)(\d+))")
     example = "https://x.com/USER"
@@ -682,8 +740,7 @@ class TwitterUserExtractor(Dispatch, TwitterExtractor):
 class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for a Twitter user timeline"""
     subcategory = "timeline"
-    pattern = (BASE_PATTERN +
-               r"/(?!search\b|home\b|i\b)([^/?#]+)/timeline(?!\w)")
+    pattern = rf"{USER_PATTERN}/timeline(?!\w)"
     example = "https://x.com/USER/timeline"
 
     def _init_cursor(self):
@@ -780,7 +837,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
 class TwitterTweetsExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's Tweets timeline"""
     subcategory = "tweets"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/tweets(?!\w)"
+    pattern = rf"{USER_PATTERN}/tweets(?!\w)"
     example = "https://x.com/USER/tweets"
 
     def tweets(self):
@@ -790,7 +847,7 @@ class TwitterTweetsExtractor(TwitterExtractor):
 class TwitterRepliesExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's timeline including replies"""
     subcategory = "replies"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/with_replies(?!\w)"
+    pattern = rf"{USER_PATTERN}/with_replies(?!\w)"
     example = "https://x.com/USER/with_replies"
 
     def tweets(self):
@@ -800,7 +857,7 @@ class TwitterRepliesExtractor(TwitterExtractor):
 class TwitterHighlightsExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's highlights timeline"""
     subcategory = "highlights"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/highlights(?!\w)"
+    pattern = rf"{USER_PATTERN}/highlights(?!\w)"
     example = "https://x.com/USER/highlights"
 
     def tweets(self):
@@ -810,7 +867,7 @@ class TwitterHighlightsExtractor(TwitterExtractor):
 class TwitterMediaExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's Media timeline"""
     subcategory = "media"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/media(?!\w)"
+    pattern = rf"{USER_PATTERN}/media(?!\w)"
     example = "https://x.com/USER/media"
 
     def tweets(self):
@@ -820,7 +877,7 @@ class TwitterMediaExtractor(TwitterExtractor):
 class TwitterLikesExtractor(TwitterExtractor):
     """Extractor for liked tweets"""
     subcategory = "likes"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/likes(?!\w)"
+    pattern = rf"{USER_PATTERN}/likes(?!\w)"
     example = "https://x.com/USER/likes"
 
     def metadata(self):
@@ -870,7 +927,7 @@ class TwitterListMembersExtractor(TwitterExtractor):
 class TwitterFollowingExtractor(TwitterExtractor):
     """Extractor for followed users"""
     subcategory = "following"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/following(?!\w)"
+    pattern = rf"{USER_PATTERN}/following(?!\w)"
     example = "https://x.com/USER/following"
 
     def items(self):
@@ -881,55 +938,12 @@ class TwitterFollowingExtractor(TwitterExtractor):
 class TwitterFollowersExtractor(TwitterExtractor):
     """Extractor for a user's followers"""
     subcategory = "followers"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/followers(?!\w)"
+    pattern = rf"{USER_PATTERN}/followers(?!\w)"
     example = "https://x.com/USER/followers"
 
     def items(self):
         self.login()
         return self._users_result(TwitterAPI(self).user_followers(self.user))
-
-
-class TwitterSearchExtractor(TwitterExtractor):
-    """Extractor for Twitter search results"""
-    subcategory = "search"
-    pattern = BASE_PATTERN + r"/search/?\?(?:[^&#]+&)*q=([^&#]+)"
-    example = "https://x.com/search?q=QUERY"
-
-    def metadata(self):
-        return {"search": text.unquote(self.user)}
-
-    def tweets(self):
-        query = text.unquote(self.user.replace("+", " "))
-
-        user = None
-        for item in query.split():
-            item = item.strip("()")
-            if item.startswith("from:"):
-                if user:
-                    user = None
-                    break
-                else:
-                    user = item[5:]
-
-        if user is not None:
-            try:
-                self._assign_user(self.api.user_by_screen_name(user))
-            except KeyError:
-                pass
-
-        return self.api.search_timeline(query)
-
-
-class TwitterHashtagExtractor(TwitterExtractor):
-    """Extractor for Twitter hashtags"""
-    subcategory = "hashtag"
-    pattern = BASE_PATTERN + r"/hashtag/([^/?#]+)"
-    example = "https://x.com/hashtag/NAME"
-
-    def items(self):
-        url = f"{self.root}/search?q=%23{self.user}"
-        data = {"_extractor": TwitterSearchExtractor}
-        yield Message.Queue, url, data
 
 
 class TwitterCommunityExtractor(TwitterExtractor):
@@ -1069,7 +1083,7 @@ class TwitterQuotesExtractor(TwitterExtractor):
 class TwitterInfoExtractor(TwitterExtractor):
     """Extractor for a user's profile data"""
     subcategory = "info"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/info"
+    pattern = rf"{USER_PATTERN}/info"
     example = "https://x.com/USER/info"
 
     def items(self):
@@ -1088,13 +1102,13 @@ class TwitterAvatarExtractor(TwitterExtractor):
     subcategory = "avatar"
     filename_fmt = "avatar {date}.{extension}"
     archive_fmt = "AV_{user[id]}_{date}"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/photo"
+    pattern = rf"{USER_PATTERN}/photo"
     example = "https://x.com/USER/photo"
 
     def tweets(self):
         self.api._user_id_by_screen_name(self.user)
         user = self._user_obj
-        url = user["legacy"]["profile_image_url_https"]
+        url = user["avatar"]["image_url"]
 
         if url == ("https://abs.twimg.com/sticky"
                    "/default_profile_images/default_profile_normal.png"):
@@ -1110,7 +1124,7 @@ class TwitterBackgroundExtractor(TwitterExtractor):
     subcategory = "background"
     filename_fmt = "background {date}.{extension}"
     archive_fmt = "BG_{user[id]}_{date}"
-    pattern = BASE_PATTERN + r"/(?!search)([^/?#]+)/header_photo"
+    pattern = rf"{USER_PATTERN}/header_photo"
     example = "https://x.com/USER/header_photo"
 
     def tweets(self):
@@ -1433,7 +1447,8 @@ class TwitterAPI():
             "includePromotedContent": False,
         }
         return self._pagination_tweets(
-            endpoint, variables, ("bookmark_timeline_v2", "timeline"), False)
+            endpoint, variables, ("bookmark_timeline_v2", "timeline"),
+            stop_tweets=128)
 
     def search_timeline(self, query, product="Latest"):
         endpoint = "/graphql/4fpceYZ6-YQCx_JSl_Cn_A/SearchTimeline"
@@ -1444,9 +1459,21 @@ class TwitterAPI():
             "product": product,
             "withGrokTranslatedBio": False,
         }
+
+        if self.extractor.config("search-pagination") in (
+                "max_id", "maxid", "id"):
+            update_variables = self._update_variables_search
+        else:
+            update_variables = None
+
+        stop_tweets = self.extractor.config("search-stop")
+        if stop_tweets is None or stop_tweets == "auto":
+            stop_tweets = 3 if update_variables is None else 0
+
         return self._pagination_tweets(
             endpoint, variables,
-            ("search_by_raw_query", "search_timeline", "timeline"))
+            ("search_by_raw_query", "search_timeline", "timeline"),
+            stop_tweets=stop_tweets, update_variables=update_variables)
 
     def community_query(self, community_id):
         endpoint = "/graphql/2W09l7nD7ZbxGQHXvfB22w/CommunityQuery"
@@ -1856,11 +1883,12 @@ class TwitterAPI():
             params["cursor"] = extr._update_cursor(cursor)
 
     def _pagination_tweets(self, endpoint, variables,
-                           path=None, stop_tweets=True,
+                           path=None, stop_tweets=0, update_variables=None,
                            features=None, field_toggles=None):
         extr = self.extractor
         original_retweets = (extr.retweets == "original")
         pinned_tweet = extr.pinned
+        stop_tweets_max = stop_tweets
 
         params = {"variables": None}
         if cursor := extr._init_cursor():
@@ -2053,11 +2081,24 @@ class TwitterAPI():
                             tweet.get("rest_id"))
                         continue
 
-            if stop_tweets and not tweet:
-                return extr._update_cursor(None)
+            if tweet:
+                stop_tweets = stop_tweets_max
+                last_tweet = tweet
+            else:
+                if stop_tweets <= 0:
+                    return extr._update_cursor(None)
+                self.log.debug(
+                    "No Tweet results (%s/%s)",
+                    stop_tweets_max - stop_tweets + 1, stop_tweets_max)
+                stop_tweets -= 1
+
             if not cursor or cursor == variables.get("cursor"):
                 return extr._update_cursor(None)
-            variables["cursor"] = extr._update_cursor(cursor)
+
+            if update_variables is None:
+                variables["cursor"] = extr._update_cursor(cursor)
+            else:
+                variables = update_variables(variables, cursor, last_tweet)
 
     def _pagination_users(self, endpoint, variables, path=None):
         extr = self.extractor
@@ -2125,6 +2166,30 @@ class TwitterAPI():
                 self.log.warning('"%s"', text)
 
         self.log.debug("Skipping %s ('%s')", tweet_id, text)
+
+    def _update_variables_search(self, variables, cursor, tweet):
+        try:
+            tweet_id = tweet.get("id_str") or tweet["legacy"]["id_str"]
+            max_id = f"max_id:{int(tweet_id)-1}"
+
+            query, n = text.re(r"\bmax_id:\d+").subn(
+                max_id, variables["rawQuery"])
+            if n:
+                variables["rawQuery"] = query
+            else:
+                variables["rawQuery"] = f"{query} {max_id}"
+
+            if prefix := self.extractor._cursor_prefix:
+                self.extractor._cursor_prefix = \
+                    f"{prefix.partition('_')[0]}_{tweet_id}/"
+            variables["cursor"] = None
+        except Exception as exc:
+            self.extractor.log.debug(
+                "Failed to update 'max_id' search query (%s: %s). Falling "
+                "back to 'cursor' pagination", exc.__class__.__name__, exc)
+            variables["cursor"] = self.extractor._update_cursor(cursor)
+
+        return variables
 
 
 @cache(maxage=365*86400, keyarg=1)

@@ -143,7 +143,7 @@ class Extractor():
         return values
 
     def request(self, url, method="GET", session=None, fatal=True,
-                retries=None, retry_codes=None, interval=True,
+                retries=None, retry_codes=None, expected=(), interval=True,
                 encoding=None, notfound=None, **kwargs):
         if session is None:
             session = self.session
@@ -202,6 +202,7 @@ class Extractor():
                     self._dump_response(response)
                 if (
                     code < 400 or
+                    code in expected or
                     code < 500 and (
                         not fatal and code != 429 or fatal is None) or
                     fatal is ...
@@ -461,7 +462,7 @@ class Extractor():
                 headers["Referer"] = self.root + "/"
 
         custom_ua = self.config("user-agent")
-        if custom_ua is None or custom_ua == "auto":
+        if not custom_ua or custom_ua == "auto":
             pass
         elif custom_ua == "browser":
             headers["User-Agent"] = _browser_useragent(None)

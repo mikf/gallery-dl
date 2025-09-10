@@ -79,6 +79,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://comick.io/comic/neko-no-oshigoto/L7TaJB4n-chapter-10.7-xy",
+    "#comment" : "redirect",
+    "#class"   : comick.ComickChapterExtractor,
+    "#pattern" : r"https://meo.comick.pictures/\d-\w+\.webp",
+
+    "volume"        : 1,
+    "chapter"       : 10,
+    "chapter_minor" : ".5",
+    "chapter_hid"   : "L7TaJB4n",
+    "chapter_id"    : 4105343,
+    "chapter_string": "L7TaJB4n-chapter-10.5-en",
+},
+
+{
     "#url"     : "https://comick.io/comic/koko-jidai-ni-gomandatta-jou-sama-to-no-dousei-seikatsu-wa-igaito-igokochi-ga-warukunai/aPu5CgJA-chapter-3-vi",
     "#class"   : comick.ComickChapterExtractor,
     "#pattern" : r"https://meo.comick.pictures/\d+-[\w-]+\.(jpg|png)",
@@ -202,6 +216,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://comick.io/comic/00-fate-extra/eE2wOoqb-chapter-35-en",
+    "#comment" : "missing page data (#8054)",
+    "#class"   : comick.ComickChapterExtractor,
+    "#count"   : 0,
+    "#log"     : "eE2wOoqb-chapter-35-en: Broken Chapter (missing 'b2key' for all pages)",
+},
+
+{
     "#url"     : "https://comick.io/comic/kobayashi-san-chi-no-maid-dragon",
     "#comment" : "all chapters",
     "#class"   : comick.ComickMangaExtractor,
@@ -302,6 +324,51 @@ __tests__ = (
     "chapter": 0,
     "chapter_minor": "",
     "lang"   : "iso:639",
+},
+
+{
+    "#url"     : "https://comick.io/comic/neko-no-oshigoto/cover",
+    "#class"   : comick.ComickCoversExtractor,
+    "#results" : (
+        "https://meo.comick.pictures/l6wvkz.jpg",
+        "https://meo.comick.pictures/X8xRNp.jpg",
+    ),
+
+    "id"          : {45687770, 45687771},
+    "width"       : {1053, 1055},
+    "height"      : 1500,
+    "size"        : int,
+    "lang"        : "ja",
+    "extension"   : "jpg",
+    "manga"       : "Neko no Oshigoto",
+    "volume"      : range(1, 2),
+    "cover"       : {
+        "b2key"      : str,
+        "gpurl"      : str,
+        "h"          : int,
+        "id"         : int,
+        "is_primary" : bool,
+        "locale"     : "ja",
+        "md_comic_id": int,
+        "mdid"       : "iso:uuid",
+        "s"          : int,
+        "url"        : "iso:uuid",
+        "vol"        : str,
+        "w"          : int,
+    },
+},
+
+{
+    "#url"     : "https://comick.io/comic/01-sakamoto-days/cover",
+    "#class"   : comick.ComickCoversExtractor,
+    "#pattern" : r"https://meo\.comick\.pictures/\w+\.jpg",
+    "#count"   : range(50, 80),
+
+    "id"    : int,
+    "width" : int,
+    "height": int,
+    "volume": range(1, 30),
+    "lang"  : {"ja", "en", "fr", "pt-br"},
 },
 
 )
