@@ -159,6 +159,7 @@ CATEGORY_MAP = {
     "sensescans"     : "Sense-Scans",
     "sexcom"         : "Sex.com",
     "silverpic"      : "SilverPic.com",
+    "simpcity"       : "SimpCity Forums",
     "simplyhentai"   : "Simply Hentai",
     "sizebooru"      : "Size Booru",
     "slickpic"       : "SlickPic",
