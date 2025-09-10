@@ -42,8 +42,7 @@ class TiktokExtractor(Extractor):
                 continue
 
             post = video_detail["itemInfo"]["itemStruct"]
-            author = post["author"]
-            post["user"] = author["uniqueId"]
+            post["user"] = (a := post.get("author")) and a["uniqueId"] or ""
             post["date"] = text.parse_timestamp(post["createTime"])
             original_title = title = post["desc"]
 
