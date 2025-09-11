@@ -46,7 +46,8 @@ class TestFormatter(unittest.TestCase):
         "h": "<p>foo </p> &amp; bar <p> </p>",
         "H": """<p>
   <a href="http://www.example.com">Lorem ipsum dolor sit amet</a>.
-  Duis aute irure <a href="http://blog.example.org">dolor</a>.
+  Duis aute irure <a href="http://blog.example.org/lorem?foo=bar">
+  http://blog.example.org</a>.
 </p>""",
         "u": "&#x27;&lt; / &gt;&#x27;",
         "t": 1262304000,
@@ -78,6 +79,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{n!H}", "")
         self._run_test("{h!R}", [])
         self._run_test("{H!R}", ["http://www.example.com",
+                                 "http://blog.example.org/lorem?foo=bar",
                                  "http://blog.example.org"])
         self._run_test("{a!s}", self.kwdict["a"])
         self._run_test("{a!r}", f"'{self.kwdict['a']}'")
