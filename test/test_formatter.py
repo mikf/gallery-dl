@@ -178,6 +178,11 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{l[0]}" , "a")
         self._run_test("{a[6]}" , "w")
 
+    def test_indexing_negative(self):
+        self._run_test("{l[-1]}" , "c")
+        self._run_test("{a[-7]}" , "o")
+        self._run_test("{a[-0]}" , "h")  # same as a[0]
+
     def test_dict_access(self):
         self._run_test("{d[a]}"  , "foo")
         self._run_test("{d['a']}", "foo")
