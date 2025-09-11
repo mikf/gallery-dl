@@ -56,11 +56,14 @@ class CyberfileFolderExtractor(CyberfileExtractor):
         url = f"{self.root}/folder/{folder_hash}"
         folder_num = text.extr(self.request(url).text, "ages('folder', '", "'")
 
+        extract_urls = text.re(r'dtfullurl="([^"]+)').findall
+        perpage = 600
+
         data = {
             "pageType" : "folder",
             "nodeId"   : folder_num,
-            "pageStart": "1",
-            "perPage"  : "0",
+            "pageStart": 1,
+            "perPage"  : perpage,
             "filterOrderBy": "",
         }
         resp = self.request_api("/account/ajax/load_files", data)
@@ -71,8 +74,16 @@ class CyberfileFolderExtractor(CyberfileExtractor):
             "folder_num" : text.parse_int(folder_num),
             "folder"     : resp["page_title"],
         }
-        for url in text.extract_iter(resp["html"], 'dtfullurl="', '"'):
-            yield Message.Queue, url, folder
+
+        while True:
+            urls = extract_urls(resp["html"])
+            for url in urls:
+                yield Message.Queue, url, folder
+
+            if len(urls) < perpage:
+                return
+            data["pageStart"] += 1
+            resp = self.request_api("/account/ajax/load_files", data)
 
 
 class CyberfileFileExtractor(CyberfileExtractor):
