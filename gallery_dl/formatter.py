@@ -301,6 +301,8 @@ def parse_field_name(field_name):
                         key = _slice(key[1:])
                     else:
                         key = _slice(key)
+                elif key[0] == "-":
+                    key = int(key)
                 else:
                     key = key.strip("\"'")
             except TypeError:
