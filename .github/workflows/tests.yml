@@ -26,14 +26,14 @@ jobs:
         - "pypy3.9"
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Check file permissions
       run: |
         if [[ "$(find ./gallery_dl -type f -not -perm 644)" ]]; then exit 1; fi
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
