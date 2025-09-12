@@ -187,24 +187,26 @@ class FanslyListsExtractor(FanslyExtractor):
 
 class FanslyCreatorPostsExtractor(FanslyExtractor):
     subcategory = "creator-posts"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/posts"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/posts(?:/wall/(\d+))?"
     example = "https://fansly.com/CREATOR/posts"
 
     def posts(self):
-        account = self.api.account(self.groups[0])
+        creator, wall_id = self.groups
+        account = self.api.account(creator)
         return self.api.timeline_new(
-            account["id"], account["walls"][0]["id"])
+            account["id"], wall_id or account["walls"][0]["id"])
 
 
 class FanslyCreatorMediaExtractor(FanslyExtractor):
     subcategory = "creator-media"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/media"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/media(?:/wall/(\d+))?"
     example = "https://fansly.com/CREATOR/media"
 
     def posts(self):
-        account = self.api.account(self.groups[0])
+        creator, wall_id = self.groups
+        account = self.api.account(creator)
         return self.api.mediaoffers_location(
-            account["id"], account["walls"][0]["id"])
+            account["id"], wall_id or account["walls"][0]["id"])
 
 
 class FanslyAPI():
@@ -262,7 +264,7 @@ class FanslyAPI():
             "after"   : None,
             "sortMode": sort,
         }
-        return self._pagination(endpoint, params)
+        return self._pagination_list(endpoint, params)
 
     def mediaoffers_location(self, account_id, wall_id):
         endpoint = "/v1/mediaoffers/location"
@@ -380,18 +382,20 @@ class FanslyAPI():
         while True:
             response = self._call(endpoint, params)
 
-            if isinstance(response, list):
-                if not response:
-                    return
-                yield from self._update_items(response)
-                params["after"] = response[-1]["sortId"]
+            if not response.get("posts"):
+                return
+            posts = self._update_posts(response)
+            yield from posts
+            params["before"] = min(p["id"] for p in posts)
 
-            else:
-                if not response.get("posts"):
-                    return
-                posts = self._update_posts(response)
-                yield from posts
-                params["before"] = min(p["id"] for p in posts)
+    def _pagination_list(self, endpoint, params):
+        while True:
+            response = self._call(endpoint, params)
+
+            if not response:
+                return
+            yield from self._update_items(response)
+            params["after"] = response[-1]["sortId"]
 
     def _pagination_media(self, endpoint, params):
         while True:
