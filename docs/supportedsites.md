@@ -292,7 +292,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="fansly" title="fansly">
     <td>Fansly</td>
     <td>https://fansly.com/</td>
-    <td>Creator Posts, Home Feed, Lists, Account Lists, Posts</td>
+    <td>Creator Media, Creator Posts, Home Feed, Lists, Account Lists, Posts</td>
     <td></td>
 </tr>
 <tr id="fantia" title="fantia">

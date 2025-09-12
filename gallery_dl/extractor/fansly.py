@@ -191,13 +191,20 @@ class FanslyCreatorPostsExtractor(FanslyExtractor):
     example = "https://fansly.com/CREATOR/posts"
 
     def posts(self):
-        creator = self.groups[0]
-        if creator.startswith("id:"):
-            account = self.api.account_by_id(creator[3:])
-        else:
-            account = self.api.account(creator)
-        wall_id = account["walls"][0]["id"]
-        return self.api.timeline_new(account["id"], wall_id)
+        account = self.api.account(self.groups[0])
+        return self.api.timeline_new(
+            account["id"], account["walls"][0]["id"])
+
+
+class FanslyCreatorMediaExtractor(FanslyExtractor):
+    subcategory = "creator-media"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/media"
+    example = "https://fansly.com/CREATOR/media"
+
+    def posts(self):
+        account = self.api.account(self.groups[0])
+        return self.api.mediaoffers_location(
+            account["id"], account["walls"][0]["id"])
 
 
 class FanslyAPI():
@@ -217,7 +224,12 @@ class FanslyAPI():
         else:
             self.extractor.log.warning("No 'token' provided")
 
-    def account(self, username):
+    def account(self, creator):
+        if creator.startswith("id:"):
+            return self.account_by_id(creator[3:])
+        return self.account_by_username(creator)
+
+    def account_by_username(self, username):
         endpoint = "/v1/account"
         params = {"usernames": username}
         return self._call(endpoint, params)[0]
@@ -251,6 +263,20 @@ class FanslyAPI():
             "sortMode": sort,
         }
         return self._pagination(endpoint, params)
+
+    def mediaoffers_location(self, account_id, wall_id):
+        endpoint = "/v1/mediaoffers/location"
+        params = {
+            "locationId": wall_id,
+            "locationType": "1002",
+            "accountId": account_id,
+            "mediaType": "",
+            "before": "",
+            "after" : "0",
+            "limit" : "30",
+            "offset": "0",
+        }
+        return self._pagination_media(endpoint, params)
 
     def post(self, post_id):
         endpoint = "/v1/post"
@@ -319,6 +345,19 @@ class FanslyAPI():
 
         return posts
 
+    def _update_media(self, items, response):
+        posts = {
+            post["id"]: post
+            for post in response["posts"]
+        }
+
+        response["posts"] = [
+            posts[item["correlationId"]]
+            for item in items
+        ]
+
+        return self._update_posts(response)
+
     def _update_items(self, items):
         ids = [item["id"] for item in items]
         accounts = {
@@ -353,3 +392,13 @@ class FanslyAPI():
                 posts = self._update_posts(response)
                 yield from posts
                 params["before"] = min(p["id"] for p in posts)
+
+    def _pagination_media(self, endpoint, params):
+        while True:
+            response = self._call(endpoint, params)
+
+            data = response["data"]
+            if not data:
+                return
+            yield from self._update_media(data, response["aggregationData"])
+            params["before"] = data[-1]["id"]

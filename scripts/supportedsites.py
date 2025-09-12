@@ -591,7 +591,7 @@ def subcategory_text(bc, c, sc):
         sc = f"{sc[:-1]}ies"
     elif sc.endswith("h"):
         sc = f"{sc}es"
-    elif not sc.endswith("s"):
+    elif not sc.endswith("s") and not sc.endswith("edia"):
         sc = f"{sc}s"
     return sc
 
