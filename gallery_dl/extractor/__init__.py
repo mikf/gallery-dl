@@ -31,6 +31,7 @@ modules = [
     "batoto",
     "bbc",
     "behance",
+    "bellazon",
     "bilibili",
     "blogger",
     "bluesky",
