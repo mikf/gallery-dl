@@ -281,7 +281,7 @@ class BoostyAPI():
         if not access_token:
             if auth := self.extractor.cookies.get("auth", domain=".boosty.to"):
                 access_token = text.extr(
-                    auth, "%22accessToken%22%3A%22", "%22")
+                    text.unquote(auth), '"accessToken":"', '"')
         if access_token:
             self.headers["Authorization"] = "Bearer " + access_token
 
