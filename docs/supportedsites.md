@@ -133,6 +133,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Collections, Galleries, User Profiles</td>
     <td></td>
 </tr>
+<tr id="bellazon" title="bellazon">
+    <td>Bellazon</td>
+    <td>https://www.bellazon.com/</td>
+    <td>Forums, Posts, Threads</td>
+    <td></td>
+</tr>
 <tr id="bilibili" title="bilibili">
     <td>Bilibili</td>
     <td>https://www.bilibili.com/</td>
