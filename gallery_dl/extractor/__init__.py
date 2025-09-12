@@ -71,6 +71,7 @@ modules = [
     "gelbooru_v02",
     "girlsreleased",
     "girlswithmuscle",
+    "girlygirlpic",
     "gofile",
     "hatenablog",
     "hentai2read",
