@@ -16,63 +16,42 @@ from ..cache import cache
 class ImgbbExtractor(Extractor):
     """Base class for imgbb extractors"""
     category = "imgbb"
-    directory_fmt = ("{category}", "{user}")
-    filename_fmt = "{title} {id}.{extension}"
-    archive_fmt = "{id}"
-    root = "https://imgbb.com"
-
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.page_url = self.sort = None
+    directory_fmt = ("{category}", "{user[name]:?//}{user[id]:? (/)/}",
+                     "{album[title]} ({album[id]})")
+    filename_fmt = "{title} ({id}).{extension}"
+    archive_fmt = "{user[id]} {id}"
+    cookies_domain = ".imgbb.com"
+    cookies_names = ("PHPSESSID", "LID")
+    root = "https://ibb.co"
 
     def items(self):
         self.login()
 
-        url = self.page_url
-        params = {"sort": self.sort}
-        while True:
-            response = self.request(url, params=params, allow_redirects=False)
-            if response.status_code < 300:
-                break
-            url = response.headers["location"]
-            if url.startswith(self.root):
-                raise exception.NotFoundError(self.subcategory)
-
-        page = response.text
-        data = self.metadata(page)
-        first = True
-
-        for img in self.images(page):
-            image = {
-                "id"       : img["url_viewer"].rpartition("/")[2],
-                "user"     : img["user"]["username"] if "user" in img else "",
-                "title"    : text.unescape(img["title"]),
-                "url"      : img["image"]["url"],
-                "extension": img["image"]["extension"],
-                "size"     : text.parse_int(img["image"]["size"]),
-                "width"    : text.parse_int(img["width"]),
-                "height"   : text.parse_int(img["height"]),
-            }
-            image.update(data)
-            if first:
-                first = False
-                yield Message.Directory, data
-            yield Message.Url, image["url"], image
+        for image in self.posts():
+            url = image["url"]
+            text.nameext_from_url(url, image)
+            yield Message.Directory, image
+            yield Message.Url, url, image
 
     def login(self):
+        if self.cookies_check(("LID",)):
+            return
+
         username, password = self._get_auth_info()
         if username:
-            self.cookies_update(self._login_impl(username, password))
+            return self.cookies_update(self._login_impl(username, password))
 
     @cache(maxage=365*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = self.root + "/login"
+        url = "https://imgbb.com/login"
         page = self.request(url).text
-        token = text.extr(page, 'PF.obj.config.auth_token="', '"')
+        token = text.extr(page, 'name="auth_token" value="', '"')
 
-        headers = {"Referer": url}
+        headers = {
+            "Referer": url,
+        }
         data = {
             "auth_token"   : token,
             "login-subject": username,
@@ -84,27 +63,26 @@ class ImgbbExtractor(Extractor):
             raise exception.AuthenticationError()
         return self.cookies
 
-    def _extract_resource(self, page):
-        return util.json_loads(text.extr(
-            page, "CHV.obj.resource=", "};") + "}")
-
-    def _extract_user(self, page):
-        return self._extract_resource(page).get("user") or {}
-
-    def _pagination(self, page, endpoint, params):
-        data = None
+    def _pagination(self, page, url, params):
         seek, pos = text.extract(page, 'data-seek="', '"')
         tokn, pos = text.extract(page, 'PF.obj.config.auth_token="', '"', pos)
-        params["action"] = "list"
-        params["list"] = "images"
-        params["sort"] = self.sort
-        params["seek"] = seek
-        params["page"] = 2
-        params["auth_token"] = tokn
+        data, pos = text.extract(page, "CHV.obj.resource=", "};", pos)
+        self.kwdict["user"] = util.json_loads(data + "}").get("user")
 
+        data = None
         while True:
-            for img in text.extract_iter(page, "data-object='", "'"):
-                yield util.json_loads(text.unquote(img))
+            for obj in text.extract_iter(page, "data-object='", "'"):
+                post = util.json_loads(text.unquote(obj))
+                image = post["image"]
+                image["filename"], image["name"] = \
+                    image["name"], image["filename"]
+                image["id"] = post["id_encoded"]
+                image["title"] = post["title"]
+                image["width"] = text.parse_int(post["width"])
+                image["height"] = text.parse_int(post["height"])
+                image["size"] = text.parse_int(image["size"])
+                yield image
+
             if data:
                 if not data["seekEnd"] or params["seek"] == data["seekEnd"]:
                     return
@@ -112,105 +90,111 @@ class ImgbbExtractor(Extractor):
                 params["page"] += 1
             elif not seek or 'class="pagination-next"' not in page:
                 return
-            data = self.request_json(endpoint, method="POST", data=params)
+            else:
+                params["action"] = "list"
+                params["page"] = 2
+                params["seek"] = seek
+                params["auth_token"] = tokn
+
+                headers = {
+                    "Accept": "application/json, text/javascript, */*; q=0.01",
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Origin": self.root,
+                    "Sec-Fetch-Dest": "empty",
+                    "Sec-Fetch-Mode": "cors",
+                    "Sec-Fetch-Site": "same-origin",
+                }
+
+            data = self.request_json(
+                url, method="POST", headers=headers, data=params)
             page = data["html"]
 
 
 class ImgbbAlbumExtractor(ImgbbExtractor):
     """Extractor for albums on imgbb.com"""
     subcategory = "album"
-    directory_fmt = ("{category}", "{user}", "{album_name} {album_id}")
     pattern = r"(?:https?://)?ibb\.co/album/([^/?#]+)/?(?:\?([^#]+))?"
     example = "https://ibb.co/album/ID"
 
-    def __init__(self, match):
-        ImgbbExtractor.__init__(self, match)
-        self.album_name = None
-        self.album_id = match[1]
-        self.sort = text.parse_query(match[2]).get("sort", "date_desc")
-        self.page_url = "https://ibb.co/album/" + self.album_id
+    def posts(self):
+        album_id, qs = self.groups
+        url = f"{self.root}/album/{album_id}"
+        params = text.parse_query(qs)
+        params = {"sort": params["sort"]} if "sort" in params else {}
+        page = self.request(url, params=params).text
+        extr = text.extract_from(page)
 
-    def metadata(self, page):
-        album = text.extr(page, '"og:title" content="', '"')
-        user = self._extract_user(page)
-        return {
-            "album_id"   : self.album_id,
-            "album_name" : text.unescape(album),
-            "user"       : user.get("username") or "",
-            "user_id"    : user.get("id") or "",
-            "displayname": user.get("name") or "",
+        self.kwdict["album"] = album = {
+            "url": extr(
+                'property="og:url" content="', '"'),
+            "title": text.unescape(extr(
+                'property="og:title" content="', '"')),
+            "description": text.unescape(extr(
+                'property="og:description" content="', '"')),
+            "id": extr(
+                'data-text="album-name" href="https://ibb.co/album/', '"'),
+            "count": text.parse_int(extr(
+                'data-text="image-count">', "<")),
         }
 
-    def images(self, page):
-        url = text.extr(page, '"og:url" content="', '"')
-        album_id = url.rpartition("/")[2].partition("?")[0]
-
-        return self._pagination(page, "https://ibb.co/json", {
-            "from"      : "album",
-            "albumid"   : album_id,
-            "params_hidden[list]"   : "images",
-            "params_hidden[from]"   : "album",
-            "params_hidden[albumid]": album_id,
-        })
-
-
-class ImgbbUserExtractor(ImgbbExtractor):
-    """Extractor for user profiles in imgbb.com"""
-    subcategory = "user"
-    pattern = r"(?:https?://)?([\w-]+)\.imgbb\.com/?(?:\?([^#]+))?$"
-    example = "https://USER.imgbb.com"
-
-    def __init__(self, match):
-        ImgbbExtractor.__init__(self, match)
-        self.user = match[1]
-        self.sort = text.parse_query(match[2]).get("sort", "date_desc")
-        self.page_url = f"https://{self.user}.imgbb.com/"
-
-    def metadata(self, page):
-        user = self._extract_user(page)
-        return {
-            "user"       : user.get("username") or self.user,
-            "user_id"    : user.get("id") or "",
-            "displayname": user.get("name") or "",
-        }
-
-    def images(self, page):
-        user = text.extr(page, '.obj.resource={"id":"', '"')
-        return self._pagination(page, self.page_url + "json", {
-            "from"      : "user",
-            "userid"    : user,
-            "params_hidden[userid]": user,
-            "params_hidden[from]"  : "user",
-        })
+        url = f"{self.root}/json"
+        params["pathname"] = f"/album/{album['id']}"
+        return self._pagination(page, url, params)
 
 
 class ImgbbImageExtractor(ImgbbExtractor):
     subcategory = "image"
-    pattern = r"(?:https?://)?ibb\.co/(?!album/)([^/?#]+)"
+    pattern = r"(?:https?://)?ibb\.co/([^/?#]+)"
     example = "https://ibb.co/ID"
 
-    def __init__(self, match):
-        ImgbbExtractor.__init__(self, match)
-        self.image_id = match[1]
-
-    def items(self):
-        url = "https://ibb.co/" + self.image_id
+    def posts(self):
+        url = f"{self.root}/{self.groups[0]}"
         page = self.request(url).text
         extr = text.extract_from(page)
-        user = self._extract_user(page)
 
         image = {
-            "id"    : self.image_id,
+            "id"    : extr('property="og:url" content="https://ibb.co/', '"'),
             "title" : text.unescape(extr(
                 '"og:title" content="', ' hosted at ImgBB"')),
             "url"   : extr('"og:image" content="', '"'),
             "width" : text.parse_int(extr('"og:image:width" content="', '"')),
             "height": text.parse_int(extr('"og:image:height" content="', '"')),
-            "user"       : user.get("username") or "",
-            "user_id"    : user.get("id") or "",
-            "displayname": user.get("name") or "",
+            "album" : extr("Added to <a", "</a>"),
+            "date"  : text.parse_datetime(extr(
+                '<span title="', '"'), "%Y-%m-%d %H:%M:%S"),
+            "user"  : util.json_loads(extr(
+                "CHV.obj.resource=", "};") + "}").get("user"),
         }
-        image["extension"] = text.ext_from_url(image["url"])
 
-        yield Message.Directory, image
-        yield Message.Url, image["url"], image
+        if album := image["album"]:
+            image["album"] = {
+                "id"   : text.extr(album, "/album/", '"'),
+                "title": text.unescape(album.rpartition(">")[2]),
+            }
+        else:
+            image["album"] = None
+
+        return (image,)
+
+
+class ImgbbUserExtractor(ImgbbExtractor):
+    """Extractor for user profiles in imgbb.com"""
+    subcategory = "user"
+    directory_fmt = ("{category}", "{user[name]} ({user[id]})")
+    pattern = r"(?:https?://)?([\w-]+)\.imgbb\.com/?(?:\?([^#]+))?"
+    example = "https://USER.imgbb.com"
+
+    def posts(self):
+        user, qs = self.groups
+        url = f"https://{user}.imgbb.com/"
+        params = text.parse_query(qs)
+        params = {"sort": params["sort"]} if "sort" in params else {}
+        page = self.request(url, params=params).text
+
+        if "<h1>Sign in</h1>" in page:
+            raise exception.AuthRequired(
+                ("username & password", "authenticated cookies"), "user")
+
+        url = f"{url}json"
+        params["pathname"] = "/"
+        return self._pagination(page, url, params)
