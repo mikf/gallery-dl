@@ -1104,7 +1104,7 @@ extractor.*.actions
 -------------------
 Type
     * ``object`` (`pattern` -> `Action(s)`_)
-    * ``list`` of ``lists`` with `pattern` -> `Action(s)`_ pairs as elements
+    * ``list`` of [`pattern`, `Action(s)`_] pairs
 Example
     .. code:: json
 
@@ -1136,11 +1136,12 @@ Description
     ``pattern`` is parsed as severity level (``debug``, ``info``, ``warning``, ``error``, or integer value)
     followed by an optional
     `Python Regular Expression <https://docs.python.org/3/library/re.html#regular-expression-syntax>`__
-    separated by a colon ``:``
+    separated by a colon:
+    ``<level>:<re>``
 
     Using ``*`` as `level` or leaving it empty
-    matches logging messages of all levels
-    (e.g. ``*:<re>`` or ``:<re>``).
+    matches logging messages of all levels:
+    ``*:<re>`` or ``:<re>``
 
 
 extractor.*.postprocessors
@@ -5773,8 +5774,8 @@ Default
     * ``3`` if `search-pagination <extractor.twitter.search-pagination_>`__ is set to ``"cursor"``
     * ``0`` otherwise
 Description
-    Selects how many empty search result batches
-    to receive before stopping.
+    Number of empty search result batches
+    to accept before stopping.
 
 
 extractor.twitter.timeline.strategy
@@ -8790,9 +8791,11 @@ Example
     * ``"print Hello World"``
     * ``"raise AbortExtraction an error occured"``
     * ``"flag file = terminate"``
+    * ``["print Exiting", "exit 1"]``
 Description
     An Action_ is parsed as `Action Type`
-    followed by (optional) arguments.
+    followed by (optional) arguments:
+    ``<type> <arg1> <arg2> …``
 
     It is possible to specify more than one ``action``
     by providing them as a ``list``: ``["<action1>", "<action2>", …]``
@@ -8811,6 +8814,7 @@ Description
     ``level``:
         | Modify severity level of the current logging message.
         | Can be one of ``debug``, ``info``, ``warning``, ``error`` or an integer value.
+        | Use ``0`` to ignore a message (``level = 0``).
     ``print``:
         Write argument to stdout.
     ``exec``:
