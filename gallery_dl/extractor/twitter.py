@@ -1454,7 +1454,7 @@ class TwitterAPI():
         endpoint = "/graphql/4fpceYZ6-YQCx_JSl_Cn_A/SearchTimeline"
         variables = {
             "rawQuery": query,
-            "count": 100,
+            "count": self.extractor.config("search-limit", 20),
             "querySource": "typed_query",
             "product": product,
             "withGrokTranslatedBio": False,

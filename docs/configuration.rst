@@ -5739,6 +5739,16 @@ Description
     will be taken from the original Tweets, not the Retweets.
 
 
+extractor.twitter.search-limit
+------------------------------
+Type
+    ``integer``
+Default
+    ``20``
+Description
+    Number of requested results per search query.
+
+
 extractor.twitter.search-pagination
 -----------------------------------
 Type
