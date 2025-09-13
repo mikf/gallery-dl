@@ -102,8 +102,11 @@ class Ao3Extractor(Extractor):
     def _pagination(self, path, needle='<li id="work_'):
         while True:
             page = self.request(self.root + path).text
+
             yield from text.extract_iter(page, needle, '"')
-            path = text.extr(page, '<a rel="next" href="', '"')
+
+            path = (text.extr(page, '<a rel="next" href="', '"') or
+                    text.extr(page, '<li class="next"><a href="', '"'))
             if not path:
                 return
             path = text.unescape(path)
