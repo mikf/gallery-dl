@@ -15,7 +15,7 @@ Consider all listed sites to potentially be NSFW.
 <tbody valign="top">
 <tr id="2ch" title="2ch">
     <td>2ch</td>
-    <td>https://2ch.hk/</td>
+    <td>https://2ch.su/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
