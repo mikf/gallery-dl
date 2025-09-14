@@ -592,7 +592,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="mangadex" title="mangadex">
     <td>MangaDex</td>
     <td>https://mangadex.org/</td>
-    <td>Authors, Chapters, Updates Feed, Library, MDLists, Manga</td>
+    <td>Authors, Chapters, Covers, Updates Feed, Library, MDLists, Manga</td>
     <td>Supported</td>
 </tr>
 <tr id="mangapark" title="mangapark">
