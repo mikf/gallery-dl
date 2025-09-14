@@ -4,37 +4,41 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://2ch.hk/"""
+"""Extractors for https://2ch.su/"""
 
 from .common import Extractor, Message
 from .. import text, util
+
+BASE_PATTERN = r"(?:https?://)?2ch\.(su|life|hk)"
 
 
 class _2chThreadExtractor(Extractor):
     """Extractor for 2ch threads"""
     category = "2ch"
     subcategory = "thread"
-    root = "https://2ch.hk"
+    root = "https://2ch.su"
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{tim}{filename:? //}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
-    pattern = r"(?:https?://)?2ch\.hk/([^/?#]+)/res/(\d+)"
-    example = "https://2ch.hk/a/res/12345.html"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/res/(\d+)"
+    example = "https://2ch.su/a/res/12345.html"
 
     def __init__(self, match):
+        tld = match[1]
+        self.root = f"https://2ch.{'su' if tld == 'hk' else tld}"
         Extractor.__init__(self, match)
-        self.board, self.thread = match.groups()
 
     def items(self):
-        url = f"{self.root}/{self.board}/res/{self.thread}.json"
+        _, board, thread = self.groups
+        url = f"{self.root}/{board}/res/{thread}.json"
         posts = self.request_json(url)["threads"][0]["posts"]
 
         op = posts[0]
         title = op.get("subject") or text.remove_html(op["comment"])
 
         thread = {
-            "board" : self.board,
-            "thread": self.thread,
+            "board" : board,
+            "thread": thread,
             "title" : text.unescape(title)[:50],
         }
 
@@ -61,16 +65,17 @@ class _2chBoardExtractor(Extractor):
     """Extractor for 2ch boards"""
     category = "2ch"
     subcategory = "board"
-    root = "https://2ch.hk"
-    pattern = r"(?:https?://)?2ch\.hk/([^/?#]+)/?$"
-    example = "https://2ch.hk/a/"
+    root = "https://2ch.su"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/?$"
+    example = "https://2ch.su/a/"
 
     def __init__(self, match):
+        tld = match[1]
+        self.root = f"https://2ch.{'su' if tld == 'hk' else tld}"
         Extractor.__init__(self, match)
-        self.board = match[1]
 
     def items(self):
-        base = f"{self.root}/{self.board}"
+        base = f"{self.root}/{self.groups[1]}"
 
         # index page
         url = f"{base}/index.json"
