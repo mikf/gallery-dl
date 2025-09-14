@@ -96,6 +96,57 @@ class MangadexExtractor(Extractor):
         return data
 
 
+class MangadexCoversExtractor(MangadexExtractor):
+    """Extractor for mangadex manga covers"""
+    subcategory = "covers"
+    directory_fmt = ("{category}", "{manga}", "Covers")
+    filename_fmt = "{volume:>02}_{lang}.{extension}"
+    archive_fmt = "c_{cover_id}"
+    pattern = (rf"{BASE_PATTERN}/(?:title|manga)/(?!follows|feed$)([0-9a-f-]+)"
+               r"(?:/[^/?#]+)?\?tab=art")
+    example = ("https://mangadex.org/title"
+               "/01234567-89ab-cdef-0123-456789abcdef?tab=art")
+
+    def items(self):
+        base = f"{self.root}/covers/{self.uuid}/"
+        for cover in self.api.covers_manga(self.uuid):
+            data = self._transform_cover(cover)
+            name = data["cover"]
+            text.nameext_from_url(name, data)
+            data["cover_id"] = data["filename"]
+            yield Message.Directory, data
+            yield Message.Url, f"{base}{name}", data
+
+    def _transform_cover(self, cover):
+        relationships = defaultdict(list)
+        for item in cover["relationships"]:
+            relationships[item["type"]].append(item)
+        manga = self.api.manga(relationships["manga"][0]["id"])
+        for item in manga["relationships"]:
+            relationships[item["type"]].append(item)
+
+        cattributes = cover["attributes"]
+        mattributes = manga["attributes"]
+
+        return {
+            "manga"   : (mattributes["title"].get("en") or
+                         next(iter(mattributes["title"].values()))),
+            "manga_id": manga["id"],
+            "status"  : mattributes["status"],
+            "author"  : [author["attributes"]["name"]
+                         for author in relationships["author"]],
+            "artist"  : [artist["attributes"]["name"]
+                         for artist in relationships["artist"]],
+            "tags"    : [tag["attributes"]["name"]["en"]
+                         for tag in mattributes["tags"]],
+            "cover"   : cattributes["fileName"],
+            "lang"    : cattributes.get("locale"),
+            "volume"  : text.parse_int(cattributes["volume"]),
+            "date"    : text.parse_datetime(cattributes["createdAt"]),
+            "date_updated": text.parse_datetime(cattributes["updatedAt"]),
+        }
+
+
 class MangadexChapterExtractor(MangadexExtractor):
     """Extractor for manga-chapters from mangadex.org"""
     subcategory = "chapter"
@@ -239,6 +290,10 @@ class MangadexAPI():
         params = {"includes[]": ("scanlation_group",)}
         return self._call("/chapter/" + uuid, params)["data"]
 
+    def covers_manga(self, uuid):
+        params = {"manga[]": uuid}
+        return self._pagination_covers("/cover", params)
+
     def list(self, uuid):
         return self._call("/list/" + uuid, None, True)["data"]
 
@@ -371,6 +426,20 @@ class MangadexAPI():
     def _pagination_manga(self, endpoint, params=None, auth=False):
         if params is None:
             params = {}
+
+        return self._pagination(endpoint, params, auth)
+
+    def _pagination_covers(self, endpoint, params=None, auth=False):
+        if params is None:
+            params = {}
+
+        lang = self.extractor.config("lang")
+        if isinstance(lang, str) and "," in lang:
+            lang = lang.split(",")
+        params["locales"] = lang
+        params["contentRating"] = None
+        params["order[volume]"] = \
+            "desc" if self.extractor.config("chapter-reverse") else "asc"
 
         return self._pagination(endpoint, params, auth)
 
