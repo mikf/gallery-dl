@@ -72,6 +72,37 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://ibb.co/album/jyYWqL",
+    "#class"   : imgbb.ImgbbAlbumExtractor,
+    "#results" : "https://i.ibb.co/1J4mTWzQ/test.png",
+
+    "extension": "png",
+    "filename" : "test",
+    "height"   : 32,
+    "id"       : "bRGKX9bm",
+    "mime"     : "image/png",
+    "name"     : "test.png",
+    "size"     : 182,
+    "title"    : "test",
+    "url"      : "https://i.ibb.co/1J4mTWzQ/test.png",
+    "width"    : 64,
+    "album"    : {
+        "count"      : 1,
+        "id"         : "jyYWqL",
+        "title"      : "test-テスト-\"&> Album",
+        "url"        : "https://ibb.co/album/jyYWqL",
+        "description": """test-テスト-"&>\nDescription""",
+    },
+    "user"     : {
+        "id"        : "nrFBYw",
+        "name"      : "Gdldev",
+        "url"       : "https://gdldev.imgbb.com/",
+        "url_albums": "https://gdldev.imgbb.com/albums",
+        "username"  : "gdldev",
+    },
+},
+
+{
     "#url"     : "https://folkie.imgbb.com",
     "#class"   : imgbb.ImgbbUserExtractor,
     "#auth"    : True,
@@ -85,6 +116,30 @@ __tests__ = (
     "#class"   : imgbb.ImgbbUserExtractor,
     "#auth"     : False,
     "#exception": exception.AuthRequired,
+},
+
+{
+    "#url"     : "https://gdldev.imgbb.com/",
+    "#class"   : imgbb.ImgbbUserExtractor,
+    "#results" : "https://i.ibb.co/1J4mTWzQ/test.png",
+
+    "extension": "png",
+    "filename" : "test",
+    "height"   : 32,
+    "id"       : "bRGKX9bm",
+    "mime"     : "image/png",
+    "name"     : "test.png",
+    "size"     : 182,
+    "title"    : "test",
+    "url"      : "https://i.ibb.co/1J4mTWzQ/test.png",
+    "width"    : 64,
+    "user"     : {
+        "id"        : "nrFBYw",
+        "name"      : "Gdldev",
+        "url"       : "https://gdldev.imgbb.com/",
+        "url_albums": "https://gdldev.imgbb.com/albums",
+        "username"  : "gdldev",
+    },
 },
 
 {
@@ -112,6 +167,34 @@ __tests__ = (
         "url"       : "https://folkie.imgbb.com/",
         "url_albums": "https://folkie.imgbb.com/albums",
         "username"  : "folkie",
+    },
+},
+
+{
+    "#url"     : "https://ibb.co/bRGKX9bm",
+    "#class"   : imgbb.ImgbbImageExtractor,
+    "#auth"    : False,
+    "#results" : "https://i.ibb.co/1J4mTWzQ/test.png",
+    "#sha1_content": "0c8768055e4e20e7c7259608b67799171b691140",
+
+    "date"     : "dt:2025-07-30 20:05:06",
+    "extension": "png",
+    "filename" : "test",
+    "height"   : 32,
+    "id"       : "bRGKX9bm",
+    "title"    : "test",
+    "url"      : "https://i.ibb.co/1J4mTWzQ/test.png",
+    "width"    : 64,
+    "album"    : {
+        "id"   : "jyYWqL",
+        "title": "test-テスト-\"&> Album",
+    },
+    "user"     : {
+        "id"        : "nrFBYw",
+        "name"      : "Gdldev",
+        "url"       : "https://gdldev.imgbb.com/",
+        "url_albums": "https://gdldev.imgbb.com/albums",
+        "username"  : "gdldev",
     },
 },
 

@@ -34,7 +34,7 @@ class ImgbbExtractor(Extractor):
             yield Message.Url, url, image
 
     def login(self):
-        if self.cookies_check(("LID",)):
+        if self.cookies_check(self.cookies_names):
             return
 
         username, password = self._get_auth_info()
@@ -66,8 +66,8 @@ class ImgbbExtractor(Extractor):
     def _pagination(self, page, url, params):
         seek, pos = text.extract(page, 'data-seek="', '"')
         tokn, pos = text.extract(page, 'PF.obj.config.auth_token="', '"', pos)
-        data, pos = text.extract(page, "CHV.obj.resource=", "};", pos)
-        self.kwdict["user"] = util.json_loads(data + "}").get("user")
+        resc, pos = text.extract(page, "CHV.obj.resource=", "};", pos)
+        self.kwdict["user"] = util.json_loads(resc + "}").get("user")
 
         data = None
         while True:
@@ -111,7 +111,7 @@ class ImgbbExtractor(Extractor):
 
 
 class ImgbbAlbumExtractor(ImgbbExtractor):
-    """Extractor for albums on imgbb.com"""
+    """Extractor for imgbb albums"""
     subcategory = "album"
     pattern = r"(?:https?://)?ibb\.co/album/([^/?#]+)/?(?:\?([^#]+))?"
     example = "https://ibb.co/album/ID"
@@ -120,7 +120,6 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
         album_id, qs = self.groups
         url = f"{self.root}/album/{album_id}"
         params = text.parse_query(qs)
-        params = {"sort": params["sort"]} if "sort" in params else {}
         page = self.request(url, params=params).text
         extr = text.extract_from(page)
 
@@ -178,7 +177,7 @@ class ImgbbImageExtractor(ImgbbExtractor):
 
 
 class ImgbbUserExtractor(ImgbbExtractor):
-    """Extractor for user profiles in imgbb.com"""
+    """Extractor for imgbb user profiles"""
     subcategory = "user"
     directory_fmt = ("{category}", "{user[name]} ({user[id]})")
     pattern = r"(?:https?://)?([\w-]+)\.imgbb\.com/?(?:\?([^#]+))?"
@@ -188,13 +187,17 @@ class ImgbbUserExtractor(ImgbbExtractor):
         user, qs = self.groups
         url = f"https://{user}.imgbb.com/"
         params = text.parse_query(qs)
-        params = {"sort": params["sort"]} if "sort" in params else {}
-        page = self.request(url, params=params).text
+        response = self.request(url, params=params, allow_redirects=False)
 
-        if "<h1>Sign in</h1>" in page:
+        if response.status_code < 300:
+            params["pathname"] = "/"
+            return self._pagination(response.text, f"{url}json", params)
+
+        if response.status_code == 301:
+            raise exception.NotFoundError("user")
+        redirect = f"HTTP redirect to {response.headers.get('Location')}"
+        if response.status_code == 302:
             raise exception.AuthRequired(
-                ("username & password", "authenticated cookies"), "user")
-
-        url = f"{url}json"
-        params["pathname"] = "/"
-        return self._pagination(page, url, params)
+                ("username & password", "authenticated cookies"),
+                "profile", redirect)
+        raise exception.AbortExtraction(redirect)
