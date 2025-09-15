@@ -88,6 +88,7 @@ modules = [
     "imagefap",
     "imgbb",
     "imgbox",
+    "imgpile",
     "imgth",
     "imgur",
     "imhentai",

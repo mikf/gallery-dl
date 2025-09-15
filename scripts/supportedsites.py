@@ -90,6 +90,7 @@ CATEGORY_MAP = {
     "imagechest"     : "ImageChest",
     "imgdrive"       : "ImgDrive.net",
     "imgkiwi"        : "IMG.Kiwi",
+    "imgpile"        : "imgpile",
     "imgtaxi"        : "ImgTaxi.com",
     "imgth"          : "imgth",
     "imgur"          : "imgur",
