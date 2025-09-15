@@ -457,6 +457,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries, individual Images</td>
     <td></td>
 </tr>
+<tr id="imgpile" title="imgpile">
+    <td>imgpile</td>
+    <td>https://imgpile.com/</td>
+    <td>Posts, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="imgth" title="imgth">
     <td>imgth</td>
     <td>https://imgth.com/</td>
