@@ -1221,6 +1221,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, individual Images, User Profiles, Videos</td>
     <td></td>
 </tr>
+<tr id="imglike" title="imglike">
+    <td>Nude Celeb</td>
+    <td>https://imglike.com/</td>
+    <td>Albums, individual Images, User Profiles, Videos</td>
+    <td></td>
+</tr>
 
 <tr id="Danbooru" title="Danbooru">
     <td colspan="4"><strong>Danbooru Instances</strong></td>
