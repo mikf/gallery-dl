@@ -20,7 +20,8 @@ class SimpcityExtractor(Extractor):
     root = "https://simpcity.cr"
 
     def items(self):
-        extract_urls = text.re(r' href="([^"]+)').findall
+        extract_urls = text.re(
+            r'<(?:a [^>]*?href|iframe [^>]*?src)="([^"]+)').findall
 
         for post in self.posts():
             urls = extract_urls(post["content"])
