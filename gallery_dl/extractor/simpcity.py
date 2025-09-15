@@ -92,7 +92,8 @@ class SimpcityExtractor(Extractor):
             "id": extr('data-content="post-', '"'),
             "author_url": extr('itemprop="url" content="', '"'),
             "date": text.parse_datetime(extr('datetime="', '"')),
-            "content": extr('<div itemprop="text">', "\t\t</div>").strip(),
+            "content": extr('<div itemprop="text">',
+                            '<div class="js-selectToQuote').strip(),
         }
 
         url_a = post["author_url"]

@@ -60,6 +60,28 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://simpcity.cr/threads/puutin_cos.219873/post-26053409",
+    "#comment" : "iframe embeds (#8214)",
+    "#class"   : simpcity.SimpcityPostExtractor,
+    "#auth"    : True,
+    "#results" : (
+        "https://jpg5.su/img/NNFssUg",
+        "https://saint2.cr/embed/nPy1kG3w55V",
+        "https://saint2.cr/embed/c0KhPjU4-F3",
+        "https://saint2.cr/embed/sZWnVZ_mQsV",
+        "https://saint2.cr/embed/MEBiLx6DETQ",
+    ),
+},
+
+{
+    "#url"     : "https://simpcity.cr/threads/shinhashimoto00-shinhashimoto01.184378/post-13389764",
+    "#comment" : "quote in post content (#8214)",
+    "#class"   : simpcity.SimpcityPostExtractor,
+    "#auth"    : True,
+    "#results" : ("/goto/post?id=13358068", "https://cyberdrop.me/a/Sh9GlG38"),
+},
+
+{
     "#url"     : "https://simpcity.cr/threads/alua-tatakai.89490/",
     "#class"   : simpcity.SimpcityThreadExtractor,
     "#auth"    : True,
