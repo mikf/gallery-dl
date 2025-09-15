@@ -156,6 +156,18 @@ class CheveretoAlbumExtractor(CheveretoExtractor):
                 yield Message.Queue, image, data
 
 
+class CheveretoCategoryExtractor(CheveretoExtractor):
+    """Extractor for chevereto galleries"""
+    subcategory = "category"
+    pattern = BASE_PATTERN + r"(/category/[^/?#]+)"
+    example = "https://imglike.com/category/TITLE"
+
+    def items(self):
+        data = {"_extractor": CheveretoImageExtractor}
+        for image in self._pagination(self.root + self.path):
+            yield Message.Queue, image, data
+
+
 class CheveretoUserExtractor(CheveretoExtractor):
     """Extractor for chevereto users"""
     subcategory = "user"

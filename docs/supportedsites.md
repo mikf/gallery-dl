@@ -1206,25 +1206,25 @@ Consider all listed sites to potentially be NSFW.
 <tr id="jpgfish" title="jpgfish">
     <td>JPG Fish</td>
     <td>https://jpg6.su/</td>
-    <td>Albums, individual Images, User Profiles, Videos</td>
+    <td>Albums, Categories, individual Images, User Profiles, Videos</td>
     <td></td>
 </tr>
 <tr id="imgkiwi" title="imgkiwi">
     <td>IMG.Kiwi</td>
     <td>https://img.kiwi/</td>
-    <td>Albums, individual Images, User Profiles, Videos</td>
+    <td>Albums, Categories, individual Images, User Profiles, Videos</td>
     <td></td>
 </tr>
 <tr id="imagepond" title="imagepond">
     <td>ImagePond</td>
     <td>https://imagepond.net/</td>
-    <td>Albums, individual Images, User Profiles, Videos</td>
+    <td>Albums, Categories, individual Images, User Profiles, Videos</td>
     <td></td>
 </tr>
 <tr id="imglike" title="imglike">
     <td>Nude Celeb</td>
     <td>https://imglike.com/</td>
-    <td>Albums, individual Images, User Profiles, Videos</td>
+    <td>Albums, Categories, individual Images, User Profiles, Videos</td>
     <td></td>
 </tr>
 
