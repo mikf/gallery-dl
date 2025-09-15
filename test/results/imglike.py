@@ -49,4 +49,13 @@ __tests__ = (
     ),
 },
 
+{
+    "#url"     : "https://imglike.com/category/Bursting-boobs",
+    "#category": ("chevereto", "imglike", "category"),
+    "#class"   : chevereto.CheveretoCategoryExtractor,
+    "#pattern" : chevereto.CheveretoImageExtractor.pattern,
+    "#range"   : "1-100",
+    "#count"   : 100,
+},
+
 )
