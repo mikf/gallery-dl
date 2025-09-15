@@ -50,6 +50,10 @@ BASE_PATTERN = CheveretoExtractor.update({
         "root": "https://imagepond.net",
         "pattern": r"imagepond\.net",
     },
+    "imglike": {
+        "root": "https://imglike.com",
+        "pattern": r"imglike\.com",
+    },
 })
 
 
