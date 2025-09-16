@@ -102,7 +102,10 @@ class DanbooruExtractor(BaseExtractor):
                     post["extension"] = "webm"
 
             if url[0] == "/":
-                url = self.root + url
+                if url[1] == "/":
+                    url = "https:" + url
+                else:
+                    url = self.root + url
 
             post.update(data)
             yield Message.Directory, post

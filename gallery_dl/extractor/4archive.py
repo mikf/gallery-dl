@@ -62,7 +62,8 @@ class _4archiveThreadExtractor(Extractor):
         data = {
             "name": extr('class="name">', "</span>"),
             "date": text.parse_datetime(
-                extr('class="dateTime postNum" >', "<").strip(),
+                (extr('class="dateTime">', "<") or
+                 extr('class="dateTime postNum" >', "<")).strip(),
                 "%Y-%m-%d %H:%M:%S"),
             "no"  : text.parse_int(extr(">Post No.", "<")),
         }
@@ -70,8 +71,7 @@ class _4archiveThreadExtractor(Extractor):
             extr('class="fileText"', ">File: <a")
             data.update({
                 "url"     : extr('href="', '"'),
-                "filename": extr(
-                    'rel="noreferrer noopener"', "</a>").strip()[1:],
+                "filename": extr('alt="Image: ', '"'),
                 "size"    : text.parse_bytes(extr(" (", ", ")[:-1]),
                 "width"   : text.parse_int(extr("", "x")),
                 "height"  : text.parse_int(extr("", "px")),

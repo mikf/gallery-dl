@@ -72,6 +72,10 @@ class VkExtractor(Extractor):
                 photo["width"] = photo["height"] = 0
 
             photo["id"] = photo["id"].rpartition("_")[2]
+            photo["date"] = text.parse_timestamp(text.extr(
+                photo["date"], 'data-date="', '"'))
+            photo["description"] = text.unescape(text.extr(
+                photo.get("desc", ""), ">", "<"))
             photo.update(data)
 
             text.nameext_from_url(url, photo)
@@ -108,6 +112,10 @@ class VkExtractor(Extractor):
             total = payload[1]
             photos = payload[3]
 
+            for i in range(len(photos)):
+                photos[i]["num"] = self.offset + i + 1
+                photos[i]["count"] = total
+
             offset_next = self.offset + len(photos)
             if offset_next >= total:
                 # the last chunk of photos also contains the first few photos
@@ -128,7 +136,7 @@ class VkPhotosExtractor(VkExtractor):
     subcategory = "photos"
     pattern = (BASE_PATTERN + r"/(?:"
                r"(?:albums|photos|id)(-?\d+)"
-               r"|(?!(?:album|tag)-?\d+_?)([^/?#]+))")
+               r"|(?!(?:album|tag|wall)-?\d+_?)([^/?#]+))")
     example = "https://vk.com/id12345"
 
     def __init__(self, match):
@@ -179,17 +187,40 @@ class VkAlbumExtractor(VkExtractor):
     pattern = BASE_PATTERN + r"/album(-?\d+)_(\d+)$"
     example = "https://vk.com/album12345_00"
 
-    def __init__(self, match):
-        VkExtractor.__init__(self, match)
-        self.user_id, self.album_id = match.groups()
-
     def photos(self):
-        return self._pagination(f"album{self.user_id}_{self.album_id}")
+        user_id, album_id = self.groups
+        return self._pagination(f"album{user_id}_{album_id}")
 
     def metadata(self):
+        user_id, album_id = self.groups
+
+        url = f"{self.root}/album{user_id}_{album_id}"
+        page = self.request(url).text
+        desc = text.extr(page, 'name="og:description" value="', '"')
+        try:
+            album_name, user_name, photos = desc.rsplit(" - ", 2)
+        except ValueError:
+            if msg := text.extr(
+                    page, '<div class="message_page_title">Error</div>',
+                    "</div>"):
+                msg = f" ('{text.remove_html(msg)[:-5]}')"
+            self.log.warning("%s_%s: Failed to extract metadata%s",
+                             user_id, album_id, msg)
+            return {"user": {"id": user_id}, "album": {"id": album_id}}
+
         return {
-            "user": {"id": self.user_id},
-            "album": {"id": self.album_id},
+            "user": {
+                "id"   : user_id,
+                "nick" : text.unescape(user_name),
+                "name" : text.unescape(text.extr(
+                    page, 'class="ui_crumb" href="/', '"')),
+                "group": user_id[0] == "-",
+            },
+            "album": {
+                "id"   : album_id,
+                "name" : text.unescape(album_name),
+                "count": text.parse_int(photos[:-7])
+            },
         }
 
 
@@ -209,3 +240,35 @@ class VkTaggedExtractor(VkExtractor):
 
     def metadata(self):
         return {"user": {"id": self.user_id}}
+
+
+class VkWallPostExtractor(VkExtractor):
+    """Extractor for a vk wall post"""
+    subcategory = "wall-post"
+    directory_fmt = ("{category}", "{user[id]}", "wall")
+    filename_fmt = "{wall[id]}_{num}.{extension}"
+    pattern = BASE_PATTERN + r"/wall(-?\d+)_(\d+)"
+    example = "https://vk.com/wall12345_123"
+
+    def photos(self):
+        user_id, wall_id = self.groups
+        return self._pagination(f"wall{user_id}_{wall_id}")
+
+    def metadata(self):
+        user_id, wall_id = self.groups
+
+        url = f"{self.root}/wall{user_id}_{wall_id}"
+        page = self.request(url).text
+        desc = text.unescape(
+            text.extr(page, 'data-testid="post_description">', "</div>") or
+            text.extr(page, 'name="description" content="', '"'))
+
+        return {
+            "user": {
+                "id": user_id,
+            },
+            "wall": {
+                "id": wall_id,
+                "description": desc,
+            },
+        }

@@ -354,12 +354,11 @@ class Extractor():
             raise exception.AbortExtraction(
                 f"User input required ({prompt.strip(' :')})")
 
-    def _get_auth_info(self):
+    def _get_auth_info(self, password=None):
         """Return authentication information as (username, password) tuple"""
         username = self.config("username")
-        password = None
 
-        if username:
+        if username or password:
             password = self.config("password")
             if not password:
                 self._check_input_allowed("password")
@@ -667,12 +666,18 @@ class Extractor():
         return False
 
     def _extract_jsonld(self, page):
-        return util.json_loads(text.extr(
-            page, '<script type="application/ld+json">', "</script>"))
+        return util.json_loads(
+            text.extr(page, '<script type="application/ld+json">',
+                      "</script>") or
+            text.extr(page, "<script type='application/ld+json'>",
+                      "</script>"))
 
     def _extract_nextdata(self, page):
-        return util.json_loads(text.extr(
-            page, ' id="__NEXT_DATA__" type="application/json">', "</script>"))
+        return util.json_loads(
+            text.extr(page, ' id="__NEXT_DATA__" type="application/json">',
+                      "</script>") or
+            text.extr(page, " id='__NEXT_DATA__' type='application/json'>",
+                      "</script>"))
 
     def _cache(self, func, maxage, keyarg=None):
         #  return cache.DatabaseCacheDecorator(func, maxage, keyarg)

@@ -356,6 +356,7 @@ def parse_args(args=None):
     parser.add_argument("root", nargs="?")
 
     args = parser.parse_args()
+    args.category = args.category.lower()
 
     if root := args.root:
         if "://" in root:

@@ -31,15 +31,12 @@ class TumblrExtractor(Extractor):
     filename_fmt = "{category}_{blog_name}_{id}_{num:>02}.{extension}"
     archive_fmt = "{id}_{num}"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-
-        if name := match[2]:
-            self.blog = name + ".tumblr.com"
-        else:
-            self.blog = match[1] or match[3]
-
     def _init(self):
+        if name := self.groups[1]:
+            self.blog = f"{name}.tumblr.com"
+        else:
+            self.blog = self.groups[0] or self.groups[2]
+
         self.api = TumblrAPI(self)
         self.types = self._setup_posttypes()
         self.avatar = self.config("avatar", False)
@@ -287,14 +284,10 @@ class TumblrPostExtractor(TumblrExtractor):
     pattern = BASE_PATTERN + r"/(?:post/|image/)?(\d+)"
     example = "https://www.tumblr.com/BLOG/12345"
 
-    def __init__(self, match):
-        TumblrExtractor.__init__(self, match)
-        self.post_id = match[4]
+    def posts(self):
         self.reblogs = True
         self.date_min = 0
-
-    def posts(self):
-        return self.api.posts(self.blog, {"id": self.post_id})
+        return self.api.posts(self.blog, {"id": self.groups[3]})
 
     def _setup_posttypes(self):
         return POST_TYPES
@@ -303,15 +296,13 @@ class TumblrPostExtractor(TumblrExtractor):
 class TumblrTagExtractor(TumblrExtractor):
     """Extractor for Tumblr user's posts by tag"""
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"/tagged/([^/?#]+)"
+    pattern = BASE_PATTERN + r"(?:/archive)?/tagged/([^/?#]+)"
     example = "https://www.tumblr.com/BLOG/tagged/TAG"
 
-    def __init__(self, match):
-        TumblrExtractor.__init__(self, match)
-        self.tag = text.unquote(match[4].replace("-", " "))
-
     def posts(self):
-        return self.api.posts(self.blog, {"tag": self.tag})
+        self.kwdict["search_tags"] = tag = text.unquote(
+            self.groups[3].replace("-", " "))
+        return self.api.posts(self.blog, {"tag": tag})
 
 
 class TumblrDayExtractor(TumblrExtractor):
@@ -320,21 +311,13 @@ class TumblrDayExtractor(TumblrExtractor):
     pattern = BASE_PATTERN + r"/day/(\d\d\d\d/\d\d/\d\d)"
     example = "https://www.tumblr.com/BLOG/day/1970/01/01"
 
-    def __init__(self, match):
-        TumblrExtractor.__init__(self, match)
-        year, month, day = match[4].split("/")
-        self.ordinal = date(int(year), int(month), int(day)).toordinal()
-
-    def _init(self):
-        TumblrExtractor._init(self)
-
-        self.date_min = (
-            # 719163 == date(1970, 1, 1).toordinal()
-            (self.ordinal - 719163) * 86400)
-
-        self.api.before = self.date_min + 86400
-
     def posts(self):
+        year, month, day = self.groups[3].split("/")
+        ordinal = date(int(year), int(month), int(day)).toordinal()
+
+        # 719163 == date(1970, 1, 1).toordinal()
+        self.date_min = (ordinal - 719163) * 86400
+        self.api.before = self.date_min + 86400
         return self.api.posts(self.blog, {})
 
 
@@ -550,8 +533,11 @@ class TumblrAPI(oauth.OAuth1API):
             params["api_key"] = self.api_key
 
         strategy = self.extractor.config("pagination")
-        if not strategy and "offset" not in params:
-            strategy = "api"
+        if not strategy:
+            if params.get("before"):
+                strategy = "before"
+            elif "offset" not in params:
+                strategy = "api"
 
         while True:
             data = self._call(endpoint, params)
@@ -573,10 +559,9 @@ class TumblrAPI(oauth.OAuth1API):
                     endpoint = data["_links"]["next"]["href"]
                 except KeyError:
                     return
-
-                params = None
-                if self.api_key:
-                    endpoint += "&api_key=" + self.api_key
+                if params is not None and self.api_key:
+                    endpoint = f"{endpoint}&api_key={self.api_key}"
+                    params = None
 
             elif strategy == "before":
                 if not posts:

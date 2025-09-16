@@ -9,7 +9,7 @@
 """Extractors for https://comick.io/"""
 
 from .common import GalleryExtractor, ChapterExtractor, MangaExtractor, Message
-from .. import text
+from .. import text, exception
 from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?comick\.io"
@@ -67,9 +67,35 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
     def metadata(self, page):
         slug, chstr = self.groups
         manga = _manga_info(self, slug)
-        props = _chapter_info(self, manga, chstr)
 
-        ch = props["chapter"]
+        while True:
+            try:
+                props = _chapter_info(self, manga, chstr)
+            except exception.HttpError as exc:
+                if exc.response.status_code != 404:
+                    raise
+                if exc.response.headers.get(
+                        "Content-Type", "").startswith("text/html"):
+                    if locals().get("_retry_buildid"):
+                        raise
+                    self.log.debug("Updating Next.js build ID")
+                    _retry_buildid = True
+                    _manga_info.cache.clear()
+                    manga = _manga_info(self, slug)
+                    continue
+                if b'"notFound":true' in exc.response.content:
+                    raise exception.NotFoundError("chapter")
+                raise
+
+            if "__N_REDIRECT" in props:
+                path = props["__N_REDIRECT"]
+                self.log.debug("Following redirect to %s", path)
+                _, slug, chstr = path.rsplit("/", 2)
+                continue
+
+            ch = props["chapter"]
+            break
+
         self._images = ch["md_images"]
 
         if chapter := ch["chap"]:

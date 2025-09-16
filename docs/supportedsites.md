@@ -15,7 +15,7 @@ Consider all listed sites to potentially be NSFW.
 <tbody valign="top">
 <tr id="2ch" title="2ch">
     <td>2ch</td>
-    <td>https://2ch.hk/</td>
+    <td>https://2ch.su/</td>
     <td>Boards, Threads</td>
     <td></td>
 </tr>
@@ -106,7 +106,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="ao3" title="ao3">
     <td>Archive of Our Own</td>
     <td>https://archiveofourown.org/</td>
-    <td>Search Results, Series, Subscriptions, Tag Searches, User Profiles, Bookmarks, Works</td>
+    <td>Search Results, Series, Subscriptions, Tag Searches, User Profiles, User Bookmarks, User Series, User Works, Works</td>
     <td>Supported</td>
 </tr>
 <tr id="artstation" title="artstation">
@@ -131,6 +131,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Behance</td>
     <td>https://www.behance.net/</td>
     <td>Collections, Galleries, User Profiles</td>
+    <td></td>
+</tr>
+<tr id="bellazon" title="bellazon">
+    <td>Bellazon</td>
+    <td>https://www.bellazon.com/</td>
+    <td>Forums, Posts, Threads</td>
     <td></td>
 </tr>
 <tr id="bilibili" title="bilibili">
@@ -211,6 +217,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, Media Files</td>
     <td></td>
 </tr>
+<tr id="cyberfile" title="cyberfile">
+    <td>CyberFile</td>
+    <td>https://cyberfile.me/</td>
+    <td>Files, Folders</td>
+    <td></td>
+</tr>
 <tr id="dankefuerslesen" title="dankefuerslesen">
     <td>Danke fürs Lesen</td>
     <td>https://danke.moe/</td>
@@ -276,6 +288,12 @@ Consider all listed sites to potentially be NSFW.
     <td>https://www.facebook.com/</td>
     <td>Albums, Avatars, User Profile Information, Photos, Profile Photos, Sets, User Profiles, Videos</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
+</tr>
+<tr id="fansly" title="fansly">
+    <td>Fansly</td>
+    <td>https://fansly.com/</td>
+    <td>Creator Media, Creator Posts, Home Feed, Lists, Account Lists, Posts</td>
+    <td></td>
 </tr>
 <tr id="fantia" title="fantia">
     <td>Fantia</td>
@@ -439,6 +457,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries, individual Images</td>
     <td></td>
 </tr>
+<tr id="imgpile" title="imgpile">
+    <td>imgpile</td>
+    <td>https://imgpile.com/</td>
+    <td>Posts, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="imgth" title="imgth">
     <td>imgth</td>
     <td>https://imgth.com/</td>
@@ -574,7 +598,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="mangadex" title="mangadex">
     <td>MangaDex</td>
     <td>https://mangadex.org/</td>
-    <td>Authors, Chapters, Updates Feed, Library, MDLists, Manga</td>
+    <td>Authors, Chapters, Covers, Updates Feed, Library, MDLists, Manga</td>
     <td>Supported</td>
 </tr>
 <tr id="mangapark" title="mangapark">
@@ -871,6 +895,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Boards, Likes, Pins, User Pins, related Pins, Search Results</td>
     <td></td>
 </tr>
+<tr id="simpcity" title="simpcity">
+    <td>SimpCity Forums</td>
+    <td>https://simpcity.cr/</td>
+    <td>Forums, Posts, Threads</td>
+    <td></td>
+</tr>
 <tr id="simplyhentai" title="simplyhentai">
     <td>Simply Hentai</td>
     <td>https://www.simply-hentai.com/</td>
@@ -1036,7 +1066,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="vk" title="vk">
     <td>VK</td>
     <td>https://vk.com/</td>
-    <td>Albums, Photos, Tagged Photos</td>
+    <td>Albums, Photos, Tagged Photos, individual Wall Posts</td>
     <td></td>
 </tr>
 <tr id="vsco" title="vsco">
@@ -1576,6 +1606,12 @@ Consider all listed sites to potentially be NSFW.
 <tr id="nozrip" title="nozrip">
     <td>GaryC Booru</td>
     <td>https://noz.rip/booru/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr id="thecollectionS" title="thecollectionS">
+    <td>The /co/llection</td>
+    <td>https://co.llection.pics/</td>
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>

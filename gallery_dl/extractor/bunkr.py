@@ -160,7 +160,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 file = self._extract_file(data_id)
 
                 file["name"] = util.json_loads(text.extr(
-                    item, 'original:', ',\n'))
+                    item, 'original:', ',\n').replace("\\'", "'"))
                 file["slug"] = util.json_loads(text.extr(
                     item, 'slug: ', ',\n'))
                 file["uuid"] = text.extr(
@@ -175,7 +175,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 raise
             except Exception as exc:
                 self.log.error("%s: %s", exc.__class__.__name__, exc)
-                self.log.debug("", exc_info=exc)
+                self.log.debug("%s", item, exc_info=exc)
 
     def _extract_file(self, data_id):
         referer = f"{self.root_dl}/file/{data_id}"
@@ -219,8 +219,8 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
             page = self.request(f"{self.root}{album_id}").text
             data_id = text.extr(page, 'data-file-id="', '"')
             file = self._extract_file(data_id)
-            file["name"] = text.unescape(text.extr(
-                page, "<h1", "<").rpartition(">")[2])
+            file["name"] = text.unquote(text.unescape(text.extr(
+                page, "<h1", "<").rpartition(">")[2]))
             file["slug"] = album_id.rpartition("/")[2]
             file["uuid"] = text.extr(page, "/thumbs/", ".")
         except Exception as exc:

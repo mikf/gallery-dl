@@ -46,7 +46,8 @@ class TestFormatter(unittest.TestCase):
         "h": "<p>foo </p> &amp; bar <p> </p>",
         "H": """<p>
   <a href="http://www.example.com">Lorem ipsum dolor sit amet</a>.
-  Duis aute irure <a href="http://blog.example.org">dolor</a>.
+  Duis aute irure <a href="http://blog.example.org/lorem?foo=bar">
+  http://blog.example.org</a>.
 </p>""",
         "u": "&#x27;&lt; / &gt;&#x27;",
         "t": 1262304000,
@@ -78,6 +79,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{n!H}", "")
         self._run_test("{h!R}", [])
         self._run_test("{H!R}", ["http://www.example.com",
+                                 "http://blog.example.org/lorem?foo=bar",
                                  "http://blog.example.org"])
         self._run_test("{a!s}", self.kwdict["a"])
         self._run_test("{a!r}", f"'{self.kwdict['a']}'")
@@ -175,6 +177,11 @@ class TestFormatter(unittest.TestCase):
     def test_indexing(self):
         self._run_test("{l[0]}" , "a")
         self._run_test("{a[6]}" , "w")
+
+    def test_indexing_negative(self):
+        self._run_test("{l[-1]}" , "c")
+        self._run_test("{a[-7]}" , "o")
+        self._run_test("{a[-0]}" , "h")  # same as a[0]
 
     def test_dict_access(self):
         self._run_test("{d[a]}"  , "foo")

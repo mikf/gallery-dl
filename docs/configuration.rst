@@ -1104,7 +1104,7 @@ extractor.*.actions
 -------------------
 Type
     * ``object`` (`pattern` -> `Action(s)`_)
-    * ``list`` of ``lists`` with `pattern` -> `Action(s)`_ pairs as elements
+    * ``list`` of [`pattern`, `Action(s)`_] pairs
 Example
     .. code:: json
 
@@ -1136,11 +1136,12 @@ Description
     ``pattern`` is parsed as severity level (``debug``, ``info``, ``warning``, ``error``, or integer value)
     followed by an optional
     `Python Regular Expression <https://docs.python.org/3/library/re.html#regular-expression-syntax>`__
-    separated by a colon ``:``
+    separated by a colon:
+    ``<level>:<re>``
 
     Using ``*`` as `level` or leaving it empty
-    matches logging messages of all levels
-    (e.g. ``*:<re>`` or ``:<re>``).
+    matches logging messages of all levels:
+    ``*:<re>`` or ``:<re>``
 
 
 extractor.*.postprocessors
@@ -2036,6 +2037,20 @@ Description
     uses the same domain as a given input URL.
 
 
+extractor.cyberfile.password
+----------------------------
+Type
+    ``string``
+Default
+    ``""``
+Description
+    Password value used to access protected files and folders.
+
+    Note: Leave this value empty or undefined
+    to be interactively prompted for a password when needed
+    (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
+
+
 extractor.[Danbooru].external
 -----------------------------
 Type
@@ -2809,6 +2824,28 @@ Description
 
     Note: ``comments`` can also be enabled via
     `fanbox.comments <extractor.fanbox.comments_>`__
+
+
+extractor.fansly.formats
+------------------------
+Type
+    ``list`` of ``integers``
+Default
+    ``[1, 2, 3, 4, 302, 303]``
+Description
+    List of file formats to consider during format selection.
+
+
+extractor.fansly.token
+----------------------
+Type
+    ``string``
+Example
+    ``"kX7pL9qW3zT2rY8mB5nJ4vC6xF1tA0hD8uE2wG9yR3sQ7iZ4oM5jN6cP8lV0bK2tU9aL1eW"``
+Description
+    ``authorization`` header value
+    used for requests to ``https://apiv3.fansly.com/api``
+    to access locked content.
 
 
 extractor.flickr.access-token & .access-token-secret
@@ -5277,7 +5314,8 @@ extractor.tumblr.pagination
 Type
     ``string``
 Default
-    ``"offset"``
+    * ``"before"`` if `date-max <extractor.tumblr.date-min & .date-max_>`__ is set
+    * ``"offset"`` otherwise
 Description
     Controls how to paginate over blog posts.
 
@@ -5700,6 +5738,44 @@ Description
 
     If this value is ``"original"``, metadata for these files
     will be taken from the original Tweets, not the Retweets.
+
+
+extractor.twitter.search-limit
+------------------------------
+Type
+    ``integer``
+Default
+    ``20``
+Description
+    Number of requested results per search query.
+
+
+extractor.twitter.search-pagination
+-----------------------------------
+Type
+    ``string``
+Default
+    ``"cursor"``
+Description
+    Selects how to paginate over search results.
+
+    ``"cursor"``
+        Use ``cursor`` values provided by the API
+    ``"max_id"`` | ``"maxid"`` | ``"id"``
+        Update the ``max_id`` search query parameter
+        to the Tweet ID value of the last retrieved Tweet.
+
+
+extractor.twitter.search-stop
+-----------------------------
+Type
+    ``integer``
+Default
+    * ``3`` if `search-pagination <extractor.twitter.search-pagination_>`__ is set to ``"cursor"``
+    * ``0`` otherwise
+Description
+    Number of empty search result batches
+    to accept before stopping.
 
 
 extractor.twitter.timeline.strategy
@@ -8715,9 +8791,11 @@ Example
     * ``"print Hello World"``
     * ``"raise AbortExtraction an error occured"``
     * ``"flag file = terminate"``
+    * ``["print Exiting", "exit 1"]``
 Description
     An Action_ is parsed as `Action Type`
-    followed by (optional) arguments.
+    followed by (optional) arguments:
+    ``<type> <arg1> <arg2> …``
 
     It is possible to specify more than one ``action``
     by providing them as a ``list``: ``["<action1>", "<action2>", …]``
@@ -8736,6 +8814,7 @@ Description
     ``level``:
         | Modify severity level of the current logging message.
         | Can be one of ``debug``, ``info``, ``warning``, ``error`` or an integer value.
+        | Use ``0`` to ignore a message (``level = 0``).
     ``print``:
         Write argument to stdout.
     ``exec``:
