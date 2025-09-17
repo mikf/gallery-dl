@@ -27,6 +27,7 @@ class SchalenetworkExtractor(Extractor):
     root = "https://niyaniya.moe"
     root_api = "https://api.schale.network"
     root_auth = "https://auth.schale.network"
+    extr_class = None
     request_interval = (0.5, 1.5)
 
     def _init(self):
@@ -38,6 +39,7 @@ class SchalenetworkExtractor(Extractor):
 
     def _pagination(self, endpoint, params):
         url_api = self.root_api + endpoint
+        cls = self.extr_class
 
         while True:
             data = self.request_json(
@@ -50,7 +52,7 @@ class SchalenetworkExtractor(Extractor):
 
             for entry in entries:
                 url = f"{self.root}/g/{entry['id']}/{entry['key']}"
-                entry["_extractor"] = SchalenetworkGalleryExtractor
+                entry["_extractor"] = cls
                 yield Message.Queue, url, entry
 
             try:
@@ -236,3 +238,6 @@ class SchalenetworkFavoriteExtractor(SchalenetworkExtractor):
         params["page"] = text.parse_int(params.get("page"), 1)
         self.headers["Authorization"] = self._token()
         return self._pagination(f"/books/favorites?crt={self._crt()}", params)
+
+
+SchalenetworkExtractor.extr_class = SchalenetworkGalleryExtractor

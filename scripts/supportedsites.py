@@ -63,6 +63,7 @@ CATEGORY_MAP = {
     "girlswithmuscle": "Girls with Muscle",
     "hatenablog"     : "HatenaBlog",
     "hbrowse"        : "HBrowse",
+    "hdoujin"        : "HDoujin Galleries",
     "hentai2read"    : "Hentai2Read",
     "hentaicosplay"  : "Hentai Cosplay",
     "hentaienvy"     : "HentaiEnvy",

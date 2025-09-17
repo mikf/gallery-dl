@@ -73,6 +73,7 @@ modules = [
     "girlswithmuscle",
     "gofile",
     "hatenablog",
+    "hdoujin",
     "hentai2read",
     "hentaicosplays",
     "hentaifoundry",
