@@ -369,6 +369,8 @@ class FacebookExtractor(Extractor):
                 for edge in (user["profile_tabs"]["profile_user"]
                              ["timeline_nav_app_sections"]["edges"])
             ]
+            user["biography"] = self.decode_all(text.extr(
+                page, '"best_description":{"text":"', '"'))
         except Exception:
             if user is None:
                 self.log.debug("Failed to extract user data: %s", data)
