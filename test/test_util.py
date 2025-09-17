@@ -1041,6 +1041,9 @@ value = 123
         self.assertEqual(response.links.get("next"), None)
         self.assertEqual(response.close(), None)
 
+        with response as ctx:
+            self.assertIs(response, ctx)
+
 
 class TestExtractor():
     category = "test_category"
