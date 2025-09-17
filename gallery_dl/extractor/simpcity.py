@@ -27,6 +27,7 @@ class SimpcityExtractor(Extractor):
             urls = extract_urls(post["content"])
             data = {"post": post}
             post["count"] = data["count"] = len(urls)
+            yield Message.Directory, data
             for data["num"], url in enumerate(urls, 1):
                 yield Message.Queue, url, data
 
