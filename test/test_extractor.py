@@ -156,6 +156,9 @@ class TestExtractorModule(unittest.TestCase):
                 self.fail(f"{cls.__name__} pattern does not match "
                           f"example URL '{cls.example}'")
 
+            self.assertEqual(cls, extr.__class__)
+            self.assertEqual(cls, extractor.find(cls.example).__class__)
+
             extr.request = fail_request
             extr.initialize()
             extr.finalize()
