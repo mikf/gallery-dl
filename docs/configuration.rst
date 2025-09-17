@@ -3092,6 +3092,70 @@ Description
     Recursively download files from subfolders.
 
 
+extractor.hdoujin.crt
+---------------------
+Type
+    ``string``
+Example
+    * ``"0542daa9-352c-4fd5-a497-6c6d5cf07423"``
+    * ``"/12345/a1b2c3d4e5f6?crt=0542daa9-352c-4fd5-a497-6c6d5cf07423"``
+Description
+    The ``crt`` query parameter value
+    sent when fetching gallery data.
+
+    To get this value:
+
+    * Open your browser's Developer Tools (F12)
+    * Select `Network` -> `XHR`
+    * Open a gallery page
+    * Select the last `Network` entry and copy its ``crt`` value
+
+    Note: You will also need your browser's
+    `user-agent <extractor.*.user-agent_>`__
+
+
+extractor.hdoujin.format
+------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["0", "1600", "1280", "980", "780"]``
+Description
+    Name(s) of the image format to download.
+
+    When more than one format is given, the first available one is selected.
+
+    | Possible formats are
+    | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"`` (original)
+
+
+extractor.hdoujin.tags
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Group ``tags`` by type and
+    provide them as ``tags_<type>`` metadata fields,
+    for example ``tags_artist`` or ``tags_character``.
+
+
+extractor.hdoujin.token
+-----------------------
+Type
+    ``string``
+Example
+    * ``"3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
+    * ``"Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
+    * ``"Authorization: Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
+Description
+    ``Authorization`` header value
+    used for requests to ``https://api.hdoujin.org``
+    to access ``favorite`` galleries.
+
+
 extractor.hentaifoundry.descriptions
 ------------------------------------
 Type
@@ -3584,70 +3648,6 @@ Description
 
     If the selected format is not available,
     the first in the list gets chosen (usually `mp3`).
-
-
-extractor.schalenetwork.crt
----------------------------
-Type
-    ``string``
-Example
-    * ``"0542daa9-352c-4fd5-a497-6c6d5cf07423"``
-    * ``"/12345/a1b2c3d4e5f6?crt=0542daa9-352c-4fd5-a497-6c6d5cf07423"``
-Description
-    The ``crt`` query parameter value
-    sent when fetching gallery data.
-
-    To get this value:
-
-    * Open your browser's Developer Tools (F12)
-    * Select `Network` -> `XHR`
-    * Open a gallery page
-    * Select the last `Network` entry and copy its ``crt`` value
-
-    Note: You will also need your browser's
-    `user-agent <extractor.*.user-agent_>`__
-
-
-extractor.schalenetwork.format
-------------------------------
-Type
-    * ``string``
-    * ``list`` of ``strings``
-Default
-    ``["0", "1600", "1280", "980", "780"]``
-Description
-    Name(s) of the image format to download.
-
-    When more than one format is given, the first available one is selected.
-
-    | Possible formats are
-    | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"`` (original)
-
-
-extractor.schalenetwork.tags
-----------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Group ``tags`` by type and
-    provide them as ``tags_<type>`` metadata fields,
-    for example ``tags_artist`` or ``tags_character``.
-
-
-extractor.schalenetwork.token
------------------------------
-Type
-    ``string``
-Example
-    * ``"3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
-    * ``"Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
-    * ``"Authorization: Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
-Description
-    ``Authorization`` header value
-    used for requests to ``https://api.schale.network``
-    to access ``favorite`` galleries.
 
 
 extractor.lolisafe.domain
@@ -4878,6 +4878,70 @@ Default
     ``true``
 Description
     Download videos.
+
+
+extractor.schalenetwork.crt
+---------------------------
+Type
+    ``string``
+Example
+    * ``"0542daa9-352c-4fd5-a497-6c6d5cf07423"``
+    * ``"/12345/a1b2c3d4e5f6?crt=0542daa9-352c-4fd5-a497-6c6d5cf07423"``
+Description
+    The ``crt`` query parameter value
+    sent when fetching gallery data.
+
+    To get this value:
+
+    * Open your browser's Developer Tools (F12)
+    * Select `Network` -> `XHR`
+    * Open a gallery page
+    * Select the last `Network` entry and copy its ``crt`` value
+
+    Note: You will also need your browser's
+    `user-agent <extractor.*.user-agent_>`__
+
+
+extractor.schalenetwork.format
+------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["0", "1600", "1280", "980", "780"]``
+Description
+    Name(s) of the image format to download.
+
+    When more than one format is given, the first available one is selected.
+
+    | Possible formats are
+    | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"`` (original)
+
+
+extractor.schalenetwork.tags
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Group ``tags`` by type and
+    provide them as ``tags_<type>`` metadata fields,
+    for example ``tags_artist`` or ``tags_character``.
+
+
+extractor.schalenetwork.token
+-----------------------------
+Type
+    ``string``
+Example
+    * ``"3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
+    * ``"Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
+    * ``"Authorization: Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
+Description
+    ``Authorization`` header value
+    used for requests to ``https://api.schale.network``
+    to access ``favorite`` galleries.
 
 
 extractor.sexcom.gifs

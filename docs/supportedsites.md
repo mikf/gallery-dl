@@ -373,6 +373,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Archive, Individual Posts, Home Feed, Search Results</td>
     <td></td>
 </tr>
+<tr id="hdoujin" title="hdoujin">
+    <td>HDoujin Galleries</td>
+    <td>https://hdoujin.org/</td>
+    <td>Favorites, Galleries, Search Results</td>
+    <td></td>
+</tr>
 <tr id="hentaifoundry" title="hentaifoundry">
     <td>Hentai Foundry</td>
     <td>https://www.hentai-foundry.com/</td>
