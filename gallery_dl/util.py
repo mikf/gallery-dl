@@ -641,6 +641,12 @@ class NullResponse():
         self.url = url
         self.reason = str(reason)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
+
     def __str__(self):
         return "900 " + self.reason
 
