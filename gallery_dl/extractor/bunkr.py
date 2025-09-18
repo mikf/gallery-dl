@@ -162,7 +162,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 file["name"] = util.json_loads(text.extr(
                     item, 'original:', ',\n').replace("\\'", "'"))
                 file["slug"] = util.json_loads(text.extr(
-                    item, 'slug: ', ',\n'))
+                    item, 'slug: ', ',\n').replace("\\'", "'"))
                 file["uuid"] = text.extr(
                     item, 'name: "', ".")
                 file["size"] = text.parse_int(text.extr(
