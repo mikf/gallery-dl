@@ -191,6 +191,7 @@ modules = [
     "tcbscans",
     "telegraph",
     "tenor",
+    "thehentaiworld",
     "tiktok",
     "tmohentai",
     "toyhouse",

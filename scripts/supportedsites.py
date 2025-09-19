@@ -179,6 +179,7 @@ CATEGORY_MAP = {
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
     "thecollectionS" : "The /co/llection",
+    "thehentaiworld" : "The Hentai World",
     "tiktok"         : "TikTok",
     "tmohentai"      : "TMOHentai",
     "tumblrgallery"  : "TumblrGallery",
