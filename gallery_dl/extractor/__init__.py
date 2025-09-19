@@ -120,6 +120,7 @@ modules = [
     "manganelo",
     "mangapark",
     "mangaread",
+    "mangataro",
     "mangoxo",
     "misskey",
     "motherless",
