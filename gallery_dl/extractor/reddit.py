@@ -56,6 +56,7 @@ class RedditExtractor(Extractor):
                 urls = []
 
                 if submission:
+                    submission["comment"] = None
                     submission["date"] = text.parse_timestamp(
                         submission["created_utc"])
                     yield Message.Directory, submission
@@ -99,13 +100,12 @@ class RedditExtractor(Extractor):
                     elif not submission["is_self"]:
                         urls.append((url, submission))
 
+                    if selftext and (txt := submission["selftext_html"]):
+                        for url in text.extract_iter(txt, ' href="', '"'):
+                            urls.append((url, submission))
+
                 elif parentdir:
                     yield Message.Directory, comments[0]
-
-                if selftext and submission:
-                    for url in text.extract_iter(
-                            submission["selftext_html"] or "", ' href="', '"'):
-                        urls.append((url, submission))
 
                 if self.api.comments:
                     if comments and not submission:
@@ -115,24 +115,24 @@ class RedditExtractor(Extractor):
                             yield Message.Directory, submission
 
                     for comment in comments:
+                        media = (embeds and "media_metadata" in comment)
                         html = comment["body_html"] or ""
                         href = (' href="' in html)
-                        media = (embeds and "media_metadata" in comment)
 
-                        if media or href:
-                            comment["date"] = text.parse_timestamp(
-                                comment["created_utc"])
-                            if submission:
-                                data = submission.copy()
-                                data["comment"] = comment
-                            else:
-                                data = comment
+                        if not media and not href:
+                            continue
+
+                        data = submission.copy()
+                        data["comment"] = comment
+                        comment["date"] = text.parse_timestamp(
+                            comment["created_utc"])
 
                         if media:
-                            for embed in self._extract_embed(comment):
-                                submission["num"] += 1
-                                text.nameext_from_url(embed, submission)
-                                yield Message.Url, embed, submission
+                            for url in self._extract_embed(comment):
+                                data["num"] += 1
+                                text.nameext_from_url(url, data)
+                                yield Message.Url, url, data
+                            submission["num"] = data["num"]
 
                         if href:
                             for url in text.extract_iter(html, ' href="', '"'):
