@@ -54,7 +54,11 @@ class PostProcessor():
             else:
                 self.log.debug(
                     "Using %s archive '%s'", self.name, archive_path)
+                job.register_hooks({"finalize": self._close_archive})
                 return True
 
         self.archive = None
         return False
+
+    def _close_archive(self, _):
+        self.archive.close()
