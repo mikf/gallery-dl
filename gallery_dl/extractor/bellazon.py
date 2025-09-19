@@ -25,7 +25,7 @@ class BellazonExtractor(Extractor):
 
     def items(self):
         extract_urls = text.re(r'<a ([^>]*?href="([^"]+)".*?)</a>').findall
-        native = f"{self.root}/"
+        native = (f"{self.root}/", f"{self.root[6:]}/")
 
         for post in self.posts():
             urls = extract_urls(post["content"])
@@ -41,10 +41,20 @@ class BellazonExtractor(Extractor):
                         name = url
                     else:
                         name = text.unescape(alt)
+
                     dc = text.nameext_from_url(name, data.copy())
                     dc["id"] = text.extr(info, 'data-fileid="', '"')
                     if ext := text.extr(info, 'data-fileext="', '"'):
                         dc["extension"] = ext
+                    elif "/core/interface/file/attachment.php" in url:
+                        if not dc["id"]:
+                            dc["id"] = url.rpartition("?id=")[2]
+                        if (pos := info.find(">")) >= 0 and \
+                                (name := info[pos+1:].strip()):
+                            text.nameext_from_url(name, dc)
+
+                    if url[0] == "/":
+                        url = f"https:{url}"
                     yield Message.Url, url, dc
                 else:
                     yield Message.Queue, url, data
@@ -88,7 +98,7 @@ class BellazonExtractor(Extractor):
             "posts": stats[1]["userInteractionCount"],
             "date" : text.parse_datetime(schema["datePublished"]),
             "date_updated": text.parse_datetime(schema["dateModified"]),
-            "description" : text.unescape(schema["text"]),
+            "description" : text.unescape(schema["text"]).strip(),
             "section"     : path[-2],
             "author"      : author["name"],
             "author_url"  : url_a,
