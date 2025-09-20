@@ -73,6 +73,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/#comment-4351049",
+    "#class"   : bellazon.BellazonPostExtractor,
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/3556-bipasha-basu/#findComment-2134610",
     "#class"   : bellazon.BellazonPostExtractor,
     "#results" : "https://www.bellazon.com/main/uploads/monthly_04_2010/post-35864-1270985307.jpg",
