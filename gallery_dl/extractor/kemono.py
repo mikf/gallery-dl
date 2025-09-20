@@ -407,7 +407,11 @@ class KemonoDiscordExtractor(KemonoExtractor):
             r"(/[A-Za-z0-9-._~:/?#\[\]@!$&'()*+,;%=]+)").findall
         find_hash = util.re(HASH_PATTERN).match
 
-        posts = self.api.discord_channel(channel_id)
+        if (order := self.config("order-posts")) and order[0] in ("r", "d"):
+            posts = self.api.discord_channel(channel_id, channel["post_count"])
+        else:
+            posts = self.api.discord_channel(channel_id)
+
         if max_posts := self.config("max-posts"):
             posts = itertools.islice(posts, max_posts)
 
@@ -627,9 +631,12 @@ class KemonoAPI():
         endpoint = f"/{service}/user/{creator_id}/tags"
         return self._call(endpoint)
 
-    def discord_channel(self, channel_id):
+    def discord_channel(self, channel_id, post_count=None):
         endpoint = f"/discord/channel/{channel_id}"
-        return self._pagination(endpoint, {}, 150)
+        if post_count is None:
+            return self._pagination(endpoint, {}, 150)
+        else:
+            return self._pagination_reverse(endpoint, {}, 150, post_count)
 
     def discord_channel_lookup(self, server_id):
         endpoint = f"/discord/channel/lookup/{server_id}"
@@ -670,3 +677,18 @@ class KemonoAPI():
             if len(data) < batch:
                 return
             params["o"] += batch
+
+    def _pagination_reverse(self, endpoint, params, batch, count):
+        params["o"] = count // batch * batch
+
+        while True:
+            data = self._call(endpoint, params)
+
+            if not data:
+                return
+            data.reverse()
+            yield from data
+
+            if not params["o"]:
+                return
+            params["o"] -= batch
