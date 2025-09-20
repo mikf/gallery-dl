@@ -91,6 +91,28 @@ class BellazonExtractor(Extractor):
             pnum += 1
             url = f"{base}/page/{pnum}/"
 
+    def _pagination_reverse(self, base, pnum=None):
+        base = f"{self.root}{base}"
+
+        url = f"{base}/page/9999/"  # force redirect to highest page number
+        with self.request(url) as response:
+            parts = response.url.rsplit("/", 3)
+            pnum = text.parse_int(parts[2]) if parts[1] == "page" else 1
+            page = response.text
+
+        while True:
+            yield page
+
+            pnum -= 1
+            if pnum > 1:
+                url = f"{base}/page/{pnum}/"
+            elif pnum == 1:
+                url = f"{base}/"
+            else:
+                return
+
+            page = self.request(url).text
+
     def _parse_thread(self, page):
         schema = self._extract_jsonld(page)
         author = schema["author"]
@@ -166,10 +188,22 @@ class BellazonThreadExtractor(BellazonExtractor):
     example = "https://www.bellazon.com/main/topic/123-SLUG/"
 
     def posts(self):
-        for page in self._pagination(*self.groups):
+        if (order := self.config("order-posts")) and \
+                order[0] not in ("d", "r"):
+            pages = self._pagination(*self.groups)
+            reverse = False
+        else:
+            pages = self._pagination_reverse(*self.groups)
+            reverse = True
+
+        for page in pages:
             if "thread" not in self.kwdict:
                 self.kwdict["thread"] = self._parse_thread(page)
-            for html in text.extract_iter(page, "<article ", "</article>"):
+            posts = text.extract_iter(page, "<article ", "</article>")
+            if reverse:
+                posts = list(posts)
+                posts.reverse()
+            for html in posts:
                 yield self._parse_post(html)
 
 

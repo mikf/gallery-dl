@@ -1600,6 +1600,22 @@ Description
     ``image``, ``video``, ``mediacollection``, ``embed``, ``text``.
 
 
+extractor.bellazon.order-posts
+------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    posts of a ``thread`` are processed.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"`` | ``"reverse"``
+        Descending order (newest first)
+
+
 extractor.bellazon.quoted
 -------------------------
 Type

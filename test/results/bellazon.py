@@ -244,6 +244,7 @@ __tests__ = (
     "#url"     : "https://www.bellazon.com/main/topic/1774-zhang-ziyi/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#range"   : "1-5",
+    "#options" : {"prder-posts": "asc"},
     "#results" : (
         "http://img292.echo.cx/my.php?image=4moon011rk.jpg",
         "http://img294.echo.cx/my.php?image=heroclip3jb.jpg",
