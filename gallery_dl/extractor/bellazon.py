@@ -24,8 +24,10 @@ class BellazonExtractor(Extractor):
     archive_fmt = "{post[id]}/{filename}"
 
     def items(self):
-        extract_urls = text.re(r'<a ([^>]*?href="([^"]+)".*?)</a>').findall
         native = (f"{self.root}/", f"{self.root[6:]}/")
+        extract_urls = text.re(
+            r'(?s)<((?:video .*?<source src|a [^>]*?href)="([^"]+).*?)</a>'
+        ).findall
 
         for post in self.posts():
             urls = extract_urls(post["content"])
