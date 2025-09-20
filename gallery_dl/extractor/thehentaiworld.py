@@ -25,7 +25,13 @@ class ThehentaiworldExtractor(Extractor):
 
     def items(self):
         for url in self.posts():
-            post = self._extract_post(url)
+            try:
+                post = self._extract_post(url)
+            except Exception as exc:
+                self.status |= 1
+                self.log.warning("Failed to extract post %s (%s: %s)",
+                                 url, exc.__class__.__name__, exc)
+                continue
 
             if "file_urls" in post:
                 urls = post["file_urls"]
