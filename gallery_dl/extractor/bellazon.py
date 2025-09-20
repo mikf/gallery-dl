@@ -133,7 +133,7 @@ class BellazonExtractor(Extractor):
 class BellazonPostExtractor(BellazonExtractor):
     subcategory = "post"
     pattern = (rf"{BASE_PATTERN}(/topic/\d+-[\w-]+(?:/page/\d+)?)"
-               rf"/?#findComment-(\d+)")
+               rf"/?#(?:findC|c)omment-(\d+)")
     example = "https://www.bellazon.com/main/topic/123-SLUG/#findComment-12345"
 
     def posts(self):
