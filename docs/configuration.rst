@@ -1600,6 +1600,16 @@ Description
     ``image``, ``video``, ``mediacollection``, ``embed``, ``text``.
 
 
+extractor.bellazon.quoted
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract files from quoted content.
+
+
 extractor.[blogger].api-key
 ---------------------------
 Type

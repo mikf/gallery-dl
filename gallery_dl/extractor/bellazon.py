@@ -29,8 +29,17 @@ class BellazonExtractor(Extractor):
             r'(?s)<((?:video .*?<source src|a [^>]*?href)="([^"]+).*?)</a>'
         ).findall
 
+        if self.config("quoted", False):
+            strip_quoted = None
+        else:
+            strip_quoted = text.re(r"(?s)<blockquote .*?</blockquote>").sub
+
         for post in self.posts():
-            urls = extract_urls(post["content"])
+            if strip_quoted is None:
+                urls = extract_urls(post["content"])
+            else:
+                urls = extract_urls(strip_quoted("", post["content"]))
+
             data = {"post": post}
             post["count"] = data["count"] = len(urls)
 
