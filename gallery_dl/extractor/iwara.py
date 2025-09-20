@@ -45,6 +45,7 @@ class IwaraExtractor(Extractor):
                                image["id"], exc.__class__.__name__, exc)
                 continue
 
+            group_info["type"] = "image"
             group_info["count"] = len(files)
             yield Message.Directory, group_info
             for num, file in enumerate(files, 1):
