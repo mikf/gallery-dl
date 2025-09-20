@@ -3631,9 +3631,27 @@ Description
     `revisions <extractor.kemono.revisions_>`__
     are returned.
 
-    * ``"asc"``: Ascending order (oldest first)
-    * ``"desc"``: Descending order (newest first)
-    * ``"reverse"``: Same as ``"asc"``
+    ``"asc"`` | ``"reverse"``
+        Ascending order (oldest first)
+    ``"desc"``
+        Descending order (newest first)
+
+
+extractor.kemono.discord.order-posts
+------------------------------------
+Type
+    ``string``
+Default
+    ``"asc"``
+Description
+    Controls the order in which
+    ``discord`` posts
+    are returned.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"`` | ``"reverse"``
+        Descending order (newest first)
 
 
 extractor.khinsider.covers

@@ -535,7 +535,33 @@ __tests__ = (
     "#url"     : "https://kemono.cr/discord/server/488668827274444803/608504710906904576",
     "#category": ("", "kemono", "discord"),
     "#class"   : kemono.KemonoDiscordExtractor,
-    "#count"   : 4,
+    "#results" : (
+        "https://kemono.cr/data/6e/6a/6e6a4a048e6f3c047edac851d1f66eca4a4f0a823faa1d9395892378fcb700b1.png",
+        "https://kemono.cr/data/55/e1/55e1ddf540ded5e6651de65c059529d1f51451cde523ec103dc696f1cc3595a4.png",
+        "https://kemono.cr/data/9d/98/9d983fd163d5f5335c896c93b9f363198d6ca14a7e5bf0fa823aa86268732f85.png",
+        "https://kemono.cr/data/fb/54/fb54ff75f1c879b25bf031a55a1730002049337693443f1b57c08b07e35c452f.png",
+    ),
+
+    "channel"      : "finish-work",
+    "channel_id"   : "608504710906904576",
+    "channel_nsfw" : False,
+    "channel_topic": None,
+    "channel_type" : 0,
+    "server"       : "ABFMMD NSFW Server",
+    "server_id"    : "488668827274444803",
+},
+
+{
+    "#url"     : "https://kemono.cr/discord/server/488668827274444803/608504710906904576",
+    "#category": ("", "kemono", "discord"),
+    "#class"   : kemono.KemonoDiscordExtractor,
+    "#options" : {"order-posts": "reverse"},
+    "#results" : (
+        "https://kemono.cr/data/fb/54/fb54ff75f1c879b25bf031a55a1730002049337693443f1b57c08b07e35c452f.png",
+        "https://kemono.cr/data/9d/98/9d983fd163d5f5335c896c93b9f363198d6ca14a7e5bf0fa823aa86268732f85.png",
+        "https://kemono.cr/data/55/e1/55e1ddf540ded5e6651de65c059529d1f51451cde523ec103dc696f1cc3595a4.png",
+        "https://kemono.cr/data/6e/6a/6e6a4a048e6f3c047edac851d1f66eca4a4f0a823faa1d9395892378fcb700b1.png",
+    ),
 
     "channel"      : "finish-work",
     "channel_id"   : "608504710906904576",
