@@ -180,6 +180,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/66334-charly-jordan/page/31/#comment-5317926",
+    "#comment" : "video embed (#8239)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#results" : "https://www.bellazon.com/main/uploads/monthly_2021_07/215731864_146910617534875_8340126104113274819_n.mp4.2f3cd5cd8cac6bf04c51d511892f187b.mp4",
+
+    "extension": "mp4",
+    "filename" : "215731864_146910617534875_8340126104113274819_n.mp4.2f3cd5cd8cac6bf04c51d511892f187b",
+    "id"       : "10919171",
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
