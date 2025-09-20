@@ -50,6 +50,10 @@ BASE_PATTERN = CheveretoExtractor.update({
         "root": "https://imagepond.net",
         "pattern": r"imagepond\.net",
     },
+    "imglike": {
+        "root": "https://imglike.com",
+        "pattern": r"imglike\.com",
+    },
 })
 
 
@@ -150,6 +154,18 @@ class CheveretoAlbumExtractor(CheveretoExtractor):
         for album in albums:
             for image in self._pagination(album):
                 yield Message.Queue, image, data
+
+
+class CheveretoCategoryExtractor(CheveretoExtractor):
+    """Extractor for chevereto galleries"""
+    subcategory = "category"
+    pattern = BASE_PATTERN + r"(/category/[^/?#]+)"
+    example = "https://imglike.com/category/TITLE"
+
+    def items(self):
+        data = {"_extractor": CheveretoImageExtractor}
+        for image in self._pagination(self.root + self.path):
+            yield Message.Queue, image, data
 
 
 class CheveretoUserExtractor(CheveretoExtractor):

@@ -373,6 +373,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Archive, Individual Posts, Home Feed, Search Results</td>
     <td></td>
 </tr>
+<tr id="hdoujin" title="hdoujin">
+    <td>HDoujin Galleries</td>
+    <td>https://hdoujin.org/</td>
+    <td>Favorites, Galleries, Search Results</td>
+    <td></td>
+</tr>
 <tr id="hentaifoundry" title="hentaifoundry">
     <td>Hentai Foundry</td>
     <td>https://www.hentai-foundry.com/</td>
@@ -610,6 +616,12 @@ Consider all listed sites to potentially be NSFW.
 <tr id="mangaread" title="mangaread">
     <td>MangaRead</td>
     <td>https://mangaread.org/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr id="mangataro" title="mangataro">
+    <td>MangaTaro</td>
+    <td>https://mangataro.org/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -985,6 +997,12 @@ Consider all listed sites to potentially be NSFW.
     <td>individual Images, Search Results, User Profiles</td>
     <td></td>
 </tr>
+<tr id="thehentaiworld" title="thehentaiworld">
+    <td>The Hentai World</td>
+    <td>https://thehentaiworld.com/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
 <tr id="tiktok" title="tiktok">
     <td>TikTok</td>
     <td>https://www.tiktok.com/</td>
@@ -1206,19 +1224,25 @@ Consider all listed sites to potentially be NSFW.
 <tr id="jpgfish" title="jpgfish">
     <td>JPG Fish</td>
     <td>https://jpg6.su/</td>
-    <td>Albums, individual Images, User Profiles, Videos</td>
+    <td>Albums, Categories, individual Images, User Profiles, Videos</td>
     <td></td>
 </tr>
 <tr id="imgkiwi" title="imgkiwi">
     <td>IMG.Kiwi</td>
     <td>https://img.kiwi/</td>
-    <td>Albums, individual Images, User Profiles, Videos</td>
+    <td>Albums, Categories, individual Images, User Profiles, Videos</td>
     <td></td>
 </tr>
 <tr id="imagepond" title="imagepond">
     <td>ImagePond</td>
     <td>https://imagepond.net/</td>
-    <td>Albums, individual Images, User Profiles, Videos</td>
+    <td>Albums, Categories, individual Images, User Profiles, Videos</td>
+    <td></td>
+</tr>
+<tr id="imglike" title="imglike">
+    <td>Nude Celeb</td>
+    <td>https://imglike.com/</td>
+    <td>Albums, Categories, individual Images, User Profiles, Videos</td>
     <td></td>
 </tr>
 

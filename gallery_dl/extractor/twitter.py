@@ -2070,7 +2070,7 @@ class TwitterAPI():
                         quoted = tweet["quoted_status_result"]["result"]
                         quoted["legacy"]["quoted_by"] = (
                             tweet["core"]["user_results"]["result"]
-                            ["legacy"]["screen_name"])
+                            ["core"]["screen_name"])
                         quoted["legacy"]["quoted_by_id_str"] = tweet["rest_id"]
                         quoted["sortIndex"] = entry.get("sortIndex")
 

@@ -328,6 +328,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/instagram/info",
+    "#class"   : facebook.FacebookInfoExtractor,
+    "#metadata": "post",
+
+    "id"            : "100064469571787",
+    "name"          : "Instagram",
+    "username"      : "instagram",
+    "biography"     : "Discover what's new on Instagram 🔎✨",
+    "url"           : "https://www.facebook.com/instagram",
+    "set_id"        : "",
+    "!user_pfbid"    : r"re:pfbid\w{64}",
+},
+
+{
     "#url"     : "https://www.facebook.com/brando.cha.3/info",
     "#class"   : facebook.FacebookInfoExtractor,
     "#metadata": "post",
@@ -335,6 +349,7 @@ __tests__ = (
     "id"            : "100046356937542",
     "name"          : "Throwaway Idk",
     "username"      : "brando.cha.3",
+    "biography"     : "",
     "url"           : "https://www.facebook.com/brando.cha.3",
     "alternate_name": "",
     "profile_video" : None,
