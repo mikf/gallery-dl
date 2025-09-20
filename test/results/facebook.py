@@ -385,4 +385,14 @@ __tests__ = (
     ],
 },
 
+{
+    "#url"     : "https://www.facebook.com/Forgetmen0w/info",
+    "#comment" : "'biography' fallback (#8233)",
+    "#class"   : facebook.FacebookInfoExtractor,
+    "#auth"    : True,
+    "#metadata": "post",
+
+    "biography": "G ❤️",
+},
+
 )
