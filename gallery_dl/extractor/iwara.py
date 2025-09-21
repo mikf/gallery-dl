@@ -103,34 +103,37 @@ class IwaraExtractor(Extractor):
         raise exception.AbortExtraction(f"Unsupported result type '{type}'")
 
     def extract_media_info(self, item, key, include_file_info=True):
-        title = t.strip() if (t := item.get("title")) else ""
+        info = {
+            "id"      : item["id"],
+            "slug"    : item.get("slug"),
+            "rating"  : item.get("rating"),
+            "likes"   : item.get("numLikes"),
+            "views"   : item.get("numViews"),
+            "comments": item.get("numComments"),
+            "tags"    : [t["id"] for t in item.get("tags") or ()],
+            "title"   : t.strip() if (t := item.get("title")) else "",
+            "description": t.strip() if (t := item.get("body")) else "",
+        }
 
         if include_file_info:
             file_info = item if key is None else item.get(key) or {}
             filename, _, extension = file_info.get("name", "").rpartition(".")
 
-            return {
-                "id"       : item["id"],
-                "file_id"  : file_info.get("id"),
-                "title"    : title,
-                "filename" : filename,
-                "extension": extension,
-                "date"        : text.parse_datetime(
-                    file_info.get("createdAt"), "%Y-%m-%dT%H:%M:%S.%fZ"),
-                "date_updated": text.parse_datetime(
-                    file_info.get("updatedAt"), "%Y-%m-%dT%H:%M:%S.%fZ"),
-                "mime"     : file_info.get("mime"),
-                "size"     : file_info.get("size"),
-                "width"    : file_info.get("width"),
-                "height"   : file_info.get("height"),
-                "duration" : file_info.get("duration"),
-                "type"     : file_info.get("type"),
-            }
-        else:
-            return {
-                "id"   : item["id"],
-                "title": title,
-            }
+            info["file_id"] = file_info.get("id")
+            info["filename"] = filename
+            info["extension"] = extension
+            info["date"] = text.parse_datetime(
+                file_info.get("createdAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
+            info["date_updated"] = text.parse_datetime(
+                file_info.get("updatedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
+            info["mime"] = file_info.get("mime")
+            info["size"] = file_info.get("size")
+            info["width"] = file_info.get("width")
+            info["height"] = file_info.get("height")
+            info["duration"] = file_info.get("duration")
+            info["type"] = file_info.get("type")
+
+        return info
 
     def extract_user_info(self, profile):
         user = profile.get("user") or {}
