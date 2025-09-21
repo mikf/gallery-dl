@@ -372,9 +372,13 @@ class FacebookExtractor(Extractor):
 
             if bio := text.extr(page, '"best_description":{"text":"', '"'):
                 user["biography"] = self.decode_all(bio)
+            elif (pos := page.find(
+                    '"__module_operation_ProfileCometTileView_profileT')) >= 0:
+                user["biography"] = self.decode_all(text.rextr(
+                    page, '"text":"', '"', pos))
             else:
                 user["biography"] = text.unescape(text.remove_html(text.extr(
-                    page, ">Intro</span></span></h2>", "<ul>")))
+                    page, "</span></span></h2>", "<ul>")))
         except Exception:
             if user is None:
                 self.log.debug("Failed to extract user data: %s", data)
