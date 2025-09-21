@@ -134,7 +134,7 @@ __tests__ = (
     "extension": "mp4",
     "filename" : r"re:^\d+$",
     "id"       : r"re:6361\d\d\d",
-    "num"      : range(3, 12),
+    "num"      : range(2, 11),
     "post"     : {
         "author_id"  : "101807",
         "author_slug": "rogerdanish",
@@ -191,6 +191,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/66334-charly-jordan/page/3/#findComment-4602714",
+    "#comment" : "'/profile/' link",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#count"   : 0,
+},
+
+{
+    "#url"     : "https://www.bellazon.com/main/topic/66334-charly-jordan/page/3/#findComment-4603172",
+    "#comment" : "'inline' image",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#results" : "https://www.bellazon.com/main/uploads/monthly_2018_04/30602369_1891291154222843_1650952189830496256_n.jpg.33e6ab78dd0e8723f790ad4f58f3761a.jpg",
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
@@ -244,7 +258,7 @@ __tests__ = (
     "#url"     : "https://www.bellazon.com/main/topic/1774-zhang-ziyi/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#range"   : "1-5",
-    "#options" : {"prder-posts": "asc"},
+    "#options" : {"order-posts": "asc"},
     "#results" : (
         "http://img292.echo.cx/my.php?image=4moon011rk.jpg",
         "http://img294.echo.cx/my.php?image=heroclip3jb.jpg",

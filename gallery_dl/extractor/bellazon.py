@@ -20,13 +20,16 @@ class BellazonExtractor(Extractor):
     root = "https://www.bellazon.com/main"
     directory_fmt = ("{category}", "{thread[section]}",
                      "{thread[title]} ({thread[id]})")
-    filename_fmt = "{post[id]}_{num:>02}_{id}.{extension}"
-    archive_fmt = "{post[id]}/{filename}"
+    filename_fmt = "{post[id]}_{num:>02}_{id}_{filename}.{extension}"
+    archive_fmt = "{post[id]}/{id}_{filename}"
 
     def items(self):
         native = (f"{self.root}/", f"{self.root[6:]}/")
         extract_urls = text.re(
-            r'(?s)<((?:video .*?<source src|a [^>]*?href)="([^"]+).*?)</a>'
+            r'(?s)<('
+            r'(?:video .*?<source src|a [^>]*?href)="([^"]+).*?</a>'
+            r'|img [^>]*?src="([^"]+)"[^>]*>'
+            r')'
         ).findall
 
         if self.config("quoted", False):
@@ -44,9 +47,14 @@ class BellazonExtractor(Extractor):
             post["count"] = data["count"] = len(urls)
 
             yield Message.Directory, data
-            for data["num"], (info, url) in enumerate(urls, 1):
-                url = text.unescape(url)
+            data["num"] = 0
+            for info, url, url_img in urls:
+                url = text.unescape(url or url_img)
+
                 if url.startswith(native):
+                    if "/uploads/emoticons/" in url or "/profile/" in url:
+                        continue
+                    data["num"] += 1
                     if not (alt := text.extr(info, ' alt="', '"')) or (
                             alt.startswith("post-") and "_thumb." in alt):
                         name = url
@@ -60,13 +68,13 @@ class BellazonExtractor(Extractor):
                     elif "/core/interface/file/attachment.php" in url:
                         if not dc["id"]:
                             dc["id"] = url.rpartition("?id=")[2]
-                        if (pos := info.find(">")) >= 0 and \
-                                (name := info[pos+1:].strip()):
+                        if name := text.extr(info, ">", "<").strip():
                             text.nameext_from_url(name, dc)
 
                     if url[0] == "/":
                         url = f"https:{url}"
                     yield Message.Url, url, dc
+
                 else:
                     yield Message.Queue, url, data
 
