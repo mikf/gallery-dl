@@ -80,7 +80,10 @@ def parse_command_line(module, argv):
     parser, opts, args = module.parseOpts(argv)
 
     ytdlp = hasattr(module, "cookies")
-    std_headers = module.std_headers
+    try:
+        std_headers = module.utils.networking.std_headers
+    except AttributeError:
+        std_headers = module.std_headers
 
     try:
         parse_bytes = module.parse_bytes
@@ -345,7 +348,7 @@ def parse_command_line(module, argv):
         "nopart": opts.nopart,
         "updatetime": opts.updatetime,
         "writedescription": opts.writedescription,
-        "writeannotations": opts.writeannotations,
+        "writeannotations": getattr(opts, "writeannotations", None),
         "writeinfojson": opts.writeinfojson,
         "allow_playlist_files": opts.allow_playlist_files,
         "clean_infojson": opts.clean_infojson,
@@ -378,7 +381,8 @@ def parse_command_line(module, argv):
         "max_views": opts.max_views,
         "daterange": date,
         "cachedir": opts.cachedir,
-        "youtube_print_sig_code": opts.youtube_print_sig_code,
+        "youtube_print_sig_code": getattr(
+            opts, "youtube_print_sig_code", None),
         "age_limit": opts.age_limit,
         "download_archive": download_archive_fn,
         "break_on_existing": getattr(opts, "break_on_existing", None),
@@ -394,8 +398,8 @@ def parse_command_line(module, argv):
         "socket_timeout": opts.socket_timeout,
         "bidi_workaround": opts.bidi_workaround,
         "debug_printtraffic": opts.debug_printtraffic,
-        "prefer_ffmpeg": opts.prefer_ffmpeg,
-        "include_ads": opts.include_ads,
+        "prefer_ffmpeg": getattr(opts, "prefer_ffmpeg", None),
+        "include_ads": getattr(opts, "include_ads", None),
         "default_search": opts.default_search,
         "dynamic_mpd": getattr(opts, "dynamic_mpd", None),
         "extractor_args": getattr(opts, "extractor_args", None),
@@ -420,7 +424,7 @@ def parse_command_line(module, argv):
             opts, "sleep_interval_subtitles", None),
         "external_downloader": opts.external_downloader,
         "playlist_items": opts.playlist_items,
-        "xattr_set_filesize": opts.xattr_set_filesize,
+        "xattr_set_filesize": getattr(opts, "xattr_set_filesize", None),
         "match_filter": match_filter,
         "no_color": getattr(opts, "no_color", None),
         "ffmpeg_location": opts.ffmpeg_location,
@@ -430,7 +434,7 @@ def parse_command_line(module, argv):
             opts, "hls_split_discontinuity", None),
         "external_downloader_args": opts.external_downloader_args,
         "postprocessor_args": opts.postprocessor_args,
-        "cn_verification_proxy": opts.cn_verification_proxy,
+        "cn_verification_proxy": getattr(opts, "cn_verification_proxy", None),
         "geo_verification_proxy": opts.geo_verification_proxy,
         "geo_bypass": getattr(
             opts, "geo_bypass", "default"),
