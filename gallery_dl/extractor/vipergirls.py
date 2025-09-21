@@ -51,8 +51,16 @@ class VipergirlsExtractor(Extractor):
                 like = False
 
         posts = root.iter("post")
-        if self.page:
-            util.advance(posts, (text.parse_int(self.page[5:]) - 1) * 15)
+        if (order := self.config("order-posts")) and \
+                order[0] not in ("d", "r"):
+            if self.page:
+                util.advance(posts, (text.parse_int(self.page[5:]) - 1) * 15)
+        else:
+            posts = list(posts)
+            if self.page:
+                offset = text.parse_int(self.page[5:]) * 15
+                posts = posts[:offset]
+            posts.reverse()
 
         for post in posts:
             images = list(post)
