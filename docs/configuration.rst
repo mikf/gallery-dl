@@ -6053,6 +6053,22 @@ Description
     or `cookies <extractor.*.cookies_>`__
 
 
+extractor.vipergirls.order-posts
+--------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    posts of a ``thread`` are processed.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"`` | ``"reverse"``
+        Descending order (newest first)
+
+
 extractor.vk.offset
 -------------------
 Type
