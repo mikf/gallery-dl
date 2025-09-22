@@ -505,10 +505,12 @@ class InstagramTaggedExtractor(InstagramExtractor):
     def metadata(self):
         if self.item.startswith("id:"):
             self.user_id = self.item[3:]
-            return {"tagged_owner_id": self.user_id}
-
-        self.user_id = self.api.user_id(self.item)
-        user = self.api.user_by_name(self.item)
+            if not self.config("metadata"):
+                return {"tagged_owner_id": self.user_id}
+            user = self.api.user_by_id(self.user_id)
+        else:
+            self.user_id = self.api.user_id(self.item)
+            user = self.api.user_by_name(self.item)
 
         return {
             "tagged_owner_id" : user["id"],
