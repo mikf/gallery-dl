@@ -33,7 +33,7 @@ class SimpcityExtractor(Extractor):
 
     def request_page(self, url):
         try:
-            return self.request(url).text
+            return self.request(url)
         except exception.HttpError as exc:
             if exc.status == 403 and b">Log in<" in exc.response.content:
                 msg = text.extr(exc.response.text, "blockMessage--error", "</")
@@ -46,14 +46,14 @@ class SimpcityExtractor(Extractor):
         base = f"{self.root}{base}"
 
         if pnum is None:
-            url = base
+            url = f"{base}/"
             pnum = 1
         else:
             url = f"{base}/page-{pnum}"
             pnum = None
 
         while True:
-            page = self.request_page(url)
+            page = self.request_page(url).text
 
             yield page
 
@@ -61,6 +61,31 @@ class SimpcityExtractor(Extractor):
                 return
             pnum += 1
             url = f"{base}/page-{pnum}"
+
+    def _pagination_reverse(self, base, pnum=None):
+        base = f"{self.root}{base}"
+
+        url = f"{base}/page-9999"  # force redirect to last page
+        with self.request_page(url) as response:
+            url = response.url
+            if url[-1] == "/":
+                pnum = 1
+            else:
+                pnum = text.parse_int(url[url.rfind("-")+1:], 1)
+            page = response.text
+
+        while True:
+            yield page
+
+            pnum -= 1
+            if pnum > 1:
+                url = f"{base}/page-{pnum}"
+            elif pnum == 1:
+                url = f"{base}/"
+            else:
+                return
+
+            page = self.request_page(url).text
 
     def _parse_thread(self, page):
         schema = self._extract_jsonld(page)["mainEntity"]
@@ -112,7 +137,7 @@ class SimpcityPostExtractor(SimpcityExtractor):
     def posts(self):
         post_id = self.groups[0]
         url = f"{self.root}/posts/{post_id}/"
-        page = self.request_page(url)
+        page = self.request_page(url).text
 
         pos = page.find(f'data-content="post-{post_id}"')
         if pos < 0:
@@ -129,10 +154,22 @@ class SimpcityThreadExtractor(SimpcityExtractor):
     example = "https://simpcity.cr/threads/TITLE.12345/"
 
     def posts(self):
-        for page in self._pagination(*self.groups):
+        if (order := self.config("order-posts")) and \
+                order[0] not in ("d", "r"):
+            pages = self._pagination(*self.groups)
+            reverse = False
+        else:
+            pages = self._pagination_reverse(*self.groups)
+            reverse = True
+
+        for page in pages:
             if "thread" not in self.kwdict:
                 self.kwdict["thread"] = self._parse_thread(page)
-            for html in text.extract_iter(page, "<article ", "</article>"):
+            posts = text.extract_iter(page, "<article ", "</article>")
+            if reverse:
+                posts = list(posts)
+                posts.reverse()
+            for html in posts:
                 yield self._parse_post(html)
 
 
