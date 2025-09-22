@@ -20,7 +20,7 @@ import collections
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, output, path, util  # noqa E402
+from gallery_dl import extractor, output, path, util, exception  # noqa E402
 from gallery_dl import postprocessor, config  # noqa E402
 from gallery_dl.postprocessor.common import PostProcessor  # noqa E402
 
@@ -866,6 +866,18 @@ class PythonTest(BasePostprocessorTest):
         self.assertNotIn("_result", self.pathfmt.kwdict)
         self._trigger()
         self.assertEqual(self.pathfmt.kwdict["_result"], 24)
+
+    def test_eval(self):
+        self._create({"mode": "eval", "expression": "abort()"})
+
+        with self.assertRaises(exception.StopExtraction):
+            self._trigger()
+
+    def test_eval_auto(self):
+        self._create({"expression": "abort()"})
+
+        with self.assertRaises(exception.StopExtraction):
+            self._trigger()
 
     def _write_module(self, path):
         with open(path, "w") as fp:
