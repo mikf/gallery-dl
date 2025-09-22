@@ -8017,6 +8017,23 @@ Description
     See `metadata.event`_ for a list of available events.
 
 
+python.expression
+-----------------
+Type
+    ``string``
+Example
+    * ``"print('Foo Bar')"``
+    * ``"terminate()"``
+Description
+    A
+    `Python expression <https://docs.python.org/3/glossary.html#term-expression>`__
+    to
+    `evaluate <https://docs.python.org/3/library/functions.html#eval>`__.
+
+    Note: Only used with
+    `"mode": "eval" <python.mode_>`__
+
+
 python.function
 ---------------
 Type
@@ -8032,6 +8049,23 @@ Description
       ``<function name>`` is the name of the function in that module.
 
     It gets called with the current metadata dict as argument.
+
+
+python.mode
+-----------
+Type
+    ``string``
+Default
+    ``"function"``
+Description
+    Selects what Python code to run.
+
+    ``"eval"``
+        Evaluate an
+        `expression <python.expression_>`__
+    ``function"``
+        Call a
+        `function <python.function_>`__
 
 
 rename.from
