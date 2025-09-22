@@ -350,6 +350,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://x.com/GrimboGrim/status/1839019491835129889",
+    "#comment" : "animated GIF",
+    "#class"   : twitter.TwitterTweetExtractor,
+    "#results" : "https://video.twimg.com/tweet_video/GYWCeZAaMAQ32uh.mp4",
+
+    "extension": "mp4",
+    "type"     : "animated_gif",
+},
+
+{
     "#url"     : "https://x.com/carrotsprout_/status/1577924293023133696",
     "#comment" : "mixed image & video",
     "#class"   : twitter.TwitterTweetExtractor,
