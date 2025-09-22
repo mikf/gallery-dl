@@ -278,6 +278,20 @@ class DanbooruTagExtractor(DanbooruExtractor):
         return self._pagination("/posts.json", {"tags": self.tags}, prefix)
 
 
+class DanbooruRandomExtractor(DanbooruTagExtractor):
+    """Extractor for a random danbooru post from a tag search"""
+    subcategory = "random"
+    pattern = BASE_PATTERN + r"/posts/random\?(?:[^&#]*&)*tags=([^&#]*)"
+    example = "https://danbooru.donmai.us/posts/random?tags=TAG"
+
+    def posts(self):
+        posts = self.request_json(
+            self.root + "/posts/random.json", params={"tags": self.tags})
+        if isinstance(posts, dict):
+            return (posts,)
+        return posts
+
+
 class DanbooruPoolExtractor(DanbooruExtractor):
     """Extractor for Danbooru pools"""
     subcategory = "pool"
