@@ -382,4 +382,24 @@ __tests__ = (
     "other_names": list,
 },
 
+{
+    "#url"     : "https://danbooru.donmai.us/posts/random?tags=bonocho",
+    "#category": ("Danbooru", "danbooru", "random"),
+    "#class"   : danbooru.DanbooruRandomExtractor,
+    "#pattern" : "https://cdn.donmai.us/original/.+",
+    "#count"   : 1,
+
+    "search_tags": "bonocho",
+},
+
+{
+    "#url"     : "https://danbooru.donmai.us/posts/random",
+    "#category": ("Danbooru", "danbooru", "random"),
+    "#class"   : danbooru.DanbooruRandomExtractor,
+    "#pattern" : "https://cdn.donmai.us/original/.+",
+    "#count"   : 1,
+
+    "search_tags": "",
+},
+
 )
