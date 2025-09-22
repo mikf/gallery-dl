@@ -36,4 +36,16 @@ __tests__ = (
     "#class"   : danbooru.DanbooruPopularExtractor,
 },
 
+{
+    "#url"     : "https://booru.allthefallen.moe/posts/random?tags=yume_shokunin",
+    "#category": ("Danbooru", "atfbooru", "random"),
+    "#class"   : danbooru.DanbooruRandomExtractor,
+},
+
+{
+    "#url"     : "https://booru.allthefallen.moe/posts/random",
+    "#category": ("Danbooru", "atfbooru", "random"),
+    "#class"   : danbooru.DanbooruRandomExtractor,
+},
+
 )

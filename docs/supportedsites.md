@@ -1252,25 +1252,25 @@ Consider all listed sites to potentially be NSFW.
 <tr id="danbooru" title="danbooru">
     <td>Danbooru</td>
     <td>https://danbooru.donmai.us/</td>
-    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Random Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr id="atfbooru" title="atfbooru">
     <td>ATFBooru</td>
     <td>https://booru.allthefallen.moe/</td>
-    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Random Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr id="aibooru" title="aibooru">
     <td>AIBooru</td>
     <td>https://aibooru.online/</td>
-    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Random Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 <tr id="booruvar" title="booruvar">
     <td>Booruvar</td>
     <td>https://booru.borvar.art/</td>
-    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Tag Searches</td>
+    <td>Artists, Artist Searches, Favorite Groups, Pools, Popular Images, Posts, Random Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
 

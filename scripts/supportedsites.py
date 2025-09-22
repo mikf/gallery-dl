@@ -264,6 +264,7 @@ SUBCATEGORY_MAP = {
     },
     "Danbooru": {
         "favgroup": "Favorite Groups",
+        "random"  : "Random Posts",
     },
     "desktopography": {
         "site": "",

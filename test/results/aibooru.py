@@ -80,4 +80,24 @@ __tests__ = (
     "#class"   : danbooru.DanbooruPopularExtractor,
 },
 
+{
+    "#url"     : "https://aibooru.online/posts/random?tags=center_frills&z=1",
+    "#category": ("Danbooru", "aibooru", "random"),
+    "#class"   : danbooru.DanbooruRandomExtractor,
+    "#pattern" : "https://cdn.aibooru.download/original/.+",
+    "#count"   : 1,
+
+    "search_tags": "center_frills",
+},
+
+{
+    "#url"     : "https://aibooru.online/posts/random",
+    "#category": ("Danbooru", "aibooru", "random"),
+    "#class"   : danbooru.DanbooruRandomExtractor,
+    "#pattern" : "https://cdn.aibooru.download/original/.+",
+    "#count"   : 1,
+
+    "search_tags": "",
+},
+
 )
