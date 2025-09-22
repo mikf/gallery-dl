@@ -555,6 +555,17 @@ class MetadataTest(BasePostprocessorTest):
         test({"mode": "custom", "format": "{foo}\n{missing}\n"})
         test({"format": "{foo}\n{missing}\n"})
 
+    def test_metadata_mode_print(self):
+        self._create(
+            {"mode": "print", "format": "{foo}\n{missing}"},
+            {"foo": "bar"},
+        )
+
+        with patch("sys.stdout", Mock()) as m:
+            self._trigger()
+
+        self.assertEqual(self._output(m), "bar\nNone\n")
+
     def test_metadata_extfmt(self):
         pp = self._create({
             "extension"       : "ignored",
