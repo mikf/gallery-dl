@@ -111,7 +111,8 @@ class ThehentaiworldExtractor(Extractor):
 
 class ThehentaiworldPostExtractor(ThehentaiworldExtractor):
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}(/(?:hentai-image|video)s/([^/?#]+))"
+    pattern = (rf"{BASE_PATTERN}"
+               rf"(/(?:(?:3d-cgi-)?hentai-image|video)s/([^/?#]+))")
     example = "https://thehentaiworld.com/hentai-images/SLUG/"
 
     def posts(self):
