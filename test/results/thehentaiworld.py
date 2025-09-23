@@ -177,11 +177,16 @@ __tests__ = (
     "#url"     : "https://thehentaiworld.com/3d-cgi-hentai-images/ciri-and-shani-cekc-the-witcher-3/",
     "#class"   : thehentaiworld.ThehentaiworldPostExtractor,
     "#results" : "https://thehentaiworld.com/wp-content/uploads/2025/08/Ciri-and-Shani-CEKC-The-Witcher-3-Hentai-3D-CGI.jpeg",
+
+    "type"     : "3d cgi",
 },
 
 {
     "#url"     : "https://thehentaiworld.com/gif-animated-hentai-images/rangiku-matsumoto-sketchdrif-bleach/",
     "#class"   : thehentaiworld.ThehentaiworldPostExtractor,
+    "#results" : "https://thehentaiworld.com/wp-content/uploads/2025/05/Rangiku-Matsumoto-Sketchdrif-Bleach-Animated-Hentai.gif",
+
+    "type"     : "animated",
 },
 
 {
