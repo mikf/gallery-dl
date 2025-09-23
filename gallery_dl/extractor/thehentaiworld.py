@@ -60,14 +60,16 @@ class ThehentaiworldExtractor(Extractor):
                 "<li>Posted: ", "<"), "%Y-%m-%d"),
         }
 
-        if "/videos/" in url:
+        if (c := url[27]) == "v":
             post["type"] = "video"
             post["width"] = post["height"] = 0
             post["votes"] = text.parse_int(extr("(<strong>", "</strong>"))
             post["score"] = text.parse_float(extr("<strong>", "<"))
             post["file_url"] = extr('<source src="', '"')
         else:
-            post["type"] = "image"
+            post["type"] = ("animated" if c == "g" else
+                            "3d cgi" if c == "3" else
+                            "image")
             post["width"] = text.parse_int(extr("<li>Size: ", " "))
             post["height"] = text.parse_int(extr("x ", "<"))
             post["file_url"] = extr('a href="', '"')
