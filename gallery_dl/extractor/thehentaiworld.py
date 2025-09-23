@@ -109,16 +109,6 @@ class ThehentaiworldExtractor(Extractor):
             pnum += 1
 
 
-class ThehentaiworldPostExtractor(ThehentaiworldExtractor):
-    subcategory = "post"
-    pattern = (rf"{BASE_PATTERN}"
-               rf"(/(?:(?:3d-cgi-)?hentai-image|video)s/([^/?#]+))")
-    example = "https://thehentaiworld.com/hentai-images/SLUG/"
-
-    def posts(self):
-        return (f"{self.root}{self.groups[0]}/",)
-
-
 class ThehentaiworldTagExtractor(ThehentaiworldExtractor):
     subcategory = "tag"
     per_page = 24
@@ -137,3 +127,13 @@ class ThehentaiworldTagExtractor(ThehentaiworldExtractor):
         self.page_start += pages
         self.post_start += posts
         return num
+
+
+class ThehentaiworldPostExtractor(ThehentaiworldExtractor):
+    subcategory = "post"
+    pattern = (rf"{BASE_PATTERN}("
+               rf"/(?:video|(?:[\w-]+-)?hentai-image)s/([^/?#]+))")
+    example = "https://thehentaiworld.com/hentai-images/SLUG/"
+
+    def posts(self):
+        return (f"{self.root}{self.groups[0]}/",)

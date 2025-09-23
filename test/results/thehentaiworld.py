@@ -180,6 +180,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://thehentaiworld.com/gif-animated-hentai-images/rangiku-matsumoto-sketchdrif-bleach/",
+    "#class"   : thehentaiworld.ThehentaiworldPostExtractor,
+},
+
+{
     "#url"     : "https://thehentaiworld.com/tag/aurahack/",
     "#class"   : thehentaiworld.ThehentaiworldTagExtractor,
     "#pattern" : r"https://thehentaiworld\.com/wp\-content/uploads/20\d\d/.+",
