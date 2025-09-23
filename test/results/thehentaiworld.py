@@ -174,6 +174,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://thehentaiworld.com/3d-cgi-hentai-images/ciri-and-shani-cekc-the-witcher-3/",
+    "#class"   : thehentaiworld.ThehentaiworldPostExtractor,
+    "#results" : "https://thehentaiworld.com/wp-content/uploads/2025/08/Ciri-and-Shani-CEKC-The-Witcher-3-Hentai-3D-CGI.jpeg",
+},
+
+{
     "#url"     : "https://thehentaiworld.com/tag/aurahack/",
     "#class"   : thehentaiworld.ThehentaiworldTagExtractor,
     "#pattern" : r"https://thehentaiworld\.com/wp\-content/uploads/20\d\d/.+",
