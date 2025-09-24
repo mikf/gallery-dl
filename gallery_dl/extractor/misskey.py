@@ -25,8 +25,8 @@ class MisskeyExtractor(BaseExtractor):
     def _init(self):
         self.api = MisskeyAPI(self)
         self.instance = self.root.rpartition("://")[2]
-        self.renotes = self.config("renotes", False)
-        self.replies = self.config("replies", True)
+        self.renotes = True if self.config("renotes", False) else False
+        self.replies = True if self.config("replies", True) else False
 
     def items(self):
         for note in self.notes():
@@ -254,6 +254,8 @@ class MisskeyAPI():
 
     def _pagination(self, endpoint, data):
         data["limit"] = 100
+        data["withRenotes"] = self.extractor.renotes
+
         while True:
             notes = self._call(endpoint, data)
             if not notes:
