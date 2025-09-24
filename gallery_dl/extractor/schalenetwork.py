@@ -62,10 +62,11 @@ class SchalenetworkExtractor(Extractor):
                 pass
             params["page"] += 1
 
-    def _token(self):
+    def _token(self, required=True):
         if token := self.config("token"):
             return f"Bearer {token.rpartition(' ')[2]}"
-        raise exception.AuthRequired("'token'", "your favorites")
+        if required:
+            raise exception.AuthRequired("'token'", "your favorites")
 
     def _crt(self):
         crt = self.config("crt")
@@ -88,7 +89,7 @@ class SchalenetworkExtractor(Extractor):
         else:
             msg = f"{exc.status} {exc.response.reason}"
         raise exception.AuthRequired(
-            "'crt' query parameter & matching '--user-agent'", None, msg)
+            "'crt' query parameter & matching 'user-agent'", None, msg)
 
 
 class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
@@ -118,15 +119,21 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
 
     def metadata(self, _):
         _, gid, gkey = self.groups
+
         url = f"{self.root_api}/books/detail/{gid}/{gkey}"
-        data = self.request_json(url, headers=self.headers)
-        data["date"] = text.parse_timestamp(data["created_at"] // 1000)
+        headers = self.headers
+        data = self.request_json(url, headers=headers)
+
+        try:
+            data["date"] = text.parse_timestamp(data["created_at"] // 1000)
+            data["count"] = len(data["thumbnails"]["entries"])
+            del data["thumbnails"]
+        except Exception:
+            pass
 
         tags = []
         types = self.TAG_TYPES
-        tags_data = data["tags"]
-
-        for tag in tags_data:
+        for tag in data["tags"]:
             name = tag["name"]
             namespace = tag.get("namespace", 0)
             tags.append(types[namespace] + ":" + name)
@@ -134,33 +141,34 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
 
         if self.config("tags", False):
             tags = collections.defaultdict(list)
-            for tag in tags_data    :
+            for tag in data["tags"]:
                 tags[tag.get("namespace", 0)].append(tag["name"])
             for type, values in tags.items():
                 data["tags_" + types[type]] = values
 
+        url = f"{self.root_api}/books/detail/{gid}/{gkey}?crt={self._crt()}"
+        if token := self._token(False):
+            headers = headers.copy()
+            headers["Authorization"] = token
         try:
-            data["count"] = len(data["thumbnails"]["entries"])
-            del data["thumbnails"]
-        except Exception:
-            pass
+            data_fmt = self.request_json(
+                url, method="POST", headers=headers)
+        except exception.HttpError as exc:
+            self._require_auth(exc)
+
+        self.fmt = self._select_format(data_fmt["data"])
+        data["source"] = data_fmt.get("source")
 
         return data
 
     def images(self, _):
-        crt = self._crt()
         _, gid, gkey = self.groups
-        url = f"{self.root_api}/books/detail/{gid}/{gkey}?crt={crt}"
-        try:
-            data = self.request_json(url, method="POST", headers=self.headers)
-        except exception.HttpError as exc:
-            self._require_auth(exc)
-
-        fmt = self._select_format(data["data"])
+        fmt = self.fmt
 
         url = (f"{self.root_api}/books/data/{gid}/{gkey}"
-               f"/{fmt['id']}/{fmt['key']}/{fmt['w']}?crt={crt}")
-        data = self.request_json(url, headers=self.headers)
+               f"/{fmt['id']}/{fmt['key']}/{fmt['w']}?crt={self._crt()}")
+        headers = self.headers
+        data = self.request_json(url, headers=headers)
         base = data["base"]
 
         results = []
@@ -169,7 +177,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
             info = {
                 "width" : dimensions[0],
                 "height": dimensions[1],
-                "_http_headers": self.headers,
+                "_http_headers": headers,
             }
             results.append((base + entry["path"], info))
         return results
