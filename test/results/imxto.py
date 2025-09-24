@@ -62,4 +62,16 @@ __tests__ = (
     "title": "untitled gallery",
 },
 
+{
+    "#url"     : "https://imx.to/g/mgun",
+    "#comment" : "multiple pages (#8282)",
+    "#category": ("imagehost", "imxto", "gallery"),
+    "#class"   : imagehosts.ImxtoGalleryExtractor,
+    "#pattern" : imagehosts.ImxtoImageExtractor.pattern,
+    "#count"   : 1037,
+    "#auth"    : True,
+
+    "title": "freckledspirit",
+},
+
 )
