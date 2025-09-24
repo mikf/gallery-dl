@@ -700,7 +700,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="patreon" title="patreon">
     <td>Patreon</td>
     <td>https://www.patreon.com/</td>
-    <td>Creators, Posts, User Profiles</td>
+    <td>Collections, Creators, Posts, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr id="pexels" title="pexels">

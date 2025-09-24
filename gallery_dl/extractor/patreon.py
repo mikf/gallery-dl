@@ -230,6 +230,16 @@ class PatreonExtractor(Extractor):
             attr["created"], "%Y-%m-%dT%H:%M:%S.%f%z")
         return attr
 
+    def _collection(self, collection_id):
+        url = f"{self.root}/api/collection/{collection_id}"
+        data = self.request_json(url)
+        coll = data["data"]
+        attr = coll["attributes"]
+        attr["id"] = coll["id"]
+        attr["date"] = text.parse_datetime(
+            attr["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        return attr
+
     def _filename(self, url):
         """Fetch filename from an URL's Content-Disposition header"""
         response = self.request(url, method="HEAD", fatal=False)
@@ -331,6 +341,33 @@ class PatreonExtractor(Extractor):
                 pass
 
         raise exception.AbortExtraction("Unable to extract bootstrap data")
+
+
+class PatreonCollectionExtractor(PatreonExtractor):
+    """Extractor for a patreon collection"""
+    subcategory = "collection"
+    directory_fmt = ("{category}", "{creator[full_name]}",
+                     "Collections", "{collection[title]} ({collection[id]})")
+    pattern = r"(?:https?://)?(?:www\.)?patreon\.com/collection/(\d+)"
+    example = "https://www.patreon.com/collection/12345"
+
+    def posts(self):
+        collection_id = self.groups[0]
+        self.kwdict["collection"] = collection = \
+            self._collection(collection_id)
+        campaign_id = text.extr(
+            collection["thumbnail"]["url"], "/campaign/", "/")
+
+        url = self._build_url("posts", (
+            # patreon returns '400 Bad Request' without campaign_id filter
+            f"&filter[campaign_id]={campaign_id}"
+            "&filter[contains_exclusive_posts]=true"
+            "&filter[is_draft]=false"
+            f"&filter[collection_id]={collection_id}"
+            "&filter[include_drops]=true"
+            "&sort=collection_order"
+        ))
+        return self._pagination(url)
 
 
 class PatreonCreatorExtractor(PatreonExtractor):
