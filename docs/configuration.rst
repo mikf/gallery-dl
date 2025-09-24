@@ -3428,6 +3428,39 @@ Description
         Do not download videos
 
 
+extractor.instagram.warn-images
+-------------------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Description
+    Show a warning when downloading images
+    with a resolution smaller than the `original`.
+
+    ``true``
+        Show a warning when at least one dimension
+        is smaller than the reported `original` resolution
+    ``"all"`` | ``"both"``
+        Show a warning only when both ``width`` and ``height``
+        are smaller than the reported `original` resolution
+    ``false``
+        Do not show a warning
+
+
+extractor.instagram.warn-videos
+-------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Show a warning when downloading videos with a
+    `User-Agent <extractor.*.user-agent_>`__
+    header causing potentially lowered video quality.
+
+
 extractor.instagram.stories.split
 ---------------------------------
 Type
