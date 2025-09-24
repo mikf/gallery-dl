@@ -125,8 +125,18 @@ class ImxtoGalleryExtractor(ImagehostImageExtractor):
             "title": text.unescape(title.partition(">")[2]).strip(),
         }
 
-        for url in text.extract_iter(page, "<a href=", " ", pos):
-            yield Message.Queue, url.strip("\"'"), data
+        params = {"page": 1}
+        while True:
+            for url in text.extract_iter(page, "<a href=", " ", pos):
+                if "/i/" in url:
+                    yield Message.Queue, url.strip("\"'"), data
+
+            if 'class="pagination' not in page or \
+                    'class="disabled">Last' in page:
+                return
+
+            params["page"] += 1
+            page = self.request(self.page_url, params=params).text
 
 
 class AcidimgImageExtractor(ImagehostImageExtractor):
