@@ -1026,11 +1026,12 @@ class TwitterTweetExtractor(TwitterExtractor):
             return
 
         while True:
+            parent_id = tweet["rest_id"]
             tweet_id = tweet["legacy"].get("quoted_status_id_str")
             if not tweet_id:
                 break
             tweet = self.api.tweet_result_by_rest_id(tweet_id)
-            tweet["legacy"]["quoted_by_id_str"] = tweet_id
+            tweet["legacy"]["quoted_by_id_str"] = parent_id
             yield tweet
 
     def _tweets_detail(self, tweet_id):
