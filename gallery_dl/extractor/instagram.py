@@ -39,7 +39,6 @@ class InstagramExtractor(Extractor):
         self.www_claim = "0"
         self.csrf_token = util.generate_token()
         self._find_tags = util.re(r"#\w+").findall
-        self._warn_video_ua = True
         self._logged_in = True
         self._cursor = None
         self._user = None
@@ -51,6 +50,12 @@ class InstagramExtractor(Extractor):
             self.api = InstagramGraphqlAPI(self)
         else:
             self.api = InstagramRestAPI(self)
+
+        self._warn_video = True if self.config("warn-videos", True) else False
+        self._warn_image = (
+            9 if not (wi := self.config("warn-images", True)) else
+            1 if wi in ("all", "both") else
+            0)
 
     def items(self):
         self.login()
@@ -239,8 +244,8 @@ class InstagramExtractor(Extractor):
                 manifest = item.get("video_dash_manifest")
                 media = video
 
-                if self._warn_video_ua:
-                    self._warn_video_ua = False
+                if self._warn_video:
+                    self._warn_video = False
                     pattern = text.re(
                         r"Chrome/\d{3,}\.\d+\.\d+\.\d+(?!\d* Mobile)")
                     if not pattern.search(self.session.headers["User-Agent"]):
@@ -250,8 +255,9 @@ class InstagramExtractor(Extractor):
                 video = manifest = None
                 media = image
 
-                if image["width"] < item.get("original_width", 0) or \
-                        image["height"] < item.get("original_height", 0):
+                if self._warn_image < (
+                        (image["width"] < item.get("original_width", 0)) +
+                        (image["height"] < item.get("original_height", 0))):
                     self.log.warning(
                         "%s: Available image resolutions lower than the "
                         "original (%sx%s < %sx%s). "
