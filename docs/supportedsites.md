@@ -607,6 +607,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Authors, Chapters, Covers, Updates Feed, Library, MDLists, Manga</td>
     <td>Supported</td>
 </tr>
+<tr id="mangafire" title="mangafire">
+    <td>MangaFire</td>
+    <td>https://mangafire.to/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
 <tr id="mangapark" title="mangapark">
     <td>MangaPark</td>
     <td>https://mangapark.net/</td>

@@ -103,6 +103,7 @@ CATEGORY_MAP = {
     "itchio"         : "itch.io",
     "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
+    "mangafire"      : "MangaFire",
     "mangataro"      : "MangaTaro",
     "schalenetwork"  : "Schale Network",
     "leakgallery"    : "Leak Gallery",
