@@ -706,7 +706,7 @@ extractor.*.user-agent
 Type
     ``string``
 Default
-    * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``, ``weasyl``
+    * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``, ``weasyl``, ``zerochan``
     * ``"gallery-dl/VERSION (by mikf)"``: ``[E621]``
     * ``"net.umanle.arca.android.playstore/0.9.75"``: ``arcalive``
     * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``

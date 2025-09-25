@@ -26,6 +26,7 @@ class ZerochanExtractor(BooruExtractor):
     per_page = 250
     cookies_domain = ".zerochan.net"
     cookies_names = ("z_id", "z_hash")
+    useragent = util.USERAGENT
     request_interval = (0.5, 1.5)
 
     def login(self):
