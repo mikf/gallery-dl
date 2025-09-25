@@ -115,6 +115,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
         10: "mixed",
         11: "language",
         12: "other",
+        13: "reclass",
     }
 
     def metadata(self, _):
