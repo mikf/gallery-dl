@@ -115,6 +115,7 @@ modules = [
     "lynxchan",
     "madokami",
     "mangadex",
+    "mangafire",
     "mangafox",
     "mangahere",
     "manganelo",

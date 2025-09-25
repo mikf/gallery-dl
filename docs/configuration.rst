@@ -3808,6 +3808,17 @@ Description
     List of acceptable content ratings for returned chapters.
 
 
+extractor.mangafire.manga.lang
+------------------------------
+Type
+    ``string``
+Default
+    ``"en"``
+Description
+    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
+    language code selecting which chapters to download.
+
+
 extractor.mangapark.source
 --------------------------
 Type
