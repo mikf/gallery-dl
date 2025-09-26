@@ -34,6 +34,8 @@ class DownloaderBase():
             self.partdir = util.expand_path(self.partdir)
             os.makedirs(self.partdir, exist_ok=True)
 
+        self._proxy_rotator = extractor._proxy_rotator
+
         proxies = self.config("proxy", util.SENTINEL)
         if proxies is util.SENTINEL:
             self.proxies = extractor._proxies

@@ -38,6 +38,7 @@ class HttpDownloader(DownloaderBase):
         self.retry_codes = self.config("retry-codes", extractor._retry_codes)
         self.timeout = self.config("timeout", extractor._timeout)
         self.verify = self.config("verify", extractor._verify)
+        self.proxy_rotate = extractor._proxy_rotate
         self.mtime = self.config("mtime", True)
         self.rate = self.config("rate")
         interval_429 = self.config("sleep-429")
@@ -117,6 +118,16 @@ class HttpDownloader(DownloaderBase):
         if self.part and not metadata:
             pathfmt.part_enable(self.partdir)
 
+        proxies = self.proxies
+        if self._proxy_rotator:
+            proxy_info = self._proxy_rotator.get_proxy()
+            proxy_url = proxy_info["url"]
+            proxies = {
+                scheme: proxy_url
+                for scheme in proxy_info["schemes"]
+            }
+            self.log.debug("Downloader using proxy: %s ", proxy_url)
+
         while True:
             if tries:
                 if response:
@@ -157,20 +168,36 @@ class HttpDownloader(DownloaderBase):
                     headers=headers,
                     data=kwdict.get("_http_data"),
                     timeout=self.timeout,
-                    proxies=self.proxies,
+                    proxies=proxies,
                     verify=self.verify,
                 )
-            except ConnectionError as exc:
-                try:
-                    reason = exc.args[0].reason
-                    cls = reason.__class__.__name__
-                    pre, _, err = str(reason.args[-1]).partition(":")
-                    msg = f"{cls}: {(err or pre).lstrip()}"
-                except Exception:
+            except (ConnectionError, Timeout) as exc:
+                if isinstance(exc, ConnectionError):
+                    try:
+                        reason = exc.args[0].reason
+                        cls = reason.__class__.__name__
+                        pre, _, err = str(reason.args[-1]).partition(":")
+                        msg = f"{cls}: {(err or pre).lstrip()}"
+                    except Exception:
+                        msg = str(exc)
+                else:
                     msg = str(exc)
-                continue
-            except Timeout as exc:
-                msg = str(exc)
+
+                if self._proxy_rotator and self.proxy_rotate:
+                    self.log.debug(
+                        "%s with proxy. Marking as failed and rotating.",
+                        exc.__class__.__name__)
+                    try:
+                        self._proxy_rotator.mark_failed()
+                        proxy_info = self._proxy_rotator.get_proxy()
+                        proxies = {
+                            s: proxy_info["url"] for s in proxy_info["schemes"]
+                        }
+                        self.log.debug("Downloader using proxy: %s",
+                                       proxy_info["url"])
+                    except exception.NoAvailableProxyError as e:
+                        self.log.error("Proxy rotation failed: %s", e)
+                        return False
                 continue
             except Exception as exc:
                 self.log.warning(exc)

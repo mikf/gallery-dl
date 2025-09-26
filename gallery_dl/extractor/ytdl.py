@@ -72,6 +72,13 @@ class YoutubeDLExtractor(Extractor):
 
         if self._proxies:
             user_opts["proxy"] = self._proxies.get("http")
+        elif self._proxy_rotator:
+            proxy_info = self._proxy_rotator.get_proxy()
+            proxy_url = proxy_info["url"]
+            user_opts["proxy"] = proxy_url
+            self.log.debug(
+                "Extractor using proxy: %s", proxy_url
+            )
 
         username, password = self._get_auth_info()
         if username:
