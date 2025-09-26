@@ -144,7 +144,8 @@ class CheveretoAlbumExtractor(CheveretoExtractor):
 
     def items(self):
         url = self.root + self.path
-        data = {"_extractor": CheveretoImageExtractor}
+        data_image = {"_extractor": CheveretoImageExtractor}
+        data_video = {"_extractor": CheveretoVideoExtractor}
 
         if self.path.endswith("/sub"):
             albums = self._pagination(url)
@@ -152,8 +153,9 @@ class CheveretoAlbumExtractor(CheveretoExtractor):
             albums = (url,)
 
         for album in albums:
-            for image in self._pagination(album):
-                yield Message.Queue, image, data
+            for item_url in self._pagination(album):
+                data = data_video if "/video/" in item_url else data_image
+                yield Message.Queue, item_url, data
 
 
 class CheveretoCategoryExtractor(CheveretoExtractor):
