@@ -110,7 +110,9 @@ class MetadataPP(PostProcessor):
             events = events.split(",")
         job.register_hooks({event: self.run for event in events}, options)
 
-        self._init_archive(job, options, "_MD_")
+        if self._archive_init(job, options, "_MD_"):
+            self._archive_register(job)
+
         self.filter = self._make_filter(options)
         self.mtime = options.get("mtime")
         self.omode = options.get("open", omode)

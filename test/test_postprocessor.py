@@ -21,7 +21,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import extractor, output, path, util, exception  # noqa E402
-from gallery_dl import postprocessor, config  # noqa E402
+from gallery_dl import postprocessor, config, archive  # noqa E402
 from gallery_dl.postprocessor.common import PostProcessor  # noqa E402
 
 
@@ -39,7 +39,7 @@ class FakeJob():
         self.get_logger = logging.getLogger
         self.hooks = collections.defaultdict(list)
 
-    def register_hooks(self, hooks, options):
+    def register_hooks(self, hooks, options=None):
         for hook, callback in hooks.items():
             self.hooks[hook].append(callback)
 
@@ -352,6 +352,23 @@ class ExecTest(BasePostprocessorTest):
             start_new_session=False,
         )
         i.wait.assert_called_once_with()
+
+    def test_archive(self):
+        pp = self._create({
+            "command": ["echo", "foobar"],
+            "archive": ":memory:",
+            "event"  : "finalize",
+        })
+
+        self.assertIsInstance(pp.archive, archive.DownloadArchive)
+
+        with patch.object(pp.archive, "add") as m_aa, \
+                patch.object(pp.archive, "close") as m_ac:
+            self._trigger(("finalize",))
+        pp.archive.close()
+
+        m_aa.assert_called_once_with(self.pathfmt.kwdict)
+        m_ac.assert_called_once()
 
 
 class HashTest(BasePostprocessorTest):
@@ -811,6 +828,22 @@ class MetadataTest(BasePostprocessorTest):
 }
 """)
 
+    def test_archive(self):
+        pp = self._create({
+            "archive": ":memory:",
+            "event"  : "finalize",
+        })
+
+        self.assertIsInstance(pp.archive, archive.DownloadArchive)
+
+        with patch.object(pp.archive, "add") as m_aa, \
+                patch.object(pp.archive, "close") as m_ac:
+            self._trigger(("finalize",))
+        pp.archive.close()
+
+        m_aa.assert_called_once_with(self.pathfmt.kwdict)
+        m_ac.assert_called_once()
+
     def _output(self, mock):
         return "".join(
             call[1][0]
@@ -889,6 +922,23 @@ class PythonTest(BasePostprocessorTest):
 
         with self.assertRaises(exception.StopExtraction):
             self._trigger()
+
+    def test_archive(self):
+        pp = self._create({
+            "expression": "True",
+            "archive"   : ":memory:",
+            "event"     : "finalize",
+        })
+
+        self.assertIsInstance(pp.archive, archive.DownloadArchive)
+
+        with patch.object(pp.archive, "add") as m_aa, \
+                patch.object(pp.archive, "close") as m_ac:
+            self._trigger(("finalize",))
+        pp.archive.close()
+
+        m_aa.assert_called_once_with(self.pathfmt.kwdict)
+        m_ac.assert_called_once()
 
     def _write_module(self, path):
         with open(path, "w") as fp:
