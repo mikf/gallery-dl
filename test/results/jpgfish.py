@@ -71,6 +71,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.jpg6.su/img/funnymeme.LecXGS",
+    "#category": ("chevereto", "jpgfish", "image"),
+    "#class"   : chevereto.CheveretoImageExtractor,
+},
+
+{
     "#url"     : "https://jpg1.su/album/CDilP/?sort=date_desc&page=1",
     "#category": ("chevereto", "jpgfish", "album"),
     "#class"   : chevereto.CheveretoAlbumExtractor,

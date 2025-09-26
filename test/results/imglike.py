@@ -24,6 +24,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.imglike.com/image/EMT-Skills-Verification-by-EMSA.Lx6dT",
+    "#category": ("chevereto", "imglike", "image"),
+    "#class"   : chevereto.CheveretoImageExtractor,
+},
+
+{
     "#url"     : "https://imglike.com/albertthomas9",
     "#category": ("chevereto", "imglike", "user"),
     "#class"   : chevereto.CheveretoUserExtractor,

@@ -25,6 +25,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.imagepond.net/image/IMG-20250217-160622.TJNphg",
+    "#category": ("chevereto", "imagepond", "image"),
+    "#class"   : chevereto.CheveretoImageExtractor,
+},
+
+{
     "#url"     : "https://imagepond.net/video/1000423939.zb8Fxy",
     "#category": ("chevereto", "imagepond", "video"),
     "#class"   : chevereto.CheveretoVideoExtractor,
