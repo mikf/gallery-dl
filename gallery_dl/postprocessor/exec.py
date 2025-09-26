@@ -50,7 +50,8 @@ class ExecPP(PostProcessor):
             events = events.split(",")
         job.register_hooks({event: execute for event in events}, options)
 
-        self._init_archive(job, options)
+        if self._archive_init(job, options):
+            self._archive_register(job)
 
     def _prepare_cmd(self, cmd):
         if isinstance(cmd, str):

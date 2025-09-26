@@ -26,6 +26,9 @@ class PythonPP(PostProcessor):
             module = util.import_file(module_name)
             self.function = getattr(module, function_name)
 
+        if archive := self._archive_init(job, options):
+            self.run = self.run_archive
+
         events = options.get("event")
         if events is None:
             events = ("file",)
@@ -33,8 +36,8 @@ class PythonPP(PostProcessor):
             events = events.split(",")
         job.register_hooks({event: self.run for event in events}, options)
 
-        if self._init_archive(job, options):
-            self.run = self.run_archive
+        if archive:
+            self._archive_register(job)
 
     def run(self, pathfmt):
         self.function(pathfmt.kwdict)
