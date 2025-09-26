@@ -2046,8 +2046,7 @@ Example
     * ``"fr,it,pl"``
     * ``["fr", "it", "pl"]``
 Description
-    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language codes
-    to filter chapters by.
+    |ISO 639-1| code(s) to filter chapters by.
 
 
 extractor.cyberdrop.domain
@@ -3789,8 +3788,7 @@ Example
     * ``"fr,it"``
     * ``["fr", "it"]``
 Description
-    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language codes
-    to filter chapters by.
+    |ISO 639-1| code(s) to filter chapters by.
 
 
 extractor.mangadex.ratings
@@ -3815,8 +3813,7 @@ Type
 Default
     ``"en"``
 Description
-    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
-    language code selecting which chapters to download.
+    |ISO 639-1| code selecting which chapters to download.
 
 
 extractor.mangapark.source
@@ -5258,8 +5255,7 @@ Examples
     * ``["fr", "it"]``
 Description
     Only include assets that are in the specified languages. ``all`` can be
-    used to specify all languages. Valid values are `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
-    language codes.
+    used to specify all languages. Valid values are |ISO 639-1| codes.
 
 
 extractor.steamgriddb.nsfw
@@ -9116,6 +9112,7 @@ Description
 .. |mode: color| replace:: ``"mode": "color"``
 .. |open()| replace:: the built-in ``open()`` function
 .. |json.dump()| replace:: ``json.dump()``
+.. |ISO 639-1| replace:: `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language
 
 .. _directory: `extractor.*.directory`_
 .. _base-directory: `extractor.*.base-directory`_
