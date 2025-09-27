@@ -75,7 +75,7 @@ class CheveretoImageExtractor(CheveretoExtractor):
                     fromhex=True)
 
         file = {
-            "id"   : self.path.rpartition(".")[2],
+            "id"   : self.path.rpartition("/")[2].rpartition(".")[2],
             "url"  : url,
             "album": text.remove_html(extr(
                 "Added to <a", "</a>").rpartition(">")[2]),
