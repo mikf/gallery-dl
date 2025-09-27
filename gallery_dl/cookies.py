@@ -29,7 +29,9 @@ SUPPORTED_BROWSERS_CHROMIUM = {
 SUPPORTED_BROWSERS_FIREFOX = {"firefox", "librewolf", "zen"}
 SUPPORTED_BROWSERS_WEBKIT = {"safari", "orion"}
 SUPPORTED_BROWSERS = \
-    SUPPORTED_BROWSERS_CHROMIUM | SUPPORTED_BROWSERS_FIREFOX | SUPPORTED_BROWSERS_WEBKIT
+    SUPPORTED_BROWSERS_CHROMIUM \
+    | SUPPORTED_BROWSERS_FIREFOX \
+    | SUPPORTED_BROWSERS_WEBKIT
 
 logger = logging.getLogger("cookies")
 
@@ -116,7 +118,8 @@ def load_cookies_webkit(browser_name, profile=None, domain=None):
     cookies = []
     for page_size in page_sizes:
         _webkit_parse_cookies_page(p.read_bytes(page_size), cookies)
-    _log_info("Extracted %s cookies from %s", browser_name.capitalize(), len(cookies))
+    _log_info("Extracted %s cookies from %s",
+        browser_name.capitalize(), len(cookies))
     return cookies
 
 
@@ -301,9 +304,9 @@ def _safari_cookies_database():
 
 
 def _orion_cookies_database():
-    path = os.path.expanduser("~/Library/HTTPStorages/com.kagi.kagimacOS.binarycookies")
+    path = os.path.expanduser(
+        "~/Library/HTTPStorages/com.kagi.kagimacOS.binarycookies")
     return open(path, "rb")
-
 
 def _webkit_parse_cookies_header(data):
     p = DataParser(data)
