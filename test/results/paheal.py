@@ -61,6 +61,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://rule34.paheal.net/post/list/non_existant_tag/1",
+    "#category": ("shimmie2", "paheal", "tag"),
+    "#class"   : paheal.PahealTagExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://rule34.paheal.net/post/view/481609",
     "#category": ("shimmie2", "paheal", "post"),
     "#class"   : paheal.PahealPostExtractor,
@@ -114,6 +121,13 @@ __tests__ = (
     "tags"     : "animated Metal_Gear Metal_Gear_Solid_V Quiet Vg_erotica webm",
     "uploader" : "justausername",
     "width"    : 1768,
+},
+
+{
+    "#url"     : "https://rule34.paheal.net/post/view/7",
+    "#category": ("shimmie2", "paheal", "post"),
+    "#class"   : paheal.PahealPostExtractor,
+    "#count"   : 0,
 },
 
 )

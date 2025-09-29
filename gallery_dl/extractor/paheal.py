@@ -9,7 +9,7 @@
 """Extractors for https://rule34.paheal.net/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 
 
 class PahealExtractor(Extractor):
@@ -97,7 +97,12 @@ class PahealTagExtractor(PahealExtractor):
         base = f"{self.root}/post/list/{self.groups[0]}/"
 
         while True:
-            page = self.request(base + str(pnum)).text
+            try:
+                page = self.request(f"{base}{pnum}").text
+            except exception.HttpError as exc:
+                if exc.status == 404:
+                    return
+                raise
 
             pos = page.find("id='image-list'")
             for post in text.extract_iter(
@@ -146,4 +151,9 @@ class PahealPostExtractor(PahealExtractor):
     example = "https://rule34.paheal.net/post/view/12345"
 
     def get_posts(self):
-        return (self._extract_post(self.groups[0]),)
+        try:
+            return (self._extract_post(self.groups[0]),)
+        except exception.HttpError as exc:
+            if exc.status == 404:
+                return ()
+            raise
