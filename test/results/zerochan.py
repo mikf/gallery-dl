@@ -46,6 +46,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.zerochan.net/non_existant_tag",
+    "#comment" : "handle HttpError exception (#8313)",
+    "#class"   : zerochan.ZerochanTagExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://www.zerochan.net/2920445",
     "#category": ("booru", "zerochan", "image"),
     "#class"   : zerochan.ZerochanImageExtractor,
@@ -339,6 +346,22 @@ __tests__ = (
         "Source:Key Visual",
         "Source:Official Art",
     ],
+},
+
+{
+    "#url"     : "https://www.zerochan.net/1",
+    "#category": ("booru", "zerochan", "image"),
+    "#class"   : zerochan.ZerochanImageExtractor,
+    "#count"   : 0,
+    "#log"     : "'deleted'",
+},
+
+{
+    "#url"     : "https://www.zerochan.net/9876540",
+    "#category": ("booru", "zerochan", "image"),
+    "#class"   : zerochan.ZerochanImageExtractor,
+    "#count"   : 0,
+    "#log"     : "'Not found'",
 },
 
 )
