@@ -1232,7 +1232,7 @@ class PixivAppAPI():
         params = {"word": word, "search_target": target,
                   "sort": sort, "duration": duration,
                   "start_date": date_start, "end_date": date_end}
-        return self._pagination("/v1/search/illust", params)
+        return self._pagination_search("/v1/search/illust", params)
 
     def user_bookmarks_illust(self, user_id, tag=None, restrict="public"):
         """Return illusts bookmarked by a user"""
@@ -1321,6 +1321,48 @@ class PixivAppAPI():
             query = data["next_url"].rpartition("?")[2]
             params = text.parse_query(query)
             data = self._call(endpoint, params)
+
+    def _pagination_search(self, endpoint, params):
+        sort = params["sort"]
+        if sort == "date_desc":
+            date_key = "end_date"
+            date_off = timedelta(days=1)
+            date_cmp = lambda lhs, rhs: lhs >= rhs  # noqa E731
+        elif sort == "date_asc":
+            date_key = "start_date"
+            date_off = timedelta(days=-1)
+            date_cmp = lambda lhs, rhs: lhs <= rhs  # noqa E731
+        else:
+            date_key = None
+        date_last = None
+
+        while True:
+            data = self._call(endpoint, params)
+
+            if date_last is None:
+                yield from data["illusts"]
+            else:
+                works = data["illusts"]
+                if date_cmp(date_last, works[-1]["create_date"]):
+                    for work in works:
+                        if date_last is None:
+                            yield work
+                        elif date_cmp(date_last, work["create_date"]):
+                            date_last = None
+
+            if not (next_url := data.get("next_url")):
+                return
+            query = next_url.rpartition("?")[2]
+            params = text.parse_query(query)
+
+            if date_key and text.parse_int(params.get("offset")) >= 5000:
+                date_last = data["illusts"][-1]["create_date"]
+                date_val = (text.parse_datetime(
+                    date_last) + date_off).strftime("%Y-%m-%d")
+                self.log.info("Reached 'offset' >= 5000; "
+                              "Updating '%s' to '%s'", date_key, date_val)
+                params[date_key] = date_val
+                params.pop("offset", None)
 
 
 @cache(maxage=36500*86400, keyarg=0)
