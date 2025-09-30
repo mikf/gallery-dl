@@ -284,7 +284,7 @@ class InstagramExtractor(Extractor):
             if manifest is not None:
                 media["_ytdl_manifest_data"] = manifest
             if "owner" in item:
-                media["owner2"] = item["owner"]
+                media["owner"] = item["owner"]
             if "reshared_story_media_author" in item:
                 media["author"] = item["reshared_story_media_author"]
             if "expiring_at" in item:
