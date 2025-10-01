@@ -449,6 +449,27 @@ class InstagramExtractor(Extractor):
                 user[key] = 0
 
 
+class InstagramPostExtractor(InstagramExtractor):
+    """Extractor for an Instagram post"""
+    subcategory = "post"
+    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
+               r"/(?:share/()|[^/?#]+/)?(?:p|tv|reels?)/([^/?#]+)")
+    example = "https://www.instagram.com/p/abcdefg/"
+
+    def posts(self):
+        share, shortcode = self.groups
+        if share is not None:
+            url = text.ensure_http_scheme(self.url)
+            headers = {
+                "Sec-Fetch-Dest": "empty",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "same-origin",
+            }
+            location = self.request_location(url, headers=headers)
+            shortcode = location.split("/")[-2]
+        return self.api.media(shortcode)
+
+
 class InstagramUserExtractor(Dispatch, InstagramExtractor):
     """Extractor for an Instagram user profile"""
     pattern = USER_PATTERN + r"/?(?:$|[?#])"
@@ -744,27 +765,6 @@ class InstagramAvatarExtractor(InstagramExtractor):
             "like_count": 0,
             "image_versions2": {"candidates": (avatar,)},
         },)
-
-
-class InstagramPostExtractor(InstagramExtractor):
-    """Extractor for an Instagram post"""
-    subcategory = "post"
-    pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?:share/()|[^/?#]+/)?(?:p|tv|reel)/([^/?#]+)")
-    example = "https://www.instagram.com/p/abcdefg/"
-
-    def posts(self):
-        share, shortcode = self.groups
-        if share is not None:
-            url = text.ensure_http_scheme(self.url)
-            headers = {
-                "Sec-Fetch-Dest": "empty",
-                "Sec-Fetch-Mode": "navigate",
-                "Sec-Fetch-Site": "same-origin",
-            }
-            location = self.request_location(url, headers=headers)
-            shortcode = location.split("/")[-2]
-        return self.api.media(shortcode)
 
 
 class InstagramRestAPI():

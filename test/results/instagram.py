@@ -283,6 +283,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.instagram.com/reels/CDg_6Y1pxWu/",
+    "#class"   : instagram.InstagramPostExtractor,
+},
+
+{
     "#url"     : "https://www.instagram.com/share/p/BACiUUUYQV",
     "#category": ("", "instagram", "post"),
     "#class"   : instagram.InstagramPostExtractor,
