@@ -453,11 +453,16 @@ class InstagramPostExtractor(InstagramExtractor):
     """Extractor for an Instagram post"""
     subcategory = "post"
     pattern = (r"(?:https?://)?(?:www\.)?instagram\.com"
-               r"/(?:share/()|[^/?#]+/)?(?:p|tv|reels?)/([^/?#]+)")
+               r"/(?:share/()|[^/?#]+/)?(?:p|tv|reels?())/([^/?#]+)")
     example = "https://www.instagram.com/p/abcdefg/"
 
+    def __init__(self, match):
+        if match[2] is not None:
+            self.subcategory = "reel"
+        InstagramExtractor.__init__(self, match)
+
     def posts(self):
-        share, shortcode = self.groups
+        share, reel, shortcode = self.groups
         if share is not None:
             url = text.ensure_http_scheme(self.url)
             headers = {
