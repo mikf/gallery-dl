@@ -177,6 +177,7 @@ class InstagramExtractor(Extractor):
                 "post_id": reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
                 "post_url": post_url,
+                "type": "story" if expires else "highlight",
             }
             if "title" in post:
                 data["highlight_title"] = post["title"]
@@ -187,7 +188,6 @@ class InstagramExtractor(Extractor):
             data = {
                 "post_id" : post["pk"],
                 "post_shortcode": post["code"],
-                "post_url": f"{self.root}/p/{post['code']}/",
                 "likes": post.get("like_count", 0),
                 "liked": post.get("has_liked", False),
                 "pinned": self._extract_pinned(post),
@@ -292,6 +292,14 @@ class InstagramExtractor(Extractor):
 
             self._extract_tagged_users(item, media)
             files.append(media)
+
+        if "type" not in data:
+            if len(files) == 1 and files[0]["video_url"]:
+                data["type"] = "reel"
+                data["post_url"] = f"{self.root}/reel/{post['code']}/"
+            else:
+                data["type"] = "post"
+                data["post_url"] = f"{self.root}/p/{post['code']}/"
 
         return data
 
