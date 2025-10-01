@@ -82,6 +82,39 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://simpcity.cr/threads/kayle-oralglory.36572/post-12065490",
+    "#comment" : "deleted thread author (#8323)",
+    "#class"   : simpcity.SimpcityPostExtractor,
+    "#auth"    : True,
+    "#results" : (
+        "https://jpg5.su/img/aKroBJp",
+        "https://jpg5.su/img/aKroy2E",
+        "https://jpg5.su/img/aKrofqa",
+        "https://jpg5.su/img/aKroDgo",
+        "https://bunkr.cr/v/6sErIc9pjrnQ3",
+    ),
+
+    "post"  : {
+        "author"    : "Hexorium",
+        "author_id" : "3715883",
+        "author_url": "https://simpcity.cr/members/hexorium.3715883/",
+        "count"     : 5,
+        "date"      : "dt:2024-12-15 21:37:05",
+        "id"        : "12065490",
+    },
+    "thread": {
+        "author"    : "Deleted member 166159",
+        "author_id" : "166159",
+        "author_url": "",
+        "date"      : "dt:2022-04-05 14:48:14",
+        "id"        : "36572",
+        "section"   : "Premium Asians",
+        "title"     : "Kayle OralGlory",
+        "url"       : "https://simpcity.cr/threads/kayle-oralglory.36572/",
+    },
+},
+
+{
     "#url"     : "https://simpcity.cr/threads/alua-tatakai.89490/",
     "#class"   : simpcity.SimpcityThreadExtractor,
     "#auth"    : True,

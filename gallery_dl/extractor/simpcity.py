@@ -92,7 +92,7 @@ class SimpcityExtractor(Extractor):
         author = schema["author"]
         stats = schema["interactionStatistic"]
         url_t = schema["url"]
-        url_a = author["url"]
+        url_a = author.get("url") or ""
 
         thread = {
             "id"   : url_t[url_t.rfind(".")+1:-1],
@@ -104,8 +104,9 @@ class SimpcityExtractor(Extractor):
             "tags" : (schema["keywords"].split(", ")
                       if "keywords" in schema else ()),
             "section"   : schema["articleSection"],
-            "author"    : author["name"],
-            "author_id" : url_a[url_a.rfind(".")+1:-1],
+            "author"    : author.get("name") or "",
+            "author_id" : (url_a[url_a.rfind(".")+1:-1] if url_a else
+                           (author.get("name") or "")[15:]),
             "author_url": url_a,
         }
 
