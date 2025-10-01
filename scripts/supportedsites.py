@@ -105,6 +105,7 @@ CATEGORY_MAP = {
     "kabeuchi"       : "かべうち",
     "mangafire"      : "MangaFire",
     "mangataro"      : "MangaTaro",
+    "s3ndpics"       : "S3ND",
     "schalenetwork"  : "Schale Network",
     "leakgallery"    : "Leak Gallery",
     "livedoor"       : "livedoor Blog",

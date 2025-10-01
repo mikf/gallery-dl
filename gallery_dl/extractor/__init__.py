@@ -167,6 +167,7 @@ modules = [
     "rule34us",
     "rule34vault",
     "rule34xyz",
+    "s3ndpics",
     "saint",
     "sankaku",
     "sankakucomplex",

@@ -871,6 +871,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Playlists, Posts, Tag Searches</td>
     <td>Supported</td>
 </tr>
+<tr id="s3ndpics" title="s3ndpics">
+    <td>S3ND</td>
+    <td>https://s3nd.pics/</td>
+    <td>Posts, Search Results, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="saint" title="saint">
     <td>Saint</td>
     <td>https://saint2.su/</td>
