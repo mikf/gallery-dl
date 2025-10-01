@@ -39,7 +39,7 @@ class MangadexExtractor(Extractor):
             data = self._transform(chapter)
             data["_extractor"] = MangadexChapterExtractor
             self._cache[uuid] = data
-            yield Message.Queue, self.root + "/chapter/" + uuid, data
+            yield Message.Queue, f"{self.root}/chapter/{uuid}", data
 
     def _items_manga(self):
         data = {"_extractor": MangadexMangaExtractor}
@@ -51,13 +51,8 @@ class MangadexExtractor(Extractor):
         relationships = defaultdict(list)
         for item in chapter["relationships"]:
             relationships[item["type"]].append(item)
-        manga = self.api.manga(relationships["manga"][0]["id"])
-        for item in manga["relationships"]:
-            relationships[item["type"]].append(item)
 
         cattributes = chapter["attributes"]
-        mattributes = manga["attributes"]
-
         if lang := cattributes.get("translatedLanguage"):
             lang = lang.partition("-")[0]
 
@@ -66,34 +61,20 @@ class MangadexExtractor(Extractor):
         else:
             chnum, sep, minor = 0, "", ""
 
-        data = {
-            "manga"   : (mattributes["title"].get("en") or
-                         next(iter(mattributes["title"].values()))),
-            "manga_id": manga["id"],
+        return {
+            **_manga_info(self, relationships["manga"][0]["id"]),
             "title"   : cattributes["title"],
             "volume"  : text.parse_int(cattributes["volume"]),
             "chapter" : text.parse_int(chnum),
             "chapter_minor": sep + minor,
             "chapter_id": chapter["id"],
             "date"    : text.parse_datetime(cattributes["publishAt"]),
+            "group"   : [group["attributes"]["name"]
+                         for group in relationships["scanlation_group"]],
             "lang"    : lang,
-            "language": util.code_to_language(lang),
             "count"   : cattributes["pages"],
             "_external_url": cattributes.get("externalUrl"),
         }
-
-        data["artist"] = [artist["attributes"]["name"]
-                          for artist in relationships["artist"]]
-        data["author"] = [author["attributes"]["name"]
-                          for author in relationships["author"]]
-        data["group"] = [group["attributes"]["name"]
-                         for group in relationships["scanlation_group"]]
-
-        data["status"] = mattributes["status"]
-        data["tags"] = [tag["attributes"]["name"]["en"]
-                        for tag in mattributes["tags"]]
-
-        return data
 
 
 class MangadexCoversExtractor(MangadexExtractor):
@@ -121,24 +102,10 @@ class MangadexCoversExtractor(MangadexExtractor):
         relationships = defaultdict(list)
         for item in cover["relationships"]:
             relationships[item["type"]].append(item)
-        manga = self.api.manga(relationships["manga"][0]["id"])
-        for item in manga["relationships"]:
-            relationships[item["type"]].append(item)
-
         cattributes = cover["attributes"]
-        mattributes = manga["attributes"]
 
         return {
-            "manga"   : (mattributes["title"].get("en") or
-                         next(iter(mattributes["title"].values()))),
-            "manga_id": manga["id"],
-            "status"  : mattributes["status"],
-            "author"  : [author["attributes"]["name"]
-                         for author in relationships["author"]],
-            "artist"  : [artist["attributes"]["name"]
-                         for artist in relationships["artist"]],
-            "tags"    : [tag["attributes"]["name"]["en"]
-                         for tag in mattributes["tags"]],
+            **_manga_info(self, relationships["manga"][0]["id"]),
             "cover"   : cattributes["fileName"],
             "lang"    : cattributes.get("locale"),
             "volume"  : text.parse_int(cattributes["volume"]),
@@ -150,7 +117,7 @@ class MangadexCoversExtractor(MangadexExtractor):
 class MangadexChapterExtractor(MangadexExtractor):
     """Extractor for manga-chapters from mangadex.org"""
     subcategory = "chapter"
-    pattern = BASE_PATTERN + r"/chapter/([0-9a-f-]+)"
+    pattern = f"{BASE_PATTERN}/chapter/([0-9a-f-]+)"
     example = ("https://mangadex.org/chapter"
                "/01234567-89ab-cdef-0123-456789abcdef")
 
@@ -177,13 +144,13 @@ class MangadexChapterExtractor(MangadexExtractor):
             "page-reverse") else enumerate
         for data["page"], page in enum(chapter["data"], 1):
             text.nameext_from_url(page, data)
-            yield Message.Url, base + page, data
+            yield Message.Url, f"{base}{page}", data
 
 
 class MangadexMangaExtractor(MangadexExtractor):
     """Extractor for manga from mangadex.org"""
     subcategory = "manga"
-    pattern = BASE_PATTERN + r"/(?:title|manga)/(?!follows|feed$)([0-9a-f-]+)"
+    pattern = f"{BASE_PATTERN}/(?:title|manga)/(?!follows|feed$)([0-9a-f-]+)"
     example = ("https://mangadex.org/title"
                "/01234567-89ab-cdef-0123-456789abcdef")
 
@@ -194,7 +161,7 @@ class MangadexMangaExtractor(MangadexExtractor):
 class MangadexFeedExtractor(MangadexExtractor):
     """Extractor for chapters from your Updates Feed"""
     subcategory = "feed"
-    pattern = BASE_PATTERN + r"/titles?/feed$()"
+    pattern = f"{BASE_PATTERN}/titles?/feed$()"
     example = "https://mangadex.org/title/feed"
 
     def chapters(self):
@@ -242,7 +209,7 @@ class MangadexListExtractor(MangadexExtractor):
 class MangadexAuthorExtractor(MangadexExtractor):
     """Extractor for mangadex authors"""
     subcategory = "author"
-    pattern = BASE_PATTERN + r"/author/([0-9a-f-]+)"
+    pattern = f"{BASE_PATTERN}/author/([0-9a-f-]+)"
     example = ("https://mangadex.org/author"
                "/01234567-89ab-cdef-0123-456789abcdef/NAME")
 
@@ -280,30 +247,30 @@ class MangadexAPI():
                      else text.ensure_http_scheme(server).rstrip("/"))
 
     def athome_server(self, uuid):
-        return self._call("/at-home/server/" + uuid)
+        return self._call(f"/at-home/server/{uuid}")
 
     def author(self, uuid, manga=False):
         params = {"includes[]": ("manga",)} if manga else None
-        return self._call("/author/" + uuid, params)["data"]
+        return self._call(f"/author/{uuid}", params)["data"]
 
     def chapter(self, uuid):
         params = {"includes[]": ("scanlation_group",)}
-        return self._call("/chapter/" + uuid, params)["data"]
+        return self._call(f"/chapter/{uuid}", params)["data"]
 
     def covers_manga(self, uuid):
         params = {"manga[]": uuid}
         return self._pagination_covers("/cover", params)
 
     def list(self, uuid):
-        return self._call("/list/" + uuid, None, True)["data"]
+        return self._call(f"/list/{uuid}", None, True)["data"]
 
     def list_feed(self, uuid):
-        return self._pagination_chapters("/list/" + uuid + "/feed", None, True)
+        return self._pagination_chapters(f"/list/{uuid}/feed", None, True)
 
     @memcache(keyarg=1)
     def manga(self, uuid):
         params = {"includes[]": ("artist", "author")}
-        return self._call("/manga/" + uuid, params)["data"]
+        return self._call(f"/manga/{uuid}", params)["data"]
 
     def manga_author(self, uuid_author):
         params = {"authorOrArtist": uuid_author}
@@ -315,7 +282,7 @@ class MangadexAPI():
             "order[volume]" : order,
             "order[chapter]": order,
         }
-        return self._pagination_chapters("/manga/" + uuid + "/feed", params)
+        return self._pagination_chapters(f"/manga/{uuid}/feed", params)
 
     def user_follows_manga(self):
         params = {"contentRating": None}
@@ -366,17 +333,17 @@ class MangadexAPI():
             _refresh_token_cache.update(
                 (username, "personal"), data["refresh_token"])
 
-        return "Bearer " + access_token
+        return f"Bearer {access_token}"
 
     @cache(maxage=900, keyarg=1)
     def _authenticate_impl_legacy(self, username, password):
         if refresh_token := _refresh_token_cache(username):
             self.extractor.log.info("Refreshing access token")
-            url = self.root + "/auth/refresh"
+            url = f"{self.root}/auth/refresh"
             json = {"token": refresh_token}
         else:
             self.extractor.log.info("Logging in as %s", username)
-            url = self.root + "/auth/login"
+            url = f"{self.root}/auth/login"
             json = {"username": username, "password": password}
 
         self.extractor.log.debug("Using legacy login method")
@@ -387,7 +354,7 @@ class MangadexAPI():
 
         if refresh_token != data["token"]["refresh"]:
             _refresh_token_cache.update(username, data["token"]["refresh"])
-        return "Bearer " + data["token"]["session"]
+        return f"Bearer {data['token']['session']}"
 
     def _call(self, endpoint, params=None, auth=False):
         url = self.root + endpoint
@@ -470,3 +437,33 @@ class MangadexAPI():
 @cache(maxage=90*86400, keyarg=0)
 def _refresh_token_cache(username):
     return None
+
+
+@memcache(keyarg=1)
+def _manga_info(self, uuid):
+    manga = self.api.manga(uuid)
+
+    rel = defaultdict(list)
+    for item in manga["relationships"]:
+        rel[item["type"]].append(item)
+    mattr = manga["attributes"]
+
+    return {
+        "manga" : (mattr["title"].get("en") or
+                   next(iter(mattr["title"].values()))),
+        "manga_id": manga["id"],
+        "manga_titles": [t.popitem()[1]
+                         for t in mattr.get("altTitles") or ()],
+        "manga_date"  : text.parse_datetime(mattr.get("createdAt")),
+        "description" : (mattr["description"].get("en") or
+                         next(iter(mattr["description"].values()))),
+        "demographic": mattr.get("publicationDemographic"),
+        "origin": mattr.get("originalLanguage"),
+        "status": mattr.get("status"),
+        "year"  : mattr.get("year"),
+        "rating": mattr.get("contentRating"),
+        "links" : mattr.get("links"),
+        "tags"  : [tag["attributes"]["name"]["en"] for tag in mattr["tags"]],
+        "artist": [artist["attributes"]["name"] for artist in rel["artist"]],
+        "author": [author["attributes"]["name"] for author in rel["author"]],
+    }
