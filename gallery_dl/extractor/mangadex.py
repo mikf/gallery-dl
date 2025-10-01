@@ -66,7 +66,7 @@ class MangadexExtractor(Extractor):
             "title"   : cattributes["title"],
             "volume"  : text.parse_int(cattributes["volume"]),
             "chapter" : text.parse_int(chnum),
-            "chapter_minor": sep + minor,
+            "chapter_minor": f"{sep}{minor}",
             "chapter_id": chapter["id"],
             "date"    : text.parse_datetime(cattributes["publishAt"]),
             "group"   : [group["attributes"]["name"]
@@ -84,7 +84,7 @@ class MangadexCoversExtractor(MangadexExtractor):
     filename_fmt = "{volume:>02}_{lang}.{extension}"
     archive_fmt = "c_{cover_id}"
     pattern = (rf"{BASE_PATTERN}/(?:title|manga)/(?!follows|feed$)([0-9a-f-]+)"
-               r"(?:/[^/?#]+)?\?tab=art")
+               rf"(?:/[^/?#]+)?\?tab=art")
     example = ("https://mangadex.org/title"
                "/01234567-89ab-cdef-0123-456789abcdef?tab=art")
 
@@ -117,7 +117,7 @@ class MangadexCoversExtractor(MangadexExtractor):
 class MangadexChapterExtractor(MangadexExtractor):
     """Extractor for manga-chapters from mangadex.org"""
     subcategory = "chapter"
-    pattern = f"{BASE_PATTERN}/chapter/([0-9a-f-]+)"
+    pattern = rf"{BASE_PATTERN}/chapter/([0-9a-f-]+)"
     example = ("https://mangadex.org/chapter"
                "/01234567-89ab-cdef-0123-456789abcdef")
 
@@ -150,7 +150,7 @@ class MangadexChapterExtractor(MangadexExtractor):
 class MangadexMangaExtractor(MangadexExtractor):
     """Extractor for manga from mangadex.org"""
     subcategory = "manga"
-    pattern = f"{BASE_PATTERN}/(?:title|manga)/(?!follows|feed$)([0-9a-f-]+)"
+    pattern = rf"{BASE_PATTERN}/(?:title|manga)/(?!follows|feed$)([0-9a-f-]+)"
     example = ("https://mangadex.org/title"
                "/01234567-89ab-cdef-0123-456789abcdef")
 
@@ -161,7 +161,7 @@ class MangadexMangaExtractor(MangadexExtractor):
 class MangadexFeedExtractor(MangadexExtractor):
     """Extractor for chapters from your Updates Feed"""
     subcategory = "feed"
-    pattern = f"{BASE_PATTERN}/titles?/feed$()"
+    pattern = rf"{BASE_PATTERN}/titles?/feed$()"
     example = "https://mangadex.org/title/feed"
 
     def chapters(self):
@@ -171,7 +171,7 @@ class MangadexFeedExtractor(MangadexExtractor):
 class MangadexFollowingExtractor(MangadexExtractor):
     """Extractor for followed manga from your Library"""
     subcategory = "following"
-    pattern = BASE_PATTERN + r"/titles?/follows(?:\?([^#]+))?$"
+    pattern = rf"{BASE_PATTERN}/titles?/follows(?:\?([^#]+))?$"
     example = "https://mangadex.org/title/follows"
 
     items = MangadexExtractor._items_manga
@@ -183,8 +183,8 @@ class MangadexFollowingExtractor(MangadexExtractor):
 class MangadexListExtractor(MangadexExtractor):
     """Extractor for mangadex MDLists"""
     subcategory = "list"
-    pattern = (BASE_PATTERN +
-               r"/list/([0-9a-f-]+)(?:/[^/?#]*)?(?:\?tab=(\w+))?")
+    pattern = (rf"{BASE_PATTERN}"
+               rf"/list/([0-9a-f-]+)(?:/[^/?#]*)?(?:\?tab=(\w+))?")
     example = ("https://mangadex.org/list"
                "/01234567-89ab-cdef-0123-456789abcdef/NAME")
 
@@ -209,7 +209,7 @@ class MangadexListExtractor(MangadexExtractor):
 class MangadexAuthorExtractor(MangadexExtractor):
     """Extractor for mangadex authors"""
     subcategory = "author"
-    pattern = f"{BASE_PATTERN}/author/([0-9a-f-]+)"
+    pattern = rf"{BASE_PATTERN}/author/([0-9a-f-]+)"
     example = ("https://mangadex.org/author"
                "/01234567-89ab-cdef-0123-456789abcdef/NAME")
 
@@ -357,7 +357,7 @@ class MangadexAPI():
         return f"Bearer {data['token']['session']}"
 
     def _call(self, endpoint, params=None, auth=False):
-        url = self.root + endpoint
+        url = f"{self.root}{endpoint}"
         headers = self.headers_auth if auth else self.headers
 
         while True:
