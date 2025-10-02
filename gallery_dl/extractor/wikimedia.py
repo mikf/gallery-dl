@@ -62,7 +62,10 @@ class WikimediaExtractor(BaseExtractor):
                 return url
         raise exception.AbortExtraction("Unable to find API endpoint")
 
-    def prepare(self, image):
+    def prepare_info(self, page):
+        """Adjust the content of an image info object"""
+
+    def prepare_image(self, image):
         """Adjust the content of an image object"""
         image["metadata"] = {
             m["name"]: m["value"]
@@ -80,14 +83,18 @@ class WikimediaExtractor(BaseExtractor):
     def items(self):
         for info in self._pagination(self.params):
             try:
-                images = info["imageinfo"]
+                images = info.pop("imageinfo")
             except KeyError:
                 self.log.debug("Missing 'imageinfo' for %s", info)
-                continue
+                images = ()
 
-            for image in images:
-                self.prepare(image)
-                yield Message.Directory, image
+            info["count"] = len(images)
+            self.prepare_info(info)
+            yield Message.Directory, info
+
+            for info["num"], image in enumerate(images, 1):
+                self.prepare_image(image)
+                image.update(info)
                 yield Message.Url, image["url"], image
 
         if self.subcategories:
@@ -245,9 +252,8 @@ class WikimediaArticleExtractor(WikimediaExtractor):
                 "titles"   : path,
             }
 
-    def prepare(self, image):
-        WikimediaExtractor.prepare(self, image)
-        image["page"] = self.title
+    def prepare_info(self, info):
+        info["page"] = self.title
 
 
 class WikimediaWikiExtractor(WikimediaExtractor):
