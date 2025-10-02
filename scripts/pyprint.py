@@ -7,8 +7,6 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-import re
-
 
 def pyprint(obj, indent=0, sort=None, oneline=True, lmin=0, lmax=16):
 
@@ -26,7 +24,8 @@ def pyprint(obj, indent=0, sort=None, oneline=True, lmin=0, lmax=16):
             quote_beg = '"""\\\n'
             quote_end = '\\\n"""'
         elif '"' in obj:
-            obj = re.sub(r'(?<!\\)"', '\\"', obj)
+            quote_beg = quote_end = \
+                "'''" if obj[0] == '"' or obj[-1] == '"' else '"""'
 
         return f'''{prefix}{quote_beg}{obj}{quote_end}'''
 
