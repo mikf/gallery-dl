@@ -121,6 +121,7 @@ modules = [
     "manganelo",
     "mangapark",
     "mangaread",
+    "mangareader",
     "mangataro",
     "mangoxo",
     "misskey",
