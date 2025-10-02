@@ -45,6 +45,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://tl.wikipedia.org/wiki/Sitosol",
+    "#comment" : "revisions of an image in an article",
+    "#category": ("wikimedia", "wikipedia", "article"),
+    "#class"   : wikimedia.WikimediaArticleExtractor,
+    "#options" : {"image-revisions": 10},
+    "#count"   : 2,
+    "#pattern" : (
+        r"https://upload.wikimedia.org/wikipedia/commons/2/2e/Crowded_cytosol.png",
+        r"https://upload.wikimedia.org/wikipedia/commons/archive/2/2e/20080911161129%21Crowded_cytosol.png",
+    ),
+},
+
+{
     "#url"     : "https://en.wikipedia.org/wiki/Category:Physics",
     "#category": ("wikimedia", "wikipedia", "category"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
