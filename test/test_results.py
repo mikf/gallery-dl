@@ -348,6 +348,17 @@ class TestExtractorResults(unittest.TestCase):
                     for _ in value:
                         len_value += 1
                 self.assertEqual(int(length), len_value, msg=path)
+            elif test.startswith("hash:"):
+                digest = test[5:].lower()
+                msg = f"{path} / {digest}"
+                if digest == "md5":
+                    self.assertRegex(value, r"^[0-9a-fA-F]{32}$", msg)
+                elif digest == "sha1":
+                    self.assertRegex(value, r"^[0-9a-fA-F]{40}$", msg)
+                elif digest == "sha256":
+                    self.assertRegex(value, r"^[0-9a-fA-F]{64}$", msg)
+                elif digest == "sha512":
+                    self.assertRegex(value, r"^[0-9a-fA-F]{128}$", msg)
             elif test.startswith("iso:"):
                 iso = test[4:]
                 if iso in ("dt", "datetime", "8601"):
