@@ -6548,6 +6548,20 @@ Description
     Download video files.
 
 
+extractor.wikimedia.image-revisions
+-----------------------------------
+Type
+    ``integer``
+Default
+    ``1``
+Description
+    Number of revisions to return for a single image.
+
+    The dafault value of 1 only returns the latest revision.
+
+    The value must be between 1 and 500.
+
+
 extractor.wikimedia.limit
 -------------------------
 Type
