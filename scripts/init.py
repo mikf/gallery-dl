@@ -358,6 +358,12 @@ def parse_args(args=None):
     args = parser.parse_args()
     args.category = args.category.lower()
 
+    if "://" in args.category:
+        base = args.category.split("/", 3)
+        if not args.root:
+            args.root = "/".join(base[:3])
+        args.category = re.sub(r"\W+", "", base[2].split(".")[-2])
+
     if root := args.root:
         if "://" in root:
             root = root.rstrip("/")
