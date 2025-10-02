@@ -173,7 +173,7 @@ class NozomiSearchExtractor(NozomiExtractor):
 
         for tag in self.tags:
             (negative if tag[0] == "-" else positive).append(
-                tag.replace("/", ""))
+                text.quote(tag.replace("/", "")))
 
         for tag in positive:
             ids = nozomi("nozomi/" + tag)
