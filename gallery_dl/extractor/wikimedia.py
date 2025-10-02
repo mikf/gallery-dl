@@ -46,6 +46,12 @@ class WikimediaExtractor(BaseExtractor):
         else:
             self.api_url = None
 
+        # note: image revisions are different from page revisions
+        # ref:
+        # https://www.mediawiki.org/wiki/API:Revisions
+        # https://www.mediawiki.org/wiki/API:Imageinfo
+        self.image_revisions = self.config("image-revisions", 1)
+
     @cache(maxage=36500*86400, keyarg=1)
     def _search_api_path(self, root):
         self.log.debug("Probing possible API endpoints")
@@ -74,14 +80,15 @@ class WikimediaExtractor(BaseExtractor):
     def items(self):
         for info in self._pagination(self.params):
             try:
-                image = info["imageinfo"][0]
-            except LookupError:
+                images = info["imageinfo"]
+            except KeyError:
                 self.log.debug("Missing 'imageinfo' for %s", info)
                 continue
 
-            self.prepare(image)
-            yield Message.Directory, image
-            yield Message.Url, image["url"], image
+            for image in images:
+                self.prepare(image)
+                yield Message.Directory, image
+                yield Message.Url, image["url"], image
 
         if self.subcategories:
             base = self.root + "/wiki/"
@@ -108,6 +115,7 @@ class WikimediaExtractor(BaseExtractor):
             "timestamp|user|userid|comment|canonicaltitle|url|size|"
             "sha1|mime|metadata|commonmetadata|extmetadata|bitdepth"
         )
+        params["iilimit"] = self.image_revisions
 
         while True:
             data = self.request_json(url, params=params)
