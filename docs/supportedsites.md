@@ -625,6 +625,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
+<tr id="mangareader" title="mangareader">
+    <td>MangaReader</td>
+    <td>https://mangareader.to/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
 <tr id="mangataro" title="mangataro">
     <td>MangaTaro</td>
     <td>https://mangataro.org/</td>

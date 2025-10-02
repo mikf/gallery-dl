@@ -3935,6 +3935,18 @@ Description
     |ISO 639-1| code selecting which chapters to download.
 
 
+extractor.mangareader.manga.lang
+--------------------------------
+Type
+    ``string``
+Default
+    ``"en"``
+Example
+    ``"pt-br"``
+Description
+    |ISO 639-1| code selecting which chapters to download.
+
+
 extractor.mangapark.source
 --------------------------
 Type

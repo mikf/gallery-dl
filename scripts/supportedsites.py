@@ -104,6 +104,7 @@ CATEGORY_MAP = {
     "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
     "mangafire"      : "MangaFire",
+    "mangareader"    : "MangaReader",
     "mangataro"      : "MangaTaro",
     "s3ndpics"       : "S3ND",
     "schalenetwork"  : "Schale Network",

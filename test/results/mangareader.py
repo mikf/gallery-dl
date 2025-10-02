@@ -1,0 +1,140 @@
+# -*- coding: utf-8 -*-
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+from gallery_dl.extractor import mangareader
+
+
+__tests__ = (
+{
+    "#url"     : "https://mangareader.to/read/the-only-thing-i-must-do-in-an-all-girls-game-world-i-got-reincarnated-as-the-guy-stuck-between-yuri-couples-68609/en/chapter-2",
+    "#class"   : mangareader.MangareaderChapterExtractor,
+    "#pattern" : r"https://c-1\.mreadercdn\.com/_v1/\d/\d/\w+\.jpg",
+    "#count"   : 46,
+
+    "author"        : [],
+    "chapter"       : 2,
+    "chapter_id"    : 2285279,
+    "chapter_minor" : "",
+    "chapter_string": "2",
+    "chapter_url"   : "https://mangareader.to/read/the-only-thing-i-must-do-in-an-all-girls-game-world-i-got-reincarnated-as-the-guy-stuck-between-yuri-couples-68609/en/chapter-2",
+    "count"         : 46,
+    "description"   : '''"Everything for the Score"—nicknamed "Esco"—is a renowned masterpiece in the world of yuri games. A boy who reincarnates into its world suddenly finds himself in the role of Sanjo Hiro, infamously known as "the guy who gets in the way of yuri." Hiro is a nuisance character who ends up ruined no matter which route he's in. To avoid triggering his death flags, he begins to train and search for a safe path—but for some reason, heroine events keep unfolding around him as the central figure...!? "I don’t want a harem romcom! Just give me yuri! Let me see the yuri!"''',
+    "extension"     : "jpg",
+    "filename"      : "hash:md5",
+    "lang"          : "en",
+    "manga"         : "The Only Thing I Must Do in an All-Girls Game World: I Got Reincarnated as the Guy Stuck Between Yuri Couples",
+    "manga_alt"     : "男子禁制ゲーム世界で俺がやるべき唯一のこと　百合の間に挟まる男として転生してしまいました",
+    "manga_id"      : 68609,
+    "manga_slug"    : "the-only-thing-i-must-do-in-an-all-girls-game-world-i-got-reincarnated-as-the-guy-stuck-between-yuri-couples",
+    "manga_url"     : "https://mangareader.to/the-only-thing-i-must-do-in-an-all-girls-game-world-i-got-reincarnated-as-the-guy-stuck-between-yuri-couples-68609",
+    "page"          : range(1, 46),
+    "published"     : "?",
+    "score"         : 0.0,
+    "status"        : "Publishing",
+    "title"         : "Chapter 2",
+    "type"          : "Manga",
+    "views"         : range(300, 50_000),
+    "tags"          : [
+        "Action",
+        "Comedy",
+        "Fantasy",
+        "Harem",
+        "Romance",
+        "School",
+    ],
+},
+
+{
+    "#url"     : "https://mangareader.to/read/komi-cant-communicate-287/fr/chapter-85.5",
+    "#class"   : mangareader.MangareaderChapterExtractor,
+    "#results" : (
+        "https://c-1.mreadercdn.com/_v1/1/1200/c9edb089648fbfca67eaab21fa9f4a61.jpeg",
+        "https://c-1.mreadercdn.com/_v1/0/1200/d7288b30936489b11e18e81125d28054.jpeg",
+    ),
+
+    "author"        : ["Oda, Tomohito"],
+    "chapter"       : 85,
+    "chapter_id"    : 868842,
+    "chapter_minor" : ".5",
+    "chapter_string": "85.5",
+    "chapter_url"   : "https://mangareader.to/read/komi-cant-communicate-287/fr/chapter-85.5",
+    "count"         : 2,
+    "description"   : """It's Shouko Komi's first day at the prestigious Itan Private High School, and she has already risen to the status of the school's Madonna. With long black hair and a tall, graceful appearance, she captures the attention of anyone who comes across her. There's just one problem though—despite her popularity, Shouko is terrible at communicating with others.  Hitohito Tadano is your average high school boy. With his life motto of "read the situation and make sure to stay away from trouble," he quickly finds that sitting next to Shouko has made him the enemy of everyone in his class! One day, knocked out by accident, Hitohito later wakes up to the sound of Shouko's "meow." He lies that he heard nothing, causing Shouko to run away. But before she can escape, Hitohito surmises that Shouko is not able to talk to others easily—in fact, she has never been able to make a single friend. Hitohito resolves to help Shouko with her goal of making one hundred friends so that she can overcome her communication disorder.  [Written by MAL Rewrite]""",
+    "extension"     : "jpeg",
+    "filename"      : "hash:md5",
+    "lang"          : "fr",
+    "manga"         : "Komi Can't Communicate",
+    "manga_alt"     : "古見さんは、コミュ症です。",
+    "manga_id"      : 287,
+    "manga_slug"    : "komi-cant-communicate",
+    "manga_url"     : "https://mangareader.to/komi-cant-communicate-287",
+    "page"          : range(1, 2),
+    "published"     : "May 18, 2016 to ?",
+    "score"         : 8.28,
+    "status"        : "Finished",
+    "title"         : "Souvenirs du festival culturel",
+    "type"          : "Manga",
+    "views"         : range(2_000_000, 3_000_000),
+    "tags"          : [
+        "Comedy",
+        "School",
+        "Shounen",
+    ],
+},
+
+{
+    "#url"     : "https://mangareader.to/read/komi-cant-communicate-287/ja/volume-6",
+    "#class"   : mangareader.MangareaderChapterExtractor,
+    "#count"   : 198,
+
+    "chapter"       : 0,
+    "chapter_id"    : 21304,
+    "chapter_minor" : "",
+    "chapter_string": "6",
+    "chapter_url"   : "https://mangareader.to/read/komi-cant-communicate-287/ja/volume-6",
+    "count"         : 198,
+    "lang"          : "ja",
+    "manga_id"      : 287,
+    "volume"        : 6,
+    "volume_cover"  : "https://img.mreadercdn.com/_m/200x300/100/c8/b9/c8b925c9d65fd68cc8d179eca560f895/c8b925c9d65fd68cc8d179eca560f895.jpeg",
+},
+
+{
+    "#url"     : "https://mangareader.to/mashle-magic-and-muscles-1616",
+    "#class"   : mangareader.MangareaderMangaExtractor,
+    "#pattern" : mangareader.MangareaderChapterExtractor.pattern,
+    "#options" : {"lang": "pt-br"},
+    "#count"   : 162,
+
+    "author"        : ["Koumoto, Hajime"],
+    "chapter"       : int,
+    "chapter_minor" : "",
+    "chapter_string": str,
+    "chapter_url"   : r"re:https://mangareader.to/read/mashle-magic-and-muscles-1616/pt-br/chapter-\d+",
+    "description"   : """To everyone else in his magic-dominated world, the young and powerless Mash Vandead is a threat to the gene pool and must be purged. Living secretly in the forest, he spends every day training his body, building muscles strong enough to compete with magic itself! However, upon having his identity exposed and his peaceful life threatened, Mash begins his journey to becoming a "Divine Visionary," a role so powerful that society would have no choice but to accept his existence.  And so, in order to maintain his peaceful life, the magicless Mash enrolls in the prestigious Easton Magic Academy, competing against the children of some of the most powerful and elite in the realm. Lacking the very skill needed to survive at Easton, magic, Mash appears to already be at a disadvantage to his fellow classmates. In order to achieve his goals, Mash will have to fight his way through every trial using his fists alone, overcoming magic with muscles, all for the illustrious title of Divine Visionary!  [Written by MAL Rewrite]""",
+    "lang"          : "pt",
+    "manga"         : "Mashle: Magic and Muscles",
+    "manga_alt"     : "マッシュル-MASHLE-",
+    "manga_id"      : 1616,
+    "manga_slug"    : "mashle-magic-and-muscles",
+    "manga_url"     : "https://mangareader.to/mashle-magic-and-muscles-1616",
+    "published"     : "Jan 27, 2020 to Jul 2, 2023",
+    "score"         : float,
+    "status"        : "Finished",
+    "title"         : str,
+    "type"          : "Manga",
+    "views"         : range(1_000_000, 3_000_000),
+    "tags"          : [
+        "Action",
+        "Comedy",
+        "Magic",
+        "Parody",
+        "Shounen",
+        "Supernatural",
+    ],
+},
+
+)
