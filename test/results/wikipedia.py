@@ -51,6 +51,10 @@ __tests__ = (
     "#class"   : wikimedia.WikimediaArticleExtractor,
     "#options" : {"image-revisions": 5},
     "#count"   : "> 8",
+
+    "page" : "Title",
+    "count": {2, 5},
+    "num"  : range(1, 5),
 },
 
 {
