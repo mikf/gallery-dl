@@ -289,6 +289,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.instagram.com/share/BACiUUUYQV",
+    "#category": ("", "instagram", "post"),
+    "#class"   : instagram.InstagramPostExtractor,
+    "shortcode"  : "C6q-XdvsU5v",
+},
+
+{
     "#url"     : "https://www.instagram.com/share/p/BACiUUUYQV",
     "#category": ("", "instagram", "post"),
     "#class"   : instagram.InstagramPostExtractor,
