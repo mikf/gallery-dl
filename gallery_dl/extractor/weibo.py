@@ -148,7 +148,8 @@ class WeiboExtractor(Extractor):
             media = max(info["playback_list"],
                         key=lambda m: m["meta"]["quality_index"])
         except Exception:
-            return {"url": (info.get("stream_url_hd") or
+            return {"url": (info.get("replay_hd") or
+                            info.get("stream_url_hd") or
                             info.get("stream_url") or "")}
         else:
             return media["play_info"].copy()
