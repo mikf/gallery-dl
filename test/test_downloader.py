@@ -386,6 +386,8 @@ SAMPLES = {
     ("mp3" , b"\xFF\xFB"),
     ("mp3" , b"\xFF\xF3"),
     ("mp3" , b"\xFF\xF2"),
+    ("m3u8", b"#EXTM3U\n#EXT-X-STREAM-INF:PROGRAM-ID=1, BANDWIDTH=200000"),
+    ("mpd" , b'<MPD xmlns="urn:mpeg:dash:schema:mpd:2011"'),
     ("zip" , b"PK\x03\x04"),
     ("zip" , b"PK\x05\x06"),
     ("zip" , b"PK\x07\x08"),
