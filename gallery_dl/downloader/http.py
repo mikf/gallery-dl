@@ -413,7 +413,7 @@ class HttpDownloader(DownloaderBase):
     def _find_extension(self, response):
         """Get filename extension from MIME type"""
         mtype = response.headers.get("Content-Type", "image/jpeg")
-        mtype = mtype.partition(";")[0]
+        mtype = mtype.partition(";")[0].lower()
 
         if "/" not in mtype:
             mtype = "image/" + mtype
@@ -475,6 +475,10 @@ MIME_TYPES = {
     "audio/ogg"  : "ogg",
     "audio/mpeg" : "mp3",
 
+    "application/vnd.apple.mpegurl": "m3u8",
+    "application/x-mpegurl"        : "m3u8",
+    "application/dash+xml"         : "mpd",
+
     "application/zip"  : "zip",
     "application/x-zip": "zip",
     "application/x-zip-compressed": "zip",
@@ -526,6 +530,8 @@ SIGNATURE_CHECKS = {
                        s[8:12] == b"WAVE"),
     "mp3" : lambda s: (s[0:3] == b"ID3" or
                        s[0:2] in (b"\xFF\xFB", b"\xFF\xF3", b"\xFF\xF2")),
+    "m3u8": lambda s: s[0:7] == b"#EXTM3U",
+    "mpd" : lambda s: b"<MPD" in s,
     "zip" : lambda s: s[0:4] in (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08"),
     "rar" : lambda s: s[0:6] == b"Rar!\x1A\x07",
     "7z"  : lambda s: s[0:6] == b"\x37\x7A\xBC\xAF\x27\x1C",
