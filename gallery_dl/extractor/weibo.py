@@ -87,15 +87,20 @@ class WeiboExtractor(Extractor):
             yield Message.Directory, status
 
             for num, file in enumerate(files, 1):
-                if file["url"].startswith("http:"):
-                    file["url"] = "https:" + file["url"][5:]
+                url = file["url"]
+                if url.startswith("http:"):
+                    url = f"https:{url[5:]}"
                 if "filename" not in file:
-                    text.nameext_from_url(file["url"], file)
+                    text.nameext_from_url(url, file)
                     if file["extension"] == "json":
                         file["extension"] = "mp4"
+                if file["extension"] == "m3u8":
+                    url = f"ytdl:{url}"
+                    file["_ytdl_manifest"] = "hls"
+                    file["extension"] = "mp4"
                 file["status"] = status
                 file["num"] = num
-                yield Message.Url, file["url"], file
+                yield Message.Url, url, file
 
     def _extract_status(self, status, files):
         if "mix_media_info" in status:
