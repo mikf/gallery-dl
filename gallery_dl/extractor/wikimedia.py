@@ -62,7 +62,7 @@ class WikimediaExtractor(BaseExtractor):
                 return url
         raise exception.AbortExtraction("Unable to find API endpoint")
 
-    def prepare_info(self, page):
+    def prepare_info(self, info):
         """Adjust the content of an image info object"""
 
     def prepare_image(self, image):
