@@ -45,6 +45,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://en.wikipedia.org/wiki/Title",
+    "#comment" : "force download revisions of images in an article",
+    "#category": ("wikimedia", "wikipedia", "article"),
+    "#class"   : wikimedia.WikimediaArticleExtractor,
+    "#options" : {"image-revisions": 5},
+    "#count"   : "> 8",
+
+    "page" : "Title",
+    "count": {2, 5},
+    "num"  : range(1, 5),
+},
+
+{
     "#url"     : "https://en.wikipedia.org/wiki/Category:Physics",
     "#category": ("wikimedia", "wikipedia", "category"),
     "#class"   : wikimedia.WikimediaArticleExtractor,

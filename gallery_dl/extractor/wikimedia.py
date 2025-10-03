@@ -46,6 +46,12 @@ class WikimediaExtractor(BaseExtractor):
         else:
             self.api_url = None
 
+        # note: image revisions are different from page revisions
+        # ref:
+        # https://www.mediawiki.org/wiki/API:Revisions
+        # https://www.mediawiki.org/wiki/API:Imageinfo
+        self.image_revisions = self.config("image-revisions", 1)
+
     @cache(maxage=36500*86400, keyarg=1)
     def _search_api_path(self, root):
         self.log.debug("Probing possible API endpoints")
@@ -56,7 +62,10 @@ class WikimediaExtractor(BaseExtractor):
                 return url
         raise exception.AbortExtraction("Unable to find API endpoint")
 
-    def prepare(self, image):
+    def prepare_info(self, info):
+        """Adjust the content of an image info object"""
+
+    def prepare_image(self, image):
         """Adjust the content of an image object"""
         image["metadata"] = {
             m["name"]: m["value"]
@@ -74,14 +83,19 @@ class WikimediaExtractor(BaseExtractor):
     def items(self):
         for info in self._pagination(self.params):
             try:
-                image = info["imageinfo"][0]
-            except LookupError:
+                images = info.pop("imageinfo")
+            except KeyError:
                 self.log.debug("Missing 'imageinfo' for %s", info)
-                continue
+                images = ()
 
-            self.prepare(image)
-            yield Message.Directory, image
-            yield Message.Url, image["url"], image
+            info["count"] = len(images)
+            self.prepare_info(info)
+            yield Message.Directory, info
+
+            for info["num"], image in enumerate(images, 1):
+                self.prepare_image(image)
+                image.update(info)
+                yield Message.Url, image["url"], image
 
         if self.subcategories:
             base = self.root + "/wiki/"
@@ -108,6 +122,7 @@ class WikimediaExtractor(BaseExtractor):
             "timestamp|user|userid|comment|canonicaltitle|url|size|"
             "sha1|mime|metadata|commonmetadata|extmetadata|bitdepth"
         )
+        params["iilimit"] = self.image_revisions
 
         while True:
             data = self.request_json(url, params=params)
@@ -237,9 +252,8 @@ class WikimediaArticleExtractor(WikimediaExtractor):
                 "titles"   : path,
             }
 
-    def prepare(self, image):
-        WikimediaExtractor.prepare(self, image)
-        image["page"] = self.title
+    def prepare_info(self, info):
+        info["page"] = self.title
 
 
 class WikimediaWikiExtractor(WikimediaExtractor):
