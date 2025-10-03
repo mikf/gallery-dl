@@ -6560,6 +6560,9 @@ Description
     The dafault value of 1 only returns the latest revision.
 
     The value must be between 1 and 500.
+Note
+    The API sometimes returns image revisions on article pages even when this option is
+    set to 1. However, setting it to a higher value may reduce the number of API requests.
 
 
 extractor.wikimedia.limit
