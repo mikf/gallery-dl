@@ -228,7 +228,8 @@ class Extractor():
                     break
 
             finally:
-                Extractor.request_timestamp = time.time()
+                if interval:
+                    Extractor.request_timestamp = time.time()
 
             self.log.debug("%s (%s/%s)", msg, tries, retries+1)
             if tries > retries:
@@ -262,6 +263,7 @@ class Extractor():
     def request_location(self, url, **kwargs):
         kwargs.setdefault("method", "HEAD")
         kwargs.setdefault("allow_redirects", False)
+        kwargs.setdefault("interval", False)
         return self.request(url, **kwargs).headers.get("location", "")
 
     def request_json(self, url, **kwargs):
