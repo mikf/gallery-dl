@@ -309,6 +309,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://weibo.com/7926989456/5160875674043425",
+    "#comment" : "'replay_hd' video (live replay #8339)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#results" : "ytdl:https://live.video.weibocdn.com/4817f457-c9be-47f7-a5a0-8591fd363cb1_index.m3u8",
+},
+
+{
     "#url"     : "https://weibo.com/7117031969/5208376084532264",
     "#comment" : "'.m3u8' manifest (live replay #8339)",
     "#class"   : weibo.WeiboStatusExtractor,
