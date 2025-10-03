@@ -331,4 +331,19 @@ __tests__ = (
     "#count"   : 1,
 },
 
+{
+    "#url"     : "https://weibo.com/3317906495/5217357545080355",
+    "#comment" : "stream as 'wblive-out.api.weibo.com' URL (#8339)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#results" : "ytdl:https://live.video.weibocdn.com/5073cc59-42fc-4b9c-9a61-852d44b0ccc3_index.m3u8",
+},
+
+{
+    "#url"     : "https://weibo.com/7130470964/5217692969600188",
+    "#comment" : "stream without replay (#8339)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#count"   : 0,
+    "#log"     : "HttpError: '404 ' for 'https://wblive-out.api.weibo.com/2/wblive/room/play?id=1022:2321325216257942356128'",
+},
+
 )
