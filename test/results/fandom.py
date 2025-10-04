@@ -105,6 +105,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://youtube.fandom.com/wiki/File:(500)_Montage_-_Reason_2_Die_Awakening",
+    "#comment" : "file without extension",
+    "#category": ("wikimedia", "fandom-youtube", "file"),
+    "#class"   : wikimedia.WikimediaArticleExtractor,
+
+    "extension": "",
+    "filename" : "(500) Montage - Reason 2 Die Awakening",
+    "page"     : "File:(500)_Montage_-_Reason_2_Die_Awakening",
+    "sha1"     : "6819869792d85927d60cc0a0cdc9e33dbd446731",
+    "size"     : 81905,
+},
+
+{
     "#url"     : "https://youtube.fandom.com",
     "#category": ("wikimedia", "fandom-youtube", "wiki"),
     "#class"   : wikimedia.WikimediaWikiExtractor,
