@@ -29,6 +29,12 @@ class WeiboExtractor(Extractor):
         Extractor.__init__(self, match)
         self._prefix, self.user = match.groups()
 
+    def _init_cookies(self):
+        cookies = _cookie_cache()
+        if cookies is not None:
+            self.session.cookies.update(cookies)
+        Extractor._init_cookies(self)
+
     def _init(self):
         self.livephoto = self.config("livephoto", True)
         self.retweets = self.config("retweets", False)
@@ -36,10 +42,6 @@ class WeiboExtractor(Extractor):
         self.movies = self.config("movies", False)
         self.gifs = self.config("gifs", True)
         self.gifs_video = (self.gifs == "video")
-
-        cookies = _cookie_cache()
-        if cookies is not None:
-            self.cookies.update(cookies)
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
