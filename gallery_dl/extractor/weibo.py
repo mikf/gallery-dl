@@ -150,6 +150,10 @@ class WeiboExtractor(Extractor):
                     self.log.debug("%s: Ignoring 'movie' video", status["id"])
 
     def _extract_video(self, info):
+        if info.get("live_status") == 1:
+            self.log.debug("Skipping ongoing live stream")
+            return {"url": ""}
+
         try:
             media = max(info["playback_list"],
                         key=lambda m: m["meta"]["quality_index"])
