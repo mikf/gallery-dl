@@ -203,8 +203,12 @@ class WeiboExtractor(Extractor):
                     raise exception.AbortExtraction(
                         f'"{data.get("msg") or "unknown error"}"')
 
-            data = data["data"]
-            statuses = data["list"]
+            try:
+                data = data["data"]
+                statuses = data["list"]
+            except KeyError:
+                return
+
             yield from statuses
 
             # videos, newvideo
@@ -217,7 +221,8 @@ class WeiboExtractor(Extractor):
             # album
             if since_id := data.get("since_id"):
                 params["sinceid"] = since_id
-                continue
+            else:
+                params["sinceid"] = None
 
             # home, article
             if "page" in params:
@@ -304,7 +309,7 @@ class WeiboFeedExtractor(WeiboExtractor):
 
     def statuses(self):
         endpoint = "/statuses/mymblog"
-        params = {"uid": self._user_id(), "feature": "0"}
+        params = {"uid": self._user_id(), "page": 1, "feature": "0"}
         return self._pagination(endpoint, params)
 
 
