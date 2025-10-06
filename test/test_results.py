@@ -53,6 +53,7 @@ AUTH_REQUIRED = {
     "fantia",
     "instagram",
     "twitter",
+    "poipiku",
 }
 
 AUTH_KEYS = (
