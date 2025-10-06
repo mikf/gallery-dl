@@ -27,7 +27,7 @@ class GirlsreleasedExtractor(Extractor):
             yield Message.Queue, f"{base}{set[0]}", data
 
     def _pagination(self):
-        base = f"{self.root}/api/0.1/sets/{self._path}/{self.groups[0]}/page/"
+        base = f"{self.root}/api/0.2/sets/{self._path}/{self.groups[0]}/page/"
         for pnum in itertools.count():
             sets = self.request_json(f"{base}{pnum}")["sets"]
             if not sets:
@@ -45,7 +45,7 @@ class GirlsreleasedSetExtractor(GirlsreleasedExtractor):
     example = "https://girlsreleased.com/set/12345"
 
     def items(self):
-        url = f"{self.root}/api/0.1/set/{self.groups[0]}"
+        url = f"{self.root}/api/0.2/set/{self.groups[0]}"
         json = self.request_json(url)["set"]
         data = {
             "title": json["name"] or json["id"],
