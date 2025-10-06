@@ -293,6 +293,8 @@ class InstagramExtractor(Extractor):
             self._extract_tagged_users(item, media)
             files.append(media)
 
+        if "subscription_media_visibility" in post:
+            data["subscription"] = post["subscription_media_visibility"]
         if "type" not in data:
             if len(files) == 1 and files[0]["video_url"]:
                 data["type"] = "reel"
