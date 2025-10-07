@@ -100,7 +100,7 @@ class InstagramExtractor(Extractor):
                     if videos:
                         file["_http_headers"] = videos_headers
                         text.nameext_from_url(url, file)
-                        if videos_dash and "_ytdl_manifest_data" in post:
+                        if videos_dash and "_ytdl_manifest_data" in file:
                             file["_fallback"] = (url,)
                             file["_ytdl_manifest"] = "dash"
                             url = f"ytdl:{post['post_url']}{file['num']}.mp4"
