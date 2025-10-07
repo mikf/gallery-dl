@@ -102,4 +102,76 @@ __tests__ = (
     "user_name"    : "onitsuraaaai",
 },
 
+{
+    "#url"     : "https://poipiku.com/12282220/12290661.html",
+    "#comment" : "Password Required ('yes')",
+    "#class"   : poipiku.PoipikuPostExtractor,
+    "#options" : {"password": "yes"},
+    "#pattern" : (
+        r"https://cdn.poipiku.com/012282220/012290661_cTNUS0cX9.png\?.+",
+        r"https://cdn.poipiku.com/012282220/012290661_027772303_q9Yb5mdQO.png\?.+",
+        r"https://cdn.poipiku.com/012282220/012290661_027772304_jTlthEwKf.jpeg\?.+",
+    ),
+
+    "count"        : 3,
+    "num"          : range(1, 3),
+    "filename"     : str,
+    "extension"    : {"jpeg", "png"},
+    "description"  : "过去的🕶️Σ🕶️ 🔞<br />堆堆<br /><br />18↑ yes/no",
+    "original"     : True,
+    "post_category": "DOODLE",
+    "post_id"      : "12290661",
+    "user_id"      : "12282220",
+    "user_name"    : "FaratMo4",
+},
+
+{
+    "#url"     : "https://poipiku.com/3572553/5776587.html",
+    "#comment" : "SPOILER / Warning (warning.png)",
+    "#class"   : poipiku.PoipikuPostExtractor,
+},
+
+{
+    "#url"     : "https://poipiku.com/9117461/12291186.html",
+    "#comment" : "Follower Only (publish_follower.png)  + Password ('yes')",
+    "#class"   : poipiku.PoipikuPostExtractor,
+},
+
+{
+    "#url"     : "https://poipiku.com/11516189/12291094.html",
+    "#comment" : "Retweet Required (publish_t_rt.png) + Password",
+    "#class"   : poipiku.PoipikuPostExtractor,
+},
+
+{
+    "#url"     : "https://poipiku.com/542956/12293287.html",
+    "#comment" : "Sign-In Only (publish_login.png)",
+    "#class"   : poipiku.PoipikuPostExtractor,
+    "#auth"    : False,
+},
+
+{
+    "#url"     : "https://poipiku.com/11513074/12290032.html",
+    "#comment" : "Sign-In Only (publish_login.png) + Password",
+    "#class"   : poipiku.PoipikuPostExtractor,
+    "#auth"    : False,
+},
+
+{
+
+    "#url"     : "https://poipiku.com/2498939/12293054.html",
+    "#comment" : "Animated GIF",
+    "#class"   : poipiku.PoipikuPostExtractor,
+    "#auth"    : False,
+    "#result"  : "https://cdn.poipiku.com/002498939/012293054_RcNvVjZ85.gif_640.jpg",
+    "#sha1_content": "ac4726b93dc6d507188cfcb5193dd20bcf6c38b0",
+},
+
+{
+
+    "#url"     : "https://poipiku.com/11329926/11669296.html",
+    "#comment" : "Text Posts",
+    "#class"   : poipiku.PoipikuPostExtractor,
+},
+
 )
