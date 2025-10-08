@@ -77,7 +77,7 @@ class FanslyExtractor(Extractor):
             variants.append(media)
 
         formats = [
-            (type > 256, variant["width"], type, variant)
+            (variant["width"], (type-500 if type > 256 else type), variant)
             for variant in variants
             if variant.get("locations") and
             (type := variant["type"]) in self.formats
