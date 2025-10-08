@@ -188,11 +188,28 @@ Description
 extractor.*.base-directory
 --------------------------
 Type
-    |Path|_
+    * |Path|_
+    * ``object`` (Condition_ → |Path|_)
 Default
     ``"./gallery-dl/"``
+Example
+    .. code:: json
+
+        "~/Downloads/gallery-dl"
+
+    .. code:: json
+
+        {
+            "score >= 100": "$DL",
+            "duration"    : "$DL/video",
+            ""            : "/tmp/files/"
+        }
 Description
     Directory path used as base for all download destinations.
+
+    If this is an ``object``,
+    it must contain Conditions_ mapping to the |Path|_ to use.
+    Specifying a default |Path|_ with ``""`` is required.
 
 
 extractor.*.parent-directory
