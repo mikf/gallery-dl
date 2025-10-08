@@ -7490,15 +7490,12 @@ Description
 output.log
 ----------
 Type
-    * ``string``
+    * `Format String`_
     * |Logging Configuration|_
 Default
     ``"[{name}][{levelname}] {message}"``
 Description
     Configuration for logging output to stderr.
-
-    If this is a simple ``string``, it specifies
-    the format string for logging messages.
 
 
 output.logfile
@@ -7518,7 +7515,7 @@ Type
 Description
     File to write external URLs unsupported by *gallery-dl* to.
 
-    The default format string here is ``"{message}"``.
+    The default `Format String`_ here is ``"{message}"``.
 
 
 output.errorfile
@@ -7529,7 +7526,7 @@ Type
 Description
     File to write input URLs which returned an error to.
 
-    The default format string here is also ``"{message}"``.
+    The default `Format String`_ here is also ``"{message}"``.
 
     When combined with
     ``-I``/``--input-file-comment`` or
@@ -9164,8 +9161,8 @@ Description
     Extended logging output configuration.
 
     * format
-        * General format string for logging messages
-          or an ``object`` with format strings for each loglevel.
+        * General `Format String`_ for logging messages
+          or an ``object`` with `Format Strings`_ for each loglevel.
 
           In addition to the default
           `LogRecord attributes <https://docs.python.org/3/library/logging.html#logrecord-attributes>`__,
