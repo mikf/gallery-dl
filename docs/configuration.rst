@@ -8230,7 +8230,7 @@ Description
     Name of the metadata field whose value should be used.
 
     This value must be either a UNIX timestamp or a
-    |datetime|_ object.
+    |type-datetime|_ object.
 Note
     This option is ignored if `mtime.value`_ is set.
 
@@ -8248,7 +8248,7 @@ Description
     The `Format String`_ whose value should be used.
 
     The resulting value must be either a UNIX timestamp or a
-    |datetime|_ object.
+    |type-datetime|_ object.
 Note:
     Unlike standard `Format Strings`_, replacement fields here
     preserve the original type of their value
@@ -9353,9 +9353,7 @@ Example
     * ``["width > 800", "0.9 < width/height < 1.1"]``
 Description
     A Condition_ is an Expression_
-    whose result is evaluated as a
-    `boolean <https://docs.python.org/3/library/stdtypes.html#boolean-type-bool>`__
-    value.
+    whose result is evaluated as a |type-bool|_ value.
 
 
 Format String
@@ -9391,7 +9389,8 @@ Reference
 .. |mature_content| replace:: ``mature_content``
 .. |webbrowser.open()| replace:: ``webbrowser.open()``
 .. |type-str| replace:: ``str``
-.. |datetime| replace:: ``datetime``
+.. |type-bool| replace:: ``boolean``
+.. |type-datetime| replace:: ``datetime``
 .. |datetime.max| replace:: ``datetime.max``
 .. |Date| replace:: ``Date``
 .. |Duration| replace:: ``Duration``
@@ -9426,7 +9425,8 @@ Reference
 .. _.netrc:             https://stackoverflow.com/tags/.netrc/info
 .. _Last-Modified:      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
 .. _type-str:           https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str
-.. _datetime:           https://docs.python.org/3/library/datetime.html#datetime-objects
+.. _type-bool:          https://docs.python.org/3/library/stdtypes.html#boolean-type-bool
+.. _type-datetime:      https://docs.python.org/3/library/datetime.html#datetime-objects
 .. _datetime.max:       https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _strptime:           https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
 .. _webbrowser.open():  https://docs.python.org/3/library/webbrowser.html
