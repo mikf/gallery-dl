@@ -443,4 +443,9 @@ __tests__ = (
     "#class"   : bluesky.BlueskyPostExtractor,
 },
 
+{
+    "#url"     : "https://bsky.app/saved",
+    "#class"   : bluesky.BlueskyBookmarkExtractor,
+},
+
 )
