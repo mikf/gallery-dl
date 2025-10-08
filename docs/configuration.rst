@@ -8042,6 +8042,10 @@ Description
     ``"mode": "modify"``
         An object with metadata field names mapping to a `Format String`_
         whose result is assigned to that field name.
+Note:
+    Unlike standard `Format Strings`_, replacement fields here
+    preserve the original type of their value
+    instead of automatically converting it to |type-str|_.
 
 
 metadata.content-format
@@ -8245,6 +8249,10 @@ Description
 
     The resulting value must be either a UNIX timestamp or a
     |datetime|_ object.
+Note:
+    Unlike standard `Format Strings`_, replacement fields here
+    preserve the original type of their value
+    instead of automatically converting it to |type-str|_.
 
 
 python.archive
@@ -9382,6 +9390,7 @@ Reference
 .. |verify| replace:: ``verify``
 .. |mature_content| replace:: ``mature_content``
 .. |webbrowser.open()| replace:: ``webbrowser.open()``
+.. |type-str| replace:: ``str``
 .. |datetime| replace:: ``datetime``
 .. |datetime.max| replace:: ``datetime.max``
 .. |Date| replace:: ``Date``
@@ -9416,6 +9425,7 @@ Reference
 .. _Conversion(s):      https://gdl-org.github.io/docs/formatting.html#conversions
 .. _.netrc:             https://stackoverflow.com/tags/.netrc/info
 .. _Last-Modified:      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
+.. _type-str:           https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str
 .. _datetime:           https://docs.python.org/3/library/datetime.html#datetime-objects
 .. _datetime.max:       https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _strptime:           https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
