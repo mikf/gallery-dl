@@ -74,44 +74,13 @@ class PoipikuExtractor(Extractor):
             yield Message.Directory, post
 
             thumb = extr('class="IllustItemThumbImg" src="', '"')
-            if reason := self._discard_post(post, thumb):
-                if isinstance(reason, str):
-                    self.log.warning("%s: '%s'", post["post_id"], reason)
-                continue
-            elif reason is not False:
-                thumb = reason
+            if thumb.startswith("https://cdn.poipiku.com/img/"):
+                thumb = ""  # swallows the warning images etc
 
             self.headers["Referer"] = post_url
             for post["num"], url in enumerate(extract_files(
                     post, thumb, extr), 1):
                 yield Message.Url, url, text.nameext_from_url(url, post)
-
-    def _discard_post(self, post, thumb):
-        if not thumb:
-            return True
-        if thumb.startswith("https://cdn.poipiku.com/img/"):
-            self.log.debug("%s: %s", post["post_id"], thumb)
-            type = text.rextr(thumb, "/", ".")
-            if type == "warning":
-                return None
-            elif type == "publish_pass":
-                return ""
-            elif type == "publish_login":
-                return 0 if self.logged_in else "You need to sign in"
-            elif type == "publish_follower":
-                return "Favorite only"
-            elif type == "publish_t_rt":
-                return "Retweet required"
-        if thumb.startswith((
-            "https://img.poipiku.com/img/",
-            "//img.poipiku.com/img/",
-            "/img/",
-        )):
-            self.log.debug("%s: %s", post["post_id"], thumb)
-            if "/warning" in thumb:
-                return None
-            return True
-        return False
 
     def _extract_files_auth(self, post, thumb, extr):
         data = self._show_illust_detail(post)
