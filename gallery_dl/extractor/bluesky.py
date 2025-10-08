@@ -150,9 +150,15 @@ class BlueskyExtractor(Extractor):
 
         if "images" in media:
             for image in media["images"]:
-                files.append(self._extract_media(image, "image"))
+                try:
+                    files.append(self._extract_media(image, "image"))
+                except Exception:
+                    pass
         if "video" in media and self.videos:
-            files.append(self._extract_media(media, "video"))
+            try:
+                files.append(self._extract_media(media, "video"))
+            except Exception:
+                pass
 
         post["count"] = len(files)
         return files
