@@ -9,7 +9,7 @@
 """Extractors for https://fansly.com/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, util, exception
 import time
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?fansly\.com"
@@ -42,6 +42,23 @@ class FanslyExtractor(Extractor):
                 post.update(file)
                 url = file["url"]
                 yield Message.Url, url, text.nameext_from_url(url, post)
+
+    def posts(self):
+        creator, wall_id = self.groups
+        account = self.api.account(creator)
+        walls = account["walls"]
+
+        if wall_id:
+            for wall in walls:
+                if wall["id"] == wall_id:
+                    break
+            else:
+                raise exception.NotFoundError("wall")
+            walls = (wall,)
+
+        for wall in walls:
+            self.kwdict["wall"] = wall
+            yield from self.posts_wall(account, wall)
 
     def _extract_files(self, post):
         files = []
@@ -190,11 +207,8 @@ class FanslyCreatorPostsExtractor(FanslyExtractor):
     pattern = rf"{BASE_PATTERN}/([^/?#]+)/posts(?:/wall/(\d+))?"
     example = "https://fansly.com/CREATOR/posts"
 
-    def posts(self):
-        creator, wall_id = self.groups
-        account = self.api.account(creator)
-        return self.api.timeline_new(
-            account["id"], wall_id or account["walls"][0]["id"])
+    def posts_wall(self, account, wall):
+        return self.api.timeline_new(account["id"], wall["id"])
 
 
 class FanslyCreatorMediaExtractor(FanslyExtractor):
@@ -202,11 +216,8 @@ class FanslyCreatorMediaExtractor(FanslyExtractor):
     pattern = rf"{BASE_PATTERN}/([^/?#]+)/media(?:/wall/(\d+))?"
     example = "https://fansly.com/CREATOR/media"
 
-    def posts(self):
-        creator, wall_id = self.groups
-        account = self.api.account(creator)
-        return self.api.mediaoffers_location(
-            account["id"], wall_id or account["walls"][0]["id"])
+    def posts_wall(self, account, wall):
+        return self.api.mediaoffers_location(account["id"], wall["id"])
 
 
 class FanslyAPI():
