@@ -22,18 +22,14 @@ class WeiboExtractor(Extractor):
     directory_fmt = ("{category}", "{user[screen_name]}")
     filename_fmt = "{status[id]}_{num:>02}.{extension}"
     archive_fmt = "{status[id]}_{num}"
+    cookies_domain = ".weibo.com"
+    cookies_names = ("SUB", "SUBP")
     root = "https://weibo.com"
     request_interval = (1.0, 2.0)
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self._prefix, self.user = match.groups()
-
-    def _init_cookies(self):
-        cookies = _cookie_cache()
-        if cookies is not None:
-            self.session.cookies.update(cookies)
-        Extractor._init_cookies(self)
 
     def _init(self):
         self.livephoto = self.config("livephoto", True)
@@ -42,6 +38,25 @@ class WeiboExtractor(Extractor):
         self.movies = self.config("movies", False)
         self.gifs = self.config("gifs", True)
         self.gifs_video = (self.gifs == "video")
+
+        cookies = _cookie_cache()
+        if cookies is None:
+            self.logged_in = self.cookies_check(
+                self.cookies_names, self.cookies_domain)
+            return
+
+        domain = self.cookies_domain
+        cookies = {c.name: c for c in cookies if c.domain == domain}
+        for cookie in self.cookies:
+            if cookie.domain == domain and cookie.name in cookies:
+                del cookies[cookie.name]
+                if not cookies:
+                    self.logged_in = True
+                    return
+
+        self.logged_in = False
+        for cookie in cookies.values():
+            self.cookies.set_cookie(cookie)
 
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
