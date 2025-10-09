@@ -7720,8 +7720,8 @@ Description
       name and any further elements its arguments.
 
       Each element of this list is evaluated as a `Format String`_ using
-      the files' metadata as well as ``{_path}``, ``{_directory}``,
-      and ``{_filename}``.
+      the files' metadata as well as
+      ``{_path}``, ``{_temppath}``, ``{_directory}``, and ``{_filename}``.
 
 
 exec.commands

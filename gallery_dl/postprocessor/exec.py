@@ -55,7 +55,8 @@ class ExecPP(PostProcessor):
 
     def _prepare_cmd(self, cmd):
         if isinstance(cmd, str):
-            self._sub = util.re(r"\{(_directory|_filename|_path|)\}").sub
+            self._sub = util.re(
+                r"\{(_directory|_filename|_(?:temp)?path|)\}").sub
             return self.exec_string, cmd
         else:
             return self.exec_list, [formatter.parse(arg) for arg in cmd]
@@ -69,6 +70,7 @@ class ExecPP(PostProcessor):
 
         kwdict["_directory"] = pathfmt.realdirectory
         kwdict["_filename"] = pathfmt.filename
+        kwdict["_temppath"] = pathfmt.temppath
         kwdict["_path"] = pathfmt.realpath
 
         args = [arg.format_map(kwdict) for arg in self.args]
@@ -131,6 +133,8 @@ class ExecPP(PostProcessor):
             return quote(self.pathfmt.realdirectory)
         if name == "_filename":
             return quote(self.pathfmt.filename)
+        if name == "_temppath":
+            return quote(self.pathfmt.temppath)
         return quote(self.pathfmt.realpath)
 
 

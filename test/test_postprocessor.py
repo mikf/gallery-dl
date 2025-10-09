@@ -195,7 +195,8 @@ class ExecTest(BasePostprocessorTest):
 
     def test_command_string(self):
         self._create({
-            "command": "echo {} {_path} {_directory} {_filename} && rm {};",
+            "command": "echo {} {_path} {_temppath} {_directory} {_filename} "
+                       "&& rm {};",
         })
 
         with patch("gallery_dl.util.Popen") as p:
@@ -208,6 +209,7 @@ class ExecTest(BasePostprocessorTest):
             (f"echo "
              f"{self.pathfmt.realpath} "
              f"{self.pathfmt.realpath} "
+             f"{self.pathfmt.temppath} "
              f"{self.pathfmt.realdirectory} "
              f"{self.pathfmt.filename} "
              f"&& rm {self.pathfmt.realpath};"),
@@ -243,7 +245,8 @@ class ExecTest(BasePostprocessorTest):
     def test_command_many(self):
         self._create({
             "commands": [
-                "echo {} {_path} {_directory} {_filename} && rm {};",
+                "echo {} {_path} {_temppath} {_directory} {_filename} "
+                "&& rm {};",
                 ["~/script.sh", "{category}", "\fE _directory.upper()"],
             ]
         })
@@ -259,6 +262,7 @@ class ExecTest(BasePostprocessorTest):
                 (f"echo "
                  f"{self.pathfmt.realpath} "
                  f"{self.pathfmt.realpath} "
+                 f"{self.pathfmt.temppath} "
                  f"{self.pathfmt.realdirectory} "
                  f"{self.pathfmt.filename} "
                  f"&& rm {self.pathfmt.realpath};"),
