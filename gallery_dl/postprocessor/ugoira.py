@@ -386,7 +386,7 @@ class UgoiraPP(PostProcessor):
         content.append("")
 
         ffconcat = tempdir + "/ffconcat.txt"
-        with open(ffconcat, "w") as fp:
+        with open(ffconcat, "w", encoding="utf-8") as fp:
             fp.write("\n".join(content))
         return ffconcat
 
@@ -401,7 +401,7 @@ class UgoiraPP(PostProcessor):
         content.append("")
 
         timecodes = tempdir + "/timecodes.tc"
-        with open(timecodes, "w") as fp:
+        with open(timecodes, "w", encoding="utf-8") as fp:
             fp.write("\n".join(content))
         return timecodes
 

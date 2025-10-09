@@ -541,7 +541,7 @@ class Extractor():
         elif isinstance(cookies_source, str):
             path = util.expand_path(cookies_source)
             try:
-                with open(path) as fp:
+                with open(path, encoding="utf-8") as fp:
                     cookies = util.cookiestxt_load(fp)
             except ValueError as exc:
                 self.log.warning("cookies: Invalid Netscape cookies.txt file "
@@ -599,7 +599,7 @@ class Extractor():
 
         path_tmp = path + ".tmp"
         try:
-            with open(path_tmp, "w") as fp:
+            with open(path_tmp, "w", encoding="utf-8") as fp:
                 util.cookiestxt_store(fp, self.cookies)
             os.replace(path_tmp, path)
         except OSError as exc:

@@ -241,7 +241,7 @@ def _firefox_cookies_database(browser_name, profile=None, container=None):
             os.path.dirname(path), "containers.json")
 
         try:
-            with open(containers_path) as fp:
+            with open(containers_path, encoding="utf-8") as fp:
                 identities = util.json_loads(fp.read())["identities"]
         except OSError:
             _log_error("Unable to read Firefox container database at '%s'",
