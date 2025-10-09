@@ -23,7 +23,7 @@ class ZerochanExtractor(BooruExtractor):
     filename_fmt = "{id}.{extension}"
     archive_fmt = "{id}"
     page_start = 1
-    per_page = 250
+    per_page = 200
     cookies_domain = ".zerochan.net"
     cookies_names = ("z_id", "z_hash")
     useragent = util.USERAGENT
@@ -188,9 +188,10 @@ class ZerochanTagExtractor(ZerochanExtractor):
 
     def posts_html(self):
         url = self.root + "/" + self.search_tag
-        params = text.parse_query(self.query)
-        params["p"] = text.parse_int(params.get("p"), self.page_start)
         metadata = self.config("metadata")
+
+        params = text.parse_query(self.query, empty=True)
+        params["p"] = text.parse_int(params.get("p"), self.page_start)
 
         while True:
             try:
@@ -231,11 +232,11 @@ class ZerochanTagExtractor(ZerochanExtractor):
     def posts_api(self):
         url = self.root + "/" + self.search_tag
         metadata = self.config("metadata")
-        params = {
-            "json": "1",
-            "l"   : self.per_page,
-            "p"   : self.page_start,
-        }
+
+        params = text.parse_query(self.query, empty=True)
+        params["p"] = text.parse_int(params.get("p"), self.page_start)
+        params.setdefault("l", self.per_page)
+        params["json"] = "1"
 
         while True:
             try:
