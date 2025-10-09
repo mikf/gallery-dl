@@ -73,7 +73,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         else:
             comic_name = episode_name = ""
 
-        if extr('<span class="tx _btnOpenEpisodeList ', '"'):
+        if extr('<span class="tx _btnOpenEpisodeLis', '"'):
             episode = extr(">#", "<")
         else:
             episode = ""
