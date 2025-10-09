@@ -267,7 +267,7 @@ def parse_float(value, default=0.0):
         return default
 
 
-def parse_query(qs):
+def parse_query(qs, empty=False):
     """Parse a query string into name-value pairs
 
     Ignore values whose name has been seen before
@@ -279,7 +279,7 @@ def parse_query(qs):
     try:
         for name_value in qs.split("&"):
             name, eq, value = name_value.partition("=")
-            if eq:
+            if eq or empty:
                 name = unquote(name.replace("+", " "))
                 if name not in result:
                     result[name] = unquote(value.replace("+", " "))

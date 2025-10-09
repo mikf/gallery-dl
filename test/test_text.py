@@ -459,10 +459,14 @@ class TestText(unittest.TestCase):
         # missing value
         self.assertEqual(f("bar"), {})
         self.assertEqual(f("bar="), {"bar": ""})
+        self.assertEqual(f("bar", empty=True), {"bar": ""})
         self.assertEqual(f("foo=1&bar"), {"foo": "1"})
         self.assertEqual(f("foo=1&bar="), {"foo": "1", "bar": ""})
+        self.assertEqual(f("foo=1&bar", True), {"foo": "1", "bar": ""})
         self.assertEqual(f("foo=1&bar&baz=3"), {"foo": "1", "baz": "3"})
         self.assertEqual(f("foo=1&bar=&baz=3"),
+                         {"foo": "1", "bar": "", "baz": "3"})
+        self.assertEqual(f("foo=1&bar&baz=3", True),
                          {"foo": "1", "bar": "", "baz": "3"})
 
         # keys with identical names
