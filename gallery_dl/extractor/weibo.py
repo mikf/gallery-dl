@@ -240,8 +240,9 @@ class WeiboExtractor(Extractor):
             # album
             if since_id := data.get("since_id"):
                 params["sinceid"] = since_id
-            else:
-                params["sinceid"] = None
+                if "page" in params:
+                    params["page"] += 1
+                continue
 
             # home, article
             if "page" in params:
@@ -328,7 +329,9 @@ class WeiboFeedExtractor(WeiboExtractor):
 
     def statuses(self):
         endpoint = "/statuses/mymblog"
-        params = {"uid": self._user_id(), "page": 1, "feature": "0"}
+        params = {"uid": self._user_id(), "feature": "0"}
+        if self.logged_in:
+            params["page"] = 1
         return self._pagination(endpoint, params)
 
 
