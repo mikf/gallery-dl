@@ -22,7 +22,7 @@ class RecursiveExtractor(Extractor):
         url = self.url.partition(":")[2]
 
         if url.startswith("file://"):
-            with open(url[7:]) as fp:
+            with open(url[7:], encoding="utf-8") as fp:
                 page = fp.read()
         else:
             page = self.request(text.ensure_http_scheme(url)).text

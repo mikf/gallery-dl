@@ -31,7 +31,7 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
         module.YoutubeDL.deprecation_warning = util.false
 
     if cfg := config("config-file"):
-        with open(util.expand_path(cfg)) as fp:
+        with open(util.expand_path(cfg), encoding="utf-8") as fp:
             contents = fp.read()
         argv = shlex.split(contents, comments=True)
 
