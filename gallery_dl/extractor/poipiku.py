@@ -44,10 +44,10 @@ class PoipikuExtractor(Extractor):
     def items(self):
         if self.cookies_check(("POIPIKU_LK",)):
             extract_files = self._extract_files_auth
-            self.logged_in = True
+            logged_in = True
         else:
             extract_files = self._extract_files_noauth
-            self.logged_in = False
+            logged_in = False
             if self.cookies_warning:
                 self.log.warning("no 'POIPIKU_LK' cookie set")
                 PoipikuExtractor.cookies_warning = False
@@ -67,51 +67,56 @@ class PoipikuExtractor(Extractor):
                     '<h2 class="UserInfoUserName">', '</').rpartition(">")[2]),
                 "description": text.unescape(extr(
                     'class="IllustItemDesc" >', '</h1>')),
-                "original"   : self.logged_in,
+                "warning"    : False,
+                "password"   : False,
+                "requires"   : None,
+                "original"   : logged_in,
                 "_http_headers": {"Referer": post_url},
             }
 
-            yield Message.Directory, post
-
-            thumb = extr('class="IllustItemThumbImg" src="', '"')
-            if reason := self._discard_post(post, thumb):
-                if isinstance(reason, str):
-                    self.log.warning("%s: '%s'", post["post_id"], reason)
-                continue
-            elif reason is not False:
-                thumb = reason
-
+            thumb = self._extract_thumb(post, extr)
             self.headers["Referer"] = post_url
+
+            if post["requires"] and not post["password"] and extr(
+                    "PasswordIcon", ">"):
+                post["password"] = True
+
+            yield Message.Directory, post
             for post["num"], url in enumerate(extract_files(
                     post, thumb, extr), 1):
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
-    def _discard_post(self, post, thumb):
-        if not thumb:
-            return True
-        if thumb.startswith("https://cdn.poipiku.com/img/"):
-            self.log.debug("%s: %s", post["post_id"], thumb)
-            type = text.rextr(thumb, "/", ".")
-            if type == "warning":
-                return None
-            elif type == "publish_pass":
-                return ""
-            elif type == "publish_login":
-                return 0 if self.logged_in else "You need to sign in"
-            elif type == "publish_follower":
-                return "Favorite only"
-            elif type == "publish_t_rt":
-                return "Retweet required"
-        if thumb.startswith((
-            "https://img.poipiku.com/img/",
-            "//img.poipiku.com/img/",
-            "/img/",
-        )):
-            self.log.debug("%s: %s", post["post_id"], thumb)
-            if "/warning" in thumb:
-                return None
-            return True
-        return False
+    def _extract_thumb(self, post, extr):
+        thumb = ""
+
+        while True:
+            img = extr('class="IllustItemThumbImg" src="', '"')
+
+            if not img:
+                return thumb
+            elif img.startswith("https://cdn.poipiku.com/img/"):
+                self.log.debug("%s: %s", post["post_id"], img)
+                type = text.rextr(img, "/", ".")
+                if type == "warning":
+                    post["warning"] = True
+                elif type == "publish_pass":
+                    post["password"] = True
+                elif type == "publish_login":
+                    post["requires"] = "login"
+                elif type == "publish_follower":
+                    post["requires"] = "follow"
+                elif type == "publish_t_rt":
+                    post["requires"] = "retweet"
+            elif img.startswith((
+                "https://img.poipiku.com/img/",
+                "//img.poipiku.com/img/",
+                "/img/",
+            )):
+                self.log.debug("%s: %s", post["post_id"], img)
+                if "/warning" in img:
+                    post["warning"] = True
+            else:
+                thumb = img
 
     def _extract_files_auth(self, post, thumb, extr):
         data = self._show_illust_detail(post)

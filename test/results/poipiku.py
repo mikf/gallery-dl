@@ -96,6 +96,7 @@ __tests__ = (
     "count"        : 1,
     "num"          : 1,
     "description"  : "えち描く描く詐欺ずっとやってるのですこしかいてた<br />ほたしか写ってないよ",
+    "warning"      : True,
     "post_category": "TRAINING",
     "post_id"      : "5483268",
     "user_id"      : "1400760",
@@ -119,6 +120,7 @@ __tests__ = (
     "extension"    : {"jpeg", "png"},
     "description"  : "过去的🕶️Σ🕶️ 🔞<br />堆堆<br /><br />18↑ yes/no",
     "original"     : True,
+    "password"     : True,
     "post_category": "DOODLE",
     "post_id"      : "12290661",
     "user_id"      : "12282220",
@@ -154,7 +156,11 @@ __tests__ = (
     "#url"     : "https://poipiku.com/11513074/12290032.html",
     "#comment" : "Sign-In Only (publish_login.png) + Password",
     "#class"   : poipiku.PoipikuPostExtractor,
+    "#metadata": "post",
     "#auth"    : False,
+
+    "requires": "login",
+    "password": True,
 },
 
 {
