@@ -223,6 +223,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Files, Folders</td>
     <td></td>
 </tr>
+<tr id="dandadan" title="dandadan">
+    <td>Dandadan</td>
+    <td>https://dandadan.net/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
 <tr id="dankefuerslesen" title="dankefuerslesen">
     <td>Danke fürs Lesen</td>
     <td>https://danke.moe/</td>
