@@ -93,8 +93,13 @@ class KemonoExtractor(Extractor):
             if creator_info is not None:
                 key = f"{service}_{creator_id}"
                 if key not in creator_info:
-                    creator = creator_info[key] = self.api.creator_profile(
-                        service, creator_id)
+                    try:
+                        creator = creator_info[key] = self.api.creator_profile(
+                            service, creator_id)
+                    except exception.HttpError:
+                        self.log.warning("%s/%s/%s: 'Creator not found'",
+                                         service, creator_id, post["id"])
+                        creator = creator_info[key] = util.NONE
                 else:
                     creator = creator_info[key]
 
