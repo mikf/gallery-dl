@@ -132,6 +132,54 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://blog.naver.com/fango5/224034048637",
+    "#comment" : "video with 'data-module-v2' (#8385)",
+    "#class"   : naverblog.NaverBlogPostExtractor,
+    "#pattern" : (
+        r"https://a01-g-naver-vod.akamaized.net/blog/a/read/v2/VOD_ALPHA/blog/BFECC5A8AE9558798A320806415BDC753038/pd/1759814126289/base_pathfinder_pf3448100_b2cbc7e0-a33c-11f0-8d5a-e4434b2a1c7c.mp4\?__gda__=.+",
+        r"https://a01-g-naver-vod.akamaized.net/blog/a/read/v2/VOD_ALPHA/blog/93EBA48061F914D3F5B6641B6CCF0BCB9E54/pd/1759814149475/base_pathfinder_pf3448100_c9ce7003-a33c-11f0-a0c4-a0369ffbf8a4.mp4\?__gda__=.+",
+    ),
+
+    "count"         : 2,
+    "duration"      : {2678.123, 2949.056},
+    "extension"     : "mp4",
+    "filename"      : str,
+    "id"            : {"9818E289D6E321DDA48D8BCD56F24A4E0B38", "BBE49425859BB8E21BD6346FF3FB11FE605A"},
+    "num"           : range(1, 2),
+    "p2pMetaUrl"    : "",
+    "p2pUrl"        : "",
+    "size"          : {776289502, 909858818},
+    "source"        : str,
+    "sourceFrom"    : "AM",
+    "type"          : "avc1",
+    "useP2P"        : False,
+    "bitrate"       : {
+        "audio": float,
+        "video": float,
+    },
+    "blog"          : {
+        "id"  : "fango5",
+        "num" : 59788932,
+        "user": "FUJII",
+    },
+    "encodingOption": {
+        "completeProgress": "100",
+        "height"          : 1080,
+        "id"              : "1080P_01",
+        "isEncodingComplete": "true",
+        "name"            : "1080p",
+        "profile"         : "HIGH",
+        "width"           : 1920,
+    },
+    "post"          : {
+        "date"       : "dt:2025-10-07 14:17:00",
+        "description": "전반 : MINI 여러분！ 부탁이 있어！ 후반: 헤드보이스 왕에게 나는 된다！",
+        "num"        : 224034048637,
+        "title"      : "250928 치도리의 오니렌챤 (千鳥の鬼レンチャン)",
+    },
+},
+
+{
     "#url"     : "https://blog.naver.com/gukjung",
     "#class"   : naverblog.NaverBlogBlogExtractor,
     "#pattern" : naverblog.NaverBlogPostExtractor.pattern,
