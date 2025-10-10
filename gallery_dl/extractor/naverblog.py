@@ -88,11 +88,11 @@ class NaverBlogPostExtractor(NaverBlogBase, GalleryExtractor):
             files.append((url, None))
 
     def _extract_videos(self, files, page):
-        for module in text.extract_iter(page, " data-module='", "'></"):
+        for module in text.extract_iter(page, " data-module='", "'"):
             if '"v2_video"' not in module:
                 continue
-            media = util.json_loads(module)["data"]
             try:
+                media = util.json_loads(module)["data"]
                 self._extract_media(files, media)
             except Exception as exc:
                 self.log.warning("%s: Failed to extract video '%s' (%s: %s)",
