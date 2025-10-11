@@ -450,13 +450,13 @@ def _manga_info(self, uuid):
 
     return {
         "manga" : (mattr["title"].get("en") or
-                   next(iter(mattr["title"].values()))),
+                   next(iter(mattr["title"].values()), "")),
         "manga_id": manga["id"],
         "manga_titles": [t.popitem()[1]
                          for t in mattr.get("altTitles") or ()],
         "manga_date"  : text.parse_datetime(mattr.get("createdAt")),
         "description" : (mattr["description"].get("en") or
-                         next(iter(mattr["description"].values()))),
+                         next(iter(mattr["description"].values()), "")),
         "demographic": mattr.get("publicationDemographic"),
         "origin": mattr.get("originalLanguage"),
         "status": mattr.get("status"),

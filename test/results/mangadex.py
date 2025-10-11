@@ -179,6 +179,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://mangadex.org/title/2e73a1ac-bf26-4c04-84f6-d0a22fd37624/tomodachi-no-joshi-ni-josou-saserare-danshi",
+    "#comment" : "no 'description' (#8389)",
+    "#class"   : mangadex.MangadexMangaExtractor,
+    "#count"   : 47,
+
+    "description": "",
+},
+
+{
     "#url"     : "https://mangadex.org/titles/feed",
     "#class"   : mangadex.MangadexFeedExtractor,
     "#auth"    : True,
