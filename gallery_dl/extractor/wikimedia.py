@@ -90,7 +90,16 @@ class WikimediaExtractor(BaseExtractor):
             self.prepare_info(info)
             yield Message.Directory, info
 
-            for info["num"], image in enumerate(images, 1):
+            num = 0
+            for image in images:
+                # https://www.mediawiki.org/wiki/Release_notes/1.34
+                if "filemissing" in image:
+                    self.log.warning(
+                        "File %s (or its revision) is missing",
+                        image["canonicaltitle"].partition(":")[2])
+                    continue
+                num += 1
+                image["num"] = num
                 self.prepare_image(image)
                 image.update(info)
                 yield Message.Url, image["url"], image
