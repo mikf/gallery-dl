@@ -470,6 +470,14 @@ __tests__ = (
 },
 
 {
+    "#url"      : "https://civitai.com/user/jackietop515100/posts",
+    "#comment"  : "deleted user (#8299)",
+    "#class"    : civitai.CivitaiUserPostsExtractor,
+    "#options"  : {"timeout": 5, "retries": 2},
+    "#exception": exception.HttpError,
+},
+
+{
     "#url"  : "https://civitai.com/user/waomodder/images",
     "#class": civitai.CivitaiUserImagesExtractor,
     "#pattern": r"https://image\.civitai\.com/xG1nkqKTMzGDvpLrqFT7WA/[0-9a-f-]+/original=true/\S+\.png",

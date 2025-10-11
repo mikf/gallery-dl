@@ -807,7 +807,8 @@ class CivitaiTrpcAPI():
             })
 
         params = self._type_params(params)
-        return self._pagination(endpoint, params, meta)
+        return self._pagination(endpoint, params, meta,
+                                user=("username" in params))
 
     def collection(self, collection_id):
         endpoint = "collection.getById"
@@ -854,13 +855,17 @@ class CivitaiTrpcAPI():
         return self.extractor.request_json(
             url, params=params, headers=headers)["result"]["data"]["json"]
 
-    def _pagination(self, endpoint, params, meta=None):
+    def _pagination(self, endpoint, params, meta=None, user=False):
         if "cursor" not in params:
             params["cursor"] = None
             meta_ = {"cursor": ("undefined",)}
 
+        data = self._call(endpoint, params, meta_)
+        if user and data["items"] and \
+                data["items"][0]["user"]["username"] != params["username"]:
+            return ()
+
         while True:
-            data = self._call(endpoint, params, meta_)
             yield from data["items"]
 
             try:
@@ -871,6 +876,7 @@ class CivitaiTrpcAPI():
 
             params["cursor"] = data["nextCursor"]
             meta_ = meta
+            data = self._call(endpoint, params, meta_)
 
     def _merge_params(self, params_user, params_default):
         """Combine 'params_user' with 'params_default'"""
