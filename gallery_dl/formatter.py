@@ -40,7 +40,15 @@ def parse(format_string, default=NONE, fmt=format):
     else:
         cls = StringFormatter
 
-    formatter = _CACHE[key] = cls(format_string, default, fmt)
+    try:
+        formatter = _CACHE[key] = cls(format_string, default, fmt)
+    except Exception as exc:
+        import logging
+        logging.getLogger("formatter").error(
+            "Invalid format string '%s' (%s: %s)",
+            format_string, exc.__class__.__name__, exc)
+        raise
+
     return formatter
 
 
