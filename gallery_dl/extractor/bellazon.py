@@ -27,7 +27,7 @@ class BellazonExtractor(Extractor):
         native = (f"{self.root}/", f"{self.root[6:]}/")
         extract_urls = text.re(
             r'(?s)<('
-            r'(?:video .*?<source src|a [^>]*?href)="([^"]+).*?</a>'
+            r'(?:video .*?<source [^>]*?src|a [^>]*?href)="([^"]+).*?</a>'
             r'|img [^>]*?src="([^"]+)"[^>]*>'
             r')'
         ).findall
