@@ -215,6 +215,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/70367-elyzaveta-kovalenko/page/7/#comment-5506079",
+    "#comment" : "links to other threads (#8392)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
