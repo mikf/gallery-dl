@@ -205,6 +205,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/70367-elyzaveta-kovalenko/page/5/#comment-5464973",
+    "#comment" : "(#8392)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#results" : (
+        "https://www.bellazon.com/main/uploads/monthly_2022_05/917305269_LizaKovalenko-Instagram2021_04_19.mp4.467d190a54e1bcabc50767a69706501d.mp4",
+        "https://www.bellazon.com/main/uploads/monthly_2022_05/2027180206_LizaKovalenko-Instagram2021_04_23.mp4.2eae87d7e9d6f1a993611fa1f73e8e7b.mp4",
+    ),
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
