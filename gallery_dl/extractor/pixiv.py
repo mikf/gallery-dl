@@ -274,6 +274,9 @@ class PixivExtractor(Extractor):
             "profile_image_urls": {},
         }
 
+        if "is_bookmarked" not in work:
+            work["is_bookmarked"] = True if body.get("bookmarkData") else False
+
         work["tags"] = tags = []
         for tag in body["tags"]["tags"]:
             name = tag["tag"]
