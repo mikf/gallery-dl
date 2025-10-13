@@ -308,6 +308,49 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/56-candids/",
+    "#comment" : "'Guest' author (#8397)",
+    "#class"   : bellazon.BellazonThreadExtractor,
+    "#options" : {"order-posts": "asc"},
+    "#range"   : "1",
+    "#results" : (
+        "https://www.bellazon.com/main/uploads/monthly_11_2004/post-0-0-1593851439-26962.jpg",
+    ),
+
+    "post"     : {
+        "author_id"  : "",
+        "author_slug": "",
+        "author_url" : "",
+        "content"    : """<a href="https://www.bellazon.com/main/uploads/monthly_11_2004/post-0-0-1593851439-26962.jpg" class="ipsAttachLink ipsAttachLink_image"><img data-fileid="292" src="https://www.bellazon.com/main/uploads/monthly_11_2004/post-0-0-1593851439-26962_thumb.jpg" class="ipsImage ipsImage_thumbnailed" alt="sss.jpg" loading="lazy"></a>""",
+        "count"      : 1,
+        "date"       : "dt:2004-11-21 03:09:51",
+        "id"         : "292",
+    },
+    "thread"   : {
+        "author"      : "Guest",
+        "author_id"   : "",
+        "author_slug" : "",
+        "author_url"  : "",
+        "date"        : "dt:2004-11-21 01:44:59",
+        "date_updated": "type:datetime",
+        "description" : "Welcome to the Alessandra Ambrosio Candids gallery.  Please only post candid, unposed, off-guard, or funny images in this thread.",
+        "id"          : "56",
+        "posts"       : range(13_000, 30_000),
+        "section"     : "Alessandra Ambrosio",
+        "slug"        : "candids",
+        "title"       : "Candids",
+        "url"         : "https://www.bellazon.com/main/topic/56-candids/",
+        "views"       : range(8_000_000, 10_000_000),
+        "path"        : [
+            "Females",
+            "Female Fashion Models",
+            "Alessandra Ambrosio",
+            "Candids",
+        ],
+    },
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/forum/3-actresses/",
     "#class"   : bellazon.BellazonForumExtractor,
     "#pattern" : bellazon.BellazonThreadExtractor.pattern,
