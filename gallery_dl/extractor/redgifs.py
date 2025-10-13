@@ -270,8 +270,16 @@ class RedgifsAPI():
                 return
             params["page"] += 1
 
-    @memcache(maxage=600)
     def _auth(self):
+        if self.extractor._proxy_rotator:
+            return self._get_auth_token()
+        return self._auth_cached()
+
+    @memcache(maxage=600)
+    def _auth_cached(self):
+        return self._get_auth_token()
+
+    def _get_auth_token(self):
         # https://github.com/Redgifs/api/wiki/Temporary-tokens
         url = self.API_ROOT + "/v2/auth/temporary"
         self.headers["Authorization"] = None
