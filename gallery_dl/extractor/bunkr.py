@@ -11,6 +11,7 @@
 from .common import Extractor
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text, util, config, exception
+from ..cache import memcache
 import random
 
 if config.get(("extractor", "bunkr"), "tlds"):
@@ -227,10 +228,26 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
             self.log.error("%s: %s", exc.__class__.__name__, exc)
             return (), {}
 
+        album_id, album_name, album_size = self._album_info(text.extr(
+            page, ' href="../a/', '"'))
         return (file,), {
-            "album_id"   : "",
-            "album_name" : "",
-            "album_size" : -1,
-            "description": "",
-            "count"      : 1,
+            "album_id"  : album_id,
+            "album_name": album_name,
+            "album_size": album_size,
+            "count"     : 1,
         }
+
+    @memcache(keyarg=1)
+    def _album_info(self, album_id):
+        if album_id:
+            try:
+                page = self.request(f"{self.root}/a/{album_id}").text
+                return (
+                    album_id,
+                    text.unescape(text.unescape(text.extr(
+                        page, 'property="og:title" content="', '"'))),
+                    text.extr(page, '<span class="font-semibold">(', ')'),
+                )
+            except Exception:
+                pass
+        return album_id, "", -1
