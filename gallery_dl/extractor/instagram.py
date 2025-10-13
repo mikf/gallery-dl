@@ -62,7 +62,7 @@ class InstagramExtractor(Extractor):
 
         data = self.metadata()
         if videos := self.config("videos", True):
-            videos_dash = (videos != "merged")
+            self.videos_dash = videos_dash = (videos != "merged")
             videos_headers = {"User-Agent": "Mozilla/5.0"}
         previews = self.config("previews", False)
         max_posts = self.config("max-posts")
@@ -236,13 +236,23 @@ class InstagramExtractor(Extractor):
                                  data["post_shortcode"])
                 continue
 
+            width_orig = item.get("original_width", 0)
+            height_orig = item.get("original_height", 0)
+
             if video_versions := item.get("video_versions"):
                 video = max(
                     video_versions,
                     key=lambda x: (x["width"], x["height"], x["type"]),
                 )
-                manifest = item.get("video_dash_manifest")
+
                 media = video
+                if (manifest := item.get("video_dash_manifest")) and \
+                        self.videos_dash:
+                    width = width_orig
+                    height = height_orig
+                else:
+                    width = video["width"]
+                    height = video["height"]
 
                 if self._warn_video:
                     self._warn_video = False
@@ -254,18 +264,17 @@ class InstagramExtractor(Extractor):
             else:
                 video = manifest = None
                 media = image
+                width = image["width"]
+                height = image["height"]
 
-                if self._warn_image < (
-                        (image["width"] < item.get("original_width", 0)) +
-                        (image["height"] < item.get("original_height", 0))):
+                if self._warn_image < ((width < width_orig) +
+                                       (height < height_orig)):
                     self.log.warning(
                         "%s: Available image resolutions lower than the "
                         "original (%sx%s < %sx%s). "
                         "Consider refreshing your cookies.",
                         data["post_shortcode"],
-                        image["width"], image["height"],
-                        item.get("original_width", 0),
-                        item.get("original_height", 0))
+                        width, height, width_orig, height_orig)
 
             media = {
                 "num"        : num,
@@ -277,8 +286,10 @@ class InstagramExtractor(Extractor):
                                 shortcode_from_id(item["pk"])),
                 "display_url": image["url"],
                 "video_url"  : video["url"] if video else None,
-                "width"      : media["width"],
-                "height"     : media["height"],
+                "width"          : width,
+                "width_original" : width_orig,
+                "height"         : height,
+                "height_original": height_orig,
             }
 
             if manifest is not None:
