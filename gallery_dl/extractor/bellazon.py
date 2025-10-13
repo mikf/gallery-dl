@@ -130,7 +130,7 @@ class BellazonExtractor(Extractor):
         author = schema["author"]
         stats = schema["interactionStatistic"]
         url_t = schema["url"]
-        url_a = author["url"]
+        url_a = author.get("url") or ""
 
         path = text.split_html(text.extr(
             page, '<nav class="ipsBreadcrumb', "</nav>"))[2:-1]
@@ -151,8 +151,12 @@ class BellazonExtractor(Extractor):
 
         thread["id"], _, thread["slug"] = \
             url_t.rsplit("/", 2)[1].partition("-")
-        thread["author_id"], _, thread["author_slug"] = \
-            url_a.rsplit("/", 2)[1].partition("-")
+
+        if url_a:
+            thread["author_id"], _, thread["author_slug"] = \
+                url_a.rsplit("/", 2)[1].partition("-")
+        else:
+            thread["author_id"] = thread["author_slug"] = ""
 
         return thread
 
@@ -169,8 +173,11 @@ class BellazonExtractor(Extractor):
         if (pos := post["content"].find(">")) >= 0:
             post["content"] = post["content"][pos+1:].strip()
 
-        post["author_id"], _, post["author_slug"] = \
-            post["author_url"].rsplit("/", 2)[1].partition("-")
+        if url_a := post["author_url"]:
+            post["author_id"], _, post["author_slug"] = \
+                url_a.rsplit("/", 2)[1].partition("-")
+        else:
+            post["author_id"] = post["author_slug"] = ""
 
         return post
 
