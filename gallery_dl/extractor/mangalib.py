@@ -23,7 +23,7 @@ class MangalibBase():
             return slug.split("--", 1)[-1].replace("-", " ").strip()
         except Exception:
             return slug
-            
+
 
 class MangalibChapterExtractor(MangalibBase, ChapterExtractor):
     """Extractor for mangalib manga chapters"""
@@ -33,7 +33,10 @@ class MangalibChapterExtractor(MangalibBase, ChapterExtractor):
     def __init__(self, match):
         ChapterExtractor.__init__(self, match, False)
         slug, vol, chstr, tail = self.groups
-        self.api_url = f"https://api.cdnlibs.org/api/manga/{slug}/chapter?number={chstr}&volume={vol}"
+        self.api_url = (
+            f"https://api.cdnlibs.org/api/manga/{slug}/chapter" +
+            f"?number={chstr}&volume={vol}"
+        )
         m = text.re(r"bid=(\d+)").search(tail)
         self.api_url += f"&branch_id={m.group(1)}" if m is not None else ""
 
@@ -42,6 +45,7 @@ class MangalibChapterExtractor(MangalibBase, ChapterExtractor):
         resp = _api_call(self)
 
         number, sep, minor = chstr.partition(".")
+        teams_joined = ",".join([team["name"] for team in resp["teams"]])
         return {
             "manga"        : self.slug_to_name(slug),
             "manga_slug"   : slug,
@@ -51,7 +55,7 @@ class MangalibChapterExtractor(MangalibBase, ChapterExtractor):
             "title"        : resp["name"] or "",
             "lang"         : "ru",
             "language"     : "Russian",
-            "teams"        : ",".join([team["name"] for team in resp["teams"]]),
+            "teams"        : teams_joined,
         }
 
     def images(self, _):
@@ -69,7 +73,10 @@ class MangalibMangaExtractor(MangalibBase, MangaExtractor):
 
     def __init__(self, match):
         MangaExtractor.__init__(self, match, False)
-        self.api_url = f"https://api.cdnlibs.org/api/manga/{self.groups[0]}/chapters"
+        self.api_url = (
+            "https://api.cdnlibs.org/api/manga/" +
+            f"{self.groups[0]}/chapters"
+        )
 
     def chapters(self, _):
         slug = self.groups[0]
@@ -80,10 +87,13 @@ class MangalibMangaExtractor(MangalibBase, MangaExtractor):
 
         results = []
         for chapter in data:
-            url = f"{self.root}/ru/{slug}/read/v{chapter['volume']}/c{chapter['number']}"
+            url = (
+                f"{self.root}/ru/{slug}/read/" +
+                f"v{chapter['volume']}/c{chapter['number']}"
+            )
             number, sep, minor = chapter["number"].partition(".")
-            # every chapter can have many translations by different teams, which is represented by branches
-            # (hardcoded first branch)
+            # every chapter can have many translations by different teams,
+            # which is represented by branches (I hardcoded first branch)
             for branch in chapter["branches"][:1]:
                 branch_id = branch["branch_id"]
                 teams = ",".join([team["name"] for team in branch["teams"]])
