@@ -7,7 +7,8 @@
 """Extractors for https://mangalib.me/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util, exception
+from .. import text, exception
+from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangalib\.me"
 
@@ -30,15 +31,15 @@ class MangalibChapterExtractor(MangalibBase, ChapterExtractor):
     pattern = rf"{BASE_PATTERN}/ru/([^/?#]+)/read/v(\d+)/c(\d+(?:\.\d+)?)(.*)"
 
     def __init__(self, match):
-        slug, vol, chstr, tail = match.groups()
-        url = f"https://api.cdnlibs.org/api/manga/{slug}/chapter?number={chstr}&volume={vol}"
+        ChapterExtractor.__init__(self, match, False)
+        slug, vol, chstr, tail = self.groups
+        self.api_url = f"https://api.cdnlibs.org/api/manga/{slug}/chapter?number={chstr}&volume={vol}"
         m = text.re(r"bid=(\d+)").search(tail)
-        url += f"&branch_id={m.group(1)}" if m is not None else ""
-        ChapterExtractor.__init__(self, match, url)
+        self.api_url += f"&branch_id={m.group(1)}" if m is not None else ""
 
-    def metadata(self, page):
+    def metadata(self, _):
         slug, vol, chstr, _ = self.groups
-        resp = util.json_loads(page)["data"]
+        resp = _api_call(self)
 
         number, sep, minor = chstr.partition(".")
         return {
@@ -53,8 +54,8 @@ class MangalibChapterExtractor(MangalibBase, ChapterExtractor):
             "teams"        : ",".join([team["name"] for team in resp["teams"]]),
         }
 
-    def images(self, page):
-        resp = util.json_loads(page)["data"]
+    def images(self, _):
+        resp = _api_call(self)
         base = "https://img3.mixlib.me"
         return [(base + item["url"], None) for item in resp["pages"]]
 
@@ -66,11 +67,14 @@ class MangalibMangaExtractor(MangalibBase, MangaExtractor):
     pattern = (rf"{BASE_PATTERN}/ru/manga/([^/?#]+)")
     reverse = False
 
+    def __init__(self, match):
+        MangaExtractor.__init__(self, match, False)
+        self.api_url = f"https://api.cdnlibs.org/api/manga/{self.groups[0]}/chapters"
+
     def chapters(self, _):
         slug = self.groups[0]
+        data = _api_call(self)
 
-        api_url = f"https://api.cdnlibs.org/api/manga/{slug}/chapters"
-        data = self.request_json(api_url, fatal=False)["data"]
         if "toast" in data:
             raise exception.AbortExtraction(data["toast"]["message"])
 
@@ -97,3 +101,8 @@ class MangalibMangaExtractor(MangalibBase, MangaExtractor):
                 results.append((url + f"?bid={branch_id}", data))
 
         return results
+
+
+@memcache(keyarg=0)
+def _api_call(extr):
+    return extr.request_json(extr.api_url)["data"]
