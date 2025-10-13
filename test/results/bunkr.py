@@ -240,7 +240,10 @@ __tests__ = (
     "#category": ("lolisafe", "bunkr", "media"),
     "#class"   : bunkr.BunkrMediaExtractor,
     "#results"     : "https://mlk-bk.cdn.gigachad-cdn.ru/image-sZrQUeOx.jpg",
-    "#sha1_content": "55998743751dfe008d0e95605114fcbfa7dc4de8",
+    "#sha1_content": (
+        "55998743751dfe008d0e95605114fcbfa7dc4de8",
+        "caf7c3d3439d94e83b3c24ddaf5a3a48aa057519",
+    ),
 
     "count"    : 1,
     "extension": "jpg",
@@ -328,6 +331,27 @@ __tests__ = (
     "name"       : "'\"'",
     "slug"       : "Nzt1ID7lsgwR4",
     "uuid"       : "acba241d-c1e8-40c3-aa73-94daf75fcd13",
+},
+
+{
+    "#url"     : "https://bunkr.cr/f/mX1DBQooiUOJ9",
+    "#comment" : "'album_...' metadata from '/f/' URL (#8405)",
+    "#category": ("lolisafe", "bunkr", "media"),
+    "#class"   : bunkr.BunkrMediaExtractor,
+    "#results" : "https://rum.bunkr.ru/edf721b7-618b-4214-9305-845e1d210437.png",
+
+    "album_id"  : "MwY4XLNV",
+    "album_name": "foo & bar",
+    "album_size": "3.54 MB",
+    "count"     : 1,
+    "extension" : "png",
+    "filename"  : "danbooru_10113035_fe864be2aa86487e5b08c768be78b787",
+    "id"        : "",
+    "id_url"    : "54661720",
+    "name"      : "danbooru_10113035_fe864be2aa86487e5b08c768be78b787",
+    "num"       : 1,
+    "slug"      : "mX1DBQooiUOJ9",
+    "uuid"      : "edf721b7-618b-4214-9305-845e1d210437",
 },
 
 )
