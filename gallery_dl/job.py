@@ -145,7 +145,7 @@ class Job():
         # sleep before extractor start
         sleep = util.build_duration_func(
             extractor.config("sleep-extractor"))
-        if sleep:
+        if sleep is not None:
             extractor.sleep(sleep(), "extractor")
 
         try:
@@ -167,8 +167,7 @@ class Job():
             self.status |= exc.code
         except OSError as exc:
             log.debug("", exc_info=exc)
-            name = exc.__class__.__name__
-            if name == "JSONDecodeError":
+            if (name := exc.__class__.__name__) == "JSONDecodeError":
                 log.error("Failed to parse JSON data:  %s: %s", name, exc)
                 self.status |= 1
             else:  # regular OSError
@@ -257,10 +256,10 @@ class Job():
     def _prepare_predicates(self, target, skip=True):
         predicates = []
 
-        if self.extractor.config(target + "-unique"):
+        if self.extractor.config(f"{target}-unique"):
             predicates.append(util.UniquePredicate())
 
-        if pfilter := self.extractor.config(target + "-filter"):
+        if pfilter := self.extractor.config(f"{target}-filter"):
             try:
                 pred = util.FilterPredicate(pfilter, target)
             except (SyntaxError, ValueError, TypeError) as exc:
@@ -268,7 +267,7 @@ class Job():
             else:
                 predicates.append(pred)
 
-        if prange := self.extractor.config(target + "-range"):
+        if prange := self.extractor.config(f"{target}-range"):
             try:
                 pred = util.RangePredicate(prange)
             except ValueError as exc:
@@ -288,7 +287,7 @@ class Job():
         return self._logger_adapter(logger, self)
 
     def _write_unsupported(self, url):
-        if self.ulog:
+        if self.ulog is not None:
             self.ulog.info(url)
 
 
@@ -321,7 +320,7 @@ class DownloadJob(Job):
             for callback in hooks["prepare"]:
                 callback(pathfmt)
 
-        if archive and archive.check(kwdict):
+        if archive is not None and archive.check(kwdict):
             pathfmt.fix_extension()
             self.handle_skip()
             return
@@ -330,7 +329,7 @@ class DownloadJob(Job):
             pathfmt.build_path()
 
             if pathfmt.exists():
-                if archive and self._archive_write_skip:
+                if archive is not None and self._archive_write_skip:
                     archive.add(kwdict)
                 self.handle_skip()
                 return
@@ -340,12 +339,12 @@ class DownloadJob(Job):
                 callback(pathfmt)
 
             if kwdict.pop("_file_recheck", False) and pathfmt.exists():
-                if archive and self._archive_write_skip:
+                if archive is not None and self._archive_write_skip:
                     archive.add(kwdict)
                 self.handle_skip()
                 return
 
-        if self.sleep:
+        if self.sleep is not None:
             self.extractor.sleep(self.sleep(), "download")
 
         # download from URL
@@ -369,7 +368,7 @@ class DownloadJob(Job):
                 return
 
         if not pathfmt.temppath:
-            if archive and self._archive_write_skip:
+            if archive is not None and self._archive_write_skip:
                 archive.add(kwdict)
             self.handle_skip()
             return
@@ -383,17 +382,17 @@ class DownloadJob(Job):
         pathfmt.finalize()
         self.out.success(pathfmt.path)
         self._skipcnt = 0
-        if archive and self._archive_write_file:
+        if archive is not None and self._archive_write_file:
             archive.add(kwdict)
         if "after" in hooks:
             for callback in hooks["after"]:
                 callback(pathfmt)
-        if archive and self._archive_write_after:
+        if archive is not None and self._archive_write_after:
             archive.add(kwdict)
 
     def handle_directory(self, kwdict):
         """Set and create the target directory for downloads"""
-        if not self.pathfmt:
+        if self.pathfmt is None:
             self.initialize(kwdict)
         else:
             if "post-after" in self.hooks:
@@ -511,7 +510,7 @@ class DownloadJob(Job):
         self.out.skip(pathfmt.path)
 
         if self._skipexc:
-            if not self._skipftr or self._skipftr(pathfmt.kwdict):
+            if self._skipftr is None or self._skipftr(pathfmt.kwdict):
                 self._skipcnt += 1
                 if self._skipcnt >= self._skipmax:
                     raise self._skipexc
@@ -555,7 +554,7 @@ class DownloadJob(Job):
         cfg = extr.config
 
         pathfmt = self.pathfmt = path.PathFormat(extr)
-        if kwdict:
+        if kwdict is not None:
             pathfmt.set_directory(kwdict)
 
         self.sleep = util.build_duration_func(cfg("sleep"))
@@ -625,7 +624,7 @@ class DownloadJob(Job):
         else:
             # monkey-patch methods to always return False
             pathfmt.exists = lambda x=None: False
-            if self.archive:
+            if self.archive is not None:
                 self.archive.check = pathfmt.exists
 
         if not cfg("postprocess", True):
@@ -685,7 +684,7 @@ class DownloadJob(Job):
                     pp_dict["__init__"] = None
 
                 pp_cls = postprocessor.find(name)
-                if not pp_cls:
+                if pp_cls is None:
                     pp_log.warning("module '%s' not found", name)
                     continue
                 try:
@@ -710,14 +709,10 @@ class DownloadJob(Job):
             condition = util.compile_filter(expr)
             for hook, callback in hooks.items():
                 self.hooks[hook].append(functools.partial(
-                    self._call_hook, callback, condition))
+                    _call_hook_condition, callback, condition))
         else:
             for hook, callback in hooks.items():
                 self.hooks[hook].append(callback)
-
-    def _call_hook(self, callback, condition, pathfmt):
-        if condition(pathfmt.kwdict):
-            callback(pathfmt)
 
     def _build_extractor_filter(self):
         clist = self.extractor.config("whitelist")
@@ -734,20 +729,25 @@ class DownloadJob(Job):
         return util.build_extractor_filter(clist, negate, special)
 
 
+def _call_hook_condition(callback, condition, pathfmt):
+    if condition(pathfmt.kwdict):
+        callback(pathfmt)
+
+
 class SimulationJob(DownloadJob):
     """Simulate the extraction process without downloading anything"""
 
     def handle_url(self, url, kwdict):
         ext = kwdict["extension"] or "jpg"
         kwdict["extension"] = self.pathfmt.extension_map(ext, ext)
-        if self.sleep:
+        if self.sleep is not None:
             self.extractor.sleep(self.sleep(), "download")
-        if self.archive and self._archive_write_skip:
+        if self.archive is not None and self._archive_write_skip:
             self.archive.add(kwdict)
         self.out.skip(self.pathfmt.build_filename(kwdict))
 
     def handle_directory(self, kwdict):
-        if not self.pathfmt:
+        if self.pathfmt is None:
             self.initialize()
 
 
@@ -935,7 +935,7 @@ class DataJob(Job):
         extractor = self.extractor
         sleep = util.build_duration_func(
             extractor.config("sleep-extractor"))
-        if sleep:
+        if sleep is not None:
             extractor.sleep(sleep(), "extractor")
 
         # collect data
