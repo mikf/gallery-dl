@@ -68,7 +68,7 @@ class IssuuUserExtractor(IssuuBase, Extractor):
                 data = text.extr(html, '\\"docs\\":', '}]\\n"]')
                 docs = util.json_loads(data.replace('\\"', '"'))
             except Exception as exc:
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
                 return
 
             for publication in docs:

@@ -404,7 +404,7 @@ class DeviantartExtractor(Extractor):
             try:
                 return self._tiptap_to_html(markup)
             except Exception as exc:
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
                 self.log.error("%s: '%s: %s'", deviation["index"],
                                exc.__class__.__name__, exc)
 

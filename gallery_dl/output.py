@@ -89,6 +89,11 @@ class LoggerAdapter():
         self.logger = logger
         self.extra = job._logger_extra
 
+    def traceback(self, exc):
+        if self.logger.isEnabledFor(logging.DEBUG):
+            self.logger._log(
+                logging.DEBUG, "", None, exc_info=exc, extra=self.extra)
+
     def debug(self, msg, *args, **kwargs):
         if self.logger.isEnabledFor(logging.DEBUG):
             kwargs["extra"] = self.extra

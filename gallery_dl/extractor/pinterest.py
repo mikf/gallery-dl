@@ -46,7 +46,7 @@ class PinterestExtractor(Extractor):
             try:
                 files = self._extract_files(pin)
             except Exception as exc:
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
                 self.log.warning(
                     "%s: Error when extracting download URLs (%s: %s)",
                     pin.get("id"), exc.__class__.__name__, exc)

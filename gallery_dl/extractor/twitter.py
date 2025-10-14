@@ -146,7 +146,7 @@ class TwitterExtractor(Extractor):
                 self._extract_media(
                     data, data["extended_entities"]["media"], files)
             except Exception as exc:
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
                 self.log.warning(
                     "%s: Error while extracting media files (%s: %s)",
                     data["id_str"], exc.__class__.__name__, exc)
@@ -155,7 +155,7 @@ class TwitterExtractor(Extractor):
             try:
                 self._extract_card(tweet, files)
             except Exception as exc:
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
                 self.log.warning(
                     "%s: Error while extracting Card files (%s: %s)",
                     data["id_str"], exc.__class__.__name__, exc)
@@ -164,7 +164,7 @@ class TwitterExtractor(Extractor):
             try:
                 self._extract_twitpic(data, files)
             except Exception as exc:
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
                 self.log.warning(
                     "%s: Error while extracting TwitPic files (%s: %s)",
                     data["id_str"], exc.__class__.__name__, exc)
