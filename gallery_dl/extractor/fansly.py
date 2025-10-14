@@ -79,7 +79,7 @@ class FanslyExtractor(Extractor):
             try:
                 self._extract_attachment(files, post, attachment)
             except Exception as exc:
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
                 self.log.error(
                     "%s/%s, Failed to extract media (%s: %s)",
                     post["id"], attachment.get("id"),

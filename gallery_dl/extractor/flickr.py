@@ -38,7 +38,7 @@ class FlickrExtractor(Extractor):
                 self.log.warning(
                     "Skipping photo %s (%s: %s)",
                     photo["id"], exc.__class__.__name__, exc)
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
             else:
                 photo.update(data)
                 url = self._file_url(photo)

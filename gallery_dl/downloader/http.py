@@ -95,7 +95,7 @@ class HttpDownloader(DownloaderBase):
         except Exception as exc:
             if self.downloading:
                 output.stderr_write("\n")
-            self.log.debug("", exc_info=exc)
+            self.log.traceback(exc)
             raise
         finally:
             # remove file from incomplete downloads

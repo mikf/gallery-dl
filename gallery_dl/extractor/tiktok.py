@@ -214,7 +214,7 @@ class TiktokUserExtractor(TiktokExtractor):
         except (ImportError, SyntaxError) as exc:
             self.log.error("Cannot import module '%s'",
                            getattr(exc, "name", ""))
-            self.log.debug("", exc_info=exc)
+            self.log.traceback(exc)
             raise exception.ExtractionError("yt-dlp or youtube-dl is required "
                                             "for this feature!")
 

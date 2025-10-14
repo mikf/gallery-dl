@@ -157,16 +157,17 @@ class Job():
                 raise
             pass
         except exception.AbortExtraction as exc:
+            log.traceback(exc)
             log.error(exc.message)
             self.status |= exc.code
         except (exception.TerminateExtraction, exception.RestartExtraction):
             raise
         except exception.GalleryDLException as exc:
             log.error("%s: %s", exc.__class__.__name__, exc)
-            log.debug("", exc_info=exc)
+            log.traceback(exc)
             self.status |= exc.code
         except OSError as exc:
-            log.debug("", exc_info=exc)
+            log.traceback(exc)
             if (name := exc.__class__.__name__) == "JSONDecodeError":
                 log.error("Failed to parse JSON data:  %s: %s", name, exc)
                 self.status |= 1
@@ -179,7 +180,7 @@ class Job():
                        "copy its output and report this issue on "
                        "https://github.com/mikf/gallery-dl/issues ."),
                       exc.__class__.__name__, exc)
-            log.debug("", exc_info=exc)
+            log.traceback(exc)
             self.status |= 1
         except BaseException:
             self.status |= 1
@@ -690,9 +691,9 @@ class DownloadJob(Job):
                 try:
                     pp_obj = pp_cls(self, pp_dict)
                 except Exception as exc:
+                    pp_log.traceback(exc)
                     pp_log.error("'%s' initialization failed:  %s: %s",
                                  name, exc.__class__.__name__, exc)
-                    pp_log.debug("", exc_info=exc)
                 else:
                     pp_list.append(pp_obj)
 

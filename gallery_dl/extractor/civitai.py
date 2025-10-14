@@ -211,7 +211,7 @@ class CivitaiExtractor(Extractor):
         try:
             return self.api.image_generationdata(image["id"])
         except Exception as exc:
-            return self.log.debug("", exc_info=exc)
+            return self.log.traceback(exc)
 
     def _extract_meta_post(self, image):
         try:
@@ -220,7 +220,7 @@ class CivitaiExtractor(Extractor):
                 post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
             return post
         except Exception as exc:
-            return self.log.debug("", exc_info=exc)
+            return self.log.traceback(exc)
 
     def _extract_meta_version(self, item, is_post=True):
         try:
@@ -228,7 +228,7 @@ class CivitaiExtractor(Extractor):
                 version = self.api.model_version(version_id).copy()
                 return version.pop("model", None), version
         except Exception as exc:
-            self.log.debug("", exc_info=exc)
+            self.log.traceback(exc)
         return None, None
 
     def _extract_version_id(self, item, is_post=True):
