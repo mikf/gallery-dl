@@ -388,6 +388,8 @@ class DownloadJob(Job):
         if "after" in hooks:
             for callback in hooks["after"]:
                 callback(pathfmt)
+        if archive and self._archive_write_after:
+            archive.add(kwdict)
 
     def handle_directory(self, kwdict):
         """Set and create the target directory for downloads"""
@@ -593,11 +595,13 @@ class DownloadJob(Job):
                 if events is None:
                     self._archive_write_file = True
                     self._archive_write_skip = False
+                    self._archive_write_after = False
                 else:
                     if isinstance(events, str):
                         events = events.split(",")
                     self._archive_write_file = ("file" in events)
                     self._archive_write_skip = ("skip" in events)
+                    self._archive_write_after = ("after" in events)
 
         if skip := cfg("skip", True):
             self._skipexc = None
