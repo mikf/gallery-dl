@@ -42,6 +42,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://imagetwist.com/tynhxt4ay9rl/9g09tq0e2i1b.jpg",
+    "#comment" : "'Image not found' (#8415)",
+    "#category": ("imagehost", "imagetwist", "image"),
+    "#class"   : imagehosts.ImagetwistImageExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://imagetwist.com/p/gdldev/747223/digits",
     "#category": ("imagehost", "imagetwist", "gallery"),
     "#class"   : imagehosts.ImagetwistGalleryExtractor,
