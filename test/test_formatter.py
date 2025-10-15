@@ -271,8 +271,8 @@ class TestFormatter(unittest.TestCase):
 
     def test_specifier_datetime(self):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", "2010-01-01 00:00:00")
-        self._run_test("{ds:D%Y}", "1970-01-01 00:00:00")
-        self._run_test("{l:D%Y}", "1970-01-01 00:00:00")
+        self._run_test("{ds:D%Y}", "0101-01-01 00:00:00")
+        self._run_test("{l2:D%Y}", "0101-01-01 00:00:00")
 
     def test_specifier_offset(self):
         self._run_test("{dt:O 01:00}", "2010-01-01 01:00:00")

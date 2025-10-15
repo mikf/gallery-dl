@@ -44,14 +44,14 @@ class TestDatetime(unittest.TestCase):
         _assert("2010-01-01T00:00:00Z"            , d)
         _assert("2010-01-01T00:00:00.123456Z"     , d)
 
-        _assert(0    , dt.EPOCH)
-        _assert(""   , dt.EPOCH)
-        _assert("foo", dt.EPOCH)
-        _assert(None , dt.EPOCH)
-        _assert(()   , dt.EPOCH)
-        _assert([]   , dt.EPOCH)
-        _assert({}   , dt.EPOCH)
-        _assert((1, 2, 3), dt.EPOCH)
+        _assert(0    , dt.NONE)
+        _assert(""   , dt.NONE)
+        _assert("foo", dt.NONE)
+        _assert(None , dt.NONE)
+        _assert(()   , dt.NONE)
+        _assert([]   , dt.NONE)
+        _assert({}   , dt.NONE)
+        _assert((1, 2, 3), dt.NONE)
 
     @unittest.skipIf(sys.hexversion < 0x30b0000,
                      "extended fromisoformat timezones")
@@ -101,7 +101,7 @@ class TestDatetime(unittest.TestCase):
         self.assertEqual(f("1555816235"), value)
 
         for value in ((), [], {}, None, ""):
-            self.assertEqual(f(value), dt.EPOCH)
+            self.assertEqual(f(value), dt.NONE)
             self.assertEqual(f(value, "foo"), "foo")
 
     def test_parse(self, f=dt.parse):
@@ -119,7 +119,7 @@ class TestDatetime(unittest.TestCase):
         )
 
         for value in ((), [], {}, None, 1, 2.3):
-            self.assertEqual(f(value, "%Y"), dt.EPOCH)
+            self.assertEqual(f(value, "%Y"), dt.NONE)
 
     def test_parse_iso(self, f=dt.parse_iso):
         null = dt.from_ts(0)
@@ -140,18 +140,27 @@ class TestDatetime(unittest.TestCase):
             datetime.datetime(2019, 5, 7, 21, 25, 2),
         )
         self.assertEqual(
-            f("1970.01.01"),
+            f("1970-01-01"),
             dt.EPOCH,
+        )
+        self.assertEqual(
+            f("1970.01.01"),
+            dt.NONE,
         )
 
         for value in ((), [], {}, None, 1, 2.3):
-            self.assertEqual(f(value), dt.EPOCH)
+            self.assertEqual(f(value), dt.NONE)
 
     def test_parse_compat(self, f=dt.parse_compat):
         self.assertEqual(
             f("2019-05-07T21:25:02.753+0900", "%Y-%m-%dT%H:%M:%S.%f%z"),
             datetime.datetime(2019, 5, 7, 12, 25, 2),
         )
+
+    def test_none(self):
+        self.assertFalse(dt.NONE)
+        self.assertIsInstance(dt.NONE, dt.datetime)
+        self.assertEqual(str(dt.NONE), "0101-01-01 00:00:00")
 
 
 if __name__ == "__main__":
