@@ -9,7 +9,7 @@
 """Extractors for https://www.deviantart.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, util, dt, exception
 from ..cache import cache, memcache
 import collections
 import mimetypes
@@ -1187,8 +1187,8 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             deviation["username"] = deviation["author"]["username"]
             deviation["_username"] = deviation["username"].lower()
 
-        deviation["date"] = dt = text.parse_datetime(deviation["ts"])
-        deviation["published_time"] = int(util.datetime_to_timestamp(dt))
+        deviation["date"] = d = text.parse_datetime(deviation["ts"])
+        deviation["published_time"] = int(dt.to_ts(d))
 
         deviation["da_category"] = "Status"
         deviation["category_path"] = "status"

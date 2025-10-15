@@ -7,7 +7,7 @@
 """Extractors for https://4archive.org/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, dt
 
 
 class _4archiveThreadExtractor(Extractor):
@@ -37,7 +37,7 @@ class _4archiveThreadExtractor(Extractor):
 
         for post in posts:
             post.update(data)
-            post["time"] = int(util.datetime_to_timestamp(post["date"]))
+            post["time"] = int(dt.to_ts(post["date"]))
             yield Message.Directory, post
             if "url" in post:
                 yield Message.Url, post["url"], text.nameext_from_url(
