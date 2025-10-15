@@ -53,6 +53,8 @@ class ImagehostImageExtractor(Extractor):
         ).text
 
         url, filename = self.get_info(page)
+        if not url:
+            return
         data = text.nameext_from_url(filename, {"token": self.token})
         data.update(self.metadata(page))
         if self._https and url.startswith("http:"):
@@ -199,6 +201,8 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
 
     def get_info(self, page):
         url     , pos = text.extract(page, '<img src="', '"')
+        if url and url.startswith("/imgs/"):
+            return None, None
         filename, pos = text.extract(page, ' alt="', '"', pos)
         return url, filename
 
