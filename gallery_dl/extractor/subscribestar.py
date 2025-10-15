@@ -50,10 +50,16 @@ class SubscribestarExtractor(Extractor):
             for num, item in enumerate(media, 1):
                 item.update(data)
                 item["num"] = num
-                text.nameext_from_url(item.get("name") or item["url"], item)
-                if item["url"][0] == "/":
-                    item["url"] = self.root + item["url"]
-                yield Message.Url, item["url"], item
+
+                url = item["url"]
+                if name := (item.get("name") or item.get("original_filename")):
+                    text.nameext_from_name(name, item)
+                else:
+                    text.nameext_from_url(url, item)
+
+                if url[0] == "/":
+                    url = f"{self.root}{url}"
+                yield Message.Url, url, item
 
     def posts(self):
         """Yield HTML content of all relevant posts"""
