@@ -150,13 +150,19 @@ class KemonoExtractor(Extractor):
                     url = self.root + "/data" + url[20:]
                 file["url"] = url
 
-                text.nameext_from_url(file.get("name", url), file)
-                ext = text.ext_from_url(url)
-                if not file["extension"]:
-                    file["extension"] = ext
-                elif ext == "txt" and file["extension"] != "txt":
-                    file["_http_validate"] = _validate
-                elif ext in exts_archive or \
+                if name := file.get("name"):
+                    text.nameext_from_name(name, file)
+                    ext = text.ext_from_url(url)
+
+                    if not file["extension"]:
+                        file["extension"] = ext
+                    elif ext == "txt" and file["extension"] != "txt":
+                        file["_http_validate"] = _validate
+                else:
+                    text.nameext_from_url(url, file)
+                    ext = file["extension"]
+
+                if ext in exts_archive or \
                         ext == "bin" and file["extension"] in exts_archive:
                     file["type"] = "archive"
                     if archives:
