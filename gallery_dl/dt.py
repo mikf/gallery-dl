@@ -12,6 +12,14 @@ import sys
 import time
 from datetime import datetime, date, timedelta, timezone  # noqa F401
 
+
+class NullDatetime(datetime):
+
+    def __bool__(self):
+        return False
+
+
+NONE = NullDatetime(101, 1, 1)
 EPOCH = datetime(1970, 1, 1)
 SECOND = timedelta(0, 1)
 
@@ -29,7 +37,7 @@ def normalize(dt):
 def convert(value):
     """Convert 'value' to a naive UTC datetime object"""
     if not value:
-        return EPOCH
+        return NONE
 
     if isinstance(value, datetime):
         return value
@@ -51,7 +59,7 @@ def parse(dt_string, format):
     try:
         return normalize(datetime.strptime(dt_string, format))
     except Exception:
-        return EPOCH
+        return NONE
 
 
 if sys.hexversion < 0x30c0000:
@@ -64,7 +72,7 @@ if sys.hexversion < 0x30c0000:
                 dt_string = dt_string[:-1]
             return normalize(datetime.fromisoformat(dt_string))
         except Exception:
-            return EPOCH
+            return NONE
 
     def parse_compat(dt_string, format):
         """Parse 'dt_string' as ISO 8601 value using 'format'"""
@@ -80,7 +88,7 @@ else:
         try:
             return normalize(datetime.fromisoformat(dt_string))
         except Exception:
-            return EPOCH
+            return NONE
 
     def parse_compat(dt_string, format):
         """Parse 'dt_string' as ISO 8601 value"""
@@ -94,7 +102,7 @@ else:
     now = from_ts
 
 
-def parse_ts(ts, default=EPOCH):
+def parse_ts(ts, default=NONE):
     """Create a datetime object from a Unix timestamp"""
     try:
         return from_ts(int(ts))
