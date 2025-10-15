@@ -587,6 +587,7 @@ Description
     * ``sankaku``
     * ``scrolller``
     * ``seiga``
+    * ``simpcity``
     * ``subscribestar``
     * ``tapas``
     * ``tsumino``

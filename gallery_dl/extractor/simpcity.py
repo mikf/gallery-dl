@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, exception
+from ..cache import cache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?simpcity\.(?:cr|su)"
 
@@ -17,9 +18,13 @@ BASE_PATTERN = r"(?:https?://)?(?:www\.)?simpcity\.(?:cr|su)"
 class SimpcityExtractor(Extractor):
     """Base class for simpcity extractors"""
     category = "simpcity"
+    cookies_domain = "simpcity.cr"
+    cookies_names = ("ogaddgmetaprof_user",)
     root = "https://simpcity.cr"
 
     def items(self):
+        self.login()
+
         extract_urls = text.re(
             r'<(?:a [^>]*?href|iframe [^>]*?src)="([^"]+)').findall
 
@@ -36,11 +41,43 @@ class SimpcityExtractor(Extractor):
             return self.request(url)
         except exception.HttpError as exc:
             if exc.status == 403 and b">Log in<" in exc.response.content:
-                msg = text.extr(exc.response.text, "blockMessage--error", "</")
                 raise exception.AuthRequired(
-                    "'authenticated cookies'", None,
-                    msg.rpartition(">")[2].strip())
+                    ("username & password", "authenticated cookies"), None,
+                    self._extract_error(exc.response.text))
             raise
+
+    def login(self):
+        if self.cookies_check(self.cookies_names):
+            return
+
+        username, password = self._get_auth_info()
+        if username:
+            self.cookies_update(self._login_impl(username, password))
+
+    @cache(maxage=365*86400, keyarg=1)
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = f"{self.root}/login/login"
+        page = self.request(url).text
+        data = {
+            "_xfToken": text.extr(page, 'name="_xfToken" value="', '"'),
+            "login"   : username,
+            "password": password,
+            "remember": "1",
+            "_xfRedirect": "",
+        }
+        response = self.request(url, method="POST", data=data)
+
+        if not response.history:
+            err = self._extract_error(response.text)
+            raise exception.AuthenticationError(f'"{err}"')
+
+        return {
+            cookie.name: cookie.value
+            for cookie in self.cookies
+            if cookie.domain.endswith(self.cookies_domain)
+        }
 
     def _pagination(self, base, pnum=None):
         base = f"{self.root}{base}"
@@ -86,6 +123,10 @@ class SimpcityExtractor(Extractor):
                 return
 
             page = self.request_page(url).text
+
+    def _extract_error(self, html):
+        return text.unescape(text.extr(
+            html, "blockMessage--error", "</").rpartition(">")[2].strip())
 
     def _parse_thread(self, page):
         schema = self._extract_jsonld(page)["mainEntity"]
