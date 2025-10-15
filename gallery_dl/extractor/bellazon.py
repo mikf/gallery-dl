@@ -47,7 +47,7 @@ class BellazonExtractor(Extractor):
             post["count"] = data["count"] = len(urls)
 
             yield Message.Directory, data
-            data["num"] = 0
+            data["num"] = data["num_internal"] = data["num_external"] = 0
             for info, url, url_img in urls:
                 url = text.unescape(url or url_img)
 
@@ -59,6 +59,7 @@ class BellazonExtractor(Extractor):
                     ):
                         continue
                     data["num"] += 1
+                    data["num_internal"] += 1
                     if not (alt := text.extr(info, ' alt="', '"')) or (
                             alt.startswith("post-") and "_thumb." in alt):
                         name = url
@@ -80,6 +81,8 @@ class BellazonExtractor(Extractor):
                     yield Message.Url, url, dc
 
                 else:
+                    data["num"] += 1
+                    data["num_external"] += 1
                     yield Message.Queue, url, data
 
     def _pagination(self, base, pnum=None):

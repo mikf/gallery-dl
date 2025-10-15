@@ -23,7 +23,9 @@ __tests__ = (
     "filename" : str,
     "extension": "jpg",
     "count"    : 5,
-    "num"      : range(1, 5),
+    "num"         : range(1, 5),
+    "num_internal": range(1, 5),
+    "num_external": 0,
     "post"     : {
         "author_id"  : "72476",
         "author_slug": "shepherd",
@@ -134,7 +136,7 @@ __tests__ = (
     "extension": "mp4",
     "filename" : r"re:^\d+$",
     "id"       : r"re:6361\d\d\d",
-    "num"      : range(2, 11),
+    "num"      : range(2, 12),
     "post"     : {
         "author_id"  : "101807",
         "author_slug": "rogerdanish",
