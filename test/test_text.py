@@ -203,6 +203,10 @@ class TestText(unittest.TestCase):
         self.assertEqual(f("http://example.org/v2/filename.ext"), result)
         self.assertEqual(
             f("http://example.org/v2/filename.ext?param=value#frag"), result)
+        self.assertEqual(
+            f("http://example.org/v2/foo%202?bar&<>.ext?param=value#frag"),
+            {"filename": "foo 2", "extension": ""},
+        )
 
         # long "extension"
         fn = "httpswww.example.orgpath-path-path-path-path-path-path-path"
@@ -211,6 +215,20 @@ class TestText(unittest.TestCase):
         # invalid arguments
         for value in INVALID:
             self.assertEqual(f(value), empty)
+
+    def test_nameext_from_name(self, f=text.nameext_from_name):
+        self.assertEqual(
+            f(""),
+            {"filename": "", "extension": ""},
+        )
+        self.assertEqual(
+            f("filename.ext"),
+            {"filename": "filename", "extension": "ext"},
+        )
+        self.assertEqual(
+            f("foo%202?bar&<>.ext"),
+            {"filename": "foo%202?bar&<>", "extension": "ext"},
+        )
 
     def test_extract(self, f=text.extract):
         txt = "<a><b>"
