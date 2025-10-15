@@ -119,7 +119,7 @@ def load_cookies_webkit(browser_name, profile=None, domain=None):
     for page_size in page_sizes:
         _webkit_parse_cookies_page(p.read_bytes(page_size), cookies)
     _log_info("Extracted %s cookies from %s",
-              browser_name.capitalize(), len(cookies))
+              len(cookies), browser_name.capitalize())
 
     return cookies
 
