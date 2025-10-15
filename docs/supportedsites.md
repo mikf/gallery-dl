@@ -935,7 +935,7 @@ Consider all listed sites to potentially be NSFW.
     <td>SimpCity Forums</td>
     <td>https://simpcity.cr/</td>
     <td>Forums, Posts, Threads</td>
-    <td></td>
+    <td>Supported</td>
 </tr>
 <tr id="simplyhentai" title="simplyhentai">
     <td>Simply Hentai</td>
