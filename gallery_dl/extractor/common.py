@@ -23,7 +23,7 @@ from datetime import datetime
 from xml.etree import ElementTree
 from requests.adapters import HTTPAdapter
 from .message import Message
-from .. import config, output, text, util, cache, exception
+from .. import config, output, text, util, dt, cache, exception
 urllib3 = requests.packages.urllib3
 
 
@@ -315,7 +315,7 @@ class Extractor():
         elif until:
             if isinstance(until, datetime):
                 # convert to UTC timestamp
-                until = util.datetime_to_timestamp(until)
+                until = dt.to_ts(until)
             else:
                 until = float(until)
             seconds = until - now

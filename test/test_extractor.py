@@ -14,10 +14,9 @@ from unittest.mock import patch
 
 import time
 import string
-from datetime import datetime, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, util  # noqa E402
+from gallery_dl import extractor, util, dt  # noqa E402
 from gallery_dl.extractor import mastodon  # noqa E402
 from gallery_dl.extractor.common import Extractor, Message  # noqa E402
 from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
@@ -233,8 +232,8 @@ class TestExtractorWait(unittest.TestCase):
 
     def test_wait_until_datetime(self):
         extr = extractor.find("generic:https://example.org/")
-        until = util.datetime_utcnow() + timedelta(seconds=5)
-        until_local = datetime.now() + timedelta(seconds=5)
+        until = dt.now() + dt.timedelta(seconds=5)
+        until_local = dt.datetime.now() + dt.timedelta(seconds=5)
 
         if not until.microsecond:
             until = until.replace(microsecond=until_local.microsecond)
@@ -251,8 +250,8 @@ class TestExtractorWait(unittest.TestCase):
             self._assert_isotime(calls[0][1][1], until_local)
 
     def _assert_isotime(self, output, until):
-        if not isinstance(until, datetime):
-            until = datetime.fromtimestamp(until)
+        if not isinstance(until, dt.datetime):
+            until = dt.datetime.fromtimestamp(until)
         o = self._isotime_to_seconds(output)
         u = self._isotime_to_seconds(until.time().isoformat()[:8])
         self.assertLessEqual(o-u, 1.0)

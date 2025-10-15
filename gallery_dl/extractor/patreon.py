@@ -9,7 +9,7 @@
 """Extractors for https://www.patreon.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util, dt, exception
 from ..cache import memcache
 import collections
 import itertools
@@ -445,8 +445,7 @@ class PatreonUserExtractor(PatreonExtractor):
 
     def posts(self):
         if date_max := self._get_date_min_max(None, None)[1]:
-            self._cursor = cursor = \
-                util.datetime_from_timestamp(date_max).isoformat()
+            self._cursor = cursor = dt.from_ts(date_max).isoformat()
             self._init_cursor = lambda: cursor
 
         url = self._build_url("stream", (
