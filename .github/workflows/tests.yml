@@ -47,7 +47,7 @@ jobs:
     - name: Install yt-dlp
       run: |
         case "${{ matrix.python-version }}" in
-            3.8|3.9)
+            3.8|3.9|pypy3.9)
                 # install from PyPI
                 pip install yt-dlp
                 ;;
