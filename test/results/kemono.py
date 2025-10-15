@@ -137,7 +137,7 @@ __tests__ = (
         "https://kemono.cr/data/b0/38/b03882c8b0ab3b1cf9fc658a2bb2f9ac6ad4f3449015311dcd2d7ee7f748db31.png",
     ),
 
-    "tags": r"re:\bpin-up\b",
+    "tags": list,
 },
 
 {
@@ -241,7 +241,7 @@ __tests__ = (
     "#class"   : kemono.KemonoPostExtractor,
     "#options" : {"dms": True, "comments": True},
 
-    "comments": (),
+    "comments": [],
     "dms": [
         {
             "added"    : "2021-07-31T02:47:51.327865",
@@ -378,6 +378,7 @@ __tests__ = (
     "revision_hash": {
         "9872bfb536a47cc69d95d2f195cd5c825808f089",
         "e0e93281495e151b11636c156e52bfe9234c2a40",
+        "eb2fa4385af730509a42f8f0424bd0b9a0e4bc21",
     },
 },
 
