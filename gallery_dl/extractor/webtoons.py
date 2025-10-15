@@ -131,7 +131,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
 
     def assets(self, page):
         if self.config("thumbnails", False):
-            active = text.extr(page, 'class="on ', '</a>')
+            active = text.extr(page, 'class="on', '</a>')
             url = _url(text.extr(active, 'data-url="', '"'))
             return ({"url": url, "type": "thumbnail"},)
 
