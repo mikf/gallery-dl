@@ -9,8 +9,7 @@
 """Extractors for https://danbooru.donmai.us/ and other Danbooru instances"""
 
 from .common import BaseExtractor, Message
-from .. import text, util
-import datetime
+from .. import text, util, dt
 
 
 class DanbooruExtractor(BaseExtractor):
@@ -69,8 +68,7 @@ class DanbooruExtractor(BaseExtractor):
                 continue
 
             text.nameext_from_url(url, post)
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            post["date"] = dt.parse_iso(post["created_at"])
 
             post["tags"] = (
                 post["tag_string"].split(" ")
@@ -357,11 +355,11 @@ class DanbooruPopularExtractor(DanbooruExtractor):
     def metadata(self):
         self.params = params = text.parse_query(self.groups[-1])
         scale = params.get("scale", "day")
-        date = params.get("date") or datetime.date.today().isoformat()
+        date = params.get("date") or dt.date.today().isoformat()
 
         if scale == "week":
-            date = datetime.date.fromisoformat(date)
-            date = (date - datetime.timedelta(days=date.weekday())).isoformat()
+            date = dt.date.fromisoformat(date)
+            date = (date - dt.timedelta(days=date.weekday())).isoformat()
         elif scale == "month":
             date = date[:-3]
 

@@ -122,11 +122,10 @@ class TestDatetime(unittest.TestCase):
             self.assertEqual(f(value, "%Y"), dt.NONE)
 
     def test_parse_iso(self, f=dt.parse_iso):
-        null = dt.from_ts(0)
-
-        self.assertEqual(f("1970-01-01T00:00:00+00:00"), null)
-        self.assertEqual(f("1970-01-01T00:00:00+0000") , null)
-
+        self.assertEqual(
+            f("1970-01-01T00:00:00+00:00"),
+            dt.from_ts(0),
+        )
         self.assertEqual(
             f("2019-05-07T21:25:02+09:00"),
             datetime.datetime(2019, 5, 7, 12, 25, 2),
@@ -152,6 +151,10 @@ class TestDatetime(unittest.TestCase):
             self.assertEqual(f(value), dt.NONE)
 
     def test_parse_compat(self, f=dt.parse_compat):
+        self.assertEqual(
+            f("1970-01-01T00:00:00+0000", "%Y-%m-%dT%H:%M:%S%z"),
+            dt.EPOCH,
+        )
         self.assertEqual(
             f("2019-05-07T21:25:02.753+0900", "%Y-%m-%dT%H:%M:%S.%f%z"),
             datetime.datetime(2019, 5, 7, 12, 25, 2),

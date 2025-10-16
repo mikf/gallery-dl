@@ -9,10 +9,9 @@
 """Extractors for https://aryion.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util, dt, exception
 from ..cache import cache
 from email.utils import parsedate_tz
-from datetime import datetime
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?aryion\.com/g4"
 
@@ -156,7 +155,7 @@ class AryionExtractor(Extractor):
             "artist": artist,
             "path"  : text.split_html(extr(
                 "cookiecrumb'>", '</span'))[4:-1:2],
-            "date"  : datetime(*parsedate_tz(lmod)[:6]),
+            "date"  : dt.datetime(*parsedate_tz(lmod)[:6]),
             "size"  : text.parse_int(clen),
             "views" : text.parse_int(extr("Views</b>:", "<").replace(",", "")),
             "width" : text.parse_int(extr("Resolution</b>:", "x")),

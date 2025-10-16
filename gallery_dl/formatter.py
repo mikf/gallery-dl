@@ -13,7 +13,6 @@ import sys
 import time
 import string
 import _string
-import datetime
 import operator
 from . import text, util, dt
 
@@ -484,13 +483,13 @@ def _parse_offset(format_spec, default):
     if not offset or offset == "local":
         def off(dt_utc):
             local = time.localtime(dt.to_ts(dt_utc))
-            return fmt(dt_utc + datetime.timedelta(0, local.tm_gmtoff))
+            return fmt(dt_utc + dt.timedelta(0, local.tm_gmtoff))
     else:
         hours, _, minutes = offset.partition(":")
         offset = 3600 * int(hours)
         if minutes:
             offset += 60 * (int(minutes) if offset > 0 else -int(minutes))
-        offset = datetime.timedelta(0, offset)
+        offset = dt.timedelta(0, offset)
 
         def off(obj):
             return fmt(obj + offset)
@@ -557,7 +556,7 @@ _FORMATTERS = {
 _GLOBALS = {
     "_env": lambda: os.environ,
     "_lit": lambda: _literal,
-    "_now": datetime.datetime.now,
+    "_now": dt.datetime.now,
     "_nul": lambda: util.NONE,
 }
 _CONVERSIONS = {
