@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import deviantart
-import datetime
 from gallery_dl import exception
 
 
@@ -60,7 +59,7 @@ __tests__ = (
         "transparency": bool,
         "width"       : int,
     },
-    "date"            : datetime.datetime,
+    "date"            : "type:datetime",
     "deviationid"     : str,
     "?download_filesize": int,
     "extension"       : str,

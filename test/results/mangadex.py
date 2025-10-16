@@ -6,7 +6,6 @@
 
 from gallery_dl.extractor import mangadex
 from gallery_dl import exception
-import datetime
 
 
 __tests__ = (
@@ -132,7 +131,7 @@ __tests__ = (
     "chapter"      : 0,
     "chapter_minor": "",
     "chapter_id"   : str,
-    "date"         : datetime.datetime,
+    "date"         : "type:datetime",
     "lang"         : "iso:lang",
     "artist"       : ["Arakawa Hiromu"],
     "author"       : ["Arakawa Hiromu"],
