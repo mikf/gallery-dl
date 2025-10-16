@@ -6,7 +6,6 @@
 
 from gallery_dl.extractor import facebook
 from gallery_dl import exception
-import datetime
 
 
 __tests__ = (
@@ -191,7 +190,7 @@ __tests__ = (
     "#count"   : 1,
 
     "caption"  : "They were on a break... #FriendsReunion #MoreTogether",
-    "date"     : datetime.datetime(2021, 5, 27, 21, 55, 19),
+    "date"     : "dt:2021-05-27 21:55:19",
     "filename" : "191053255_10160743390471729_9001965649022744000_n",
     "extension": "jpg",
     "id"       : "10160743390456729",
@@ -212,7 +211,7 @@ __tests__ = (
     "#count"   : 1,
 
     "caption"  : "",
-    "date"     : datetime.datetime(2014, 5, 3, 0, 44, 47),
+    "date"     : "dt:2014-05-03 00:44:47",
     "filename" : str,
     "extension": "png",
     "id"       : "10152716011076729",
@@ -272,7 +271,7 @@ __tests__ = (
     "#class"   : facebook.FacebookVideoExtractor,
     "#count"   : 1,
 
-    "date"     : datetime.datetime(2024, 4, 19, 17, 25, 48),
+    "date"     : "dt:2024-04-19 17:25:48",
     "filename" : str,
     "id"       : "1165557851291824",
     "url"      : str,

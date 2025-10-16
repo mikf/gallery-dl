@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import toyhouse
-import datetime
 
 
 __tests__ = (
@@ -19,7 +18,7 @@ __tests__ = (
 
     "artists"   : list,
     "characters": list,
-    "date"      : datetime.datetime,
+    "date"      : "type:datetime",
     "hash"      : r"re:\w+",
     "id"        : r"re:\d+",
     "url"       : str,
