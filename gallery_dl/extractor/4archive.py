@@ -61,10 +61,9 @@ class _4archiveThreadExtractor(Extractor):
         extr = text.extract_from(post)
         data = {
             "name": extr('class="name">', "</span>"),
-            "date": self.parse_datetime(
+            "date": self.parse_datetime_iso(
                 (extr('class="dateTime">', "<") or
-                 extr('class="dateTime postNum" >', "<")).strip(),
-                "%Y-%m-%d %H:%M:%S"),
+                 extr('class="dateTime postNum" >', "<")).strip()),
             "no"  : text.parse_int(extr(">Post No.", "<")),
         }
         if 'class="file"' in post:

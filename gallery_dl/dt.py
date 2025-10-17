@@ -74,7 +74,7 @@ if sys.hexversion < 0x30c0000:
         except Exception:
             return NONE
 
-    def parse_compat(dt_string, format):
+    def parse_compat(dt_string, format="%Y-%m-%dT%H:%M:%S%z"):
         """Parse 'dt_string' as ISO 8601 value using 'format'"""
         return parse(dt_string, format)
 
@@ -90,7 +90,7 @@ else:
         except Exception:
             return NONE
 
-    def parse_compat(dt_string, format):
+    def parse_compat(dt_string, format=None):
         """Parse 'dt_string' as ISO 8601 value"""
         return parse_iso(dt_string)
 
