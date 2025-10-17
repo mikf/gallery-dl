@@ -1187,7 +1187,7 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             deviation["username"] = deviation["author"]["username"]
             deviation["_username"] = deviation["username"].lower()
 
-        deviation["date"] = d = self.parse_datetime(deviation["ts"])
+        deviation["date"] = d = self.parse_datetime_iso(deviation["ts"])
         deviation["published_time"] = int(dt.to_ts(d))
 
         deviation["da_category"] = "Status"

@@ -141,8 +141,8 @@ class BellazonExtractor(Extractor):
             "title": schema["headline"],
             "views": stats[0]["userInteractionCount"],
             "posts": stats[1]["userInteractionCount"],
-            "date" : self.parse_datetime(schema["datePublished"]),
-            "date_updated": self.parse_datetime(schema["dateModified"]),
+            "date" : self.parse_datetime_iso(schema["datePublished"]),
+            "date_updated": self.parse_datetime_iso(schema["dateModified"]),
             "description" : text.unescape(schema["text"]).strip(),
             "section"     : path[-2],
             "author"      : author["name"],
@@ -162,7 +162,7 @@ class BellazonExtractor(Extractor):
         post = {
             "id": extr('id="elComment_', '"'),
             "author_url": extr(" href='", "'"),
-            "date": self.parse_datetime(extr("datetime='", "'")),
+            "date": self.parse_datetime_iso(extr("datetime='", "'")),
             "content": extr("<!-- Post content -->", "\n\t\t</div>"),
         }
 
