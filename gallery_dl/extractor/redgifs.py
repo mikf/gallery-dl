@@ -51,7 +51,7 @@ class RedgifsExtractor(Extractor):
 
             gif.update(metadata)
             gif["count"] = cnt
-            gif["date"] = text.parse_timestamp(gif.get("createDate"))
+            gif["date"] = self.parse_timestamp(gif.get("createDate"))
             yield Message.Directory, gif
 
             for num, gif in enumerate(gifs, enum):

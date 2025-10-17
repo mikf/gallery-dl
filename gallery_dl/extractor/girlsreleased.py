@@ -52,7 +52,7 @@ class GirlsreleasedSetExtractor(GirlsreleasedExtractor):
             "id": json["id"],
             "site": json["site"],
             "model": [model for _, model in json["models"]],
-            "date": text.parse_timestamp(json["date"]),
+            "date": self.parse_timestamp(json["date"]),
             "count": len(json["images"]),
             "url": "https://girlsreleased.com/set/" + json["id"],
         }

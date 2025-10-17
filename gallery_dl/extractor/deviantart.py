@@ -259,7 +259,7 @@ class DeviantartExtractor(Extractor):
 
         deviation["published_time"] = text.parse_int(
             deviation["published_time"])
-        deviation["date"] = text.parse_timestamp(
+        deviation["date"] = self.parse_timestamp(
             deviation["published_time"])
 
         if self.comments:
@@ -1187,7 +1187,7 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             deviation["username"] = deviation["author"]["username"]
             deviation["_username"] = deviation["username"].lower()
 
-        deviation["date"] = d = text.parse_datetime(deviation["ts"])
+        deviation["date"] = d = self.parse_datetime(deviation["ts"])
         deviation["published_time"] = int(dt.to_ts(d))
 
         deviation["da_category"] = "Status"

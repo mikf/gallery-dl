@@ -86,7 +86,7 @@ class CivitaiExtractor(Extractor):
                     images = self.api.images_post(post["id"])
 
                 post = self.api.post(post["id"])
-                post["date"] = text.parse_datetime(
+                post["date"] = self.parse_datetime(
                     post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
                 data = {
                     "post": post,
@@ -122,7 +122,7 @@ class CivitaiExtractor(Extractor):
                     data["post"] = post = self._extract_meta_post(file)
                     if post:
                         post.pop("user", None)
-                file["date"] = text.parse_datetime(
+                file["date"] = self.parse_datetime(
                     file["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
                 data["url"] = url = self._url(file)
@@ -180,7 +180,7 @@ class CivitaiExtractor(Extractor):
             if "id" not in file and data["filename"].isdecimal():
                 file["id"] = text.parse_int(data["filename"])
             if "date" not in file:
-                file["date"] = text.parse_datetime(
+                file["date"] = self.parse_datetime(
                     file["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
             if self._meta_generation:
                 file["generation"] = self._extract_meta_generation(file)
@@ -216,7 +216,7 @@ class CivitaiExtractor(Extractor):
     def _extract_meta_post(self, image):
         try:
             post = self.api.post(image["postId"])
-            post["date"] = text.parse_datetime(
+            post["date"] = self.parse_datetime(
                 post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
             return post
         except Exception as exc:
@@ -278,7 +278,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
             versions = (version,)
 
         for version in versions:
-            version["date"] = text.parse_datetime(
+            version["date"] = self.parse_datetime(
                 version["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
             data = {
@@ -593,7 +593,7 @@ class CivitaiGeneratedExtractor(CivitaiExtractor):
         self._require_auth()
 
         for gen in self.api.orchestrator_queryGeneratedImages():
-            gen["date"] = text.parse_datetime(
+            gen["date"] = self.parse_datetime(
                 gen["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
             yield Message.Directory, gen
             for step in gen.pop("steps", ()):

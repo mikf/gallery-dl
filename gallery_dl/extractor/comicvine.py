@@ -60,6 +60,6 @@ class ComicvineTagExtractor(BooruExtractor):
     _file_url = operator.itemgetter("original")
 
     def _prepare(self, post):
-        post["date"] = text.parse_datetime(
+        post["date"] = self.parse_datetime(
             post["dateCreated"], "%a, %b %d %Y")
         post["tags"] = [tag["name"] for tag in post["tags"] if tag["name"]]

@@ -135,7 +135,7 @@ class BlueskyExtractor(Extractor):
 
         post["instance"] = self.instance
         post["post_id"] = self._pid(post)
-        post["date"] = text.parse_datetime(
+        post["date"] = self.parse_datetime(
             post["createdAt"][:19], "%Y-%m-%dT%H:%M:%S")
 
     def _extract_files(self, post):

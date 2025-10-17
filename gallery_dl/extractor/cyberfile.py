@@ -113,7 +113,7 @@ class CyberfileFileExtractor(CyberfileExtractor):
                 "Filesize:", "</tr>"))[:-1]),
             "tags"    : text.split_html(extr(
                 "Keywords:", "</tr>")),
-            "date"    : text.parse_datetime(text.remove_html(extr(
+            "date"    : self.parse_datetime(text.remove_html(extr(
                 "Uploaded:", "</tr>")), "%d/%m/%Y %H:%M:%S"),
             "permissions": text.remove_html(extr(
                 "Permissions:", "</tr>")).split(" &amp; "),

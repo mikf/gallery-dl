@@ -43,7 +43,7 @@ class WallhavenExtractor(Extractor):
         wp["url"] = wp.pop("path")
         if "tags" in wp:
             wp["tags"] = [t["name"] for t in wp["tags"]]
-        wp["date"] = text.parse_datetime(
+        wp["date"] = self.parse_datetime(
             wp.pop("created_at"), "%Y-%m-%d %H:%M:%S")
         wp["width"] = wp.pop("dimension_x")
         wp["height"] = wp.pop("dimension_y")

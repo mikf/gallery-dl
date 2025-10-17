@@ -59,7 +59,7 @@ class NekohousePostExtractor(NekohouseExtractor):
                 'class="scrape__user-name', '</').rpartition(">")[2].strip()),
             "title"   : text.unescape(extr(
                 'class="scrape__title', '</').rpartition(">")[2]),
-            "date"   : text.parse_datetime(extr(
+            "date"   : self.parse_datetime(extr(
                 'datetime="', '"')[:19], "%Y-%m-%d %H:%M:%S"),
             "content": text.unescape(extr(
                 'class="scrape__content">', "</div>").strip()),

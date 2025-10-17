@@ -64,7 +64,7 @@ class MastodonExtractor(BaseExtractor):
 
             status["count"] = len(attachments)
             status["tags"] = [tag["name"] for tag in status["tags"]]
-            status["date"] = text.parse_datetime(
+            status["date"] = self.parse_datetime(
                 status["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
 
             yield Message.Directory, status
@@ -319,7 +319,7 @@ class MastodonAPI():
             if code == 404:
                 raise exception.NotFoundError()
             if code == 429:
-                self.extractor.wait(until=text.parse_datetime(
+                self.extractor.wait(until=self.parse_datetime(
                     response.headers["x-ratelimit-reset"],
                     "%Y-%m-%dT%H:%M:%S.%fZ",
                 ))

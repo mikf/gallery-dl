@@ -47,7 +47,7 @@ class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
             "album_name" : text.unescape(extr('title="', '"')),
             "album_size" : text.parse_bytes(extr(
                 '<p class="title">', "B")),
-            "date"       : text.parse_datetime(extr(
+            "date"       : self.parse_datetime(extr(
                 '<p class="title">', '<'), "%d.%m.%Y"),
             "description": text.unescape(text.unescape(  # double
                 desc.rpartition(" [R")[0])),

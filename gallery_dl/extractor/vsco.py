@@ -62,7 +62,7 @@ class VscoExtractor(Extractor):
                 "grid"  : img["grid_name"],
                 "meta"  : img.get("image_meta") or {},
                 "tags"  : [tag["text"] for tag in img.get("tags") or ()],
-                "date"  : text.parse_timestamp(img["upload_date"] // 1000),
+                "date"  : self.parse_timestamp(img["upload_date"] // 1000),
                 "video" : img["is_video"],
                 "width" : img["width"],
                 "height": img["height"],

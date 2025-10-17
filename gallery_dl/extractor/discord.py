@@ -72,7 +72,7 @@ class DiscordExtractor(Extractor):
                 "author_files": [],
                 "message": self.extract_message_text(message),
                 "message_id": message["id"],
-                "date": text.parse_datetime(
+                "date": self.parse_datetime(
                     message["timestamp"], "%Y-%m-%dT%H:%M:%S.%f%z"
                 ),
                 "files": []

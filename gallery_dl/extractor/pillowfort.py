@@ -48,7 +48,7 @@ class PillowfortExtractor(Extractor):
                 for url in inline(post["content"]):
                     files.append({"url": url})
 
-            post["date"] = text.parse_datetime(
+            post["date"] = self.parse_datetime(
                 post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
             post["post_id"] = post.pop("id")
             post["count"] = len(files)
@@ -76,7 +76,7 @@ class PillowfortExtractor(Extractor):
                 if "id" not in file:
                     post["id"] = post["hash"]
                 if "created_at" in file:
-                    post["date"] = text.parse_datetime(
+                    post["date"] = self.parse_datetime(
                         file["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
 
                 yield msgtype, url, post

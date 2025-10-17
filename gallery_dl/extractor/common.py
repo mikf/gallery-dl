@@ -63,6 +63,10 @@ class Extractor():
             else:
                 self.category = CATEGORY_MAP[self.category]
 
+        self.parse_datetime = dt.parse
+        self.parse_datetime_iso = dt.parse_iso
+        self.parse_timestamp = dt.parse_ts
+
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
 

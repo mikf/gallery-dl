@@ -36,7 +36,7 @@ class IssuuPublicationExtractor(IssuuBase, GalleryExtractor):
             '{"":' + data.replace('\\"', '"')))
 
         doc = data["initialDocumentData"]["document"]
-        doc["date"] = text.parse_datetime(
+        doc["date"] = self.parse_datetime(
             doc["originalPublishDateInISOString"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
         self.count = text.parse_int(doc["pageCount"])

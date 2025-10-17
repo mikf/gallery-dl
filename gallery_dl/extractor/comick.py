@@ -114,9 +114,9 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
             "chapter_hid"   : ch["hid"],
             "chapter_string": chstr,
             "group"   : ch["group_name"],
-            "date"    : text.parse_datetime(
+            "date"    : self.parse_datetime(
                 ch["created_at"][:19], "%Y-%m-%dT%H:%M:%S"),
-            "date_updated"  : text.parse_datetime(
+            "date_updated"  : self.parse_datetime(
                 ch["updated_at"][:19], "%Y-%m-%dT%H:%M:%S"),
             "lang"    : ch["lang"],
         }

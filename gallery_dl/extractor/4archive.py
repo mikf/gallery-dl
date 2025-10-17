@@ -61,7 +61,7 @@ class _4archiveThreadExtractor(Extractor):
         extr = text.extract_from(post)
         data = {
             "name": extr('class="name">', "</span>"),
-            "date": text.parse_datetime(
+            "date": self.parse_datetime(
                 (extr('class="dateTime">', "<") or
                  extr('class="dateTime postNum" >', "<")).strip(),
                 "%Y-%m-%d %H:%M:%S"),

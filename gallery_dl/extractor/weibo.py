@@ -98,7 +98,7 @@ class WeiboExtractor(Extractor):
                 files = []
                 self._extract_status(status, files)
 
-            status["date"] = text.parse_datetime(
+            status["date"] = self.parse_datetime(
                 status["created_at"], "%a %b %d %H:%M:%S %z %Y")
             status["count"] = len(files)
             yield Message.Directory, status

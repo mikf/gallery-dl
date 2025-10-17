@@ -122,9 +122,9 @@ class IwaraExtractor(Extractor):
             info["file_id"] = file_info.get("id")
             info["filename"] = filename
             info["extension"] = extension
-            info["date"] = text.parse_datetime(
+            info["date"] = self.parse_datetime(
                 file_info.get("createdAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
-            info["date_updated"] = text.parse_datetime(
+            info["date_updated"] = self.parse_datetime(
                 file_info.get("updatedAt"), "%Y-%m-%dT%H:%M:%S.%fZ")
             info["mime"] = file_info.get("mime")
             info["size"] = file_info.get("size")
@@ -144,7 +144,7 @@ class IwaraExtractor(Extractor):
             "status" : user.get("status"),
             "role"   : user.get("role"),
             "premium": user.get("premium"),
-            "date"   : text.parse_datetime(
+            "date"   : self.parse_datetime(
                 user.get("createdAt"), "%Y-%m-%dT%H:%M:%S.000Z"),
             "description": profile.get("body"),
         }

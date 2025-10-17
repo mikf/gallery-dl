@@ -29,7 +29,7 @@ class PicartoGalleryExtractor(Extractor):
 
     def items(self):
         for post in self.posts():
-            post["date"] = text.parse_datetime(
+            post["date"] = self.parse_datetime(
                 post["created_at"], "%Y-%m-%d %H:%M:%S")
             variations = post.pop("variations", ())
             yield Message.Directory, post
