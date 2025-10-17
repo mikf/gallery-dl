@@ -2098,6 +2098,45 @@ Description
       ``None`` and ``Soft`` rated images,
 
 
+extractor.civitai.period
+------------------------
+Type
+    ``string``
+Default
+    ``"AllTime"``
+Description
+    Sets the ``period`` parameter
+    when paginating over results.
+Supported Values
+    * ``"AllTime"``
+    * ``"Year"``
+    * ``"Month"``
+    * ``"Week"``
+    * ``"Day"``
+
+
+extractor.civitai.sort
+----------------------
+Type
+    ``string``
+Default
+    ``"Newest"``
+Description
+    Sets the ``sort`` parameter
+    when paginating over results.
+Supported Values
+    * ``"Newest"``
+    * ``"Oldest"``
+    * ``"Most Reactions"``
+    * ``"Most Comments"``
+    * ``"Most Collected"``
+Special Values
+    ``"asc"``
+        Ascending order (``"Oldest"``)
+    ``"desc"`` | ``"reverse"``
+        Descending order (``"Newest"``)
+
+
 extractor.civitai.quality
 -------------------------
 Type

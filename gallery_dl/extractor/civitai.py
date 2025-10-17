@@ -342,9 +342,9 @@ class CivitaiModelExtractor(CivitaiExtractor):
             params = {
                 "modelVersionId": version["id"],
                 "prioritizedUserIds": (user["id"],),
-                "period": "AllTime",
-                "sort": "Most Reactions",
-                "limit": 20,
+                "period" : self.api._param_period(),
+                "sort"   : self.api._param_sort(),
+                "limit"  : 20,
                 "pending": True,
             }
             images = self.api.images(params, defaults=False)
@@ -391,8 +391,8 @@ class CivitaiCollectionExtractor(CivitaiExtractor):
 
         params = {
             "collectionId"  : cid,
-            "period"        : "AllTime",
-            "sort"          : "Newest",
+            "period"        : self.api._param_period(),
+            "sort"          : self.api._param_sort(),
             "browsingLevel" : self.api.nsfw,
             "include"       : ("cosmetics",),
         }
@@ -719,8 +719,8 @@ class CivitaiTrpcAPI():
         if defaults:
             params = self._merge_params(params, {
                 "useIndex"     : True,
-                "period"       : "AllTime",
-                "sort"         : "Newest",
+                "period"       : self._param_period(),
+                "sort"         : self._param_sort(),
                 "withMeta"     : False,  # Metadata Only
                 "fromPlatform" : False,  # Made On-Site
                 "browsingLevel": self.nsfw,
@@ -733,8 +733,8 @@ class CivitaiTrpcAPI():
     def images_gallery(self, model, version, user):
         endpoint = "image.getImagesAsPostsInfinite"
         params = {
-            "period"        : "AllTime",
-            "sort"          : "Newest",
+            "period"        : self._param_period(),
+            "sort"          : self._param_sort(),
             "modelVersionId": version["id"],
             "modelId"       : model["id"],
             "hidden"        : False,
@@ -768,9 +768,9 @@ class CivitaiTrpcAPI():
 
         if defaults:
             params = self._merge_params(params, {
-                "period"       : "AllTime",
+                "period"       : self._param_period(),
                 "periodMode"   : "published",
-                "sort"         : "Newest",
+                "sort"         : self._param_sort(),
                 "pending"      : False,
                 "hidden"       : False,
                 "followed"     : False,
@@ -797,9 +797,9 @@ class CivitaiTrpcAPI():
         if defaults:
             params = self._merge_params(params, {
                 "browsingLevel": self.nsfw,
-                "period"       : "AllTime",
+                "period"       : self._param_period(),
                 "periodMode"   : "published",
-                "sort"         : "Newest",
+                "sort"         : self._param_sort(),
                 "followed"     : False,
                 "draftOnly"    : False,
                 "pending"      : True,
@@ -821,7 +821,7 @@ class CivitaiTrpcAPI():
         if defaults:
             params = self._merge_params(params, {
                 "browsingLevel": self.nsfw,
-                "sort"         : "Newest",
+                "sort"         : self._param_sort(),
             })
 
         params = self._type_params(params)
@@ -835,7 +835,7 @@ class CivitaiTrpcAPI():
     def orchestrator_queryGeneratedImages(self):
         endpoint = "orchestrator.queryGeneratedImages"
         params = {
-            "ascending": False,
+            "ascending": True if self._param_sort() == "Oldest" else False,
             "tags"     : ("gen",),
             "authed"   : True,
         }
@@ -907,6 +907,21 @@ class CivitaiTrpcAPI():
                 type = types[name]
                 params[name] = [type(item) for item in value]
         return params
+
+    def _param_period(self):
+        if period := self.extractor.config("period"):
+            return period
+        return "AllTime"
+
+    def _param_sort(self):
+        if sort := self.extractor.config("sort"):
+            s = sort[0].lower()
+            if s in "drn":
+                return "Newest"
+            if s in "ao":
+                return "Oldest"
+            return sort
+        return "Newest"
 
 
 def _bool(value):
