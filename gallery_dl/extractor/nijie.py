@@ -82,7 +82,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             "title"      : keywords[0].strip(),
             "description": text.unescape(extr(
                 '"description": "', '"').replace("&amp;", "&")),
-            "date"       : text.parse_datetime(extr(
+            "date"       : self.parse_datetime(extr(
                 '"datePublished": "', '"'), "%a %b %d %H:%M:%S %Y", 9),
             "artist_id"  : text.parse_int(extr('/members.php?id=', '"')),
             "artist_name": keywords[1],
@@ -101,7 +101,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             "artist_id"  : text.parse_int(extr('members.php?id=', '"')),
             "artist_name": keywords[1],
             "tags"       : keywords[2:-1],
-            "date"       : text.parse_datetime(extr(
+            "date"       : self.parse_datetime(extr(
                 "itemprop='datePublished' content=", "<").rpartition(">")[2],
                 "%Y-%m-%d %H:%M:%S", 9),
         }

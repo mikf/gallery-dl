@@ -99,7 +99,7 @@ class TumblrExtractor(Extractor):
 
             if "trail" in post:
                 del post["trail"]
-            post["date"] = text.parse_timestamp(post["timestamp"])
+            post["date"] = self.parse_timestamp(post["timestamp"])
             posts = []
 
             if "photos" in post:  # type "photo" or "link"

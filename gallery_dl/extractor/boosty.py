@@ -78,7 +78,7 @@ class BoostyExtractor(Extractor):
         post["links"] = links = []
 
         if "createdAt" in post:
-            post["date"] = text.parse_timestamp(post["createdAt"])
+            post["date"] = self.parse_timestamp(post["createdAt"])
 
         for block in post["data"]:
             try:

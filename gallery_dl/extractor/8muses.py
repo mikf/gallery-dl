@@ -85,7 +85,7 @@ class _8musesAlbumExtractor(Extractor):
             "parent" : text.parse_int(album["parentId"]),
             "views"  : text.parse_int(album["numberViews"]),
             "likes"  : text.parse_int(album["numberLikes"]),
-            "date"   : text.parse_datetime(
+            "date"   : self.parse_datetime(
                 album["updatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ"),
         }
 

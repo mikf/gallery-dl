@@ -32,7 +32,7 @@ class KabeuchiUserExtractor(Extractor):
             if post.get("is_ad") or not post["image1"]:
                 continue
 
-            post["date"] = text.parse_datetime(
+            post["date"] = self.parse_datetime(
                 post["created_at"], "%Y-%m-%d %H:%M:%S")
             yield Message.Directory, post
 

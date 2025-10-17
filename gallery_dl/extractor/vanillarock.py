@@ -47,7 +47,7 @@ class VanillarockPostExtractor(VanillarockExtractor):
             "count": len(imgs),
             "title": text.unescape(name),
             "path" : self.path.strip("/"),
-            "date" : text.parse_datetime(extr(
+            "date" : self.parse_datetime(extr(
                 '<div class="date">', '</div>'), "%Y-%m-%d %H:%M"),
             "tags" : text.split_html(extr(
                 '<div class="cat-tag">', '</div>'))[::2],

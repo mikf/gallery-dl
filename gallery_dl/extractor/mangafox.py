@@ -99,7 +99,7 @@ class MangafoxMangaExtractor(MangaExtractor):
                 "chapter"       : text.parse_int(chapter),
                 "chapter_minor" : minor or "",
                 "chapter_string": cstr,
-                "date"          : text.parse_datetime(
+                "date"          : self.parse_datetime(
                     extr('right">', '</span>'), "%b %d, %Y"),
             }
             chapter.update(data)

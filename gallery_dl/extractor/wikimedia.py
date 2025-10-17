@@ -75,7 +75,7 @@ class WikimediaExtractor(BaseExtractor):
             for m in image["commonmetadata"] or ()}
 
         text.nameext_from_url(image["canonicaltitle"].partition(":")[2], image)
-        image["date"] = text.parse_datetime(
+        image["date"] = self.parse_datetime(
             image["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
 
     def items(self):

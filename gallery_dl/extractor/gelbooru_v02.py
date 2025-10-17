@@ -122,7 +122,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
 
     def _prepare(self, post):
         post["tags"] = post["tags"].strip()
-        post["date"] = text.parse_datetime(
+        post["date"] = self.parse_datetime(
             post["created_at"], "%a %b %d %H:%M:%S %z %Y")
 
     def _html(self, post):

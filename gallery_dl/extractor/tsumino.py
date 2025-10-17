@@ -65,7 +65,7 @@ class TsuminoGalleryExtractor(TsuminoBase, GalleryExtractor):
             "title_jp"  : title_jp,
             "thumbnail" : extr('"og:image" content="', '"'),
             "uploader"  : text.remove_html(extr('id="Uploader">', '</div>')),
-            "date"      : text.parse_datetime(
+            "date"      : self.parse_datetime(
                 extr('id="Uploaded">', '</div>').strip(), "%Y %B %d"),
             "rating"    : text.parse_float(extr(
                 'id="Rating">', '</div>').partition(" ")[0]),

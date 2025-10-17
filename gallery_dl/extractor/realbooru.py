@@ -48,7 +48,7 @@ class RealbooruExtractor(booru.BooruExtractor):
         return num
 
     def _prepare(self, post):
-        post["date"] = text.parse_datetime(post["created_at"], "%b, %d %Y")
+        post["date"] = self.parse_datetime(post["created_at"], "%b, %d %Y")
 
     def _pagination(self, params, begin, end):
         url = self.root + "/index.php"

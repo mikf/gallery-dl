@@ -68,7 +68,7 @@ class Rule34xyzExtractor(BooruExtractor):
 
     def _prepare(self, post):
         post.pop("files", None)
-        post["date"] = text.parse_datetime(
+        post["date"] = self.parse_datetime(
             post["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
         post["filename"], _, post["format"] = post["filename"].rpartition(".")
         if "tags" in post:

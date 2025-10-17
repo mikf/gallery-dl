@@ -49,7 +49,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
         files = self._extract_files(post)
 
         post["count"] = len(files)
-        post["date"] = text.parse_datetime(
+        post["date"] = self.parse_datetime(
             post["createdAt"][:19], "%Y-%m-%dT%H:%M:%S")
         post["post_url"] = post_url = \
             f"{self.root}/b/{post['boardSlug']}/{post['id']}"

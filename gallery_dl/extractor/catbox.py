@@ -28,7 +28,7 @@ class CatboxAlbumExtractor(GalleryExtractor):
         return {
             "album_id"   : self.page_url.rpartition("/")[2],
             "album_name" : text.unescape(extr("<h1>", "<")),
-            "date"       : text.parse_datetime(extr(
+            "date"       : self.parse_datetime(extr(
                 "<p>Created ", "<"), "%B %d %Y"),
             "description": text.unescape(extr("<p>", "<")),
         }

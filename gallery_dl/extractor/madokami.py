@@ -47,7 +47,7 @@ class MadokamiMangaExtractor(MadokamiExtractor):
                 "path": text.unescape(extr('href="', '"')),
                 "chapter_string": text.unescape(extr(">", "<")),
                 "size": text.parse_bytes(extr("<td>", "</td>")),
-                "date": text.parse_datetime(
+                "date": self.parse_datetime(
                     extr("<td>", "</td>").strip(), "%Y-%m-%d %H:%M"),
             })
 

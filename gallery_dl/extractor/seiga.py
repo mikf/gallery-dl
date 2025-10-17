@@ -213,7 +213,7 @@ class SeigaImageExtractor(SeigaExtractor):
 
         data["description"] = text.remove_html(data["description"])
         data["image_id"] = text.parse_int(self.image_id)
-        data["date"] = text.parse_datetime(
+        data["date"] = self.parse_datetime(
             data["date"] + ":00+0900", "%Y年%m月%d日 %H:%M:%S%z")
 
         return (data, data)

@@ -119,7 +119,7 @@ class LensdumpImageExtractor(LensdumpBase, Extractor):
                 'property="image:width" content="', '"')),
             "height": text.parse_int(extr(
                 'property="image:height" content="', '"')),
-            "date"  : text.parse_datetime(extr(
+            "date"  : self.parse_datetime(extr(
                 '<span title="', '"'), "%Y-%m-%d %H:%M:%S"),
         }
 

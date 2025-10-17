@@ -32,7 +32,7 @@ class ItakuExtractor(Extractor):
     def items(self):
         if images := self.images():
             for image in images:
-                image["date"] = text.parse_datetime(
+                image["date"] = self.parse_datetime(
                     image["date_added"], "%Y-%m-%dT%H:%M:%S.%fZ")
                 for category, tags in image.pop("categorized_tags").items():
                     image[f"tags_{category.lower()}"] = [
@@ -60,14 +60,14 @@ class ItakuExtractor(Extractor):
             for post in posts:
                 images = post.pop("gallery_images") or ()
                 post["count"] = len(images)
-                post["date"] = text.parse_datetime(
+                post["date"] = self.parse_datetime(
                     post["date_added"], "%Y-%m-%dT%H:%M:%S.%fZ")
                 post["tags"] = [t["name"] for t in post["tags"]]
 
                 yield Message.Directory, post
                 for post["num"], image in enumerate(images, 1):
                     post["file"] = image
-                    image["date"] = text.parse_datetime(
+                    image["date"] = self.parse_datetime(
                         image["date_added"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
                     url = image["image"]

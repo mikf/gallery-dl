@@ -79,7 +79,7 @@ class CheveretoImageExtractor(CheveretoExtractor):
             "url"  : url,
             "album": text.remove_html(extr(
                 "Added to <a", "</a>").rpartition(">")[2]),
-            "date" : text.parse_datetime(extr(
+            "date" : self.parse_datetime(extr(
                 '<span title="', '"'), "%Y-%m-%d %H:%M:%S"),
             "user" : extr('username: "', '"'),
         }
@@ -116,7 +116,7 @@ class CheveretoVideoExtractor(CheveretoExtractor):
                 'class="far fa-clock"></i>', "—"),
             "album": text.remove_html(extr(
                 "Added to <a", "</a>").rpartition(">")[2]),
-            "date"     : text.parse_datetime(extr(
+            "date"     : self.parse_datetime(extr(
                 '<span title="', '"'), "%Y-%m-%d %H:%M:%S"),
             "user"     : extr('username: "', '"'),
         }

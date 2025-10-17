@@ -65,7 +65,7 @@ class _2chenThreadExtractor(Extractor):
         extr = text.extract_from(post)
         return {
             "name"    : text.unescape(extr("<span>", "</span>")),
-            "date"    : text.parse_datetime(
+            "date"    : self.parse_datetime(
                 extr("<time", "<").partition(">")[2],
                 "%d %b %Y (%a) %H:%M:%S"
             ),

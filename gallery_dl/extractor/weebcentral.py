@@ -127,7 +127,7 @@ class WeebcentralMangaExtractor(WeebcentralBase, MangaExtractor):
                 "chapter"      : text.parse_int(chapter),
                 "chapter_minor": sep + minor,
                 "chapter_type" : type,
-                "date"         : text.parse_datetime(
+                "date"         : self.parse_datetime(
                     extr(' datetime="', '"')[:-5], "%Y-%m-%dT%H:%M:%S"),
             }
             chapter.update(data)

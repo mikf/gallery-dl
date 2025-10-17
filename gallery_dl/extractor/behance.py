@@ -67,7 +67,7 @@ class BehanceExtractor(Extractor):
             tags = [tag["title"] for tag in tags]
         data["tags"] = tags
 
-        data["date"] = text.parse_timestamp(
+        data["date"] = self.parse_timestamp(
             data.get("publishedOn") or data.get("conceived_on") or 0)
 
         if creator := data.get("creator"):

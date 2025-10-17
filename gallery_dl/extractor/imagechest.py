@@ -53,10 +53,10 @@ class ImagechestGalleryExtractor(GalleryExtractor):
     def _metadata_api(self, page):
         post = self.api.post(self.gallery_id)
 
-        post["date"] = text.parse_datetime(
+        post["date"] = self.parse_datetime(
             post["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
         for img in post["images"]:
-            img["date"] = text.parse_datetime(
+            img["date"] = self.parse_datetime(
                 img["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
 
         post["gallery_id"] = self.gallery_id

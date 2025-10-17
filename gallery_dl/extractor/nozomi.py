@@ -49,7 +49,7 @@ class NozomiExtractor(Extractor):
             post["character"] = self._list(post.get("character"))
 
             try:
-                post["date"] = text.parse_datetime(
+                post["date"] = self.parse_datetime(
                     post["date"] + ":00", "%Y-%m-%d %H:%M:%S%z")
             except Exception:
                 post["date"] = None
