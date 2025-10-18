@@ -16,7 +16,7 @@ import json
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|beta\.)?"
                 r"(kemono|coomer)\.(cr|s[tu]|party)")
-USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
+USER_PATTERN = rf"{BASE_PATTERN}/([^/?#]+)/user/([^/?#]+)"
 HASH_PATTERN = r"/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})"
 
 
@@ -145,9 +145,9 @@ class KemonoExtractor(Extractor):
                     file["hash"] = hash = ""
 
                 if url[0] == "/":
-                    url = self.root + "/data" + url
+                    url = f"{self.root}/data{url}"
                 elif url.startswith(self.root):
-                    url = self.root + "/data" + url[20:]
+                    url = f"{self.root}/data{url[20:]}"
                 file["url"] = url
 
                 if name := file.get("name"):
@@ -200,13 +200,13 @@ class KemonoExtractor(Extractor):
         username = username[0]
         self.log.info("Logging in as %s", username)
 
-        url = self.root + "/api/v1/authentication/login"
+        url = f"{self.root}/api/v1/authentication/login"
         data = {"username": username, "password": password}
 
         response = self.request(url, method="POST", json=data, fatal=False)
         if response.status_code >= 400:
             try:
-                msg = '"' + response.json()["error"] + '"'
+                msg = f'"{response.json()["error"]}"'
             except Exception:
                 msg = '"Username or password is incorrect"'
             raise exception.AuthenticationError(msg)
@@ -322,7 +322,7 @@ def _validate(response):
 class KemonoUserExtractor(KemonoExtractor):
     """Extractor for all posts from a kemono.cr user listing"""
     subcategory = "user"
-    pattern = USER_PATTERN + r"/?(?:\?([^#]+))?(?:$|\?|#)"
+    pattern = rf"{USER_PATTERN}/?(?:\?([^#]+))?(?:$|\?|#)"
     example = "https://kemono.cr/SERVICE/user/12345"
 
     def __init__(self, match):
@@ -345,7 +345,7 @@ class KemonoUserExtractor(KemonoExtractor):
 class KemonoPostsExtractor(KemonoExtractor):
     """Extractor for kemono.cr post listings"""
     subcategory = "posts"
-    pattern = BASE_PATTERN + r"/posts()()(?:/?\?([^#]+))?"
+    pattern = rf"{BASE_PATTERN}/posts()()(?:/?\?([^#]+))?"
     example = "https://kemono.cr/posts"
 
     def posts(self):
@@ -357,7 +357,7 @@ class KemonoPostsExtractor(KemonoExtractor):
 class KemonoPostExtractor(KemonoExtractor):
     """Extractor for a single kemono.cr post"""
     subcategory = "post"
-    pattern = USER_PATTERN + r"/post/([^/?#]+)(/revisions?(?:/(\d*))?)?"
+    pattern = rf"{USER_PATTERN}/post/([^/?#]+)(/revisions?(?:/(\d*))?)?"
     example = "https://kemono.cr/SERVICE/user/12345/post/12345"
 
     def __init__(self, match):
@@ -390,7 +390,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
                      "{server_id} {server}", "{channel_id} {channel}")
     filename_fmt = "{id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "discord_{server_id}_{id}_{num}"
-    pattern = BASE_PATTERN + r"/discord/server/(\d+)[/#](?:channel/)?(\d+)"
+    pattern = rf"{BASE_PATTERN}/discord/server/(\d+)[/#](?:channel/)?(\d+)"
     example = "https://kemono.cr/discord/server/12345/12345"
 
     def items(self):
@@ -434,7 +434,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
                 attachment["type"] = "attachment"
                 files.append(attachment)
             for path in find_inline(post["content"] or ""):
-                files.append({"path": "https://cdn.discordapp.com" + path,
+                files.append({"path": f"https://cdn.discordapp.com{path}",
                               "name": path, "type": "inline", "hash": ""})
 
             post.update(data)
@@ -452,15 +452,15 @@ class KemonoDiscordExtractor(KemonoExtractor):
                     post["extension"] = text.ext_from_url(url)
 
                 if url[0] == "/":
-                    url = self.root + "/data" + url
+                    url = f"{self.root}/data{url}"
                 elif url.startswith(self.root):
-                    url = self.root + "/data" + url[20:]
+                    url = f"{self.root}/data{url[20:]}"
                 yield Message.Url, url, post
 
 
 class KemonoDiscordServerExtractor(KemonoExtractor):
     subcategory = "discord-server"
-    pattern = BASE_PATTERN + r"/discord/server/(\d+)$"
+    pattern = rf"{BASE_PATTERN}/discord/server/(\d+)$"
     example = "https://kemono.cr/discord/server/12345"
 
     def items(self):
@@ -488,7 +488,7 @@ def discord_server_info(extr, server_id):
 class KemonoFavoriteExtractor(KemonoExtractor):
     """Extractor for kemono.cr favorites"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/(?:account/)?favorites()()(?:/?\?([^#]+))?"
+    pattern = rf"{BASE_PATTERN}/(?:account/)?favorites()()(?:/?\?([^#]+))?"
     example = "https://kemono.cr/account/favorites/artists"
 
     def items(self):
@@ -536,7 +536,7 @@ class KemonoFavoriteExtractor(KemonoExtractor):
 class KemonoArtistsExtractor(KemonoExtractor):
     """Extractor for kemono artists"""
     subcategory = "artists"
-    pattern = BASE_PATTERN + r"/artists(?:\?([^#]+))?"
+    pattern = rf"{BASE_PATTERN}/artists(?:\?([^#]+))?"
     example = "https://kemono.cr/artists"
 
     def items(self):
@@ -570,32 +570,32 @@ class KemonoArtistsExtractor(KemonoExtractor):
 
 
 class KemonoAPI():
-    """Interface for the Kemono API v1.1.0
+    """Interface for the Kemono API v1.3.0
 
     https://kemono.cr/documentation/api
     """
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.root = extractor.root + "/api/v1"
+        self.root = f"{extractor.root}/api"
         self.headers = {"Accept": "text/css"}
 
     def posts(self, offset=0, query=None, tags=None):
-        endpoint = "/posts"
+        endpoint = "/v1/posts"
         params = {"q": query, "o": offset, "tag": tags}
         return self._pagination(endpoint, params, 50, "posts")
 
     def file(self, file_hash):
-        endpoint = "/file/" + file_hash
+        endpoint = f"/v1/file/{file_hash}"
         return self._call(endpoint)
 
     def creators(self):
-        endpoint = "/creators"
+        endpoint = "/v1/creators"
         return self._call(endpoint)
 
     def creator_posts(self, service, creator_id,
                       offset=0, query=None, tags=None):
-        endpoint = f"/{service}/user/{creator_id}/posts"
+        endpoint = f"/v1/{service}/user/{creator_id}/posts"
         params = {"o": offset, "tag": tags, "q": query}
         return self._pagination(endpoint, params, 50)
 
@@ -607,58 +607,58 @@ class KemonoAPI():
                 service, creator_id, post["id"])["post"]
 
     def creator_announcements(self, service, creator_id):
-        endpoint = f"/{service}/user/{creator_id}/announcements"
+        endpoint = f"/v1/{service}/user/{creator_id}/announcements"
         return self._call(endpoint)
 
     def creator_dms(self, service, creator_id):
-        endpoint = f"/{service}/user/{creator_id}/dms"
+        endpoint = f"/v1/{service}/user/{creator_id}/dms"
         return self._call(endpoint)
 
     def creator_fancards(self, service, creator_id):
-        endpoint = f"/{service}/user/{creator_id}/fancards"
+        endpoint = f"/v1/{service}/user/{creator_id}/fancards"
         return self._call(endpoint)
 
     def creator_post(self, service, creator_id, post_id):
-        endpoint = f"/{service}/user/{creator_id}/post/{post_id}"
+        endpoint = f"/v1/{service}/user/{creator_id}/post/{post_id}"
         return self._call(endpoint)
 
     def creator_post_comments(self, service, creator_id, post_id):
-        endpoint = f"/{service}/user/{creator_id}/post/{post_id}/comments"
+        endpoint = f"/v1/{service}/user/{creator_id}/post/{post_id}/comments"
         return self._call(endpoint, fatal=False)
 
     def creator_post_revisions(self, service, creator_id, post_id):
-        endpoint = f"/{service}/user/{creator_id}/post/{post_id}/revisions"
+        endpoint = f"/v1/{service}/user/{creator_id}/post/{post_id}/revisions"
         return self._call(endpoint, fatal=False)
 
     def creator_profile(self, service, creator_id):
-        endpoint = f"/{service}/user/{creator_id}/profile"
+        endpoint = f"/v1/{service}/user/{creator_id}/profile"
         return self._call(endpoint)
 
     def creator_links(self, service, creator_id):
-        endpoint = f"/{service}/user/{creator_id}/links"
+        endpoint = f"/v1/{service}/user/{creator_id}/links"
         return self._call(endpoint)
 
     def creator_tags(self, service, creator_id):
-        endpoint = f"/{service}/user/{creator_id}/tags"
+        endpoint = f"/v1/{service}/user/{creator_id}/tags"
         return self._call(endpoint)
 
     def discord_channel(self, channel_id, post_count=None):
-        endpoint = f"/discord/channel/{channel_id}"
+        endpoint = f"/v1/discord/channel/{channel_id}"
         if post_count is None:
             return self._pagination(endpoint, {}, 150)
         else:
             return self._pagination_reverse(endpoint, {}, 150, post_count)
 
     def discord_channel_lookup(self, server_id):
-        endpoint = f"/discord/channel/lookup/{server_id}"
+        endpoint = f"/v1/discord/channel/lookup/{server_id}"
         return self._call(endpoint)
 
     def discord_server(self, server_id):
-        endpoint = f"/discord/server/{server_id}"
+        endpoint = f"/v1/discord/server/{server_id}"
         return self._call(endpoint)
 
     def account_favorites(self, type):
-        endpoint = "/account/favorites"
+        endpoint = "/v1/account/favorites"
         params = {"type": type}
         return self._call(endpoint, params)
 
