@@ -169,6 +169,20 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
         url = (f"{self.root_api}/books/data/{gid}/{gkey}"
                f"/{fmt['id']}/{fmt['key']}/{fmt['w']}?crt={self._crt()}")
         headers = self.headers
+
+        if self.config("cbz", False):
+            headers["Authorization"] = self._token()
+            dl = self.request_json(
+                f"{url}&action=dl", method="POST", headers=headers)
+            # 'crt' parameter here is necessary for 'hdoujin' downloads
+            url = f"{dl['base']}?crt={self._crt()}"
+            info = text.nameext_from_url(url)
+            if "fallback" in dl:
+                info["_fallback"] = (dl["fallback"],)
+            if not info["extension"]:
+                info["extension"] = "cbz"
+            return ((url, info),)
+
         data = self.request_json(url, headers=headers)
         base = data["base"]
 
