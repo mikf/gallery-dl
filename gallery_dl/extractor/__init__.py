@@ -39,6 +39,7 @@ modules = [
     "booth",
     "bunkr",
     "catbox",
+    "cfake",
     "chevereto",
     "cien",
     "civitai",
