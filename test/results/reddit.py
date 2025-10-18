@@ -180,6 +180,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.reddit.com/comments/1nz2ic5",
+    "#comment" : "comment share URL",
+    "#category": ("", "reddit", "submission"),
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#pattern" : r"https://i\.redd\.it/\w+\.png",
+    "#count"   : 2,
+},
+
+{
     "#url"     : "https://www.reddit.com/r/RobloxArt/comments/15ko0qu/",
     "#comment" : "comment embeds (#5366)",
     "#class"   : reddit.RedditSubmissionExtractor,
