@@ -126,10 +126,9 @@ class TwitterExtractor(Extractor):
             tdata["count"] = len(files)
             yield Message.Directory, tdata
 
-            del tdata["source_id"]
-            del tdata["sensitive_flags"]
-            if "source_user" in tdata:
-                del tdata["source_user"]
+            tdata.pop("source_id", None)
+            tdata.pop("source_user", None)
+            tdata.pop("sensitive_flags", None)
 
             for tdata["num"], file in enumerate(files, 1):
                 file.update(tdata)
