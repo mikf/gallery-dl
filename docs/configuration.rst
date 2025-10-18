@@ -3284,6 +3284,19 @@ Description
     Recursively download files from subfolders.
 
 
+extractor.hdoujin.cbz
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download each gallery as a single ``.cbz`` file.
+Note
+    Requires a
+    `token <extractor.hdoujin.token_>`__
+
+
 extractor.hdoujin.crt
 ---------------------
 Type
@@ -3345,7 +3358,10 @@ Example
 Description
     ``Authorization`` header value
     used for requests to ``https://api.hdoujin.org``
-    to access ``favorite`` galleries.
+    to access ``favorite`` galleries
+    or download
+    `.cbz <extractor.hdoujin.cbz_>`__
+    archives.
 
 
 extractor.hentaifoundry.descriptions
@@ -5163,6 +5179,19 @@ Description
     Download videos.
 
 
+extractor.schalenetwork.cbz
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download each gallery as a single ``.cbz`` file.
+Note
+    Requires a
+    `token <extractor.schalenetwork.token_>`__
+
+
 extractor.schalenetwork.crt
 ---------------------------
 Type
@@ -5227,7 +5256,10 @@ Example
 Description
     ``Authorization`` header value
     used for requests to ``https://api.schale.network``
-    to access ``favorite`` galleries.
+    to access ``favorite`` galleries
+    or download
+    `.cbz <extractor.schalenetwork.cbz_>`__
+    archives.
 
 
 extractor.sexcom.gifs
