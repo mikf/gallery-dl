@@ -177,8 +177,7 @@ class PatreonExtractor(Extractor):
             post, included, "attachments")
         attr["attachments_media"] = self._files(
             post, included, "attachments_media")
-        attr["date"] = self.parse_datetime(
-            attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        attr["date"] = self.parse_datetime_iso(attr["published_at"])
 
         try:
             attr["campaign"] = (included["campaign"][
@@ -226,8 +225,7 @@ class PatreonExtractor(Extractor):
         user = response.json()["data"]
         attr = user["attributes"]
         attr["id"] = user["id"]
-        attr["date"] = self.parse_datetime(
-            attr["created"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        attr["date"] = self.parse_datetime_iso(attr["created"])
         return attr
 
     def _collection(self, collection_id):
@@ -236,8 +234,7 @@ class PatreonExtractor(Extractor):
         coll = data["data"]
         attr = coll["attributes"]
         attr["id"] = coll["id"]
-        attr["date"] = self.parse_datetime(
-            attr["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        attr["date"] = self.parse_datetime_iso(attr["created_at"])
         return attr
 
     def _filename(self, url):
