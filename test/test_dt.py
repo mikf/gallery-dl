@@ -160,7 +160,7 @@ class TestDatetime(unittest.TestCase):
     def test_none(self):
         self.assertFalse(dt.NONE)
         self.assertIsInstance(dt.NONE, dt.datetime)
-        self.assertEqual(str(dt.NONE), "0101-01-01 00:00:00")
+        self.assertEqual(str(dt.NONE), "[Invalid DateTime]")
 
 
 if __name__ == "__main__":
