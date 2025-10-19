@@ -43,6 +43,8 @@ class TestDatetime(unittest.TestCase):
         _assert("2009-12-31T19:00:00.123456-05:00", d)
         _assert("2010-01-01T00:00:00Z"            , d)
         _assert("2010-01-01T00:00:00.123456Z"     , d)
+        _assert("2009-12-31T19:00:00-0500"        , d)
+        _assert("2009-12-31T19:00:00.123456-0500" , d)
 
         _assert(0    , dt.NONE)
         _assert(""   , dt.NONE)
@@ -63,11 +65,8 @@ class TestDatetime(unittest.TestCase):
             self.assertEqual(result, expected, msg=repr(value))
 
         d = datetime.datetime(2010, 1, 1)
-
         _assert("2009-12-31T19:00:00-05"          , d)
-        _assert("2009-12-31T19:00:00-0500"        , d)
         _assert("2009-12-31T19:00:00.123456-05"   , d)
-        _assert("2009-12-31T19:00:00.123456-0500" , d)
 
     def test_to_timestamp(self, f=dt.to_ts):
         self.assertEqual(f(dt.EPOCH), 0.0)
@@ -146,19 +145,17 @@ class TestDatetime(unittest.TestCase):
             f("1970.01.01"),
             dt.NONE,
         )
-
-        for value in ((), [], {}, None, 1, 2.3):
-            self.assertEqual(f(value), dt.NONE)
-
-    def test_parse_compat(self, f=dt.parse_compat):
         self.assertEqual(
-            f("1970-01-01T00:00:00+0000", "%Y-%m-%dT%H:%M:%S%z"),
+            f("1970-01-01T00:00:00+0000"),
             dt.EPOCH,
         )
         self.assertEqual(
-            f("2019-05-07T21:25:02.753+0900", "%Y-%m-%dT%H:%M:%S.%f%z"),
+            f("2019-05-07T21:25:02.753+0900"),
             datetime.datetime(2019, 5, 7, 12, 25, 2),
         )
+
+        for value in ((), [], {}, None, 1, 2.3):
+            self.assertEqual(f(value), dt.NONE)
 
     def test_none(self):
         self.assertFalse(dt.NONE)
