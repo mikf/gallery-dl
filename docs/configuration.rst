@@ -6626,6 +6626,17 @@ Description
     will be taken from the original posts, not the retweeted posts.
 
 
+extractor.weibo.text
+--------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract full ``text`` & ``text_raw`` metadata
+    for statuses with truncated ``text``.
+
+
 extractor.weibo.videos
 ----------------------
 Type
