@@ -34,6 +34,7 @@ class WeiboExtractor(Extractor):
     def _init(self):
         self.livephoto = self.config("livephoto", True)
         self.retweets = self.config("retweets", False)
+        self.longtext = self.config("text", False)
         self.videos = self.config("videos", True)
         self.movies = self.config("movies", False)
         self.gifs = self.config("gifs", True)
@@ -97,6 +98,10 @@ class WeiboExtractor(Extractor):
             else:
                 files = []
                 self._extract_status(status, files)
+
+            if self.longtext and status.get("isLongText") and \
+                    status["text"].endswith('class="expand">展开</span>'):
+                status = self._status_by_id(status["id"])
 
             status["date"] = text.parse_datetime(
                 status["created_at"], "%a %b %d %H:%M:%S %z %Y")
@@ -190,7 +195,8 @@ class WeiboExtractor(Extractor):
         return video
 
     def _status_by_id(self, status_id):
-        url = f"{self.root}/ajax/statuses/show?id={status_id}"
+        url = (f"{self.root}/ajax/statuses/show"
+               f"?id={status_id}&isGetLongText=true")
         return self.request_json(url)
 
     def _user_id(self):
