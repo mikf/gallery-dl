@@ -117,6 +117,7 @@ class MetadataPP(PostProcessor):
         self.mtime = options.get("mtime")
         self.omode = options.get("open", omode)
         self.encoding = options.get("encoding", "utf-8")
+        self.newline = options.get("newline")
         self.skip = options.get("skip", False)
         self.meta_path = options.get("metadata-path")
 
@@ -138,11 +139,15 @@ class MetadataPP(PostProcessor):
             return
 
         try:
-            with open(path, self.omode, encoding=self.encoding) as fp:
+            with open(path, self.omode,
+                      encoding=self.encoding,
+                      newline=self.newline) as fp:
                 self.write(fp, pathfmt.kwdict)
         except FileNotFoundError:
             os.makedirs(directory, exist_ok=True)
-            with open(path, self.omode, encoding=self.encoding) as fp:
+            with open(path, self.omode,
+                      encoding=self.encoding,
+                      newline=self.newline) as fp:
                 self.write(fp, pathfmt.kwdict)
 
         if archive:

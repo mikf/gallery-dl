@@ -8182,7 +8182,7 @@ metadata.open
 -------------
 Type
     ``string``
-Defsult
+Default
     ``"w"``
 Description
     The ``mode`` in which metadata files get opened.
@@ -8198,13 +8198,31 @@ metadata.encoding
 -----------------
 Type
     ``string``
-Defsult
+Default
     ``"utf-8"``
 Description
     Name of the encoding used to encode a file's content.
 
     See the ``encoding`` argument of |open()|_ for further details.
 
+metadata.newline
+-----------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    The newline sequence used in metadata files. If null, any '\n' characters
+    written are translated to the system default line separator.
+
+    See the ``newline`` argument of |open()|_ for further details.
+
+    ``null``
+        Any '\n' characters written are translated to the system default line separator.
+    ``"" or "\n"``
+        Don't replace newline characters.
+    ``"\r\n" or "\r"``
+        Replace newline characters with the given sequence.
 
 metadata.private
 ----------------
