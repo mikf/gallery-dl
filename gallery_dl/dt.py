@@ -38,19 +38,10 @@ def convert(value):
     """Convert 'value' to a naive UTC datetime object"""
     if not value:
         return NONE
-
     if isinstance(value, datetime):
-        return value
-
-    if isinstance(value, str):
-        try:
-            if value[-1] == "Z":
-                # compat for Python < 3.11
-                value = value[:-1]
-            return normalize(datetime.fromisoformat(value))
-        except Exception:
-            pass
-
+        return normalize(value)
+    if isinstance(value, str) and (dt := parse_iso(value)) is not NONE:
+        return dt
     return parse_ts(value)
 
 
@@ -70,13 +61,12 @@ if sys.hexversion < 0x30c0000:
             if dt_string[-1] == "Z":
                 # compat for Python < 3.11
                 dt_string = dt_string[:-1]
+            elif dt_string[-5] in "+-":
+                # compat for Python < 3.11
+                dt_string = f"{dt_string[:-2]}:{dt_string[-2:]}"
             return normalize(datetime.fromisoformat(dt_string))
         except Exception:
             return NONE
-
-    def parse_compat(dt_string, format="%Y-%m-%dT%H:%M:%S%z"):
-        """Parse 'dt_string' as ISO 8601 value using 'format'"""
-        return parse(dt_string, format)
 
     from_ts = datetime.utcfromtimestamp
     now = datetime.utcnow
@@ -89,10 +79,6 @@ else:
             return normalize(datetime.fromisoformat(dt_string))
         except Exception:
             return NONE
-
-    def parse_compat(dt_string, format=None):
-        """Parse 'dt_string' as ISO 8601 value"""
-        return parse_iso(dt_string)
 
     def from_ts(ts=None):
         """Convert Unix timestamp to naive UTC datetime"""
