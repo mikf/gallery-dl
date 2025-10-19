@@ -258,8 +258,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "_"            : extr('<div id="gdc"><div class="cs ct', '"'),
             "eh_category"  : extr('>', '<'),
             "uploader"     : extr('<div id="gdn">', '</div>'),
-            "date"         : self.parse_datetime(extr(
-                '>Posted:</td><td class="gdt2">', '</td>'), "%Y-%m-%d %H:%M"),
+            "date"         : self.parse_datetime_iso(extr(
+                '>Posted:</td><td class="gdt2">', '</td>')),
             "parent"       : extr(
                 '>Parent:</td><td class="gdt2"><a href="', '"'),
             "expunged"     : "Yes" != extr(

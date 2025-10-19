@@ -167,8 +167,7 @@ class BatotoMangaExtractor(BatotoBase, MangaExtractor):
 
             data["chapter"] = text.parse_int(chapter)
             data["chapter_minor"] = sep + minor
-            data["date"] = self.parse_datetime(
-                extr('time="', '"'), "%Y-%m-%dT%H:%M:%S.%fZ")
+            data["date"] = self.parse_datetime_iso(extr('time="', '"'))
 
             url = f"{self.root}/title/{href}"
             results.append((url, data.copy()))

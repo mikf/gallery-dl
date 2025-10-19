@@ -53,8 +53,7 @@ class PahealExtractor(Extractor):
                          extr("<source src='", "'")),
             "uploader": text.unquote(extr(
                 "class='username' href='/user/", "'")),
-            "date"    : self.parse_datetime(
-                extr("datetime='", "'"), "%Y-%m-%dT%H:%M:%S%z"),
+            "date"    : self.parse_datetime_iso(extr("datetime='", "'")),
             "source"  : text.unescape(text.extr(
                 extr(">Source Link<", "</td>"), "href='", "'")),
         }
