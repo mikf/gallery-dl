@@ -18,8 +18,14 @@ class NullDatetime(datetime):
     def __bool__(self):
         return False
 
+    def __str__(self):
+        return "[Invalid DateTime]"
 
-NONE = NullDatetime(101, 1, 1)
+    def __format__(self, format_spec):
+        return f"[Invalid DateTime {format_spec}]"
+
+
+NONE = NullDatetime(1, 1, 1)
 EPOCH = datetime(1970, 1, 1)
 SECOND = timedelta(0, 1)
 
