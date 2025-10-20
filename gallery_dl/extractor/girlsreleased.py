@@ -41,7 +41,7 @@ class GirlsreleasedExtractor(Extractor):
 class GirlsreleasedSetExtractor(GirlsreleasedExtractor):
     """Extractor for girlsreleased galleries"""
     subcategory = "set"
-    pattern = BASE_PATTERN + r"/set/(\d+)"
+    pattern = rf"{BASE_PATTERN}/set/(\d+)"
     example = "https://girlsreleased.com/set/12345"
 
     def items(self):
@@ -65,12 +65,12 @@ class GirlsreleasedSetExtractor(GirlsreleasedExtractor):
 class GirlsreleasedModelExtractor(GirlsreleasedExtractor):
     """Extractor for girlsreleased models"""
     subcategory = _path = "model"
-    pattern = BASE_PATTERN + r"/model/(\d+(?:/.+)?)"
+    pattern = rf"{BASE_PATTERN}/model/(\d+(?:/.+)?)"
     example = "https://girlsreleased.com/model/12345/MODEL"
 
 
 class GirlsreleasedSiteExtractor(GirlsreleasedExtractor):
     """Extractor for girlsreleased sites"""
     subcategory = _path = "site"
-    pattern = BASE_PATTERN + r"/site/([^/?#]+(?:/model/\d+/?.*)?)"
+    pattern = rf"{BASE_PATTERN}/site/([^/?#]+(?:/model/\d+/?.*)?)"
     example = "https://girlsreleased.com/site/SITE"

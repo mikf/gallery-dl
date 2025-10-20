@@ -21,7 +21,7 @@ class NudostarExtractor(GalleryExtractor):
 class NudostarModelExtractor(NudostarExtractor):
     """Extractor for NudoStar models"""
     subcategory = "model"
-    pattern = BASE_PATTERN + r"(/models/([^/?#]+)/?)$"
+    pattern = rf"{BASE_PATTERN}(/models/([^/?#]+)/?)$"
     example = "https://nudostar.tv/models/MODEL/"
 
     def metadata(self, page):
@@ -53,7 +53,7 @@ class NudostarModelExtractor(NudostarExtractor):
 class NudostarImageExtractor(NudostarExtractor):
     """Extractor for NudoStar images"""
     subcategory = "image"
-    pattern = BASE_PATTERN + r"(/models/([^/?#]+)/(\d+)/)"
+    pattern = rf"{BASE_PATTERN}(/models/([^/?#]+)/(\d+)/)"
     example = "https://nudostar.tv/models/MODEL/123/"
 
     def items(self):

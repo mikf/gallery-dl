@@ -16,7 +16,7 @@ import itertools
 import binascii
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?instagram\.com"
-USER_PATTERN = BASE_PATTERN + r"/(?!(?:p|tv|reel|explore|stories)/)([^/?#]+)"
+USER_PATTERN = rf"{BASE_PATTERN}/(?!(?:p|tv|reel|explore|stories)/)([^/?#]+)"
 
 
 class InstagramExtractor(Extractor):
@@ -501,7 +501,7 @@ class InstagramPostExtractor(InstagramExtractor):
 
 class InstagramUserExtractor(Dispatch, InstagramExtractor):
     """Extractor for an Instagram user profile"""
-    pattern = USER_PATTERN + r"/?(?:$|[?#])"
+    pattern = rf"{USER_PATTERN}/?(?:$|[?#])"
     example = "https://www.instagram.com/USER/"
 
     def items(self):
@@ -521,7 +521,7 @@ class InstagramUserExtractor(Dispatch, InstagramExtractor):
 class InstagramPostsExtractor(InstagramExtractor):
     """Extractor for an Instagram user's posts"""
     subcategory = "posts"
-    pattern = USER_PATTERN + r"/posts"
+    pattern = rf"{USER_PATTERN}/posts"
     example = "https://www.instagram.com/USER/posts/"
 
     def posts(self):
@@ -538,7 +538,7 @@ class InstagramPostsExtractor(InstagramExtractor):
 class InstagramReelsExtractor(InstagramExtractor):
     """Extractor for an Instagram user's reels"""
     subcategory = "reels"
-    pattern = USER_PATTERN + r"/reels"
+    pattern = rf"{USER_PATTERN}/reels"
     example = "https://www.instagram.com/USER/reels/"
 
     def posts(self):
@@ -555,7 +555,7 @@ class InstagramReelsExtractor(InstagramExtractor):
 class InstagramTaggedExtractor(InstagramExtractor):
     """Extractor for an Instagram user's tagged posts"""
     subcategory = "tagged"
-    pattern = USER_PATTERN + r"/tagged"
+    pattern = rf"{USER_PATTERN}/tagged"
     example = "https://www.instagram.com/USER/tagged/"
 
     def metadata(self):
@@ -581,7 +581,7 @@ class InstagramTaggedExtractor(InstagramExtractor):
 class InstagramGuideExtractor(InstagramExtractor):
     """Extractor for an Instagram guide"""
     subcategory = "guide"
-    pattern = USER_PATTERN + r"/guide/[^/?#]+/(\d+)"
+    pattern = rf"{USER_PATTERN}/guide/[^/?#]+/(\d+)"
     example = "https://www.instagram.com/USER/guide/NAME/12345"
 
     def __init__(self, match):
@@ -598,7 +598,7 @@ class InstagramGuideExtractor(InstagramExtractor):
 class InstagramSavedExtractor(InstagramExtractor):
     """Extractor for an Instagram user's saved media"""
     subcategory = "saved"
-    pattern = USER_PATTERN + r"/saved(?:/all-posts)?/?$"
+    pattern = rf"{USER_PATTERN}/saved(?:/all-posts)?/?$"
     example = "https://www.instagram.com/USER/saved/"
 
     def posts(self):
@@ -608,7 +608,7 @@ class InstagramSavedExtractor(InstagramExtractor):
 class InstagramCollectionExtractor(InstagramExtractor):
     """Extractor for Instagram collection"""
     subcategory = "collection"
-    pattern = USER_PATTERN + r"/saved/([^/?#]+)/([^/?#]+)"
+    pattern = rf"{USER_PATTERN}/saved/([^/?#]+)/([^/?#]+)"
     example = "https://www.instagram.com/USER/saved/COLLECTION/12345"
 
     def __init__(self, match):
@@ -692,7 +692,7 @@ class InstagramStoriesExtractor(InstagramExtractor):
 class InstagramHighlightsExtractor(InstagramExtractor):
     """Extractor for an Instagram user's story highlights"""
     subcategory = "highlights"
-    pattern = USER_PATTERN + r"/highlights"
+    pattern = rf"{USER_PATTERN}/highlights"
     example = "https://www.instagram.com/USER/highlights/"
 
     def posts(self):
@@ -703,7 +703,7 @@ class InstagramHighlightsExtractor(InstagramExtractor):
 class InstagramFollowersExtractor(InstagramExtractor):
     """Extractor for an Instagram user's followers"""
     subcategory = "followers"
-    pattern = USER_PATTERN + r"/followers"
+    pattern = rf"{USER_PATTERN}/followers"
     example = "https://www.instagram.com/USER/followers/"
 
     def items(self):
@@ -717,7 +717,7 @@ class InstagramFollowersExtractor(InstagramExtractor):
 class InstagramFollowingExtractor(InstagramExtractor):
     """Extractor for an Instagram user's followed users"""
     subcategory = "following"
-    pattern = USER_PATTERN + r"/following"
+    pattern = rf"{USER_PATTERN}/following"
     example = "https://www.instagram.com/USER/following/"
 
     def items(self):
@@ -732,7 +732,7 @@ class InstagramTagExtractor(InstagramExtractor):
     """Extractor for Instagram tags"""
     subcategory = "tag"
     directory_fmt = ("{category}", "{subcategory}", "{tag}")
-    pattern = BASE_PATTERN + r"/explore/tags/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/explore/tags/([^/?#]+)"
     example = "https://www.instagram.com/explore/tags/TAG/"
 
     def metadata(self):
@@ -745,7 +745,7 @@ class InstagramTagExtractor(InstagramExtractor):
 class InstagramInfoExtractor(InstagramExtractor):
     """Extractor for an Instagram user's profile data"""
     subcategory = "info"
-    pattern = USER_PATTERN + r"/info"
+    pattern = rf"{USER_PATTERN}/info"
     example = "https://www.instagram.com/USER/info/"
 
     def items(self):
@@ -761,7 +761,7 @@ class InstagramInfoExtractor(InstagramExtractor):
 class InstagramAvatarExtractor(InstagramExtractor):
     """Extractor for an Instagram user's avatar"""
     subcategory = "avatar"
-    pattern = USER_PATTERN + r"/avatar"
+    pattern = rf"{USER_PATTERN}/avatar"
     example = "https://www.instagram.com/USER/avatar/"
 
     def posts(self):

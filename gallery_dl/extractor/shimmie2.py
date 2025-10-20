@@ -93,7 +93,7 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     file_url_fmt = "{}/_images/{}/{}%20-%20{}.{}"
-    pattern = BASE_PATTERN + r"post/list/([^/?#]+)(?:/(\d+))?"
+    pattern = rf"{BASE_PATTERN}post/list/([^/?#]+)(?:/(\d+))?"
     example = "https://vidya.pics/post/list/TAG/1"
 
     def metadata(self):
@@ -158,7 +158,7 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
 class Shimmie2PostExtractor(Shimmie2Extractor):
     """Extractor for single shimmie2 posts"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"post/view/(\d+)"
+    pattern = rf"{BASE_PATTERN}post/view/(\d+)"
     example = "https://vidya.pics/post/view/12345"
 
     def posts(self):

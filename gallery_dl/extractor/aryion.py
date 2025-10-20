@@ -175,7 +175,7 @@ class AryionGalleryExtractor(AryionExtractor):
     """Extractor for a user's gallery on eka's portal"""
     subcategory = "gallery"
     categorytransfer = True
-    pattern = BASE_PATTERN + r"/(?:gallery/|user/|latest.php\?name=)([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/(?:gallery/|user/|latest.php\?name=)([^/?#]+)"
     example = "https://aryion.com/g4/gallery/USER"
 
     def __init__(self, match):
@@ -206,7 +206,7 @@ class AryionFavoriteExtractor(AryionExtractor):
     directory_fmt = ("{category}", "{user!l}", "favorites")
     archive_fmt = "f_{user}_{id}"
     categorytransfer = True
-    pattern = BASE_PATTERN + r"/favorites/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/favorites/([^/?#]+)"
     example = "https://aryion.com/g4/favorites/USER"
 
     def posts(self):
@@ -219,7 +219,7 @@ class AryionTagExtractor(AryionExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "tags", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/tags\.php\?([^#]+)"
+    pattern = rf"{BASE_PATTERN}/tags\.php\?([^#]+)"
     example = "https://aryion.com/g4/tags.php?tag=TAG"
 
     def _init(self):
@@ -237,7 +237,7 @@ class AryionTagExtractor(AryionExtractor):
 class AryionPostExtractor(AryionExtractor):
     """Extractor for individual posts on eka's portal"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/view/(\d+)"
+    pattern = rf"{BASE_PATTERN}/view/(\d+)"
     example = "https://aryion.com/g4/view/12345"
 
     def posts(self):

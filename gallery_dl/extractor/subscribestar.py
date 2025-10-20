@@ -221,7 +221,7 @@ class SubscribestarExtractor(Extractor):
 class SubscribestarUserExtractor(SubscribestarExtractor):
     """Extractor for media from a subscribestar user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/(?!posts/)([^/?#]+)"
     example = "https://www.subscribestar.com/USER"
 
     def posts(self):
@@ -243,7 +243,7 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
 class SubscribestarPostExtractor(SubscribestarExtractor):
     """Extractor for media from a single subscribestar post"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/posts/(\d+)"
+    pattern = rf"{BASE_PATTERN}/posts/(\d+)"
     example = "https://www.subscribestar.com/posts/12345"
 
     def posts(self):

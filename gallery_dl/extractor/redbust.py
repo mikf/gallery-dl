@@ -46,7 +46,7 @@ class RedbustExtractor(Extractor):
 
 class RedbustGalleryExtractor(GalleryExtractor, RedbustExtractor):
     """Extractor for RedBust galleries"""
-    pattern = BASE_PATTERN + r"/([\w-]+)/?$"
+    pattern = rf"{BASE_PATTERN}/([\w-]+)/?$"
     example = "https://redbust.com/TITLE/"
 
     def items(self):
@@ -124,7 +124,7 @@ class RedbustGalleryExtractor(GalleryExtractor, RedbustExtractor):
 class RedbustTagExtractor(RedbustExtractor):
     """Extractor for RedBust tag searches"""
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"/tag/([\w-]+)"
+    pattern = rf"{BASE_PATTERN}/tag/([\w-]+)"
     example = "https://redbust.com/tag/TAG/"
 
     def galleries(self):
@@ -134,7 +134,7 @@ class RedbustTagExtractor(RedbustExtractor):
 class RedbustArchiveExtractor(RedbustExtractor):
     """Extractor for RedBust monthly archive collections"""
     subcategory = "archive"
-    pattern = BASE_PATTERN + r"(/\d{4}/\d{2})"
+    pattern = rf"{BASE_PATTERN}(/\d{{4}}/\d{{2}})"
     example = "https://redbust.com/2010/01/"
 
     def galleries(self):
@@ -145,7 +145,7 @@ class RedbustImageExtractor(RedbustExtractor):
     """Extractor for RedBust images"""
     subcategory = "image"
     directory_fmt = ("{category}", "{title}")
-    pattern = BASE_PATTERN + r"/(?!tag/|\d{4}/)([\w-]+)/([\w-]+)/?$"
+    pattern = rf"{BASE_PATTERN}/(?!tag/|\d{{4}}/)([\w-]+)/([\w-]+)/?$"
     example = "https://redbust.com/TITLE/SLUG/"
 
     def items(self):

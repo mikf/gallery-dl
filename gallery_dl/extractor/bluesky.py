@@ -14,7 +14,7 @@ from ..cache import cache, memcache
 
 BASE_PATTERN = (r"(?:https?://)?"
                 r"(?:(?:www\.)?(?:c|[fv]x)?bs[ky]y[ex]?\.app|main\.bsky\.dev)")
-USER_PATTERN = BASE_PATTERN + r"/profile/([^/?#]+)"
+USER_PATTERN = rf"{BASE_PATTERN}/profile/([^/?#]+)"
 
 
 class BlueskyExtractor(Extractor):
@@ -216,7 +216,7 @@ class BlueskyExtractor(Extractor):
 
 
 class BlueskyUserExtractor(Dispatch, BlueskyExtractor):
-    pattern = USER_PATTERN + r"$"
+    pattern = rf"{USER_PATTERN}$"
     example = "https://bsky.app/profile/HANDLE"
 
     def items(self):
@@ -237,7 +237,7 @@ class BlueskyUserExtractor(Dispatch, BlueskyExtractor):
 
 class BlueskyPostsExtractor(BlueskyExtractor):
     subcategory = "posts"
-    pattern = USER_PATTERN + r"/posts"
+    pattern = rf"{USER_PATTERN}/posts"
     example = "https://bsky.app/profile/HANDLE/posts"
 
     def posts(self):
@@ -247,7 +247,7 @@ class BlueskyPostsExtractor(BlueskyExtractor):
 
 class BlueskyRepliesExtractor(BlueskyExtractor):
     subcategory = "replies"
-    pattern = USER_PATTERN + r"/replies"
+    pattern = rf"{USER_PATTERN}/replies"
     example = "https://bsky.app/profile/HANDLE/replies"
 
     def posts(self):
@@ -257,7 +257,7 @@ class BlueskyRepliesExtractor(BlueskyExtractor):
 
 class BlueskyMediaExtractor(BlueskyExtractor):
     subcategory = "media"
-    pattern = USER_PATTERN + r"/media"
+    pattern = rf"{USER_PATTERN}/media"
     example = "https://bsky.app/profile/HANDLE/media"
 
     def posts(self):
@@ -267,7 +267,7 @@ class BlueskyMediaExtractor(BlueskyExtractor):
 
 class BlueskyVideoExtractor(BlueskyExtractor):
     subcategory = "video"
-    pattern = USER_PATTERN + r"/video"
+    pattern = rf"{USER_PATTERN}/video"
     example = "https://bsky.app/profile/HANDLE/video"
 
     def posts(self):
@@ -277,7 +277,7 @@ class BlueskyVideoExtractor(BlueskyExtractor):
 
 class BlueskyLikesExtractor(BlueskyExtractor):
     subcategory = "likes"
-    pattern = USER_PATTERN + r"/likes"
+    pattern = rf"{USER_PATTERN}/likes"
     example = "https://bsky.app/profile/HANDLE/likes"
 
     def posts(self):
@@ -288,7 +288,7 @@ class BlueskyLikesExtractor(BlueskyExtractor):
 
 class BlueskyFeedExtractor(BlueskyExtractor):
     subcategory = "feed"
-    pattern = USER_PATTERN + r"/feed/([^/?#]+)"
+    pattern = rf"{USER_PATTERN}/feed/([^/?#]+)"
     example = "https://bsky.app/profile/HANDLE/feed/NAME"
 
     def posts(self):
@@ -298,7 +298,7 @@ class BlueskyFeedExtractor(BlueskyExtractor):
 
 class BlueskyListExtractor(BlueskyExtractor):
     subcategory = "list"
-    pattern = USER_PATTERN + r"/lists/([^/?#]+)"
+    pattern = rf"{USER_PATTERN}/lists/([^/?#]+)"
     example = "https://bsky.app/profile/HANDLE/lists/ID"
 
     def posts(self):
@@ -308,7 +308,7 @@ class BlueskyListExtractor(BlueskyExtractor):
 
 class BlueskyFollowingExtractor(BlueskyExtractor):
     subcategory = "following"
-    pattern = USER_PATTERN + r"/follows"
+    pattern = rf"{USER_PATTERN}/follows"
     example = "https://bsky.app/profile/HANDLE/follows"
 
     def items(self):
@@ -320,7 +320,7 @@ class BlueskyFollowingExtractor(BlueskyExtractor):
 
 class BlueskyPostExtractor(BlueskyExtractor):
     subcategory = "post"
-    pattern = USER_PATTERN + r"/post/([^/?#]+)"
+    pattern = rf"{USER_PATTERN}/post/([^/?#]+)"
     example = "https://bsky.app/profile/HANDLE/post/ID"
 
     def posts(self):
@@ -330,7 +330,7 @@ class BlueskyPostExtractor(BlueskyExtractor):
 
 class BlueskyInfoExtractor(BlueskyExtractor):
     subcategory = "info"
-    pattern = USER_PATTERN + r"/info"
+    pattern = rf"{USER_PATTERN}/info"
     example = "https://bsky.app/profile/HANDLE/info"
 
     def items(self):
@@ -342,7 +342,7 @@ class BlueskyInfoExtractor(BlueskyExtractor):
 class BlueskyAvatarExtractor(BlueskyExtractor):
     subcategory = "avatar"
     filename_fmt = "avatar_{post_id}.{extension}"
-    pattern = USER_PATTERN + r"/avatar"
+    pattern = rf"{USER_PATTERN}/avatar"
     example = "https://bsky.app/profile/HANDLE/avatar"
 
     def posts(self):
@@ -352,7 +352,7 @@ class BlueskyAvatarExtractor(BlueskyExtractor):
 class BlueskyBackgroundExtractor(BlueskyExtractor):
     subcategory = "background"
     filename_fmt = "background_{post_id}.{extension}"
-    pattern = USER_PATTERN + r"/ba(?:nner|ckground)"
+    pattern = rf"{USER_PATTERN}/ba(?:nner|ckground)"
     example = "https://bsky.app/profile/HANDLE/banner"
 
     def posts(self):
@@ -361,7 +361,7 @@ class BlueskyBackgroundExtractor(BlueskyExtractor):
 
 class BlueskySearchExtractor(BlueskyExtractor):
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/search(?:/|\?q=)(.+)"
+    pattern = rf"{BASE_PATTERN}/search(?:/|\?q=)(.+)"
     example = "https://bsky.app/search?q=QUERY"
 
     def posts(self):
@@ -371,7 +371,7 @@ class BlueskySearchExtractor(BlueskyExtractor):
 
 class BlueskyHashtagExtractor(BlueskyExtractor):
     subcategory = "hashtag"
-    pattern = BASE_PATTERN + r"/hashtag/([^/?#]+)(?:/(top|latest))?"
+    pattern = rf"{BASE_PATTERN}/hashtag/([^/?#]+)(?:/(top|latest))?"
     example = "https://bsky.app/hashtag/NAME"
 
     def posts(self):
@@ -381,7 +381,7 @@ class BlueskyHashtagExtractor(BlueskyExtractor):
 
 class BlueskyBookmarkExtractor(BlueskyExtractor):
     subcategory = "bookmark"
-    pattern = BASE_PATTERN + r"/saved"
+    pattern = rf"{BASE_PATTERN}/saved"
     example = "https://bsky.app/saved"
 
     def posts(self):

@@ -88,13 +88,13 @@ BASE_PATTERN = E621Extractor.update({
 
 class E621TagExtractor(E621Extractor, danbooru.DanbooruTagExtractor):
     """Extractor for e621 posts from tag searches"""
-    pattern = BASE_PATTERN + r"/posts?(?:\?[^#]*?tags=|/index/\d+/)([^&#]*)"
+    pattern = rf"{BASE_PATTERN}/posts?(?:\?[^#]*?tags=|/index/\d+/)([^&#]*)"
     example = "https://e621.net/posts?tags=TAG"
 
 
 class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
     """Extractor for e621 pools"""
-    pattern = BASE_PATTERN + r"/pool(?:s|/show)/(\d+)"
+    pattern = rf"{BASE_PATTERN}/pool(?:s|/show)/(\d+)"
     example = "https://e621.net/pools/12345"
 
     def posts(self):
@@ -119,7 +119,7 @@ class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
 
 class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
     """Extractor for single e621 posts"""
-    pattern = BASE_PATTERN + r"/post(?:s|/show)/(\d+)"
+    pattern = rf"{BASE_PATTERN}/post(?:s|/show)/(\d+)"
     example = "https://e621.net/posts/12345"
 
     def posts(self):
@@ -129,7 +129,7 @@ class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
 
 class E621PopularExtractor(E621Extractor, danbooru.DanbooruPopularExtractor):
     """Extractor for popular images from e621"""
-    pattern = BASE_PATTERN + r"/explore/posts/popular(?:\?([^#]*))?"
+    pattern = rf"{BASE_PATTERN}/explore/posts/popular(?:\?([^#]*))?"
     example = "https://e621.net/explore/posts/popular"
 
     def posts(self):
@@ -141,7 +141,7 @@ class E621FavoriteExtractor(E621Extractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "Favorites", "{user_id}")
     archive_fmt = "f_{user_id}_{id}"
-    pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
+    pattern = rf"{BASE_PATTERN}/favorites(?:\?([^#]*))?"
     example = "https://e621.net/favorites"
 
     def metadata(self):

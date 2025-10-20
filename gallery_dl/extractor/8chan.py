@@ -69,7 +69,7 @@ class _8chanThreadExtractor(_8chanExtractor):
                      "{threadId} {subject[:50]}")
     filename_fmt = "{postId}{num:?-//} {filename[:200]}.{extension}"
     archive_fmt = "{boardUri}_{postId}_{num}"
-    pattern = BASE_PATTERN + r"/([^/?#]+)/(?:res|last)/(\d+)"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/(?:res|last)/(\d+)"
     example = "https://8chan.moe/a/res/12345.html"
 
     def items(self):
@@ -107,7 +107,7 @@ class _8chanThreadExtractor(_8chanExtractor):
 class _8chanBoardExtractor(_8chanExtractor):
     """Extractor for 8chan boards"""
     subcategory = "board"
-    pattern = BASE_PATTERN + r"/([^/?#]+)/(?:(\d+)\.html)?$"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/(?:(\d+)\.html)?$"
     example = "https://8chan.moe/a/"
 
     def items(self):

@@ -134,7 +134,7 @@ class VkExtractor(Extractor):
 class VkPhotosExtractor(VkExtractor):
     """Extractor for photos from a vk user"""
     subcategory = "photos"
-    pattern = (BASE_PATTERN + r"/(?:"
+    pattern = (rf"{BASE_PATTERN}/(?:"
                r"(?:albums|photos|id)(-?\d+)"
                r"|(?!(?:album|tag|wall)-?\d+_?)([^/?#]+))")
     example = "https://vk.com/id12345"
@@ -184,7 +184,7 @@ class VkAlbumExtractor(VkExtractor):
     """Extractor for a vk album"""
     subcategory = "album"
     directory_fmt = ("{category}", "{user[id]}", "{album[id]}")
-    pattern = BASE_PATTERN + r"/album(-?\d+)_(\d+)$"
+    pattern = rf"{BASE_PATTERN}/album(-?\d+)_(\d+)$"
     example = "https://vk.com/album12345_00"
 
     def photos(self):
@@ -228,7 +228,7 @@ class VkTaggedExtractor(VkExtractor):
     """Extractor for a vk tagged photos"""
     subcategory = "tagged"
     directory_fmt = ("{category}", "{user[id]}", "tags")
-    pattern = BASE_PATTERN + r"/tag(-?\d+)$"
+    pattern = rf"{BASE_PATTERN}/tag(-?\d+)$"
     example = "https://vk.com/tag12345"
 
     def __init__(self, match):
@@ -247,7 +247,7 @@ class VkWallPostExtractor(VkExtractor):
     subcategory = "wall-post"
     directory_fmt = ("{category}", "{user[id]}", "wall")
     filename_fmt = "{wall[id]}_{num}.{extension}"
-    pattern = BASE_PATTERN + r"/wall(-?\d+)_(\d+)"
+    pattern = rf"{BASE_PATTERN}/wall(-?\d+)_(\d+)"
     example = "https://vk.com/wall12345_123"
 
     def photos(self):

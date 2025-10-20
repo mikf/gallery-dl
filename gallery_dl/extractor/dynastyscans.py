@@ -41,7 +41,7 @@ class DynastyscansBase():
 
 class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
     """Extractor for manga-chapters from dynasty-scans.com"""
-    pattern = BASE_PATTERN + r"(/chapters/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}(/chapters/[^/?#]+)"
     example = "https://dynasty-scans.com/chapters/NAME"
 
     def metadata(self, page):
@@ -81,7 +81,7 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
 class DynastyscansMangaExtractor(DynastyscansBase, MangaExtractor):
     chapterclass = DynastyscansChapterExtractor
     reverse = False
-    pattern = BASE_PATTERN + r"(/series/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}(/series/[^/?#]+)"
     example = "https://dynasty-scans.com/series/NAME"
 
     def chapters(self, page):
@@ -97,7 +97,7 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
     directory_fmt = ("{category}", "Images")
     filename_fmt = "{image_id}.{extension}"
     archive_fmt = "i_{image_id}"
-    pattern = BASE_PATTERN + r"/images/?(?:\?([^#]+))?$"
+    pattern = rf"{BASE_PATTERN}/images/?(?:\?([^#]+))?$"
     example = "https://dynasty-scans.com/images?QUERY"
 
     def __init__(self, match):
@@ -126,7 +126,7 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
 class DynastyscansImageExtractor(DynastyscansSearchExtractor):
     """Extractor for individual images on dynasty-scans.com"""
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/images/(\d+)"
+    pattern = rf"{BASE_PATTERN}/images/(\d+)"
     example = "https://dynasty-scans.com/images/12345"
 
     def images(self):
@@ -136,7 +136,7 @@ class DynastyscansImageExtractor(DynastyscansSearchExtractor):
 class DynastyscansAnthologyExtractor(DynastyscansSearchExtractor):
     """Extractor for dynasty-scans anthologies"""
     subcategory = "anthology"
-    pattern = BASE_PATTERN + r"/anthologies/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/anthologies/([^/?#]+)"
     example = "https://dynasty-scans.com/anthologies/TITLE"
 
     def items(self):
