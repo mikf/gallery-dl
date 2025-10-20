@@ -352,7 +352,7 @@ class FanboxExtractor(Extractor):
 class FanboxCreatorExtractor(FanboxExtractor):
     """Extractor for a Fanbox creator's works"""
     subcategory = "creator"
-    pattern = USER_PATTERN + r"(?:/posts)?/?$"
+    pattern = rf"{USER_PATTERN}(?:/posts)?/?$"
     example = "https://USER.fanbox.cc/"
 
     def posts(self):
@@ -370,7 +370,7 @@ class FanboxCreatorExtractor(FanboxExtractor):
 class FanboxPostExtractor(FanboxExtractor):
     """Extractor for media from a single Fanbox post"""
     subcategory = "post"
-    pattern = USER_PATTERN + r"/posts/(\d+)"
+    pattern = rf"{USER_PATTERN}/posts/(\d+)"
     example = "https://USER.fanbox.cc/posts/12345"
 
     def posts(self):
@@ -380,7 +380,7 @@ class FanboxPostExtractor(FanboxExtractor):
 class FanboxHomeExtractor(FanboxExtractor):
     """Extractor for your Fanbox home feed"""
     subcategory = "home"
-    pattern = BASE_PATTERN + r"/?$"
+    pattern = rf"{BASE_PATTERN}/?$"
     example = "https://fanbox.cc/"
 
     def posts(self):
@@ -391,7 +391,7 @@ class FanboxHomeExtractor(FanboxExtractor):
 class FanboxSupportingExtractor(FanboxExtractor):
     """Extractor for your supported Fanbox users feed"""
     subcategory = "supporting"
-    pattern = BASE_PATTERN + r"/home/supporting"
+    pattern = rf"{BASE_PATTERN}/home/supporting"
     example = "https://fanbox.cc/home/supporting"
 
     def posts(self):

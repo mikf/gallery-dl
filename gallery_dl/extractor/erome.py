@@ -64,7 +64,7 @@ class EromeExtractor(Extractor):
 class EromeAlbumExtractor(EromeExtractor):
     """Extractor for albums on erome.com"""
     subcategory = "album"
-    pattern = BASE_PATTERN + r"/a/(\w+)"
+    pattern = rf"{BASE_PATTERN}/a/(\w+)"
     example = "https://www.erome.com/a/ID"
 
     def items(self):
@@ -117,7 +117,7 @@ class EromeAlbumExtractor(EromeExtractor):
 
 class EromeUserExtractor(EromeExtractor):
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!a/|search\?)([^/?#]+)(?:/?\?([^#]+))?"
+    pattern = rf"{BASE_PATTERN}/(?!a/|search\?)([^/?#]+)(?:/?\?([^#]+))?"
     example = "https://www.erome.com/USER"
 
     def albums(self):
@@ -133,7 +133,7 @@ class EromeUserExtractor(EromeExtractor):
 
 class EromeSearchExtractor(EromeExtractor):
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/search/?\?(q=[^#]+)"
+    pattern = rf"{BASE_PATTERN}/search/?\?(q=[^#]+)"
     example = "https://www.erome.com/search?q=QUERY"
 
     def albums(self):

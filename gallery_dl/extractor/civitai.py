@@ -15,7 +15,7 @@ import itertools
 import time
 
 BASE_PATTERN = r"(?:https?://)?civitai\.com"
-USER_PATTERN = BASE_PATTERN + r"/user/([^/?#]+)"
+USER_PATTERN = rf"{BASE_PATTERN}/user/([^/?#]+)"
 
 
 class CivitaiExtractor(Extractor):
@@ -248,7 +248,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
     directory_fmt = ("{category}", "{user[username]}",
                      "{model[id]}{model[name]:? //}",
                      "{version[id]}{version[name]:? //}")
-    pattern = BASE_PATTERN + r"/models/(\d+)(?:/?\?modelVersionId=(\d+))?"
+    pattern = rf"{BASE_PATTERN}/models/(\d+)(?:/?\?modelVersionId=(\d+))?"
     example = "https://civitai.com/models/12345/TITLE"
 
     def items(self):
@@ -365,7 +365,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
 
 class CivitaiImageExtractor(CivitaiExtractor):
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/images/(\d+)"
+    pattern = rf"{BASE_PATTERN}/images/(\d+)"
     example = "https://civitai.com/images/12345"
 
     def images(self):
@@ -376,7 +376,7 @@ class CivitaiCollectionExtractor(CivitaiExtractor):
     subcategory = "collection"
     directory_fmt = ("{category}", "{user_collection[username]}",
                      "collections", "{collection[id]}{collection[name]:? //}")
-    pattern = BASE_PATTERN + r"/collections/(\d+)"
+    pattern = rf"{BASE_PATTERN}/collections/(\d+)"
     example = "https://civitai.com/collections/12345"
 
     def images(self):
@@ -398,7 +398,7 @@ class CivitaiPostExtractor(CivitaiExtractor):
     subcategory = "post"
     directory_fmt = ("{category}", "{username|user[username]}", "posts",
                      "{post[id]}{post[title]:? //}")
-    pattern = BASE_PATTERN + r"/posts/(\d+)"
+    pattern = rf"{BASE_PATTERN}/posts/(\d+)"
     example = "https://civitai.com/posts/12345"
 
     def posts(self):
@@ -407,7 +407,7 @@ class CivitaiPostExtractor(CivitaiExtractor):
 
 class CivitaiTagExtractor(CivitaiExtractor):
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"/tag/([^/?&#]+)"
+    pattern = rf"{BASE_PATTERN}/tag/([^/?&#]+)"
     example = "https://civitai.com/tag/TAG"
 
     def models(self):
@@ -417,7 +417,7 @@ class CivitaiTagExtractor(CivitaiExtractor):
 
 class CivitaiSearchModelsExtractor(CivitaiExtractor):
     subcategory = "search-models"
-    pattern = BASE_PATTERN + r"/search/models\?([^#]+)"
+    pattern = rf"{BASE_PATTERN}/search/models\?([^#]+)"
     example = "https://civitai.com/search/models?query=QUERY"
 
     def models(self):
@@ -428,7 +428,7 @@ class CivitaiSearchModelsExtractor(CivitaiExtractor):
 
 class CivitaiSearchImagesExtractor(CivitaiExtractor):
     subcategory = "search-images"
-    pattern = BASE_PATTERN + r"/search/images\?([^#]+)"
+    pattern = rf"{BASE_PATTERN}/search/images\?([^#]+)"
     example = "https://civitai.com/search/images?query=QUERY"
 
     def images(self):
@@ -439,7 +439,7 @@ class CivitaiSearchImagesExtractor(CivitaiExtractor):
 
 class CivitaiModelsExtractor(CivitaiExtractor):
     subcategory = "models"
-    pattern = BASE_PATTERN + r"/models(?:/?\?([^#]+))?(?:$|#)"
+    pattern = rf"{BASE_PATTERN}/models(?:/?\?([^#]+))?(?:$|#)"
     example = "https://civitai.com/models"
 
     def models(self):
@@ -449,7 +449,7 @@ class CivitaiModelsExtractor(CivitaiExtractor):
 
 class CivitaiImagesExtractor(CivitaiExtractor):
     subcategory = "images"
-    pattern = BASE_PATTERN + r"/images(?:/?\?([^#]+))?(?:$|#)"
+    pattern = rf"{BASE_PATTERN}/images(?:/?\?([^#]+))?(?:$|#)"
     example = "https://civitai.com/images"
 
     def images(self):
@@ -460,7 +460,7 @@ class CivitaiImagesExtractor(CivitaiExtractor):
 
 class CivitaiVideosExtractor(CivitaiExtractor):
     subcategory = "videos"
-    pattern = BASE_PATTERN + r"/videos(?:/?\?([^#]+))?(?:$|#)"
+    pattern = rf"{BASE_PATTERN}/videos(?:/?\?([^#]+))?(?:$|#)"
     example = "https://civitai.com/videos"
 
     def images(self):
@@ -471,7 +471,7 @@ class CivitaiVideosExtractor(CivitaiExtractor):
 
 class CivitaiPostsExtractor(CivitaiExtractor):
     subcategory = "posts"
-    pattern = BASE_PATTERN + r"/posts(?:/?\?([^#]+))?(?:$|#)"
+    pattern = rf"{BASE_PATTERN}/posts(?:/?\?([^#]+))?(?:$|#)"
     example = "https://civitai.com/posts"
 
     def posts(self):
@@ -480,7 +480,7 @@ class CivitaiPostsExtractor(CivitaiExtractor):
 
 
 class CivitaiUserExtractor(Dispatch, CivitaiExtractor):
-    pattern = USER_PATTERN + r"/?(?:$|\?|#)"
+    pattern = rf"{USER_PATTERN}/?(?:$|\?|#)"
     example = "https://civitai.com/user/USER"
 
     def items(self):
@@ -496,7 +496,7 @@ class CivitaiUserExtractor(Dispatch, CivitaiExtractor):
 
 class CivitaiUserModelsExtractor(CivitaiExtractor):
     subcategory = "user-models"
-    pattern = USER_PATTERN + r"/models/?(?:\?([^#]+))?"
+    pattern = rf"{USER_PATTERN}/models/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/models"
 
     def models(self):
@@ -510,7 +510,7 @@ class CivitaiUserPostsExtractor(CivitaiExtractor):
     subcategory = "user-posts"
     directory_fmt = ("{category}", "{username|user[username]}", "posts",
                      "{post[id]}{post[title]:? //}")
-    pattern = USER_PATTERN + r"/posts/?(?:\?([^#]+))?"
+    pattern = rf"{USER_PATTERN}/posts/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/posts"
 
     def posts(self):
@@ -522,7 +522,7 @@ class CivitaiUserPostsExtractor(CivitaiExtractor):
 
 class CivitaiUserImagesExtractor(CivitaiExtractor):
     subcategory = "user-images"
-    pattern = USER_PATTERN + r"/images/?(?:\?([^#]+))?"
+    pattern = rf"{USER_PATTERN}/images/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/images"
 
     def __init__(self, match):
@@ -543,7 +543,7 @@ class CivitaiUserImagesExtractor(CivitaiExtractor):
 class CivitaiUserVideosExtractor(CivitaiExtractor):
     subcategory = "user-videos"
     directory_fmt = ("{category}", "{username|user[username]}", "videos")
-    pattern = USER_PATTERN + r"/videos/?(?:\?([^#]+))?"
+    pattern = rf"{USER_PATTERN}/videos/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/videos"
 
     def __init__(self, match):
@@ -562,7 +562,7 @@ class CivitaiUserVideosExtractor(CivitaiExtractor):
 
 class CivitaiUserCollectionsExtractor(CivitaiExtractor):
     subcategory = "user-collections"
-    pattern = USER_PATTERN + r"/collections/?(?:\?([^#]+))?"
+    pattern = rf"{USER_PATTERN}/collections/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/collections"
 
     def items(self):
@@ -581,7 +581,7 @@ class CivitaiGeneratedExtractor(CivitaiExtractor):
     subcategory = "generated"
     filename_fmt = "{filename}.{extension}"
     directory_fmt = ("{category}", "generated")
-    pattern = f"{BASE_PATTERN}/generate"
+    pattern = rf"{BASE_PATTERN}/generate"
     example = "https://civitai.com/generate"
 
     def items(self):

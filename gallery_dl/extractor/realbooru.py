@@ -82,7 +82,7 @@ class RealbooruTagExtractor(RealbooruExtractor):
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
     per_page = 42
-    pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]*)"
+    pattern = rf"{BASE_PATTERN}/index\.php\?page=post&s=list&tags=([^&#]*)"
     example = "https://realbooru.com/index.php?page=post&s=list&tags=TAG"
 
     def metadata(self):
@@ -102,7 +102,7 @@ class RealbooruFavoriteExtractor(RealbooruExtractor):
     directory_fmt = ("{category}", "favorites", "{favorite_id}")
     archive_fmt = "f_{favorite_id}_{id}"
     per_page = 50
-    pattern = BASE_PATTERN + r"/index\.php\?page=favorites&s=view&id=(\d+)"
+    pattern = rf"{BASE_PATTERN}/index\.php\?page=favorites&s=view&id=(\d+)"
     example = "https://realbooru.com/index.php?page=favorites&s=view&id=12345"
 
     def metadata(self):
@@ -120,7 +120,7 @@ class RealbooruPoolExtractor(RealbooruExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool} {pool_name}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = BASE_PATTERN + r"/index\.php\?page=pool&s=show&id=(\d+)"
+    pattern = rf"{BASE_PATTERN}/index\.php\?page=pool&s=show&id=(\d+)"
     example = "https://realbooru.com/index.php?page=pool&s=show&id=12345"
 
     def metadata(self):
@@ -147,7 +147,7 @@ class RealbooruPoolExtractor(RealbooruExtractor):
 class RealbooruPostExtractor(RealbooruExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/index\.php\?page=post&s=view&id=(\d+)"
+    pattern = rf"{BASE_PATTERN}/index\.php\?page=post&s=view&id=(\d+)"
     example = "https://realbooru.com/index.php?page=post&s=view&id=12345"
 
     def posts(self):

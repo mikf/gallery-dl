@@ -47,7 +47,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
     filename_fmt = (
         "{manga}_c{chapter:>03}{chapter_minor:?//}_{page:>03}.{extension}")
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"(/read/[^/?#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
+    pattern = rf"{BASE_PATTERN}(/read/[^/?#]+/[a-z-]+/\d+/\d+(?:/\d+)?)"
     example = "https://read.powermanga.org/read/MANGA/en/0/123/"
 
     def items(self):
@@ -91,7 +91,7 @@ class FoolslideMangaExtractor(FoolslideExtractor):
     """Base class for manga extractors for FoOlSlide based sites"""
     subcategory = "manga"
     categorytransfer = True
-    pattern = BASE_PATTERN + r"(/series/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}(/series/[^/?#]+)"
     example = "https://read.powermanga.org/series/MANGA/"
 
     def items(self):

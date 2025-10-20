@@ -18,7 +18,7 @@ class SaintAlbumExtractor(LolisafeAlbumExtractor):
     """Extractor for saint albums"""
     category = "saint"
     root = "https://saint2.su"
-    pattern = BASE_PATTERN + r"/a/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/a/([^/?#]+)"
     example = "https://saint2.su/a/ID"
 
     def fetch_album(self, album_id):
@@ -58,7 +58,7 @@ class SaintMediaExtractor(SaintAlbumExtractor):
     """Extractor for saint media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"(/(embe)?d/([^/?#]+))"
+    pattern = rf"{BASE_PATTERN}(/(embe)?d/([^/?#]+))"
     example = "https://saint2.su/embed/ID"
 
     def fetch_album(self, album_id):

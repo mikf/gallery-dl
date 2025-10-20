@@ -52,7 +52,7 @@ class XasiatExtractor(Extractor):
 
 class XasiatAlbumExtractor(XasiatExtractor):
     subcategory = "album"
-    pattern = BASE_PATTERN + r"/(\d+)/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/(\d+)/[^/?#]+)"
     example = "https://www.xasiat.com/albums/12345/TITLE/"
 
     def items(self):
@@ -87,17 +87,17 @@ class XasiatAlbumExtractor(XasiatExtractor):
 
 class XasiatTagExtractor(XasiatExtractor):
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"/tags/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/tags/[^/?#]+)"
     example = "https://www.xasiat.com/albums/tags/TAG/"
 
 
 class XasiatCategoryExtractor(XasiatExtractor):
     subcategory = "category"
-    pattern = BASE_PATTERN + r"/categories/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/categories/[^/?#]+)"
     example = "https://www.xasiat.com/albums/categories/CATEGORY/"
 
 
 class XasiatModelExtractor(XasiatExtractor):
     subcategory = "model"
-    pattern = BASE_PATTERN + r"/models/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/models/[^/?#]+)"
     example = "https://www.xasiat.com/albums/models/MODEL/"

@@ -152,9 +152,9 @@ class MotherlessExtractor(Extractor):
 class MotherlessMediaExtractor(MotherlessExtractor):
     """Extractor for a single image/video from motherless.com"""
     subcategory = "media"
-    pattern = (BASE_PATTERN +
-               r"/((?:g/[^/?#]+/|G[IV]?[A-Z0-9]+/)?"
-               r"(?!G)[A-Z0-9]+)")
+    pattern = (rf"{BASE_PATTERN}/("
+               rf"(?:g/[^/?#]+/|G[IV]?[A-Z0-9]+/)?"
+               rf"(?!G)[A-Z0-9]+)")
     example = "https://motherless.com/ABC123"
 
     def items(self):
@@ -170,7 +170,7 @@ class MotherlessGalleryExtractor(MotherlessExtractor):
     directory_fmt = ("{category}", "{uploader}",
                      "{gallery_id} {gallery_title}")
     archive_fmt = "{gallery_id}_{id}"
-    pattern = BASE_PATTERN + "/G([IVG])?([A-Z0-9]+)/?$"
+    pattern = rf"{BASE_PATTERN}/G([IVG])?([A-Z0-9]+)/?$"
     example = "https://motherless.com/GABC123"
 
     def items(self):
@@ -206,7 +206,7 @@ class MotherlessGroupExtractor(MotherlessExtractor):
     directory_fmt = ("{category}", "{uploader}",
                      "{group_id} {group_title}")
     archive_fmt = "{group_id}_{id}"
-    pattern = BASE_PATTERN + "/g([iv]?)/?([a-z0-9_]+)/?$"
+    pattern = rf"{BASE_PATTERN}/g([iv]?)/?([a-z0-9_]+)/?$"
     example = "https://motherless.com/g/abc123"
 
     def items(self):

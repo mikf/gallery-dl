@@ -171,7 +171,7 @@ class ReactorTagExtractor(ReactorExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "{search_tags}_{post_id}_{num}"
-    pattern = BASE_PATTERN + r"/tag/([^/?#]+)(?:/[^/?#]+)?"
+    pattern = rf"{BASE_PATTERN}/tag/([^/?#]+)(?:/[^/?#]+)?"
     example = "http://reactor.cc/tag/TAG"
 
     def __init__(self, match):
@@ -187,7 +187,7 @@ class ReactorSearchExtractor(ReactorExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search_tags}")
     archive_fmt = "s_{search_tags}_{post_id}_{num}"
-    pattern = BASE_PATTERN + r"/search(?:/|\?q=)([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/search(?:/|\?q=)([^/?#]+)"
     example = "http://reactor.cc/search?q=QUERY"
 
     def __init__(self, match):
@@ -202,7 +202,7 @@ class ReactorUserExtractor(ReactorExtractor):
     """Extractor for all posts of a user on *reactor.cc sites"""
     subcategory = "user"
     directory_fmt = ("{category}", "user", "{user}")
-    pattern = BASE_PATTERN + r"/user/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/user/([^/?#]+)"
     example = "http://reactor.cc/user/USER"
 
     def __init__(self, match):
@@ -216,7 +216,7 @@ class ReactorUserExtractor(ReactorExtractor):
 class ReactorPostExtractor(ReactorExtractor):
     """Extractor for single posts on *reactor.cc sites"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/post/(\d+)"
+    pattern = rf"{BASE_PATTERN}/post/(\d+)"
     example = "http://reactor.cc/post/12345"
 
     def __init__(self, match):

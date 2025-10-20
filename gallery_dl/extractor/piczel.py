@@ -66,7 +66,7 @@ class PiczelExtractor(Extractor):
 class PiczelUserExtractor(PiczelExtractor):
     """Extractor for all images from a user's gallery"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/gallery/([^/?#]+)/?$"
+    pattern = rf"{BASE_PATTERN}/gallery/([^/?#]+)/?$"
     example = "https://piczel.tv/gallery/USER"
 
     def posts(self):
@@ -79,7 +79,7 @@ class PiczelFolderExtractor(PiczelExtractor):
     subcategory = "folder"
     directory_fmt = ("{category}", "{user[username]}", "{folder[name]}")
     archive_fmt = "f{folder[id]}_{id}_{num}"
-    pattern = BASE_PATTERN + r"/gallery/(?!image/)[^/?#]+/(\d+)"
+    pattern = rf"{BASE_PATTERN}/gallery/(?!image/)[^/?#]+/(\d+)"
     example = "https://piczel.tv/gallery/USER/12345"
 
     def posts(self):
@@ -90,7 +90,7 @@ class PiczelFolderExtractor(PiczelExtractor):
 class PiczelImageExtractor(PiczelExtractor):
     """Extractor for individual images"""
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/gallery/image/(\d+)"
+    pattern = rf"{BASE_PATTERN}/gallery/image/(\d+)"
     example = "https://piczel.tv/gallery/image/12345"
 
     def posts(self):

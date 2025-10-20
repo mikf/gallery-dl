@@ -117,7 +117,7 @@ BASE_PATTERN = BloggerExtractor.update({
 class BloggerPostExtractor(BloggerExtractor):
     """Extractor for a single blog post"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"(/\d\d\d\d/\d\d/[^/?#]+\.html)"
+    pattern = rf"{BASE_PATTERN}(/\d\d\d\d/\d\d/[^/?#]+\.html)"
     example = "https://BLOG.blogspot.com/1970/01/TITLE.html"
 
     def posts(self, blog):
@@ -127,7 +127,7 @@ class BloggerPostExtractor(BloggerExtractor):
 class BloggerBlogExtractor(BloggerExtractor):
     """Extractor for an entire Blogger blog"""
     subcategory = "blog"
-    pattern = BASE_PATTERN + r"/?$"
+    pattern = rf"{BASE_PATTERN}/?$"
     example = "https://BLOG.blogspot.com/"
 
     def posts(self, blog):
@@ -137,7 +137,7 @@ class BloggerBlogExtractor(BloggerExtractor):
 class BloggerSearchExtractor(BloggerExtractor):
     """Extractor for Blogger search resuls"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/search/?\?q=([^&#]+)"
+    pattern = rf"{BASE_PATTERN}/search/?\?q=([^&#]+)"
     example = "https://BLOG.blogspot.com/search?q=QUERY"
 
     def metadata(self):
@@ -151,7 +151,7 @@ class BloggerSearchExtractor(BloggerExtractor):
 class BloggerLabelExtractor(BloggerExtractor):
     """Extractor for Blogger posts by label"""
     subcategory = "label"
-    pattern = BASE_PATTERN + r"/search/label/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/search/label/([^/?#]+)"
     example = "https://BLOG.blogspot.com/search/label/LABEL"
 
     def metadata(self):

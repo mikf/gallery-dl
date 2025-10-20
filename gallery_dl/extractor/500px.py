@@ -92,7 +92,7 @@ class _500pxExtractor(Extractor):
 class _500pxUserExtractor(_500pxExtractor):
     """Extractor for photos from a user's photostream on 500px.com"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!photo/|liked)(?:p/)?([^/?#]+)/?(?:$|[?#])"
+    pattern = rf"{BASE_PATTERN}/(?!photo/|liked)(?:p/)?([^/?#]+)/?(?:$|[?#])"
     example = "https://500px.com/USER"
 
     def __init__(self, match):
@@ -121,8 +121,8 @@ class _500pxGalleryExtractor(_500pxExtractor):
     """Extractor for photo galleries on 500px.com"""
     subcategory = "gallery"
     directory_fmt = ("{category}", "{user[username]}", "{gallery[name]}")
-    pattern = (BASE_PATTERN + r"/(?!photo/)(?:p/)?"
-               r"([^/?#]+)/galleries/([^/?#]+)")
+    pattern = (rf"{BASE_PATTERN}/(?!photo/)(?:p/)?"
+               rf"([^/?#]+)/galleries/([^/?#]+)")
     example = "https://500px.com/USER/galleries/GALLERY"
 
     def __init__(self, match):
@@ -178,7 +178,7 @@ class _500pxGalleryExtractor(_500pxExtractor):
 class _500pxFavoriteExtractor(_500pxExtractor):
     """Extractor for favorite 500px photos"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/liked/?$"
+    pattern = rf"{BASE_PATTERN}/liked/?$"
     example = "https://500px.com/liked"
 
     def photos(self):
@@ -202,7 +202,7 @@ class _500pxFavoriteExtractor(_500pxExtractor):
 class _500pxImageExtractor(_500pxExtractor):
     """Extractor for individual images from 500px.com"""
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/photo/(\d+)"
+    pattern = rf"{BASE_PATTERN}/photo/(\d+)"
     example = "https://500px.com/photo/12345/TITLE"
 
     def __init__(self, match):

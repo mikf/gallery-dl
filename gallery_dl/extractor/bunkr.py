@@ -64,7 +64,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     root_dl = "https://get.bunkrr.su"
     root_api = "https://apidl.bunkr.ru"
     archive_fmt = "{album_id}_{id|id_url|slug}"
-    pattern = BASE_PATTERN + r"/a/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/a/([^/?#]+)"
     example = "https://bunkr.si/a/ID"
 
     def __init__(self, match):
@@ -212,7 +212,7 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
     """Extractor for bunkr.si media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"(/[fvid]/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}(/[fvid]/[^/?#]+)"
     example = "https://bunkr.si/f/FILENAME"
 
     def fetch_album(self, album_id):

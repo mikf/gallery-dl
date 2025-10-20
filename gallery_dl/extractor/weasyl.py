@@ -70,7 +70,7 @@ class WeasylExtractor(Extractor):
 
 class WeasylSubmissionExtractor(WeasylExtractor):
     subcategory = "submission"
-    pattern = BASE_PATTERN + r"(?:~[\w~-]+/submissions|submission|view)/(\d+)"
+    pattern = rf"{BASE_PATTERN}(?:~[\w~-]+/submissions|submission|view)/(\d+)"
     example = "https://www.weasyl.com/~USER/submissions/12345/TITLE"
 
     def __init__(self, match):
@@ -86,7 +86,7 @@ class WeasylSubmissionExtractor(WeasylExtractor):
 
 class WeasylSubmissionsExtractor(WeasylExtractor):
     subcategory = "submissions"
-    pattern = BASE_PATTERN + r"(?:~|submissions/)([\w~-]+)/?$"
+    pattern = rf"{BASE_PATTERN}(?:~|submissions/)([\w~-]+)/?$"
     example = "https://www.weasyl.com/submissions/USER"
 
     def __init__(self, match):
@@ -101,7 +101,7 @@ class WeasylSubmissionsExtractor(WeasylExtractor):
 class WeasylFolderExtractor(WeasylExtractor):
     subcategory = "folder"
     directory_fmt = ("{category}", "{owner_login}", "{folder_name}")
-    pattern = BASE_PATTERN + r"submissions/([\w~-]+)\?folderid=(\d+)"
+    pattern = rf"{BASE_PATTERN}submissions/([\w~-]+)\?folderid=(\d+)"
     example = "https://www.weasyl.com/submissions/USER?folderid=12345"
 
     def __init__(self, match):
@@ -122,7 +122,7 @@ class WeasylJournalExtractor(WeasylExtractor):
     subcategory = "journal"
     filename_fmt = "{journalid} {title}.{extension}"
     archive_fmt = "{journalid}"
-    pattern = BASE_PATTERN + r"journal/(\d+)"
+    pattern = rf"{BASE_PATTERN}journal/(\d+)"
     example = "https://www.weasyl.com/journal/12345"
 
     def __init__(self, match):
@@ -139,7 +139,7 @@ class WeasylJournalsExtractor(WeasylExtractor):
     subcategory = "journals"
     filename_fmt = "{journalid} {title}.{extension}"
     archive_fmt = "{journalid}"
-    pattern = BASE_PATTERN + r"journals/([\w~-]+)"
+    pattern = rf"{BASE_PATTERN}journals/([\w~-]+)"
     example = "https://www.weasyl.com/journals/USER"
 
     def __init__(self, match):
@@ -159,7 +159,7 @@ class WeasylJournalsExtractor(WeasylExtractor):
 class WeasylFavoriteExtractor(WeasylExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user}", "Favorites")
-    pattern = BASE_PATTERN + r"favorites(?:\?userid=(\d+)|/([^/?#]+))"
+    pattern = rf"{BASE_PATTERN}favorites(?:\?userid=(\d+)|/([^/?#]+))"
     example = "https://www.weasyl.com/favorites?userid=12345"
 
     def items(self):

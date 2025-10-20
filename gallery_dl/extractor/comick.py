@@ -27,7 +27,7 @@ class ComickCoversExtractor(ComickBase, GalleryExtractor):
     directory_fmt = ("{category}", "{manga}", "Covers")
     filename_fmt = "{volume:>02}_{lang}.{extension}"
     archive_fmt = "c_{id}"
-    pattern = BASE_PATTERN + r"/comic/([\w-]+)/cover"
+    pattern = rf"{BASE_PATTERN}/comic/([\w-]+)/cover"
     example = "https://comick.io/comic/MANGA/cover"
 
     def metadata(self, page):
@@ -60,7 +60,7 @@ class ComickCoversExtractor(ComickBase, GalleryExtractor):
 class ComickChapterExtractor(ComickBase, ChapterExtractor):
     """Extractor for comick.io manga chapters"""
     archive_fmt = "{chapter_hid}_{page}"
-    pattern = (BASE_PATTERN + r"/comic/([\w-]+)"
+    pattern = (rf"{BASE_PATTERN}/comic/([\w-]+)"
                r"/(\w+(?:-(?:chapter|volume)-[^/?#]+)?)")
     example = "https://comick.io/comic/MANGA/ID-chapter-123-en"
 
@@ -140,7 +140,7 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
 
 class ComickMangaExtractor(ComickBase, MangaExtractor):
     """Extractor for comick.io manga"""
-    pattern = BASE_PATTERN + r"/comic/([\w-]+)/?(?:\?([^#]+))?"
+    pattern = rf"{BASE_PATTERN}/comic/([\w-]+)/?(?:\?([^#]+))?"
     example = "https://comick.io/comic/MANGA"
 
     def items(self):

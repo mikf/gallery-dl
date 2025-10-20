@@ -98,7 +98,7 @@ class YiffverseExtractor(BooruExtractor):
 class YiffversePostExtractor(YiffverseExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/post/(\d+)"
+    pattern = rf"{BASE_PATTERN}/post/(\d+)"
     example = "https://yiffverse.com/post/12345"
 
     def posts(self):
@@ -109,7 +109,7 @@ class YiffversePlaylistExtractor(YiffverseExtractor):
     subcategory = "playlist"
     directory_fmt = ("{category}", "{playlist_id}")
     archive_fmt = "p_{playlist_id}_{id}"
-    pattern = BASE_PATTERN + r"/playlist/(\d+)"
+    pattern = rf"{BASE_PATTERN}/playlist/(\d+)"
     example = "https://yiffverse.com/playlist/12345"
 
     def metadata(self):
@@ -124,7 +124,7 @@ class YiffverseTagExtractor(YiffverseExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/(?:tag/([^/?#]+))?(?:/?\?([^#]+))?(?:$|#)"
+    pattern = rf"{BASE_PATTERN}/(?:tag/([^/?#]+))?(?:/?\?([^#]+))?(?:$|#)"
     example = "https://yiffverse.com/tag/TAG"
 
     def _init(self):

@@ -58,7 +58,7 @@ class PornpicsExtractor(Extractor):
 
 class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
     """Extractor for pornpics galleries"""
-    pattern = BASE_PATTERN + r"/galleries/((?:[^/?#]+-)?(\d+))"
+    pattern = rf"{BASE_PATTERN}/galleries/((?:[^/?#]+-)?(\d+))"
     example = "https://www.pornpics.com/galleries/TITLE-12345/"
 
     def __init__(self, match):
@@ -94,7 +94,7 @@ class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
 class PornpicsTagExtractor(PornpicsExtractor):
     """Extractor for galleries from pornpics tag searches"""
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"/tags/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/tags/([^/?#]+)"
     example = "https://www.pornpics.com/tags/TAGS/"
 
     def galleries(self):
@@ -105,7 +105,7 @@ class PornpicsTagExtractor(PornpicsExtractor):
 class PornpicsSearchExtractor(PornpicsExtractor):
     """Extractor for galleries from pornpics search results"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/(?:\?q=|pornstars/|channels/)([^/&#]+)"
+    pattern = rf"{BASE_PATTERN}/(?:\?q=|pornstars/|channels/)([^/&#]+)"
     example = "https://www.pornpics.com/?q=QUERY"
 
     def galleries(self):

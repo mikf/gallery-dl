@@ -147,7 +147,7 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
     subcategory = "thread"
     directory_fmt = ("{category}", "{board[shortname]}",
                      "{thread_num} {title|comment[:50]}")
-    pattern = BASE_PATTERN + r"/([^/?#]+)/thread/(\d+)"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/thread/(\d+)"
     example = "https://archived.moe/a/thread/12345/"
 
     def __init__(self, match):
@@ -174,7 +174,7 @@ class FoolfuukaThreadExtractor(FoolfuukaExtractor):
 class FoolfuukaBoardExtractor(FoolfuukaExtractor):
     """Base extractor for FoolFuuka based boards/archives"""
     subcategory = "board"
-    pattern = BASE_PATTERN + r"/([^/?#]+)(?:/(?:page/)?(\d*))?$"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)(?:/(?:page/)?(\d*))?$"
     example = "https://archived.moe/a/"
 
     def __init__(self, match):
@@ -210,7 +210,7 @@ class FoolfuukaSearchExtractor(FoolfuukaExtractor):
     """Base extractor for search results on FoolFuuka based boards/archives"""
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search}")
-    pattern = BASE_PATTERN + r"/([^/?#]+)/search((?:/[^/?#]+/[^/?#]+)+)"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/search((?:/[^/?#]+/[^/?#]+)+)"
     example = "https://archived.moe/_/search/text/QUERY/"
     request_interval = (0.5, 1.5)
 
@@ -265,7 +265,7 @@ class FoolfuukaGalleryExtractor(FoolfuukaExtractor):
     """Base extractor for FoolFuuka galleries"""
     subcategory = "gallery"
     directory_fmt = ("{category}", "{board}", "gallery")
-    pattern = BASE_PATTERN + r"/([^/?#]+)/gallery(?:/(\d+))?"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/gallery(?:/(\d+))?"
     example = "https://archived.moe/a/gallery"
 
     def metadata(self):

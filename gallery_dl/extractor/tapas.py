@@ -72,7 +72,7 @@ class TapasExtractor(Extractor):
 
 class TapasEpisodeExtractor(TapasExtractor):
     subcategory = "episode"
-    pattern = BASE_PATTERN + r"/episode/(\d+)"
+    pattern = rf"{BASE_PATTERN}/episode/(\d+)"
     example = "https://tapas.io/episode/12345"
 
     def items(self):
@@ -116,7 +116,7 @@ class TapasEpisodeExtractor(TapasExtractor):
 
 class TapasSeriesExtractor(TapasExtractor):
     subcategory = "series"
-    pattern = BASE_PATTERN + r"/series/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/series/([^/?#]+)"
     example = "https://tapas.io/series/TITLE"
 
     def items(self):
@@ -150,7 +150,7 @@ class TapasSeriesExtractor(TapasExtractor):
 
 class TapasCreatorExtractor(TapasExtractor):
     subcategory = "creator"
-    pattern = BASE_PATTERN + r"/(?!series|episode)([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/(?!series|episode)([^/?#]+)"
     example = "https://tapas.io/CREATOR"
 
     def items(self):

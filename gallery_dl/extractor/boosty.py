@@ -159,7 +159,7 @@ class BoostyExtractor(Extractor):
 class BoostyUserExtractor(BoostyExtractor):
     """Extractor for boosty.to user profiles"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/([^/?#]+)(?:\?([^#]+))?$"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)(?:\?([^#]+))?$"
     example = "https://boosty.to/USER"
 
     def posts(self):
@@ -175,7 +175,7 @@ class BoostyMediaExtractor(BoostyExtractor):
     subcategory = "media"
     directory_fmt = "{category}", "{user[blogUrl]} ({user[id]})", "media"
     filename_fmt = "{post[id]}_{num}.{extension}"
-    pattern = BASE_PATTERN + r"/([^/?#]+)/media/([^/?#]+)(?:\?([^#]+))?"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/media/([^/?#]+)(?:\?([^#]+))?"
     example = "https://boosty.to/USER/media/all"
 
     def posts(self):
@@ -188,7 +188,7 @@ class BoostyMediaExtractor(BoostyExtractor):
 class BoostyFeedExtractor(BoostyExtractor):
     """Extractor for your boosty.to subscription feed"""
     subcategory = "feed"
-    pattern = BASE_PATTERN + r"/(?:\?([^#]+))?(?:$|#)"
+    pattern = rf"{BASE_PATTERN}/(?:\?([^#]+))?(?:$|#)"
     example = "https://boosty.to/"
 
     def posts(self):
@@ -199,7 +199,7 @@ class BoostyFeedExtractor(BoostyExtractor):
 class BoostyPostExtractor(BoostyExtractor):
     """Extractor for boosty.to posts"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/([^/?#]+)/posts/([0-9a-f-]+)"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/posts/([0-9a-f-]+)"
     example = "https://boosty.to/USER/posts/01234567-89ab-cdef-0123-456789abcd"
 
     def posts(self):
@@ -212,7 +212,7 @@ class BoostyPostExtractor(BoostyExtractor):
 class BoostyFollowingExtractor(BoostyExtractor):
     """Extractor for your boosty.to subscribed users"""
     subcategory = "following"
-    pattern = BASE_PATTERN + r"/app/settings/subscriptions"
+    pattern = rf"{BASE_PATTERN}/app/settings/subscriptions"
     example = "https://boosty.to/app/settings/subscriptions"
 
     def items(self):
@@ -227,7 +227,7 @@ class BoostyDirectMessagesExtractor(BoostyExtractor):
     subcategory = "direct-messages"
     directory_fmt = ("{category}", "{user[blogUrl]} ({user[id]})",
                      "Direct Messages")
-    pattern = BASE_PATTERN + r"/app/messages/?\?dialogId=(\d+)"
+    pattern = rf"{BASE_PATTERN}/app/messages/?\?dialogId=(\d+)"
     example = "https://boosty.to/app/messages?dialogId=12345"
 
     def items(self):
