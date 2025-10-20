@@ -22,7 +22,7 @@ class NullDatetime(datetime):
         return "[Invalid DateTime]"
 
     def __format__(self, format_spec):
-        return f"[Invalid DateTime {format_spec}]"
+        return "[Invalid DateTime]"
 
 
 NONE = NullDatetime(1, 1, 1)
