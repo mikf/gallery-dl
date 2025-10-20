@@ -9,7 +9,7 @@
 """Extractors for https://hiperdex.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
+from .. import text
 from ..cache import memcache
 
 BASE_PATTERN = (r"((?:https?://)?(?:www\.)?"
@@ -79,7 +79,7 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
         return self.chapter_data(self.chapter)
 
     def images(self, page):
-        pattern = util.re(r'id="image-\d+"\s+(?:data-)?src="([^"]+)')
+        pattern = text.re(r'id="image-\d+"\s+(?:data-)?src="([^"]+)')
         return [
             (url.strip(), None)
             for url in pattern.findall(page)

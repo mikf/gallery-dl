@@ -23,7 +23,7 @@ class MangaparkBase():
     category = "mangapark"
 
     def _parse_chapter_title(self, title):
-        match = util.re(
+        match = text.re(
             r"(?i)"
             r"(?:vol(?:\.|ume)?\s*(\d+)\s*)?"
             r"ch(?:\.|apter)?\s*(\d+)([^\s:]*)"

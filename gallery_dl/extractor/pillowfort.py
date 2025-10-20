@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from ..cache import cache
-from .. import text, util, exception
+from .. import text, exception
 
 BASE_PATTERN = r"(?:https?://)?www\.pillowfort\.social"
 
@@ -36,7 +36,7 @@ class PillowfortExtractor(Extractor):
         external = self.config("external", False)
 
         if inline:
-            inline = util.re(r'src="(https://img\d+\.pillowfort\.social'
+            inline = text.re(r'src="(https://img\d+\.pillowfort\.social'
                              r'/posts/[^"]+)').findall
 
         for post in self.posts():

@@ -30,7 +30,7 @@ class Hentai2readChapterExtractor(Hentai2readBase, ChapterExtractor):
         chapter_id, pos = text.extract(page, 'data-cid="', '"', pos)
         chapter, sep, minor = self.groups[1].partition(".")
 
-        match = util.re(
+        match = text.re(
             r"Reading (.+) \(([^)]+)\) Hentai(?: by (.*))? - "
             r"([^:]+): (.+) . Page 1 ").match(title)
         if match:

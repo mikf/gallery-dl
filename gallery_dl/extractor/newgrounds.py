@@ -34,7 +34,7 @@ class NewgroundsExtractor(Extractor):
         self.user_root = f"https://{self.user}.newgrounds.com"
 
     def _init(self):
-        self._extract_comment_urls = util.re(
+        self._extract_comment_urls = text.re(
             r'(?:<img |data-smartload-)src="([^"]+)').findall
         self.flash = self.config("flash", True)
 
@@ -321,7 +321,7 @@ class NewgroundsExtractor(Extractor):
 
     def _video_formats(self, sources):
         src = sources["360p"][0]["src"]
-        sub = util.re(r"\.360p\.\w+").sub
+        sub = text.re(r"\.360p\.\w+").sub
 
         for fmt in self.format:
             try:

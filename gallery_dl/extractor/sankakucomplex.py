@@ -64,19 +64,19 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
             yield Message.Url, url, file
 
     def _extract_images(self, content):
-        orig_sub = util.re(r"-\d+x\d+\.").sub
+        orig_sub = text.re(r"-\d+x\d+\.").sub
         return [
             orig_sub(".", url) for url in
             util.unique(text.extract_iter(content, 'data-lazy-src="', '"'))
         ]
 
     def _extract_videos(self, content):
-        return util.re(r"<source [^>]*src=[\"']([^\"']+)").findall(content)
+        return text.re(r"<source [^>]*src=[\"']([^\"']+)").findall(content)
 
     def _extract_embeds(self, content):
         return [
             "ytdl:" + url for url in
-            util.re(r"<iframe [^>]*src=[\"']([^\"']+)").findall(content)
+            text.re(r"<iframe [^>]*src=[\"']([^\"']+)").findall(content)
         ]
 
 

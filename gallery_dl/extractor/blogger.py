@@ -13,7 +13,7 @@ from .. import text, util
 
 
 def original(url):
-    return (util.re(r"(/|=)(?:[sw]\d+|w\d+-h\d+)(?=/|$)")
+    return (text.re(r"(/|=)(?:[sw]\d+|w\d+-h\d+)(?=/|$)")
             .sub(r"\1s0", url)
             .replace("http:", "https:", 1))
 
@@ -32,7 +32,7 @@ class BloggerExtractor(BaseExtractor):
         self.videos = self.config("videos", True)
 
         if self.videos:
-            self.findall_video = util.re(
+            self.findall_video = text.re(
                 r"""src=["'](https?://www\.blogger\.com"""
                 r"""/video\.g\?token=[^"']+)""").findall
 
@@ -43,7 +43,7 @@ class BloggerExtractor(BaseExtractor):
         blog["date"] = self.parse_datetime_iso(blog["published"])
         del blog["selfLink"]
 
-        findall_image = util.re(
+        findall_image = text.re(
             r'src="(https?://(?:'
             r'blogger\.googleusercontent\.com/img|'
             r'lh\d+(?:-\w+)?\.googleusercontent\.com|'

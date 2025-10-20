@@ -60,16 +60,16 @@ class TumblrExtractor(Extractor):
         blog = None
 
         # pre-compile regular expressions
-        self._sub_video = util.re(
+        self._sub_video = text.re(
             r"https?://((?:vt|vtt|ve)(?:\.media)?\.tumblr\.com"
             r"/tumblr_[^_]+)_\d+\.([0-9a-z]+)").sub
         if self.inline:
-            self._sub_image = util.re(
+            self._sub_image = text.re(
                 r"https?://(\d+\.media\.tumblr\.com(?:/[0-9a-f]+)?"
                 r"/tumblr(?:_inline)?_[^_]+)_\d+\.([0-9a-z]+)").sub
-            self._subn_orig_image = util.re(r"/s\d+x\d+/").subn
-            _findall_image = util.re('<img src="([^"]+)"').findall
-            _findall_video = util.re('<source src="([^"]+)"').findall
+            self._subn_orig_image = text.re(r"/s\d+x\d+/").subn
+            _findall_image = text.re('<img src="([^"]+)"').findall
+            _findall_video = text.re('<source src="([^"]+)"').findall
 
         for post in self.posts():
             if self.date_min > post["timestamp"]:

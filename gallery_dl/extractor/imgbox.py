@@ -9,7 +9,7 @@
 """Extractors for https://imgbox.com/"""
 
 from .common import Extractor, Message, AsynchronousMixin
-from .. import text, util, exception
+from .. import text, exception
 
 
 class ImgboxExtractor(Extractor):
@@ -69,7 +69,7 @@ class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
         page = self.request(self.root + "/g/" + self.gallery_key).text
         if "The specified gallery could not be found." in page:
             raise exception.NotFoundError("gallery")
-        self.image_keys = util.re(
+        self.image_keys = text.re(
             r'<a href="/([^"]+)"><img alt="').findall(page)
 
         title = text.extr(page, "<h1>", "</h1>")

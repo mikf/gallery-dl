@@ -76,7 +76,7 @@ class TwitterExtractor(Extractor):
         seen_tweets = set() if self.config("unique", True) else None
 
         if self.twitpic:
-            self._find_twitpic = util.re(
+            self._find_twitpic = text.re(
                 r"https?(://twitpic\.com/(?!photos/)\w+)").findall
 
         tweets = self.tweets()

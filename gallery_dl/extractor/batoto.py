@@ -104,7 +104,7 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
             info = text.remove_html(extr('link-hover">', "</"))
         info = text.unescape(info)
 
-        match = util.re(
+        match = text.re(
             r"(?i)(?:(?:Volume|S(?:eason)?)\s*(\d+)\s+)?"
             r"(?:Chapter|Episode)\s*(\d+)([\w.]*)").match(info)
         if match:

@@ -9,7 +9,7 @@
 """Extractors for Moebooru based sites"""
 
 from .booru import BooruExtractor
-from .. import text, util, dt
+from .. import text, dt
 import collections
 
 
@@ -32,7 +32,7 @@ class MoebooruExtractor(BooruExtractor):
             return
 
         tags = collections.defaultdict(list)
-        pattern = util.re(r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'+]+)")
+        pattern = text.re(r"tag-type-([^\"' ]+).*?[?;]tags=([^\"'+]+)")
         for tag_type, tag_name in pattern.findall(tag_container):
             tags[tag_type].append(text.unquote(tag_name))
         for key, value in tags.items():

@@ -9,7 +9,7 @@
 """Extractors for https://www.mangahere.cc/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
+from .. import text
 
 
 class MangahereBase():
@@ -102,7 +102,7 @@ class MangahereMangaExtractor(MangahereBase, MangaExtractor):
             info, pos = text.extract(page, 'class="title3">', '<', pos)
             date, pos = text.extract(page, 'class="title2">', '<', pos)
 
-            match = util.re(
+            match = text.re(
                 r"(?:Vol\.0*(\d+) )?Ch\.0*(\d+)(\S*)(?: - (.*))?").match(info)
             if match:
                 volume, chapter, minor, title = match.groups()

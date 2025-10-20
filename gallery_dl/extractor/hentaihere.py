@@ -33,7 +33,7 @@ class HentaihereChapterExtractor(HentaihereBase, ChapterExtractor):
         title = text.extr(page, "<title>", "</title>")
         chapter_id = text.extr(page, 'report/C', '"')
         chapter, sep, minor = self.chapter.partition(".")
-        match = util.re(
+        match = text.re(
             r"Page 1 \| (.+) \(([^)]+)\) - Chapter \d+: (.+) by "
             r"(.+) at ").match(title)
         return {

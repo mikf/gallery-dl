@@ -9,7 +9,7 @@
 """Extractors for https://www.imagebam.com/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 
 
 class ImagebamExtractor(Extractor):
@@ -69,7 +69,7 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
             page, 'id="gallery-name">', '<').strip())}
 
     def images(self, page):
-        findall = util.re(r'<a href="https://www\.imagebam\.com'
+        findall = text.re(r'<a href="https://www\.imagebam\.com'
                           r'(/(?:image/|view/M)[a-zA-Z0-9]+)').findall
         paths = []
         while True:

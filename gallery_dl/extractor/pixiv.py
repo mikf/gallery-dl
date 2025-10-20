@@ -43,7 +43,7 @@ class PixivExtractor(Extractor):
         self.meta_captions = self.config("captions")
 
         if self.sanity_workaround or self.meta_captions:
-            self.meta_captions_sub = util.re(
+            self.meta_captions_sub = text.re(
                 r'<a href="/jump\.php\?([^"]+)').sub
 
     def items(self):

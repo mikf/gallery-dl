@@ -216,7 +216,7 @@ class FanboxExtractor(Extractor):
     def _get_urls_from_post(self, content_body, post):
         num = 0
         if cover_image := post.get("coverImageUrl"):
-            cover_image = util.re("/c/[0-9a-z_]+").sub("", cover_image)
+            cover_image = text.re("/c/[0-9a-z_]+").sub("", cover_image)
             final_post = post.copy()
             final_post["isCoverImage"] = True
             final_post["fileUrl"] = cover_image
