@@ -9,9 +9,8 @@
 """Extractors for https://8chan.moe/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text, dt
 from ..cache import memcache
-from datetime import timedelta
 import itertools
 
 BASE_PATTERN = r"(?:https?://)?8chan\.(moe|se|cc)"
@@ -44,7 +43,7 @@ class _8chanExtractor(Extractor):
     def cookies_prepare(self):
         # fetch captcha cookies
         # (necessary to download without getting interrupted)
-        now = util.datetime_utcnow()
+        now = dt.now()
         url = self.root + "/captcha.js"
         params = {"d": now.strftime("%a %b %d %Y %H:%M:%S GMT+0000 (UTC)")}
         self.request(url, params=params).content
@@ -57,7 +56,7 @@ class _8chanExtractor(Extractor):
             if cookie.domain.endswith(domain):
                 cookie.expires = None
                 if cookie.name == "captchaexpiration":
-                    cookie.value = (now + timedelta(30, 300)).strftime(
+                    cookie.value = (now + dt.timedelta(30, 300)).strftime(
                         "%a, %d %b %Y %H:%M:%S GMT")
 
         return self.cookies

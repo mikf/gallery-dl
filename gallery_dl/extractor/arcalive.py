@@ -49,8 +49,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
         files = self._extract_files(post)
 
         post["count"] = len(files)
-        post["date"] = text.parse_datetime(
-            post["createdAt"][:19], "%Y-%m-%dT%H:%M:%S")
+        post["date"] = self.parse_datetime_iso(post["createdAt"][:19])
         post["post_url"] = post_url = \
             f"{self.root}/b/{post['boardSlug']}/{post['id']}"
         post["_http_headers"] = {"Referer": post_url + "?p=1"}

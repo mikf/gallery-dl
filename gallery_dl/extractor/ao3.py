@@ -182,11 +182,11 @@ class Ao3WorkExtractor(Ao3Extractor):
                 extr('<dd class="freeform tags">', "</dd>")),
             "lang"         : extr('<dd class="language" lang="', '"'),
             "series"       : extr('<dd class="series">', "</dd>"),
-            "date"         : text.parse_datetime(
-                extr('<dd class="published">', "<"), "%Y-%m-%d"),
-            "date_completed": text.parse_datetime(
-                extr('>Completed:</dt><dd class="status">', "<"), "%Y-%m-%d"),
-            "date_updated" : text.parse_timestamp(
+            "date"         : self.parse_datetime_iso(extr(
+                '<dd class="published">', "<")),
+            "date_completed": self.parse_datetime_iso(extr(
+                '>Completed:</dt><dd class="status">', "<")),
+            "date_updated" : self.parse_timestamp(
                 path.rpartition("updated_at=")[2]),
             "words"        : text.parse_int(
                 extr('<dd class="words">', "<").replace(",", "")),

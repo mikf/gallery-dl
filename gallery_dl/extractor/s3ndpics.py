@@ -30,10 +30,8 @@ class S3ndpicsExtractor(Extractor):
         for post in self.posts():
             post["id"] = post.pop("_id", None)
             post["user"] = post.pop("userId", None)
-            post["date"] = text.parse_datetime(
-                post["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
-            post["date_updated"] = text.parse_datetime(
-                post["updatedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            post["date"] = self.parse_datetime_iso(post["createdAt"])
+            post["date_updated"] = self.parse_datetime_iso(post["updatedAt"])
 
             files = post.pop("files", ())
             post["count"] = len(files)

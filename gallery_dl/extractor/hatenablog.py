@@ -34,7 +34,7 @@ class HatenablogExtractor(Extractor):
 
     def _handle_article(self, article: str):
         extr = text.extract_from(article)
-        date = text.parse_datetime(extr('<time datetime="', '"'))
+        date = self.parse_datetime_iso(extr('<time datetime="', '"'))
         entry_link = text.unescape(extr('<a href="', '"'))
         entry = entry_link.partition("/entry/")[2]
         title = text.unescape(extr('>', '<'))

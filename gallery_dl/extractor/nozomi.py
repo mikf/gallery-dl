@@ -9,7 +9,7 @@
 """Extractors for https://nozomi.la/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, dt
 
 
 def decode_nozomi(n):
@@ -49,10 +49,9 @@ class NozomiExtractor(Extractor):
             post["character"] = self._list(post.get("character"))
 
             try:
-                post["date"] = text.parse_datetime(
-                    post["date"] + ":00", "%Y-%m-%d %H:%M:%S%z")
+                post["date"] = dt.parse_iso(post["date"] + ":00")
             except Exception:
-                post["date"] = None
+                post["date"] = dt.NONE
 
             post.update(data)
 

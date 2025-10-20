@@ -98,7 +98,7 @@ class FlickrImageExtractor(FlickrExtractor):
         photo["comments"] = text.parse_int(photo["comments"]["_content"])
         photo["description"] = photo["description"]["_content"]
         photo["tags"] = [t["raw"] for t in photo["tags"]["tag"]]
-        photo["date"] = text.parse_timestamp(photo["dateuploaded"])
+        photo["date"] = self.parse_timestamp(photo["dateuploaded"])
         photo["views"] = text.parse_int(photo["views"])
         photo["id"] = text.parse_int(photo["id"])
 
@@ -489,7 +489,7 @@ class FlickrAPI(oauth.OAuth1API):
     def _extract_format(self, photo):
         photo["description"] = photo["description"]["_content"].strip()
         photo["views"] = text.parse_int(photo["views"])
-        photo["date"] = text.parse_timestamp(photo["dateupload"])
+        photo["date"] = self.parse_timestamp(photo["dateupload"])
         photo["tags"] = photo["tags"].split()
 
         self._extract_metadata(photo)

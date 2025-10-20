@@ -9,7 +9,7 @@
 """Extractors for https://www.newgrounds.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, util, dt, exception
 from ..cache import cache
 import itertools
 
@@ -218,7 +218,7 @@ class NewgroundsExtractor(Extractor):
             "description": text.unescape(extr(':description" content="', '"')),
             "type"       : "art",
             "_type"      : "i",
-            "date"       : text.parse_datetime(extr(
+            "date"       : dt.parse_iso(extr(
                 'itemprop="datePublished" content="', '"')),
             "rating"     : extr('class="rated-', '"'),
             "url"        : full('src="', '"'),
@@ -268,7 +268,7 @@ class NewgroundsExtractor(Extractor):
             "description": text.unescape(extr(':description" content="', '"')),
             "type"       : "audio",
             "_type"      : "a",
-            "date"       : text.parse_datetime(extr(
+            "date"       : dt.parse_iso(extr(
                 'itemprop="datePublished" content="', '"')),
             "url"        : extr('{"url":"', '"').replace("\\/", "/"),
             "index"      : text.parse_int(index),
@@ -287,7 +287,7 @@ class NewgroundsExtractor(Extractor):
             src = src.replace("\\/", "/")
             formats = ()
             type = extr(',"description":"', '"')
-            date = text.parse_datetime(extr(
+            date = dt.parse_iso(extr(
                 'itemprop="datePublished" content="', '"'))
             if type:
                 type = type.rpartition(" ")[2].lower()
@@ -302,7 +302,7 @@ class NewgroundsExtractor(Extractor):
             sources = self.request_json(url, headers=headers)["sources"]
             formats = self._video_formats(sources)
             src = next(formats, "")
-            date = text.parse_timestamp(src.rpartition("?")[2])
+            date = self.parse_timestamp(src.rpartition("?")[2])
             type = "movie"
 
         return {

@@ -86,7 +86,7 @@ class HentaifoundryExtractor(Extractor):
                 .replace("\r\n", "\n")),
             "ratings"    : [text.unescape(r) for r in text.extract_iter(extr(
                 "class='ratings_box'", "</div>"), "title='", "'")],
-            "date"       : text.parse_datetime(extr("datetime='", "'")),
+            "date"       : self.parse_datetime_iso(extr("datetime='", "'")),
             "views"      : text.parse_int(extr(">Views</span>", "<")),
             "score"      : text.parse_int(extr(">Vote Score</span>", "<")),
             "media"      : text.unescape(extr(">Media</span>", "<").strip()),
@@ -126,7 +126,7 @@ class HentaifoundryExtractor(Extractor):
             "title"   : text.unescape(extr(
                 "<div class='titlebar'>", "</a>").rpartition(">")[2]),
             "author"  : text.unescape(extr('alt="', '"')),
-            "date"    : text.parse_datetime(extr(
+            "date"    : self.parse_datetime(extr(
                 ">Updated<", "</span>").rpartition(">")[2], "%B %d, %Y"),
             "status"  : extr("class='indent'>", "<"),
         }

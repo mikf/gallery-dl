@@ -108,7 +108,7 @@ class FacebookExtractor(Extractor):
                 '"message":{"delight_ranges"',
                 '"},"message_preferred_body"'
             ).rsplit('],"text":"', 1)[-1]),
-            "date": text.parse_timestamp(
+            "date": self.parse_timestamp(
                 text.extr(photo_page, '\\"publish_time\\":', ',') or
                 text.extr(photo_page, '"created_time":', ',')
             ),
@@ -172,7 +172,7 @@ class FacebookExtractor(Extractor):
             "user_id": text.extr(
                 video_page, '"owner":{"__typename":"User","id":"', '"'
             ),
-            "date": text.parse_timestamp(text.extr(
+            "date": self.parse_timestamp(text.extr(
                 video_page, '\\"publish_time\\":', ','
             )),
             "type": "video"

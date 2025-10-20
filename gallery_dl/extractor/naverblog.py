@@ -9,8 +9,7 @@
 """Extractors for https://blog.naver.com/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text, util
-import datetime
+from .. import text, util, dt
 import time
 
 
@@ -67,11 +66,11 @@ class NaverBlogPostExtractor(NaverBlogBase, GalleryExtractor):
 
         return data
 
-    def _parse_datetime(self, date_string):
-        if "전" in date_string:
+    def _parse_datetime(self, dt_string):
+        if "전" in dt_string:
             ts = time.gmtime()
-            return datetime.datetime(ts.tm_year, ts.tm_mon, ts.tm_mday)
-        return text.parse_datetime(date_string, "%Y. %m. %d. %H:%M")
+            return dt.datetime(ts.tm_year, ts.tm_mon, ts.tm_mday)
+        return dt.parse(dt_string, "%Y. %m. %d. %H:%M")
 
     def images(self, page):
         files = []

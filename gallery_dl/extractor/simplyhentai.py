@@ -48,7 +48,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
             "characters": split(extr('box-title">Characters</div>', '</div>')),
             "tags"      : split(extr('box-title">Tags</div>', '</div>')),
             "artist"    : split(extr('box-title">Artists</div>', '</div>')),
-            "date"      : text.parse_datetime(text.remove_html(
+            "date"      : self.parse_datetime(text.remove_html(
                 extr('Uploaded', '</div>')), "%d.%m.%Y"),
         }
         data["lang"] = util.language_to_code(data["language"])
@@ -152,7 +152,7 @@ class SimplyhentaiVideoExtractor(Extractor):
             "episode": text.parse_int(episode),
             "tags": text.split_html(tags)[::2],
             "type": "video",
-            "date": text.parse_datetime(text.remove_html(
+            "date": self.parse_datetime(text.remove_html(
                 date), "%B %d, %Y %H:%M"),
         })
 

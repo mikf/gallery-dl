@@ -96,7 +96,7 @@ class EromeAlbumExtractor(EromeExtractor):
             if not date:
                 ts = text.extr(group, '?v=', '"')
                 if len(ts) > 1:
-                    date = text.parse_timestamp(ts)
+                    date = self.parse_timestamp(ts)
 
         data = {
             "album_id": album_id,

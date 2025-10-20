@@ -48,13 +48,11 @@ class MisskeyExtractor(BaseExtractor):
             note["instance"] = self.instance
             note["instance_remote"] = note["user"]["host"]
             note["count"] = len(files)
-            note["date"] = text.parse_datetime(
-                note["createdAt"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            note["date"] = self.parse_datetime_iso(note["createdAt"])
 
             yield Message.Directory, note
             for note["num"], file in enumerate(files, 1):
-                file["date"] = text.parse_datetime(
-                    file["createdAt"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                file["date"] = self.parse_datetime_iso(file["createdAt"])
                 note["file"] = file
                 url = file["url"]
                 yield Message.Url, url, text.nameext_from_url(url, note)

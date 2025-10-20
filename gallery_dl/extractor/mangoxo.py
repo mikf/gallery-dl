@@ -119,7 +119,7 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
             "album": {
                 "id": self.album_id,
                 "name": text.unescape(title),
-                "date": text.parse_datetime(date.strip(), "%Y.%m.%d %H:%M"),
+                "date": self.parse_datetime(date.strip(), "%Y.%m.%d %H:%M"),
                 "description": text.unescape(descr),
             },
             "count": text.parse_int(count),

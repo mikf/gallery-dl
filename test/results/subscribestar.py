@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import subscribestar
-import datetime
 
 
 __tests__ = (
@@ -20,7 +19,7 @@ __tests__ = (
     "author_name": "subscribestar",
     "author_nick": "SubscribeStar",
     "content"    : str,
-    "date"       : datetime.datetime,
+    "date"       : "type:datetime",
     "id"         : int,
     "num"        : int,
     "post_id"    : int,
@@ -38,7 +37,7 @@ __tests__ = (
     "#options" : {"metadata": True},
     "#range"   : "1",
 
-    "date": datetime.datetime,
+    "date": "type:datetime",
 },
 
 {

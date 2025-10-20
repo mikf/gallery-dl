@@ -70,8 +70,7 @@ class BoothItemExtractor(BoothExtractor):
                 url + ".json", headers=headers, interval=False)
 
         item["booth_category"] = item.pop("category", None)
-        item["date"] = text.parse_datetime(
-            item["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        item["date"] = self.parse_datetime_iso(item["published_at"])
         item["tags"] = [t["name"] for t in item["tags"]]
 
         shop = item["shop"]

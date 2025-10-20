@@ -40,7 +40,7 @@ class BloggerExtractor(BaseExtractor):
         blog = self.api.blog_by_url("http://" + self.blog)
         blog["pages"] = blog["pages"]["totalItems"]
         blog["posts"] = blog["posts"]["totalItems"]
-        blog["date"] = text.parse_datetime(blog["published"])
+        blog["date"] = self.parse_datetime_iso(blog["published"])
         del blog["selfLink"]
 
         findall_image = util.re(
@@ -65,7 +65,7 @@ class BloggerExtractor(BaseExtractor):
             post["author"] = post["author"]["displayName"]
             post["replies"] = post["replies"]["totalItems"]
             post["content"] = text.remove_html(content)
-            post["date"] = text.parse_datetime(post["published"])
+            post["date"] = self.parse_datetime_iso(post["published"])
             del post["selfLink"]
             del post["blog"]
 

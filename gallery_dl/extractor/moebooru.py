@@ -9,9 +9,8 @@
 """Extractors for Moebooru based sites"""
 
 from .booru import BooruExtractor
-from .. import text, util
+from .. import text, util, dt
 import collections
-import datetime
 
 
 class MoebooruExtractor(BooruExtractor):
@@ -21,7 +20,7 @@ class MoebooruExtractor(BooruExtractor):
     page_start = 1
 
     def _prepare(self, post):
-        post["date"] = text.parse_timestamp(post["created_at"])
+        post["date"] = dt.parse_ts(post["created_at"])
 
     def _html(self, post):
         url = f"{self.root}/post/show/{post['id']}"
@@ -164,14 +163,14 @@ class MoebooruPopularExtractor(MoebooruExtractor):
             date = (f"{params['year']:>04}-{params.get('month', '01'):>02}-"
                     f"{params.get('day', '01'):>02}")
         else:
-            date = datetime.date.today().isoformat()
+            date = dt.date.today().isoformat()
 
         scale = self.scale
         if scale.startswith("by_"):
             scale = scale[3:]
         if scale == "week":
-            date = datetime.date.fromisoformat(date)
-            date = (date - datetime.timedelta(days=date.weekday())).isoformat()
+            date = dt.date.fromisoformat(date)
+            date = (date - dt.timedelta(days=date.weekday())).isoformat()
         elif scale == "month":
             date = date[:-3]
 

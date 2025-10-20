@@ -24,8 +24,7 @@ class WeasylExtractor(Extractor):
         # Some submissions don't have content and can be skipped
         if "submission" in data["media"]:
             data["url"] = data["media"]["submission"][0]["url"]
-            data["date"] = text.parse_datetime(
-                data["posted_at"][:19], "%Y-%m-%dT%H:%M:%S")
+            data["date"] = self.parse_datetime_iso(data["posted_at"][:19])
             text.nameext_from_url(data["url"], data)
             return True
         return False
@@ -42,7 +41,7 @@ class WeasylExtractor(Extractor):
             f"{self.root}/api/journals/{journalid}/view")
         data["extension"] = "html"
         data["html"] = "text:" + data["content"]
-        data["date"] = text.parse_datetime(data["posted_at"])
+        data["date"] = self.parse_datetime_iso(data["posted_at"])
         return data
 
     def submissions(self, owner_login, folderid=None):

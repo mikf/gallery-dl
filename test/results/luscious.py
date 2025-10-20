@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import luscious
-import datetime
 from gallery_dl import exception
 
 
@@ -49,7 +48,7 @@ __tests__ = (
     "aspect_ratio"    : r"re:\d+:\d+",
     "category"        : "luscious",
     "created"         : int,
-    "date"            : datetime.datetime,
+    "date"            : "type:datetime",
     "height"          : int,
     "id"              : int,
     "is_animated"     : False,

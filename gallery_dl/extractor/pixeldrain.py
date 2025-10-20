@@ -24,10 +24,6 @@ class PixeldrainExtractor(Extractor):
         if api_key := self.config("api-key"):
             self.session.auth = util.HTTPBasicAuth("", api_key)
 
-    def parse_datetime(self, date_string):
-        return text.parse_datetime(
-            date_string, "%Y-%m-%dT%H:%M:%S.%fZ")
-
 
 class PixeldrainFileExtractor(PixeldrainExtractor):
     """Extractor for pixeldrain files"""
@@ -45,7 +41,7 @@ class PixeldrainFileExtractor(PixeldrainExtractor):
         file = self.request_json(url + "/info")
 
         file["url"] = url + "?download"
-        file["date"] = self.parse_datetime(file["date_upload"])
+        file["date"] = self.parse_datetime_iso(file["date_upload"])
 
         text.nameext_from_url(file["name"], file)
         yield Message.Directory, file
@@ -72,7 +68,7 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
 
         files = album["files"]
         album["count"] = album["file_count"]
-        album["date"] = self.parse_datetime(album["date_created"])
+        album["date"] = self.parse_datetime_iso(album["date_created"])
 
         if self.file_index:
             idx = text.parse_int(self.file_index)
@@ -91,7 +87,7 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
             file["album"] = album
             file["num"] = num
             file["url"] = url = f"{self.root}/api/file/{file['id']}?download"
-            file["date"] = self.parse_datetime(file["date_upload"])
+            file["date"] = self.parse_datetime_iso(file["date_upload"])
             text.nameext_from_url(file["name"], file)
             yield Message.Url, url, file
 
@@ -112,7 +108,7 @@ class PixeldrainFolderExtractor(PixeldrainExtractor):
             "mime_type"  : data["file_type"],
             "size"       : data["file_size"],
             "hash_sha256": data["sha256_sum"],
-            "date"       : self.parse_datetime(data["created"]),
+            "date"       : self.parse_datetime_iso(data["created"]),
         }
 
     def items(self):

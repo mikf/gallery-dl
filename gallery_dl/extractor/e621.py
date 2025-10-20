@@ -51,8 +51,7 @@ class E621Extractor(danbooru.DanbooruExtractor):
 
             post["filename"] = file["md5"]
             post["extension"] = file["ext"]
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            post["date"] = self.parse_datetime_iso(post["created_at"])
 
             post.update(data)
             yield Message.Directory, post

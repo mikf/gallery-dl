@@ -31,7 +31,7 @@ class PostmillExtractor(BaseExtractor):
 
             title = text.unescape(extr(
                 '<meta property="og:title" content="', '">'))
-            date = text.parse_datetime(extr(
+            date = self.parse_datetime_iso(extr(
                 '<meta property="og:article:published_time" content="', '">'))
             username = extr(
                 '<meta property="og:article:author" content="', '">')

@@ -216,7 +216,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     def _items_hitomi(self):
         if self.config("metadata", False):
             data = self.metadata_from_api()
-            data["date"] = text.parse_timestamp(data["posted"])
+            data["date"] = self.parse_timestamp(data["posted"])
         else:
             data = {}
 
@@ -233,7 +233,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         data = self.metadata_from_page(page)
         if self.config("metadata", False):
             data.update(self.metadata_from_api())
-            data["date"] = text.parse_timestamp(data["posted"])
+            data["date"] = self.parse_timestamp(data["posted"])
         if self.config("tags", False):
             tags = collections.defaultdict(list)
             for tag in data["tags"]:
@@ -258,8 +258,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "_"            : extr('<div id="gdc"><div class="cs ct', '"'),
             "eh_category"  : extr('>', '<'),
             "uploader"     : extr('<div id="gdn">', '</div>'),
-            "date"         : text.parse_datetime(extr(
-                '>Posted:</td><td class="gdt2">', '</td>'), "%Y-%m-%d %H:%M"),
+            "date"         : self.parse_datetime_iso(extr(
+                '>Posted:</td><td class="gdt2">', '</td>')),
             "parent"       : extr(
                 '>Parent:</td><td class="gdt2"><a href="', '"'),
             "expunged"     : "Yes" != extr(

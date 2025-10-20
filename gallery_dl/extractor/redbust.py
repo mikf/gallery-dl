@@ -90,7 +90,7 @@ class RedbustGalleryExtractor(GalleryExtractor, RedbustExtractor):
             "categories"  : text.split_html(extr(
                 '<li class="category">', "</li>"))[::2],
             "title"       : text.unescape(extr('class="post-title">', "<")),
-            "date"        : text.parse_datetime(
+            "date"        : self.parse_datetime(
                 extr('class="post-byline">', "<").strip(), "%B %d, %Y"),
             "views"       : text.parse_int(extr("</b>", "v").replace(",", "")),
             "tags"        : text.split_html(extr(

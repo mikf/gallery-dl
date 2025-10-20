@@ -15,7 +15,7 @@ import datetime
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import formatter, text, util, config  # noqa E402
+from gallery_dl import formatter, text, dt, util, config  # noqa E402
 
 try:
     import jinja2
@@ -154,7 +154,7 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{t}" , self.kwdict["t"] , None, int)
         self._run_test("{t}" , self.kwdict["t"] , None, util.identity)
         self._run_test("{dt}", self.kwdict["dt"], None, util.identity)
-        self._run_test("{ds}", self.kwdict["dt"], None, text.parse_datetime)
+        self._run_test("{ds}", self.kwdict["dt"], None, dt.parse_iso)
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", self.kwdict["dt"],
                        None, util.identity)
 
@@ -271,8 +271,8 @@ class TestFormatter(unittest.TestCase):
 
     def test_specifier_datetime(self):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", "2010-01-01 00:00:00")
-        self._run_test("{ds:D%Y}", "2010-01-01T01:00:00+01:00")
-        self._run_test("{l:D%Y}", "None")
+        self._run_test("{ds:D%Y}", "[Invalid DateTime]")
+        self._run_test("{l2:D%Y}", "[Invalid DateTime]")
 
     def test_specifier_offset(self):
         self._run_test("{dt:O 01:00}", "2010-01-01 01:00:00")

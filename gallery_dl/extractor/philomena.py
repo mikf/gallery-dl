@@ -36,8 +36,7 @@ class PhilomenaExtractor(BooruExtractor):
         return url
 
     def _prepare(self, post):
-        post["date"] = text.parse_datetime(
-            post["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
+        post["date"] = self.parse_datetime_iso(post["created_at"][:19])
 
 
 BASE_PATTERN = PhilomenaExtractor.update({

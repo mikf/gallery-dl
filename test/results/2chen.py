@@ -6,7 +6,6 @@
 
 gallery_dl = __import__("gallery_dl.extractor.2chen")
 _2chen = getattr(gallery_dl.extractor, "2chen")
-import datetime
 
 
 __tests__ = (
@@ -18,7 +17,7 @@ __tests__ = (
     "#count"   : ">= 179",
 
     "board" : "tv",
-    "date"  : datetime.datetime,
+    "date"  : "type:datetime",
     "hash"  : r"re:[0-9a-f]{40}",
     "name"  : "Anonymous",
     "no"    : r"re:\d+",

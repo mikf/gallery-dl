@@ -34,8 +34,8 @@ class WikifeetGalleryExtractor(GalleryExtractor):
             "celeb"     : self.celeb,
             "type"      : self.type,
             "birthplace": text.unescape(extr('"bplace":"', '"')),
-            "birthday"  : text.parse_datetime(text.unescape(
-                extr('"bdate":"', '"'))[:10], "%Y-%m-%d"),
+            "birthday"  : self.parse_datetime_iso(text.unescape(extr(
+                '"bdate":"', '"'))[:10]),
             "shoesize"  : text.unescape(extr('"ssize":', ',')),
             "rating"    : text.parse_float(extr('"score":', ',')),
             "celebrity" : text.unescape(extr('"cname":"', '"')),

@@ -31,17 +31,17 @@ class NaverChzzkExtractor(Extractor):
             data["uid"] = data["objectId"]
             data["user"] = comment["user"]
             data["count"] = len(files)
-            data["date"] = text.parse_datetime(
+            data["date"] = self.parse_datetime(
                 data["createdDate"], "%Y%m%d%H%M%S")
 
             yield Message.Directory, data
             for data["num"], file in enumerate(files, 1):
                 if extra := file.get("extraJson"):
                     file.update(util.json_loads(extra))
-                file["date"] = text.parse_datetime(
-                    file["createdDate"], "%Y-%m-%dT%H:%M:%S.%f%z")
-                file["date_updated"] = text.parse_datetime(
-                    file["updatedDate"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                file["date"] = self.parse_datetime_iso(
+                    file["createdDate"])
+                file["date_updated"] = self.parse_datetime_iso(
+                    file["updatedDate"])
                 data["file"] = file
                 url = file["attachValue"]
                 yield Message.Url, url, text.nameext_from_url(url, data)

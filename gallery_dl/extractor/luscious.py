@@ -69,7 +69,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
                 image["thumbnail"] = ""
 
             image["tags"] = [item["text"] for item in image["tags"]]
-            image["date"] = text.parse_timestamp(image["created"])
+            image["date"] = self.parse_timestamp(image["created"])
             image["id"] = text.parse_int(image["id"])
 
             url = (image["url_to_original"] or image["url_to_video"]
@@ -188,7 +188,7 @@ fragment AlbumStandard on Album {
         album["created_by"] = album["created_by"]["display_name"]
 
         album["id"] = text.parse_int(album["id"])
-        album["date"] = text.parse_timestamp(album["created"])
+        album["date"] = self.parse_timestamp(album["created"])
 
         return album
 

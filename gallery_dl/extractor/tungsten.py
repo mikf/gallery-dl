@@ -23,7 +23,7 @@ class TungstenExtractor(Extractor):
     def items(self):
         for post in self.posts():
             url = post["original_url"]
-            post["date"] = text.parse_datetime(post["created_at"])
+            post["date"] = self.parse_datetime_iso(post["created_at"])
             post["filename"] = url[url.rfind("/")+1:]
             post["extension"] = "webp"
             yield Message.Directory, post

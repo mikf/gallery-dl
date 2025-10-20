@@ -35,8 +35,7 @@ class PexelsExtractor(Extractor):
                 post["type"] = attr["type"]
 
             post.update(metadata)
-            post["date"] = text.parse_datetime(
-                post["created_at"][:-5], "%Y-%m-%dT%H:%M:%S")
+            post["date"] = self.parse_datetime_iso(post["created_at"][:-5])
 
             if "image" in post:
                 url, _, query = post["image"]["download_link"].partition("?")

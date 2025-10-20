@@ -33,7 +33,7 @@ class AgnphExtractor(booru.BooruExtractor):
         self.cookies.set("confirmed_age", "true", domain="agn.ph")
 
     def _prepare(self, post):
-        post["date"] = text.parse_timestamp(post["created_at"])
+        post["date"] = self.parse_timestamp(post["created_at"])
         post["status"] = post["status"].strip()
         post["has_children"] = ("true" in post["has_children"])
 

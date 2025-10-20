@@ -46,7 +46,7 @@ class _2chThreadExtractor(Extractor):
         for post in posts:
             if files := post.get("files"):
                 post["post_name"] = post["name"]
-                post["date"] = text.parse_timestamp(post["timestamp"])
+                post["date"] = self.parse_timestamp(post["timestamp"])
                 del post["files"]
                 del post["name"]
 

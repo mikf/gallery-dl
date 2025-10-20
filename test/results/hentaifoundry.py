@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import hentaifoundry
-import datetime
 
 
 __tests__ = (
@@ -190,7 +189,7 @@ Sorry for the bad quality, I made it on after effect because Flash works like sh
     "author"     : "SnowWolf35",
     "chapters"   : int,
     "comments"   : int,
-    "date"       : datetime.datetime,
+    "date"       : "type:datetime",
     "description": str,
     "index"      : int,
     "rating"     : int,

@@ -33,7 +33,7 @@ class AdultempireGalleryExtractor(GalleryExtractor):
             "gallery_id": text.parse_int(self.gallery_id),
             "title"     : text.unescape(extr('title="', '"')),
             "studio"    : extr(">studio</small>", "<").strip(),
-            "date"      : text.parse_datetime(extr(
+            "date"      : self.parse_datetime(extr(
                 ">released</small>", "<").strip(), "%m/%d/%Y"),
             "actors"    : sorted(text.split_html(extr(
                 '<ul class="item-details item-cast-list ', '</ul>'))[1:]),
