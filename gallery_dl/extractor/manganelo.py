@@ -50,10 +50,10 @@ class ManganeloChapterExtractor(ManganeloExtractor, ChapterExtractor):
         extr = text.extract_from(page)
 
         data = {
-            "date"        : text.parse_datetime(extr(
-                '"datePublished": "', '"')[:19], "%Y-%m-%dT%H:%M:%S"),
-            "date_updated": text.parse_datetime(extr(
-                '"dateModified": "', '"')[:19], "%Y-%m-%dT%H:%M:%S"),
+            "date"        : self.parse_datetime_iso(extr(
+                '"datePublished": "', '"')[:19]),
+            "date_updated": self.parse_datetime_iso(extr(
+                '"dateModified": "', '"')[:19]),
             "manga_id"    : text.parse_int(extr("comic_id =", ";")),
             "chapter_id"  : text.parse_int(extr("chapter_id =", ";")),
             "manga"       : extr("comic_name =", ";").strip('" '),
@@ -99,7 +99,7 @@ class ManganeloMangaExtractor(ManganeloExtractor, MangaExtractor):
         manga = text.unescape(extr("<h1>", "<"))
         author = text.remove_html(extr("<li>Author(s) :", "</a>"))
         status = extr("<li>Status :", "<").strip()
-        update = text.parse_datetime(extr(
+        update = self.parse_datetime(extr(
             "<li>Last updated :", "<").strip(), "%b-%d-%Y %I:%M:%S %p")
         tags = text.split_html(extr(">Genres :", "</li>"))[::2]
 
@@ -121,7 +121,7 @@ class ManganeloMangaExtractor(ManganeloExtractor, MangaExtractor):
                 "chapter" : text.parse_int(chapter),
                 "chapter_minor": (sep and ".") + minor,
                 "title"   : title.partition(": ")[2],
-                "date"    : text.parse_datetime(date, "%b-%d-%Y %H:%M"),
+                "date"    : self.parse_datetime(date, "%b-%d-%Y %H:%M"),
                 "lang"    : "en",
                 "language": "English",
             }))

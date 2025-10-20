@@ -168,7 +168,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                     item, 'name: "', ".")
                 file["size"] = text.parse_int(text.extr(
                     item, "size:  ", " ,\n"))
-                file["date"] = text.parse_datetime(text.extr(
+                file["date"] = self.parse_datetime(text.extr(
                     item, 'timestamp: "', '"'), "%H:%M:%S %d/%m/%Y")
 
                 yield file

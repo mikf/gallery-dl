@@ -51,7 +51,7 @@ class ToyhouseExtractor(Extractor):
         extr = text.extract_from(post)
         return {
             "url": extr(needle, '"'),
-            "date": text.parse_datetime(extr(
+            "date": self.parse_datetime(extr(
                 '</h2>\n            <div class="mb-1">', '<'),
                 "%d %b %Y, %I:%M:%S %p"),
             "artists": [

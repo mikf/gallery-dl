@@ -68,7 +68,7 @@ class DankefuerslesenChapterExtractor(DankefuerslesenBase, ChapterExtractor):
             "chapter_minor": minor,
             "group"     : manga["groups"][group_id].split(" & "),
             "group_id"  : text.parse_int(group_id),
-            "date"      : text.parse_timestamp(data["release_date"][group_id]),
+            "date"      : self.parse_timestamp(data["release_date"][group_id]),
             "lang"      : util.NONE,
             "language"  : util.NONE,
         }

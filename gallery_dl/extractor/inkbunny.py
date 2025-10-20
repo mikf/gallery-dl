@@ -35,8 +35,8 @@ class InkbunnyExtractor(Extractor):
 
         for post in self.posts():
             post.update(metadata)
-            post["date"] = text.parse_datetime(
-                post["create_datetime"] + "00", "%Y-%m-%d %H:%M:%S.%f%z")
+            post["date"] = self.parse_datetime_iso(
+                post["create_datetime"][:19])
             post["tags"] = [kw["keyword_name"] for kw in post["keywords"]]
             post["ratings"] = [r["name"] for r in post["ratings"]]
             files = post["files"]
@@ -52,8 +52,8 @@ class InkbunnyExtractor(Extractor):
             for post["num"], file in enumerate(files, 1):
                 post.update(file)
                 post["deleted"] = (file["deleted"] == "t")
-                post["date"] = text.parse_datetime(
-                    file["create_datetime"] + "00", "%Y-%m-%d %H:%M:%S.%f%z")
+                post["date"] = self.parse_datetime_iso(
+                    file["create_datetime"][:19])
                 text.nameext_from_url(file["file_name"], post)
 
                 url = file["file_url_full"]

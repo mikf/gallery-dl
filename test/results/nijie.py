@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import nijie
-import datetime
 from gallery_dl import exception
 
 
@@ -32,7 +31,7 @@ __tests__ = (
     "artist_id"  : 44,
     "artist_name": "ED",
     "count"      : 1,
-    "date"       : datetime.datetime,
+    "date"       : "type:datetime",
     "description": str,
     "extension"  : "jpg",
     "filename"   : str,

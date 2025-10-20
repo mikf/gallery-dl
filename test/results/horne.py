@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import nijie
-import datetime
 
 
 __tests__ = (
@@ -29,7 +28,7 @@ __tests__ = (
 
     "artist_id"  : 58000,
     "artist_name": "のえるわ",
-    "date"       : datetime.datetime,
+    "date"       : "type:datetime",
     "description": str,
     "image_id"   : int,
     "num"        : int,

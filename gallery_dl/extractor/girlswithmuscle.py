@@ -101,9 +101,8 @@ class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
             "model": model,
             "model_list": self._parse_model_list(model),
             "tags": text.split_html(tags)[1::2],
-            "date": text.parse_datetime(
-                text.extr(page, 'class="hover-time"  title="', '"')[:19],
-                "%Y-%m-%d %H:%M:%S"),
+            "date": self.parse_datetime_iso(text.extr(
+                page, 'class="hover-time"  title="', '"')[:19]),
             "is_favorite": self._parse_is_favorite(page),
             "source_filename": source,
             "uploader": uploader,

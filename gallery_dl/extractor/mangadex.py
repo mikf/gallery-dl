@@ -68,7 +68,7 @@ class MangadexExtractor(Extractor):
             "chapter" : text.parse_int(chnum),
             "chapter_minor": f"{sep}{minor}",
             "chapter_id": chapter["id"],
-            "date"    : text.parse_datetime(cattributes["publishAt"]),
+            "date"    : self.parse_datetime_iso(cattributes["publishAt"]),
             "group"   : [group["attributes"]["name"]
                          for group in relationships["scanlation_group"]],
             "lang"    : lang,
@@ -109,8 +109,8 @@ class MangadexCoversExtractor(MangadexExtractor):
             "cover"   : cattributes["fileName"],
             "lang"    : cattributes.get("locale"),
             "volume"  : text.parse_int(cattributes["volume"]),
-            "date"    : text.parse_datetime(cattributes["createdAt"]),
-            "date_updated": text.parse_datetime(cattributes["updatedAt"]),
+            "date"    : self.parse_datetime_iso(cattributes["createdAt"]),
+            "date_updated": self.parse_datetime_iso(cattributes["updatedAt"]),
         }
 
 
@@ -454,7 +454,7 @@ def _manga_info(self, uuid):
         "manga_id": manga["id"],
         "manga_titles": [t.popitem()[1]
                          for t in mattr.get("altTitles") or ()],
-        "manga_date"  : text.parse_datetime(mattr.get("createdAt")),
+        "manga_date"  : self.parse_datetime_iso(mattr.get("createdAt")),
         "description" : (mattr["description"].get("en") or
                          next(iter(mattr["description"].values()), "")),
         "demographic": mattr.get("publicationDemographic"),

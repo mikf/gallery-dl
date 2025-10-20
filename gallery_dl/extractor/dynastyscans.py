@@ -62,7 +62,7 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
             "author"  : text.remove_html(author),
             "group"   : (text.remove_html(group) or
                          text.extr(group, ' alt="', '"')),
-            "date"    : text.parse_datetime(extr(
+            "date"    : self.parse_datetime(extr(
                 '"icon-calendar"></i> ', '<'), "%b %d, %Y"),
             "tags"    : text.split_html(extr(
                 "class='tags'>", "<div id='chapter-actions'")),
@@ -166,8 +166,6 @@ class DynastyscansAnthologyExtractor(DynastyscansSearchExtractor):
             data["scanlator"] = content[1].text[11:]
             data["tags"] = content[2].text[6:].lower().split(", ")
             data["title"] = element[5].text
-            data["date"] = text.parse_datetime(
-                element[1].text, "%Y-%m-%dT%H:%M:%S%z")
-            data["date_updated"] = text.parse_datetime(
-                element[2].text, "%Y-%m-%dT%H:%M:%S%z")
+            data["date"] = self.parse_datetime_iso(element[1].text)
+            data["date_updated"] = self.parse_datetime_iso(element[2].text)
             yield Message.Queue, element[4].text, data

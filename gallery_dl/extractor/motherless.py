@@ -9,9 +9,8 @@
 """Extractors for https://motherless.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, dt, exception
 from ..cache import memcache
-from datetime import timedelta
 
 BASE_PATTERN = r"(?:https?://)?motherless\.com"
 
@@ -115,14 +114,14 @@ class MotherlessExtractor(Extractor):
 
         return data
 
-    def _parse_datetime(self, dt):
-        if " ago" not in dt:
-            return text.parse_datetime(dt, "%d  %b  %Y")
+    def _parse_datetime(self, dt_string):
+        if " ago" not in dt_string:
+            return dt.parse(dt_string, "%d  %b  %Y")
 
-        value = text.parse_int(dt[:-5])
-        delta = timedelta(0, value*3600) if dt[-5] == "h" else timedelta(value)
-        return (util.datetime_utcnow() - delta).replace(
-            hour=0, minute=0, second=0)
+        value = text.parse_int(dt_string[:-5])
+        delta = (dt.timedelta(0, value*3600) if dt_string[-5] == "h" else
+                 dt.timedelta(value))
+        return (dt.now() - delta).replace(hour=0, minute=0, second=0)
 
     @memcache(keyarg=2)
     def _extract_gallery_title(self, page, gallery_id):

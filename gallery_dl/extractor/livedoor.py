@@ -45,7 +45,7 @@ class LivedoorExtractor(Extractor):
             "title"      : text.unescape(extr('dc:title="', '"')),
             "categories" : extr('dc:subject="', '"').partition(",")[::2],
             "description": extr('dc:description="', '"'),
-            "date"       : text.parse_datetime(extr('dc:date="', '"')),
+            "date"       : self.parse_datetime_iso(extr('dc:date="', '"')),
             "tags"       : text.split_html(tags)[1:] if tags else [],
             "user"       : self.user,
             "body"       : body,

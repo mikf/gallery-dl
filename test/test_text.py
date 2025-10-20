@@ -11,8 +11,6 @@ import os
 import sys
 import unittest
 
-import datetime
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import text, util  # noqa E402
 
@@ -536,51 +534,6 @@ class TestText(unittest.TestCase):
 
         self.assertEqual(f({"ä&": "あと", "#": "?"}),
                          "%C3%A4%26=%E3%81%82%E3%81%A8&%23=%3F")
-
-    def test_parse_timestamp(self, f=text.parse_timestamp):
-        null = util.datetime_utcfromtimestamp(0)
-        value = util.datetime_utcfromtimestamp(1555816235)
-
-        self.assertEqual(f(0)           , null)
-        self.assertEqual(f("0")         , null)
-        self.assertEqual(f(1555816235)  , value)
-        self.assertEqual(f("1555816235"), value)
-
-        for value in INVALID_ALT:
-            self.assertEqual(f(value), None)
-            self.assertEqual(f(value, "foo"), "foo")
-
-    def test_parse_datetime(self, f=text.parse_datetime):
-        null = util.datetime_utcfromtimestamp(0)
-
-        self.assertEqual(f("1970-01-01T00:00:00+00:00"), null)
-        self.assertEqual(f("1970-01-01T00:00:00+0000") , null)
-        self.assertEqual(f("1970.01.01", "%Y.%m.%d")   , null)
-
-        self.assertEqual(
-            f("2019-05-07T21:25:02+09:00"),
-            datetime.datetime(2019, 5, 7, 12, 25, 2),
-        )
-        self.assertEqual(
-            f("2019-05-07T21:25:02+0900"),
-            datetime.datetime(2019, 5, 7, 12, 25, 2),
-        )
-        self.assertEqual(
-            f("2019-05-07T21:25:02.753+0900", "%Y-%m-%dT%H:%M:%S.%f%z"),
-            datetime.datetime(2019, 5, 7, 12, 25, 2),
-        )
-        self.assertEqual(
-            f("2019-05-07T21:25:02", "%Y-%m-%dT%H:%M:%S", utcoffset=9),
-            datetime.datetime(2019, 5, 7, 12, 25, 2),
-        )
-        self.assertEqual(
-            f("2019-05-07 21:25:02"),
-            "2019-05-07 21:25:02",
-        )
-
-        for value in INVALID:
-            self.assertEqual(f(value), None)
-        self.assertEqual(f("1970.01.01"), "1970.01.01")
 
 
 if __name__ == "__main__":

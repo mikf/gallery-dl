@@ -173,7 +173,7 @@ class InstagramExtractor(Extractor):
                 post_url = f"{self.root}/stories/highlights/{reel_id}/"
             data = {
                 "user"   : post.get("user"),
-                "expires": text.parse_timestamp(expires),
+                "expires": self.parse_timestamp(expires),
                 "post_id": reel_id,
                 "post_shortcode": shortcode_from_id(reel_id),
                 "post_url": post_url,
@@ -224,7 +224,7 @@ class InstagramExtractor(Extractor):
         data["owner_id"] = owner["pk"]
         data["username"] = owner.get("username")
         data["fullname"] = owner.get("full_name")
-        data["post_date"] = data["date"] = text.parse_timestamp(
+        data["post_date"] = data["date"] = self.parse_timestamp(
             post.get("taken_at") or post.get("created_at") or post.get("seen"))
         data["_files"] = files = []
         for num, item in enumerate(items, 1):
@@ -278,7 +278,7 @@ class InstagramExtractor(Extractor):
 
             media = {
                 "num"        : num,
-                "date"       : text.parse_timestamp(item.get("taken_at") or
+                "date"       : self.parse_timestamp(item.get("taken_at") or
                                                     media.get("taken_at") or
                                                     post.get("taken_at")),
                 "media_id"   : item["pk"],
@@ -299,7 +299,7 @@ class InstagramExtractor(Extractor):
             if "reshared_story_media_author" in item:
                 media["author"] = item["reshared_story_media_author"]
             if "expiring_at" in item:
-                media["expires"] = text.parse_timestamp(post["expiring_at"])
+                media["expires"] = self.parse_timestamp(post["expiring_at"])
 
             self._extract_tagged_users(item, media)
             files.append(media)
@@ -342,7 +342,7 @@ class InstagramExtractor(Extractor):
             "post_id"    : post["id"],
             "post_shortcode": post["shortcode"],
             "post_url"   : f"{self.root}/p/{post['shortcode']}/",
-            "post_date"  : text.parse_timestamp(post["taken_at_timestamp"]),
+            "post_date"  : self.parse_timestamp(post["taken_at_timestamp"]),
             "description": text.parse_unicode_escapes("\n".join(
                 edge["node"]["text"]
                 for edge in post["edge_media_to_caption"]["edges"]
@@ -634,7 +634,7 @@ class InstagramStoriesTrayExtractor(InstagramExtractor):
     def items(self):
         base = f"{self.root}/stories/id:"
         for story in self.api.reels_tray():
-            story["date"] = text.parse_timestamp(story["latest_reel_media"])
+            story["date"] = self.parse_timestamp(story["latest_reel_media"])
             story["_extractor"] = InstagramStoriesExtractor
             yield Message.Queue, f"{base}{story['id']}/", story
 

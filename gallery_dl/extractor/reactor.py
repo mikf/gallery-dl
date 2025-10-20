@@ -97,7 +97,7 @@ class ReactorExtractor(BaseExtractor):
                 return
 
         num = 0
-        date = text.parse_datetime(data["datePublished"])
+        date = self.parse_datetime_iso(data["datePublished"])
         user = data["author"]["name"]
         description = text.unescape(data["description"])
         title, _, tags = text.unescape(data["headline"]).partition(" / ")

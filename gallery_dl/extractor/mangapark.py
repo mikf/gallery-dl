@@ -101,7 +101,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
             "language"  : util.code_to_language(lang),
             "source"    : chapter["srcTitle"],
             "source_id" : chapter["sourceId"],
-            "date"      : text.parse_timestamp(chapter["dateCreate"] // 1000),
+            "date"      : self.parse_timestamp(chapter["dateCreate"] // 1000),
         }
 
     def images(self, _):
@@ -138,7 +138,7 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
                 "language"  : util.code_to_language(lang),
                 "source"    : chapter["srcTitle"],
                 "source_id" : chapter["sourceId"],
-                "date"      : text.parse_timestamp(
+                "date"      : self.parse_timestamp(
                     chapter["dateCreate"] // 1000),
                 "_extractor": MangaparkChapterExtractor,
             }

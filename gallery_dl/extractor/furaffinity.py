@@ -143,7 +143,7 @@ class FuraffinityExtractor(Extractor):
             data["folders"] = ()  # folders not present in old layout
 
         data["user"] = self.user or data["artist_url"]
-        data["date"] = text.parse_timestamp(data["filename"].partition(".")[0])
+        data["date"] = self.parse_timestamp(data["filename"].partition(".")[0])
         data["description"] = self._process_description(data["_description"])
         data["thumbnail"] = (f"https://t.furaffinity.net/{post_id}@600-"
                              f"{path.rsplit('/', 2)[1]}.jpg")

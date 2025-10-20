@@ -9,8 +9,7 @@
 """Extractors for https://www.tumblr.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, oauth, exception
-from datetime import datetime, date, timedelta
+from .. import text, util, dt, oauth, exception
 
 
 BASE_PATTERN = (
@@ -100,7 +99,7 @@ class TumblrExtractor(Extractor):
 
             if "trail" in post:
                 del post["trail"]
-            post["date"] = text.parse_timestamp(post["timestamp"])
+            post["date"] = self.parse_timestamp(post["timestamp"])
             posts = []
 
             if "photos" in post:  # type "photo" or "link"
@@ -313,7 +312,7 @@ class TumblrDayExtractor(TumblrExtractor):
 
     def posts(self):
         year, month, day = self.groups[3].split("/")
-        ordinal = date(int(year), int(month), int(day)).toordinal()
+        ordinal = dt.date(int(year), int(month), int(day)).toordinal()
 
         # 719163 == date(1970, 1, 1).toordinal()
         self.date_min = (ordinal - 719163) * 86400
@@ -514,7 +513,7 @@ class TumblrAPI(oauth.OAuth1API):
                         self.extractor.wait(seconds=reset)
                         continue
 
-                    t = (datetime.now() + timedelta(0, float(reset))).time()
+                    t = (dt.now() + dt.timedelta(0, float(reset))).time()
                     raise exception.AbortExtraction(
                         f"Aborting - Rate limit will reset at "
                         f"{t.hour:02}:{t.minute:02}:{t.second:02}")

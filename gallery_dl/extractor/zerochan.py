@@ -76,7 +76,7 @@ class ZerochanExtractor(BooruExtractor):
         data = {
             "id"      : text.parse_int(entry_id),
             "file_url": jsonld["contentUrl"],
-            "date"    : text.parse_datetime(jsonld["datePublished"]),
+            "date"    : self.parse_datetime_iso(jsonld["datePublished"]),
             "width"   : text.parse_int(jsonld["width"][:-3]),
             "height"  : text.parse_int(jsonld["height"][:-3]),
             "size"    : text.parse_bytes(jsonld["contentSize"][:-1]),

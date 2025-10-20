@@ -55,8 +55,7 @@ class Furry34Extractor(BooruExtractor):
 
     def _prepare(self, post):
         post.pop("files", None)
-        post["date"] = text.parse_datetime(
-            post["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        post["date"] = self.parse_datetime_iso(post["created"])
         post["filename"], _, post["format"] = post["filename"].rpartition(".")
         if "tags" in post:
             post["tags"] = [t["value"] for t in post["tags"]]

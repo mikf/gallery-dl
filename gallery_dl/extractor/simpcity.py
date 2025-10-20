@@ -139,7 +139,7 @@ class SimpcityExtractor(Extractor):
             "id"   : url_t[url_t.rfind(".")+1:-1],
             "url"  : url_t,
             "title": schema["headline"],
-            "date" : text.parse_datetime(schema["datePublished"]),
+            "date" : self.parse_datetime_iso(schema["datePublished"]),
             "views": stats[0]["userInteractionCount"],
             "posts": stats[1]["userInteractionCount"],
             "tags" : (schema["keywords"].split(", ")
@@ -160,7 +160,7 @@ class SimpcityExtractor(Extractor):
             "author": extr('data-author="', '"'),
             "id": extr('data-content="post-', '"'),
             "author_url": extr('itemprop="url" content="', '"'),
-            "date": text.parse_datetime(extr('datetime="', '"')),
+            "date": self.parse_datetime_iso(extr('datetime="', '"')),
             "content": extr('<div itemprop="text">',
                             '<div class="js-selectToQuote').strip(),
         }

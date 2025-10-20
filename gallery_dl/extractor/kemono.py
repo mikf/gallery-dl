@@ -244,7 +244,7 @@ class KemonoExtractor(Extractor):
     def _parse_datetime(self, date_string):
         if len(date_string) > 19:
             date_string = date_string[:19]
-        return text.parse_datetime(date_string, "%Y-%m-%dT%H:%M:%S")
+        return self.parse_datetime_iso(date_string)
 
     def _revisions(self, posts):
         return itertools.chain.from_iterable(

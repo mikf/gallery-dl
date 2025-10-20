@@ -38,7 +38,7 @@ class ImgurExtractor(Extractor):
 
         image["url"] = url = \
             f"https://i.imgur.com/{image['id']}.{image['ext']}"
-        image["date"] = text.parse_datetime(image["created_at"])
+        image["date"] = self.parse_datetime_iso(image["created_at"])
         image["_http_validate"] = self._validate
         text.nameext_from_url(url, image)
 
@@ -106,7 +106,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
 
         del album["media"]
         count = len(images)
-        album["date"] = text.parse_datetime(album["created_at"])
+        album["date"] = self.parse_datetime_iso(album["created_at"])
 
         try:
             del album["ad_url"]

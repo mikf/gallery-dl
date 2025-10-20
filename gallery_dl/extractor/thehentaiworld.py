@@ -56,8 +56,7 @@ class ThehentaiworldExtractor(Extractor):
             "id"      : text.parse_int(extr(" postid-", " ")),
             "slug"    : extr(" post-", '"'),
             "tags"    : extr('id="tagsHead">', "</ul>"),
-            "date"    : text.parse_datetime(extr(
-                "<li>Posted: ", "<"), "%Y-%m-%d"),
+            "date"    : self.parse_datetime_iso(extr("<li>Posted: ", "<")),
         }
 
         if (c := url[27]) == "v":

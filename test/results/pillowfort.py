@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import pillowfort
-import datetime
 
 
 __tests__ = (
@@ -24,7 +23,7 @@ __tests__ = (
     "content"         : str,
     "count"           : 4,
     "created_at"      : str,
-    "date"            : datetime.datetime,
+    "date"            : "type:datetime",
     "deleted"         : None,
     "deleted_at"      : None,
     "deleted_by_mod"  : None,

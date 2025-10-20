@@ -246,7 +246,7 @@ class GelbooruFavoriteExtractor(GelbooruBase,
 
             for fav in favs:
                 for post in self._api_request({"id": fav["favorite"]}):
-                    post["date_favorited"] = text.parse_timestamp(fav["added"])
+                    post["date_favorited"] = self.parse_timestamp(fav["added"])
                     yield post
 
             params["pid"] += 1
@@ -273,7 +273,7 @@ class GelbooruFavoriteExtractor(GelbooruBase,
 
             for fav in favs:
                 for post in self._api_request({"id": fav["favorite"]}):
-                    post["date_favorited"] = text.parse_timestamp(fav["added"])
+                    post["date_favorited"] = self.parse_timestamp(fav["added"])
                     yield post
 
             params["pid"] -= 1

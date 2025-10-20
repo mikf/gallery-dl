@@ -36,7 +36,7 @@ class SaintAlbumExtractor(LolisafeAlbumExtractor):
                 break
             files.append({
                 "id2"  : id2,
-                "date" : text.parse_timestamp(extr("", ".")),
+                "date" : self.parse_timestamp(extr("", ".")),
                 "id"   : extr("/embed/", '"'),
                 "size" : text.parse_int(extr('data="', '"')),
                 "file" : text.unescape(extr(
@@ -73,7 +73,7 @@ class SaintMediaExtractor(SaintAlbumExtractor):
                 file = {
                     "id"   : album_id,
                     "id2"  : extr("/thumbs/", "-"),
-                    "date" : text.parse_timestamp(extr("", ".")),
+                    "date" : self.parse_timestamp(extr("", ".")),
                     "file" : text.unescape(extr('<source src="', '"')),
                     "id_dl": extr("/d/", "'"),
                 }

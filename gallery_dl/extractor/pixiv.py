@@ -9,9 +9,8 @@
 """Extractors for https://www.pixiv.net/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, util, dt, exception
 from ..cache import cache, memcache
-from datetime import datetime, timedelta
 import itertools
 import hashlib
 
@@ -96,7 +95,7 @@ class PixivExtractor(Extractor):
             if transform_tags:
                 transform_tags(work)
             work["num"] = 0
-            work["date"] = text.parse_datetime(work["create_date"])
+            work["date"] = dt.parse_iso(work["create_date"])
             work["rating"] = ratings.get(work["x_restrict"])
             work["suffix"] = ""
             work.update(metadata)
@@ -353,10 +352,10 @@ class PixivExtractor(Extractor):
             if fmt in urls:
                 yield urls[fmt]
 
-    def _date_from_url(self, url, offset=timedelta(hours=9)):
+    def _date_from_url(self, url, offset=dt.timedelta(hours=9)):
         try:
             _, _, _, _, _, y, m, d, H, M, S, _ = url.split("/")
-            return datetime(
+            return dt.datetime(
                 int(y), int(m), int(d), int(H), int(M), int(S)) - offset
         except Exception:
             return None
@@ -715,8 +714,7 @@ class PixivRankingExtractor(PixivExtractor):
                 self.log.warning("invalid date '%s'", date)
                 date = None
         if not date:
-            now = util.datetime_utcnow()
-            date = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+            date = (dt.now() - dt.timedelta(days=1)).strftime("%Y-%m-%d")
         self.date = date
 
         self.type = type = query.get("content")
@@ -891,8 +889,7 @@ class PixivSketchExtractor(Extractor):
         for post in self.posts():
             media = post["media"]
             post["post_id"] = post["id"]
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            post["date"] = dt.parse_iso(post["created_at"])
             util.delete_items(post, ("id", "media", "_links"))
 
             yield Message.Directory, post
@@ -972,7 +969,7 @@ class PixivNovelExtractor(PixivExtractor):
             if transform_tags:
                 transform_tags(novel)
             novel["num"] = 0
-            novel["date"] = text.parse_datetime(novel["create_date"])
+            novel["date"] = dt.parse_iso(novel["create_date"])
             novel["rating"] = ratings.get(novel["x_restrict"])
             novel["suffix"] = ""
 
@@ -1154,7 +1151,7 @@ class PixivAppAPI():
             "get_secure_url": "1",
         }
 
-        time = util.datetime_utcnow().strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        time = dt.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
         headers = {
             "X-Client-Time": time,
             "X-Client-Hash": hashlib.md5(
@@ -1329,11 +1326,11 @@ class PixivAppAPI():
         sort = params["sort"]
         if sort == "date_desc":
             date_key = "end_date"
-            date_off = timedelta(days=1)
+            date_off = dt.timedelta(days=1)
             date_cmp = lambda lhs, rhs: lhs >= rhs  # noqa E731
         elif sort == "date_asc":
             date_key = "start_date"
-            date_off = timedelta(days=-1)
+            date_off = dt.timedelta(days=-1)
             date_cmp = lambda lhs, rhs: lhs <= rhs  # noqa E731
         else:
             date_key = None
@@ -1360,8 +1357,8 @@ class PixivAppAPI():
 
             if date_key and text.parse_int(params.get("offset")) >= 5000:
                 date_last = data["illusts"][-1]["create_date"]
-                date_val = (text.parse_datetime(
-                    date_last) + date_off).strftime("%Y-%m-%d")
+                date_val = (dt.parse_iso(date_last) + date_off).strftime(
+                    "%Y-%m-%d")
                 self.log.info("Reached 'offset' >= 5000; "
                               "Updating '%s' to '%s'", date_key, date_val)
                 params[date_key] = date_val

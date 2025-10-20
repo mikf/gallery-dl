@@ -40,7 +40,7 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
                 extr('property="og:title" content="', '"')),
             "description": text.unescape(
                 extr('property="og:description" content="', '"')),
-            "date"       : text.parse_datetime(
+            "date"       : self.parse_datetime_iso(
                 extr('property="article:published_time" content="', '"')),
         }
         content = extr('<div class="entry-content">', '</article>')

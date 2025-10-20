@@ -150,8 +150,7 @@ class PornhubGifExtractor(PornhubExtractor):
             "tags" : extr("data-context-tag='", "'").split(","),
             "title": extr('"name": "', '"'),
             "url"  : extr('"contentUrl": "', '"'),
-            "date" : text.parse_datetime(
-                extr('"uploadDate": "', '"'), "%Y-%m-%d"),
+            "date" : self.parse_datetime_iso(extr('"uploadDate": "', '"')),
             "viewkey"  : extr('From this video: '
                               '<a href="/view_video.php?viewkey=', '"'),
             "timestamp": extr('lass="directLink tstamp" rel="nofollow">', '<'),

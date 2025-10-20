@@ -16,7 +16,6 @@ import random
 import getpass
 import hashlib
 import binascii
-import datetime
 import functools
 import itertools
 import subprocess
@@ -24,7 +23,7 @@ import collections
 import urllib.parse
 from http.cookiejar import Cookie
 from email.utils import mktime_tz, parsedate_tz
-from . import text, version, exception
+from . import text, dt, version, exception
 
 
 def bencode(num, alphabet="0123456789"):
@@ -228,63 +227,6 @@ def to_string(value):
     return str(value)
 
 
-def to_datetime(value):
-    """Convert 'value' to a datetime object"""
-    if not value:
-        return EPOCH
-
-    if isinstance(value, datetime.datetime):
-        return value
-
-    if isinstance(value, str):
-        try:
-            if value[-1] == "Z":
-                # compat for Python < 3.11
-                value = value[:-1]
-            dt = datetime.datetime.fromisoformat(value)
-            if dt.tzinfo is None:
-                if dt.microsecond:
-                    dt = dt.replace(microsecond=0)
-            else:
-                # convert to naive UTC
-                dt = dt.astimezone(datetime.timezone.utc).replace(
-                    microsecond=0, tzinfo=None)
-            return dt
-        except Exception:
-            pass
-
-    return text.parse_timestamp(value, EPOCH)
-
-
-def datetime_to_timestamp(dt):
-    """Convert naive UTC datetime to Unix timestamp"""
-    return (dt - EPOCH) / SECOND
-
-
-def datetime_to_timestamp_string(dt):
-    """Convert naive UTC datetime to Unix timestamp string"""
-    try:
-        return str((dt - EPOCH) // SECOND)
-    except Exception:
-        return ""
-
-
-if sys.hexversion < 0x30c0000:
-    # Python <= 3.11
-    datetime_utcfromtimestamp = datetime.datetime.utcfromtimestamp
-    datetime_utcnow = datetime.datetime.utcnow
-    datetime_from_timestamp = datetime_utcfromtimestamp
-else:
-    # Python >= 3.12
-    def datetime_from_timestamp(ts=None):
-        """Convert Unix timestamp to naive UTC datetime"""
-        Y, m, d, H, M, S, _, _, _ = time.gmtime(ts)
-        return datetime.datetime(Y, m, d, H, M, S)
-
-    datetime_utcfromtimestamp = datetime_from_timestamp
-    datetime_utcnow = datetime_from_timestamp
-
-
 def json_default(obj):
     if isinstance(obj, CustomNone):
         return None
@@ -379,7 +321,7 @@ def extract_headers(response):
             text.nameext_from_url(name, data)
 
     if hlm := headers.get("last-modified"):
-        data["date"] = datetime.datetime(*parsedate_tz(hlm)[:6])
+        data["date"] = dt.datetime(*parsedate_tz(hlm)[:6])
 
     return data
 
@@ -751,11 +693,11 @@ class Flags():
 # 735506 == 739342 - 137 * 28
 # v135.0 release of Chrome  on 2025-04-01 has ordinal 739342
 # 735562 == 739342 - 135 * 28
-#  _ord_today = datetime.date.today().toordinal()
+#  _ord_today = dt.date.today().toordinal()
 #  _ff_ver = (_ord_today - 735506) // 28
 #  _ch_ver = (_ord_today - 735562) // 28
 
-_ff_ver = (datetime.date.today().toordinal() - 735506) // 28
+_ff_ver = (dt.date.today().toordinal() - 735506) // 28
 #  _ch_ver = _ff_ver - 2
 
 re = text.re
@@ -763,8 +705,6 @@ re_compile = text.re_compile
 
 NONE = CustomNone()
 FLAGS = Flags()
-EPOCH = datetime.datetime(1970, 1, 1)
-SECOND = datetime.timedelta(0, 1)
 WINDOWS = (os.name == "nt")
 SENTINEL = object()
 EXECUTABLE = getattr(sys, "frozen", False)
@@ -786,8 +726,8 @@ GLOBALS = {
     "contains" : contains,
     "parse_int": text.parse_int,
     "urlsplit" : urllib.parse.urlsplit,
-    "datetime" : datetime.datetime,
-    "timedelta": datetime.timedelta,
+    "datetime" : dt.datetime,
+    "timedelta": dt.timedelta,
     "abort"    : raises(exception.StopExtraction),
     "error"    : raises(exception.AbortExtraction),
     "terminate": raises(exception.TerminateExtraction),

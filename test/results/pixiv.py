@@ -668,6 +668,8 @@ __tests__ = (
     "#class"   : pixiv.PixivSketchExtractor,
     "#pattern" : r"https://img\-sketch\.pixiv\.net/uploads/medium/file/\d+/\d+\.(jpg|png)",
     "#count"   : ">= 35",
+
+    "date": "type:datetime",
 },
 
 )

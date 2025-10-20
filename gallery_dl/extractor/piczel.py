@@ -26,8 +26,7 @@ class PiczelExtractor(Extractor):
     def items(self):
         for post in self.posts():
             post["tags"] = [t["title"] for t in post["tags"] if t["title"]]
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            post["date"] = self.parse_datetime_iso(post["created_at"])
 
             if post["multi"]:
                 images = post["images"]

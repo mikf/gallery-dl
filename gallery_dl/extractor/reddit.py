@@ -57,7 +57,7 @@ class RedditExtractor(Extractor):
 
                 if submission:
                     submission["comment"] = None
-                    submission["date"] = text.parse_timestamp(
+                    submission["date"] = self.parse_timestamp(
                         submission["created_utc"])
                     yield Message.Directory, submission
                     visited.add(submission["id"])
@@ -124,7 +124,7 @@ class RedditExtractor(Extractor):
 
                         data = submission.copy()
                         data["comment"] = comment
-                        comment["date"] = text.parse_timestamp(
+                        comment["date"] = self.parse_timestamp(
                             comment["created_utc"])
 
                         if media:

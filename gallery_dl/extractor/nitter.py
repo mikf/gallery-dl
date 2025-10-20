@@ -114,7 +114,7 @@ class NitterExtractor(BaseExtractor):
         return {
             "author"  : author,
             "user"    : self.user_obj or author,
-            "date"    : text.parse_datetime(
+            "date"    : self.parse_datetime(
                 extr('title="', '"'), "%b %d, %Y · %I:%M %p %Z"),
             "tweet_id": link.rpartition("/")[2].partition("#")[0],
             "content": extr('class="tweet-content', "</div").partition(">")[2],
@@ -142,7 +142,7 @@ class NitterExtractor(BaseExtractor):
         return {
             "author"  : author,
             "user"    : self.user_obj or author,
-            "date"    : text.parse_datetime(
+            "date"    : self.parse_datetime(
                 extr('title="', '"'), "%b %d, %Y · %I:%M %p %Z"),
             "tweet_id": link.rpartition("/")[2].partition("#")[0],
             "content" : extr('class="quote-text', "</div").partition(">")[2],
@@ -173,7 +173,7 @@ class NitterExtractor(BaseExtractor):
             "nick"            : extr('title="', '"'),
             "name"            : extr('title="@', '"'),
             "description"     : extr('<p dir="auto">', '<'),
-            "date"            : text.parse_datetime(
+            "date"            : self.parse_datetime(
                 extr('class="profile-joindate"><span title="', '"'),
                 "%I:%M %p - %d %b %Y"),
             "statuses_count"  : text.parse_int(extr(

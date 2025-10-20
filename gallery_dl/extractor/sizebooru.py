@@ -45,9 +45,9 @@ class SizebooruExtractor(BooruExtractor):
 
         post.update({
             "id"       : text.parse_int(post_id),
-            "date"     : text.parse_datetime(
+            "date"     : self.parse_datetime(
                 extr("<b>Posted Date:</b> ", "<"), "%m/%d/%Y"),
-            "date_approved": text.parse_datetime(
+            "date_approved": self.parse_datetime(
                 extr("<b>Approved Date:</b> ", "<"), "%m/%d/%Y"),
             "approver" : text.remove_html(extr("<b>Approved By:</b>", "</")),
             "uploader" : text.remove_html(extr("<b>Posted By:</b>", "</")),

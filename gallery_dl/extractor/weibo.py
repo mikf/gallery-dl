@@ -103,7 +103,7 @@ class WeiboExtractor(Extractor):
                     status["text"].endswith('class="expand">展开</span>'):
                 status = self._status_by_id(status["id"])
 
-            status["date"] = text.parse_datetime(
+            status["date"] = self.parse_datetime(
                 status["created_at"], "%a %b %d %H:%M:%S %z %Y")
             status["count"] = len(files)
             yield Message.Directory, status

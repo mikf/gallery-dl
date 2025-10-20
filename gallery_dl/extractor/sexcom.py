@@ -9,8 +9,7 @@
 """Extractors for https://www.sex.com/"""
 
 from .common import Extractor, Message
-from .. import text
-from datetime import datetime
+from .. import text, dt
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?sex\.com(?:/[a-z]{2})?"
 
@@ -34,10 +33,10 @@ class SexcomExtractor(Extractor):
             url = pin["url"]
             parts = url.rsplit("/", 4)
             try:
-                pin["date_url"] = dt = datetime(
+                pin["date_url"] = d = dt.datetime(
                     int(parts[1]), int(parts[2]), int(parts[3]))
                 if "date" not in pin:
-                    pin["date"] = dt
+                    pin["date"] = d
             except Exception:
                 pass
             pin["tags"] = [t[1:] for t in pin["tags"]]
@@ -136,7 +135,7 @@ class SexcomExtractor(Extractor):
             text.nameext_from_url(data["url"], data)
 
         data["uploader"] = extr('itemprop="author">', '<')
-        data["date"] = text.parse_datetime(extr('datetime="', '"'))
+        data["date"] = dt.parse_iso(extr('datetime="', '"'))
         data["tags"] = text.split_html(extr('class="tags"> Tags', '</div>'))
         data["comments"] = text.parse_int(extr('Comments (', ')'))
 
@@ -314,7 +313,7 @@ class SexcomSearchExtractor(SexcomExtractor):
 
                 parts = path.rsplit("/", 4)
                 try:
-                    pin["date_url"] = pin["date"] = datetime(
+                    pin["date_url"] = pin["date"] = dt.datetime(
                         int(parts[1]), int(parts[2]), int(parts[3]))
                 except Exception:
                     pass

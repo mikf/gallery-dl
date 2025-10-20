@@ -42,7 +42,7 @@ class RawkumaChapterExtractor(RawkumaBase, ChapterExtractor):
             "chapter_minor": sep + minor,
             "chapter_id"   : text.parse_int(item["cid"]),
             "title"        : text.unescape(title),
-            "date"         : text.parse_datetime(
+            "date"         : self.parse_datetime(
                 date, "%Y-%m-%dWIB%H:%M:%S%z"),
             "thumbnail"    : item.get("t"),
             "lang"         : "ja",

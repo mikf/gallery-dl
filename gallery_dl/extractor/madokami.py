@@ -47,8 +47,7 @@ class MadokamiMangaExtractor(MadokamiExtractor):
                 "path": text.unescape(extr('href="', '"')),
                 "chapter_string": text.unescape(extr(">", "<")),
                 "size": text.parse_bytes(extr("<td>", "</td>")),
-                "date": text.parse_datetime(
-                    extr("<td>", "</td>").strip(), "%Y-%m-%d %H:%M"),
+                "date": self.parse_datetime_iso(extr("<td>", "</td>").strip()),
             })
 
         if self.config("chapter-reverse"):

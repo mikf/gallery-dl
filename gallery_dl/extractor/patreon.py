@@ -9,7 +9,7 @@
 """Extractors for https://www.patreon.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util, dt, exception
 from ..cache import memcache
 import collections
 import itertools
@@ -177,8 +177,7 @@ class PatreonExtractor(Extractor):
             post, included, "attachments")
         attr["attachments_media"] = self._files(
             post, included, "attachments_media")
-        attr["date"] = text.parse_datetime(
-            attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        attr["date"] = self.parse_datetime_iso(attr["published_at"])
 
         try:
             attr["campaign"] = (included["campaign"][
@@ -226,8 +225,7 @@ class PatreonExtractor(Extractor):
         user = response.json()["data"]
         attr = user["attributes"]
         attr["id"] = user["id"]
-        attr["date"] = text.parse_datetime(
-            attr["created"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        attr["date"] = self.parse_datetime_iso(attr["created"])
         return attr
 
     def _collection(self, collection_id):
@@ -236,8 +234,7 @@ class PatreonExtractor(Extractor):
         coll = data["data"]
         attr = coll["attributes"]
         attr["id"] = coll["id"]
-        attr["date"] = text.parse_datetime(
-            attr["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        attr["date"] = self.parse_datetime_iso(attr["created_at"])
         return attr
 
     def _filename(self, url):
@@ -445,8 +442,7 @@ class PatreonUserExtractor(PatreonExtractor):
 
     def posts(self):
         if date_max := self._get_date_min_max(None, None)[1]:
-            self._cursor = cursor = \
-                util.datetime_from_timestamp(date_max).isoformat()
+            self._cursor = cursor = dt.from_ts(date_max).isoformat()
             self._init_cursor = lambda: cursor
 
         url = self._build_url("stream", (

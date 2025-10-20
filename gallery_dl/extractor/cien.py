@@ -61,7 +61,7 @@ class CienArticleExtractor(CienExtractor):
         post["post_url"] = url
         post["post_id"] = text.parse_int(post_id)
         post["count"] = len(files)
-        post["date"] = text.parse_datetime(post["datePublished"])
+        post["date"] = self.parse_datetime_iso(post["datePublished"])
 
         try:
             post["author"]["id"] = text.parse_int(author_id)

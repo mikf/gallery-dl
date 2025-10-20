@@ -208,9 +208,9 @@ class SubscribestarExtractor(Extractor):
     def _parse_datetime(self, dt):
         if dt.startswith("Updated on "):
             dt = dt[11:]
-        date = text.parse_datetime(dt, "%b %d, %Y %I:%M %p")
+        date = self.parse_datetime(dt, "%b %d, %Y %I:%M %p")
         if date is dt:
-            date = text.parse_datetime(dt, "%B %d, %Y %I:%M %p")
+            date = self.parse_datetime(dt, "%B %d, %Y %I:%M %p")
         return date
 
     def _warn_preview(self):

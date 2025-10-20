@@ -128,7 +128,7 @@ class FanboxExtractor(Extractor):
                         if file.get("extension", "").lower() in exts
                     ]
 
-        post["date"] = text.parse_datetime(post["publishedDatetime"])
+        post["date"] = self.parse_datetime_iso(post["publishedDatetime"])
         post["text"] = content_body.get("text") if content_body else None
         post["isCoverImage"] = False
 

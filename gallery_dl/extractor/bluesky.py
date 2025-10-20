@@ -135,8 +135,7 @@ class BlueskyExtractor(Extractor):
 
         post["instance"] = self.instance
         post["post_id"] = self._pid(post)
-        post["date"] = text.parse_datetime(
-            post["createdAt"][:19], "%Y-%m-%dT%H:%M:%S")
+        post["date"] = self.parse_datetime_iso(post["createdAt"][:19])
 
     def _extract_files(self, post):
         if "embed" not in post:
