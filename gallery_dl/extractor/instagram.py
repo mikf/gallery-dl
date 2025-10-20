@@ -38,7 +38,7 @@ class InstagramExtractor(Extractor):
     def _init(self):
         self.www_claim = "0"
         self.csrf_token = util.generate_token()
-        self._find_tags = util.re(r"#\w+").findall
+        self._find_tags = text.re(r"#\w+").findall
         self._logged_in = True
         self._cursor = None
         self._user = None

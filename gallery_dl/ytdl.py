@@ -262,7 +262,7 @@ def parse_command_line(module, argv):
         else module.match_filter_func(opts.match_filter))
 
     if cookiesfrombrowser := getattr(opts, "cookiesfrombrowser", None):
-        pattern = util.re(r"""(?x)
+        pattern = text.re(r"""(?x)
             (?P<name>[^+:]+)
             (?:\s*\+\s*(?P<keyring>[^:]+))?
             (?:\s*:\s*(?!:)(?P<profile>.+?))?
@@ -528,7 +528,7 @@ def legacy_postprocessors(opts, module, ytdlp, compat_opts):
             if len(dur) == 2 and all(t is not None for t in dur):
                 remove_ranges.append(tuple(dur))
                 continue
-        remove_chapters_patterns.append(util.re(regex))
+        remove_chapters_patterns.append(text.re(regex))
     if opts.remove_chapters or sponsorblock_query:
         postprocessors.append({
             "key": "ModifyChapters",

@@ -7,7 +7,7 @@
 """Extractors for https://hatenablog.com"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 
 
 BASE_PATTERN = (
@@ -30,7 +30,7 @@ class HatenablogExtractor(Extractor):
         self.domain = match[1] or match[2]
 
     def _init(self):
-        self._find_img = util.re(r'<img +([^>]+)').finditer
+        self._find_img = text.re(r'<img +([^>]+)').finditer
 
     def _handle_article(self, article: str):
         extr = text.extract_from(article)
@@ -73,7 +73,7 @@ class HatenablogEntriesExtractor(HatenablogExtractor):
 
     def _init(self):
         HatenablogExtractor._init(self)
-        self._find_pager_url = util.re(
+        self._find_pager_url = text.re(
             r' class="pager-next">\s*<a href="([^"]+)').search
 
     def items(self):

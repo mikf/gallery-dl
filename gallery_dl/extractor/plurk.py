@@ -61,7 +61,7 @@ class PlurkExtractor(Extractor):
         if not data:
             raise exception.NotFoundError("user")
         return util.json_loads(
-            util.re(r"new Date\(([^)]+)\)").sub(r"\1", data))
+            text.re(r"new Date\(([^)]+)\)").sub(r"\1", data))
 
 
 class PlurkTimelineExtractor(PlurkExtractor):

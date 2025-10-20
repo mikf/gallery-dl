@@ -63,7 +63,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
     def _extract_files(self, post):
         files = []
 
-        for video, media in util.re(r"<(?:img|vide(o)) ([^>]+)").findall(
+        for video, media in text.re(r"<(?:img|vide(o)) ([^>]+)").findall(
                 post["content"]):
             if not self.emoticons and 'class="arca-emoticon"' in media:
                 continue

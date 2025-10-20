@@ -64,13 +64,13 @@ class DeviantartExtractor(Extractor):
         if self.quality:
             if self.quality == "png":
                 self.quality = "-fullview.png?"
-                self.quality_sub = util.re(r"-fullview\.[a-z0-9]+\?").sub
+                self.quality_sub = text.re(r"-fullview\.[a-z0-9]+\?").sub
             else:
                 self.quality = f",q_{self.quality}"
-                self.quality_sub = util.re(r",q_\d+").sub
+                self.quality_sub = text.re(r",q_\d+").sub
 
         if self.intermediary:
-            self.intermediary_subn = util.re(r"(/f/[^/]+/[^/]+)/v\d+/.*").subn
+            self.intermediary_subn = text.re(r"(/f/[^/]+/[^/]+)/v\d+/.*").subn
 
         if isinstance(self.original, str) and \
                 self.original.lower().startswith("image"):
@@ -269,7 +269,7 @@ class DeviantartExtractor(Extractor):
             )
 
         # filename metadata
-        sub = util.re(r"\W").sub
+        sub = text.re(r"\W").sub
         deviation["filename"] = "".join((
             sub("_", deviation["title"].lower()), "_by_",
             sub("_", deviation["author"]["username"].lower()), "-d",
@@ -675,7 +675,7 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
 
     def _find_folder(self, folders, name, uuid):
         if uuid.isdecimal():
-            match = util.re(
+            match = text.re(
                 "(?i)" + name.replace("-", "[^a-z0-9]+") + "$").match
             for folder in folders:
                 if match(folder["name"]):

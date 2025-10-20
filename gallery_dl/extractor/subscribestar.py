@@ -161,7 +161,7 @@ class SubscribestarExtractor(Extractor):
         attachments = text.extr(
             html, 'class="uploads-docs"', 'class="post-edit_form"')
         if attachments:
-            for att in util.re(r'class="doc_preview[" ]').split(
+            for att in text.re(r'class="doc_preview[" ]').split(
                     attachments)[1:]:
                 media.append({
                     "id"  : text.parse_int(text.extr(
@@ -175,7 +175,7 @@ class SubscribestarExtractor(Extractor):
         audios = text.extr(
             html, 'class="uploads-audios"', 'class="post-edit_form"')
         if audios:
-            for audio in util.re(r'class="audio_preview-data[" ]').split(
+            for audio in text.re(r'class="audio_preview-data[" ]').split(
                     audios)[1:]:
                 media.append({
                     "id"  : text.parse_int(text.extr(

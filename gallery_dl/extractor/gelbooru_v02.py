@@ -96,7 +96,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         params["pid"] = self.page_start * self.per_page
 
         data = {}
-        find_ids = util.re(r"\sid=\"p(\d+)").findall
+        find_ids = text.re(r"\sid=\"p(\d+)").findall
 
         while True:
             page = self.request(url, params=params).text
@@ -136,7 +136,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
             return
 
         tags = collections.defaultdict(list)
-        pattern = util.re(r"(?s)tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)")
+        pattern = text.re(r"(?s)tag-type-([^\"' ]+).*?[?;]tags=([^\"'&]+)")
         for tag_type, tag_name in pattern.findall(tag_container):
             tags[tag_type].append(text.unescape(text.unquote(tag_name)))
         for key, value in tags.items():

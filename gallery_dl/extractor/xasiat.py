@@ -7,7 +7,7 @@
 """Extractors for https://www.xasiat.com"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 import time
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?xasiat\.com((?:/fr|/ja)?/albums"
@@ -29,7 +29,7 @@ class XasiatExtractor(Extractor):
 
     def _pagination(self, path, pnum=1):
         url = f"{self.root}{path}/"
-        find_posts = util.re(r'class="item  ">\s*<a href="([^"]+)').findall
+        find_posts = text.re(r'class="item  ">\s*<a href="([^"]+)').findall
 
         while True:
             params = {
@@ -69,11 +69,11 @@ class XasiatAlbumExtractor(XasiatExtractor):
 
         data = {
             "title": text.unescape(title),
-            "model": util.re(
+            "model": text.re(
                 r'top_models1"></i>\s*(.+)\s*</span').findall(info),
-            "tags": util.re(
+            "tags": text.re(
                 r'tags/[^"]+\">\s*(.+)\s*</a').findall(info),
-            "album_category": util.re(
+            "album_category": text.re(
                 r'categories/[^"]+\">\s*(.+)\s*</a').findall(info)[0],
             "album_url": response.url,
             "album_id": text.parse_int(album_id),

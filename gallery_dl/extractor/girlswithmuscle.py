@@ -5,7 +5,7 @@
 # published by the Free Software Foundation.
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, exception
 from ..cache import cache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?girlswithmuscle\.com"
@@ -155,7 +155,7 @@ class GirlswithmuscleSearchExtractor(GirlswithmuscleExtractor):
             raise exception.AuthorizationError(msg)
         page = response.text
 
-        match = util.re(r"Page (\d+) of (\d+)").search(page)
+        match = text.re(r"Page (\d+) of (\d+)").search(page)
         current, total = match.groups()
         current, total = text.parse_int(current), text.parse_int(total)
 

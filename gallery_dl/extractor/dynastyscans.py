@@ -46,7 +46,7 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        match = util.re(
+        match = text.re(
             r"(?:<a[^>]*>)?([^<]+)(?:</a>)?"  # manga name
             r"(?: ch(\d+)([^:<]*))?"  # chapter info
             r"(?:: (.+))?"  # title

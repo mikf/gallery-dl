@@ -47,7 +47,7 @@ class SankakuExtractor(BooruExtractor):
         self.api = SankakuAPI(self)
         if self.config("tags") == "extended":
             self._tags = self._tags_extended
-            self._tags_findall = util.re(
+            self._tags_findall = text.re(
                 r"tag-type-([^\"' ]+).*?\?tags=([^\"'&]+)").findall
 
     def _file_url(self, post):
@@ -129,10 +129,10 @@ class SankakuTagExtractor(SankakuExtractor):
 
         if "date:" in self.tags:
             # rewrite 'date:' tags (#1790)
-            self.tags = util.re(
+            self.tags = text.re(
                 r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)(?!T)").sub(
                 r"date:\3-\2-\1T00:00", self.tags)
-            self.tags = util.re(
+            self.tags = text.re(
                 r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)(?!T)").sub(
                 r"date:\1-\2-\3T00:00", self.tags)
 

@@ -9,7 +9,7 @@
 """Extractors for https://rule34.us/"""
 
 from .booru import BooruExtractor
-from .. import text, util
+from .. import text
 import collections
 
 
@@ -19,7 +19,7 @@ class Rule34usExtractor(BooruExtractor):
     per_page = 42
 
     def _init(self):
-        self._find_tags = util.re(
+        self._find_tags = text.re(
             r'<li class="([^-"]+)-tag"[^>]*><a href="[^;"]+;q=([^"]+)').findall
 
     def _parse_post(self, post_id):
