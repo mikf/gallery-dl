@@ -805,6 +805,28 @@ class MetadataTest(BasePostprocessorTest):
         self.assertTrue(not e.called)
         self.assertTrue(m.called)
 
+    def test_metadata_option_newline(self):
+        self._create({
+            "newline": "\r\n",
+            "filename"      : "data.json",
+            "directory"     : "",
+            "base-directory": self.dir.name,
+        })
+
+        self._trigger()
+
+        path = os.path.join(self.dir.name, "data.json")
+        with open(path, newline="") as fp:
+            content = fp.read()
+
+        self.assertEqual(content, """\
+{\r\n\
+    "category": "test",\r\n\
+    "filename": "file",\r\n\
+    "extension": "ext"\r\n\
+}\r\n\
+""")
+
     def test_metadata_option_include(self):
         self._create(
             {"include": ["_private", "filename", "foo"], "sort": True},
