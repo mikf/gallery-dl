@@ -8205,6 +8205,7 @@ Description
 
     See the ``encoding`` argument of |open()|_ for further details.
 
+
 metadata.newline
 -----------------
 Type
@@ -8212,17 +8213,21 @@ Type
 Default
     ``null``
 Description
-    The newline sequence used in metadata files. If null, any '\n' characters
+    The newline sequence used in metadata files.
+
+    If ``null``, any ``\n`` characters
     written are translated to the system default line separator.
 
     See the ``newline`` argument of |open()|_ for further details.
-
+Supported Values
     ``null``
-        Any '\n' characters written are translated to the system default line separator.
-    ``"" or "\n"``
+        Any ``\n`` characters
+        written are translated to the system default line separator.
+    ``""`` | ``"\n"``
         Don't replace newline characters.
-    ``"\r\n" or "\r"``
+    ``"\r"`` | ``"\r\n"``
         Replace newline characters with the given sequence.
+
 
 metadata.private
 ----------------
