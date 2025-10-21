@@ -33,7 +33,7 @@ def find(name):
     cls = None
     if name in modules:  # prevent unwanted imports
         try:
-            module = __import__(name, globals(), None, (), 1)
+            module = __import__(name, globals(), None, None, 1)
         except ImportError:
             pass
         else:
