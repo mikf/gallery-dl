@@ -351,6 +351,16 @@ class Extractor():
         else:
             return getpass.getpass(prompt)
 
+    def utils(self):
+        if (category := self.__class__.category) in CACHE_UTILS:
+            return CACHE_UTILS[category]
+        CACHE_UTILS[category] = module = \
+            __import__(f"utils.{category}", globals(), None, category, 1)
+        return module
+
+    def resource(self, name):
+        return getattr(self.utils(), name)
+
     def _check_input_allowed(self, prompt=""):
         input = self.config("input")
         if input is None:
@@ -1104,6 +1114,7 @@ def _browser_useragent(browser):
 
 CACHE_ADAPTERS = {}
 CACHE_COOKIES = {}
+CACHE_UTILS = {}
 CATEGORY_MAP = ()
 
 
