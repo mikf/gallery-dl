@@ -299,7 +299,7 @@ def _list_classes():
 def _modules_internal():
     globals_ = globals()
     for module_name in modules:
-        yield __import__(module_name, globals_, None, (), 1)
+        yield __import__(module_name, globals_, None, None, 1)
 
 
 def _modules_path(path, files):
