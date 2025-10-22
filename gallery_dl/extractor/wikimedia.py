@@ -51,6 +51,7 @@ class WikimediaExtractor(BaseExtractor):
         # https://www.mediawiki.org/wiki/API:Revisions
         # https://www.mediawiki.org/wiki/API:Imageinfo
         self.image_revisions = self.config("image-revisions", 1)
+        self.format = self.config("format", "original")
 
     @cache(maxage=36500*86400, keyarg=1)
     def _search_api_path(self, root):
@@ -74,8 +75,14 @@ class WikimediaExtractor(BaseExtractor):
             m["name"]: m["value"]
             for m in image["commonmetadata"] or ()}
 
-        text.nameext_from_url(image["canonicaltitle"].partition(":")[2], image)
+        text.nameext_from_name(
+            image["canonicaltitle"].partition(":")[2], image)
         image["date"] = self.parse_datetime_iso(image["timestamp"])
+
+        if self.format:
+            url = image["url"]
+            image["url"] = (f"{url}{'&' if '?' in url else '?'}"
+                            f"format={self.format}")
 
     def items(self):
         for info in self._pagination(self.params):

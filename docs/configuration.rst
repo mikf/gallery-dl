@@ -6647,6 +6647,17 @@ Description
     Download video files.
 
 
+extractor.wikimedia.format
+--------------------------
+Type
+    ``string``
+Default
+    ``"original"``
+Description
+    Sets the `format` query parameter value
+    added to all download URLs.
+
+
 extractor.wikimedia.image-revisions
 -----------------------------------
 Type
