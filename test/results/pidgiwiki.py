@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://www.pidgi.net/wiki/File:Key_art_-_Fight_Knight.png",
     "#category": ("wikimedia", "pidgiwiki", "file"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
-    "#results" : "https://cdn.pidgi.net/images/0/0c/Key_art_-_Fight_Knight.png",
+    "#results" : "https://cdn.pidgi.net/images/0/0c/Key_art_-_Fight_Knight.png?format=original",
 },
 
 {

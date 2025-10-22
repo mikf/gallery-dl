@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://commons.wikimedia.org/wiki/File:Starr-050516-1367-Pimenta_dioica-flowers-Maunaloa-Molokai_(24762757525).jpg",
     "#category": ("wikimedia", "wikimediacommons", "file"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
-    "#results" : "https://upload.wikimedia.org/wikipedia/commons/f/fa/Starr-050516-1367-Pimenta_dioica-flowers-Maunaloa-Molokai_%2824762757525%29.jpg",
+    "#results" : "https://upload.wikimedia.org/wikipedia/commons/f/fa/Starr-050516-1367-Pimenta_dioica-flowers-Maunaloa-Molokai_%2824762757525%29.jpg?format=original",
 },
 
 {
@@ -35,7 +35,7 @@ __tests__ = (
         "https://commons.wikimedia.org/wiki/Category:Ivan_Shishkin_in_art",
         "https://commons.wikimedia.org/wiki/Category:Ivan_Shishkin._To_the_190th_anniversary_of_the_birth",
         "https://commons.wikimedia.org/wiki/Category:Paintings_by_Ivan_Shishkin",
-        "https://commons.wikimedia.org/wiki/Category:Shishkin_street_(Martyshkino)",
+        "https://commons.wikimedia.org/wiki/Category:Shishkin_Street_(Martyshkino)",
         "https://commons.wikimedia.org/wiki/Category:Shishkin_street,_Moscow",
         "https://commons.wikimedia.org/wiki/Category:Shishkin's_Pine",
     ),
