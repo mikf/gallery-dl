@@ -966,18 +966,16 @@ class BaseExtractor(Extractor):
 
     def __init__(self, match):
         if not self.category:
-            self.groups = match.groups()
-            self.match = match
-            self._init_category()
+            self._init_category(match)
         Extractor.__init__(self, match)
 
-    def _init_category(self):
-        for index, group in enumerate(self.groups):
+    def _init_category(self, match):
+        for index, group in enumerate(match.groups()):
             if group is not None:
                 if index:
                     self.category, self.root, info = self.instances[index-1]
                     if not self.root:
-                        self.root = text.root_from_url(self.match[0])
+                        self.root = text.root_from_url(match[0])
                     self.config_instance = info.get
                 else:
                     self.root = group
