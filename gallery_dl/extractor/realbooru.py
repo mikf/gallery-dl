@@ -27,11 +27,15 @@ class RealbooruExtractor(booru.BooruExtractor):
         rating = extr('name="rating" content="', '"')
         extr('class="container"', '>')
 
+        tag_container = text.extr(page, 'id="tagLink"', '</div>')
+        pattern = text.re(r'<a class="(?:tag-type-)?(?:[^"]+).*?;tags=([^"&]+)')
+        tags = [text.unescape(text.unquote(tag)) for tag in pattern.findall(tag_container)]
+
         post = {
             "_html"     : page,
             "id"        : post_id,
             "rating"    : "e" if rating == "adult" else (rating or "?")[0],
-            "tags"      : text.unescape(extr(' alt="', '"')),
+            "tags"      : tags,
             "file_url"  : extr('src="', '"'),
             "created_at": extr(">Posted at ", " by "),
             "uploader"  : extr(">", "<"),
