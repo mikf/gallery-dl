@@ -993,6 +993,13 @@ class BaseExtractor(Extractor):
                     self.category = group.partition("://")[2]
                 break
 
+    def utils(self):
+        if (category := self.__class__.basecategory) in CACHE_UTILS:
+            return CACHE_UTILS[category]
+        CACHE_UTILS[category] = module = \
+            __import__(f"utils.{category}", globals(), None, category, 1)
+        return module
+
     @classmethod
     def update(cls, instances):
         if extra_instances := config.get(("extractor",), cls.basecategory):
