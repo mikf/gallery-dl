@@ -25,12 +25,17 @@ class WikimediaExtractor(BaseExtractor):
         self._init_category(match)
 
         if self.category == "wikimedia":
-            self.category = self.root.split(".")[-2]
+            labels = self.root.split(".")
+            self.lang = labels[-3][-2:]
+            self.category = labels[-2]
         elif self.category in ("fandom", "wikigg"):
+            self.lang = "en"
             self.basesubcategory = self.category
             self.category = (
                 f"{self.category}-"
                 f"{self.root.partition('.')[0].rpartition('/')[2]}")
+        else:
+            self.lang = ""
 
         if useragent := self.config_instance("useragent"):
             self.useragent = useragent
@@ -237,7 +242,8 @@ class WikimediaArticleExtractor(WikimediaExtractor):
 
         path = self.groups[-1]
         if path[2] == "/":
-            self.root = f"{self.root}/{path[:2]}"
+            self.lang = lang = path[:2]
+            self.root = f"{self.root}/{lang}"
             path = path[3:]
         if path.startswith("wiki/"):
             path = path[5:]
@@ -272,6 +278,7 @@ class WikimediaArticleExtractor(WikimediaExtractor):
 
     def prepare_info(self, info):
         info["page"] = self.path
+        info["lang"] = self.lang
 
 
 class WikimediaWikiExtractor(WikimediaExtractor):

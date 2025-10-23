@@ -32,6 +32,7 @@ __tests__ = (
     "extmetadata"   : dict,
     "filename"      : str,
     "height"        : int,
+    "lang"          : "en",
     "metadata"      : dict,
     "mime"          : r"re:image/\w+",
     "page"          : "Athena",
