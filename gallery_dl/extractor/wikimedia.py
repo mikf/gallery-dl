@@ -27,6 +27,7 @@ class WikimediaExtractor(BaseExtractor):
         if self.category == "wikimedia":
             self.category = self.root.split(".")[-2]
         elif self.category in ("fandom", "wikigg"):
+            self.basesubcategory = self.category
             self.category = (
                 f"{self.category}-"
                 f"{self.root.partition('.')[0].rpartition('/')[2]}")
