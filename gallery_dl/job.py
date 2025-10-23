@@ -130,6 +130,8 @@ class Job():
         if extr.basecategory:
             if not cfgpath:
                 cfgpath.append((extr.category, extr.subcategory))
+            if extr.basesubcategory:
+                cfgpath.append((extr.basesubcategory, extr.subcategory))
             cfgpath.append((extr.basecategory, extr.subcategory))
 
         return cfgpath

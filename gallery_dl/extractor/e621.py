@@ -180,6 +180,7 @@ class E621FavoriteExtractor(E621Extractor):
 class E621FrontendExtractor(Extractor):
     """Extractor for alternative e621 frontends"""
     basecategory = "E621"
+    basesubcategory = ""
     category = "e621"
     subcategory = "frontend"
     pattern = r"(?:https?://)?e621\.(?:cc/\?tags|anthro\.fr/\?q)=([^&#]*)"
