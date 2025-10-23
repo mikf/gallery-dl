@@ -6652,7 +6652,10 @@ extractor.wikimedia.format
 Type
     ``string``
 Default
-    ``"original"``
+    ``fandom`` | ``wikigg``
+        ``"original"``
+    otherwise
+        ``""``
 Description
     Sets the `format` query parameter value
     added to all download URLs.

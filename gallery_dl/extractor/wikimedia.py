@@ -24,12 +24,14 @@ class WikimediaExtractor(BaseExtractor):
     def __init__(self, match):
         self._init_category(match)
 
+        self.format = False
         if self.category == "wikimedia":
             labels = self.root.split(".")
             self.lang = labels[-3][-2:]
             self.category = labels[-2]
         elif self.category in ("fandom", "wikigg"):
             self.lang = "en"
+            self.format = "original"
             self.basesubcategory = self.category
             self.category = (
                 f"{self.category}-"
@@ -56,7 +58,7 @@ class WikimediaExtractor(BaseExtractor):
         # https://www.mediawiki.org/wiki/API:Revisions
         # https://www.mediawiki.org/wiki/API:Imageinfo
         self.image_revisions = self.config("image-revisions", 1)
-        self.format = self.config("format", "original")
+        self.format = self.config("format", self.format)
         self.per_page = self.config("limit", 50)
         self.subcategories = False
 
