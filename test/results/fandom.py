@@ -107,6 +107,8 @@ __tests__ = (
     "#category": ("wikimedia", "fandom-discogs", "file"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
     "#results" : "https://static.wikia.nocookie.net/discogs/images/a/ab/CH-0430D2.jpg/revision/latest?cb=20241007150151&path-prefix=zh&format=original",
+
+    "lang": "zh",
 },
 
 {
