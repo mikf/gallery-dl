@@ -28,8 +28,11 @@ class RealbooruExtractor(booru.BooruExtractor):
         extr('class="container"', '>')
 
         tag_container = text.extr(page, 'id="tagLink"', '</div>')
-        pattern = text.re(r'<a class="(?:tag-type-)?(?:[^"]+).*?;tags=([^"&]+)')
-        tags = [text.unescape(text.unquote(tag)) for tag in pattern.findall(tag_container)]
+        pattern = text.re(r'<a class="(?:tag-type-)?.*?;tags=([^"&]+)')
+        tags = [
+            text.unescape(text.unquote(tag))
+            for tag in pattern.findall(tag_container)
+        ]
 
         post = {
             "_html"     : page,
