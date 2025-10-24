@@ -22,8 +22,8 @@ import random
 import hashlib
 import binascii
 import itertools
-from . import text, util
-from .cache import cache
+from ... import text, util
+from ...cache import cache
 
 
 class ClientTransaction():
