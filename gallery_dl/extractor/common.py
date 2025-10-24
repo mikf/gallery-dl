@@ -993,7 +993,7 @@ class BaseExtractor(Extractor):
                     self.category = group.partition("://")[2]
                 break
 
-    def utils(self):
+    def utilsb(self):
         if (category := self.__class__.basecategory) in CACHE_UTILS:
             return CACHE_UTILS[category]
         CACHE_UTILS[category] = module = \
