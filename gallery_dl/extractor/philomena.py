@@ -22,7 +22,7 @@ class PhilomenaExtractor(BooruExtractor):
     per_page = 50
 
     def _init(self):
-        self.api = PhilomenaAPI(self)
+        self.api = self.utilsb().PhilomenaAPI(self)
         self.svg = self.config("svg", True)
 
     def _file_url(self, post):
@@ -32,7 +32,7 @@ class PhilomenaExtractor(BooruExtractor):
             url = post["view_url"]
 
         if self.svg and post["format"] == "svg":
-            return url.rpartition(".")[0] + ".svg"
+            return f"{url.rpartition('.')[0]}.svg"
         return url
 
     def _prepare(self, post):
@@ -75,9 +75,7 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
     pattern = rf"{BASE_PATTERN}/(?:search/?\?([^#]+)|tags/([^/?#]+))"
     example = "https://derpibooru.org/search?q=QUERY"
 
-    def __init__(self, match):
-        PhilomenaExtractor.__init__(self, match)
-
+    def posts(self):
         if q := self.groups[-1]:
             q = q.replace("+", " ")
             for old, new in (
@@ -90,15 +88,12 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
             ):
                 if old in q:
                     q = q.replace(old, new)
-            self.params = {"q": text.unquote(text.unquote(q))}
+            params = {"q": text.unquote(text.unquote(q))}
         else:
-            self.params = text.parse_query(self.groups[-2])
+            params = text.parse_query(self.groups[-2])
 
-    def metadata(self):
-        return {"search_tags": self.params.get("q", "")}
-
-    def posts(self):
-        return self.api.search(self.params)
+        self.kwdict["search_tags"] = params.get("q", "")
+        return self.api.search(params)
 
 
 class PhilomenaGalleryExtractor(PhilomenaExtractor):
@@ -109,76 +104,14 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
     pattern = rf"{BASE_PATTERN}/galleries/(\d+)"
     example = "https://derpibooru.org/galleries/12345"
 
-    def metadata(self):
+    def posts(self):
+        gid = self.groups[-1]
+
         try:
-            return {"gallery": self.api.gallery(self.groups[-1])}
+            self.kwdict["gallery"] = self.api.gallery(gid)
         except IndexError:
             raise exception.NotFoundError("gallery")
 
-    def posts(self):
-        gallery_id = f"gallery_id:{self.groups[-1]}"
+        gallery_id = f"gallery_id:{gid}"
         params = {"sd": "desc", "sf": gallery_id, "q": gallery_id}
         return self.api.search(params)
-
-
-class PhilomenaAPI():
-    """Interface for the Philomena API
-
-    https://www.derpibooru.org/pages/api
-    """
-
-    def __init__(self, extractor):
-        self.extractor = extractor
-        self.root = extractor.root + "/api"
-
-    def gallery(self, gallery_id):
-        endpoint = "/v1/json/search/galleries"
-        params = {"q": "id:" + gallery_id}
-        return self._call(endpoint, params)["galleries"][0]
-
-    def image(self, image_id):
-        endpoint = "/v1/json/images/" + image_id
-        return self._call(endpoint)["image"]
-
-    def search(self, params):
-        endpoint = "/v1/json/search/images"
-        return self._pagination(endpoint, params)
-
-    def _call(self, endpoint, params=None):
-        url = self.root + endpoint
-
-        while True:
-            response = self.extractor.request(url, params=params, fatal=None)
-
-            if response.status_code < 400:
-                return response.json()
-
-            if response.status_code == 429:
-                self.extractor.wait(seconds=600)
-                continue
-
-            # error
-            self.extractor.log.debug(response.content)
-            raise exception.HttpError("", response)
-
-    def _pagination(self, endpoint, params):
-        extr = self.extractor
-
-        if api_key := extr.config("api-key"):
-            params["key"] = api_key
-
-        if filter_id := extr.config("filter"):
-            params["filter_id"] = filter_id
-        elif not api_key:
-            params["filter_id"] = extr.config_instance("filter_id") or "2"
-
-        params["page"] = extr.page_start
-        params["per_page"] = extr.per_page
-
-        while True:
-            data = self._call(endpoint, params)
-            yield from data["images"]
-
-            if len(data["images"]) < extr.per_page:
-                return
-            params["page"] += 1
