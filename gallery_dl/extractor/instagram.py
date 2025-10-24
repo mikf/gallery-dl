@@ -300,6 +300,8 @@ class InstagramExtractor(Extractor):
                 media["author"] = item["reshared_story_media_author"]
             if "expiring_at" in item:
                 media["expires"] = self.parse_timestamp(post["expiring_at"])
+            if "subscription_media_visibility" in item:
+                media["subscription"] = item["subscription_media_visibility"]
 
             self._extract_tagged_users(item, media)
             files.append(media)
