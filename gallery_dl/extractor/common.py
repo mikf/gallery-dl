@@ -351,11 +351,13 @@ class Extractor():
         else:
             return getpass.getpass(prompt)
 
-    def utils(self):
-        if (category := self.__class__.category) in CACHE_UTILS:
-            return CACHE_UTILS[category]
-        CACHE_UTILS[category] = module = \
-            __import__(f"utils.{category}", globals(), None, category, 1)
+    def utils(self, name=None):
+        if name is None:
+            name = self.__class__.category
+        if name in CACHE_UTILS:
+            return CACHE_UTILS[name]
+        CACHE_UTILS[name] = module = \
+            __import__(f"utils.{name}", globals(), None, name, 1)
         return module
 
     def resource(self, name):
@@ -993,13 +995,6 @@ class BaseExtractor(Extractor):
                     self.category = group.partition("://")[2]
                 break
 
-    def utilsb(self):
-        if (category := self.__class__.basecategory) in CACHE_UTILS:
-            return CACHE_UTILS[category]
-        CACHE_UTILS[category] = module = \
-            __import__(f"utils.{category}", globals(), None, category, 1)
-        return module
-
     @classmethod
     def update(cls, instances):
         if extra_instances := config.get(("extractor",), cls.basecategory):
@@ -1020,8 +1015,8 @@ class BaseExtractor(Extractor):
             pattern_list.append(pattern + "()")
 
         return (
-            r"(?:" + cls.basecategory + r":(https?://[^/?#]+)|"
-            r"(?:https?://)?(?:" + "|".join(pattern_list) + r"))"
+            rf"(?:{cls.basecategory}:(https?://[^/?#]+)|"
+            rf"(?:https?://)?(?:{'|'.join(pattern_list)}))"
         )
 
 

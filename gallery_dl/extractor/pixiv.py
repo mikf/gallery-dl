@@ -30,7 +30,7 @@ class PixivExtractor(Extractor):
     # https://s.pximg.net/common/images/limit_mypixiv_360.png
 
     def _init(self):
-        self.api = self.utils().PixivAppAPI(self)
+        self.api = self.utils("pixiv").PixivAppAPI(self)
         self.load_ugoira = self.config("ugoira", True)
         self.load_ugoira_original = (self.load_ugoira == "original")
         self.max_posts = self.config("max-posts", 0)

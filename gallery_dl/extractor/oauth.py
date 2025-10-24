@@ -364,8 +364,9 @@ class OAuthMastodon(OAuthBase):
     def items(self):
         yield Message.Version, 1
         from .utils import mastodon
+        from .mastodon import MastodonExtractor
 
-        for _, root, application in mastodon.MastodonExtractor.instances:
+        for _, root, application in MastodonExtractor.instances:
             if self.instance == root.partition("://")[2]:
                 break
         else:

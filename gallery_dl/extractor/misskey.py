@@ -22,7 +22,7 @@ class MisskeyExtractor(BaseExtractor):
         self.item = self.groups[-1]
 
     def _init(self):
-        self.api = self.utilsb().MisskeyAPI(self)
+        self.api = self.utils("misskey").MisskeyAPI(self)
         self.instance = self.root.rpartition("://")[2]
         self.renotes = True if self.config("renotes", False) else False
         self.replies = True if self.config("replies", True) else False

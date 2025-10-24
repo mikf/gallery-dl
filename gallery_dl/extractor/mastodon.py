@@ -24,13 +24,14 @@ class MastodonExtractor(BaseExtractor):
         self.item = self.groups[-1]
 
     def _init(self):
-        self.api = self.utilsb().MastodonAPI(self)
         self.instance = self.root.partition("://")[2]
         self.reblogs = self.config("reblogs", False)
         self.replies = self.config("replies", True)
         self.cards = self.config("cards", False)
 
     def items(self):
+        self.api = self.utils("mastodon").MastodonAPI(self)
+
         for status in self.statuses():
 
             if self._check_moved:

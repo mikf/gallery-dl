@@ -22,7 +22,7 @@ class PhilomenaExtractor(BooruExtractor):
     per_page = 50
 
     def _init(self):
-        self.api = self.utilsb().PhilomenaAPI(self)
+        self.api = self.utils("philomena").PhilomenaAPI(self)
         self.svg = self.config("svg", True)
 
     def _file_url(self, post):

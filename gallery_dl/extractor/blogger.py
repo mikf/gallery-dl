@@ -27,7 +27,7 @@ class BloggerExtractor(BaseExtractor):
     archive_fmt = "{post[id]}_{num}"
 
     def _init(self):
-        self.api = self.utilsb().BloggerAPI(self)
+        self.api = self.utils("blogger").BloggerAPI(self)
         self.blog = self.root.rpartition("/")[2]
         self.videos = self.config("videos", True)
 
