@@ -7,8 +7,7 @@
 """Extractors for Misskey instances"""
 
 from .common import BaseExtractor, Message, Dispatch
-from .. import text, exception
-from ..cache import memcache
+from .. import text
 
 
 class MisskeyExtractor(BaseExtractor):
@@ -23,7 +22,7 @@ class MisskeyExtractor(BaseExtractor):
         self.item = self.groups[-1]
 
     def _init(self):
-        self.api = MisskeyAPI(self)
+        self.api = self.utilsb().MisskeyAPI(self)
         self.instance = self.root.rpartition("://")[2]
         self.renotes = True if self.config("renotes", False) else False
         self.replies = True if self.config("replies", True) else False
@@ -112,10 +111,10 @@ class MisskeyUserExtractor(Dispatch, MisskeyExtractor):
     def items(self):
         base = f"{self.root}/@{self.item}/"
         return self._dispatch_extractors((
-            (MisskeyInfoExtractor      , base + "info"),
-            (MisskeyAvatarExtractor    , base + "avatar"),
-            (MisskeyBackgroundExtractor, base + "banner"),
-            (MisskeyNotesExtractor     , base + "notes"),
+            (MisskeyInfoExtractor      , f"{base}info"),
+            (MisskeyAvatarExtractor    , f"{base}avatar"),
+            (MisskeyBackgroundExtractor, f"{base}banner"),
+            (MisskeyNotesExtractor     , f"{base}notes"),
         ), ("notes",))
 
 
@@ -199,64 +198,3 @@ class MisskeyFavoriteExtractor(MisskeyExtractor):
 
     def notes(self):
         return self.api.i_favorites()
-
-
-class MisskeyAPI():
-    """Interface for Misskey API
-
-    https://github.com/misskey-dev/misskey
-    https://misskey-hub.net/en/docs/api/
-    https://misskey-hub.net/docs/api/endpoints.html
-    """
-
-    def __init__(self, extractor):
-        self.root = extractor.root
-        self.extractor = extractor
-        self.access_token = extractor.config("access-token")
-
-    def user_id_by_username(self, username):
-        return self.users_show(username)["id"]
-
-    def users_following(self, user_id):
-        endpoint = "/users/following"
-        data = {"userId": user_id}
-        return self._pagination(endpoint, data)
-
-    def users_notes(self, user_id):
-        endpoint = "/users/notes"
-        data = {"userId": user_id}
-        return self._pagination(endpoint, data)
-
-    @memcache(keyarg=1)
-    def users_show(self, username):
-        endpoint = "/users/show"
-        username, _, host = username.partition("@")
-        data = {"username": username, "host": host or None}
-        return self._call(endpoint, data)
-
-    def notes_show(self, note_id):
-        endpoint = "/notes/show"
-        data = {"noteId": note_id}
-        return self._call(endpoint, data)
-
-    def i_favorites(self):
-        endpoint = "/i/favorites"
-        if not self.access_token:
-            raise exception.AuthenticationError()
-        data = {"i": self.access_token}
-        return self._pagination(endpoint, data)
-
-    def _call(self, endpoint, data):
-        url = f"{self.root}/api{endpoint}"
-        return self.extractor.request_json(url, method="POST", json=data)
-
-    def _pagination(self, endpoint, data):
-        data["limit"] = 100
-        data["withRenotes"] = self.extractor.renotes
-
-        while True:
-            notes = self._call(endpoint, data)
-            if not notes:
-                return
-            yield from notes
-            data["untilId"] = notes[-1]["id"]
