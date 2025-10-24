@@ -258,11 +258,11 @@ class OAuthFlickr(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
-        from . import flickr
+        from .utils import flickr
 
         self._oauth1_authorization_flow(
-            flickr.FlickrAPI.API_KEY,
-            flickr.FlickrAPI.API_SECRET,
+            flickr.FlickrOAuthAPI.API_KEY,
+            flickr.FlickrOAuthAPI.API_SECRET,
             "https://www.flickr.com/services/oauth/request_token",
             "https://www.flickr.com/services/oauth/authorize",
             "https://www.flickr.com/services/oauth/access_token",
@@ -276,7 +276,7 @@ class OAuthSmugmug(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
-        from . import smugmug
+        from .utils import smugmug
 
         self._oauth1_authorization_flow(
             smugmug.SmugmugAPI.API_KEY,
@@ -294,7 +294,7 @@ class OAuthTumblr(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
-        from . import tumblr
+        from .utils import tumblr
 
         self._oauth1_authorization_flow(
             tumblr.TumblrAPI.API_KEY,
@@ -316,7 +316,7 @@ class OAuthDeviantart(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
-        from . import deviantart
+        from .utils import deviantart
 
         self._oauth2_authorization_code_grant(
             self.oauth_config("client-id"),
@@ -337,7 +337,7 @@ class OAuthReddit(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
-        from . import reddit
+        from .utils import reddit
 
         self.session.headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
         self._oauth2_authorization_code_grant(
@@ -363,7 +363,7 @@ class OAuthMastodon(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
-        from . import mastodon
+        from .utils import mastodon
 
         for _, root, application in mastodon.MastodonExtractor.instances:
             if self.instance == root.partition("://")[2]:
@@ -417,7 +417,7 @@ class OAuthPixiv(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
-        from . import pixiv
+        from .utils import pixiv
 
         code_verifier = util.generate_token(32)
         digest = hashlib.sha256(code_verifier.encode()).digest()
