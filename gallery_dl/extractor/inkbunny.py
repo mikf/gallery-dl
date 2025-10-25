@@ -10,8 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, exception
-from ..cache import cache
-
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?inkbunny\.net"
 
@@ -25,7 +23,7 @@ class InkbunnyExtractor(Extractor):
     root = "https://inkbunny.net"
 
     def _init(self):
-        self.api = InkbunnyAPI(self)
+        self.api = self.utils().InkbunnyAPI(self)
 
     def items(self):
         self.api.authenticate()
@@ -58,7 +56,7 @@ class InkbunnyExtractor(Extractor):
 
                 url = file["file_url_full"]
                 if "/private_files/" in url:
-                    url += "?sid=" + self.api.session_id
+                    url = f"{url}?sid={self.api.session_id}"
                 yield Message.Url, url, post
 
     def posts(self):
@@ -102,9 +100,9 @@ class InkbunnyPoolExtractor(InkbunnyExtractor):
     """Extractor for inkbunny pools"""
     subcategory = "pool"
     pattern = (rf"{BASE_PATTERN}/(?:"
-               r"poolview_process\.php\?pool_id=(\d+)|"
-               r"submissionsviewall\.php"
-               r"\?((?:[^#]+&)?mode=pool(?:&[^#]+)?))")
+               rf"poolview_process\.php\?pool_id=(\d+)|"
+               rf"submissionsviewall\.php"
+               rf"\?((?:[^#]+&)?mode=pool(?:&[^#]+)?))")
     example = "https://inkbunny.net/poolview_process.php?pool_id=12345"
 
     def __init__(self, match):
@@ -236,14 +234,12 @@ class InkbunnyFollowingExtractor(InkbunnyExtractor):
     example = ("https://inkbunny.net/watchlist_process.php"
                "?mode=watching&user_id=12345")
 
-    def __init__(self, match):
-        InkbunnyExtractor.__init__(self, match)
-        self.user_id = match[1] or \
-            text.parse_query(match[2]).get("user_id")
-
     def items(self):
-        url = self.root + "/watchlist_process.php"
-        params = {"mode": "watching", "user_id": self.user_id}
+        user_id, qs = self.groups
+        if not user_id:
+            user_id = text.parse_query(qs).get("user_id")
+        url = f"{self.root}/watchlist_process.php"
+        params = {"mode": "watching", "user_id": user_id}
 
         with self.request(url, params=params) as response:
             url, _, params = response.url.partition("?")
@@ -271,113 +267,8 @@ class InkbunnyPostExtractor(InkbunnyExtractor):
     pattern = rf"{BASE_PATTERN}/s/(\d+)"
     example = "https://inkbunny.net/s/12345"
 
-    def __init__(self, match):
-        InkbunnyExtractor.__init__(self, match)
-        self.submission_id = match[1]
-
     def posts(self):
-        submissions = self.api.detail(({"submission_id": self.submission_id},))
+        submissions = self.api.detail(({"submission_id": self.groups[0]},))
         if submissions[0] is None:
             raise exception.NotFoundError("submission")
         return submissions
-
-
-class InkbunnyAPI():
-    """Interface for the Inkunny API
-
-    Ref: https://wiki.inkbunny.net/wiki/API
-    """
-
-    def __init__(self, extractor):
-        self.extractor = extractor
-        self.session_id = None
-
-    def detail(self, submissions):
-        """Get full details about submissions with the given IDs"""
-        ids = {
-            sub["submission_id"]: idx
-            for idx, sub in enumerate(submissions)
-        }
-        params = {
-            "submission_ids": ",".join(ids),
-            "show_description": "yes",
-            "show_pools": "yes",
-        }
-
-        submissions = [None] * len(ids)
-        for sub in self._call("submissions", params)["submissions"]:
-            submissions[ids[sub["submission_id"]]] = sub
-        return submissions
-
-    def search(self, params):
-        """Perform a search"""
-        return self._pagination_search(params)
-
-    def set_allowed_ratings(self, nudity=True, sexual=True,
-                            violence=True, strong_violence=True):
-        """Change allowed submission ratings"""
-        params = {
-            "tag[2]": "yes" if nudity else "no",
-            "tag[3]": "yes" if violence else "no",
-            "tag[4]": "yes" if sexual else "no",
-            "tag[5]": "yes" if strong_violence else "no",
-        }
-        self._call("userrating", params)
-
-    def authenticate(self, invalidate=False):
-        username, password = self.extractor._get_auth_info()
-        if invalidate:
-            _authenticate_impl.invalidate(username or "guest")
-        if username:
-            self.session_id = _authenticate_impl(self, username, password)
-        else:
-            self.session_id = _authenticate_impl(self, "guest", "")
-            self.set_allowed_ratings()
-
-    def _call(self, endpoint, params):
-        url = "https://inkbunny.net/api_" + endpoint + ".php"
-
-        while True:
-            params["sid"] = self.session_id
-            data = self.extractor.request_json(url, params=params)
-
-            if "error_code" not in data:
-                return data
-
-            if str(data["error_code"]) == "2":
-                self.authenticate(invalidate=True)
-                continue
-
-            raise exception.AbortExtraction(data.get("error_message"))
-
-    def _pagination_search(self, params):
-        params["page"] = 1
-        params["get_rid"] = "yes"
-        params["submission_ids_only"] = "yes"
-
-        while True:
-            data = self._call("search", params)
-            if not data["submissions"]:
-                return
-
-            yield from self.detail(data["submissions"])
-
-            if data["page"] >= data["pages_count"]:
-                return
-            if "get_rid" in params:
-                del params["get_rid"]
-                params["rid"] = data["rid"]
-            params["page"] += 1
-
-
-@cache(maxage=365*86400, keyarg=1)
-def _authenticate_impl(api, username, password):
-    api.extractor.log.info("Logging in as %s", username)
-
-    url = "https://inkbunny.net/api_login.php"
-    data = {"username": username, "password": password}
-    data = api.extractor.request_json(url, method="POST", data=data)
-
-    if "sid" not in data:
-        raise exception.AuthenticationError(data.get("error_message"))
-    return data["sid"]
