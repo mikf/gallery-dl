@@ -28,7 +28,7 @@ class _500pxExtractor(Extractor):
 
         for photo in self.photos():
             url = photo["images"][-1]["url"]
-            photo["extension"] = photo["image_format"]
+            photo["extension"] = photo["image_format"] if "image_format" in photo else None
             if data:
                 photo.update(data)
             yield Message.Directory, photo
@@ -42,7 +42,17 @@ class _500pxExtractor(Extractor):
 
     def _extend(self, edges):
         """Extend photos with additional metadata and higher resolution URLs"""
-        ids = [str(edge["node"]["legacyId"]) for edge in edges]
+
+        """Sometimes v1 API does not return all the requested photos, so keep edges
+        data as fallback (mapped by legacyId for easy retrieval)"""
+        fallbacks = {}
+        for edge in edges:
+            id = str(edge["node"]["legacyId"])
+            fallbacks[id] = edge["node"]
+            """Replace v2 ID with legacyId to keep filenames consistent"""
+            fallbacks[id]["id"] = id
+
+        ids = list(fallbacks.keys())
 
         url = "https://api.500px.com/v1/photos"
         params = {
@@ -60,11 +70,17 @@ class _500pxExtractor(Extractor):
         }
 
         photos = self._request_api(url, params)["photos"]
-        return [
-            photos[pid] for pid in ids
-            if pid in photos or
-            self.log.warning("Unable to fetch photo %s", pid)
-        ]
+
+        result = list()
+        for pid in ids:
+            if pid in photos:
+                result.append(photos[pid])
+            elif "images" in fallbacks[pid]:
+                result.append(fallbacks[pid])
+            else:
+                self.log.warning("Unable to fetch photo %s", pid)
+
+        return result
 
     def _request_api(self, url, params):
         headers = {
@@ -415,7 +431,7 @@ query GalleriesDetailQueryRendererQuery($galleryOwnerLegacyId: ID!, $ownerLegacy
         buttonName
         externalUrl
         cover {
-          images(sizes: [35, 33]) {
+          images(sizes: [33, 35]) {
             size
             webpUrl
             jpegUrl
@@ -453,7 +469,7 @@ fragment GalleriesDetailPaginationContainer_gallery_RlXb8 on Gallery {
     id
   }
   cover {
-    images(sizes: [33, 32, 36, 2048]) {
+    images(sizes: [32, 33, 36, 2048]) {
       url
       size
       webpUrl
@@ -498,7 +514,7 @@ fragment GalleriesDetailPaginationContainer_gallery_RlXb8 on Gallery {
             isFollowedByMe
           }
         }
-        images(sizes: [33, 32]) {
+        images(sizes: [32, 33, 35]) {
           size
           url
           webpUrl
@@ -540,7 +556,7 @@ fragment GalleriesDetailPaginationContainer_gallery_3e6UuE on Gallery {
     id
   }
   cover {
-    images(sizes: [33, 32, 36, 2048]) {
+    images(sizes: [32, 33, 36, 2048]) {
       url
       size
       webpUrl
@@ -585,7 +601,7 @@ fragment GalleriesDetailPaginationContainer_gallery_3e6UuE on Gallery {
             isFollowedByMe
           }
         }
-        images(sizes: [33, 32]) {
+        images(sizes: [32, 33, 35]) {
           size
           url
           webpUrl
