@@ -265,6 +265,9 @@ SUBCATEGORY_MAP = {
         "discord-server": "",
         "posts"         : "",
     },
+    "cyberfile": {
+        "shared": "Shares",
+    },
     "Danbooru": {
         "favgroup": "Favorite Groups",
         "random"  : "Random Posts",

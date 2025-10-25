@@ -220,7 +220,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="cyberfile" title="cyberfile">
     <td>CyberFile</td>
     <td>https://cyberfile.me/</td>
-    <td>Files, Folders</td>
+    <td>Files, Folders, Shares</td>
     <td></td>
 </tr>
 <tr id="dandadan" title="dandadan">

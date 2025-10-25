@@ -86,6 +86,37 @@ class CyberfileFolderExtractor(CyberfileExtractor):
             resp = self.request_api("/account/ajax/load_files", data)
 
 
+class CyberfileSharedExtractor(CyberfileExtractor):
+    subcategory = "shared"
+    pattern = rf"{BASE_PATTERN}/shared/([a-zA-Z0-9]+)"
+    example = "https://cyberfile.me/shared/AbCdEfGhIjK"
+
+    def items(self):
+        # get 'filehosting' cookie
+        url = f"{self.root}/shared/{self.groups[0]}"
+        self.request(url, method="HEAD")
+
+        data = {
+            "pageType" : "nonaccountshared",
+            "nodeId"   : "",
+            "pageStart": "1",
+            "perPage"  : "500",
+            "filterOrderBy": "",
+        }
+        resp = self.request_api("/account/ajax/load_files", data)
+
+        html = resp["html"]
+        pos = html.find("<!-- /.navbar-collapse -->") + 26
+
+        data = {"_extractor": CyberfileFolderExtractor}
+        for folder in text.extract_iter(html, 'sharing-url="', '"', pos):
+            yield Message.Queue, folder, data
+
+        data = {"_extractor": CyberfileFileExtractor}
+        for file in text.extract_iter(html, 'dtfullurl="', '"', pos):
+            yield Message.Queue, file, data
+
+
 class CyberfileFileExtractor(CyberfileExtractor):
     subcategory = "file"
     directory_fmt = ("{category}", "{uploader}", "{folder}")
