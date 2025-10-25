@@ -2231,6 +2231,16 @@ Description
     (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
 
 
+extractor.cyberfile.recursive
+-----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Recursively download files from subfolders.
+
+
 extractor.[Danbooru].external
 -----------------------------
 Type
