@@ -44,6 +44,7 @@ FILES = [
 PACKAGES = [
     "gallery_dl",
     "gallery_dl.extractor",
+    "gallery_dl.extractor.utils",
     "gallery_dl.downloader",
     "gallery_dl.postprocessor",
 ]
