@@ -56,7 +56,9 @@ class CyberfileFolderExtractor(CyberfileExtractor):
         url = f"{self.root}/folder/{folder_hash}"
         folder_num = text.extr(self.request(url).text, "ages('folder', '", "'")
 
-        extract_urls = text.re(r'dtfullurl="([^"]+)').findall
+        extract_folders = text.re(r'sharing-url="([^"]+)').findall
+        extract_files = text.re(r'dtfullurl="([^"]+)').findall
+        recursive = self.config("recursive", True)
         perpage = 600
 
         data = {
@@ -67,20 +69,27 @@ class CyberfileFolderExtractor(CyberfileExtractor):
             "filterOrderBy": "",
         }
         resp = self.request_api("/account/ajax/load_files", data)
+        html = resp["html"]
 
         folder = {
-            "_extractor" : CyberfileFileExtractor,
             "folder_hash": folder_hash,
             "folder_num" : text.parse_int(folder_num),
             "folder"     : resp["page_title"],
         }
 
         while True:
-            urls = extract_urls(resp["html"])
-            for url in urls:
-                yield Message.Queue, url, folder
+            folders = extract_folders(html)
+            if recursive and folders:
+                folder["_extractor"] = CyberfileFolderExtractor
+                for url in folders:
+                    yield Message.Queue, url, folder
 
-            if len(urls) < perpage:
+            if files := extract_files(html):
+                folder["_extractor"] = CyberfileFileExtractor
+                for url in files:
+                    yield Message.Queue, url, folder
+
+            if len(folders) + len(files) < perpage:
                 return
             data["pageStart"] += 1
             resp = self.request_api("/account/ajax/load_files", data)
@@ -109,12 +118,12 @@ class CyberfileSharedExtractor(CyberfileExtractor):
         pos = html.find("<!-- /.navbar-collapse -->") + 26
 
         data = {"_extractor": CyberfileFolderExtractor}
-        for folder in text.extract_iter(html, 'sharing-url="', '"', pos):
-            yield Message.Queue, folder, data
+        for url in text.extract_iter(html, 'sharing-url="', '"', pos):
+            yield Message.Queue, url, data
 
         data = {"_extractor": CyberfileFileExtractor}
-        for file in text.extract_iter(html, 'dtfullurl="', '"', pos):
-            yield Message.Queue, file, data
+        for url in text.extract_iter(html, 'dtfullurl="', '"', pos):
+            yield Message.Queue, url, data
 
 
 class CyberfileFileExtractor(CyberfileExtractor):
