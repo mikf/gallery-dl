@@ -104,4 +104,24 @@ __tests__ = (
     "#exception": exception.AuthorizationError,
 },
 
+{
+    "#url"     : "https://cyberfile.me/shared/tao35avvfc",
+    "#class"   : cyberfile.CyberfileSharedExtractor,
+},
+
+{
+    "#url"     : "https://cyberfile.me/shared/l7zoinbctg",
+    "#class"   : cyberfile.CyberfileSharedExtractor,
+    "#results" : (
+        "https://cyberfile.me/gb3s",
+        "https://cyberfile.me/gb8m"
+    ),
+},
+
+{
+    "#url"     : "https://cyberfile.me/shared/wqpd9n0si5",
+    "#class"   : cyberfile.CyberfileSharedExtractor,
+    "#results" : "https://cyberfile.me/folder/9f611ebab76f363e4b818397c7828a73/CF_DSPRMTRS",
+},
+
 )
