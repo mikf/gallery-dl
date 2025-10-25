@@ -9,7 +9,6 @@
 import json
 from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
-from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?facebook\.com"
 USER_PATTERN = (rf"{BASE_PATTERN}/"
@@ -152,11 +151,11 @@ class FacebookExtractor(Extractor):
                 ))
 
         if photo.get("taggedids"):
-            taggedids=set()
+            taggedids = set()
             photo["taggedids"] = f"[{photo['taggedids']}]"
-            data=json.loads(photo["taggedids"])
+            data = json.loads(photo["taggedids"])
             for row in data:
-                if row.get("node",{}).get("__typename","") == "User":
+                if row.get("node", {}).get("__typename", "") == "User":
                     taggedids.add(row["node"]["id"])
             photo["taggedids"] = taggedids
         return photo
