@@ -11,7 +11,7 @@ from ...cache import cache, memcache
 import hashlib
 
 
-@cache(maxage=28*86400, keyarg=0)
+@cache(maxage=28*86400, keyarg=0, utils=True)
 def _refresh_token_cache(username):
     return None
 
@@ -106,7 +106,7 @@ class IwaraAPI():
     def authenticate(self):
         self.headers["Authorization"] = self._authenticate_impl(self.username)
 
-    @cache(maxage=3600, keyarg=1)
+    @cache(maxage=3600, keyarg=1, utils=True)
     def _authenticate_impl(self, username):
         refresh_token = _refresh_token_cache(username)
         if refresh_token is None:

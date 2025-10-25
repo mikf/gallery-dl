@@ -24,7 +24,7 @@ TAG_TYPES = {
 }
 
 
-@cache(maxage=365*86400, keyarg=1)
+@cache(maxage=365*86400, keyarg=1, utils=True)
 def _authenticate_impl(extr, username, password):
     extr.log.info("Logging in as %s", username)
 

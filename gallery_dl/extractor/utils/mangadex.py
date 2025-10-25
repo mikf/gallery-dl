@@ -10,7 +10,7 @@ from ... import text, util, exception
 from ...cache import cache, memcache
 
 
-@cache(maxage=90*86400, keyarg=0)
+@cache(maxage=90*86400, keyarg=0, utils=True)
 def _refresh_token_cache(username):
     return None
 
@@ -93,7 +93,7 @@ class MangadexAPI():
         self.headers_auth["Authorization"] = \
             self._authenticate_impl(self.username, self.password)
 
-    @cache(maxage=900, keyarg=1)
+    @cache(maxage=900, keyarg=1, utils=True)
     def _authenticate_impl_client(self, username, password):
         if refresh_token := _refresh_token_cache((username, "personal")):
             self.extractor.log.info("Refreshing access token")
@@ -130,7 +130,7 @@ class MangadexAPI():
 
         return f"Bearer {access_token}"
 
-    @cache(maxage=900, keyarg=1)
+    @cache(maxage=900, keyarg=1, utils=True)
     def _authenticate_impl_legacy(self, username, password):
         if refresh_token := _refresh_token_cache(username):
             self.extractor.log.info("Refreshing access token")

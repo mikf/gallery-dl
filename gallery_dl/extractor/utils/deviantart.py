@@ -11,14 +11,14 @@ from ...cache import cache, memcache
 import collections
 
 
-@cache(maxage=36500*86400, keyarg=0)
+@cache(maxage=36500*86400, keyarg=0, utils=True)
 def _refresh_token_cache(token):
     if token and token[0] == "#":
         return None
     return token
 
 
-@cache(maxage=28*86400, keyarg=1)
+@cache(maxage=28*86400, keyarg=1, utils=True)
 def _login_impl(extr, username, password):
     extr.log.info("Logging in as %s", username)
 
@@ -336,7 +336,7 @@ class DeviantartOAuthAPI():
         self.headers["Authorization"] = \
             self._authenticate_impl(refresh_token_key)
 
-    @cache(maxage=3600, keyarg=1)
+    @cache(maxage=3600, keyarg=1, utils=True)
     def _authenticate_impl(self, refresh_token_key):
         """Actual authenticate implementation"""
         url = "https://www.deviantart.com/oauth2/token"

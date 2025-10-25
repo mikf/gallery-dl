@@ -10,7 +10,7 @@ from ... import exception
 from ...cache import cache
 
 
-@cache(maxage=36500*86400, keyarg=0)
+@cache(maxage=36500*86400, keyarg=0, utils=True)
 def _access_token_cache(instance):
     return None
 

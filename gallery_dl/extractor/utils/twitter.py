@@ -506,7 +506,7 @@ class TwitterAPI():
             else:
                 raise exception.NotFoundError("user")
 
-    @cache(maxage=3600)
+    @cache(maxage=3600, utils=True)
     def _guest_token(self):
         endpoint = "/1.1/guest/activate.json"
         self.log.info("Requesting guest token")
@@ -521,7 +521,7 @@ class TwitterAPI():
             self.extractor.cookies.set(
                 "gt", guest_token, domain=self.extractor.cookies_domain)
 
-    @cache(maxage=10800)
+    @cache(maxage=10800, utils=True)
     def _client_transaction(self):
         self.log.info("Initializing client transaction keys")
 
@@ -1027,7 +1027,7 @@ class TwitterAPI():
         return variables
 
 
-@cache(maxage=365*86400, keyarg=1)
+@cache(maxage=365*86400, keyarg=1, utils=True)
 def _login_impl(extr, username, password):
     extr.log.error("Login with username & password is no longer supported. "
                    "Use browser cookies instead.")

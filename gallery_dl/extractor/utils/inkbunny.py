@@ -10,7 +10,7 @@ from ... import exception
 from ...cache import cache
 
 
-@cache(maxage=365*86400, keyarg=1)
+@cache(maxage=365*86400, keyarg=1, utils=True)
 def _authenticate_impl(api, username, password):
     api.extractor.log.info("Logging in as %s", username)
 

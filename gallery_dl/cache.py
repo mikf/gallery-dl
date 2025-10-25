@@ -72,8 +72,10 @@ class DatabaseCacheDecorator():
     db = None
     _init = True
 
-    def __init__(self, func, keyarg, maxage):
-        self.key = f"{func.__module__}.{func.__name__}"
+    def __init__(self, func, keyarg, maxage, utils=False):
+        module = (func.__module__.replace(".utils.", ".", 1)
+                  if utils else func.__module__)
+        self.key = f"{module}.{func.__name__}"
         self.func = func
         self.cache = {}
         self.keyarg = keyarg
@@ -162,9 +164,9 @@ def memcache(maxage=None, keyarg=None):
     return wrap
 
 
-def cache(maxage=3600, keyarg=None):
+def cache(maxage=3600, keyarg=None, utils=False):
     def wrap(func):
-        return DatabaseCacheDecorator(func, keyarg, maxage)
+        return DatabaseCacheDecorator(func, keyarg, maxage, utils)
     return wrap
 
 

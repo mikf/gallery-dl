@@ -63,7 +63,7 @@ class ClientTransaction():
         end = homepage.find(">", pos)
         return text.extr(homepage[beg:end], 'content="', '"')
 
-    @cache(maxage=36500*86400, keyarg=1)
+    @cache(maxage=36500*86400, keyarg=1, utils=True)
     def _extract_indices(self, ondemand_s, extractor):
         url = (f"https://abs.twimg.com/responsive-web/client-web"
                f"/ondemand.s.{ondemand_s}a.js")

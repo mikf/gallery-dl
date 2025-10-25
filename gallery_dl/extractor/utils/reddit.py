@@ -10,7 +10,7 @@ from ... import text, util, exception
 from ...cache import cache
 
 
-@cache(maxage=36500*86400, keyarg=0)
+@cache(maxage=36500*86400, keyarg=0, utils=True)
 def _refresh_token_cache(token):
     if token and token[0] == "#":
         return None
@@ -117,7 +117,7 @@ class RedditAPI():
         self.headers["Authorization"] = \
             self._authenticate_impl(self.refresh_token)
 
-    @cache(maxage=3600, keyarg=1)
+    @cache(maxage=3600, keyarg=1, utils=True)
     def _authenticate_impl(self, refresh_token=None):
         """Actual authenticate implementation"""
         url = "https://www.reddit.com/api/v1/access_token"
