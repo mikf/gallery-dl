@@ -1657,6 +1657,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr id="soybooru" title="soybooru">
+    <td>Soybooru</td>
+    <td>https://soybooru.com/</td>
+    <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
 
 <tr id="szurubooru" title="szurubooru">
     <td colspan="4"><strong>szurubooru Instances</strong></td>
