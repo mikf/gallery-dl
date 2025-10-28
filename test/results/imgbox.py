@@ -37,9 +37,16 @@ __tests__ = (
     "#url"     : "https://imgbox.com/qHhw7lpG",
     "#category": ("", "imgbox", "image"),
     "#class"   : imgbox.ImgboxImageExtractor,
+    "#results" : "https://images3.imgbox.com/6d/9a/qHhw7lpG_o.png",
+
     "#sha1_url"     : "ee9cdea6c48ad0161c1b5f81f6b0c9110997038c",
     "#sha1_metadata": "dfc72310026b45f3feb4f9cada20c79b2575e1af",
     "#sha1_content" : "0c8768055e4e20e7c7259608b67799171b691140",
+
+    "extension": "png",
+    "filename" : "test-___-___",
+    "image_key": "qHhw7lpG",
+    "num"      : None,
 },
 
 {
@@ -47,6 +54,30 @@ __tests__ = (
     "#category": ("", "imgbox", "image"),
     "#class"   : imgbox.ImgboxImageExtractor,
     "#exception": exception.NotFoundError,
+},
+
+{
+    "#url"     : "https://images3.imgbox.com/6d/9a/qHhw7lpG_o.png",
+    "#comment" : "direct link",
+    "#class"   : imgbox.ImgboxImageExtractor,
+    "#results" : "https://images3.imgbox.com/6d/9a/qHhw7lpG_o.png",
+
+    "extension": "png",
+    "filename" : "test-___-___",
+    "image_key": "qHhw7lpG",
+    "num"      : None,
+},
+
+{
+    "#url"     : "https://i.imgbox.com/ivEi0Dgm.jpg",
+    "#comment" : "direct link",
+    "#class"   : imgbox.ImgboxImageExtractor,
+    "#results" : "https://images3.imgbox.com/72/e9/ivEi0Dgm_o.jpg",
+
+    "extension": "jpg",
+    "filename" : "3998C2F200000578-3861564-image-a-25_1477114630790",
+    "image_key": "ivEi0Dgm",
+    "num"      : "1",
 },
 
 )
