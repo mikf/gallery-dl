@@ -3021,6 +3021,16 @@ Note
     `fanbox.comments <extractor.fanbox.comments_>`__
 
 
+extractor.fanbox.creator.offset
+-------------------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    Custom ``offset`` starting value when paginating over posts.
+
+
 extractor.fansly.formats
 ------------------------
 Type

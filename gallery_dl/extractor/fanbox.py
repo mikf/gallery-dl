@@ -362,9 +362,20 @@ class FanboxCreatorExtractor(FanboxExtractor):
 
     def _pagination_creator(self, url):
         urls = self.request_json(url, headers=self.headers)["body"]
+        if offset := self.config("offset"):
+            quotient, remainder = divmod(offset, 10)
+            if quotient:
+                urls = urls[quotient:]
+        else:
+            remainder = None
+
         for url in urls:
             url = text.ensure_http_scheme(url)
-            yield from self.request_json(url, headers=self.headers)["body"]
+            posts = self.request_json(url, headers=self.headers)["body"]
+            if remainder:
+                posts = posts[remainder:]
+                remainder = None
+            yield from posts
 
 
 class FanboxPostExtractor(FanboxExtractor):
