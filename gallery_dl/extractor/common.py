@@ -31,6 +31,7 @@ class Extractor():
     category = ""
     subcategory = ""
     basecategory = ""
+    basesubcategory = ""
     categorytransfer = False
     directory_fmt = ("{category}",)
     filename_fmt = "{filename}.{extension}"
@@ -961,7 +962,6 @@ class AsynchronousMixin():
 
 
 class BaseExtractor(Extractor):
-    basesubcategory = ""
     instances = ()
 
     def __init__(self, match):
