@@ -21,7 +21,7 @@ class IdolcomplexBase():
     cookies_domain = ".idolcomplex.com"
 
     def _init(self):
-        self.api = sankaku.SankakuAPI(self)
+        self.api = self.utils("sankaku").SankakuAPI(self)
         self.api.ROOT = "https://i.sankakuapi.com"
         self.api.headers["Origin"] = self.root
 
