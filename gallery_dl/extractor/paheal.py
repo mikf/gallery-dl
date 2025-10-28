@@ -15,6 +15,7 @@ from .. import text, exception
 class PahealExtractor(Extractor):
     """Base class for paheal extractors"""
     basecategory = "shimmie2"
+    basesubcategory = ""
     category = "paheal"
     filename_fmt = "{category}_{id}_{md5}.{extension}"
     archive_fmt = "{id}"
