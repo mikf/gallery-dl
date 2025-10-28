@@ -88,7 +88,10 @@ class ImgboxImageExtractor(ImgboxExtractor):
     """Extractor for single images from imgbox.com"""
     subcategory = "image"
     archive_fmt = "{image_key}"
-    pattern = r"(?:https?://)?(?:www\.)?imgbox\.com/([A-Za-z0-9]{8})"
+    pattern = (r"(?:https?://)?(?:"
+               r"(?:www\.|i\.)?imgbox\.com|"
+               r"images\d+\.imgbox\.com/[0-9a-f]{2}/[0-9a-f]{2}"
+               r")/([A-Za-z0-9]{8})")
     example = "https://imgbox.com/1234abcd"
 
     def __init__(self, match):
