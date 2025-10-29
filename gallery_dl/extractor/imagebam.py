@@ -30,12 +30,10 @@ class ImagebamExtractor(Extractor):
         url, pos = text.extract(page, '<img src="https://images', '"')
         filename = text.unescape(text.extract(page, 'alt="', '"', pos)[0])
 
-        data = {
+        return text.nameext_from_name(filename, {
             "url"      : "https://images" + url,
             "image_key": path.rpartition("/")[2],
-        }
-        data["filename"], _, data["extension"] = filename.rpartition(".")
-        return data
+        })
 
 
 class ImagebamGalleryExtractor(ImagebamExtractor):

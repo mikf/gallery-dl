@@ -75,4 +75,16 @@ __tests__ = (
     "#sha1_content" : "f81008666b17a42d8834c4749b910e1dc10a6e83",
 },
 
+{
+    "#url"     : "https://www.imagebam.com/image/b728aa119132443",
+    "#comment" : "filename without extension (#8476)",
+    "#class"   : imagebam.ImagebamImageExtractor,
+    "#results" : "https://images3.imagebam.com/d2/7a/d9/b728aa119132443.jpg",
+
+    "extension": "",
+    "filename" : "34415_AlessandraAmbrosio_PhotoshootforVictoriasSecretwearingbikinislingerieonthebeachinMalibuCalifor",
+    "image_key": "b728aa119132443",
+    "url"      : "https://images3.imagebam.com/d2/7a/d9/b728aa119132443.jpg",
+},
+
 )
