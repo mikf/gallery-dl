@@ -75,6 +75,9 @@ class ImagehostImageExtractor(Extractor):
         """Return additional metadata"""
         return ()
 
+    def not_found(self, resource=None):
+        raise exception.NotFoundError(resource or self.__class__.subcategory)
+
 
 class ImxtoImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imx.to"""
@@ -97,7 +100,7 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
         url, pos = text.extract(
             page, '<div style="text-align:center;"><a href="', '"')
         if not url:
-            raise exception.NotFoundError("image")
+            self.not_found()
         filename, pos = text.extract(page, ' title="', '"', pos)
         if self.url_ext and filename:
             filename += splitext(url)[1]
@@ -157,7 +160,7 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
         if not url:
             url, pos = text.extract(page, '<img class="centred" src="', '"')
             if not url:
-                raise exception.NotFoundError("image")
+                self.not_found()
 
         filename, pos = text.extract(page, "alt='", "'", pos)
         if not filename:
@@ -177,7 +180,7 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
         try:
             pos = page.index('class="card-body')
         except ValueError:
-            raise exception.NotFoundError("image")
+            self.not_found()
 
         url, pos = text.extract(page, '<img src="', '"', pos)
         if url.endswith("/loader.svg"):
@@ -209,7 +212,7 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
     def get_info(self, page):
         url     , pos = text.extract(page, '<img src="', '"')
         if url and url.startswith("/imgs/"):
-            return None, None
+            self.not_found()
         filename, pos = text.extract(page, ' alt="', '"', pos)
         return url, filename
 
@@ -260,7 +263,7 @@ class ImgspiceImageExtractor(ImagehostImageExtractor):
     def get_info(self, page):
         pos = page.find('id="imgpreview"')
         if pos < 0:
-            raise exception.NotFoundError("image")
+            self.not_found()
         url , pos = text.extract(page, 'src="', '"', pos)
         name, pos = text.extract(page, 'alt="', '"', pos)
         return url, text.unescape(name)
@@ -356,7 +359,7 @@ class TurboimagehostGalleryExtractor(ImagehostImageExtractor):
 
             if params["p"] == 1 and \
                     "Requested gallery don`t exist on our website." in page:
-                raise exception.NotFoundError("gallery")
+                self.not_found()
 
             thumb_url = None
             for thumb_url in text.extract_iter(page, '"><a href="', '"'):
