@@ -174,7 +174,11 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
     example = "https://www.imagevenue.com/ME123456789"
 
     def get_info(self, page):
-        pos = page.index('class="card-body')
+        try:
+            pos = page.index('class="card-body')
+        except ValueError:
+            raise exception.NotFoundError("image")
+
         url, pos = text.extract(page, '<img src="', '"', pos)
         if url.endswith("/loader.svg"):
             url, pos = text.extract(page, '<img src="', '"', pos)
