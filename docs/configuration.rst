@@ -3707,6 +3707,24 @@ Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.itaku.order
+---------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    images/posts/users are returned.
+
+    ``"asc"`` | ``"reverse"``
+        Ascending order (oldest first)
+    ``"desc"``
+        Descending order (newest first)
+    any other ``string``
+        Custom result order
+
+
 extractor.itaku.videos
 ----------------------
 Type
