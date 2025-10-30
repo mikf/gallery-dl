@@ -182,11 +182,11 @@ class ItakuUserExtractor(Dispatch, ItakuExtractor):
     def items(self):
         base = f"{self.root}/profile/{self.groups[0]}/"
         return self._dispatch_extractors((
-            (ItakuGalleryExtractor  , base + "gallery"),
-            (ItakuPostsExtractor    , base + "posts"),
-            (ItakuFollowersExtractor, base + "followers"),
-            (ItakuFollowingExtractor, base + "following"),
-            (ItakuStarsExtractor    , base + "stars"),
+            (ItakuGalleryExtractor  , f"{base}gallery"),
+            (ItakuPostsExtractor    , f"{base}posts"),
+            (ItakuFollowersExtractor, f"{base}followers"),
+            (ItakuFollowingExtractor, f"{base}following"),
+            (ItakuStarsExtractor    , f"{base}stars"),
         ), ("gallery",))
 
 
@@ -246,7 +246,7 @@ class ItakuAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.root = extractor.root + "/api"
+        self.root = f"{extractor.root}/api"
         self.headers = {
             "Accept": "application/json, text/plain, */*",
         }
@@ -257,7 +257,7 @@ class ItakuAPI():
             "cursor"    : None,
             "date_range": "",
             "maturity_rating": ("SFW", "Questionable", "NSFW"),
-            "ordering"  : "-date_added",
+            "ordering"  : self._order(),
             "page"      : "1",
             "page_size" : "30",
             "visibility": ("PUBLIC", "PROFILE_ONLY"),
@@ -271,7 +271,7 @@ class ItakuAPI():
             "cursor"    : None,
             "date_range": "",
             "maturity_rating": ("SFW", "Questionable", "NSFW"),
-            "ordering"  : "-date_added",
+            "ordering"  : self._order(),
             "page"      : "1",
             "page_size" : "30",
             **params,
@@ -282,7 +282,7 @@ class ItakuAPI():
         endpoint = "/user_profiles/"
         params = {
             "cursor"   : None,
-            "ordering" : "-date_added",
+            "ordering" : self._order(),
             "page"     : "1",
             "page_size": "50",
             "sfw_only" : "false",
@@ -309,7 +309,7 @@ class ItakuAPI():
 
     def _call(self, endpoint, params=None):
         if not endpoint.startswith("http"):
-            endpoint = self.root + endpoint
+            endpoint = f"{self.root}{endpoint}"
         return self.extractor.request_json(
             endpoint, params=params, headers=self.headers)
 
@@ -328,3 +328,11 @@ class ItakuAPI():
                 return
 
             data = self._call(url_next)
+
+    def _order(self):
+        if order := self.extractor.config("order"):
+            if order in {"a", "asc", "r", "reverse"}:
+                return "date_added"
+            if order not in {"d", "desc"}:
+                return order
+        return "-date_added"
