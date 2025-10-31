@@ -2932,6 +2932,7 @@ Supported Values
     * ``info``
     * ``avatar``
     * ``photos``
+    * ``photostagged``
     * ``albums``
 Note
     It is possible to use ``"all"`` instead of listing all values separately.
