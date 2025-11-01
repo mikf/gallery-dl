@@ -4,22 +4,22 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://cyberdrop.me/"""
+"""Extractors for https://cyberdrop.cr/"""
 
 from . import lolisafe
 from .common import Message
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?cyberdrop\.(?:me|to)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?cyberdrop\.(?:cr|me|to)"
 
 
 class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
     """Extractor for cyberdrop albums"""
     category = "cyberdrop"
-    root = "https://cyberdrop.me"
-    root_api = "https://api.cyberdrop.me"
+    root = "https://cyberdrop.cr"
+    root_api = "https://api.cyberdrop.cr"
     pattern = rf"{BASE_PATTERN}/a/([^/?#]+)"
-    example = "https://cyberdrop.me/a/ID"
+    example = "https://cyberdrop.cr/a/ID"
 
     def items(self):
         files, data = self.fetch_album(self.album_id)
@@ -77,7 +77,7 @@ class CyberdropMediaExtractor(CyberdropAlbumExtractor):
     subcategory = "media"
     directory_fmt = ("{category}",)
     pattern = rf"{BASE_PATTERN}/f/([^/?#]+)"
-    example = "https://cyberdrop.me/f/ID"
+    example = "https://cyberdrop.cr/f/ID"
 
     def fetch_album(self, album_id):
         return self._extract_files((album_id,)), {

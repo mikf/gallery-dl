@@ -213,7 +213,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr id="cyberdrop" title="cyberdrop">
     <td>Cyberdrop</td>
-    <td>https://cyberdrop.me/</td>
+    <td>https://cyberdrop.cr/</td>
     <td>Albums, Media Files</td>
     <td></td>
 </tr>
