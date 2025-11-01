@@ -125,7 +125,7 @@ def nameext_from_name(filename, data=None):
         data = {}
 
     name, _, ext = filename.rpartition(".")
-    if name:
+    if name and len(ext) <= 16:
         data["filename"] = name
         data["extension"] = ext.lower()
     else:

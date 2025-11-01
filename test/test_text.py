@@ -228,6 +228,10 @@ class TestText(unittest.TestCase):
             {"filename": "foo%202?bar&<>", "extension": "ext"},
         )
 
+        # long "extension"
+        fn = "httpswww.example.orgpath-path-path-path-path-path-path-path"
+        self.assertEqual(f(fn), {"filename": fn, "extension": ""})
+
     def test_extract(self, f=text.extract):
         txt = "<a><b>"
         self.assertEqual(f(txt, "<", ">"), ("a" , 3))

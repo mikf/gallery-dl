@@ -550,6 +550,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.cr/patreon/user/2570882/post/79311665",
+    "#comment" : "patreon file URL as 'name' / long 'extension' (#8491)",
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
+
+    "name"     : "https://www.patreon.com/media-u/Z0FBQUFBQmpfWFNLWHpRakFlYjVNeWpuTlRuRnJBdHY3VVA2UmRhVHFpOFBHMW9QZUdVOHQ3b2pXSV9XMkJlaHFuN2JyVk5VNDBqdV9lZVRLR2NkUXUwSjgwdndDQlk3VzBCUXI5TW5iejlVWVZaUmJoTktIX3B5aGVCS3dUQk11a2hxajd4TUx2MFN2UHpKa0pfOWZQeS1UeDlzNEhpbG9pRzJsZE54MG5OcnZDOUllTGhyY01rNjVRaGgyaVFycjFSUUFIaV92OU9wdktuVjlMeFJNLXhYejdDNWZTVXZEc2l0TVZCR1A0YXM3RVMzbmsxSjh2ND0=#190833153_",
+    "filename" : "https://www.patreon.com/media-u/Z0FBQUFBQmpfWFNLWHpRakFlYjVNeWpuTlRuRnJBdHY3VVA2UmRhVHFpOFBHMW9QZUdVOHQ3b2pXSV9XMkJlaHFuN2JyVk5VNDBqdV9lZVRLR2NkUXUwSjgwdndDQlk3VzBCUXI5TW5iejlVWVZaUmJoTktIX3B5aGVCS3dUQk11a2hxajd4TUx2MFN2UHpKa0pfOWZQeS1UeDlzNEhpbG9pRzJsZE54MG5OcnZDOUllTGhyY01rNjVRaGgyaVFycjFSUUFIaV92OU9wdktuVjlMeFJNLXhYejdDNWZTVXZEc2l0TVZCR1A0YXM3RVMzbmsxSjh2ND0=#190833153_",
+    "extension": "jpg",
+},
+
+{
     "#url"     : "https://kemono.cr/discord/server/488668827274444803/608504710906904576",
     "#category": ("", "kemono", "discord"),
     "#class"   : kemono.KemonoDiscordExtractor,
