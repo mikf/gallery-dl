@@ -10,7 +10,7 @@ from . import lolisafe
 from .common import Message
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?cyberdrop\.(?:me|to)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?cyberdrop\.(?:me|to|cr)"
 
 
 class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
