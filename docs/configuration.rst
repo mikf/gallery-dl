@@ -8032,9 +8032,14 @@ Description
         Write metadata in `JSON Lines <https://jsonlines.org/>`__ format
     ``"tags"``
         Write ``tags`` separated by newlines
+    ``"print"``
+        Write the result of applying
+        `content-format <metadata.content-format_>`__
+        to ``stdout``
     ``"custom"``
-        Write the result of applying `metadata.content-format`_
-        to a file's metadata dictionary
+        Write the result of applying
+        `content-format <metadata.content-format_>`__
+        to `a file <metadata.filename_>`__
     ``"modify"``
         Add or modify metadata entries
     ``"delete"``
