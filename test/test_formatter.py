@@ -248,6 +248,19 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{a:L50/foo/>51}", "foo")
         self._run_test("{a:Lab/foo/}", "foo")
 
+    def test_specifier_maxlen_bytes(self):
+        v = self.kwdict["a"]
+        self._run_test("{a:Lb5/foo/}" , "foo")
+        self._run_test("{a:Lb50/foo/}", v)
+        self._run_test("{a:Lb50/foo/>50}", " " * 39 + v)
+        self._run_test("{a:Lb50/foo/>51}", "foo")
+        self._run_test("{a:Lbab/foo/}", "foo")
+
+        v = self.kwdict["j"]
+        self._run_test("{j:Lb5/foo/}" , "foo")
+        self._run_test("{j:Lb50/foo/}", v)
+        self._run_test("{j:Lbab/foo/}", "foo")
+
     def test_specifier_join(self):
         self._run_test("{l:J}"       , "abc")
         self._run_test("{l:J,}"      , "a,b,c")

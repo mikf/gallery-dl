@@ -413,12 +413,20 @@ def _parse_conversion(format_spec, default):
 
 def _parse_maxlen(format_spec, default):
     maxlen, replacement, format_spec = format_spec.split(_SEPARATOR, 2)
-    maxlen = text.parse_int(maxlen[1:])
     fmt = _build_format_func(format_spec, default)
 
-    def mlen(obj):
-        obj = fmt(obj)
-        return obj if len(obj) <= maxlen else replacement
+    if maxlen[1] == "b":
+        maxlen = text.parse_int(maxlen[2:])
+
+        def mlen(obj):
+            obj = fmt(obj)
+            return obj if len(obj.encode(_ENCODING)) <= maxlen else replacement
+    else:
+        maxlen = text.parse_int(maxlen[1:])
+
+        def mlen(obj):
+            obj = fmt(obj)
+            return obj if len(obj) <= maxlen else replacement
     return mlen
 
 
@@ -501,13 +509,12 @@ def _parse_sort(format_spec, default):
     fmt = _build_format_func(format_spec, default)
 
     if "d" in args or "r" in args:
-        def sort_desc(obj):
+        def sort(obj):
             return fmt(sorted(obj, reverse=True))
-        return sort_desc
     else:
-        def sort_asc(obj):
+        def sort(obj):
             return fmt(sorted(obj))
-        return sort_asc
+    return sort
 
 
 def _parse_limit(format_spec, default):
