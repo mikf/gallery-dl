@@ -330,10 +330,10 @@ def _slice(indices):
     )
 
 
-def _bytesgetter(slice, encoding=sys.getfilesystemencoding()):
+def _bytesgetter(slice):
 
     def apply_slice_bytes(obj):
-        return obj.encode(encoding)[slice].decode(encoding, "ignore")
+        return obj.encode(_ENCODING)[slice].decode(_ENCODING, "ignore")
 
     return apply_slice_bytes
 
@@ -512,14 +512,26 @@ def _parse_sort(format_spec, default):
 
 def _parse_limit(format_spec, default):
     limit, hint, format_spec = format_spec.split(_SEPARATOR, 2)
-    limit = int(limit[1:])
-    limit_hint = limit - len(hint)
     fmt = _build_format_func(format_spec, default)
 
-    def apply_limit(obj):
-        if len(obj) > limit:
-            obj = obj[:limit_hint] + hint
-        return fmt(obj)
+    if limit[1] == "b":
+        hint = hint.encode(_ENCODING)
+        limit = int(limit[2:])
+        limit_hint = limit - len(hint)
+
+        def apply_limit(obj):
+            objb = obj.encode(_ENCODING)
+            if len(objb) > limit:
+                obj = (objb[:limit_hint] + hint).decode(_ENCODING, "ignore")
+            return fmt(obj)
+    else:
+        limit = int(limit[1:])
+        limit_hint = limit - len(hint)
+
+        def apply_limit(obj):
+            if len(obj) > limit:
+                obj = obj[:limit_hint] + hint
+            return fmt(obj)
     return apply_limit
 
 
@@ -540,6 +552,7 @@ class Literal():
 _literal = Literal()
 
 _CACHE = {}
+_ENCODING = sys.getfilesystemencoding()
 _SEPARATOR = "/"
 _FORMATTERS = {
     "E" : ExpressionFormatter,
