@@ -332,6 +332,17 @@ class TestFormatter(unittest.TestCase):
         with self.assertRaises(ValueError):
             self._run_test("{a:Xfoo/ */}", "hello wo *")
 
+    def test_specifier_limit_bytes(self):
+        self._run_test("{a:Xb20/ */}", "hElLo wOrLd")
+        self._run_test("{a:Xb10/ */}", "hElLo wO *")
+
+        self._run_test("{j:Xb50/〜/}", "げんそうきょう")
+        self._run_test("{j:Xb20/〜/}", "げんそうき〜")
+        self._run_test("{j:Xb20/ */}", "げんそうきょ *")
+
+        with self.assertRaises(ValueError):
+            self._run_test("{a:Xbfoo/ */}", "hello wo *")
+
     def test_specifier_map(self):
         self._run_test("{L:Mname/}" ,
                        "['John Doe', 'Jane Smith', 'Max Mustermann']")

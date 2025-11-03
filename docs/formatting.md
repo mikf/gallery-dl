@@ -304,6 +304,16 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>Fo&nbsp;...</code></td>
 </tr>
 <tr>
+    <td rowspan="2"><code>Xb&lt;maxlen&gt;/&lt;ext&gt;/</code></td>
+    <td rowspan="2">Same as <code>X</code>, but applies to the <a href="https://docs.python.org/3/library/stdtypes.html#bytes"><code>bytes()</code></a> representation of a string in <a href="https://docs.python.org/3/library/sys.html#sys.getfilesystemencoding">filesystem encoding</a></td>
+    <td><code>{foo_ja:Xb15/〜/}</code></td>
+    <td><code>フー・バー</code></td>
+</tr>
+<tr>
+    <td><code>{foo_ja:Xb8/〜/}</code></td>
+    <td><code>フ〜</code></td>
+</tr>
+<tr>
     <td><code>J&lt;separator&gt;/</code></td>
     <td>Concatenates elements of a list with <code>&lt;separator&gt;</code> using <a href="https://docs.python.org/3/library/stdtypes.html#str.join" rel="nofollow"><code>str.join()</code></a></td>
     <td><code>{tags:J - /}</code></td>
