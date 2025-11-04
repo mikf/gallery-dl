@@ -44,8 +44,7 @@ class ArenaChannelExtractor(GalleryExtractor):
             "updated_at": self.parse_datetime_iso(info.get("updated_at")),
             "user_id": info.get("user_id"),
             "user_slug": user.get("slug") or "",
-            "user_name": (user.get("full_name") or user.get("username")
-                           or ""),
+            "user_name": user.get("full_name") or user.get("username") or "",
             "url": self.page_url,
         }
         return data
