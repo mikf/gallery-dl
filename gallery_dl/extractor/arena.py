@@ -12,7 +12,7 @@ from .common import GalleryExtractor
 from .. import text
 
 
-class ArenaChannelExtractor(GalleryExtractor):
+class ArenaGalleryExtractor(GalleryExtractor):
     """Extractor for are.na channels"""
 
     category = "arena"
