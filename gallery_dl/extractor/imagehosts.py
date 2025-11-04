@@ -465,14 +465,16 @@ class ImgdriveImageExtractor(ImagehostImageExtractor):
 class SilverpicImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from silverpic.com"""
     category = "silverpic"
-    pattern = (r"(?:https?://)?((?:www\.)?silverpic\.com"
-               r"/([a-z0-9]{10,})/[\S]+\.html)")
-    example = "https://silverpic.com/a1b2c3d4f5g6/NAME.EXT.html"
+    root = "https://silverpic.net"
+    _params = "complex"
+    pattern = (r"(?:https?://)?(?:www\.)?silverpic\.(?:net|com)"
+               r"(/([a-z0-9]{10,})/[\S]+\.html)")
+    example = "https://silverpic.net/a1b2c3d4f5g6/NAME.EXT.html"
 
     def get_info(self, page):
         url, pos = text.extract(page, '<img src="/img/', '"')
         alt, pos = text.extract(page, 'alt="', '"', pos)
-        return f"https://silverpic.com/img/{url}", alt
+        return f"{self.root}/img/{url}", alt
 
     def metadata(self, page):
         pos = page.find('<img src="/img/')
