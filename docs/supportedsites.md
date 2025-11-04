@@ -2075,7 +2075,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr id="silverpic" title="silverpic">
     <td>SilverPic.com</td>
-    <td>https://silverpic.com/</td>
+    <td>https://silverpic.net/</td>
     <td>individual Images</td>
     <td></td>
 </tr>
