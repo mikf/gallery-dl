@@ -58,8 +58,16 @@ class ImagehostImageExtractor(Extractor):
         url, filename = self.get_info(page)
         if not url:
             return
-        data = text.nameext_from_url(filename, {"token": self.token})
+
+        if filename:
+            data = text.nameext_from_name(filename)
+            if not data["extension"]:
+                data["extension"] = text.ext_from_url(url)
+        else:
+            data = text.nameext_from_url(url)
+        data["token"] = self.token
         data.update(self.metadata(page))
+
         if self._https and url.startswith("http:"):
             url = "https:" + url[5:]
         if self._validate is not None:
@@ -341,7 +349,7 @@ class TurboimagehostImageExtractor(ImagehostImageExtractor):
 
     def get_info(self, page):
         url = text.extract(page, 'src="', '"', page.index("<img "))[0]
-        return url, url
+        return url, None
 
 
 class TurboimagehostGalleryExtractor(ImagehostImageExtractor):
@@ -380,7 +388,7 @@ class ViprImageExtractor(ImagehostImageExtractor):
 
     def get_info(self, page):
         url = text.extr(page, '<img src="', '"')
-        return url, url
+        return url, None
 
 
 class ImgclickImageExtractor(ImagehostImageExtractor):
