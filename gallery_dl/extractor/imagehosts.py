@@ -304,9 +304,10 @@ class PixhostGalleryExtractor(ImagehostImageExtractor):
 class PostimgImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from postimages.org"""
     category = "postimg"
-    pattern = (r"(?:https?://)?((?:www\.)?(?:postim(?:ages|g)|pixxxels)"
-               r"\.(?:cc|org)/(?!gallery/)(?:image/)?([^/?#]+)/?)")
-    example = "https://postimages.org/ID"
+    root = "https://postimg.cc"
+    pattern = (r"(?:https?://)?(?:www\.)?(?:postim(?:ages|g)|pixxxels)"
+               r"\.(?:cc|org)(/(?!gallery/)(?:image/)?([^/?#]+)/?)")
+    example = "https://postimg.cc/ID"
 
     def get_info(self, page):
         pos = page.index(' id="download"')
@@ -319,9 +320,10 @@ class PostimgGalleryExtractor(ImagehostImageExtractor):
     """Extractor for images galleries from postimages.org"""
     category = "postimg"
     subcategory = "gallery"
-    pattern = (r"(?:https?://)?((?:www\.)?(?:postim(?:ages|g)|pixxxels)"
-               r"\.(?:cc|org)/gallery/([^/?#]+))")
-    example = "https://postimages.org/gallery/ID"
+    root = "https://postimg.cc"
+    pattern = (r"(?:https?://)?(?:www\.)?(?:postim(?:ages|g)|pixxxels)"
+               r"\.(?:cc|org)(/gallery/([^/?#]+))")
+    example = "https://postimg.cc/gallery/ID"
 
     def items(self):
         page = self.request(self.page_url).text

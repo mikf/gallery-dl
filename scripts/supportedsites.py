@@ -679,6 +679,7 @@ def build_extractor_list():
     base["imgtaxi"] = base["imgdrive"]
     base["imgwallet"] = base["imgdrive"]
     categories["imagehost"] = {k: base[k] for k in sorted(base)}
+    domains["postimg"] = "https://postimages.org/"
     domains["imgtaxi"] = "https://imgtaxi.com/"
     domains["imgwallet"] = "https://imgwallet.com/"
 
