@@ -32,10 +32,9 @@ __tests__ = (
     "#category": ("imagehost", "postimg", "image"),
     "#class"   : imagehosts.PostimgImageExtractor,
     "#results"      : "https://i.postimg.cc/PhJZt1Rw/test-tesuto.png?dl=1",
-    "#sha1_metadata": "2d05808d04e4e83e33200db83521af06e3147a84",
     "#sha1_content" : "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
 
-    "extension": "",
+    "extension": "png",
     "filename" : "test-テスト-\"&>",
     "token"    : "Wtn2b3hC",
 },
