@@ -320,8 +320,8 @@ class PostimgImageExtractor(ImagehostImageExtractor):
     def get_info(self, page):
         pos = page.index(' id="download"')
         url     , pos = text.rextract(page, ' href="', '"', pos)
-        filename, pos = text.extract(page, 'class="imagename">', '<', pos)
-        return url, text.unescape(filename)
+        filename, pos = text.extract(page, ' class="my-4">', '<', pos)
+        return url, text.unescape(filename) if filename else None
 
 
 class PostimgGalleryExtractor(ImagehostImageExtractor):
@@ -335,8 +335,16 @@ class PostimgGalleryExtractor(ImagehostImageExtractor):
 
     def items(self):
         page = self.request(self.page_url).text
-        data = {"_extractor": PostimgImageExtractor}
-        for url in text.extract_iter(page, ' class="thumb"><a href="', '"'):
+        title = text.extr(
+            page, 'property="og:title" content="', ' — Postimages"')
+
+        data = {
+            "_extractor"   : PostimgImageExtractor,
+            "gallery_title": text.unescape(title),
+        }
+
+        for token in text.extract_iter(page, 'data-image="', '"'):
+            url = f"{self.root}/{token}"
             yield Message.Queue, url, data
 
 

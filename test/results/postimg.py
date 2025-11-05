@@ -40,11 +40,25 @@ __tests__ = (
 },
 
 {
+    "#url"     : "http://postimg.org/image/5l1cogxcr/",
+    "#comment" : "no 'imagename' (#8505)",
+    "#category": ("imagehost", "postimg", "image"),
+    "#class"   : imagehosts.PostimgImageExtractor,
+    "#results" : "https://i.postimg.cc/08bm81zX/fashion-show-dream-angels-fantasy-bra-2014-adria.jpg?dl=1",
+
+    "extension": "jpg",
+    "filename" : "fashion-show-dream-angels-fantasy-bra-2014-adria",
+    "token"    : "5l1cogxcr",
+},
+
+{
     "#url"     : "https://postimg.cc/gallery/wxpDLgX",
     "#category": ("imagehost", "postimg", "gallery"),
     "#class"   : imagehosts.PostimgGalleryExtractor,
     "#pattern" : imagehosts.PostimgImageExtractor.pattern,
     "#count"   : 22,
+
+    "gallery_title": "My Gallery",
 },
 
 )
