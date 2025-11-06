@@ -271,7 +271,7 @@ class SexcomBoardExtractor(SexcomExtractor):
 class SexcomFeedExtractor(SexcomExtractor):
     """Extractor for pins from the main feed on www.sex.com"""
     subcategory = "feed"
-    directory_fmt = ("{category}", "feed")  # Corrected line
+    directory_fmt = ("{category}", "feed")
     pattern = rf"{BASE_PATTERN}/feed/?(?:\?[^#]*)?$"
     example = "https://www.sex.com/feed"
 
