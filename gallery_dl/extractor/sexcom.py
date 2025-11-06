@@ -267,7 +267,20 @@ class SexcomBoardExtractor(SexcomExtractor):
     def pins(self):
         url = f"{self.root}/user/{self.user}/{self.board}/"
         return self._pagination(url)
+        
+class SexcomFeedExtractor(SexcomExtractor):
+    """Extractor for pins from the main feed on www.sex.com"""
+    subcategory = "feed"
+    directory_fmt = ("{category}", "feed")  # Corrected line
+    pattern = rf"{BASE_PATTERN}/feed/?(?:\?[^#]*)?$"
+    example = "https://www.sex.com/feed"
 
+    def metadata(self):
+        return {"feed": True}
+
+    def pins(self):
+        url = f"{self.root}/feed/"
+        return self._pagination(url)
 
 class SexcomSearchExtractor(SexcomExtractor):
     """Extractor for search results on www.sex.com"""
