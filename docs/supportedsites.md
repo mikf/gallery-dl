@@ -928,7 +928,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="sexcom" title="sexcom">
     <td>Sex.com</td>
     <td>https://www.sex.com/</td>
-    <td>Boards, Likes, Pins, User Pins, related Pins, Search Results</td>
+    <td>Boards, Feed, Likes, Pins, User Pins, related Pins, Search Results</td>
     <td></td>
 </tr>
 <tr id="simpcity" title="simpcity">
