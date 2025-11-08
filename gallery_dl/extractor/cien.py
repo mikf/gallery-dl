@@ -34,7 +34,7 @@ class CienExtractor(Extractor):
             page = self.request(url, params=params).text
 
             for card in text.extract_iter(
-                    page, ' class="c-cardCase-item', '</div>'):
+                    page, ' class="c-cardCase-item', '</figure>'):
                 article_url = text.extr(card, ' href="', '"')
                 yield Message.Queue, article_url, data
 
