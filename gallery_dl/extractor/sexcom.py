@@ -280,6 +280,8 @@ class SexcomFeedExtractor(SexcomExtractor):
         return {"feed": True}
 
     def pins(self):
+        if not self.cookies_check(("sess_sex",)):
+            self.log.warning("no 'sess_sex' cookie set")
         url = f"{self.root}/feed/"
         return self._pagination(url)
 
