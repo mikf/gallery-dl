@@ -697,13 +697,16 @@ class Extractor():
         def get(key, default):
             ts = self.config(key, default)
             if isinstance(ts, str):
-                try:
-                    ts = int(dt.parse(ts, fmt).timestamp())
-                except ValueError as exc:
-                    self.log.warning("Unable to parse '%s': %s", key, exc)
+                dt_obj = dt.parse_iso(ts) if fmt is None else dt.parse(ts, fmt)
+                if dt_obj is dt.NONE:
+                    self.log.warning(
+                        "Unable to parse '%s': Invalid %s string '%s'",
+                        key, "isoformat" if fmt is None else "date", ts)
                     ts = default
+                else:
+                    ts = int(dt.to_ts(dt_obj))
             return ts
-        fmt = self.config("date-format", "%Y-%m-%dT%H:%M:%S")
+        fmt = self.config("date-format")
         return get("date-min", dmin), get("date-max", dmax)
 
     @classmethod
