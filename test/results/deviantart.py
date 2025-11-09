@@ -206,6 +206,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.deviantart.com/yinnyyany/gallery/all?order=newest",
+    "#class"   : deviantart.DeviantartGalleryExtractor,
+},
+
+{
     "#url"     : "https://deviantart.com/shimoda7/avatar",
     "#category": ("", "deviantart", "avatar"),
     "#class"   : deviantart.DeviantartAvatarExtractor,
