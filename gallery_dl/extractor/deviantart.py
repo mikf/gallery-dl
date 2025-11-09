@@ -888,7 +888,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     subcategory = "gallery"
     archive_fmt = "g_{_username}_{index}.{extension}"
     pattern = (rf"{BASE_PATTERN}/gallery"
-               r"(?:/all|/recommended-for-you|/?\?catpath=)?/?$")
+               r"(?:/all|/recommended-for-you)?/?(\?(?!q=).*)?$")
     example = "https://www.deviantart.com/USER/gallery/"
 
     def deviations(self):
