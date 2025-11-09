@@ -9,10 +9,10 @@ from gallery_dl.extractor import chevereto
 
 __tests__ = (
 {
-    "#url"     : "https://jpg4.su/img/funnymeme.LecXGS",
+    "#url"     : "https://jpg7.cr/img/funnymeme.LecXGS",
     "#category": ("chevereto", "jpgfish", "image"),
     "#class"   : chevereto.CheveretoImageExtractor,
-    "#results"     : "https://simp3.jpg5.su/images/funnymeme.jpg",
+    "#results"     : "https://simp3.selti-delivery.ru/images/funnymeme.jpg",
     "#sha1_content": "098e5e9b17ad634358426e0ffd1c93871474d13c",
 
     "album"    : "",
@@ -20,7 +20,22 @@ __tests__ = (
     "extension": "jpg",
     "filename" : "funnymeme",
     "id"       : "LecXGS",
-    "url"      : "https://simp3.jpg5.su/images/funnymeme.jpg",
+    "url"      : "https://simp3.selti-delivery.ru/images/funnymeme.jpg",
+    "user"     : "exearco",
+},
+
+{
+    "#url"     : "https://jpg4.su/img/funnymeme.LecXGS",
+    "#category": ("chevereto", "jpgfish", "image"),
+    "#class"   : chevereto.CheveretoImageExtractor,
+    "#results" : "https://simp3.selti-delivery.ru/images/funnymeme.jpg",
+
+    "album"    : "",
+    "date"     : "dt:2022-06-05 03:24:25",
+    "extension": "jpg",
+    "filename" : "funnymeme",
+    "id"       : "LecXGS",
+    "url"      : "https://simp3.selti-delivery.ru/images/funnymeme.jpg",
     "user"     : "exearco",
 },
 
@@ -29,7 +44,7 @@ __tests__ = (
     "#comment" : "image ID without name (#8307)",
     "#category": ("chevereto", "jpgfish", "image"),
     "#class"   : chevereto.CheveretoImageExtractor,
-    "#results"     : "https://simp3.jpg5.su/images/funnymeme.jpg",
+    "#results"     : "https://simp3.selti-delivery.ru/images/funnymeme.jpg",
     "#sha1_content": "098e5e9b17ad634358426e0ffd1c93871474d13c",
 
     "album"    : "",
@@ -37,7 +52,7 @@ __tests__ = (
     "extension": "jpg",
     "filename" : "funnymeme",
     "id"       : "LecXGS",
-    "url"      : "https://simp3.jpg5.su/images/funnymeme.jpg",
+    "url"      : str,
     "user"     : "exearco",
 },
 
@@ -45,7 +60,7 @@ __tests__ = (
     "#url"     : "https://jpg.church/img/auCruA",
     "#category": ("chevereto", "jpgfish", "image"),
     "#class"   : chevereto.CheveretoImageExtractor,
-    "#pattern" : r"https://simp2\.jpg5\.su/hannahowo_00457\.jpg",
+    "#results" : "https://simp2.selti-delivery.ru/hannahowo_00457.jpg",
 
     "album": "401-500",
     "date" : "dt:2022-03-23 13:50:52",
