@@ -269,6 +269,23 @@ class SexcomBoardExtractor(SexcomExtractor):
         return self._pagination(url)
 
 
+class SexcomFeedExtractor(SexcomExtractor):
+    """Extractor for pins from your account's main feed on www.sex.com"""
+    subcategory = "feed"
+    directory_fmt = ("{category}", "feed")
+    pattern = rf"{BASE_PATTERN}/feed"
+    example = "https://www.sex.com/feed/"
+
+    def metadata(self):
+        return {"feed": True}
+
+    def pins(self):
+        if not self.cookies_check(("sess_sex",)):
+            self.log.warning("no 'sess_sex' cookie set")
+        url = f"{self.root}/feed/"
+        return self._pagination(url)
+
+
 class SexcomSearchExtractor(SexcomExtractor):
     """Extractor for search results on www.sex.com"""
     subcategory = "search"

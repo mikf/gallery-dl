@@ -387,6 +387,7 @@ SUBCATEGORY_MAP = {
     },
     "sexcom": {
         "pins": "User Pins",
+        "feed": "Feed",
     },
     "sizebooru": {
         "user": "User Uploads",
