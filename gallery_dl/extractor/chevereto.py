@@ -39,8 +39,8 @@ class CheveretoExtractor(BaseExtractor):
 
 BASE_PATTERN = CheveretoExtractor.update({
     "jpgfish": {
-        "root": "https://jpg6.su",
-        "pattern": r"(?:www\.)?jpe?g\d?\.(?:su|pet|fish(?:ing)?|church)",
+        "root": "https://jpg7.cr",
+        "pattern": r"(?:www\.)?jpe?g\d?\.(?:cr|su|pet|fish(?:ing)?|church)",
     },
     "imagepond": {
         "root": "https://imagepond.net",
@@ -57,7 +57,7 @@ class CheveretoImageExtractor(CheveretoExtractor):
     """Extractor for chevereto images"""
     subcategory = "image"
     pattern = rf"{BASE_PATTERN}(/im(?:g|age)/[^/?#]+)"
-    example = "https://jpg2.su/img/TITLE.ID"
+    example = "https://jpg7.cr/img/TITLE.ID"
 
     def items(self):
         url = self.root + self.path
@@ -134,7 +134,7 @@ class CheveretoAlbumExtractor(CheveretoExtractor):
     """Extractor for chevereto albums"""
     subcategory = "album"
     pattern = rf"{BASE_PATTERN}(/a(?:lbum)?/[^/?#]+(?:/sub)?)"
-    example = "https://jpg2.su/album/TITLE.ID"
+    example = "https://jpg7.cr/album/TITLE.ID"
 
     def items(self):
         url = self.root + self.path
@@ -168,7 +168,7 @@ class CheveretoUserExtractor(CheveretoExtractor):
     """Extractor for chevereto users"""
     subcategory = "user"
     pattern = rf"{BASE_PATTERN}(/[^/?#]+(?:/albums)?)"
-    example = "https://jpg2.su/USER"
+    example = "https://jpg7.cr/USER"
 
     def items(self):
         url = self.root + self.path
