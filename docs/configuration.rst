@@ -1503,12 +1503,19 @@ extractor.*.date-format
 Type
     ``string``
 Default
-    ``"%Y-%m-%dT%H:%M:%S"``
+    ``null``
 Description
     Format string used to parse ``string`` values of
     `date-min` and `date-max`.
 
     See |strptime|_ for a list of formatting directives.
+Special Values
+    ``null``
+        | Parse `date-min` and `date-max` according to
+          `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`__
+        | See
+          `datetime.fromisoformat() <https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat>`__
+          for details and examples.
 Note
     Despite its name, this option does **not** control how
     ``{date}`` metadata fields are formatted.
