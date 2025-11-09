@@ -18,10 +18,6 @@ class MisskeyExtractor(BaseExtractor):
     filename_fmt = "{category}_{id}_{file[id]}.{extension}"
     archive_fmt = "{id}_{file[id]}"
 
-    def __init__(self, match):
-        BaseExtractor.__init__(self, match)
-        self.item = self.groups[-1]
-
     def _init(self):
         self.api = MisskeyAPI(self)
         self.instance = self.root.rpartition("://")[2]
@@ -110,7 +106,7 @@ class MisskeyUserExtractor(Dispatch, MisskeyExtractor):
     example = "https://misskey.io/@USER"
 
     def items(self):
-        base = f"{self.root}/@{self.item}/"
+        base = f"{self.root}/@{self.groups[-1]}/"
         return self._dispatch_extractors((
             (MisskeyInfoExtractor      , base + "info"),
             (MisskeyAvatarExtractor    , base + "avatar"),
@@ -126,7 +122,8 @@ class MisskeyNotesExtractor(MisskeyExtractor):
     example = "https://misskey.io/@USER/notes"
 
     def notes(self):
-        return self.api.users_notes(self.api.user_id_by_username(self.item))
+        return self.api.users_notes(self.api.user_id_by_username(
+            self.groups[-1]))
 
 
 class MisskeyInfoExtractor(MisskeyExtractor):
@@ -136,7 +133,7 @@ class MisskeyInfoExtractor(MisskeyExtractor):
     example = "https://misskey.io/@USER/info"
 
     def items(self):
-        user = self.api.users_show(self.item)
+        user = self.api.users_show(self.groups[-1])
         return iter(((Message.Directory, user),))
 
 
@@ -147,7 +144,7 @@ class MisskeyAvatarExtractor(MisskeyExtractor):
     example = "https://misskey.io/@USER/avatar"
 
     def notes(self):
-        user = self.api.users_show(self.item)
+        user = self.api.users_show(self.groups[-1])
         url = user.get("avatarUrl")
         return (self._make_note("avatar", user, url),) if url else ()
 
@@ -159,7 +156,7 @@ class MisskeyBackgroundExtractor(MisskeyExtractor):
     example = "https://misskey.io/@USER/banner"
 
     def notes(self):
-        user = self.api.users_show(self.item)
+        user = self.api.users_show(self.groups[-1])
         url = user.get("bannerUrl")
         return (self._make_note("background", user, url),) if url else ()
 
@@ -171,7 +168,7 @@ class MisskeyFollowingExtractor(MisskeyExtractor):
     example = "https://misskey.io/@USER/following"
 
     def items(self):
-        user_id = self.api.user_id_by_username(self.item)
+        user_id = self.api.user_id_by_username(self.groups[-1])
         for user in self.api.users_following(user_id):
             user = user["followee"]
             url = f"{self.root}/@{user['username']}"
@@ -188,7 +185,7 @@ class MisskeyNoteExtractor(MisskeyExtractor):
     example = "https://misskey.io/notes/98765"
 
     def notes(self):
-        return (self.api.notes_show(self.item),)
+        return (self.api.notes_show(self.groups[-1]),)
 
 
 class MisskeyFavoriteExtractor(MisskeyExtractor):
