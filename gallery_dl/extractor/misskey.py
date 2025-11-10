@@ -248,8 +248,10 @@ class MisskeyAPI():
         return self.extractor.request_json(url, method="POST", json=data)
 
     def _pagination(self, endpoint, data):
+        extr = self.extractor
         data["limit"] = 100
-        data["withRenotes"] = self.extractor.renotes
+        data["withRenotes"] = extr.renotes
+        data["withFiles"] = False if extr.config("text-posts") else True
 
         while True:
             notes = self._call(endpoint, data)
