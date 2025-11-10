@@ -35,4 +35,26 @@ __tests__ = (
     "#class"   : myhentaigallery.MyhentaigalleryGalleryExtractor,
 },
 
+{
+    "#url"     : "https://myhentaigallery.com/g/artist/8084?sorting=favorite",
+    "#class"   : myhentaigallery.MyhentaigalleryTagExtractor,
+    "#pattern" : myhentaigallery.MyhentaigalleryGalleryExtractor.pattern,
+    "#count"   : 18,
+},
+
+{
+    "#url"     : "https://myhentaigallery.com/g/group/2",
+    "#class"   : myhentaigallery.MyhentaigalleryTagExtractor,
+},
+
+{
+    "#url"     : "https://myhentaigallery.com/g/parody/8239",
+    "#class"   : myhentaigallery.MyhentaigalleryTagExtractor,
+},
+
+{
+    "#url"     : "https://myhentaigallery.com/g/category/59",
+    "#class"   : myhentaigallery.MyhentaigalleryTagExtractor,
+},
+
 )

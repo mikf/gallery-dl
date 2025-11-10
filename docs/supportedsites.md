@@ -658,7 +658,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="myhentaigallery" title="myhentaigallery">
     <td>My Hentai Gallery</td>
     <td>https://myhentaigallery.com/</td>
-    <td>Galleries</td>
+    <td>Galleries, Tag Searches</td>
     <td></td>
 </tr>
 <tr id="naver-blog" title="naver-blog">
