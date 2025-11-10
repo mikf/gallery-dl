@@ -4187,6 +4187,16 @@ Description
     Fetch media from replies to other notes.
 
 
+extractor.[misskey].text-posts
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Also retrieve text-only notes without media content.
+
+
 extractor.[moebooru].pool.metadata
 ----------------------------------
 Type
