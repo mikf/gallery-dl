@@ -4145,6 +4145,16 @@ Description
     Your access token, necessary to fetch favorited notes.
 
 
+extractor.[misskey].date-min & .date-max
+----------------------------------------
+Type
+    |Date|_
+Default
+    ``null``
+Description
+    Retrieve only notes posted after/before this |Date|_
+
+
 extractor.[misskey].include
 ---------------------------
 Type

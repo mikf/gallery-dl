@@ -7,7 +7,7 @@
 """Extractors for Misskey instances"""
 
 from .common import BaseExtractor, Message, Dispatch
-from .. import text, exception
+from .. import text, dt, exception
 from ..cache import memcache
 
 
@@ -252,6 +252,16 @@ class MisskeyAPI():
         data["limit"] = 100
         data["withRenotes"] = extr.renotes
         data["withFiles"] = False if extr.config("text-posts") else True
+
+        date_min, date_max = extr._get_date_min_max()
+        if date_min is not None:
+            data["sinceDate"] = date_min * 1000
+            if date_max is None:
+                # ensure notes are returned in descending order
+                # TODO: implement 'order-posts' option
+                data["untilDate"] = (int(dt.to_ts(dt.now())) + 1000) * 1000
+        if date_max is not None:
+            data["untilDate"] = date_max * 1000
 
         while True:
             notes = self._call(endpoint, data)
