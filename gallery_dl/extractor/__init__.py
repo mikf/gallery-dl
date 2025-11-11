@@ -26,6 +26,7 @@ modules = [
     "ao3",
     "arcalive",
     "architizer",
+    "arena",
     "artstation",
     "aryion",
     "batoto",
