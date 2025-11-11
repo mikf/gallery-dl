@@ -171,11 +171,19 @@ def sort_key(key, value):
         return 0
     if isinstance(value, str) and "\n" in value:
         return 7000
-    if isinstance(value, list) and len(value) > 1:
+    if isinstance(value, list) and not small(value):
         return 8000
-    if isinstance(value, dict):
+    if isinstance(value, dict) and not small(value):
         return 9000
     return 0
+
+
+def small(obj):
+    if isinstance(obj, list):
+        return False if len(obj) > 1 else small(obj[0])
+    if isinstance(obj, dict):
+        return False if len(obj) > 1 else small(next(iter(obj.values())))
+    return True
 
 
 def insert_test_result(args, result, lines):
