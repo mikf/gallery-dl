@@ -310,10 +310,13 @@ class TestExtractorResults(unittest.TestCase):
         elif isinstance(test, range):
             self.assertRange(value, test, msg=path)
         elif isinstance(test, set):
-            try:
-                self.assertIn(value, test, msg=path)
-            except AssertionError:
-                self.assertIn(type(value), test, msg=path)
+            for item in test:
+                if isinstance(item, type) and isinstance(value, item) or \
+                        value == item:
+                    break
+            else:
+                v = type(value) if len(str(value)) > 64 else value
+                self.fail(f"{v!r} not in {test}: {path}")
         elif isinstance(test, list):
             subtest = False
             for idx, item in enumerate(test):

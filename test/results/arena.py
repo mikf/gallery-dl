@@ -23,9 +23,9 @@ __tests__ = (
     "filename" : str,
     "count"    : 6,
     "num"      : range(1, 5),
-    #  "source"   : {None, dict},
+    "source"   : {None, dict},
     "block"    : {
-        #  "attachment"      : {None, dict},
+        "attachment"      : {None, dict},
         "base_class"      : "Block",
         "class"           : {"Link", "Attachment", "Image"},
         "comment_count"   : 0,
