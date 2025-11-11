@@ -55,18 +55,17 @@ class ArenaChannelExtractor(GalleryExtractor):
                         "generated_title") or "",
                 }
 
-                # Prefer original image
-                if (image := block.get("image")) and \
-                        (original := image.get("original")):
-                    url = original.get("url")
-
                 # Attachments (e.g., PDFs, files)
-                if not url and (attach := block.get("attachment")):
-                    url = attach.get("url")
+                if attachment := block.get("attachment"):
+                    url = attachment.get("url")
 
-                # Fallback to display/large image if present
-                if not url and image:
-                    if display := image.get("display"):
+                # Images
+                elif image := block.get("image"):
+                    # Prefer original image
+                    if original := image.get("original"):
+                        url = original.get("url")
+                    # Fallback to display/large image if present
+                    elif display := image.get("display"):
                         url = display.get("url")
                     elif large := image.get("large"):
                         url = large.get("url")

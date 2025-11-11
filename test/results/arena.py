@@ -116,7 +116,7 @@ __tests__ = (
         "https://d2w9rnfcy7mm78.cloudfront.net/40871580/original_3fb729c818f92de4539d4ff263eb6056.png?1762357121?bc=0",
         "https://d2w9rnfcy7mm78.cloudfront.net/40871591/original_91d7c8144a5ba9776118f0af6d923f94.png?1762357155?bc=0",
         "https://d2w9rnfcy7mm78.cloudfront.net/40871607/original_766f89eb3b06cc84372bea9d58132c93.png?1762357207?bc=0",
-        "https://d2w9rnfcy7mm78.cloudfront.net/40873309/original_eb937980661a58aa20251105-2-ydnhtz.png?1762359390?bc=0",
+        "https://attachments.are.na/40873309/ebf4eae61a70773f7494e10a98b18fe3.mp4?1762359389",
         "https://d2w9rnfcy7mm78.cloudfront.net/40873379/original_289824f61eade100785db100652abd9a.jpg?1762359483?bc=0",
     ),
 
