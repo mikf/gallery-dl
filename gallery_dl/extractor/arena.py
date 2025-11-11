@@ -16,22 +16,28 @@ class ArenaChannelExtractor(GalleryExtractor):
     category = "arena"
     subcategory = "channel"
     root = "https://are.na"
+    directory_fmt = ("{category}", "{user[full_name]} ({user[id]})",
+                     "{channel[title]} ({channel[id]})")
+    filename_fmt = "{num:>03}{block[id]:? //}.{extension}"
+    archive_fmt = "{channel[id]}/{block[id]}"
     pattern = r"(?:https?://)?(?:www\.)?are\.na/[^/?#]+/([^/?#]+)"
     example = "https://are.na/evan-collins-1522646491/cassette-futurism"
 
     def metadata(self, page):
-        info = self.request_json(
+        channel = self.request_json(
             f"https://api.are.na/v2/channels/{self.groups[0]}")
 
+        channel["date"] = self.parse_datetime_iso(
+            channel["created_at"])
+        channel["date_updated"] = self.parse_datetime_iso(
+            channel["updated_at"])
+        channel.pop("contents", None)
+
         return {
-            "gallery_id"  : info.get("slug") or str(info.get("id")),
-            "channel_id"  : info.get("id"),
-            "channel_slug": info.get("slug"),
-            "title"       : info.get("title") or "",
-            "count"       : info.get("length") or 0,
-            "user"        : info.get("user"),
-            "date"        : self.parse_datetime_iso(info.get("created_at")),
-            "date_updated": self.parse_datetime_iso(info.get("updated_at")),
+            "count"  : channel.get("length"),
+            "user"   : channel.pop("user", None),
+            "owner"  : channel.pop("owner", None),
+            "channel": channel,
         }
 
     def images(self, page):
@@ -48,12 +54,6 @@ class ArenaChannelExtractor(GalleryExtractor):
 
             for block in contents:
                 url = None
-                meta = {
-                    "id": block.get("id"),
-                    "block_class": block.get("class"),
-                    "block_title": block.get("title") or block.get(
-                        "generated_title") or "",
-                }
 
                 # Attachments (e.g., PDFs, files)
                 if attachment := block.get("attachment"):
@@ -74,11 +74,15 @@ class ArenaChannelExtractor(GalleryExtractor):
                 if not url:
                     continue
 
-                # Provide source link if it exists
-                if src := block.get("source"):
-                    meta["source_url"] = src.get("url") or ""
+                block["date"] = self.parse_datetime_iso(
+                    block["created_at"])
+                block["date_updated"] = self.parse_datetime_iso(
+                    block["updated_at"])
 
-                yield url, meta
+                yield url, {
+                    "block" : block,
+                    "source": block.pop("source", None),
+                }
 
             if len(contents) < limit:
                 return
