@@ -110,7 +110,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Supported</td>
 </tr>
 <tr id="arena" title="arena">
-    <td>Arena</td>
+    <td>Are.na</td>
     <td>https://are.na/</td>
     <td>Channels</td>
     <td></td>
