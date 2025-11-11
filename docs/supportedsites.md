@@ -109,6 +109,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Search Results, Series, Subscriptions, Tag Searches, User Profiles, User Bookmarks, User Series, User Works, Works</td>
     <td>Supported</td>
 </tr>
+<tr id="arena" title="arena">
+    <td>Are.na</td>
+    <td>https://are.na/</td>
+    <td>Channels</td>
+    <td></td>
+</tr>
 <tr id="artstation" title="artstation">
     <td>ArtStation</td>
     <td>https://www.artstation.com/</td>
