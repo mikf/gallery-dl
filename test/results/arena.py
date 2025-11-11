@@ -10,7 +10,7 @@ from gallery_dl.extractor import arena
 __tests__ = (
 {
     "#url"     : "https://are.na/evan-collins-1522646491/cassette-futurism",
-    "#class"   : arena.ArenaGalleryExtractor,
+    "#class"   : arena.ArenaChannelExtractor,
     "#pattern" : r"https://d2w9rnfcy7mm78\.cloudfront\.net/\d+/original_\w+\.\w+\?\d+\?bc=\d",
     "#count"   : 160,
 
@@ -60,7 +60,7 @@ __tests__ = (
 
 {
     "#url"     : "https://are.na/lachie/transparent-tech-cobxde9pu40",
-    "#class"   : arena.ArenaGalleryExtractor,
+    "#class"   : arena.ArenaChannelExtractor,
     "#pattern" : r"https://d2w9rnfcy7mm78\.cloudfront\.net/\d+/original_\w+(\.\w+)?\?\d+\?bc=\d",
     "#count"   : 89,
 
@@ -111,7 +111,7 @@ __tests__ = (
 
 {
     "#url"     : "https://www.are.na/mikf/touhou-zr5p8idnkag",
-    "#class"   : arena.ArenaGalleryExtractor,
+    "#class"   : arena.ArenaChannelExtractor,
     "#results" : (
         "https://d2w9rnfcy7mm78.cloudfront.net/40871580/original_3fb729c818f92de4539d4ff263eb6056.png?1762357121?bc=0",
         "https://d2w9rnfcy7mm78.cloudfront.net/40871591/original_91d7c8144a5ba9776118f0af6d923f94.png?1762357155?bc=0",

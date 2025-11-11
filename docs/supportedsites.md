@@ -112,7 +112,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="arena" title="arena">
     <td>Arena</td>
     <td>https://are.na/</td>
-    <td>Galleries</td>
+    <td>Channels</td>
     <td></td>
 </tr>
 <tr id="artstation" title="artstation">

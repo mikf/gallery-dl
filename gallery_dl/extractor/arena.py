@@ -11,9 +11,10 @@
 from .common import GalleryExtractor
 
 
-class ArenaGalleryExtractor(GalleryExtractor):
+class ArenaChannelExtractor(GalleryExtractor):
     """Extractor for are.na channels"""
     category = "arena"
+    subcategory = "channel"
     root = "https://are.na"
     pattern = r"(?:https?://)?(?:www\.)?are\.na/[^/?#]+/([^/?#]+)"
     example = "https://are.na/evan-collins-1522646491/cassette-futurism"
