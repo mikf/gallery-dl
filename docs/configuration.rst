@@ -958,6 +958,17 @@ Description
     Additional name-value pairs to be added to each metadata dictionary.
 
 
+extractor.*.keywords-default
+----------------------------
+Type
+    any
+Default
+    ``"None"``
+Description
+    Default value used for missing or undefined keyword names in a
+    `Format String`_.
+
+
 extractor.*.keywords-eval
 -------------------------
 Type
@@ -969,15 +980,18 @@ Description
     as a `Format String`_.
 
 
-extractor.*.keywords-default
-----------------------------
+extractor.*.keywords-global
+---------------------------
 Type
-    any
-Default
-    ``"None"``
+    ``object`` (`name` → `value`)
+Example
+    ``{"type": "Original", "type_id": 1, "type_category": "meta"}``
 Description
-    Default value used for missing or undefined keyword names in a
-    `Format String`_.
+    Global name-value pairs to be added to each metadata dictionary.
+Note
+    Keywords defined here will be overwritten by keywords from
+    `extractor.keywords <extractor.*.keywords_>`__
+    with the same name.
 
 
 extractor.*.metadata-url

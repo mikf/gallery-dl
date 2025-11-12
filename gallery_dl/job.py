@@ -87,6 +87,8 @@ class Job():
                 "current_git_head": util.git_head()
             }
         # user-supplied metadata
+        if kwdict := extr.config("keywords-global"):
+            self.kwdict.update(kwdict)
         if kwdict := extr.config("keywords"):
             if extr.config("keywords-eval"):
                 self.kwdict_eval = []
