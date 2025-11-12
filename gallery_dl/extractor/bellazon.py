@@ -72,7 +72,8 @@ class BellazonExtractor(Extractor):
                         dc["extension"] = ext
                     elif "/core/interface/file/attachment.php" in url:
                         if not dc["id"]:
-                            dc["id"] = url.rpartition("?id=")[2]
+                            dc["id"] = \
+                                url.rpartition("?id=")[2].partition("&")[0]
                         if name := text.extr(info, ">", "<").strip():
                             text.nameext_from_url(name, dc)
 
