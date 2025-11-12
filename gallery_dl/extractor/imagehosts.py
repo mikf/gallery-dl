@@ -287,9 +287,10 @@ class PixhostImageExtractor(ImagehostImageExtractor):
     _cookies = {"pixhostads": "1", "pixhosttest": "1"}
 
     def get_info(self, page):
-        url     , pos = text.extract(page, "class=\"image-img\" src=\"", "\"")
-        filename, pos = text.extract(page, "alt=\"", "\"", pos)
-        return url, filename
+        self.kwdict["directory"] = self.page_url.rsplit("/")[-2]
+        url , pos = text.extract(page, "class=\"image-img\" src=\"", "\"")
+        name, pos = text.extract(page, "alt=\"", "\"", pos)
+        return url, text.unescape(name) if name else None
 
 
 class PixhostGalleryExtractor(ImagehostImageExtractor):
