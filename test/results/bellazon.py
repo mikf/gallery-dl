@@ -224,6 +224,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/4322-candids/page/1852/#comment-5902385",
+    "#comment" : "attachment 'id' with query parameters (#8544)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#range"   : "4",
+    "#results" : "https://www.bellazon.com/main/applications/core/interface/file/attachment.php?id=14418097&key=491d27ee2482b1808483f1d544873b06",
+
+    "count"       : 4,
+    "num"         : 4,
+    "filename"    : "download",
+    "extension"   : "jfif",
+    "id"          : "14418097",
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
