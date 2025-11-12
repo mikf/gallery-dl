@@ -238,6 +238,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/4322-candids/page/1066/#comment-3956772",
+    "#comment" : "weird/wrong 'filename' & 'extension' (#8544)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#count"   : 16,
+
+    "extension"   : "jpg",
+    "filename"    : r"re:^[^.]+$",
+    "id"          : r"re:^\d+$",
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
