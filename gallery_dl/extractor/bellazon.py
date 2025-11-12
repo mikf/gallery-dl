@@ -62,11 +62,12 @@ class BellazonExtractor(Extractor):
                     data["num_internal"] += 1
                     if not (alt := text.extr(info, ' alt="', '"')) or (
                             alt.startswith("post-") and "_thumb." in alt):
-                        name = url
+                        dc = text.nameext_from_url(url, data.copy())
                     else:
-                        name = text.unescape(alt)
+                        dc = data.copy()
+                        dc["name"] = name = text.unescape(alt)
+                        dc["filename"] = name.partition(".")[0]
 
-                    dc = text.nameext_from_url(name, data.copy())
                     dc["id"] = text.extr(info, 'data-fileid="', '"')
                     if ext := text.extr(info, 'data-fileext="', '"'):
                         dc["extension"] = ext
@@ -75,7 +76,10 @@ class BellazonExtractor(Extractor):
                             dc["id"] = \
                                 url.rpartition("?id=")[2].partition("&")[0]
                         if name := text.extr(info, ">", "<").strip():
-                            text.nameext_from_url(name, dc)
+                            dc["name"] = name = text.unescape(name)
+                            text.nameext_from_name(name, dc)
+                    else:
+                        dc["extension"] = text.ext_from_url(url)
 
                     if url[0] == "/":
                         url = f"https:{url}"
