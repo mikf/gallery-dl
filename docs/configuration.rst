@@ -6405,12 +6405,12 @@ Type
 Default
     ``"user"``
 Example
-    ``"https://twitter.com/search?q=from:{legacy[screen_name]}"``
+    ``"https://twitter.com/search?q=from:{core[screen_name]}"``
 Description
     | Basic format string for user URLs generated from
       ``following`` and ``list-members`` queries,
     | whose replacement field values come from Twitter ``user`` objects
-      (`Example <https://gist.githubusercontent.com/mikf/99d2719b3845023326c7a4b6fb88dd04/raw/275b4f0541a2c7dc0a86d3998f7d253e8f10a588/github.json>`_)
+      (`Example <https://gist.githubusercontent.com/mikf/99d2719b3845023326c7a4b6fb88dd04/raw/01b5324cf2367bcd437730186ec0f36d5c8c683c/github.json>`_)
 Special Values
     ``"user"``
         ``https://twitter.com/i/user/{rest_id}``
