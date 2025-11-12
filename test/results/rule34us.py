@@ -14,6 +14,15 @@ __tests__ = (
     "#class"   : rule34us.Rule34usTagExtractor,
     "#pattern" : r"https://img\d*\.rule34\.us/images/../../[0-9a-f]{32}\.\w+",
     "#count"   : 10,
+
+    "search_tags": "[terios]_elysion",
+},
+
+{
+    "#url"     : "https://rule34.us/index.php?r=posts/index&q=",
+    "#comment" : "empty 'q' query parameter (#8546)",
+    "#category": ("booru", "rule34us", "tag"),
+    "#class"   : rule34us.Rule34usTagExtractor,
 },
 
 {

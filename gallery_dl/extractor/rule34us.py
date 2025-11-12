@@ -57,7 +57,7 @@ class Rule34usTagExtractor(Rule34usExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = r"(?:https?://)?rule34\.us/index\.php\?r=posts/index&q=([^&#]+)"
+    pattern = r"(?:https?://)?rule34\.us/index\.php\?r=posts/index&q=([^&#]*)"
     example = "https://rule34.us/index.php?r=posts/index&q=TAG"
 
     def __init__(self, match):
