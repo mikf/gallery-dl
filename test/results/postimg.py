@@ -13,6 +13,11 @@ __tests__ = (
     "#category": ("imagehost", "postimg", "image"),
     "#class"   : imagehosts.PostimgImageExtractor,
     "#results" : "https://i.postimg.cc/PhJZt1Rw/test-tesuto.png?dl=1",
+
+    "filename" : "test-テスト-\"&>",
+    "extension": "png",
+    "token"    : "Wtn2b3hC",
+    "post_url" : "https://postimg.cc/Wtn2b3hC",
 },
 
 {
@@ -34,9 +39,10 @@ __tests__ = (
     "#results"      : "https://i.postimg.cc/PhJZt1Rw/test-tesuto.png?dl=1",
     "#sha1_content" : "cfaa8def53ed1a575e0c665c9d6d8cf2aac7a0ee",
 
-    "extension": "png",
     "filename" : "test-テスト-\"&>",
+    "extension": "png",
     "token"    : "Wtn2b3hC",
+    "post_url" : "https://postimg.cc/Wtn2b3hC",
 },
 
 {

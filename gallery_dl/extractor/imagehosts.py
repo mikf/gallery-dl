@@ -66,6 +66,7 @@ class ImagehostImageExtractor(Extractor):
         else:
             data = text.nameext_from_url(url)
         data["token"] = self.token
+        data["post_url"] = self.page_url
         data.update(self.metadata(page))
 
         if self._https and url.startswith("http:"):
