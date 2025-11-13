@@ -13,7 +13,7 @@ from .. import text, util
 
 
 def original(url):
-    return (util.re(r"(/|=)(?:[sw]\d+|w\d+-h\d+)(?=/|$)")
+    return (text.re(r"(/|=)(?:[sw]\d+|w\d+-h\d+)(?=/|$)")
             .sub(r"\1s0", url)
             .replace("http:", "https:", 1))
 
@@ -32,7 +32,7 @@ class BloggerExtractor(BaseExtractor):
         self.videos = self.config("videos", True)
 
         if self.videos:
-            self.findall_video = util.re(
+            self.findall_video = text.re(
                 r"""src=["'](https?://www\.blogger\.com"""
                 r"""/video\.g\?token=[^"']+)""").findall
 
@@ -40,10 +40,10 @@ class BloggerExtractor(BaseExtractor):
         blog = self.api.blog_by_url("http://" + self.blog)
         blog["pages"] = blog["pages"]["totalItems"]
         blog["posts"] = blog["posts"]["totalItems"]
-        blog["date"] = text.parse_datetime(blog["published"])
+        blog["date"] = self.parse_datetime_iso(blog["published"])
         del blog["selfLink"]
 
-        findall_image = util.re(
+        findall_image = text.re(
             r'src="(https?://(?:'
             r'blogger\.googleusercontent\.com/img|'
             r'lh\d+(?:-\w+)?\.googleusercontent\.com|'
@@ -65,7 +65,7 @@ class BloggerExtractor(BaseExtractor):
             post["author"] = post["author"]["displayName"]
             post["replies"] = post["replies"]["totalItems"]
             post["content"] = text.remove_html(content)
-            post["date"] = text.parse_datetime(post["published"])
+            post["date"] = self.parse_datetime_iso(post["published"])
             del post["selfLink"]
             del post["blog"]
 
@@ -117,7 +117,7 @@ BASE_PATTERN = BloggerExtractor.update({
 class BloggerPostExtractor(BloggerExtractor):
     """Extractor for a single blog post"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"(/\d\d\d\d/\d\d/[^/?#]+\.html)"
+    pattern = rf"{BASE_PATTERN}(/\d\d\d\d/\d\d/[^/?#]+\.html)"
     example = "https://BLOG.blogspot.com/1970/01/TITLE.html"
 
     def posts(self, blog):
@@ -127,7 +127,7 @@ class BloggerPostExtractor(BloggerExtractor):
 class BloggerBlogExtractor(BloggerExtractor):
     """Extractor for an entire Blogger blog"""
     subcategory = "blog"
-    pattern = BASE_PATTERN + r"/?$"
+    pattern = rf"{BASE_PATTERN}/?$"
     example = "https://BLOG.blogspot.com/"
 
     def posts(self, blog):
@@ -137,7 +137,7 @@ class BloggerBlogExtractor(BloggerExtractor):
 class BloggerSearchExtractor(BloggerExtractor):
     """Extractor for Blogger search resuls"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/search/?\?q=([^&#]+)"
+    pattern = rf"{BASE_PATTERN}/search/?\?q=([^&#]+)"
     example = "https://BLOG.blogspot.com/search?q=QUERY"
 
     def metadata(self):
@@ -151,7 +151,7 @@ class BloggerSearchExtractor(BloggerExtractor):
 class BloggerLabelExtractor(BloggerExtractor):
     """Extractor for Blogger posts by label"""
     subcategory = "label"
-    pattern = BASE_PATTERN + r"/search/label/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/search/label/([^/?#]+)"
     example = "https://BLOG.blogspot.com/search/label/LABEL"
 
     def metadata(self):

@@ -127,6 +127,30 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://niyaniya.moe/browse?s=beach",
+    "#class"   : schalenetwork.SchalenetworkSearchExtractor,
+},
+
+{
+    "#url"     : "https://niyaniya.moe/tag/tag:beach",
+    "#class"   : schalenetwork.SchalenetworkSearchExtractor,
+},
+
+{
+    "#url"     : "https://niyaniya.moe/tag/circle:tentou+mushi+no+sanba",
+    "#class"   : schalenetwork.SchalenetworkSearchExtractor,
+    "#results" : (
+        "https://niyaniya.moe/g/26044/9b7ecf9bcf00",
+        "https://niyaniya.moe/g/24342/c723a7fe9191",
+        "https://niyaniya.moe/g/23787/7a51f4258481",
+        "https://niyaniya.moe/g/23784/d81779e07505",
+        "https://niyaniya.moe/g/23764/cb867963cfcb",
+        "https://niyaniya.moe/g/23760/a667d4a7f447",
+        "https://niyaniya.moe/g/23669/9ec3ff4c6737",
+    ),
+},
+
+{
     "#url"     : "https://niyaniya.moe/favorites",
     "#class"   : schalenetwork.SchalenetworkFavoriteExtractor,
     "#pattern" : schalenetwork.SchalenetworkGalleryExtractor.pattern,

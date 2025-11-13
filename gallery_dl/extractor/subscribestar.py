@@ -50,10 +50,16 @@ class SubscribestarExtractor(Extractor):
             for num, item in enumerate(media, 1):
                 item.update(data)
                 item["num"] = num
-                text.nameext_from_url(item.get("name") or item["url"], item)
-                if item["url"][0] == "/":
-                    item["url"] = self.root + item["url"]
-                yield Message.Url, item["url"], item
+
+                url = item["url"]
+                if name := (item.get("name") or item.get("original_filename")):
+                    text.nameext_from_name(name, item)
+                else:
+                    text.nameext_from_url(url, item)
+
+                if url[0] == "/":
+                    url = f"{self.root}{url}"
+                yield Message.Url, url, item
 
     def posts(self):
         """Yield HTML content of all relevant posts"""
@@ -155,7 +161,7 @@ class SubscribestarExtractor(Extractor):
         attachments = text.extr(
             html, 'class="uploads-docs"', 'class="post-edit_form"')
         if attachments:
-            for att in util.re(r'class="doc_preview[" ]').split(
+            for att in text.re(r'class="doc_preview[" ]').split(
                     attachments)[1:]:
                 media.append({
                     "id"  : text.parse_int(text.extr(
@@ -169,7 +175,7 @@ class SubscribestarExtractor(Extractor):
         audios = text.extr(
             html, 'class="uploads-audios"', 'class="post-edit_form"')
         if audios:
-            for audio in util.re(r'class="audio_preview-data[" ]').split(
+            for audio in text.re(r'class="audio_preview-data[" ]').split(
                     audios)[1:]:
                 media.append({
                     "id"  : text.parse_int(text.extr(
@@ -202,9 +208,9 @@ class SubscribestarExtractor(Extractor):
     def _parse_datetime(self, dt):
         if dt.startswith("Updated on "):
             dt = dt[11:]
-        date = text.parse_datetime(dt, "%b %d, %Y %I:%M %p")
+        date = self.parse_datetime(dt, "%b %d, %Y %I:%M %p")
         if date is dt:
-            date = text.parse_datetime(dt, "%B %d, %Y %I:%M %p")
+            date = self.parse_datetime(dt, "%B %d, %Y %I:%M %p")
         return date
 
     def _warn_preview(self):
@@ -215,7 +221,7 @@ class SubscribestarExtractor(Extractor):
 class SubscribestarUserExtractor(SubscribestarExtractor):
     """Extractor for media from a subscribestar user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/(?!posts/)([^/?#]+)"
     example = "https://www.subscribestar.com/USER"
 
     def posts(self):
@@ -237,7 +243,7 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
 class SubscribestarPostExtractor(SubscribestarExtractor):
     """Extractor for media from a single subscribestar post"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/posts/(\d+)"
+    pattern = rf"{BASE_PATTERN}/posts/(\d+)"
     example = "https://www.subscribestar.com/posts/12345"
 
     def posts(self):

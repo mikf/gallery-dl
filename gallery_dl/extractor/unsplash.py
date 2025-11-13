@@ -41,7 +41,7 @@ class UnsplashExtractor(Extractor):
             if metadata:
                 photo.update(metadata)
             photo["extension"] = "jpg"
-            photo["date"] = text.parse_datetime(photo["created_at"])
+            photo["date"] = self.parse_datetime_iso(photo["created_at"])
             if "tags" in photo:
                 photo["tags"] = [t["title"] for t in photo["tags"]]
 
@@ -74,7 +74,7 @@ class UnsplashExtractor(Extractor):
 class UnsplashImageExtractor(UnsplashExtractor):
     """Extractor for a single unsplash photo"""
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/photos/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/photos/([^/?#]+)"
     example = "https://unsplash.com/photos/ID"
 
     def photos(self):
@@ -85,7 +85,7 @@ class UnsplashImageExtractor(UnsplashExtractor):
 class UnsplashUserExtractor(UnsplashExtractor):
     """Extractor for all photos of an unsplash user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/@(\w+)/?$"
+    pattern = rf"{BASE_PATTERN}/@(\w+)/?$"
     example = "https://unsplash.com/@USER"
 
     def photos(self):
@@ -97,7 +97,7 @@ class UnsplashUserExtractor(UnsplashExtractor):
 class UnsplashFavoriteExtractor(UnsplashExtractor):
     """Extractor for all likes of an unsplash user"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/@(\w+)/likes"
+    pattern = rf"{BASE_PATTERN}/@(\w+)/likes"
     example = "https://unsplash.com/@USER/likes"
 
     def photos(self):
@@ -109,7 +109,7 @@ class UnsplashFavoriteExtractor(UnsplashExtractor):
 class UnsplashCollectionExtractor(UnsplashExtractor):
     """Extractor for an unsplash collection"""
     subcategory = "collection"
-    pattern = BASE_PATTERN + r"/collections/([^/?#]+)(?:/([^/?#]+))?"
+    pattern = rf"{BASE_PATTERN}/collections/([^/?#]+)(?:/([^/?#]+))?"
     example = "https://unsplash.com/collections/12345/TITLE"
 
     def __init__(self, match):
@@ -128,7 +128,7 @@ class UnsplashCollectionExtractor(UnsplashExtractor):
 class UnsplashSearchExtractor(UnsplashExtractor):
     """Extractor for unsplash search results"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/s/photos/([^/?#]+)(?:\?([^#]+))?"
+    pattern = rf"{BASE_PATTERN}/s/photos/([^/?#]+)(?:\?([^#]+))?"
     example = "https://unsplash.com/s/photos/QUERY"
 
     def __init__(self, match):

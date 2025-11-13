@@ -6,7 +6,6 @@
 
 from gallery_dl.extractor import facebook
 from gallery_dl import exception
-import datetime
 
 
 __tests__ = (
@@ -165,12 +164,33 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/photo.php/?fbid=10165113568399554&set=t.100064860875397",
+    "#class"   : facebook.FacebookPhotoExtractor,
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo?fbid=10165113568399554&set=t.100064860875397",
+    "#class"   : facebook.FacebookPhotoExtractor,
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo/?fbid=10165113568399554&set=t.100064860875397&type=3",
+    "#class"   : facebook.FacebookPhotoExtractor,
+},
+
+{
+    "#url"     : "https://www.facebook.com/photo/?fbid=10165113568399554&set=t.100064860875397&type=3&setextract",
+    "#class"   : facebook.FacebookPhotoExtractor,
+    "#fail"    : "'setextract' query parameter",
+},
+
+{
     "#url"     : "https://www.facebook.com/photo/?fbid=10160743390456729",
     "#class"   : facebook.FacebookPhotoExtractor,
     "#count"   : 1,
 
     "caption"  : "They were on a break... #FriendsReunion #MoreTogether",
-    "date"     : datetime.datetime(2021, 5, 27, 21, 55, 19),
+    "date"     : "dt:2021-05-27 21:55:19",
     "filename" : "191053255_10160743390471729_9001965649022744000_n",
     "extension": "jpg",
     "id"       : "10160743390456729",
@@ -191,7 +211,7 @@ __tests__ = (
     "#count"   : 1,
 
     "caption"  : "",
-    "date"     : datetime.datetime(2014, 5, 3, 0, 44, 47),
+    "date"     : "dt:2014-05-03 00:44:47",
     "filename" : str,
     "extension": "png",
     "id"       : "10152716011076729",
@@ -251,7 +271,7 @@ __tests__ = (
     "#class"   : facebook.FacebookVideoExtractor,
     "#count"   : 1,
 
-    "date"     : datetime.datetime(2024, 4, 19, 17, 25, 48),
+    "date"     : "dt:2024-04-19 17:25:48",
     "filename" : str,
     "id"       : "1165557851291824",
     "url"      : str,
@@ -307,6 +327,20 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/instagram/info",
+    "#class"   : facebook.FacebookInfoExtractor,
+    "#metadata": "post",
+
+    "id"            : "100064469571787",
+    "name"          : "Instagram",
+    "username"      : "instagram",
+    "biography"     : "Discover what's new on Instagram 🔎✨",
+    "url"           : "https://www.facebook.com/instagram",
+    "set_id"        : "",
+    "!user_pfbid"    : r"re:pfbid\w{64}",
+},
+
+{
     "#url"     : "https://www.facebook.com/brando.cha.3/info",
     "#class"   : facebook.FacebookInfoExtractor,
     "#metadata": "post",
@@ -314,6 +348,7 @@ __tests__ = (
     "id"            : "100046356937542",
     "name"          : "Throwaway Idk",
     "username"      : "brando.cha.3",
+    "biography"     : "",
     "url"           : "https://www.facebook.com/brando.cha.3",
     "alternate_name": "",
     "profile_video" : None,
@@ -347,6 +382,16 @@ __tests__ = (
             "url"     : "https://www.facebook.com/brando.cha.3/videos",
         },
     ],
+},
+
+{
+    "#url"     : "https://www.facebook.com/Forgetmen0w/info",
+    "#comment" : "'biography' fallback (#8233)",
+    "#class"   : facebook.FacebookInfoExtractor,
+    "#auth"    : True,
+    "#metadata": "post",
+
+    "biography": "G ❤️",
 },
 
 )

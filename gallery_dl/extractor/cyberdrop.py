@@ -4,22 +4,22 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://cyberdrop.me/"""
+"""Extractors for https://cyberdrop.cr/"""
 
 from . import lolisafe
 from .common import Message
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?cyberdrop\.(?:me|to)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?cyberdrop\.(?:cr|me|to)"
 
 
 class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
     """Extractor for cyberdrop albums"""
     category = "cyberdrop"
-    root = "https://cyberdrop.me"
-    root_api = "https://api.cyberdrop.me"
-    pattern = BASE_PATTERN + r"/a/([^/?#]+)"
-    example = "https://cyberdrop.me/a/ID"
+    root = "https://cyberdrop.cr"
+    root_api = "https://api.cyberdrop.cr"
+    pattern = rf"{BASE_PATTERN}/a/([^/?#]+)"
+    example = "https://cyberdrop.cr/a/ID"
 
     def items(self):
         files, data = self.fetch_album(self.album_id)
@@ -47,7 +47,7 @@ class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
             "album_name" : text.unescape(extr('title="', '"')),
             "album_size" : text.parse_bytes(extr(
                 '<p class="title">', "B")),
-            "date"       : text.parse_datetime(extr(
+            "date"       : self.parse_datetime(extr(
                 '<p class="title">', '<'), "%d.%m.%Y"),
             "description": text.unescape(text.unescape(  # double
                 desc.rpartition(" [R")[0])),
@@ -76,8 +76,8 @@ class CyberdropMediaExtractor(CyberdropAlbumExtractor):
     """Extractor for cyberdrop media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"/f/([^/?#]+)"
-    example = "https://cyberdrop.me/f/ID"
+    pattern = rf"{BASE_PATTERN}/f/([^/?#]+)"
+    example = "https://cyberdrop.cr/f/ID"
 
     def fetch_album(self, album_id):
         return self._extract_files((album_id,)), {

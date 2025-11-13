@@ -36,8 +36,7 @@ class PhilomenaExtractor(BooruExtractor):
         return url
 
     def _prepare(self, post):
-        post["date"] = text.parse_datetime(
-            post["created_at"][:19], "%Y-%m-%dT%H:%M:%S")
+        post["date"] = self.parse_datetime_iso(post["created_at"][:19])
 
 
 BASE_PATTERN = PhilomenaExtractor.update({
@@ -62,7 +61,7 @@ BASE_PATTERN = PhilomenaExtractor.update({
 class PhilomenaPostExtractor(PhilomenaExtractor):
     """Extractor for single posts on a Philomena booru"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/(?:images/)?(\d+)"
+    pattern = rf"{BASE_PATTERN}/(?:images/)?(\d+)"
     example = "https://derpibooru.org/images/12345"
 
     def posts(self):
@@ -73,7 +72,7 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
     """Extractor for Philomena search results"""
     subcategory = "search"
     directory_fmt = ("{category}", "{search_tags}")
-    pattern = BASE_PATTERN + r"/(?:search/?\?([^#]+)|tags/([^/?#]+))"
+    pattern = rf"{BASE_PATTERN}/(?:search/?\?([^#]+)|tags/([^/?#]+))"
     example = "https://derpibooru.org/search?q=QUERY"
 
     def __init__(self, match):
@@ -107,7 +106,7 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
     subcategory = "gallery"
     directory_fmt = ("{category}", "galleries",
                      "{gallery[id]} {gallery[title]}")
-    pattern = BASE_PATTERN + r"/galleries/(\d+)"
+    pattern = rf"{BASE_PATTERN}/galleries/(\d+)"
     example = "https://derpibooru.org/galleries/12345"
 
     def metadata(self):

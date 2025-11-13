@@ -27,7 +27,7 @@ class GirlsreleasedExtractor(Extractor):
             yield Message.Queue, f"{base}{set[0]}", data
 
     def _pagination(self):
-        base = f"{self.root}/api/0.1/sets/{self._path}/{self.groups[0]}/page/"
+        base = f"{self.root}/api/0.2/sets/{self._path}/{self.groups[0]}/page/"
         for pnum in itertools.count():
             sets = self.request_json(f"{base}{pnum}")["sets"]
             if not sets:
@@ -41,18 +41,18 @@ class GirlsreleasedExtractor(Extractor):
 class GirlsreleasedSetExtractor(GirlsreleasedExtractor):
     """Extractor for girlsreleased galleries"""
     subcategory = "set"
-    pattern = BASE_PATTERN + r"/set/(\d+)"
+    pattern = rf"{BASE_PATTERN}/set/(\d+)"
     example = "https://girlsreleased.com/set/12345"
 
     def items(self):
-        url = f"{self.root}/api/0.1/set/{self.groups[0]}"
+        url = f"{self.root}/api/0.2/set/{self.groups[0]}"
         json = self.request_json(url)["set"]
         data = {
             "title": json["name"] or json["id"],
             "id": json["id"],
             "site": json["site"],
             "model": [model for _, model in json["models"]],
-            "date": text.parse_timestamp(json["date"]),
+            "date": self.parse_timestamp(json["date"]),
             "count": len(json["images"]),
             "url": "https://girlsreleased.com/set/" + json["id"],
         }
@@ -65,12 +65,12 @@ class GirlsreleasedSetExtractor(GirlsreleasedExtractor):
 class GirlsreleasedModelExtractor(GirlsreleasedExtractor):
     """Extractor for girlsreleased models"""
     subcategory = _path = "model"
-    pattern = BASE_PATTERN + r"/model/(\d+(?:/.+)?)"
+    pattern = rf"{BASE_PATTERN}/model/(\d+(?:/.+)?)"
     example = "https://girlsreleased.com/model/12345/MODEL"
 
 
 class GirlsreleasedSiteExtractor(GirlsreleasedExtractor):
     """Extractor for girlsreleased sites"""
     subcategory = _path = "site"
-    pattern = BASE_PATTERN + r"/site/([^/?#]+(?:/model/\d+/?.*)?)"
+    pattern = rf"{BASE_PATTERN}/site/([^/?#]+(?:/model/\d+/?.*)?)"
     example = "https://girlsreleased.com/site/SITE"

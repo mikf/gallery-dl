@@ -28,11 +28,20 @@ Extractor Options
 
 
 Each extractor is identified by its ``category`` and ``subcategory``.
-The ``category`` is the lowercase site name without any spaces or special
+
+``category`` is the lowercase site name without any spaces or special
 characters, which is usually just the module name
 (``pixiv``, ``danbooru``, ...).
-The ``subcategory`` is a lowercase word describing the general functionality
+
+``subcategory`` is a lowercase word describing the general functionality
 of that extractor (``user``, ``favorite``, ``manga``, ...).
+
+The ``category`` and ``subcategory`` of all extractors are included in the
+output of ``gallery-dl --list-extractors``.
+For a specific URL, these values
+can also be determined by using the
+``-E`` / ``--extractor-info`` and ``-K`` / ``--list-keywords``
+command-line optiona (see the example below).
 
 Each one of the following options can be specified on multiple levels of the
 configuration tree:
@@ -43,23 +52,53 @@ Category level:    ``extractor.<category>.<option-name>``
 Subcategory level: ``extractor.<category>.<subcategory>.<option-name>``
 ================== =======
 
-A value in a "deeper" level hereby overrides a value of the same name on a
-lower level. Setting the ``extractor.pixiv.filename`` value, for example, lets
-you specify a general filename pattern for all the different pixiv extractors.
-Using the ``extractor.pixiv.user.filename`` value lets you override this
+JSON Representation:
+
+.. code:: json
+
+    {
+        "extractor": {
+            "<option-name>": "<value-base>",
+
+            "<category>": {
+                "<option-name>": "<value-category>",
+
+                "<subcategory>": {
+                    "<option-name>": "<value-subcategory>"
+                }
+            }
+        }
+    }
+
+A value in a "deeper" level hereby
+overrides a value of the same name on a lower level.
+For example, setting a value for ``extractor.pixiv.filename``
+lets you specify a general filename pattern
+for all the different ``pixiv`` extractors.
+Setting the ``extractor.pixiv.user.filename`` value lets you override this
 general pattern specifically for ``PixivUserExtractor`` instances.
 
-The ``category`` and ``subcategory`` of all extractors are included in the
-output of ``gallery-dl --list-extractors``. For a specific URL these values
-can also be determined by using the ``-K``/``--list-keywords`` command-line
-option (see the example below).
+Specifying an option on the top level, next to ``extractor``,
+acts as a *global* setting,
+overriding *all* other values with the same option name,
+regardless of their position.
+
+.. code:: json
+
+    {
+        "extractor": {
+            "<option-name>": "<value-base (overridden)>"
+        },
+        "<option-name>": "<value-global>"
+    }
+
 
 
 extractor.*.filename
 --------------------
 Type
-    * ``string``
-    * ``object`` (`condition` -> `format string`_)
+    * `Format String`_
+    * ``object`` (Condition_ → `Format String`_)
 Example
     .. code:: json
 
@@ -74,12 +113,15 @@ Example
         }
 
 Description
-    A `format string`_ to build filenames for downloaded files with.
+    A `Format String`_ to generate filenames for downloaded files.
 
-    If this is an ``object``, it must contain Python expressions mapping to the
-    filename format strings to use.
-    These expressions are evaluated in the specified order until one evaluates
-    to ``True``.
+    If this is an ``object``,
+    it must contain Conditions_ mapping to the
+    `Format String`_ to use.
+    These Conditions_ are evaluated in the specified order
+    until one evaluates to ``True``.
+    When none match, the ``""`` entry or
+    the extractor's default filename `Format String`_ is used.
 
     The available replacement keys depend on the extractor used. A list
     of keys for a specific one can be acquired by calling *gallery-dl*
@@ -106,8 +148,8 @@ Description
           5977527
         subcategory
           image
-
-    Note: Even if the value of the ``extension`` key is missing or
+Note
+    Even if the value of the ``extension`` key is missing or
     ``None``, it will be filled in later when the file download is
     starting. This key is therefore always available to provide
     a valid filename extension.
@@ -116,8 +158,8 @@ Description
 extractor.*.directory
 ---------------------
 Type
-    * ``list`` of ``strings``
-    * ``object`` (`condition` -> `format strings`_)
+    * ``list`` of `Format Strings`_
+    * ``object`` (Condition_ → `Format Strings`_)
 Example
     .. code:: json
 
@@ -132,10 +174,11 @@ Example
         }
 
 Description
-    A list of `format strings`_ to build target directory paths with.
+    A list of `Format String(s)`_ to generate the target directory path.
 
-    If this is an ``object``, it must contain Python expressions mapping to the
-    list of format strings to use.
+    If this is an ``object``,
+    it must contain Conditions_ mapping to the
+    list of `Format Strings`_ to use.
 
     Each individual string in such a list represents a single path
     segment, which will be joined together and appended to the
@@ -145,11 +188,28 @@ Description
 extractor.*.base-directory
 --------------------------
 Type
-    |Path|_
+    * |Path|_
+    * ``object`` (Condition_ → |Path|_)
 Default
     ``"./gallery-dl/"``
+Example
+    .. code:: json
+
+        "~/Downloads/gallery-dl"
+
+    .. code:: json
+
+        {
+            "score >= 100": "$DL",
+            "duration"    : "$DL/video",
+            ""            : "/tmp/files/"
+        }
 Description
     Directory path used as base for all download destinations.
+
+    If this is an ``object``,
+    it must contain Conditions_ mapping to the |Path|_ to use.
+    Specifying a default |Path|_ with ``""`` is required.
 
 
 extractor.*.parent-directory
@@ -202,7 +262,7 @@ extractor.*.path-restrict
 -------------------------
 Type
     * ``string``
-    * ``object`` (`character` -> `replacement character(s)`)
+    * ``object`` (`character` → `replacement character(s)`)
 Default
     ``"auto"``
 Example
@@ -214,22 +274,30 @@ Description
     | or an ``object`` mapping invalid/unwanted characters, character sets,
       or character ranges to their replacements
     | for generated path segment names.
-
-    Special values:
-
-    * ``"auto"``: Use characters from ``"unix"`` or ``"windows"``
-      depending on the local operating system
-    * ``"unix"``: ``"/"``
-    * ``"windows"``: ``"\\\\|/<>:\"?*"``
-    * ``"ascii"``: ``"^0-9A-Za-z_."`` (only ASCII digits, letters, underscores, and dots)
-    * ``"ascii+"``: ``"^0-9@-[\\]-{ #-)+-.;=!}~"`` (all ASCII characters except the ones not allowed by Windows)
-
-    Implementation Detail: For ``strings`` with length >= 2, this option uses a
+Special Values
+    ``"auto"``
+        Use characters from ``"unix"`` or ``"windows"``
+        depending on the local operating system
+    ``"unix"``
+        ``"/"``
+    ``"windows"``
+        | ``"\\\\|/<>:\"?*"``
+        | (https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file)
+    ``"ascii"``
+        | ``"^0-9A-Za-z_."``
+        | (only ASCII digits, letters, underscores, and dots)
+    ``"ascii+"``
+        | ``"^0-9@-[\\]-{ #-)+-.;=!}~"``
+        | (all ASCII characters except the ones not allowed by Windows)
+Implementation Detail
+    For ``strings`` with length >= 2, this option uses a
     `Regular Expression Character Set <https://www.regular-expressions.info/charclass.html>`__,
     meaning that:
 
-    * using a caret ``^`` as first character inverts the set
-    * character ranges are supported (``0-9a-z``)
+    * Using a caret ``^`` as first character inverts the set
+      (``"^..."``)
+    * Character ranges are supported
+      (``"0-9a-z"``)
     * ``]``, ``-``, and ``\`` need to be escaped as
       ``\\]``, ``\\-``, and ``\\\\`` respectively
       to use them as literal characters
@@ -254,8 +322,8 @@ Default
     ``"\u0000-\u001f\u007f"`` (ASCII control characters)
 Description
     Set of characters to remove from generated path names.
-
-    Note: In a string with 2 or more characters, ``[]^-\`` need to be
+Note
+    In a string with 2 or more characters, ``[]^-\`` need to be
     escaped with backslashes, e.g. ``"\\[\\]"``
 
 
@@ -268,13 +336,14 @@ Default
 Description
     Set of characters to remove from the end of generated path segment names
     using `str.rstrip() <https://docs.python.org/3/library/stdtypes.html#str.rstrip>`_
-
-    Special values:
-
-    * ``"auto"``: Use characters from ``"unix"`` or ``"windows"``
-      depending on the local operating system
-    * ``"unix"``: ``""``
-    * ``"windows"``: ``". "``
+Special Values
+    ``"auto"``
+        Use characters from ``"unix"`` or ``"windows"``
+        depending on the local operating system
+    ``"unix"``
+        ``""``
+    ``"windows"``
+        ``". "``
 
 
 extractor.*.path-convert
@@ -304,7 +373,7 @@ Description
 extractor.*.extension-map
 -------------------------
 Type
-    ``object`` (`extension` -> `replacement`)
+    ``object`` (`extension` → `replacement`)
 Default
     .. code:: json
 
@@ -376,9 +445,9 @@ Description
 extractor.*.skip-filter
 -----------------------
 Type
-    ``string``
+    Condition_
 Description
-    Python expression controlling which skipped files to count towards
+    Python Expression_ controlling which skipped files to count towards
     ``"abort"`` / ``"terminate"`` / ``"exit"``.
 
 
@@ -419,55 +488,57 @@ extractor.*.sleep-request
 Type
     |Duration|_
 Default
-    * ``"0.5-1.5"``
-        ``ao3``,
-        ``arcalive``,
-        ``booth``,
-        ``civitai``,
-        ``[Danbooru]``,
-        ``[E621]``,
-        ``[foolfuuka]:search``,
-        ``itaku``,
-        ``newgrounds``,
-        ``[philomena]``,
-        ``pixiv-novel``,
-        ``plurk``,
-        ``poipiku`` ,
-        ``pornpics``,
-        ``schalenetwork``,
-        ``scrolller``,
-        ``sizebooru``,
-        ``soundgasm``,
-        ``urlgalleries``,
-        ``vk``,
-        ``webtoons``,
-        ``weebcentral``,
-        ``xfolio``,
+    ``"0.5-1.5"``
+        ``ao3``             |
+        ``arcalive``        |
+        ``booth``           |
+        ``civitai``         |
+        ``[Danbooru]``      |
+        ``[E621]``          |
+        ``[foolfuuka]:search`` |
+        ``hdoujin``         |
+        ``itaku``           |
+        ``newgrounds``      |
+        ``[philomena]``     |
+        ``pixiv-novel``     |
+        ``plurk``           |
+        ``poipiku``         |
+        ``pornpics``        |
+        ``schalenetwork``   |
+        ``scrolller``       |
+        ``sizebooru``       |
+        ``soundgasm``       |
+        ``thehentaiworld``  |
+        ``urlgalleries``    |
+        ``vk``              |
+        ``webtoons``        |
+        ``weebcentral``     |
+        ``xfolio``          |
         ``zerochan``
-    * ``"1.0"``
-        ``furaffinity``
+    ``"1.0"``
+        ``furaffinity``     |
         ``rule34``
-    * ``"1.0-2.0"``
-        ``flickr``,
-        ``pexels``,
-        ``weibo``,
+    ``"1.0-2.0"``
+        ``flickr``          |
+        ``pexels``          |
+        ``weibo``           |
         ``[wikimedia]``
-    * ``"1.4"``
+    ``"1.4"``
         ``wallhaven``
-    * ``"2.0-4.0"``
-        ``behance``,
-        ``imagefap``,
+    ``"2.0-4.0"``
+        ``behance``         |
+        ``imagefap``        |
         ``[Nijie]``
-    * ``"3.0-6.0"``
-        ``bilibili``,
-        ``exhentai``,
-        ``[reactor]``,
+    ``"3.0-6.0"``
+        ``bilibili``        |
+        ``exhentai``        |
+        ``[reactor]``       |
         ``readcomiconline``
-    * ``"6.0-6.1"``
+    ``"6.0-6.1"``
         ``twibooru``
-    * ``"6.0-12.0"``
+    ``"6.0-12.0"``
         ``instagram``
-    * ``0``
+    ``0``
         otherwise
 Description
     Minimal time interval in seconds between each HTTP request
@@ -486,41 +557,40 @@ Description
 
     This is supported for
 
-    * ``aibooru`` (*)
+    * ``aibooru`` (`* <pw-apikey_>`__)
     * ``ao3``
     * ``aryion``
-    * ``atfbooru`` (*)
+    * ``atfbooru`` (`* <pw-apikey_>`__)
     * ``bluesky``
-    * ``booruvar`` (*)
+    * ``booruvar`` (`* <pw-apikey_>`__)
     * ``coomer``
-    * ``danbooru`` (*)
+    * ``danbooru`` (`* <pw-apikey_>`__)
     * ``deviantart``
-    * ``e621`` (*)
-    * ``e6ai`` (*)
-    * ``e926`` (*)
+    * ``e621`` (`* <pw-apikey_>`__)
+    * ``e6ai`` (`* <pw-apikey_>`__)
+    * ``e926`` (`* <pw-apikey_>`__)
     * ``exhentai``
     * ``girlswithmuscle``
-    * ``horne`` (R)
+    * ``horne`` (`R <pw-required_>`__)
     * ``idolcomplex``
     * ``imgbb``
     * ``inkbunny``
     * ``iwara``
     * ``kemono``
-    * ``madokami`` (R)
+    * ``madokami`` (`R <pw-required_>`__)
     * ``mangadex``
     * ``mangoxo``
     * ``newgrounds``
-    * ``nijie`` (R)
+    * ``nijie`` (`R <pw-required_>`__)
     * ``pillowfort``
     * ``rule34xyz``
     * ``sankaku``
-    * ``schalenetwork``
     * ``scrolller``
     * ``seiga``
+    * ``simpcity``
     * ``subscribestar``
     * ``tapas``
     * ``tsumino``
-    * ``twitter``
     * ``vipergirls``
     * ``zerochan``
 
@@ -528,15 +598,22 @@ Description
     ``-u/--username`` and ``-p/--password`` command-line options or
     by using a |.netrc|_ file. (see Authentication_)
 
-    (*) The password value for these sites should be
-    the API key found in your user profile, not the actual account password.
-
-    (R) Login with username & password or supplying logged-in
-    `cookies <extractor.*.cookies_>`__ is required
-
-    Note: Leave the ``password`` value empty or undefined
+Note
+    Leave the ``password`` value empty or undefined
     to be prompted for a password when performing a login
     (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
+
+    .. _pw-apikey:
+
+    (*) The ``password`` value for these sites should be
+    the API key found in your user profile, not the actual account password.
+
+    .. _pw-required:
+
+    (R) Login with username & password or
+    supplying authenticated
+    `cookies <extractor.*.cookies_>`__
+    is *required*
 
 
 extractor.*.input
@@ -564,7 +641,7 @@ extractor.*.cookies
 -------------------
 Type
     * |Path|_
-    * ``object`` (`name` -> `value`)
+    * ``object`` (`name` → `value`)
     * ``list``
 Description
     Source to read additional cookies from. This can be
@@ -605,13 +682,10 @@ extractor.*.cookies-select
 Type
     ``string``
 Default
-    ``"random"``
+    ``null``
 Description
     Interpret `extractor.cookies <extractor.*.cookies_>`__
     as a list of cookie sources and select one of them for each extractor run.
-
-    * ``"random"``: Select cookies `randomly <https://docs.python.org/3.10/library/random.html#random.choice>`__
-    * ``"rotate"``: Select cookies in sequence. Start over from the beginning after reaching the end of the list.
 
     .. code:: json
 
@@ -621,6 +695,12 @@ Description
           "~/.local/share/cookies-instagram-com-3.txt",
           ["firefox", null, null, "c1", ".instagram-com"],
       ]
+
+Supported Values
+    ``"random"``
+        Select cookies `randomly <https://docs.python.org/3.10/library/random.html#random.choice>`__.
+    ``"rotate"``
+        Select cookies in sequence. Start over from the beginning after reaching the end of the list.
 
 
 extractor.*.cookies-update
@@ -643,7 +723,7 @@ extractor.*.proxy
 -----------------
 Type
     * ``string``
-    * ``object`` (`scheme` -> `proxy`)
+    * ``object`` (`scheme` → `proxy`)
 Example
     .. code:: json
 
@@ -667,9 +747,8 @@ Description
       It is also possible to set a proxy for a specific host by using
       ``scheme://host`` as key.
       See `Requests' proxy documentation`_ for more details.
-
-    Note: If a proxy URL does not include a scheme,
-    ``http://`` is assumed.
+Note
+    If a proxy URL does not include a scheme, ``http://`` is assumed.
 
 
 extractor.*.proxy-env
@@ -704,12 +783,21 @@ extractor.*.user-agent
 Type
     ``string``
 Default
-    * ``"gallery-dl/VERSION"``: ``[Danbooru]``, ``mangadex``, ``weasyl``
-    * ``"gallery-dl/VERSION (by mikf)"``: ``[E621]``
-    * ``"net.umanle.arca.android.playstore/0.9.75"``: ``arcalive``
-    * ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``: ``patreon``
-    * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/LATEST.0.0.0 Safari/537.36"``: ``instagram``
-    * ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``: otherwise
+    ``"gallery-dl/VERSION"``
+        * ``[Danbooru]``
+        * ``mangadex``
+        * ``weasyl``
+        * ``zerochan``
+    ``"gallery-dl/VERSION (by mikf)"``
+        * ``[E621]``
+    ``"net.umanle.arca.android.playstore/0.9.75"``
+        * ``arcalive``
+    ``"Patreon/72.2.28 (Android; Android 14; Scale/2.10)"``
+        * ``patreon``
+    ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/LATEST.0.0.0 Safari/537.36"``
+        * ``instagram``
+    ``"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:LATEST) Gecko/20100101 Firefox/LATEST"``
+        * otherwise
 Example
     * ``"curl/8.14.1"``
     * ``"browser"``
@@ -729,17 +817,26 @@ extractor.*.browser
 Type
     ``string``
 Default
-    * ``"firefox"``: ``artstation``, ``behance``, ``fanbox``, ``twitter``
-    * ``null``: otherwise
+    ``"firefox"``
+        ``artstation`` |
+        ``behance``    |
+        ``fanbox``     |
+        ``twitter``
+    ``null``
+        otherwise
 Example
-    * ``"firefox/128:linux"``
+    * ``"firefox"``
+    * ``"firefox/128"``
     * ``"chrome:macos"``
+    * ``"chrome/138:macos"``
 Description
-    Try to emulate a real browser (``firefox`` or ``chrome``)
-    by using their default HTTP headers and TLS ciphers for HTTP requests.
+    | Try to emulate a real browser (``firefox`` or ``chrome``)
+    | by using its HTTP headers and TLS ciphers for HTTP requests
+      by setting specialized defaults for
 
-    Optionally, the operating system used in the ``User-Agent`` header can be
-    specified after a ``:`` (``windows``, ``linux``, or ``macos``).
+    * `user-agent <extractor.*.user-agent_>`__
+    * `headers <extractor.*.headers_>`__
+    * `ciphers <extractor.*.ciphers_>`__
 
     Supported browsers:
 
@@ -750,15 +847,15 @@ Description
     * ``chrome/138``
     * ``chrome/111``
 
-    Note:
-    This option sets custom
-    `headers <extractor.*.headers_>`__
-    and
-    `ciphers <extractor.*.ciphers_>`__
-    defaults.
+    The operating system used in the ``User-Agent`` header can be
+    specified after a colon ``:`` (``windows``, ``linux``, ``macos``),
+    for example ``chrome:windows``.
+Note
+    Any value *not* matching a supported browser
+    will fall back to ``"firefox"``.
 
-    Note: ``requests`` and ``urllib3`` only support HTTP/1.1, while a real
-    browser would use HTTP/2.
+    ``requests`` and ``urllib3`` only support HTTP/1.1, while a real
+    browser would use HTTP/2 and HTTP/3.
 
 
 extractor.*.referer
@@ -767,7 +864,14 @@ Type
     * ``bool``
     * ``string``
 Default
+    ``false``
+        ``4archive``      |
+        ``4chanarchives`` |
+        ``archivedmoe``   |
+        ``nsfwalbum``     |
+        ``tumblrgallery``
     ``true``
+        otherwise
 Description
     Send `Referer <https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referer>`__
     headers with all outgoing HTTP requests.
@@ -780,7 +884,7 @@ extractor.*.headers
 -------------------
 Type
     * ``"string"``
-    * ``object`` (`name` -> `value`)
+    * ``object`` (`name` → `value`)
 Default
     .. code:: json
 
@@ -831,8 +935,12 @@ extractor.*.tls12
 Type
     ``bool``
 Default
-    * ``false``: ``artstation``, ``behance``, ``vsco``
-    * ``true``: otherwise
+    ``false``
+        ``artstation`` |
+        ``behance``    |
+        ``vsco``
+    ``true``
+        otherwise
 Description
     Allow selecting TLS 1.2 cipher suites.
 
@@ -843,11 +951,22 @@ Description
 extractor.*.keywords
 --------------------
 Type
-    ``object`` (`name` -> `value`)
+    ``object`` (`name` → `value`)
 Example
     ``{"type": "Pixel Art", "type_id": 123}``
 Description
     Additional name-value pairs to be added to each metadata dictionary.
+
+
+extractor.*.keywords-default
+----------------------------
+Type
+    any
+Default
+    ``"None"``
+Description
+    Default value used for missing or undefined keyword names in a
+    `Format String`_.
 
 
 extractor.*.keywords-eval
@@ -858,18 +977,21 @@ Default
     ``false``
 Description
     Evaluate each `keywords <extractor.*.keywords_>`__ ``string`` value
-    as a `format string`_.
+    as a `Format String`_.
 
 
-extractor.*.keywords-default
-----------------------------
+extractor.*.keywords-global
+---------------------------
 Type
-    any
-Default
-    ``"None"``
+    ``object`` (`name` → `value`)
+Example
+    ``{"type": "Original", "type_id": 1, "type_category": "meta"}``
 Description
-    Default value used for missing or undefined keyword names in
-    `format strings`_.
+    Global name-value pairs to be added to each metadata dictionary.
+Note
+    Keywords defined here will be overwritten by keywords from
+    `extractor.keywords <extractor.*.keywords_>`__
+    with the same name.
 
 
 extractor.*.metadata-url
@@ -982,8 +1104,8 @@ Description
     * A category or basecategory name (``"imgur"``, ``"mastodon"``)
     * | A (base)category-subcategory pair, where both names are separated by a colon (``"redgifs:user"``).
       | Both names can be a `*` or left empty, matching all possible names (``"*:image"``, ``":user"``).
-
-    Note: Any ``blacklist`` setting will automatically include
+Note
+    Any ``blacklist`` setting will automatically include
     ``"oauth"``, ``"recursive"``, and ``"test"``.
 
 
@@ -1011,10 +1133,10 @@ Description
     `PostgreSQL Connection URI <https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS>`__,
     the archive will use this PostgreSQL database as backend (requires
     `Psycopg <https://www.psycopg.org/>`__).
+Note
+    Archive files that do not already exist get generated automatically.
 
-    Note: Archive files that do not already exist get generated automatically.
-
-    Note: Archive paths support regular `format string`_ replacements,
+    Archive paths support basic `Format String`_ replacements,
     but be aware that using external inputs for building local paths
     may pose a security risk.
 
@@ -1027,25 +1149,26 @@ Type
 Default
     ``"file"``
 Example
-    * ``"file,skip"``
-    * ``["file", "skip"]``
+    * ``"after,skip"``
+    * ``["after", "skip"]``
 Description
     `Event(s) <metadata.event_>`__
     for which IDs get written to an
     `archive <extractor.*.archive_>`__.
-
-    Available events are:
-    ``file``, ``skip``
+Available Events
+    * ``file``
+    * ``after``
+    * ``skip``
 
 
 extractor.*.archive-format
 --------------------------
 Type
-    ``string``
+    `Format String`_
 Example
     ``"{id}_{offset}"``
 Description
-    An alternative `format string`_ to build archive IDs with.
+    An alternative `Format String`_ to build archive IDs with.
 
 
 extractor.*.archive-mode
@@ -1058,16 +1181,18 @@ Description
     Controls when to write `archive IDs <extractor.*.archive-format_>`__
     to the archive database.
 
-    * ``"file"``: Write IDs immediately
-      after completing or skipping a file download.
-    * ``"memory"``: Keep IDs in memory
-      and only write them after successful job completion.
+    ``"file"``
+        Write IDs immediately
+        after completing or skipping a file download.
+    ``"memory"``
+        Keep IDs in memory
+        and only write them after successful job completion.
 
 
 extractor.*.archive-prefix
 --------------------------
 Type
-    ``string``
+    `Format String`_
 Default
     * ``""`` when `archive-table <extractor.*.archive-table_>`__ is set
     * ``"{category}"`` otherwise
@@ -1091,20 +1216,20 @@ Description
 extractor.*.archive-table
 -------------------------
 Type
-    ``string``
+    `Format String`_
 Default
     ``"archive"``
 Example
     ``"{category}"``
 Description
-    `Format string`_ selecting the archive database table name.
+    `Format String`_ selecting the archive database table name.
 
 
 extractor.*.actions
 -------------------
 Type
-    * ``object`` (`pattern` -> `Action(s)`_)
-    * ``list`` of ``lists`` with `pattern` -> `Action(s)`_ pairs as elements
+    * ``object`` (`pattern` → `Action(s)`_)
+    * ``list`` of [`pattern`, `Action(s)`_] pairs
 Example
     .. code:: json
 
@@ -1136,11 +1261,12 @@ Description
     ``pattern`` is parsed as severity level (``debug``, ``info``, ``warning``, ``error``, or integer value)
     followed by an optional
     `Python Regular Expression <https://docs.python.org/3/library/re.html#regular-expression-syntax>`__
-    separated by a colon ``:``
+    separated by a colon:
+    ``<level>:<re>``
 
     Using ``*`` as `level` or leaving it empty
-    matches logging messages of all levels
-    (e.g. ``*:<re>`` or ``:<re>``).
+    matches logging messages of all levels:
+    ``*:<re>`` or ``:<re>``
 
 
 extractor.*.postprocessors
@@ -1184,7 +1310,7 @@ Description
 extractor.*.postprocessor-options
 ---------------------------------
 Type
-    ``object`` (`name` -> `value`)
+    ``object`` (`name` → `value`)
 Example
     .. code:: json
 
@@ -1305,7 +1431,7 @@ extractor.*.image-range
 Type
     * ``string``
     * ``list`` of ``strings``
-Examples
+Example
     * ``"10-20"``
     * ``"-5, 10, 30-50, 100-"``
     * ``"10:21, 30:51:2, :5, 100:"``
@@ -1322,8 +1448,8 @@ Description
     | Arguments for range and slice notation are optional
       and will default to begin (``1``) or end (``sys.maxsize``) if omitted.
     | For example ``5-``, ``5:``, and ``5::`` all mean "Start at file number 5".
-
-    Note: The index of the first file is ``1``.
+Note
+    The index of the first file is ``1``.
 
 
 extractor.*.chapter-range
@@ -1338,15 +1464,15 @@ Description
 extractor.*.image-filter
 ------------------------
 Type
-    * ``string``
-    * ``list`` of ``strings``
-Examples
+    * Condition_
+    * ``list`` of Conditions_
+Example
     * ``"re.search(r'foo(bar)+', description)"``
     * ``["width >= 1200", "width/height > 1.2"]``
 Description
-    Python expression controlling which files to download.
+    Python Expression_ controlling which files to download.
 
-    A file only gets downloaded when *all* of the given expressions evaluate to ``True``.
+    A file only gets downloaded when *all* of the given Expressions_ evaluate to ``True``.
 
     Available values are the filename-specific ones listed by ``-K`` or ``-j``.
 
@@ -1354,9 +1480,9 @@ Description
 extractor.*.chapter-filter
 --------------------------
 Type
-    * ``string``
-    * ``list`` of ``strings``
-Examples
+    * Condition_
+    * ``list`` of Conditions_
+Example
     * ``"lang == 'en'"``
     * ``["language == 'French'", "10 <= chapter < 20"]``
 Description
@@ -1391,14 +1517,21 @@ extractor.*.date-format
 Type
     ``string``
 Default
-    ``"%Y-%m-%dT%H:%M:%S"``
+    ``null``
 Description
     Format string used to parse ``string`` values of
     `date-min` and `date-max`.
 
     See |strptime|_ for a list of formatting directives.
-
-    Note: Despite its name, this option does **not** control how
+Special Values
+    ``null``
+        | Parse `date-min` and `date-max` according to
+          `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`__
+        | See
+          `datetime.fromisoformat() <https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat>`__
+          for details and examples.
+Note
+    Despite its name, this option does **not** control how
     ``{date}`` metadata fields are formatted.
     To use a different formatting for those values other than the default
     ``%Y-%m-%d %H:%M:%S``, put |strptime|_ formatting directives
@@ -1416,11 +1549,12 @@ Description
     During data extraction,
     write received HTTP request data
     to enumerated files in the current working directory.
-
-    Special values:
-
-    * ``"all"``: Include HTTP request and response headers. Hide ``Authorization``, ``Cookie``, and ``Set-Cookie`` values.
-    * ``"ALL"``: Include all HTTP request and response headers.
+Special Values
+    ``"all"``
+        | Include HTTP request and response headers.
+        | Hide ``Authorization``, ``Cookie``, and ``Set-Cookie`` values.
+    ``"ALL"``
+        Include all HTTP request and response headers.
 
 
 
@@ -1543,9 +1677,11 @@ Default
 Description
     Controls the post extraction strategy.
 
-    * ``true``: Start on users' main gallery pages and recursively
-      descend into subfolders
-    * ``false``: Get posts from "Latest Updates" pages
+    ``true``
+        Start on users' main gallery pages and
+        recursively descend into subfolders
+    ``false``
+        Get posts from "Latest Updates" pages
 
 
 extractor.batoto.domain
@@ -1592,9 +1728,38 @@ Default
     ``["image", "video", "mediacollection", "embed"]``
 Description
     Selects which gallery modules to download from.
+Supported Types
+    * ``"image"``
+    * ``"video"``
+    * ``"mediacollection"``
+    * ``"embed"``
+    * ``"text"``
 
-    Supported module types are
-    ``image``, ``video``, ``mediacollection``, ``embed``, ``text``.
+
+extractor.bellazon.order-posts
+------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    posts of a ``thread`` are processed.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"`` | ``"reverse"``
+        Descending order (newest first)
+
+
+extractor.bellazon.quoted
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract files from quoted content.
 
 
 extractor.[blogger].api-key
@@ -1633,17 +1798,16 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-    ``"info"``,
-    ``"avatar"``,
-    ``"background"``,
-    ``"posts"``,
-    ``"replies"``,
-    ``"media"``,
-    ``"video"``,
-    ``"likes"``,
-
+Supported Values
+    * ``info``
+    * ``avatar``
+    * ``background``
+    * ``posts``
+    * ``replies``
+    * ``media``
+    * ``video``
+    * ``likes``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -1683,10 +1847,11 @@ Example
 Description
     Extract additional metadata.
 
-    * ``facets``: ``hashtags``, ``mentions``, and ``uris``
-    * ``user``: detailed ``user`` metadata for the user referenced in the input URL
-      (See `app.bsky.actor.getProfile <https://docs.bsky.app/docs/api/app-bsky-actor-get-profile>`__).
-
+    ``facets``
+        ``hashtags``, ``mentions``, ``uris``
+    ``user``
+        | Detailed ``user`` metadata for the user referenced in the input URL.
+        | (`app.bsky.actor.getProfile <https://docs.bsky.app/docs/api/app-bsky-actor-get-profile>`__)
 
 
 extractor.bluesky.post.depth
@@ -1700,7 +1865,7 @@ Default
 Description
     Sets the maximum depth of returned reply posts.
 
-    (See `depth` parameter of `app.bsky.feed.getPostThread <https://docs.bsky.app/docs/api/app-bsky-feed-get-post-thread>`__)
+    (See the ``depth`` parameter of `app.bsky.feed.getPostThread <https://docs.bsky.app/docs/api/app-bsky-feed-get-post-thread>`__)
 
 
 extractor.bluesky.quoted
@@ -1775,17 +1940,16 @@ Example
 Description
     Download videos.
 
-    | If this is a ``list``, it selects which format to try to download.
-    | Possibly available formats are
-
+    If this is a ``list``, it selects which format to try to download.
+Possible Formats
     * ``ultra_hd`` (2160p)
-    * ``quad_hd`` (1440p)
-    * ``full_hd`` (1080p)
-    * ``high`` (720p)
-    * ``medium`` (480p)
-    * ``low`` (360p)
-    * ``lowest`` (240p)
-    * ``tiny`` (144p)
+    * ``quad_hd``  (1440p)
+    * ``full_hd``  (1080p)
+    * ``high``      (720p)
+    * ``medium``    (480p)
+    * ``low``       (360p)
+    * ``lowest``    (240p)
+    * ``tiny``      (144p)
 
 
 extractor.booth.strategy
@@ -1824,8 +1988,10 @@ Default
 Description
     Controls which ``bunkr`` TLDs to accept.
 
-    * ``true``: Match URLs with *all* possible TLDs (e.g. ``bunkr.xyz`` or ``bunkrrr.duck``)
-    * ``false``: Match only URLs with known TLDs
+    ``true``
+        Match URLs with *all* possible TLDs (e.g. ``bunkr.xyz`` or ``bunkrrr.duck``)
+    ``false``
+        Match only URLs with known TLDs
 
 
 extractor.cien.files
@@ -1836,12 +2002,11 @@ Default
     ``["image", "video", "download", "gallery"]``
 Description
     Determines the type and order of files to download.
-
-    Available types are
-    ``image``,
-    ``video``,
-    ``download``,
-    ``gallery``.
+Available Types
+    * ``image``
+    * ``video``
+    * ``download``
+    * ``gallery``
 
 
 extractor.civitai.api
@@ -1853,8 +2018,10 @@ Default
 Description
     Selects which API endpoints to use.
 
-    * ``"rest"``: `Public REST API <https://developer.civitai.com/docs/api/public-rest>`__
-    * ``"trpc"``: Internal tRPC API
+    ``"rest"``
+        `Public REST API <https://developer.civitai.com/docs/api/public-rest>`__
+    ``"trpc"``
+        Internal tRPC API
 
 
 extractor.civitai.api-key
@@ -1878,11 +2045,10 @@ Default
     ``["image"]``
 Description
     Determines the type and order of files to download when processing models.
-
-    Available types are
-    ``model``,
-    ``image``,
-    ``gallery``.
+Available Types
+    * ``model``
+    * ``image``
+    * ``gallery``
 
 
 extractor.civitai.include
@@ -1895,17 +2061,15 @@ Default
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-
-    * ``"user-models"``
-    * ``"user-posts"``
-    * ``"user-images"``
-    * ``"user-videos"``
-    * ``"user-collections"``
-
-    It is possible to use ``"all"`` instead of listing all values separately.
+Supported Values
+    * ``user-models``
+    * ``user-posts``
+    * ``user-images``
+    * ``user-videos``
+    * ``user-collections``
 Note
+    It is possible to use ``"all"`` instead of listing all values separately.
+
     To get a more complete set of metadata
     like ``model['name']`` and ``post['title']``,
     include ``user-models`` and ``user-posts``
@@ -1927,8 +2091,8 @@ Example
     * ``["version", "generation"]``
 Description
     Extract additional ``generation``, ``version``, and ``post`` metadata.
-
-    Note: This requires 1 or more additional API requests per image or video.
+Note
+    This requires 1 or more additional API requests per image or video.
 
 
 extractor.civitai.nsfw
@@ -1955,6 +2119,45 @@ Description
       ``None`` and ``Soft`` rated images,
 
 
+extractor.civitai.period
+------------------------
+Type
+    ``string``
+Default
+    ``"AllTime"``
+Description
+    Sets the ``period`` parameter
+    when paginating over results.
+Supported Values
+    * ``"AllTime"``
+    * ``"Year"``
+    * ``"Month"``
+    * ``"Week"``
+    * ``"Day"``
+
+
+extractor.civitai.sort
+----------------------
+Type
+    ``string``
+Default
+    ``"Newest"``
+Description
+    Sets the ``sort`` parameter
+    when paginating over results.
+Supported Values
+    * ``"Newest"``
+    * ``"Oldest"``
+    * ``"Most Reactions"``
+    * ``"Most Comments"``
+    * ``"Most Collected"``
+Special Values
+    ``"asc"``
+        Ascending order (``"Oldest"``)
+    ``"desc"`` | ``"reverse"``
+        Descending order (``"Newest"``)
+
+
 extractor.civitai.quality
 -------------------------
 Type
@@ -1970,8 +2173,8 @@ Description
     to pass with every image URL.
 
     Known available options include ``original``, ``quality``, ``width``
-
-    Note: Set this option to an arbitrary letter, e.g., ``"w"``,
+Note
+    Set this option to an arbitrary letter, e.g., ``"w"``,
     to download images in JPEG format at their original resolution.
 
 
@@ -2017,8 +2220,7 @@ Example
     * ``"fr,it,pl"``
     * ``["fr", "it", "pl"]``
 Description
-    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language codes
-    to filter chapters by.
+    |ISO 639-1| code(s) to filter chapters by.
 
 
 extractor.cyberdrop.domain
@@ -2034,6 +2236,30 @@ Description
 
     Setting this option to ``"auto"``
     uses the same domain as a given input URL.
+
+
+extractor.cyberfile.password
+----------------------------
+Type
+    ``string``
+Default
+    ``""``
+Description
+    Password value used to access protected files and folders.
+
+    Leave this value empty or undefined
+    to be interactively prompted for a password when needed
+    (see `getpass() <https://docs.python.org/3/library/getpass.html#getpass.getpass>`__).
+
+
+extractor.cyberfile.recursive
+-----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Recursively download files from subfolders.
 
 
 extractor.[Danbooru].external
@@ -2077,8 +2303,10 @@ Default
 Description
     Controls the download target for Ugoira posts.
 
-    * ``true``: Original ZIP archives
-    * ``false``: Converted video files
+    ``true``
+        ZIP archives
+    ``false``
+        Converted video files
 
 
 extractor.[Danbooru].metadata
@@ -2099,8 +2327,8 @@ Description
     It is possible to specify a custom list of metadata includes.
     See `available_includes <https://github.com/danbooru/danbooru/blob/2cf7baaf6c5003c1a174a8f2d53db010cf05dca7/app/models/post.rb#L1842-L1849>`__
     for possible field names. ``aibooru`` also supports ``ai_metadata``.
-
-    Note: This requires 1 additional HTTP request per 200-post batch.
+Note
+    This requires 1 additional HTTP request per 200-post batch.
 
 
 extractor.[Danbooru].threshold
@@ -2114,8 +2342,8 @@ Description
     Stop paginating over API results if the length of a batch of returned
     posts is less than the specified number. Defaults to the per-page limit
     of the current instance, which is 200.
-
-    Note: Changing this setting is normally not necessary. When the value is
+Note
+    Changing this setting is normally not necessary. When the value is
     greater than the per-page limit, gallery-dl will stop after the first
     batch. The value cannot be less than 1.
 
@@ -2170,8 +2398,8 @@ Default
     ``false``
 Description
     Download the avatar of each commenting user.
-
-    Note: Enabling this option also enables deviantart.comments_.
+Note
+    Enabling this option also enables deviantart.comments_.
 
 
 extractor.deviantart.extra
@@ -2183,8 +2411,8 @@ Default
 Description
     Download extra Sta.sh resources from
     description texts and journals.
-
-    Note: Enabling this option also enables deviantart.metadata_.
+Note
+    Enabling this option also enables deviantart.metadata_.
 
 
 extractor.deviantart.flat
@@ -2197,14 +2425,16 @@ Description
     Select the directory structure created by the Gallery- and
     Favorite-Extractors.
 
-    * ``true``: Use a flat directory structure.
-    * ``false``: Collect a list of all gallery-folders or
-      favorites-collections and transfer any further work to other
-      extractors (``folder`` or ``collection``), which will then
-      create individual subdirectories for each of them.
-
-      Note: Going through all gallery folders will not be able to
-      fetch deviations which aren't in any folder.
+    ``true``
+        Use a flat directory structure.
+    ``false``
+            Collect a list of all gallery ``folders`` or
+            favorites ``collections`` and transfer any further work to other
+            extractors (``folder`` or ``collection``), which will then
+            create individual subdirectories for each of them.
+Note
+    Going through all gallery folders won't
+    fetch deviations not contained in any folder.
 
 
 extractor.deviantart.folders
@@ -2216,8 +2446,8 @@ Default
 Description
     Provide a ``folders`` metadata field that contains the names of all
     folders a deviation is present in.
-
-    Note: Gathering this information requires a lot of API calls.
+Note
+    Gathering this information requires a lot of API calls.
     Use with caution.
 
 
@@ -2234,10 +2464,9 @@ Description
 
     When disabled, assume every given profile name
     belongs to a regular user.
-
-    Special values:
-
-    * ``"skip"``: Skip groups
+Special Values
+    ``"skip"``
+        Skip groups
 
 
 extractor.deviantart.include
@@ -2253,16 +2482,15 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-    ``"avatar"``,
-    ``"background"``,
-    ``"gallery"``,
-    ``"scraps"``,
-    ``"journal"``,
-    ``"favorite"``,
-    ``"status"``.
-
+Supported Values
+    * ``avatar``
+    * ``background``
+    * ``gallery``
+    * ``scraps``
+    * ``journal``
+    * ``favorite``
+    * ``status``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -2287,23 +2515,12 @@ Description
     Selects the output format for textual content. This includes journals,
     literature and status updates.
 
-    * ``"html"``: HTML with (roughly) the same layout as on DeviantArt.
-    * ``"text"``: Plain text with image references and HTML tags removed.
-    * ``"none"``: Don't download textual content.
-
-
-extractor.deviantart.jwt
-------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Update `JSON Web Tokens <https://jwt.io/>`__ (the ``token`` URL parameter)
-    of otherwise non-downloadable, low-resolution images
-    to be able to download them in full resolution.
-
-    Note: No longer functional as of 2023-10-11
+    ``"html"``
+        HTML with (roughly) the same layout as on DeviantArt.
+    ``"text"``
+        Plain text with image references and HTML tags removed.
+    ``"none"``
+        Don't download textual content.
 
 
 extractor.deviantart.mature
@@ -2340,12 +2557,17 @@ Description
 
     It is possible to request extended metadata by specifying a list of
 
-    * ``camera``     : EXIF information (if available)
-    * ``stats``      : deviation statistics
-    * ``submission`` : submission information
-    * ``collection`` : favourited folder information (requires a `refresh token <extractor.deviantart.refresh-token_>`__)
-    * ``gallery``    : gallery folder information (requires a `refresh token <extractor.deviantart.refresh-token_>`__)
-
+    ``camera``
+        EXIF information if available
+    ``stats``
+        Deviation statistics
+    ``submission``
+        Submission information
+    ``collection``
+        Favourited folder information (requires a `refresh token <extractor.deviantart.refresh-token_>`__)
+    ``gallery``
+        Gallery folder information (requires a `refresh token <extractor.deviantart.refresh-token_>`__)
+Note
     Set this option to ``"all"`` to request all extended metadata categories.
 
     See `/deviation/metadata <https://www.deviantart.com/developers/http/v1/20210526/deviation_metadata/7824fc14d6fba6acbacca1cf38c24158>`__
@@ -2376,8 +2598,10 @@ Default
 Description
     Controls when to stop paginating over API results.
 
-    * ``"api"``: Trust the API and stop when ``has_more`` is ``false``.
-    * ``"manual"``: Disregard ``has_more`` and only stop when a batch of results is empty.
+    ``"api"``
+        Trust the API and stop when ``has_more`` is ``false``.
+    ``"manual"``
+        Disregard ``has_more`` and only stop when a batch of results is empty.
 
 
 extractor.deviantart.previews
@@ -2432,8 +2656,8 @@ Description
 
     Using a ``refresh-token`` allows you to access private or otherwise
     not publicly available deviations.
-
-    Note: The ``refresh-token`` becomes invalid
+Note
+    The ``refresh-token`` becomes invalid
     `after 3 months <https://www.deviantart.com/developers/authentication#refresh>`__
     or whenever your `cache file <cache.file_>`__ is deleted or cleared.
 
@@ -2536,8 +2760,8 @@ Example
     * ``["notes", "pools"]``
 Description
     Extract additional metadata (notes, pool metadata) if available.
-
-    Note: This requires 0-2 additional HTTP requests per post.
+Note
+    This requires 0-2 additional HTTP requests per post.
 
 
 extractor.[E621].threshold
@@ -2551,8 +2775,8 @@ Description
     Stop paginating over API results if the length of a batch of returned
     posts is less than the specified number. Defaults to the per-page limit
     of the current instance, which is 320.
-
-    Note: Changing this setting is normally not necessary. When the value is
+Note
+    Changing this setting is normally not necessary. When the value is
     greater than the per-page limit, gallery-dl will stop after the first
     batch. The value cannot be less than 1.
 
@@ -2574,10 +2798,13 @@ Type
 Default
     ``"auto"``
 Description
-    * ``"auto"``: Use ``e-hentai.org`` or ``exhentai.org``
-      depending on the input URL
-    * ``"e-hentai.org"``: Use ``e-hentai.org`` for all URLs
-    * ``"exhentai.org"``: Use ``exhentai.org`` for all URLs
+    ``"auto"``
+        Use ``e-hentai.org`` or ``exhentai.org``
+        depending on the input URL
+    ``"e-hentai.org"``
+        Use ``e-hentai.org`` for all URLs
+    ``"exhentai.org"``
+        Use ``exhentai.org`` for all URLs
 
 
 extractor.exhentai.fallback-retries
@@ -2600,10 +2827,10 @@ Example
 Description
     After downloading a gallery,
     add it to your account's favorites as the given category number.
+Note
+    Set this to `"favdel"` to remove galleries from your favorites.
 
-    Note: Set this to `"favdel"` to remove galleries from your favorites.
-
-    Note: This will remove any Favorite Notes when applied
+    This will remove any Favorite Notes when applied
     to already favorited galleries.
 
 
@@ -2680,9 +2907,11 @@ Default
 Description
     Selects an alternative source to download files from.
 
-    * ``"hitomi"``:  Download the corresponding gallery from ``hitomi.la``
-    * ``"metadata"``:  Load only a gallery's metadata from the
-      `API <https://ehwiki.org/wiki/API#Gallery_Metadata>`_
+    ``"hitomi"``
+         Download the corresponding gallery from ``hitomi.la``
+    ``"metadata"``
+        Load only a gallery's metadata from the
+        `API <https://ehwiki.org/wiki/API#Gallery_Metadata>`_
 
 
 extractor.exhentai.tags
@@ -2720,14 +2949,12 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Supported values are
-
+Supported Values
     * ``info``
     * ``avatar``
     * ``photos``
     * ``albums``
-
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -2741,9 +2968,12 @@ Default
 Description
     Control video download behavior.
 
-    * ``true``: Extract and download video & audio separately.
-    * ``"ytdl"``: Let |ytdl| handle video extraction and download, and merge video & audio streams.
-    * ``false``: Ignore videos.
+    ``true``
+        Extract and download video & audio separately.
+    ``"ytdl"``
+        Let |ytdl| handle video extraction and download, and merge video & audio streams.
+    ``false``
+        Ignore videos.
 
 
 extractor.fanbox.comments
@@ -2754,8 +2984,8 @@ Default
     ``false``
 Description
     Extract ``comments`` metadata.
-
-    Note: This requires 1 or more additional API requests per post,
+Note
+    This requires 1 or more additional API requests per post,
     depending on the number of comments.
 
 
@@ -2769,11 +2999,14 @@ Default
 Description
     Control behavior on embedded content from external sites.
 
-    * ``true``: Extract embed URLs and download them if supported
-      (videos are not downloaded).
-    * ``"ytdl"``: Like ``true``, but let |ytdl| handle video
-      extraction and download for YouTube, Vimeo, and SoundCloud embeds.
-    * ``false``: Ignore embeds.
+    ``true``
+        Extract embed URLs and download them if supported
+        (videos are not downloaded).
+    ``"ytdl"``
+        Like ``true``, but let |ytdl| handle video
+        extraction and download for YouTube, Vimeo, and SoundCloud embeds.
+    ``false``
+        Ignore embeds.
 
 
 extractor.fanbox.fee-max
@@ -2783,8 +3016,8 @@ Type
 Description
     Do not request API data or extract files from posts
     that require a fee (``feeRequired``) greater than the specified amount.
-
-    Note: This option has no effect on individual post URLs.
+Note
+    This option has no effect on individual post URLs.
 
 
 extractor.fanbox.metadata
@@ -2800,15 +3033,45 @@ Example
     * ``["user", "plan", "comments"]``
 Description
     Extract ``plan`` and extended ``user`` metadata.
-
-    Supported fields when selecting which data to extract are
-
+Supported Fields
     * ``comments``
     * ``plan``
     * ``user``
-
-    Note: ``comments`` can also be enabled via
+Note
+    ``comments`` can also be enabled via
     `fanbox.comments <extractor.fanbox.comments_>`__
+
+
+extractor.fanbox.creator.offset
+-------------------------------
+Type
+    ``integer``
+Default
+    ``0``
+Description
+    Custom ``offset`` starting value when paginating over posts.
+
+
+extractor.fansly.formats
+------------------------
+Type
+    ``list`` of ``integers``
+Default
+    ``[1, 2, 3, 4, 302, 303]``
+Description
+    List of file formats to consider during format selection.
+
+
+extractor.fansly.token
+----------------------
+Type
+    ``string``
+Example
+    ``"kX7pL9qW3zT2rY8mB5nJ4vC6xF1tA0hD8uE2wG9yR3sQ7iZ4oM5jN6cP8lV0bK2tU9aL1eW"``
+Description
+    ``authorization`` header value
+    used for requests to ``https://apiv3.fansly.com/api``
+    to access locked content.
 
 
 extractor.flickr.access-token & .access-token-secret
@@ -2831,8 +3094,8 @@ Default
 Description
     For each photo, return the albums and pools it belongs to
     as ``set`` and ``pool`` metadata.
-
-    Note: This requires 1 additional API call per photo.
+Note
+    This requires 1 additional API call per photo.
     See `flickr.photos.getAllContexts <https://www.flickr.com/services/api/flickr.photos.getAllContexts.html>`__ for details.
 
 
@@ -2845,8 +3108,8 @@ Default
 Description
     For each photo, return its EXIF/TIFF/GPS tags
     as ``exif`` and ``camera`` metadata.
-
-    Note: This requires 1 additional API call per photo.
+Note
+    This requires 1 additional API call per photo.
     See `flickr.photos.getExif <https://www.flickr.com/services/api/flickr.photos.getExif.html>`__ for details.
 
 
@@ -2859,8 +3122,8 @@ Default
 Description
     For each photo, retrieve its "full" metadata as provided by
     `flickr.photos.getInfo <https://www.flickr.com/services/api/flickr.photos.getInfo.html>`__
-
-    Note: This requires 1 additional API call per photo.
+Note
+    This requires 1 additional API call per photo.
 
 
 extractor.flickr.metadata
@@ -2892,8 +3155,8 @@ Default
     ``false``
 Description
     Extract additional ``user`` profile metadata.
-
-    Note: This requires 1 additional API call per user profile.
+Note
+    This requires 1 additional API call per user profile.
     See `flickr.people.getInfo <https://www.flickr.com/services/api/flickr.people.getInfo.html>`__ for details.
 
 
@@ -2933,8 +3196,10 @@ Default
 Description
     Controls the format of ``description`` metadata fields.
 
-    * ``"text"``: Plain text with HTML tags removed
-    * ``"html"``: Raw HTML content
+    ``"text"``
+        Plain text with HTML tags removed
+    ``"html"``
+        Raw HTML content
 
 
 extractor.furaffinity.external
@@ -2960,10 +3225,11 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-    ``"gallery"``, ``"scraps"``, ``"favorite"``.
-
+Supported Values
+    * ``gallery``
+    * ``scraps``
+    * ``favorite``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -2976,9 +3242,12 @@ Default
 Description
     Selects which site layout to expect when parsing posts.
 
-    * ``"auto"``: Automatically differentiate between ``"old"`` and ``"new"``
-    * ``"old"``: Expect the *old* site layout
-    * ``"new"``: Expect the *new* site layout
+    ``"auto"``
+        Automatically differentiate between ``"old"`` and ``"new"``
+    ``"old"``
+        Expect the *old* site layout
+    ``"new"``
+        Expect the *new* site layout
 
 
 extractor.gelbooru.api-key & .user-id
@@ -3003,9 +3272,10 @@ Default
 Description
     Controls the order in which favorited posts are returned.
 
-    * ``"asc"``: Ascending favorite date order (oldest first)
-    * ``"desc"``: Descending favorite date order (newest first)
-    * ``"reverse"``: Same as ``"asc"``
+    ``"asc"``
+        Ascending favorite date order (oldest first)
+    ``"desc"`` | ``"reverse"``
+        Descending favorite date order (newest first)
 
 
 extractor.generic.enabled
@@ -3055,6 +3325,86 @@ Description
     Recursively download files from subfolders.
 
 
+extractor.hdoujin.cbz
+---------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download each gallery as a single ``.cbz`` file.
+Note
+    Requires a
+    `token <extractor.hdoujin.token_>`__
+
+
+extractor.hdoujin.crt
+---------------------
+Type
+    ``string``
+Example
+    * ``"0542daa9-352c-4fd5-a497-6c6d5cf07423"``
+    * ``"/12345/a1b2c3d4e5f6?crt=0542daa9-352c-4fd5-a497-6c6d5cf07423"``
+Description
+    The ``crt`` query parameter value
+    sent when fetching gallery data.
+
+    To get this value:
+
+    * Open your browser's Developer Tools (F12)
+    * Select `Network` → `XHR`
+    * Open a gallery page
+    * Select the last `Network` entry and copy its ``crt`` value
+Note
+    You will also need your browser's
+    `user-agent <extractor.*.user-agent_>`__
+
+
+extractor.hdoujin.format
+------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["0", "1600", "1280", "980", "780"]``
+Description
+    Name(s) of the image format to download.
+
+    When more than one format is given, the first available one is selected.
+
+    | Possible formats are
+    | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"`` (original)
+
+
+extractor.hdoujin.tags
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Group ``tags`` by type and
+    provide them as ``tags_<type>`` metadata fields,
+    for example ``tags_artist`` or ``tags_character``.
+
+
+extractor.hdoujin.token
+-----------------------
+Type
+    ``string``
+Example
+    * ``"3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
+    * ``"Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
+    * ``"Authorization: Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
+Description
+    ``Authorization`` header value
+    used for requests to ``https://api.hdoujin.org``
+    to access ``favorite`` galleries
+    or download
+    `.cbz <extractor.hdoujin.cbz_>`__
+    archives.
+
+
 extractor.hentaifoundry.descriptions
 ------------------------------------
 Type
@@ -3064,8 +3414,10 @@ Default
 Description
     Controls the format of ``description`` metadata fields.
 
-    * ``"text"``: Plain text with HTML tags removed
-    * ``"html"``: Raw HTML content
+    ``"text"``
+        Plain text with HTML tags removed
+    ``"html"``
+        Raw HTML content
 
 
 extractor.hentaifoundry.include
@@ -3081,10 +3433,12 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-    ``"pictures"``, ``"scraps"``, ``"stories"``, ``"favorite"``.
-
+Supported Values
+    * ``pictures``
+    * ``scraps``
+    * ``stories``
+    * ``favorite``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -3096,8 +3450,9 @@ Default
     ``"webp"``
 Description
     Selects which image format to download.
-
-    Available formats are ``"webp"`` and ``"avif"``.
+Available Formats
+    * ``"webp"``
+    * ``"avif"``
 
 
 extractor.imagechest.access-token
@@ -3133,10 +3488,13 @@ Default
 Description
     Controls whether to choose the GIF or MP4 version of an animation.
 
-    * ``true``: Follow Imgur's advice and choose MP4 if the
-      ``prefer_video`` flag in an image's metadata is set.
-    * ``false``: Always choose GIF.
-    * ``"always"``: Always choose MP4.
+    ``true``
+        Follow Imgur's advice and choose MP4 if the
+        ``prefer_video`` flag in an image's metadata is set.
+    ``false``
+        Always choose GIF.
+    ``"always"``
+        Always choose MP4.
 
 
 extractor.inkbunny.orderby
@@ -3161,8 +3519,10 @@ Default
 Description
     Selects which API endpoints to use.
 
-    * ``"rest"``: REST API - higher-resolution media
-    * ``"graphql"``: GraphQL API - lower-resolution media
+    ``"rest"``
+        REST API - higher-resolution media
+    ``"graphql"``
+        GraphQL API - lower-resolution media
 
 
 extractor.instagram.cursor
@@ -3199,16 +3559,15 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-    ``"posts"``,
-    ``"reels"``,
-    ``"tagged"``,
-    ``"stories"``,
-    ``"highlights"``,
-    ``"info"``,
-    ``"avatar"``.
-
+Supported Values
+    * ``posts``
+    * ``reels``
+    * ``tagged``
+    * ``stories``
+    * ``highlights``
+    * ``info``
+    * ``avatar``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -3231,8 +3590,8 @@ Default
 Description
     Provide extended ``user`` metadata even when referring to a user by ID,
     e.g. ``instagram.com/id:12345678``.
-
-    Note: This metadata is always available when referring to a user by name,
+Note
+    This metadata is always available when referring to a user by name,
     e.g. ``instagram.com/USERNAME``.
 
 
@@ -3245,11 +3604,12 @@ Default
 Description
     Controls the order in which files of each post are returned.
 
-    * ``"asc"``: Same order as displayed in a post
-    * ``"desc"``: Reverse order as displayed in a post
-    * ``"reverse"``: Same as ``"desc"``
-
-    Note: This option does *not* affect ``{num}``.
+    ``"asc"``
+        Same order as displayed in a post
+    ``"desc"`` | ``"reverse"``
+        Reverse order as displayed in a post
+Note
+    This option does *not* affect ``{num}``.
     To enumerate files in reverse order, use ``count - num + 1``.
 
 
@@ -3262,13 +3622,16 @@ Default
 Description
     Controls the order in which posts are returned.
 
-    * ``"asc"``: Same order as displayed
-    * ``"desc"``: Reverse order as displayed
-    * ``"id"`` or ``"id_asc"``: Ascending order by ID
-    * ``"id_desc"``: Descending order by ID
-    * ``"reverse"``: Same as ``"desc"``
-
-    Note: This option only affects ``highlights``.
+    ``"asc"``
+        Same order as displayed
+    ``"desc"`` | ``"reverse"``
+        Reverse order as displayed
+    ``"id"`` or ``"id_asc"``
+        Ascending order by ID
+    ``"id_desc"``
+        Descending order by ID
+Note
+    This option only affects ``highlights``.
 
 
 extractor.instagram.previews
@@ -3299,6 +3662,39 @@ Description
         Do not download videos
 
 
+extractor.instagram.warn-images
+-------------------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``true``
+Description
+    Show a warning when downloading images
+    with a resolution smaller than the `original`.
+
+    ``true``
+        Show a warning when at least one dimension
+        is smaller than the reported `original` resolution
+    ``"all"`` | ``"both"``
+        Show a warning only when both ``width`` and ``height``
+        are smaller than the reported `original` resolution
+    ``false``
+        Do not show a warning
+
+
+extractor.instagram.warn-videos
+-------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Show a warning when downloading videos with a
+    `User-Agent <extractor.*.user-agent_>`__
+    header causing potentially lowered video quality.
+
+
 extractor.instagram.stories.split
 ---------------------------------
 Type
@@ -3322,16 +3718,32 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Supported values are
-
+Supported Values
     * ``gallery``
     * ``posts``
     * ``followers``
     * ``following``
     * ``stars``
-
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
+
+
+extractor.itaku.order
+---------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    images/posts/users are returned.
+
+    ``"asc"`` | ``"reverse"``
+        Ascending order (oldest first)
+    ``"desc"``
+        Descending order (newest first)
+    any other ``string``
+        Custom result order
 
 
 extractor.itaku.videos
@@ -3354,13 +3766,11 @@ Default
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-
-    * ``"user-images"``
-    * ``"user-videos"``
-    * ``"user-playlists"``
-
+Supported Values
+    * ``user-images``
+    * ``user-videos``
+    * ``user-playlists``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -3373,8 +3783,8 @@ Default
 Description
     Extract additional metadata for ``archives`` files, including
     ``file``, ``file_list``, and ``password``.
-
-    Note: This requires 1 additional HTTP request per ``archives`` file.
+Note
+    This requires 1 additional HTTP request per ``archives`` file.
 
 
 extractor.kemono.comments
@@ -3385,8 +3795,8 @@ Default
     ``false``
 Description
     Extract ``comments`` metadata.
-
-    Note: This requires 1 additional HTTP request per post.
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.kemono.duplicates
@@ -3468,8 +3878,10 @@ Default
     ``["attachments", "file", "inline"]``
 Description
     Determines the type and order of files to be downloaded.
-
-    Available types are ``file``, ``attachments``, and ``inline``.
+Available Types
+    * ``file``
+    * ``attachments``
+    * ``inline``
 
 
 extractor.kemono.max-posts
@@ -3503,8 +3915,8 @@ Description
     Extract post revisions.
 
     Set this to ``"unique"`` to filter out duplicate revisions.
-
-    Note: This requires 1 additional HTTP request per post.
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.kemono.order-revisions
@@ -3518,9 +3930,27 @@ Description
     `revisions <extractor.kemono.revisions_>`__
     are returned.
 
-    * ``"asc"``: Ascending order (oldest first)
-    * ``"desc"``: Descending order (newest first)
-    * ``"reverse"``: Same as ``"asc"``
+    ``"asc"`` | ``"reverse"``
+        Ascending order (oldest first)
+    ``"desc"``
+        Descending order (newest first)
+
+
+extractor.kemono.discord.order-posts
+------------------------------------
+Type
+    ``string``
+Default
+    ``"asc"``
+Description
+    Controls the order in which
+    ``discord`` posts
+    are returned.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"`` | ``"reverse"``
+        Descending order (newest first)
 
 
 extractor.khinsider.covers
@@ -3547,47 +3977,6 @@ Description
 
     If the selected format is not available,
     the first in the list gets chosen (usually `mp3`).
-
-
-extractor.schalenetwork.cbz
----------------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Download each gallery as a single ``.cbz`` file.
-
-    Disabling this option causes a gallery
-    to be downloaded as individual image files.
-
-
-extractor.schalenetwork.format
-------------------------------
-Type
-    * ``string``
-    * ``list`` of ``strings``
-Default
-    ``["0", "1600", "1280", "980", "780"]``
-Description
-    Name(s) of the image format to download.
-
-    When more than one format is given, the first available one is selected.
-
-    | Possible formats are
-    | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"`` (original)
-
-
-extractor.schalenetwork.tags
-----------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Group ``tags`` by type and
-    provide them as ``tags_<type>`` metadata fields,
-    for example ``tags_artist`` or ``tags_character``.
 
 
 extractor.lolisafe.domain
@@ -3630,7 +4019,7 @@ Description
 extractor.mangadex.api-parameters
 ---------------------------------
 Type
-    ``object`` (`name` -> `value`)
+    ``object`` (`name` → `value`)
 Example
     ``{"order[updatedAt]": "desc"}``
 Description
@@ -3650,8 +4039,7 @@ Example
     * ``"fr,it"``
     * ``["fr", "it"]``
 Description
-    `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language codes
-    to filter chapters by.
+    |ISO 639-1| code(s) to filter chapters by.
 
 
 extractor.mangadex.ratings
@@ -3667,6 +4055,28 @@ Example
     * ``["erotica", "suggestive"]``
 Description
     List of acceptable content ratings for returned chapters.
+
+
+extractor.mangafire.manga.lang
+------------------------------
+Type
+    ``string``
+Default
+    ``"en"``
+Description
+    |ISO 639-1| code selecting which chapters to download.
+
+
+extractor.mangareader.manga.lang
+--------------------------------
+Type
+    ``string``
+Default
+    ``"en"``
+Example
+    ``"pt-br"``
+Description
+    |ISO 639-1| code selecting which chapters to download.
 
 
 extractor.mangapark.source
@@ -3696,11 +4106,9 @@ Default
 Description
     The ``access-token`` value you get from `linking your account to
     gallery-dl <OAuth_>`__.
-
-    Note: gallery-dl comes with built-in tokens for ``mastodon.social``,
-    ``pawoo`` and ``baraag``. For other instances, you need to obtain an
-    ``access-token`` in order to use usernames in place of numerical
-    user IDs.
+Note
+    gallery-dl comes with built-in tokens for
+    ``mastodon.social``, ``pawoo``, and ``baraag``.
 
 
 extractor.[mastodon].cards
@@ -3751,6 +4159,16 @@ Description
     Your access token, necessary to fetch favorited notes.
 
 
+extractor.[misskey].date-min & .date-max
+----------------------------------------
+Type
+    |Date|_
+Default
+    ``null``
+Description
+    Retrieve only notes posted after/before this |Date|_
+
+
 extractor.[misskey].include
 ---------------------------
 Type
@@ -3764,13 +4182,12 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-    ``"info"``,
-    ``"avatar"``,
-    ``"background"``,
-    ``"notes"``,
-
+Supported Values
+    * ``info``
+    * ``avatar``
+    * ``background``
+    * ``notes``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -3794,6 +4211,16 @@ Description
     Fetch media from replies to other notes.
 
 
+extractor.[misskey].text-posts
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Also retrieve text-only notes without media content.
+
+
 extractor.[moebooru].pool.metadata
 ----------------------------------
 Type
@@ -3802,8 +4229,8 @@ Default
     ``false``
 Description
     Extract extended ``pool`` metadata.
-
-    Note: Not supported by all ``moebooru`` instances.
+Note
+    Not supported by all ``moebooru`` instances.
 
 
 extractor.naver-blog.videos
@@ -3870,10 +4297,12 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-    ``"art"``, ``"audio"``, ``"games"``, ``"movies"``.
-
+Supported Values
+    * ``art``
+    * ``audio``
+    * ``games``
+    * ``movies``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -3887,10 +4316,12 @@ Default
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-    ``"illustration"``, ``"doujin"``, ``"favorite"``, ``"nuita"``.
-
+Supported Values
+    * ``illustration``
+    * ``doujin``
+    * ``favorite``
+    * ``nuita``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -3924,9 +4355,12 @@ Default
 Description
     Control video download behavior.
 
-    * ``true``: Download videos
-    * ``"ytdl"``: Download videos using |ytdl|
-    * ``false``: Skip video Tweets
+    ``true``
+        Download videos
+    ``"ytdl"``
+        Download videos using |ytdl|
+    ``false``
+        Skip video Tweets
 
 
 extractor.oauth.browser
@@ -3938,9 +4372,11 @@ Default
 Description
     Controls how a user is directed to an OAuth authorization page.
 
-    * ``true``: Use Python's |webbrowser.open()|_ method to automatically
-      open the URL in the user's default browser.
-    * ``false``: Ask the user to copy & paste an URL from the terminal.
+    ``true``
+        Use Python's |webbrowser.open()|_ method to automatically
+        open the URL in the user's default browser.
+    ``false``
+        Ask the user to copy & paste an URL from the terminal.
 
 
 extractor.oauth.cache
@@ -3972,8 +4408,8 @@ Default
     ``6414``
 Description
     Port number to listen on during OAuth authorization.
-
-    Note: All redirects will go to port ``6414``, regardless
+Note
+    All redirects will go to port ``6414``, regardless
     of the port specified here. You'll have to manually adjust the
     port number in your browser's address bar when using a different
     port than the default.
@@ -3987,8 +4423,8 @@ Default
     ``false``
 Description
     Extract additional metadata (``source``, ``uploader``)
-
-    Note: This requires 1 additional HTTP request per post.
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.patreon.cursor
@@ -4020,9 +4456,7 @@ Default
     ``["images", "image_large", "attachments", "postfile", "content"]``
 Description
     Determines types and order of files to download.
-
-    Available types:
-
+Available Types
     * ``postfile``
     * ``images``
     * ``image_large``
@@ -4038,9 +4472,7 @@ Default
     ``"download_url"``
 Description
     Selects the format of ``images`` `files <extractor.patreon.files_>`__.
-
-    Possible formats:
-
+Available Formats
     * ``download_url`` (``"a":1,"p":1``)
     * ``url`` (``"w":620``)
     * ``original`` (``"q":100,"webp":0``)
@@ -4051,6 +4483,32 @@ Description
     * ``thumbnail`` (``"h":360,"w":360``)
     * ``thumbnail_large`` (``"h":1080,"w":1080``)
     * ``thumbnail_small`` (``"h":100,"w":100``)
+
+
+extractor.patreon.order-posts
+-----------------------------
+Type
+    ``string``
+Default
+    ``collection``
+        ``"asc"``
+    otherwise
+        ``"desc"``
+Example
+    * ``"-published_at"``
+    * ``"collection_order"``
+Description
+    Controls the order in which
+    posts are returned and processed.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"``
+        Descending order (newest first)
+    ``"reverse"``
+        Reverse order
+    any other ``string``
+        Custom ``sort`` order
 
 
 extractor.patreon.user.date-max
@@ -4212,15 +4670,14 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-    ``"artworks"``,
-    ``"avatar"``,
-    ``"background"``,
-    ``"favorite"``,
-    ``"novel-user"``,
-    ``"novel-bookmark"``.
-
+Supported Values
+    * ``artworks``
+    * ``avatar``
+    * ``background``
+    * ``favorite``
+    * ``novel-user``
+    * ``novel-bookmark``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -4255,8 +4712,8 @@ Description
     For works bookmarked by
     `your own account <extractor.pixiv.refresh-token_>`__,
     fetch bookmark tags as ``tags_bookmark`` metadata.
-
-    Note: This requires 1 additional API request per bookmarked post.
+Note
+    This requires 1 additional API request per bookmarked post.
 
 
 extractor.pixiv.captions
@@ -4278,8 +4735,8 @@ Default
     ``false``
 Description
     Fetch ``comments`` metadata.
-
-    Note: This requires 1 or more additional API requests per post,
+Note
+    This requires 1 or more additional API requests per post,
     depending on the number of comments.
 
 
@@ -4358,8 +4815,8 @@ Default
     ``false``
 Description
     Fetch ``comments`` metadata.
-
-    Note: This requires 1 or more additional API requests per novel,
+Note
+    This requires 1 or more additional API requests per novel,
     depending on the number of comments.
 
 
@@ -4427,8 +4884,8 @@ Description
     For novels bookmarked by
     `your own account <extractor.pixiv-novel.refresh-token_>`__,
     fetch bookmark tags as ``tags_bookmark`` metadata.
-
-    Note: This requires 1 additional API request per bookmarked post.
+Note
+    This requires 1 additional API request per bookmarked post.
 
 
 extractor.pixiv-novel.refresh-token
@@ -4500,8 +4957,10 @@ Default
 Description
     Controls how to handle redirects to CAPTCHA pages.
 
-    * ``"stop``: Stop the current extractor run.
-    * ``"wait``: Ask the user to solve the CAPTCHA and wait.
+    ``"stop``
+        Stop the current extractor run.
+    ``"wait``
+        Ask the user to solve the CAPTCHA and wait.
 
 
 extractor.readcomiconline.quality
@@ -4515,6 +4974,32 @@ Description
 
     ``"auto"`` uses the quality parameter of the input URL
     or ``"hq"`` if not present.
+
+
+extractor.reddit.api
+--------------------
+Type
+    ``string``
+Default
+    ``"oauth"``
+Description
+    Selects which API endpoints to use.
+
+    ``"oauth"``
+        Use the OAuth API at ``https://oauth.reddit.com``
+
+        Requires
+        `client-id & user-agent <extractor.reddit.client-id & .user-agent_>`__
+        and uses a
+        `refresh token <extractor.reddit.refresh-token_>`__
+        for authentication.
+
+    ``"rest"``
+        Use the REST API at ``https://www.reddit.com``
+
+        Uses
+        `cookies <extractor.*.cookies_>`__
+        for authentication.
 
 
 extractor.reddit.comments
@@ -4545,8 +5030,8 @@ Default
 Description
     Retrieve additional comments by resolving the ``more`` comment
     stubs in the base comment tree.
-
-    Note: This requires 1 additional API call for every 100 extra comments.
+Note
+    This requires 1 additional API call for every 100 extra comments.
 
 
 extractor.reddit.embeds
@@ -4579,6 +5064,22 @@ Description
     Ignore all submissions posted before/after the submission with this ID.
 
 
+extractor.reddit.limit
+----------------------
+Type
+    ``integer``
+Default
+    ``null``
+Description
+    Number of results to return in a single API query.
+
+    This value specifies the ``limit`` parameter
+    used for API requests when retrieving paginated results.
+
+    ``null`` means not including this parameter at all
+    and letting Reddit chose a default.
+
+
 extractor.reddit.previews
 -------------------------
 Type
@@ -4600,11 +5101,11 @@ Description
     Reddit extractors can recursively visit other submissions
     linked to in the initial set of submissions.
     This value sets the maximum recursion depth.
-
-    Special values:
-
-    * ``0``: Recursion is disabled
-    * ``-1``: Infinite recursion (don't do this)
+Special Values
+    ``0``
+        Recursion is disabled
+    ``-1``
+        Infinite recursion (don't do this)
 
 
 extractor.reddit.refresh-token
@@ -4645,14 +5146,18 @@ Default
 Description
     Control video download behavior.
 
-    * ``true``: Download videos and use |ytdl| to handle
-      HLS and DASH manifests
-    * ``"ytdl"``: Download videos and let |ytdl| handle all of
-      video extraction and download
-    * ``"dash"``: Extract DASH manifest URLs and use |ytdl|
-      to download and merge them. (*)
-    * ``false``: Ignore videos
-
+    ``true``
+        Download videos and use |ytdl| to handle
+        HLS and DASH manifests
+    ``"ytdl"``
+        Download videos and let |ytdl| handle all of
+        video extraction and download
+    ``"dash"``
+        Extract DASH manifest URLs and use |ytdl|
+        to download and merge them. (*)
+    ``false``
+        Ignore videos
+Note
     (*)
     This saves 1 HTTP request per video
     and might potentially be able to download otherwise deleted videos,
@@ -4667,13 +5172,7 @@ Type
 Default
     ``["hd", "sd", "gif"]``
 Description
-    List of names of the preferred animation format, which can be
-    ``"hd"``,
-    ``"sd"``,
-    ``"gif"``,
-    ``"thumbnail"``,
-    ``"vthumbnail"``, or
-    ``"poster"``.
+    List of names of the preferred animation format.`
 
     If a selected format is not available, the next one in the list will be
     tried until an available format is found.
@@ -4681,6 +5180,13 @@ Description
     If the format is given as ``string``, it will be extended with
     ``["hd", "sd", "gif"]``. Use a list with one element to
     restrict it to only one possible format.
+Available Formats
+    * ``"hd"``
+    * ``"sd"``
+    * ``"gif"``
+    * ``"thumbnail"``
+    * ``"vthumbnail"``
+    * ``"poster"``
 
 
 extractor.rule34.api-key & .user-id
@@ -4734,7 +5240,7 @@ Default
     ``false``
 Description
     | Group ``tags`` by type and
-      provide them as ``tags_TYPE`` and ``tag_string_TYPE`` metadata fields,
+      provide them as ``tags_<type>`` and ``tag_string_TYPE`` metadata fields,
     | for example ``tags_artist`` and ``tags_character``.
 
     ``true``
@@ -4751,7 +5257,7 @@ Description
         Requires:
 
         * 1 additional HTTP request per post
-        * logged-in `cookies <extractor.*.cookies_>`__
+        * authenticated `cookies <extractor.*.cookies_>`__
           to fetch full ``tags`` category data
 
     ``false``
@@ -4778,6 +5284,89 @@ Description
     Download videos.
 
 
+extractor.schalenetwork.cbz
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download each gallery as a single ``.cbz`` file.
+Note
+    Requires a
+    `token <extractor.schalenetwork.token_>`__
+
+
+extractor.schalenetwork.crt
+---------------------------
+Type
+    ``string``
+Example
+    * ``"0542daa9-352c-4fd5-a497-6c6d5cf07423"``
+    * ``"/12345/a1b2c3d4e5f6?crt=0542daa9-352c-4fd5-a497-6c6d5cf07423"``
+Description
+    The ``crt`` query parameter value
+    sent when fetching gallery data.
+
+    To get this value:
+
+    * Open your browser's Developer Tools (F12)
+    * Select `Network` → `XHR`
+    * Open a gallery page
+    * Select the last `Network` entry and copy its ``crt`` value
+Note
+    You will also need your browser's
+    `user-agent <extractor.*.user-agent_>`__
+
+
+extractor.schalenetwork.format
+------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["0", "1600", "1280", "980", "780"]``
+Description
+    Name(s) of the image format to download.
+
+    When more than one format is given, the first available one is selected.
+Formats
+    * ``"780"``
+    * ``"980"``
+    * ``"1280"``
+    * ``"1600"``
+    * ``"0"`` (original)
+
+
+extractor.schalenetwork.tags
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Group ``tags`` by type and
+    provide them as ``tags_<type>`` metadata fields,
+    for example ``tags_artist`` or ``tags_character``.
+
+
+extractor.schalenetwork.token
+-----------------------------
+Type
+    ``string``
+Example
+    * ``"3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
+    * ``"Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
+    * ``"Authorization: Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
+Description
+    ``Authorization`` header value
+    used for requests to ``https://api.schale.network``
+    to access ``favorite`` galleries
+    or download
+    `.cbz <extractor.schalenetwork.cbz_>`__
+    archives.
+
+
 extractor.sexcom.gifs
 ---------------------
 Type
@@ -4786,6 +5375,22 @@ Default
     ``true``
 Description
     Download animated images as ``.gif`` instead of ``.webp``
+
+
+extractor.simpcity.order-posts
+------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    posts of a ``thread`` are processed.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"`` | ``"reverse"``
+        Descending order (newest first)
 
 
 extractor.sizebooru.metadata
@@ -4835,12 +5440,10 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-
-    * ``"works"``
-    * ``"sentrequests"``
-
+Supported Values
+    * ``works``
+    * ``sentrequests``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -4894,7 +5497,8 @@ Type
 Default
     ``true``
 Description
-    Include animated assets when downloading from a list of assets.
+    Include ``animated`` assets
+    when downloading from a list of assets.
 
 
 extractor.steamgriddb.epilepsy
@@ -4904,7 +5508,8 @@ Type
 Default
     ``true``
 Description
-    Include assets tagged with epilepsy when downloading from a list of assets.
+    Include assets tagged with ``epilepsy``
+    when downloading from a list of assets.
 
 
 extractor.steamgriddb.dimensions
@@ -4914,24 +5519,35 @@ Type
     * ``list`` of ``strings``
 Default
     ``"all"``
-Examples
+Example
     * ``"1024x512,512x512"``
     * ``["460x215", "920x430"]``
 Description
     Only include assets that are in the specified dimensions. ``all`` can be
-    used to specify all dimensions. Valid values are:
-
-    * Grids: ``460x215``, ``920x430``, ``600x900``, ``342x482``, ``660x930``,
-      ``512x512``, ``1024x1024``
-    * Heroes: ``1920x620``, ``3840x1240``, ``1600x650``
-    * Logos: N/A (will be ignored)
-    * Icons: ``8x8``, ``10x10``, ``14x14``, ``16x16``, ``20x20``, ``24x24``,
-      ``28x28``, ``32x32``, ``35x35``, ``40x40``, ``48x48``, ``54x54``,
-      ``56x56``, ``57x57``, ``60x60``, ``64x64``, ``72x72``, ``76x76``,
-      ``80x80``, ``90x90``, ``96x96``, ``100x100``, ``114x114``, ``120x120``,
-      ``128x128``, ``144x144``, ``150x150``, ``152x152``, ``160x160``,
-      ``180x180``, ``192x192``, ``194x194``, ``256x256``, ``310x310``,
-      ``512x512``, ``768x768``, ``1024x1024``
+    used to specify all dimensions.
+Valid Values
+    Grids
+        ``460x215`` |
+        ``920x430`` |
+        ``342x482`` |
+        ``600x900`` |
+        ``660x930`` |
+        ``512x512`` |
+        ``1024x1024``
+    Heroes
+        ``1600x650`` |
+        ``1920x620`` |
+        ``3840x1240``
+    Logos
+        N/A (will be ignored)
+    Icons
+        ``8x8`` | ``10x10`` | ``14x14`` | ``16x16`` | ``20x20`` | ``24x24`` |
+        ``28x28`` | ``32x32`` | ``35x35`` | ``40x40`` | ``48x48`` | ``54x54`` |
+        ``56x56`` | ``57x57`` | ``60x60`` | ``64x64`` | ``72x72`` | ``76x76`` |
+        ``80x80`` | ``90x90`` | ``96x96`` | ``100x100`` | ``114x114`` | ``120x120`` |
+        ``128x128`` | ``144x144`` | ``150x150`` | ``152x152`` | ``160x160`` |
+        ``180x180`` | ``192x192`` | ``194x194`` | ``256x256`` | ``310x310`` |
+        ``512x512`` | ``768x768`` | ``1024x1024``
 
 
 extractor.steamgriddb.file-types
@@ -4941,17 +5557,21 @@ Type
     * ``list`` of ``strings``
 Default
     ``"all"``
-Examples
+Example
     * ``"png,jpeg"``
     * ``["jpeg", "webp"]``
 Description
     Only include assets that are in the specified file types. ``all`` can be
-    used to specify all file types. Valid values are:
-
-    * Grids: ``png``, ``jpeg``, ``jpg``, ``webp``
-    * Heroes: ``png``, ``jpeg``, ``jpg``, ``webp``
-    * Logos: ``png``, ``webp``
-    * Icons: ``png``, ``ico``
+    used to specify all file types.
+Valid Values
+    Grids
+        ``png`` | ``jpeg`` | ``jpg`` | ``webp``
+    Heroes
+        ``png`` | ``jpeg`` | ``jpg`` | ``webp``
+    Logos
+        ``png`` | ``webp``
+    Icons
+        ``png`` | ``ico``
 
 
 extractor.steamgriddb.download-fake-png
@@ -4971,7 +5591,8 @@ Type
 Default
     ``true``
 Description
-    Include assets tagged with humor when downloading from a list of assets.
+    Include assets tagged with ``humor``
+    when downloading from a list of assets.
 
 
 extractor.steamgriddb.languages
@@ -4981,13 +5602,15 @@ Type
     * ``list`` of ``strings``
 Default
     ``"all"``
-Examples
+Example
     * ``"en,km"``
     * ``["fr", "it"]``
 Description
-    Only include assets that are in the specified languages. ``all`` can be
-    used to specify all languages. Valid values are `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__
-    language codes.
+    Only include assets that are in the specified languages.
+Valid Values
+    |ISO 639-1| codes
+Note
+    ``all`` can be used to specify all languages.
 
 
 extractor.steamgriddb.nsfw
@@ -5005,16 +5628,16 @@ extractor.steamgriddb.sort
 Type
     ``string``
 Default
-    ``score_desc``
+    ``"score_desc"``
 Description
-    Set the chosen sorting method when downloading from a list of assets. Can be one of:
-
-    * ``score_desc`` (Highest Score (Beta))
-    * ``score_asc`` (Lowest Score (Beta))
+    Set the chosen sorting method when downloading from a list of assets.
+Supported Values
+    * ``score_desc``     (Highest Score (Beta))
+    * ``score_asc``      (Lowest Score (Beta))
     * ``score_old_desc`` (Highest Score (Old))
-    * ``score_old_asc`` (Lowest Score (Old))
-    * ``age_desc`` (Newest First)
-    * ``age_asc`` (Oldest First)
+    * ``score_old_asc``  (Lowest Score (Old))
+    * ``age_desc``       (Newest First)
+    * ``age_asc``        (Oldest First)
 
 
 extractor.steamgriddb.static
@@ -5033,19 +5656,23 @@ Type
     * ``string``
     * ``list`` of ``strings``
 Default
-    ``all``
-Examples
-    * ``white,black``
+    ``"all"``
+Example
+    * ``"white,black"``
     * ``["no_logo", "white_logo"]``
 Description
-    Only include assets that are in the specified styles. ``all`` can be used
-    to specify all styles. Valid values are:
-
-    * Grids: ``alternate``, ``blurred``, ``no_logo``, ``material``, ``white_logo``
-    * Heroes: ``alternate``, ``blurred``, ``material``
-    * Logos: ``official``, ``white``, ``black``, ``custom``
-    * Icons: ``official``, ``custom``
-
+    Only include assets that are in the specified styles.
+Valid Values
+    Grids
+        ``alternate`` | ``blurred`` | ``no_logo`` | ``material`` | ``white_logo``
+    Heroes
+        ``alternate`` | ``blurred`` | ``material``
+    Logos
+        ``official`` | ``white`` | ``black`` | ``custom``
+    Icons
+        ``official`` | ``custom``
+Note
+    ``"all"`` can be used to specify all styles.
 
 extractor.steamgriddb.untagged
 ------------------------------
@@ -5080,9 +5707,7 @@ Description
 
     If a selected format is not available, the next one in the list will be
     tried until a format is found.
-
-    Possible formats include
-
+Available Formats
     * ``gif``
     * ``gif_transparent``
     * ``mediumgif``
@@ -5108,9 +5733,12 @@ Default
 Description
     Controls audio download behavior.
 
-    * ``true``: Download audio tracks
-    * ``"ytdl"``: Download audio tracks using |ytdl|
-    * ``false``: Ignore audio tracks
+    ``true``
+        Download audio tracks
+    ``"ytdl"``
+        Download audio tracks using |ytdl|
+    ``false``
+        Ignore audio tracks
 
 
 extractor.tiktok.videos
@@ -5235,16 +5863,20 @@ extractor.tumblr.pagination
 Type
     ``string``
 Default
-    ``"offset"``
+    * ``"before"`` if `date-max <extractor.tumblr.date-min & .date-max_>`__ is set
+    * ``"offset"`` otherwise
 Description
     Controls how to paginate over blog posts.
 
-    * ``"api"``: ``next`` parameter provided by the API
-      (potentially misses posts due to a
-      `bug <https://github.com/tumblr/docs/issues/76>`__
-      in Tumblr's API)
-    * ``"before"``: timestamp of last post
-    * ``"offset"``: post offset number
+    ``"api"``
+        ``next`` parameter provided by the API
+        (potentially misses posts due to a
+        `bug <https://github.com/tumblr/docs/issues/76>`__
+        in Tumblr's API)
+    ``"before"``
+        Timestamp of last post
+    ``"offset"``
+        Post offset number
 
 
 extractor.tumblr.ratelimit
@@ -5256,8 +5888,10 @@ Default
 Description
     Selects how to handle exceeding the daily API rate limit.
 
-    * ``"abort"``: Raise an error and stop extraction
-    * ``"wait"``: Wait until rate limit reset
+    ``"abort"``
+        Raise an error and stop extraction
+    ``"wait"``
+        Wait until rate limit reset
 
 
 extractor.tumblr.reblogs
@@ -5268,10 +5902,13 @@ Type
 Default
     ``true``
 Description
-    * ``true``: Extract media from reblogged posts
-    * ``false``: Skip reblogged posts
-    * ``"same-blog"``: Skip reblogged posts unless the original post
-      is from the same blog
+    ``true``
+        Extract media from reblogged posts
+    ``false``
+        Skip reblogged posts
+    ``"same-blog"``
+        Skip reblogged posts unless the original post
+        is from the same blog
 
 
 extractor.tumblr.posts
@@ -5374,10 +6011,12 @@ Default
 Description
     Controls how to handle `Twitter Cards <https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/abouts-cards>`__.
 
-    * ``false``: Ignore cards
-    * ``true``: Download image content from supported cards
-    * ``"ytdl"``: Additionally download video content from unsupported cards
-      using |ytdl|
+    ``false``
+        Ignore cards
+    ``true``
+        Download image content from supported cards
+    ``"ytdl"``
+        Additionally download video content from unsupported cards using |ytdl|
 
 
 extractor.twitter.cards-blacklist
@@ -5423,8 +6062,10 @@ Default
 Description
     Controls how to handle Cross Site Request Forgery (CSRF) tokens.
 
-    * ``"auto"``: Always auto-generate a token.
-    * ``"cookies"``: Use token given by the ``ct0`` cookie if present.
+    ``"auto"``
+        Always auto-generate a token.
+    ``"cookies"``
+        Use token given by the ``ct0`` cookie if present.
 
 
 extractor.twitter.cursor
@@ -5464,8 +6105,8 @@ Description
     as running ``gallery-dl https://twitter.com/i/web/status/<TweetID>``
     with enabled `conversations <extractor.twitter.conversations_>`__ option
     for each Tweet in said timeline.
-
-    Note: This requires at least 1 additional API call per initial Tweet.
+Note
+    This requires at least 1 additional API call per initial Tweet.
 
 
 extractor.twitter.unavailable
@@ -5492,19 +6133,17 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-
-    * ``"info"``
-    * ``"avatar"``
-    * ``"background"``
-    * ``"timeline"``
-    * ``"tweets"``
-    * ``"media"``
-    * ``"replies"``
-    * ``"highlights"``
-    * ``"likes"``
-
+Supported Values
+    * ``info``
+    * ``avatar``
+    * ``background``
+    * ``timeline``
+    * ``tweets``
+    * ``media``
+    * ``replies``
+    * ``highlights``
+    * ``likes``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -5527,9 +6166,12 @@ Default
 Description
     Selects the API endpoint used to retrieve single Tweets.
 
-    * ``"restid"``: ``/TweetResultByRestId`` - accessible to guest users
-    * ``"detail"``: ``/TweetDetail`` - more stable
-    * ``"auto"``: ``"detail"`` when logged in, ``"restid"`` otherwise
+    ``"restid"``
+        ``/TweetResultByRestId`` - accessible to guest users
+    ``"detail"``
+        ``/TweetDetail`` - more stable
+    ``"auto"``
+        ``"detail"`` when logged in, ``"restid"`` otherwise
 
 
 extractor.twitter.size
@@ -5596,22 +6238,12 @@ Default
 Description
     Selects how to handle exceeding the API rate limit.
 
-    * ``"abort"``: Raise an error and stop extraction
-    * ``"wait"``: Wait until rate limit reset
-    * ``"wait:N"``: Wait for ``N`` seconds
-
-
-extractor.twitter.relogin
--------------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    When receiving a "Could not authenticate you" error while logged in with
-    `username & password <extractor.*.username & .password_>`__,
-    refresh the current login session and
-    try to continue from where it left off.
+    ``"abort"``
+        Raise an error and stop extraction
+    ``"wait"``
+        Wait until rate limit reset
+    ``"wait:N"``
+        Wait for ``N`` seconds
 
 
 extractor.twitter.locked
@@ -5623,8 +6255,10 @@ Default
 Description
     Selects how to handle "account is temporarily locked" errors.
 
-    * ``"abort"``: Raise an error and stop extraction
-    * ``"wait"``: Wait until the account is unlocked and retry
+    ``"abort"``
+        Raise an error and stop extraction
+    ``"wait"``
+        Wait until the account is unlocked and retry
 
 
 extractor.twitter.replies
@@ -5638,8 +6272,8 @@ Description
 
     If this value is ``"self"``, only consider replies where
     reply and original Tweet are from the same user.
-
-    Note: Twitter will automatically expand conversations if you
+Note
+    Twitter will automatically expand conversations if you
     use the ``/with_replies`` timeline while logged in. For example,
     media from Tweets which the user replied to will also be downloaded.
 
@@ -5660,6 +6294,44 @@ Description
     will be taken from the original Tweets, not the Retweets.
 
 
+extractor.twitter.search-limit
+------------------------------
+Type
+    ``integer``
+Default
+    ``20``
+Description
+    Number of requested results per search query.
+
+
+extractor.twitter.search-pagination
+-----------------------------------
+Type
+    ``string``
+Default
+    ``"cursor"``
+Description
+    Selects how to paginate over search results.
+
+    ``"cursor"``
+        Use ``cursor`` values provided by the API
+    ``"max_id"`` | ``"maxid"`` | ``"id"``
+        Update the ``max_id`` search query parameter
+        to the Tweet ID value of the last retrieved Tweet.
+
+
+extractor.twitter.search-stop
+-----------------------------
+Type
+    ``integer``
+Default
+    * ``3`` if `search-pagination <extractor.twitter.search-pagination_>`__ is set to ``"cursor"``
+    * ``0`` otherwise
+Description
+    Number of empty search result batches
+    to accept before stopping.
+
+
 extractor.twitter.timeline.strategy
 -----------------------------------
 Type
@@ -5670,10 +6342,14 @@ Description
     Controls the strategy / tweet source used for timeline URLs
     (``https://twitter.com/USER/timeline``).
 
-    * ``"tweets"``: `/tweets <https://twitter.com/USER/tweets>`__ timeline + search
-    * ``"media"``: `/media <https://twitter.com/USER/media>`__ timeline + search
-    * ``"with_replies"``: `/with_replies <https://twitter.com/USER/with_replies>`__ timeline + search
-    * ``"auto"``: ``"tweets"`` or ``"media"``, depending on `retweets <extractor.twitter.retweets_>`__ and `text-tweets <extractor.twitter.text-tweets_>`__ settings
+    ``"tweets"``
+        `/tweets <https://twitter.com/USER/tweets>`__ timeline + search
+    ``"media"``
+        `/media <https://twitter.com/USER/media>`__ timeline + search
+    ``"with_replies"``
+        `/with_replies <https://twitter.com/USER/with_replies>`__ timeline + search
+    ``"auto"``
+        ``"tweets"`` or ``"media"``, depending on `retweets <extractor.twitter.retweets_>`__ and `text-tweets <extractor.twitter.text-tweets_>`__ settings
 
 
 extractor.twitter.text-tweets
@@ -5719,7 +6395,7 @@ Description
     when `logging in <extractor.*.username & .password_>`__.
 
     When not specified and asked for by Twitter,
-    this identifier will need to entered in an interactive prompt.
+    this identifier will need to be entered in an interactive prompt.
 
 
 extractor.twitter.users
@@ -5731,19 +6407,21 @@ Default
 Example
     ``"https://twitter.com/search?q=from:{legacy[screen_name]}"``
 Description
-    | Format string for user URLs generated from
+    | Basic format string for user URLs generated from
       ``following`` and ``list-members`` queries,
     | whose replacement field values come from Twitter ``user`` objects
       (`Example <https://gist.githubusercontent.com/mikf/99d2719b3845023326c7a4b6fb88dd04/raw/275b4f0541a2c7dc0a86d3998f7d253e8f10a588/github.json>`_)
-
-    Special values:
-
-    * ``"user"``: ``https://twitter.com/i/user/{rest_id}``
-    * ``"timeline"``: ``https://twitter.com/id:{rest_id}/timeline``
-    * ``"tweets"``: ``https://twitter.com/id:{rest_id}/tweets``
-    * ``"media"``: ``https://twitter.com/id:{rest_id}/media``
-
-    Note: To allow gallery-dl to follow custom URL formats, set the blacklist__
+Special Values
+    ``"user"``
+        ``https://twitter.com/i/user/{rest_id}``
+    ``"timeline"``
+        ``https://twitter.com/id:{rest_id}/timeline``
+    ``"tweets"``
+        ``https://twitter.com/id:{rest_id}/tweets``
+    ``"media"``
+        ``https://twitter.com/id:{rest_id}/media``
+Note
+    To allow gallery-dl to follow custom URL formats, set the blacklist__
     for ``twitter`` to a non-default value, e.g. an empty string ``""``.
 
 .. __: `extractor.*.blacklist & .whitelist`_
@@ -5759,9 +6437,12 @@ Default
 Description
     Control video download behavior.
 
-    * ``true``: Download videos
-    * ``"ytdl"``: Download videos using |ytdl|
-    * ``false``: Skip video Tweets
+    ``true``
+        Download videos
+    ``"ytdl"``
+        Download videos using |ytdl|
+    ``false``
+        Skip video Tweets
 
 
 extractor.unsplash.format
@@ -5772,9 +6453,12 @@ Default
     ``"raw"``
 Description
     Name of the image format to download.
-
-    Available formats are
-    ``"raw"``, ``"full"``, ``"regular"``, ``"small"``, and ``"thumb"``.
+Available Formats
+    * ``"raw"``
+    * ``"full"``
+    * ``"regular"``
+    * ``"small"``
+    * ``"thumb"``
 
 
 extractor.vipergirls.domain
@@ -5797,9 +6481,25 @@ Default
     ``false``
 Description
     Automatically `like` posts after downloading their images.
-
-    Note: Requires `login <extractor.*.username & .password_>`__
+Note
+    Requires `login <extractor.*.username & .password_>`__
     or `cookies <extractor.*.cookies_>`__
+
+
+extractor.vipergirls.order-posts
+--------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    posts of a ``thread`` are processed.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"`` | ``"reverse"``
+        Descending order (newest first)
 
 
 extractor.vk.offset
@@ -5825,13 +6525,12 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-    ``"avatar"``,
-    ``"gallery"``,
-    ``"spaces"``,
-    ``"collection"``,
-
+Supported Values
+    * ``avatar``
+    * ``gallery``
+    * ``spaces``
+    * ``collection``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -5871,10 +6570,10 @@ Example
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-    ``"uploads"``, ``"collections"``.
-
+Supported Values
+    * ``uploads``
+    * ``collections``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -5886,8 +6585,8 @@ Default
     ``false``
 Description
     Extract additional metadata (tags, uploader)
-
-    Note: This requires 1 additional HTTP request per post.
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.weasyl.api-key
@@ -5911,8 +6610,8 @@ Description
     | Fetch extra submission metadata during gallery downloads.
     | (``comments``, ``description``, ``favorites``, ``folder_name``,
       ``tags``, ``views``)
-
-    Note: This requires 1 additional HTTP request per submission.
+Note
+    This requires 1 additional HTTP request per submission.
 
 
 extractor.webtoons.quality
@@ -5920,7 +6619,7 @@ extractor.webtoons.quality
 Type
     * ``integer``
     * ``string``
-    * ``object`` (`ext` -> `type`)
+    * ``object`` (`ext` → `type`)
 
 Default
     ``"original"``
@@ -5988,15 +6687,14 @@ Default
 Description
     A (comma-separated) list of subcategories to include
     when processing a user profile.
-
-    Possible values are
-    ``"home"``,
-    ``"feed"``,
-    ``"videos"``,
-    ``"newvideo"``,
-    ``"article"``,
-    ``"album"``.
-
+Supported Values
+    * ``home``
+    * ``feed``
+    * ``videos``
+    * ``newvideo``
+    * ``article``
+    * ``album``
+Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
@@ -6033,6 +6731,17 @@ Description
     will be taken from the original posts, not the retweeted posts.
 
 
+extractor.weibo.text
+--------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract full ``text`` & ``text_raw`` metadata
+    for statuses with truncated ``text``.
+
+
 extractor.weibo.videos
 ----------------------
 Type
@@ -6041,6 +6750,37 @@ Default
     ``true``
 Description
     Download video files.
+
+
+extractor.wikimedia.format
+--------------------------
+Type
+    ``string``
+Default
+    ``fandom`` | ``wikigg``
+        ``"original"``
+    otherwise
+        ``""``
+Description
+    Sets the `format` query parameter value
+    added to all download URLs.
+
+
+extractor.wikimedia.image-revisions
+-----------------------------------
+Type
+    ``integer``
+Default
+    ``1``
+Description
+    Number of revisions to return for a single image.
+
+    The dafault value of 1 only returns the latest revision.
+
+    The value must be between 1 and 500.
+Note
+    The API sometimes returns image revisions on article pages even when this option is
+    set to 1. However, setting it to a higher value may reduce the number of API requests.
 
 
 extractor.wikimedia.limit
@@ -6164,8 +6904,8 @@ Default
 Description
     Route |ytdl's| output through gallery-dl's logging system.
     Otherwise it will be written directly to stdout/stderr.
-
-    Note: Set ``quiet`` and ``no_warnings`` in
+Note
+    Set ``quiet`` and ``no_warnings`` in
     `extractor.ytdl.raw-options`_ to ``true`` to suppress all output.
 
 
@@ -6188,7 +6928,7 @@ Description
 extractor.ytdl.raw-options
 --------------------------
 Type
-    ``object`` (`name` -> `value`)
+    ``object`` (`name` → `value`)
 Example
     .. code:: json
 
@@ -6230,8 +6970,8 @@ Default
     ``false``
 Description
     Extract additional metadata (date, md5, tags, ...)
-
-    Note: This requires 1-2 additional HTTP requests per post.
+Note
+    This requires 1-2 additional HTTP requests per post.
 
 
 extractor.zerochan.pagination
@@ -6243,10 +6983,12 @@ Default
 Description
     Controls how to paginate over tag search results.
 
-    * ``"api"``: Use the `JSON API <https://www.zerochan.net/api>`__
-      (no ``extension`` metadata)
-    * ``"html"``: Parse HTML pages
-      (limited to 100 pages * 24 posts)
+    ``"api"``
+        Use the `JSON API <https://www.zerochan.net/api>`__
+        (no ``extension`` metadata)
+    ``"html"``
+        Parse HTML pages
+        (limited to 100 pages * 24 posts)
 
 
 extractor.zerochan.redirects
@@ -6269,8 +7011,8 @@ Description
     Group ``tags`` by type and
     provide them as ``tags_<type>`` metadata fields,
     for example ``tags_artist`` or ``tags_character``.
-
-    Note: This requires 1 additional HTTP request per post.
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.[booru].notes
@@ -6281,8 +7023,8 @@ Default
     ``false``
 Description
     Extract overlay notes (position and text).
-
-    Note: This requires 1 additional HTTP request per post.
+Note
+    This requires 1 additional HTTP request per post.
 
 
 extractor.[booru].url
@@ -6310,8 +7052,10 @@ Default
 Description
     Reverse the order of chapter URLs extracted from manga pages.
 
-    * ``true``: Start with the latest chapter
-    * ``false``: Start with the first chapter
+    ``true``
+        Start with the latest chapter
+    ``false``
+        Start with the first chapter
 
 
 extractor.[manga-extractor].page-reverse
@@ -6409,11 +7153,13 @@ Default
 Description
     Controls the use of ``.part`` files during file downloads.
 
-    * ``true``: Write downloaded data into ``.part`` files and rename
-      them upon download completion. This mode additionally supports
-      resuming incomplete downloads.
-    * ``false``: Do not use ``.part`` files and write data directly
-      into the actual output files.
+    ``true``
+        Write downloaded data into ``.part`` files and rename
+        them upon download completion. This mode additionally supports
+        resuming incomplete downloads.
+    ``false``
+        Do not use ``.part`` files and write data directly
+        into the actual output files.
 
 
 downloader.*.part-directory
@@ -6503,7 +7249,7 @@ downloader.*.proxy
 ------------------
 Type
     * ``string``
-    * ``object`` (`scheme` -> `proxy`)
+    * ``object`` (`scheme` → `proxy`)
 Default
     `extractor.*.proxy`_
 Description
@@ -6567,7 +7313,7 @@ Description
 downloader.http.headers
 -----------------------
 Type
-    ``object`` (`name` -> `value`)
+    ``object`` (`name` → `value`)
 Example
     ``{"Accept": "image/webp,*/*", "Referer": "https://example.org/"}``
 Description
@@ -6601,8 +7347,8 @@ Default
 Description
     Number of seconds to sleep when receiving a `429 Too Many Requests`
     response before `retrying <downloader.*.retries_>`__ the request.
-
-    Note: Requires
+Note
+    Requires
     `retry-codes <downloader.http.retry-codes_>`__
     to include ``429``.
 
@@ -6707,8 +7453,8 @@ Default
 Description
     Route |ytdl's| output through gallery-dl's logging system.
     Otherwise it will be written directly to stdout/stderr.
-
-    Note: Set ``quiet`` and ``no_warnings`` in
+Note
+    Set ``quiet`` and ``no_warnings`` in
     `downloader.ytdl.raw-options`_ to ``true`` to suppress all output.
 
 
@@ -6742,15 +7488,15 @@ Description
     `yt-dlp output template <https://github.com/yt-dlp/yt-dlp#output-template>`__
     /
     `youtube-dl output template <https://github.com/ytdl-org/youtube-dl#output-template>`__.
-
-    Special values:
-
-    * ``null``: generate filenames with `extractor.*.filename`_
-    * ``"default"``: use |ytdl's| default, currently
-      ``"%(title)s [%(id)s].%(ext)s"`` for yt-dlp_ /
-      ``"%(title)s-%(id)s.%(ext)s"`` for youtube-dl_
-
-    Note: An output template other than ``null`` might
+Special Values
+    ``null``
+        generate filenames with `extractor.*.filename`_
+    ``"default"``
+        use |ytdl's| default, currently
+        ``"%(title)s [%(id)s].%(ext)s"`` for yt-dlp_ /
+        ``"%(title)s-%(id)s.%(ext)s"`` for youtube-dl_
+Note
+    An output template other than ``null`` might
     cause unexpected results in combination with certain options
     (e.g. ``"skip": "enumerate"``)
 
@@ -6758,7 +7504,7 @@ Description
 downloader.ytdl.raw-options
 ---------------------------
 Type
-    ``object`` (`name` -> `value`)
+    ``object`` (`name` → `value`)
 Example
     .. code:: json
 
@@ -6786,18 +7532,24 @@ output.mode
 -----------
 Type
     * ``string``
-    * ``object`` (`key` -> `format string`)
+    * ``object`` (`key` → `format string`)
 Default
     ``"auto"``
 Description
     Controls the output string format and status indicators.
 
-    * ``"null"``: No output
-    * ``"pipe"``: Suitable for piping to other processes or files
-    * ``"terminal"``: Suitable for the standard Windows console
-    * ``"color"``: Suitable for terminals that understand ANSI escape codes and colors
-    * ``"auto"``: ``"pipe"`` if not on a TTY, ``"terminal"`` on Windows with
-      `output.ansi`_ disabled, ``"color"`` otherwise.
+    ``"null"``
+        No output
+    ``"pipe"``
+        Suitable for piping to other processes or files
+    ``"terminal"``
+        Suitable for the standard Windows console
+    ``"color"``
+        Suitable for terminals that understand ANSI escape codes and colors
+    ``"auto"``
+        ``"pipe"`` if not on a TTY,
+        ``"terminal"`` on Windows with `output.ansi`_ disabled,
+        ``"color"`` otherwise.
 
     | It is possible to use custom output format strings
       by setting this option to an ``object`` and specifying
@@ -6870,8 +7622,8 @@ Description
 
     When this option is specified as a simple ``string``,
     it is interpreted as ``{"encoding": "<string-value>", "errors": "replace"}``
-
-    Note: ``errors`` always defaults to ``"replace"``
+Note
+    ``errors`` always defaults to ``"replace"``
 
 
 output.shorten
@@ -6891,7 +7643,7 @@ Description
 output.colors
 -------------
 Type
-    ``object`` (`key` -> `ANSI color`)
+    ``object`` (`key` → `ANSI color`)
 Default
     .. code:: json
 
@@ -6978,26 +7730,26 @@ Description
     Controls the progress indicator when *gallery-dl* is run with
     multiple URLs as arguments.
 
-    * ``true``: Show the default progress indicator
-      (``"[{current}/{total}] {url}"``)
-    * ``false``: Do not show any progress indicator
-    * Any ``string``: Show the progress indicator using this
-      as a custom `format string`_. Possible replacement keys are
-      ``current``, ``total``  and ``url``.
+    ``true``
+        Show the default progress indicator
+        (``"[{current}/{total}] {url}"``)
+    ``false``
+        Do not show any progress indicator
+    Any ``string``
+        Show the progress indicator using this
+        as a custom `format string`_. Possible replacement keys are
+        ``current``, ``total``  and ``url``.
 
 
 output.log
 ----------
 Type
-    * ``string``
+    * `Format String`_
     * |Logging Configuration|_
 Default
     ``"[{name}][{levelname}] {message}"``
 Description
     Configuration for logging output to stderr.
-
-    If this is a simple ``string``, it specifies
-    the format string for logging messages.
 
 
 output.logfile
@@ -7017,7 +7769,7 @@ Type
 Description
     File to write external URLs unsupported by *gallery-dl* to.
 
-    The default format string here is ``"{message}"``.
+    The default `Format String`_ here is ``"{message}"``.
 
 
 output.errorfile
@@ -7028,7 +7780,7 @@ Type
 Description
     File to write input URLs which returned an error to.
 
-    The default format string here is also ``"{message}"``.
+    The default `Format String`_ here is also ``"{message}"``.
 
     When combined with
     ``-I``/``--input-file-comment`` or
@@ -7075,7 +7827,7 @@ and `event <exec.event_>`__ field:
 classify.mapping
 ----------------
 Type
-    ``object`` (`directory` -> `extensions`)
+    ``object`` (`directory` → `extensions`)
 Default
     .. code:: json
 
@@ -7106,10 +7858,11 @@ Default
 Description
     The action to take when files do **not** compare as equal.
 
-    * ``"replace"``: Replace/Overwrite the old version with the new one
-
-    * ``"enumerate"``: Add an enumeration index to the filename of the new
-      version like `skip = "enumerate" <extractor.*.skip_>`__
+    ``"replace"``
+        Replace/Overwrite the old version with the new one
+    ``"enumerate"``
+        Add an enumeration index to the filename of the new
+        version like `skip = "enumerate" <extractor.*.skip_>`__
 
 
 compare.equal
@@ -7121,15 +7874,16 @@ Default
 Description
     The action to take when files do compare as equal.
 
-    * ``"abort:N"``: Stop the current extractor run
-      after ``N`` consecutive files compared as equal.
-
-    * ``"terminate:N"``: Stop the current extractor run,
-      including parent extractors,
-      after ``N`` consecutive files compared as equal.
-
-    * ``"exit:N"``: Exit the program
-      after ``N`` consecutive files compared as equal.
+    ``"abort:N"``
+        Stop the current extractor run
+        after ``N`` consecutive files compared as equal.
+    ``"terminate:N"``
+        Stop the current extractor run,
+        including parent extractors,
+        after ``N`` consecutive files compared as equal.
+    ``"exit:N"``
+        Exit the program
+        after ``N`` consecutive files compared as equal.
 
 
 compare.shallow
@@ -7150,7 +7904,7 @@ Type
 Default
     ``"prepare"``
 Description
-    The event(s) for which directory_ format strings are (re)evaluated.
+    The event(s) for which directory_ `Format Strings`_ are (re)evaluated.
 
     See `metadata.event`_ for a list of available events.
 
@@ -7201,9 +7955,10 @@ Description
 
     * If this is a ``list``, the first element specifies the program
       name and any further elements its arguments.
-      Each element of this list is treated as a `format string`_ using
-      the files' metadata as well as ``{_path}``, ``{_directory}``,
-      and ``{_filename}``.
+
+      Each element of this list is evaluated as a `Format String`_ using
+      the files' metadata as well as
+      ``{_path}``, ``{_temppath}``, ``{_directory}``, and ``{_filename}``.
 
 
 exec.commands
@@ -7296,7 +8051,7 @@ hash.hashes
 -----------
 Type
     * ``string``
-    * ``object`` (`field name` -> `hash algorithm`)
+    * ``object`` (`field name` → `hash algorithm`)
 Default
     ``"md5,sha1"``
 Example
@@ -7346,26 +8101,36 @@ Default
 Description
     Selects how to process metadata.
 
-    * ``"json"``: write metadata using |json.dump()|_
-    * ``"jsonl"``: write metadata in `JSON Lines
-      <https://jsonlines.org/>`__ format
-    * ``"tags"``: write ``tags`` separated by newlines
-    * ``"custom"``: write the result of applying `metadata.content-format`_
-      to a file's metadata dictionary
-    * ``"modify"``: add or modify metadata entries
-    * ``"delete"``: remove metadata entries
+    ``"json"``
+        Write metadata using |json.dump()|_
+    ``"jsonl"``
+        Write metadata in `JSON Lines <https://jsonlines.org/>`__ format
+    ``"tags"``
+        Write ``tags`` separated by newlines
+    ``"print"``
+        Write the result of applying
+        `content-format <metadata.content-format_>`__
+        to ``stdout``
+    ``"custom"``
+        Write the result of applying
+        `content-format <metadata.content-format_>`__
+        to `a file <metadata.filename_>`__
+    ``"modify"``
+        Add or modify metadata entries
+    ``"delete"``
+        Remove metadata entries
 
 
 metadata.filename
 -----------------
 Type
-    ``string``
+    `Format String`_
 Default
     ``null``
 Example
     ``"{id}.data.json"``
 Description
-    A `format string`_ to build the filenames for metadata files with.
+    A `Format String`_ to generate filenames for metadata files.
     (see `extractor.filename <extractor.*.filename_>`__)
 
     Using ``"-"`` as filename will write all output to ``stdout``.
@@ -7399,9 +8164,12 @@ Default
 Description
     Selects the relative location for metadata files.
 
-    * ``false``: current target location for file downloads (base-directory_ + directory_)
-    * ``true``: current base-directory_ location
-    * any |Path|_: custom location
+    ``false``
+        Current target location for file downloads (base-directory_ + directory_)
+    ``true``
+        Current base-directory_ location
+    any |Path|_
+        Custom location
 
 
 metadata.extension
@@ -7418,15 +8186,15 @@ Description
 metadata.extension-format
 -------------------------
 Type
-    ``string``
+    `Format String`_
 Example
     * ``"{extension}.json"``
     * ``"json"``
 Description
-    Custom format string to build filename extensions for metadata
-    files with, which will replace the original filename extensions.
-
-    Note: `metadata.extension`_ is ignored if this option is set.
+    Custom `Format String`_ to generate filename extensions
+    for metadata files, which will replace the original filename extension.
+Note
+    When this option is set, `metadata.extension`_ is ignored.
 
 
 metadata.metadata-path
@@ -7493,8 +8261,8 @@ Example
     ``["id", "width", "height", "description"]``
 Description
     Include only the given top-level keys when writing JSON data.
-
-    Note: Missing or undefined fields will be silently ignored.
+Note
+    Missing or undefined fields will be silently ignored.
 
 
 metadata.exclude
@@ -7505,15 +8273,15 @@ Example
     ``["blocked", "watching", "status"]``
 Description
     Exclude all given keys from written JSON data.
-
-    Note: Cannot be used with `metadata.include`_.
+Note
+    Cannot be used with `metadata.include`_.
 
 
 metadata.fields
 ---------------
 Type
     * ``list`` of ``strings``
-    * ``object`` (`field name` -> `format string`_)
+    * ``object`` (`field name` → `Format String`_)
 Example
     .. code:: json
 
@@ -7528,25 +8296,29 @@ Example
         }
 
 Description
-    * ``"mode": "delete"``:
+    ``"mode": "delete"``
         A list of metadata field names to remove.
-    * ``"mode": "modify"``:
-        An object with metadata field names mapping to a `format string`_
-        whose result is assigned to said field name.
+    ``"mode": "modify"``
+        An object with metadata field names mapping to a `Format String`_
+        whose result is assigned to that field name.
+Note:
+    Unlike standard `Format Strings`_, replacement fields here
+    preserve the original type of their value
+    instead of automatically converting it to |type-str|_.
 
 
 metadata.content-format
 -----------------------
 Type
-    * ``string``
-    * ``list`` of ``strings``
+    * `Format String`_
+    * ``list`` of `Format Strings`_
 Example
     * ``"tags:\n\n{tags:J\n}\n"``
     * ``["tags:", "", "{tags:J\n}"]``
 Description
-    Custom format string to build the content of metadata files with.
-
-    Note: Only applies for ``"mode": "custom"``.
+    Custom `Format String(s)`_ to build the content of metadata files with.
+Note
+    Only applies to ``"mode": "custom"``.
 
 
 metadata.ascii
@@ -7559,8 +8331,8 @@ Description
     Escape all non-ASCII characters.
 
     See the ``ensure_ascii`` argument of |json.dump()|_ for further details.
-
-    Note: Only applies for ``"mode": "json"`` and ``"jsonl"``.
+Note
+    Only applies to ``"mode": "json"`` and ``"jsonl"``.
 
 
 metadata.indent
@@ -7574,8 +8346,8 @@ Description
     Indentation level of JSON output.
 
     See the ``indent`` argument of |json.dump()|_ for further details.
-
-    Note: Only applies for ``"mode": "json"``.
+Note
+    Only applies to ``"mode": "json"``.
 
 
 metadata.separators
@@ -7589,8 +8361,8 @@ Description
     to separate JSON keys and values with.
 
     See the ``separators`` argument of |json.dump()|_ for further details.
-
-    Note: Only applies for ``"mode": "json"`` and ``"jsonl"``.
+Note
+    Only applies to ``"mode": "json"`` and ``"jsonl"``.
 
 
 metadata.sort
@@ -7603,15 +8375,15 @@ Description
     Sort output by `key`.
 
     See the ``sort_keys`` argument of |json.dump()|_ for further details.
-
-    Note: Only applies for ``"mode": "json"`` and ``"jsonl"``.
+Note
+    Only applies to ``"mode": "json"`` and ``"jsonl"``.
 
 
 metadata.open
 -------------
 Type
     ``string``
-Defsult
+Default
     ``"w"``
 Description
     The ``mode`` in which metadata files get opened.
@@ -7627,12 +8399,35 @@ metadata.encoding
 -----------------
 Type
     ``string``
-Defsult
+Default
     ``"utf-8"``
 Description
     Name of the encoding used to encode a file's content.
 
     See the ``encoding`` argument of |open()|_ for further details.
+
+
+metadata.newline
+-----------------
+Type
+    ``string``
+Default
+    ``null``
+Description
+    The newline sequence used in metadata files.
+
+    If ``null``, any ``\n`` characters
+    written are translated to the system default line separator.
+
+    See the ``newline`` argument of |open()|_ for further details.
+Supported Values
+    ``null``
+        Any ``\n`` characters
+        written are translated to the system default line separator.
+    ``""`` | ``"\n"``
+        Don't replace newline characters.
+    ``"\r"`` | ``"\r\n"``
+        Replace newline characters with the given sequence.
 
 
 metadata.private
@@ -7717,25 +8512,29 @@ Description
     Name of the metadata field whose value should be used.
 
     This value must be either a UNIX timestamp or a
-    |datetime|_ object.
-
-    Note: This option gets ignored if `mtime.value`_ is set.
+    |type-datetime|_ object.
+Note
+    This option is ignored if `mtime.value`_ is set.
 
 
 mtime.value
 -----------
 Type
-    ``string``
+    `Format String`_
 Default
     ``null``
 Example
     * ``"{status[date]}"``
     * ``"{content[0:6]:R22/2022/D%Y%m%d/}"``
 Description
-    A `format string`_ whose value should be used.
+    The `Format String`_ whose value should be used.
 
     The resulting value must be either a UNIX timestamp or a
-    |datetime|_ object.
+    |type-datetime|_ object.
+Note:
+    Unlike standard `Format Strings`_, replacement fields here
+    preserve the original type of their value
+    instead of automatically converting it to |type-str|_.
 
 
 python.archive
@@ -7768,6 +8567,20 @@ Description
     See `metadata.event`_ for a list of available events.
 
 
+python.expression
+-----------------
+Type
+    Expression_
+Example
+    * ``"print('Foo Bar')"``
+    * ``"terminate()"``
+Description
+    A Python Expression_ to
+    `evaluate <https://docs.python.org/3/library/functions.html#eval>`__.
+Note
+    Only used with `"mode": "eval" <python.mode_>`__
+
+
 python.function
 ---------------
 Type
@@ -7785,12 +8598,29 @@ Description
     It gets called with the current metadata dict as argument.
 
 
-rename.from
+python.mode
 -----------
 Type
     ``string``
+Default
+    ``"function"``
 Description
-    The `format string`_ for filenames to rename.
+    Selects what Python code to run.
+
+    ``"eval"``
+        Evaluate an
+        `expression <python.expression_>`__
+    ``function"``
+        Call a
+        `function <python.function_>`__
+
+
+rename.from
+-----------
+Type
+    `Format String`_
+Description
+    The `Format String`_ for filenames to rename.
 
     When no value is given, `extractor.*.filename`_ is used.
 
@@ -7798,9 +8628,9 @@ Description
 rename.to
 ---------
 Type
-    ``string``
+    `Format String`_
 Description
-    The `format string`_ for target filenames.
+    The `Format String`_ for target filenames.
 
     When no value is given, `extractor.*.filename`_ is used.
 
@@ -7844,18 +8674,23 @@ ugoira.ffmpeg-demuxer
 Type
     ``string``
 Default
-    ``auto``
+    ``"auto"``
 Description
     |ffmpeg| demuxer to read and process input files with.
+Supported Values
+    ``"auto"``
+        use ``mkvmerge`` if available, fall back to ``concat`` otherwise
+    ``"concat"``
+        | https://ffmpeg.org/ffmpeg-formats.html#concat-1
+        | Inaccurate frame timecodes for non-uniform frame delays
+    ``"image2"``
+        | https://ffmpeg.org/ffmpeg-formats.html#image2-1
+        | Accurate timecodes, requires nanosecond file timestamps, i.e. no Windows or macOS)
+    ``"mkvmerge"``
+        Accurate timecodes, only WebM or MKV, requires `mkvmerge <ugoira.mkvmerge-location_>`__)
+    ``"archive"``
+        Store "original" frames in a ``.zip`` archive
 
-    Possible values are
-
-    * "`concat <https://ffmpeg.org/ffmpeg-formats.html#concat-1>`_" (inaccurate frame timecodes for non-uniform frame delays)
-    * "`image2 <https://ffmpeg.org/ffmpeg-formats.html#image2-1>`_" (accurate timecodes, requires nanosecond file timestamps, i.e. no Windows or macOS)
-    * "mkvmerge" (accurate timecodes, only WebM or MKV, requires `mkvmerge <ugoira.mkvmerge-location_>`__)
-    * "archive" (store "original" frames in a ``.zip`` archive)
-
-    `"auto"` will select `mkvmerge` if available and fall back to `concat` otherwise.
 
 
 ugoira.ffmpeg-location
@@ -7889,10 +8724,13 @@ Default
 Description
     Controls |ffmpeg| output.
 
-    * ``true``: Enable |ffmpeg| output
-    * ``false``: Disable all |ffmpeg| output
-    * any ``string``: Pass ``-hide_banner`` and ``-loglevel``
-      with this value as argument to |ffmpeg|
+    ``true``
+        Enable |ffmpeg| output
+    ``false``
+        Disable all |ffmpeg| output
+    any ``string``
+        Pass ``-hide_banner`` and ``-loglevel``
+        with this value as argument to |ffmpeg|
 
 
 ugoira.ffmpeg-twopass
@@ -7914,12 +8752,16 @@ Default
 Description
     Controls the frame rate argument (``-r``) for |ffmpeg|
 
-    * ``"auto"``: Automatically assign a fitting frame rate
-      based on delays between frames.
-    * ``"uniform"``: Like ``auto``, but assign an explicit frame rate
-      only to Ugoira with uniform frame delays.
-    * any other ``string``:  Use this value as argument for ``-r``.
-    * ``null`` or an empty ``string``: Don't set an explicit frame rate.
+    ``"auto"``
+        Automatically assign a fitting frame rate
+        based on delays between frames.
+    ``"uniform"``
+        Like ``auto``, but assign an explicit frame rate
+        only to Ugoira with uniform frame delays.
+    any other ``string``
+        Use this value as argument for ``-r``.
+    ``null`` or an empty ``string``
+        Don't set an explicit frame rate.
 
 
 ugoira.keep-files
@@ -8005,8 +8847,11 @@ Default
     ``"store"``
 Description
     Compression method to use when writing the archive.
-
-    Possible values are ``"store"``, ``"zip"``, ``"bzip2"``, ``"lzma"``.
+Supported Values
+    * ``"store"``
+    * ``"zip"``
+    * ``"bzip2"``
+    * ``"lzma"``
 
 
 zip.extension
@@ -8027,8 +8872,8 @@ Example
     ``["info.json"]``
 Description
     List of extra files to be added to a ZIP archive.
-
-    Note: Relative paths are relative to the current
+Note
+    Relative paths are relative to the current
     `download directory <extractor.*.directory_>`__.
 
 
@@ -8049,15 +8894,17 @@ Type
 Default
     ``"default"``
 Description
-    * ``"default"``: Write the central directory file header
-      once after everything is done or an exception is raised.
+    ``"default"``
+        Write the central directory file header
+        once after everything is done or an exception is raised.
 
-    * ``"safe"``: Update the central directory file header
-      each time a file is stored in a ZIP archive.
+    ``"safe"``
+        Update the central directory file header
+        each time a file is stored in a ZIP archive.
 
-      This greatly reduces the chance a ZIP archive gets corrupted in
-      case the Python interpreter gets shut down unexpectedly
-      (power outage, SIGKILL) but is also a lot slower.
+        This greatly reduces the chance a ZIP archive gets corrupted in
+        case the Python interpreter gets shut down unexpectedly
+        (power outage, SIGKILL) but is also a lot slower.
 
 
 
@@ -8092,8 +8939,8 @@ Description
     gets `imported <https://docs.python.org/3/reference/import.html>`__
     and searched for potential extractors,
     i.e. classes with a ``pattern`` attribute.
-
-    Note: ``null`` references internal extractors defined in
+Note
+    ``null`` references internal extractors defined in
     `extractor/__init__.py <https://github.com/mikf/gallery-dl/blob/master/gallery_dl/extractor/__init__.py#L12>`__
     or by `extractor.modules`_.
 
@@ -8101,7 +8948,7 @@ Description
 extractor.category-map
 ----------------------
 Type
-    * ``object`` (`category` -> `category`)
+    * ``object`` (`category` → `category`)
     * ``string``
 Example
     .. code:: json
@@ -8112,9 +8959,7 @@ Example
         }
 Description
     A JSON object mapping category names to their replacements.
-
-    Special values:
-
+Special Values
     * ``"compat"``
         .. code:: json
 
@@ -8136,7 +8981,7 @@ Description
 extractor.config-map
 --------------------
 Type
-    ``object`` (`category` -> `category`)
+    ``object`` (`category` → `category`)
 Default
     .. code:: json
 
@@ -8161,7 +9006,7 @@ Description
 jinja.environment
 -----------------
 Type
-    ``object`` (`name` -> `value`)
+    ``object`` (`name` → `value`)
 Example
     .. code:: json
 
@@ -8179,7 +9024,7 @@ Description
 jinja.policies
 --------------
 Type
-    ``object`` (`name` -> `value`)
+    ``object`` (`name` → `value`)
 Example
     .. code:: json
 
@@ -8218,7 +9063,7 @@ Description
     A Python |Module|_ whose namespace,
     in addition to the ``GLOBALS`` dict in
     `util.py <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/util.py#L566-L578>`__,
-    is used as |globals parameter|__ for compiled Python expressions.
+    is used as |globals parameter|__ for compiled Expressions_.
 
 .. |globals parameter| replace:: ``globals`` parameter
 .. __: https://docs.python.org/3/library/functions.html#eval
@@ -8248,15 +9093,15 @@ Type
 Default
     ``true``
 Description
-    Evaluate filter expressions in a special environment
+    Evaluate Expressions_ in a special environment
     preventing them from raising fatal exceptions.
 
-    ``true`` or ``"tryexcept"``:
+    ``true`` | ``"tryexcept"``
         Wrap expressions in a `try`/`except` block;
         Evaluate expressions raising an exception as ``false``
-    ``false`` or ``"raw"``:
+    ``false`` | ``"raw"``
         Do not wrap expressions in a special environment
-    ``"defaultdict"``:
+    ``"defaultdict"``
         Prevent exceptions when accessing undefined variables
         by using a `defaultdict <https://docs.python.org/3/library/collections.html#collections.defaultdict>`__
 
@@ -8268,7 +9113,7 @@ Type
 Default
     ``"/"``
 Description
-    Character(s) used as argument separator in format string
+    Character(s) used as argument separator in `Format String`_
     `format specifiers <formatting.md#format-specifiers>`__.
 
     For example, setting this option to ``"#"`` would allow a replacement
@@ -8300,7 +9145,7 @@ Description
 signals-actions
 ---------------
 Type
-    ``object`` (`signal` -> `Action(s)`_)
+    ``object`` (`signal` → `Action(s)`_)
 Example
     .. code:: json
 
@@ -8560,7 +9405,7 @@ Description
     Simple `tilde expansion <https://docs.python.org/3/library/os.path.html#os.path.expanduser>`__
     and `environment variable expansion <https://docs.python.org/3/library/os.path.html#os.path.expandvars>`__
     is supported.
-Note:
+Note
     In Windows environments,
     both backslashes ``\`` as well as forward slashes ``/``
     can be used as path separators.
@@ -8606,8 +9451,8 @@ Description
     Extended logging output configuration.
 
     * format
-        * General format string for logging messages
-          or an ``object`` with format strings for each loglevel.
+        * General `Format String`_ for logging messages
+          or an ``object`` with `Format Strings`_ for each loglevel.
 
           In addition to the default
           `LogRecord attributes <https://docs.python.org/3/library/logging.html#logrecord-attributes>`__,
@@ -8636,8 +9481,8 @@ Description
     * encoding
         * File encoding
         * Default: ``"utf-8"``
-
-    Note: path, mode, and encoding are only applied when configuring
+Note
+    path, mode, and encoding are only applied when configuring
     logging output to a file.
 
 
@@ -8663,9 +9508,9 @@ Description
     An ``object`` containing a ``"name"`` attribute specifying the
     post-processor type, as well as any of its `options <Postprocessor Options_>`__.
 
-    It is possible to set a ``"filter"`` expression similar to
-    `image-filter <extractor.*.image-filter_>`_ to only run a post-processor
-    conditionally.
+    It is possible to set a ``"filter"`` Condition_ similar to
+    `image-filter <extractor.*.image-filter_>`_
+    to only run a post-processor conditionally.
 
     It is also possible set a ``"whitelist"`` or ``"blacklist"`` to
     only enable or disable a post-processor for the specified
@@ -8679,7 +9524,7 @@ Description
         | Compare versions of the same file and replace/enumerate them on mismatch
         | (requires `downloader.*.part`_ = ``true`` and `extractor.*.skip`_ = ``false``)
     ``directory``
-        Reevaluate directory_ format strings
+        Reevaluate directory_ `Format Strings`_
     ``exec``
         Execute external commands
     ``hash``
@@ -8707,9 +9552,11 @@ Example
     * ``"print Hello World"``
     * ``"raise AbortExtraction an error occured"``
     * ``"flag file = terminate"``
+    * ``["print Exiting", "exit 1"]``
 Description
     An Action_ is parsed as `Action Type`
-    followed by (optional) arguments.
+    followed by (optional) arguments:
+    ``<type> <arg1> <arg2> …``
 
     It is possible to specify more than one ``action``
     by providing them as a ``list``: ``["<action1>", "<action2>", …]``
@@ -8728,6 +9575,7 @@ Description
     ``level``:
         | Modify severity level of the current logging message.
         | Can be one of ``debug``, ``info``, ``warning``, ``error`` or an integer value.
+        | Use ``0`` to ignore a message (``level = 0``).
     ``print``:
         Write argument to stdout.
     ``exec``:
@@ -8759,12 +9607,62 @@ Description
         Exit the program with the given argument as exit status.
 
 
+Expression
+----------
+Type
+    ``string``
+Example
+    * ``"1 + 2 + 3"``
+    * ``"str(id) + '_' + title"``
+    * ``"' - '.join(tags[:3]) if tags else 'no tags'"``
+Description
+    A Python Expression_ is a combination of
+    values, variables, operators, and function calls
+    that evaluate to a single value.
+Reference
+    * https://docs.python.org/3/reference/expressions.html
+
+
+Condition
+---------
+Type
+    * Expression_
+    * ``list`` of `Expressions`_
+Example
+    * ``"not is_watching"``
+    * ``"locals().get('optional')"``
+    * ``"date >= datetime(2025, 7, 1) or abort()"``
+    * ``["width > 800", "0.9 < width/height < 1.1"]``
+Description
+    A Condition_ is an Expression_
+    whose result is evaluated as a |type-bool|_ value.
+
+
+Format String
+-------------
+Type
+    ``string``
+Example
+    * ``"foo"``
+    * ``"{username}"``
+    * ``"{title} ({id}).{extension}"``
+    * ``"\fF {title.title()} ({num:>0:>0{len(str(a))}} / {count}).{extension}"``
+Description
+    A `Format String`_ allows creating dynamic text
+    by embedding metadata values directly into replacement fields
+    marked by curly braces ``{...}``.
+Reference
+    * `docs/formatting <formatting_>`__
+    * https://docs.python.org/3/library/string.html#formatstrings
+    * https://docs.python.org/3/library/string.html#formatspec
+
+.. _formatting: formatting.md
+
 
 .. |ytdl| replace:: `yt-dlp`_/`youtube-dl`_
 .. |ytdl's| replace:: yt-dlp's/youtube-dl's
 .. |ffmpeg| replace:: FFmpeg_
 .. |jinja| replace:: Jinja
-
 
 .. |.netrc| replace:: ``.netrc``
 .. |requests.request()| replace:: ``requests.request()``
@@ -8772,7 +9670,9 @@ Description
 .. |verify| replace:: ``verify``
 .. |mature_content| replace:: ``mature_content``
 .. |webbrowser.open()| replace:: ``webbrowser.open()``
-.. |datetime| replace:: ``datetime``
+.. |type-str| replace:: ``str``
+.. |type-bool| replace:: ``boolean``
+.. |type-datetime| replace:: ``datetime``
 .. |datetime.max| replace:: ``datetime.max``
 .. |Date| replace:: ``Date``
 .. |Duration| replace:: ``Duration``
@@ -8786,6 +9686,7 @@ Description
 .. |mode: color| replace:: ``"mode": "color"``
 .. |open()| replace:: the built-in ``open()`` function
 .. |json.dump()| replace:: ``json.dump()``
+.. |ISO 639-1| replace:: `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language
 
 .. _directory: `extractor.*.directory`_
 .. _base-directory: `extractor.*.base-directory`_
@@ -8795,11 +9696,19 @@ Description
 .. _postprocessors: `extractor.*.postprocessors`_
 .. _download archive: `extractor.*.archive`_
 .. _Action(s): Action_
+.. _Conditions: Condition_
+.. _Condition(s): Condition_
+.. _Expressions: Expression_
+.. _Expression(s): Expression_
+.. _Format Strings: `Format String`_
+.. _Format String(s): `Format String`_
 
 .. _Conversion(s):      https://gdl-org.github.io/docs/formatting.html#conversions
 .. _.netrc:             https://stackoverflow.com/tags/.netrc/info
 .. _Last-Modified:      https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.29
-.. _datetime:           https://docs.python.org/3/library/datetime.html#datetime-objects
+.. _type-str:           https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str
+.. _type-bool:          https://docs.python.org/3/library/stdtypes.html#boolean-type-bool
+.. _type-datetime:      https://docs.python.org/3/library/datetime.html#datetime-objects
 .. _datetime.max:       https://docs.python.org/3/library/datetime.html#datetime.datetime.max
 .. _strptime:           https://docs.python.org/3/library/datetime.html#strftime-strptime-behavior
 .. _webbrowser.open():  https://docs.python.org/3/library/webbrowser.html
@@ -8808,8 +9717,6 @@ Description
 .. _mature_content:     https://www.deviantart.com/developers/http/v1/20160316/object/deviation
 .. _Authentication:     https://github.com/mikf/gallery-dl#authentication
 .. _OAuth:              https://github.com/mikf/gallery-dl#oauth
-.. _format string:      formatting.md
-.. _format strings:     formatting.md
 .. _youtube-dl:         https://github.com/ytdl-org/youtube-dl
 .. _yt-dlp:             https://github.com/yt-dlp/yt-dlp
 .. _FFmpeg:             https://www.ffmpeg.org/

@@ -7,7 +7,7 @@
 """Extractors for https://hatenablog.com"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 
 
 BASE_PATTERN = (
@@ -30,11 +30,11 @@ class HatenablogExtractor(Extractor):
         self.domain = match[1] or match[2]
 
     def _init(self):
-        self._find_img = util.re(r'<img +([^>]+)').finditer
+        self._find_img = text.re(r'<img +([^>]+)').finditer
 
     def _handle_article(self, article: str):
         extr = text.extract_from(article)
-        date = text.parse_datetime(extr('<time datetime="', '"'))
+        date = self.parse_datetime_iso(extr('<time datetime="', '"'))
         entry_link = text.unescape(extr('<a href="', '"'))
         entry = entry_link.partition("/entry/")[2]
         title = text.unescape(extr('>', '<'))
@@ -73,7 +73,7 @@ class HatenablogEntriesExtractor(HatenablogExtractor):
 
     def _init(self):
         HatenablogExtractor._init(self)
-        self._find_pager_url = util.re(
+        self._find_pager_url = text.re(
             r' class="pager-next">\s*<a href="([^"]+)').search
 
     def items(self):
@@ -123,7 +123,7 @@ class HatenablogEntriesExtractor(HatenablogExtractor):
 class HatenablogEntryExtractor(HatenablogExtractor):
     """Extractor for a single entry URL"""
     subcategory = "entry"
-    pattern = BASE_PATTERN + r"/entry/([^?#]+)" + QUERY_RE
+    pattern = rf"{BASE_PATTERN}/entry/([^?#]+){QUERY_RE}"
     example = "https://BLOG.hatenablog.com/entry/PATH"
 
     def __init__(self, match):
@@ -146,21 +146,21 @@ class HatenablogEntryExtractor(HatenablogExtractor):
 class HatenablogHomeExtractor(HatenablogEntriesExtractor):
     """Extractor for a blog's home page"""
     subcategory = "home"
-    pattern = BASE_PATTERN + r"(/?)" + QUERY_RE
+    pattern = rf"{BASE_PATTERN}(/?){QUERY_RE}"
     example = "https://BLOG.hatenablog.com"
 
 
 class HatenablogArchiveExtractor(HatenablogEntriesExtractor):
     """Extractor for a blog's archive page"""
     subcategory = "archive"
-    pattern = (BASE_PATTERN + r"(/archive(?:/\d+(?:/\d+(?:/\d+)?)?"
-               r"|/category/[^?#]+)?)" + QUERY_RE)
+    pattern = (rf"{BASE_PATTERN}(/archive(?:/\d+(?:/\d+(?:/\d+)?)?"
+               rf"|/category/[^?#]+)?){QUERY_RE}")
     example = "https://BLOG.hatenablog.com/archive/2024"
 
 
 class HatenablogSearchExtractor(HatenablogEntriesExtractor):
     """Extractor for a blog's search results"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"(/search)" + QUERY_RE
+    pattern = rf"{BASE_PATTERN}(/search){QUERY_RE}"
     example = "https://BLOG.hatenablog.com/search?q=QUERY"
     allowed_parameters = ("q",)

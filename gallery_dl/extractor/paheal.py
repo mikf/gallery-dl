@@ -9,7 +9,7 @@
 """Extractors for https://rule34.paheal.net/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 
 
 class PahealExtractor(Extractor):
@@ -53,8 +53,7 @@ class PahealExtractor(Extractor):
                          extr("<source src='", "'")),
             "uploader": text.unquote(extr(
                 "class='username' href='/user/", "'")),
-            "date"    : text.parse_datetime(
-                extr("datetime='", "'"), "%Y-%m-%dT%H:%M:%S%z"),
+            "date"    : self.parse_datetime_iso(extr("datetime='", "'")),
             "source"  : text.unescape(text.extr(
                 extr(">Source Link<", "</td>"), "href='", "'")),
         }
@@ -97,7 +96,12 @@ class PahealTagExtractor(PahealExtractor):
         base = f"{self.root}/post/list/{self.groups[0]}/"
 
         while True:
-            page = self.request(base + str(pnum)).text
+            try:
+                page = self.request(f"{base}{pnum}").text
+            except exception.HttpError as exc:
+                if exc.status == 404:
+                    return
+                raise
 
             pos = page.find("id='image-list'")
             for post in text.extract_iter(
@@ -128,7 +132,7 @@ class PahealTagExtractor(PahealExtractor):
             "duration" : text.parse_float(duration[:-1]),
             "tags"     : text.unescape(tags),
             "size"     : text.parse_bytes(size[:-1]),
-            "date"     : text.parse_datetime(date, "%B %d, %Y; %H:%M"),
+            "date"     : self.parse_datetime(date, "%B %d, %Y; %H:%M"),
             "filename" : f"{pid} - {tags}",
             "extension": ext,
         }
@@ -146,4 +150,9 @@ class PahealPostExtractor(PahealExtractor):
     example = "https://rule34.paheal.net/post/view/12345"
 
     def get_posts(self):
-        return (self._extract_post(self.groups[0]),)
+        try:
+            return (self._extract_post(self.groups[0]),)
+        except exception.HttpError as exc:
+            if exc.status == 404:
+                return ()
+            raise

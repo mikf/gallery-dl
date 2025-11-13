@@ -7,7 +7,7 @@
 """Extractors for Misskey instances"""
 
 from .common import BaseExtractor, Message, Dispatch
-from .. import text, exception
+from .. import text, dt, exception
 from ..cache import memcache
 
 
@@ -18,15 +18,11 @@ class MisskeyExtractor(BaseExtractor):
     filename_fmt = "{category}_{id}_{file[id]}.{extension}"
     archive_fmt = "{id}_{file[id]}"
 
-    def __init__(self, match):
-        BaseExtractor.__init__(self, match)
-        self.item = self.groups[-1]
-
     def _init(self):
         self.api = MisskeyAPI(self)
         self.instance = self.root.rpartition("://")[2]
-        self.renotes = self.config("renotes", False)
-        self.replies = self.config("replies", True)
+        self.renotes = True if self.config("renotes", False) else False
+        self.replies = True if self.config("replies", True) else False
 
     def items(self):
         for note in self.notes():
@@ -48,13 +44,11 @@ class MisskeyExtractor(BaseExtractor):
             note["instance"] = self.instance
             note["instance_remote"] = note["user"]["host"]
             note["count"] = len(files)
-            note["date"] = text.parse_datetime(
-                note["createdAt"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            note["date"] = self.parse_datetime_iso(note["createdAt"])
 
             yield Message.Directory, note
             for note["num"], file in enumerate(files, 1):
-                file["date"] = text.parse_datetime(
-                    file["createdAt"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                file["date"] = self.parse_datetime_iso(file["createdAt"])
                 note["file"] = file
                 url = file["url"]
                 yield Message.Url, url, text.nameext_from_url(url, note)
@@ -108,11 +102,11 @@ BASE_PATTERN = MisskeyExtractor.update({
 class MisskeyUserExtractor(Dispatch, MisskeyExtractor):
     """Extractor for all images of a Misskey user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/@([^/?#]+)/?$"
+    pattern = rf"{BASE_PATTERN}/@([^/?#]+)/?$"
     example = "https://misskey.io/@USER"
 
     def items(self):
-        base = f"{self.root}/@{self.item}/"
+        base = f"{self.root}/@{self.groups[-1]}/"
         return self._dispatch_extractors((
             (MisskeyInfoExtractor      , base + "info"),
             (MisskeyAvatarExtractor    , base + "avatar"),
@@ -124,32 +118,33 @@ class MisskeyUserExtractor(Dispatch, MisskeyExtractor):
 class MisskeyNotesExtractor(MisskeyExtractor):
     """Extractor for a Misskey user's notes"""
     subcategory = "notes"
-    pattern = BASE_PATTERN + r"/@([^/?#]+)/notes"
+    pattern = rf"{BASE_PATTERN}/@([^/?#]+)/notes"
     example = "https://misskey.io/@USER/notes"
 
     def notes(self):
-        return self.api.users_notes(self.api.user_id_by_username(self.item))
+        return self.api.users_notes(self.api.user_id_by_username(
+            self.groups[-1]))
 
 
 class MisskeyInfoExtractor(MisskeyExtractor):
     """Extractor for a Misskey user's profile data"""
     subcategory = "info"
-    pattern = BASE_PATTERN + r"/@([^/?#]+)/info"
+    pattern = rf"{BASE_PATTERN}/@([^/?#]+)/info"
     example = "https://misskey.io/@USER/info"
 
     def items(self):
-        user = self.api.users_show(self.item)
+        user = self.api.users_show(self.groups[-1])
         return iter(((Message.Directory, user),))
 
 
 class MisskeyAvatarExtractor(MisskeyExtractor):
     """Extractor for a Misskey user's avatar"""
     subcategory = "avatar"
-    pattern = BASE_PATTERN + r"/@([^/?#]+)/avatar"
+    pattern = rf"{BASE_PATTERN}/@([^/?#]+)/avatar"
     example = "https://misskey.io/@USER/avatar"
 
     def notes(self):
-        user = self.api.users_show(self.item)
+        user = self.api.users_show(self.groups[-1])
         url = user.get("avatarUrl")
         return (self._make_note("avatar", user, url),) if url else ()
 
@@ -157,11 +152,11 @@ class MisskeyAvatarExtractor(MisskeyExtractor):
 class MisskeyBackgroundExtractor(MisskeyExtractor):
     """Extractor for a Misskey user's banner image"""
     subcategory = "background"
-    pattern = BASE_PATTERN + r"/@([^/?#]+)/ba(?:nner|ckground)"
+    pattern = rf"{BASE_PATTERN}/@([^/?#]+)/ba(?:nner|ckground)"
     example = "https://misskey.io/@USER/banner"
 
     def notes(self):
-        user = self.api.users_show(self.item)
+        user = self.api.users_show(self.groups[-1])
         url = user.get("bannerUrl")
         return (self._make_note("background", user, url),) if url else ()
 
@@ -169,11 +164,11 @@ class MisskeyBackgroundExtractor(MisskeyExtractor):
 class MisskeyFollowingExtractor(MisskeyExtractor):
     """Extractor for followed Misskey users"""
     subcategory = "following"
-    pattern = BASE_PATTERN + r"/@([^/?#]+)/following"
+    pattern = rf"{BASE_PATTERN}/@([^/?#]+)/following"
     example = "https://misskey.io/@USER/following"
 
     def items(self):
-        user_id = self.api.user_id_by_username(self.item)
+        user_id = self.api.user_id_by_username(self.groups[-1])
         for user in self.api.users_following(user_id):
             user = user["followee"]
             url = f"{self.root}/@{user['username']}"
@@ -186,17 +181,17 @@ class MisskeyFollowingExtractor(MisskeyExtractor):
 class MisskeyNoteExtractor(MisskeyExtractor):
     """Extractor for images from a Note"""
     subcategory = "note"
-    pattern = BASE_PATTERN + r"/notes/(\w+)"
+    pattern = rf"{BASE_PATTERN}/notes/(\w+)"
     example = "https://misskey.io/notes/98765"
 
     def notes(self):
-        return (self.api.notes_show(self.item),)
+        return (self.api.notes_show(self.groups[-1]),)
 
 
 class MisskeyFavoriteExtractor(MisskeyExtractor):
     """Extractor for favorited notes"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/(?:my|api/i)/favorites"
+    pattern = rf"{BASE_PATTERN}/(?:my|api/i)/favorites"
     example = "https://misskey.io/my/favorites"
 
     def notes(self):
@@ -253,7 +248,21 @@ class MisskeyAPI():
         return self.extractor.request_json(url, method="POST", json=data)
 
     def _pagination(self, endpoint, data):
+        extr = self.extractor
         data["limit"] = 100
+        data["withRenotes"] = extr.renotes
+        data["withFiles"] = False if extr.config("text-posts") else True
+
+        date_min, date_max = extr._get_date_min_max()
+        if date_min is not None:
+            data["sinceDate"] = date_min * 1000
+            if date_max is None:
+                # ensure notes are returned in descending order
+                # TODO: implement 'order-posts' option
+                data["untilDate"] = (int(dt.to_ts(dt.now())) + 1000) * 1000
+        if date_max is not None:
+            data["untilDate"] = date_max * 1000
+
         while True:
             notes = self._call(endpoint, data)
             if not notes:

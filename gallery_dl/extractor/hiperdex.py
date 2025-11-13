@@ -9,7 +9,7 @@
 """Extractors for https://hiperdex.com/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, util
+from .. import text
 from ..cache import memcache
 
 BASE_PATTERN = (r"((?:https?://)?(?:www\.)?"
@@ -67,7 +67,7 @@ class HiperdexBase():
 
 class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
     """Extractor for hiperdex manga chapters"""
-    pattern = BASE_PATTERN + r"(/mangas?/([^/?#]+)/([^/?#]+))"
+    pattern = rf"{BASE_PATTERN}(/mangas?/([^/?#]+)/([^/?#]+))"
     example = "https://hiperdex.com/manga/MANGA/CHAPTER/"
 
     def __init__(self, match):
@@ -79,7 +79,7 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
         return self.chapter_data(self.chapter)
 
     def images(self, page):
-        pattern = util.re(r'id="image-\d+"\s+(?:data-)?src="([^"]+)')
+        pattern = text.re(r'id="image-\d+"\s+(?:data-)?src="([^"]+)')
         return [
             (url.strip(), None)
             for url in pattern.findall(page)
@@ -89,7 +89,7 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
 class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
     """Extractor for hiperdex manga"""
     chapterclass = HiperdexChapterExtractor
-    pattern = BASE_PATTERN + r"(/mangas?/([^/?#]+))/?$"
+    pattern = rf"{BASE_PATTERN}(/mangas?/([^/?#]+))/?$"
     example = "https://hiperdex.com/manga/MANGA/"
 
     def __init__(self, match):
@@ -125,7 +125,7 @@ class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
     categorytransfer = False
     chapterclass = HiperdexMangaExtractor
     reverse = False
-    pattern = BASE_PATTERN + r"(/manga-a(?:rtist|uthor)/(?:[^/?#]+))"
+    pattern = rf"{BASE_PATTERN}(/manga-a(?:rtist|uthor)/(?:[^/?#]+))"
     example = "https://hiperdex.com/manga-artist/NAME/"
 
     def __init__(self, match):

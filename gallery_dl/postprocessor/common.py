@@ -21,7 +21,7 @@ class PostProcessor():
     def __repr__(self):
         return self.__class__.__name__
 
-    def _init_archive(self, job, options, prefix=None):
+    def _archive_init(self, job, options, prefix=None):
         if archive_path := options.get("archive"):
             extr = job.extractor
 
@@ -58,3 +58,9 @@ class PostProcessor():
 
         self.archive = None
         return False
+
+    def _archive_register(self, job):
+        job.register_hooks({"finalize": self._archive_close})
+
+    def _archive_close(self, _):
+        self.archive.close()

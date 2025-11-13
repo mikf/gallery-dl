@@ -9,8 +9,7 @@
 """Use metadata as file modification time"""
 
 from .common import PostProcessor
-from .. import text, util, formatter
-from datetime import datetime
+from .. import text, util, dt, formatter
 
 
 class MtimePP(PostProcessor):
@@ -36,8 +35,8 @@ class MtimePP(PostProcessor):
             return
 
         pathfmt.kwdict["_mtime_meta"] = (
-            util.datetime_to_timestamp(mtime)
-            if isinstance(mtime, datetime) else
+            dt.to_ts(mtime)
+            if isinstance(mtime, dt.datetime) else
             text.parse_int(mtime)
         )
 

@@ -51,8 +51,16 @@ class VipergirlsExtractor(Extractor):
                 like = False
 
         posts = root.iter("post")
-        if self.page:
-            util.advance(posts, (text.parse_int(self.page[5:]) - 1) * 15)
+        if (order := self.config("order-posts")) and \
+                order[0] not in ("d", "r"):
+            if self.page:
+                util.advance(posts, (text.parse_int(self.page[5:]) - 1) * 15)
+        else:
+            posts = list(posts)
+            if self.page:
+                offset = text.parse_int(self.page[5:]) * 15
+                posts = posts[:offset]
+            posts.reverse()
 
         for post in posts:
             images = list(post)
@@ -116,8 +124,8 @@ class VipergirlsExtractor(Extractor):
 class VipergirlsThreadExtractor(VipergirlsExtractor):
     """Extractor for vipergirls threads"""
     subcategory = "thread"
-    pattern = (BASE_PATTERN +
-               r"/threads/(\d+)(?:-[^/?#]+)?(/page\d+)?(?:$|#|\?(?!p=))")
+    pattern = (rf"{BASE_PATTERN}"
+               rf"/threads/(\d+)(?:-[^/?#]+)?(/page\d+)?(?:$|#|\?(?!p=))")
     example = "https://vipergirls.to/threads/12345-TITLE"
 
     def __init__(self, match):
@@ -132,8 +140,8 @@ class VipergirlsThreadExtractor(VipergirlsExtractor):
 class VipergirlsPostExtractor(VipergirlsExtractor):
     """Extractor for vipergirls posts"""
     subcategory = "post"
-    pattern = (BASE_PATTERN +
-               r"/threads/(\d+)(?:-[^/?#]+)?\?p=\d+[^#]*#post(\d+)")
+    pattern = (rf"{BASE_PATTERN}"
+               rf"/threads/(\d+)(?:-[^/?#]+)?\?p=\d+[^#]*#post(\d+)")
     example = "https://vipergirls.to/threads/12345-TITLE?p=23456#post23456"
 
     def __init__(self, match):

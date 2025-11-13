@@ -40,7 +40,7 @@ class WebmshareVideoExtractor(Extractor):
                 'property="og:video:width" content="', '"')),
             "height": text.parse_int(extr(
                 'property="og:video:height" content="', '"')),
-            "date" : text.parse_datetime(extr(
+            "date" : self.parse_datetime(extr(
                 "<small>Added ", "<"), "%B %d, %Y"),
             "views": text.parse_int(extr('glyphicon-eye-open"></span>', '<')),
             "id"       : self.video_id,

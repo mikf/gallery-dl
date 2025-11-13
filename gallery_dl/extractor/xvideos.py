@@ -28,7 +28,7 @@ class XvideosGalleryExtractor(XvideosBase, GalleryExtractor):
                      "{gallery[id]} {gallery[title]}")
     filename_fmt = "{category}_{gallery[id]}_{num:>03}.{extension}"
     archive_fmt = "{gallery[id]}_{num}"
-    pattern = BASE_PATTERN + r"/([^/?#]+)/photos/(\d+)"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/photos/(\d+)"
     example = "https://www.xvideos.com/profiles/USER/photos/12345"
 
     def __init__(self, match):
@@ -86,7 +86,7 @@ class XvideosUserExtractor(XvideosBase, Extractor):
     """Extractor for user profiles on xvideos.com"""
     subcategory = "user"
     categorytransfer = True
-    pattern = BASE_PATTERN + r"/([^/?#]+)/?(?:#.*)?$"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/?(?:#.*)?$"
     example = "https://www.xvideos.com/profiles/USER"
 
     def __init__(self, match):

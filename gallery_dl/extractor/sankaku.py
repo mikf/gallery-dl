@@ -47,7 +47,7 @@ class SankakuExtractor(BooruExtractor):
         self.api = SankakuAPI(self)
         if self.config("tags") == "extended":
             self._tags = self._tags_extended
-            self._tags_findall = util.re(
+            self._tags_findall = text.re(
                 r"tag-type-([^\"' ]+).*?\?tags=([^\"'&]+)").findall
 
     def _file_url(self, post):
@@ -67,7 +67,7 @@ class SankakuExtractor(BooruExtractor):
 
     def _prepare(self, post):
         post["created_at"] = post["created_at"]["s"]
-        post["date"] = text.parse_timestamp(post["created_at"])
+        post["date"] = self.parse_timestamp(post["created_at"])
         post["tags"] = post.pop("tag_names", ())
         post["tag_string"] = " ".join(post["tags"])
         post["_http_validate"] = self._check_expired
@@ -119,7 +119,7 @@ class SankakuTagExtractor(SankakuExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"(?:/posts)?/?\?([^#]*)"
+    pattern = rf"{BASE_PATTERN}(?:/posts)?/?\?([^#]*)"
     example = "https://sankaku.app/?tags=TAG"
 
     def __init__(self, match):
@@ -129,10 +129,10 @@ class SankakuTagExtractor(SankakuExtractor):
 
         if "date:" in self.tags:
             # rewrite 'date:' tags (#1790)
-            self.tags = util.re(
+            self.tags = text.re(
                 r"date:(\d\d)[.-](\d\d)[.-](\d\d\d\d)(?!T)").sub(
                 r"date:\3-\2-\1T00:00", self.tags)
-            self.tags = util.re(
+            self.tags = text.re(
                 r"date:(\d\d\d\d)[.-](\d\d)[.-](\d\d)(?!T)").sub(
                 r"date:\1-\2-\3T00:00", self.tags)
 
@@ -149,7 +149,7 @@ class SankakuPoolExtractor(SankakuExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name_en]}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = BASE_PATTERN + r"/(?:books|pools?/show)/(\w+)"
+    pattern = rf"{BASE_PATTERN}/(?:books|pools?/show)/(\w+)"
     example = "https://sankaku.app/books/12345"
 
     def metadata(self):
@@ -171,7 +171,7 @@ class SankakuPostExtractor(SankakuExtractor):
     """Extractor for single posts from sankaku.app"""
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/posts?(?:/show)?/(\w+)"
+    pattern = rf"{BASE_PATTERN}/posts?(?:/show)?/(\w+)"
     example = "https://sankaku.app/post/show/12345"
 
     def posts(self):
@@ -181,7 +181,7 @@ class SankakuPostExtractor(SankakuExtractor):
 class SankakuBooksExtractor(SankakuExtractor):
     """Extractor for books by tag search on sankaku.app"""
     subcategory = "books"
-    pattern = BASE_PATTERN + r"/books/?\?([^#]*)"
+    pattern = rf"{BASE_PATTERN}/books/?\?([^#]*)"
     example = "https://sankaku.app/books?tags=TAG"
 
     def __init__(self, match):

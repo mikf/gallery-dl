@@ -38,7 +38,7 @@ class FlickrExtractor(Extractor):
                 self.log.warning(
                     "Skipping photo %s (%s: %s)",
                     photo["id"], exc.__class__.__name__, exc)
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
             else:
                 photo.update(data)
                 url = self._file_url(photo)
@@ -98,7 +98,7 @@ class FlickrImageExtractor(FlickrExtractor):
         photo["comments"] = text.parse_int(photo["comments"]["_content"])
         photo["description"] = photo["description"]["_content"]
         photo["tags"] = [t["raw"] for t in photo["tags"]["tag"]]
-        photo["date"] = text.parse_timestamp(photo["dateuploaded"])
+        photo["date"] = self.parse_timestamp(photo["dateuploaded"])
         photo["views"] = text.parse_int(photo["views"])
         photo["id"] = text.parse_int(photo["id"])
 
@@ -119,7 +119,7 @@ class FlickrAlbumExtractor(FlickrExtractor):
     directory_fmt = ("{category}", "{user[username]}",
                      "Albums", "{album[id]} {album[title]}")
     archive_fmt = "a_{album[id]}_{id}"
-    pattern = BASE_PATTERN + r"/photos/([^/?#]+)/(?:album|set)s(?:/(\d+))?"
+    pattern = rf"{BASE_PATTERN}/photos/([^/?#]+)/(?:album|set)s(?:/(\d+))?"
     example = "https://www.flickr.com/photos/USER/albums/12345"
 
     def items(self):
@@ -159,7 +159,7 @@ class FlickrGalleryExtractor(FlickrExtractor):
     directory_fmt = ("{category}", "{user[username]}",
                      "Galleries", "{gallery[gallery_id]} {gallery[title]}")
     archive_fmt = "g_{gallery[id]}_{id}"
-    pattern = BASE_PATTERN + r"/photos/([^/?#]+)/galleries/(\d+)"
+    pattern = rf"{BASE_PATTERN}/photos/([^/?#]+)/galleries/(\d+)"
     example = "https://www.flickr.com/photos/USER/galleries/12345/"
 
     def metadata(self):
@@ -177,7 +177,7 @@ class FlickrGroupExtractor(FlickrExtractor):
     subcategory = "group"
     directory_fmt = ("{category}", "Groups", "{group[groupname]}")
     archive_fmt = "G_{group[nsid]}_{id}"
-    pattern = BASE_PATTERN + r"/groups/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/groups/([^/?#]+)"
     example = "https://www.flickr.com/groups/NAME/"
 
     def metadata(self):
@@ -192,7 +192,7 @@ class FlickrUserExtractor(FlickrExtractor):
     """Extractor for the photostream of a flickr user"""
     subcategory = "user"
     archive_fmt = "u_{user[nsid]}_{id}"
-    pattern = BASE_PATTERN + r"/photos/([^/?#]+)/?$"
+    pattern = rf"{BASE_PATTERN}/photos/([^/?#]+)/?$"
     example = "https://www.flickr.com/photos/USER/"
 
     def photos(self):
@@ -204,7 +204,7 @@ class FlickrFavoriteExtractor(FlickrExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user[username]}", "Favorites")
     archive_fmt = "f_{user[nsid]}_{id}"
-    pattern = BASE_PATTERN + r"/photos/([^/?#]+)/favorites"
+    pattern = rf"{BASE_PATTERN}/photos/([^/?#]+)/favorites"
     example = "https://www.flickr.com/photos/USER/favorites"
 
     def photos(self):
@@ -216,7 +216,7 @@ class FlickrSearchExtractor(FlickrExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search[text]}")
     archive_fmt = "s_{search}_{id}"
-    pattern = BASE_PATTERN + r"/search/?\?([^#]+)"
+    pattern = rf"{BASE_PATTERN}/search/?\?([^#]+)"
     example = "https://flickr.com/search/?text=QUERY"
 
     def metadata(self):
@@ -489,7 +489,7 @@ class FlickrAPI(oauth.OAuth1API):
     def _extract_format(self, photo):
         photo["description"] = photo["description"]["_content"].strip()
         photo["views"] = text.parse_int(photo["views"])
-        photo["date"] = text.parse_timestamp(photo["dateupload"])
+        photo["date"] = self.parse_timestamp(photo["dateupload"])
         photo["tags"] = photo["tags"].split()
 
         self._extract_metadata(photo)

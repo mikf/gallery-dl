@@ -20,8 +20,8 @@ import collections
 from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, output, path, util  # noqa E402
-from gallery_dl import postprocessor, config  # noqa E402
+from gallery_dl import extractor, output, path, util, exception  # noqa E402
+from gallery_dl import postprocessor, config, archive  # noqa E402
 from gallery_dl.postprocessor.common import PostProcessor  # noqa E402
 
 
@@ -39,7 +39,7 @@ class FakeJob():
         self.get_logger = logging.getLogger
         self.hooks = collections.defaultdict(list)
 
-    def register_hooks(self, hooks, options):
+    def register_hooks(self, hooks, options=None):
         for hook, callback in hooks.items():
             self.hooks[hook].append(callback)
 
@@ -195,7 +195,8 @@ class ExecTest(BasePostprocessorTest):
 
     def test_command_string(self):
         self._create({
-            "command": "echo {} {_path} {_directory} {_filename} && rm {};",
+            "command": "echo {} {_path} {_temppath} {_directory} {_filename} "
+                       "&& rm {};",
         })
 
         with patch("gallery_dl.util.Popen") as p:
@@ -208,6 +209,7 @@ class ExecTest(BasePostprocessorTest):
             (f"echo "
              f"{self.pathfmt.realpath} "
              f"{self.pathfmt.realpath} "
+             f"{self.pathfmt.temppath} "
              f"{self.pathfmt.realdirectory} "
              f"{self.pathfmt.filename} "
              f"&& rm {self.pathfmt.realpath};"),
@@ -243,7 +245,8 @@ class ExecTest(BasePostprocessorTest):
     def test_command_many(self):
         self._create({
             "commands": [
-                "echo {} {_path} {_directory} {_filename} && rm {};",
+                "echo {} {_path} {_temppath} {_directory} {_filename} "
+                "&& rm {};",
                 ["~/script.sh", "{category}", "\fE _directory.upper()"],
             ]
         })
@@ -259,6 +262,7 @@ class ExecTest(BasePostprocessorTest):
                 (f"echo "
                  f"{self.pathfmt.realpath} "
                  f"{self.pathfmt.realpath} "
+                 f"{self.pathfmt.temppath} "
                  f"{self.pathfmt.realdirectory} "
                  f"{self.pathfmt.filename} "
                  f"&& rm {self.pathfmt.realpath};"),
@@ -353,6 +357,23 @@ class ExecTest(BasePostprocessorTest):
         )
         i.wait.assert_called_once_with()
 
+    def test_archive(self):
+        pp = self._create({
+            "command": ["echo", "foobar"],
+            "archive": ":memory:",
+            "event"  : "finalize",
+        })
+
+        self.assertIsInstance(pp.archive, archive.DownloadArchive)
+
+        with patch.object(pp.archive, "add") as m_aa, \
+                patch.object(pp.archive, "close") as m_ac:
+            self._trigger(("finalize",))
+        pp.archive.close()
+
+        m_aa.assert_called_once_with(self.pathfmt.kwdict)
+        m_ac.assert_called_once()
+
 
 class HashTest(BasePostprocessorTest):
 
@@ -432,7 +453,7 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = f"{self.pathfmt.realpath}.JSON"
-        m.assert_called_once_with(path, "w", encoding="utf-8")
+        m.assert_called_once_with(path, "w", encoding="utf-8", newline=None)
 
         self.assertEqual(self._output(m), """{
     "category": "test",
@@ -452,6 +473,7 @@ class MetadataTest(BasePostprocessorTest):
             "indent"    : None,
             "open"      : "a",
             "encoding"  : "UTF-8",
+            "newline"   : "\r\n",
             "extension" : "JSON",
         }, {
             "public"    : "hello ワールド",
@@ -466,7 +488,9 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = f"{self.pathfmt.realpath}.JSON"
-        m.assert_called_once_with(path, "a", encoding="UTF-8")
+        m.assert_called_once_with(path, "a", encoding="UTF-8", newline='\r\n')
+        # Since we mocked the call to open,
+        # we don't actually see the effect of setting newline.
         self.assertEqual(self._output(m), """{\
 "_private" : "foo \\u30d0\\u30fc",\
 "category" : "test",\
@@ -487,7 +511,7 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = f"{self.pathfmt.realpath}.txt"
-        m.assert_called_once_with(path, "w", encoding="utf-8")
+        m.assert_called_once_with(path, "w", encoding="utf-8", newline=None)
         self.assertEqual(self._output(m), "foo\nbar\nbaz\n")
 
     def test_metadata_tags_split_1(self):
@@ -555,6 +579,17 @@ class MetadataTest(BasePostprocessorTest):
         test({"mode": "custom", "format": "{foo}\n{missing}\n"})
         test({"format": "{foo}\n{missing}\n"})
 
+    def test_metadata_mode_print(self):
+        self._create(
+            {"mode": "print", "format": "{foo}\n{missing}"},
+            {"foo": "bar"},
+        )
+
+        with patch("sys.stdout", Mock()) as m:
+            self._trigger()
+
+        self.assertEqual(self._output(m), "bar\nNone\n")
+
     def test_metadata_extfmt(self):
         pp = self._create({
             "extension"       : "ignored",
@@ -567,7 +602,7 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = f"{self.pathfmt.realdirectory}file.json"
-        m.assert_called_once_with(path, "w", encoding="utf-8")
+        m.assert_called_once_with(path, "w", encoding="utf-8", newline=None)
 
     def test_metadata_extfmt_2(self):
         self._create({
@@ -579,7 +614,7 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = f"{self.pathfmt.realdirectory}file.2.EXT-data:tESt"
-        m.assert_called_once_with(path, "w", encoding="utf-8")
+        m.assert_called_once_with(path, "w", encoding="utf-8", newline=None)
 
     def test_metadata_directory(self):
         self._create({
@@ -590,7 +625,7 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = f"{self.pathfmt.realdirectory}metadata/file.ext.json"
-        m.assert_called_once_with(path, "w", encoding="utf-8")
+        m.assert_called_once_with(path, "w", encoding="utf-8", newline=None)
 
     def test_metadata_directory_2(self):
         self._create({
@@ -602,7 +637,7 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = f"{self.pathfmt.realdirectory}metadata/file.json"
-        m.assert_called_once_with(path, "w", encoding="utf-8")
+        m.assert_called_once_with(path, "w", encoding="utf-8", newline=None)
 
     def test_metadata_directory_format(self):
         self._create(
@@ -614,7 +649,7 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = f"{self.pathfmt.realdirectory}../json/12500/file.ext.json"
-        m.assert_called_once_with(path, "w", encoding="utf-8")
+        m.assert_called_once_with(path, "w", encoding="utf-8", newline=None)
 
     def test_metadata_directory_empty(self):
         self._create(
@@ -625,7 +660,7 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = f"{self.pathfmt.realdirectory}./file.ext.json"
-        m.assert_called_once_with(path, "w", encoding="utf-8")
+        m.assert_called_once_with(path, "w", encoding="utf-8", newline=None)
 
     def test_metadata_basedirectory(self):
         self._create({"base-directory": True})
@@ -634,7 +669,7 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = f"{self.pathfmt.basedirectory}file.ext.json"
-        m.assert_called_once_with(path, "w", encoding="utf-8")
+        m.assert_called_once_with(path, "w", encoding="utf-8", newline=None)
 
     def test_metadata_basedirectory_custom(self):
         self._create({
@@ -646,7 +681,7 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = "/home/test/meta/file.ext.json"
-        m.assert_called_once_with(path, "w", encoding="utf-8")
+        m.assert_called_once_with(path, "w", encoding="utf-8", newline=None)
 
     def test_metadata_filename(self):
         self._create({
@@ -658,7 +693,7 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
 
         path = f"{self.pathfmt.realdirectory}test_file__meta_.data"
-        m.assert_called_once_with(path, "w", encoding="utf-8")
+        m.assert_called_once_with(path, "w", encoding="utf-8", newline=None)
 
     def test_metadata_meta_path(self):
         self._create({
@@ -758,7 +793,7 @@ class MetadataTest(BasePostprocessorTest):
         self.assertGreater(len(self._output(m)), 0)
 
         path = f"{self.pathfmt.realdirectory}file.ext.json"
-        m.assert_called_once_with(path, "w", encoding="utf-8")
+        m.assert_called_once_with(path, "w", encoding="utf-8", newline=None)
 
     def test_metadata_option_skip_false(self):
         self._create({"skip": False})
@@ -769,6 +804,28 @@ class MetadataTest(BasePostprocessorTest):
 
         self.assertTrue(not e.called)
         self.assertTrue(m.called)
+
+    def test_metadata_option_newline(self):
+        self._create({
+            "newline": "\r\n",
+            "filename"      : "data.json",
+            "directory"     : "",
+            "base-directory": self.dir.name,
+        })
+
+        self._trigger()
+
+        path = os.path.join(self.dir.name, "data.json")
+        with open(path, newline="") as fp:
+            content = fp.read()
+
+        self.assertEqual(content, """\
+{\r\n\
+    "category": "test",\r\n\
+    "filename": "file",\r\n\
+    "extension": "ext"\r\n\
+}\r\n\
+""")
 
     def test_metadata_option_include(self):
         self._create(
@@ -799,6 +856,22 @@ class MetadataTest(BasePostprocessorTest):
     "public": "hello ワールド"
 }
 """)
+
+    def test_archive(self):
+        pp = self._create({
+            "archive": ":memory:",
+            "event"  : "finalize",
+        })
+
+        self.assertIsInstance(pp.archive, archive.DownloadArchive)
+
+        with patch.object(pp.archive, "add") as m_aa, \
+                patch.object(pp.archive, "close") as m_ac:
+            self._trigger(("finalize",))
+        pp.archive.close()
+
+        m_aa.assert_called_once_with(self.pathfmt.kwdict)
+        m_ac.assert_called_once()
 
     def _output(self, mock):
         return "".join(
@@ -866,6 +939,35 @@ class PythonTest(BasePostprocessorTest):
         self.assertNotIn("_result", self.pathfmt.kwdict)
         self._trigger()
         self.assertEqual(self.pathfmt.kwdict["_result"], 24)
+
+    def test_eval(self):
+        self._create({"mode": "eval", "expression": "abort()"})
+
+        with self.assertRaises(exception.StopExtraction):
+            self._trigger()
+
+    def test_eval_auto(self):
+        self._create({"expression": "abort()"})
+
+        with self.assertRaises(exception.StopExtraction):
+            self._trigger()
+
+    def test_archive(self):
+        pp = self._create({
+            "expression": "True",
+            "archive"   : ":memory:",
+            "event"     : "finalize",
+        })
+
+        self.assertIsInstance(pp.archive, archive.DownloadArchive)
+
+        with patch.object(pp.archive, "add") as m_aa, \
+                patch.object(pp.archive, "close") as m_ac:
+            self._trigger(("finalize",))
+        pp.archive.close()
+
+        m_aa.assert_called_once_with(self.pathfmt.kwdict)
+        m_ac.assert_called_once()
 
     def _write_module(self, path):
         with open(path, "w") as fp:

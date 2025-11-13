@@ -182,6 +182,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.tiktok.com/@veronicaperasso_1/video/7212008840433274118",
+    "#comment" : "no 'author' (#8189)",
+    "#class"   : tiktok.TiktokPostExtractor,
+    "#results" : "ytdl:https://www.tiktok.com/@veronicaperasso_1/video/7212008840433274118",
+},
+
+{
     "#url"      : "https://vm.tiktok.com/ZGdh4WUhr/",
     "#comment"  : "vm.tiktok.com link: many photos",
     "#category" : ("", "tiktok", "vmpost"),

@@ -51,7 +51,7 @@ class ToyhouseExtractor(Extractor):
         extr = text.extract_from(post)
         return {
             "url": extr(needle, '"'),
-            "date": text.parse_datetime(extr(
+            "date": self.parse_datetime(extr(
                 '</h2>\n            <div class="mb-1">', '<'),
                 "%d %b %Y, %I:%M:%S %p"),
             "artists": [
@@ -104,7 +104,7 @@ class ToyhouseExtractor(Extractor):
 class ToyhouseArtExtractor(ToyhouseExtractor):
     """Extractor for artworks of a toyhouse user"""
     subcategory = "art"
-    pattern = BASE_PATTERN + r"/([^/?#]+)/art"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/art"
     example = "https://www.toyhou.se/USER/art"
 
     def posts(self):

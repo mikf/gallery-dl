@@ -14,10 +14,9 @@ from unittest.mock import patch
 
 import time
 import string
-from datetime import datetime, timedelta
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, util  # noqa E402
+from gallery_dl import extractor, util, dt, config  # noqa E402
 from gallery_dl.extractor import mastodon  # noqa E402
 from gallery_dl.extractor.common import Extractor, Message  # noqa E402
 from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
@@ -156,6 +155,9 @@ class TestExtractorModule(unittest.TestCase):
                 self.fail(f"{cls.__name__} pattern does not match "
                           f"example URL '{cls.example}'")
 
+            self.assertEqual(cls, extr.__class__)
+            self.assertEqual(cls, extractor.find(cls.example).__class__)
+
             extr.request = fail_request
             extr.initialize()
             extr.finalize()
@@ -230,8 +232,8 @@ class TestExtractorWait(unittest.TestCase):
 
     def test_wait_until_datetime(self):
         extr = extractor.find("generic:https://example.org/")
-        until = util.datetime_utcnow() + timedelta(seconds=5)
-        until_local = datetime.now() + timedelta(seconds=5)
+        until = dt.now() + dt.timedelta(seconds=5)
+        until_local = dt.datetime.now() + dt.timedelta(seconds=5)
 
         if not until.microsecond:
             until = until.replace(microsecond=until_local.microsecond)
@@ -248,8 +250,8 @@ class TestExtractorWait(unittest.TestCase):
             self._assert_isotime(calls[0][1][1], until_local)
 
     def _assert_isotime(self, output, until):
-        if not isinstance(until, datetime):
-            until = datetime.fromtimestamp(until)
+        if not isinstance(until, dt.datetime):
+            until = dt.datetime.fromtimestamp(until)
         o = self._isotime_to_seconds(output)
         u = self._isotime_to_seconds(until.time().isoformat()[:8])
         self.assertLessEqual(o-u, 1.0)
@@ -257,6 +259,79 @@ class TestExtractorWait(unittest.TestCase):
     def _isotime_to_seconds(self, isotime):
         parts = isotime.split(":")
         return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+
+
+class TextExtractorCommonDateminmax(unittest.TestCase):
+
+    def setUp(self):
+        config.clear()
+
+    tearDown = setUp
+
+    def test_date_min_max_default(self):
+        extr = extractor.find("generic:https://example.org/")
+
+        dmin, dmax = extr._get_date_min_max()
+        self.assertEqual(dmin, None)
+        self.assertEqual(dmax, None)
+
+        dmin, dmax = extr._get_date_min_max(..., -1)
+        self.assertEqual(dmin, ...)
+        self.assertEqual(dmax, -1)
+
+    def test_date_min_max_timestamp(self):
+        extr = extractor.find("generic:https://example.org/")
+        config.set((), "date-min", 1262304000)
+        config.set((), "date-max", 1262304000.123)
+
+        dmin, dmax = extr._get_date_min_max()
+        self.assertEqual(dmin, 1262304000)
+        self.assertEqual(dmax, 1262304000.123)
+
+    def test_date_min_max_iso(self):
+        extr = extractor.find("generic:https://example.org/")
+        config.set((), "date-min", "2010-01-01")
+        config.set((), "date-max", "2010-01-01T00:01:03")
+
+        dmin, dmax = extr._get_date_min_max()
+        self.assertEqual(dmin, 1262304000)
+        self.assertEqual(dmax, 1262304063)
+
+    def test_date_min_max_iso_invalid(self):
+        extr = extractor.find("generic:https://example.org/")
+        config.set((), "date-min", "2010-01-01")
+        config.set((), "date-max", "2010-01")
+
+        with self.assertLogs() as log_info:
+            dmin, dmax = extr._get_date_min_max()
+        self.assertEqual(dmin, 1262304000)
+        self.assertEqual(dmax, None)
+
+        self.assertEqual(len(log_info.output), 1)
+        self.assertEqual(
+            log_info.output[0],
+            "WARNING:generic:Unable to parse 'date-max': "
+            "Invalid isoformat string '2010-01'")
+
+    def test_date_min_max_fmt(self):
+        extr = extractor.find("generic:https://example.org/")
+        config.set((), "date-format", "%B %d %Y")
+        config.set((), "date-min", "January 01 2010")
+        config.set((), "date-max", "August 18 2022")
+
+        dmin, dmax = extr._get_date_min_max()
+        self.assertEqual(dmin, 1262304000)
+        self.assertEqual(dmax, 1660780800)
+
+    def test_date_min_max_mix(self):
+        extr = extractor.find("generic:https://example.org/")
+        config.set((), "date-format", "%B %d %Y")
+        config.set((), "date-min", "January 01 2010")
+        config.set((), "date-max", 1262304061)
+
+        dmin, dmax = extr._get_date_min_max()
+        self.assertEqual(dmin, 1262304000)
+        self.assertEqual(dmax, 1262304061)
 
 
 class TextExtractorOAuth(unittest.TestCase):

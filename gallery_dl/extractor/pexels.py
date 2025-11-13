@@ -35,8 +35,7 @@ class PexelsExtractor(Extractor):
                 post["type"] = attr["type"]
 
             post.update(metadata)
-            post["date"] = text.parse_datetime(
-                post["created_at"][:-5], "%Y-%m-%dT%H:%M:%S")
+            post["date"] = self.parse_datetime_iso(post["created_at"][:-5])
 
             if "image" in post:
                 url, _, query = post["image"]["download_link"].partition("?")
@@ -63,7 +62,7 @@ class PexelsCollectionExtractor(PexelsExtractor):
     """Extractor for a pexels.com collection"""
     subcategory = "collection"
     directory_fmt = ("{category}", "Collections", "{collection}")
-    pattern = BASE_PATTERN + r"/collections/((?:[^/?#]*-)?(\w+))"
+    pattern = rf"{BASE_PATTERN}/collections/((?:[^/?#]*-)?(\w+))"
     example = "https://www.pexels.com/collections/SLUG-a1b2c3/"
 
     def metadata(self):
@@ -78,7 +77,7 @@ class PexelsSearchExtractor(PexelsExtractor):
     """Extractor for pexels.com search results"""
     subcategory = "search"
     directory_fmt = ("{category}", "Searches", "{search_tags}")
-    pattern = BASE_PATTERN + r"/search/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/search/([^/?#]+)"
     example = "https://www.pexels.com/search/QUERY/"
 
     def metadata(self):
@@ -92,7 +91,7 @@ class PexelsUserExtractor(PexelsExtractor):
     """Extractor for pexels.com user galleries"""
     subcategory = "user"
     directory_fmt = ("{category}", "@{user[slug]}")
-    pattern = BASE_PATTERN + r"/(@(?:(?:[^/?#]*-)?(\d+)|[^/?#]+))"
+    pattern = rf"{BASE_PATTERN}/(@(?:(?:[^/?#]*-)?(\d+)|[^/?#]+))"
     example = "https://www.pexels.com/@USER-12345/"
 
     def posts(self):
@@ -101,7 +100,7 @@ class PexelsUserExtractor(PexelsExtractor):
 
 class PexelsImageExtractor(PexelsExtractor):
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/photo/((?:[^/?#]*-)?\d+)"
+    pattern = rf"{BASE_PATTERN}/photo/((?:[^/?#]*-)?\d+)"
     example = "https://www.pexels.com/photo/SLUG-12345/"
 
     def posts(self):

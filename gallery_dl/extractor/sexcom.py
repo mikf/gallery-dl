@@ -9,8 +9,7 @@
 """Extractors for https://www.sex.com/"""
 
 from .common import Extractor, Message
-from .. import text
-from datetime import datetime
+from .. import text, dt
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?sex\.com(?:/[a-z]{2})?"
 
@@ -34,10 +33,10 @@ class SexcomExtractor(Extractor):
             url = pin["url"]
             parts = url.rsplit("/", 4)
             try:
-                pin["date_url"] = dt = datetime(
+                pin["date_url"] = d = dt.datetime(
                     int(parts[1]), int(parts[2]), int(parts[3]))
                 if "date" not in pin:
-                    pin["date"] = dt
+                    pin["date"] = d
             except Exception:
                 pass
             pin["tags"] = [t[1:] for t in pin["tags"]]
@@ -136,7 +135,7 @@ class SexcomExtractor(Extractor):
             text.nameext_from_url(data["url"], data)
 
         data["uploader"] = extr('itemprop="author">', '<')
-        data["date"] = text.parse_datetime(extr('datetime="', '"'))
+        data["date"] = dt.parse_iso(extr('datetime="', '"'))
         data["tags"] = text.split_html(extr('class="tags"> Tags', '</div>'))
         data["comments"] = text.parse_int(extr('Comments (', ')'))
 
@@ -195,8 +194,8 @@ class SexcomPinExtractor(SexcomExtractor):
     """Extractor for a pinned image or video on www.sex.com"""
     subcategory = "pin"
     directory_fmt = ("{category}",)
-    pattern = (BASE_PATTERN +
-               r"(/(?:\w\w/(?:pic|gif|video)s|pin)/\d+/?)(?!.*#related$)")
+    pattern = (rf"{BASE_PATTERN}"
+               rf"(/(?:\w\w/(?:pic|gif|video)s|pin)/\d+/?)(?!.*#related$)")
     example = "https://www.sex.com/pin/12345-TITLE/"
 
     def pins(self):
@@ -207,7 +206,7 @@ class SexcomRelatedPinExtractor(SexcomPinExtractor):
     """Extractor for related pins on www.sex.com"""
     subcategory = "related-pin"
     directory_fmt = ("{category}", "related {original_pin[pin_id]}")
-    pattern = BASE_PATTERN + r"(/pin/(\d+)/?).*#related$"
+    pattern = rf"{BASE_PATTERN}(/pin/(\d+)/?).*#related$"
     example = "https://www.sex.com/pin/12345#related"
 
     def metadata(self):
@@ -224,7 +223,7 @@ class SexcomPinsExtractor(SexcomExtractor):
     """Extractor for a user's pins on www.sex.com"""
     subcategory = "pins"
     directory_fmt = ("{category}", "{user}")
-    pattern = BASE_PATTERN + r"/user/([^/?#]+)/pins/"
+    pattern = rf"{BASE_PATTERN}/user/([^/?#]+)/pins/"
     example = "https://www.sex.com/user/USER/pins/"
 
     def metadata(self):
@@ -239,7 +238,7 @@ class SexcomLikesExtractor(SexcomExtractor):
     """Extractor for a user's liked pins on www.sex.com"""
     subcategory = "likes"
     directory_fmt = ("{category}", "{user}", "Likes")
-    pattern = BASE_PATTERN + r"/user/([^/?#]+)/likes/"
+    pattern = rf"{BASE_PATTERN}/user/([^/?#]+)/likes/"
     example = "https://www.sex.com/user/USER/likes/"
 
     def metadata(self):
@@ -254,8 +253,8 @@ class SexcomBoardExtractor(SexcomExtractor):
     """Extractor for pins from a board on www.sex.com"""
     subcategory = "board"
     directory_fmt = ("{category}", "{user}", "{board}")
-    pattern = (BASE_PATTERN + r"/user"
-               r"/([^/?#]+)/(?!(?:following|pins|repins|likes)/)([^/?#]+)")
+    pattern = (rf"{BASE_PATTERN}/user"
+               rf"/([^/?#]+)/(?!(?:following|pins|repins|likes)/)([^/?#]+)")
     example = "https://www.sex.com/user/USER/BOARD/"
 
     def metadata(self):
@@ -270,14 +269,31 @@ class SexcomBoardExtractor(SexcomExtractor):
         return self._pagination(url)
 
 
+class SexcomFeedExtractor(SexcomExtractor):
+    """Extractor for pins from your account's main feed on www.sex.com"""
+    subcategory = "feed"
+    directory_fmt = ("{category}", "feed")
+    pattern = rf"{BASE_PATTERN}/feed"
+    example = "https://www.sex.com/feed/"
+
+    def metadata(self):
+        return {"feed": True}
+
+    def pins(self):
+        if not self.cookies_check(("sess_sex",)):
+            self.log.warning("no 'sess_sex' cookie set")
+        url = f"{self.root}/feed/"
+        return self._pagination(url)
+
+
 class SexcomSearchExtractor(SexcomExtractor):
     """Extractor for search results on www.sex.com"""
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search[search]}")
-    pattern = (BASE_PATTERN + r"/(?:"
-               r"(pic|gif|video)s(?:\?(search=[^#]+)$|/([^/?#]*))"
-               r"|search/(pic|gif|video)s"
-               r")/?(?:\?([^#]+))?")
+    pattern = (rf"{BASE_PATTERN}/(?:"
+               rf"(pic|gif|video)s(?:\?(search=[^#]+)$|/([^/?#]*))"
+               rf"|search/(pic|gif|video)s"
+               rf")/?(?:\?([^#]+))?")
     example = "https://www.sex.com/search/pics?query=QUERY"
 
     def _init(self):
@@ -314,7 +330,7 @@ class SexcomSearchExtractor(SexcomExtractor):
 
                 parts = path.rsplit("/", 4)
                 try:
-                    pin["date_url"] = pin["date"] = datetime(
+                    pin["date_url"] = pin["date"] = dt.datetime(
                         int(parts[1]), int(parts[2]), int(parts[3]))
                 except Exception:
                     pass

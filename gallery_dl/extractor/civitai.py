@@ -15,7 +15,7 @@ import itertools
 import time
 
 BASE_PATTERN = r"(?:https?://)?civitai\.com"
-USER_PATTERN = BASE_PATTERN + r"/user/([^/?#]+)"
+USER_PATTERN = rf"{BASE_PATTERN}/user/([^/?#]+)"
 
 
 class CivitaiExtractor(Extractor):
@@ -86,8 +86,7 @@ class CivitaiExtractor(Extractor):
                     images = self.api.images_post(post["id"])
 
                 post = self.api.post(post["id"])
-                post["date"] = text.parse_datetime(
-                    post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                post["date"] = self.parse_datetime_iso(post["publishedAt"])
                 data = {
                     "post": post,
                     "user": post.pop("user"),
@@ -122,8 +121,7 @@ class CivitaiExtractor(Extractor):
                     data["post"] = post = self._extract_meta_post(file)
                     if post:
                         post.pop("user", None)
-                file["date"] = text.parse_datetime(
-                    file["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                file["date"] = self.parse_datetime_iso(file["createdAt"])
 
                 data["url"] = url = self._url(file)
                 text.nameext_from_url(url, data)
@@ -180,8 +178,7 @@ class CivitaiExtractor(Extractor):
             if "id" not in file and data["filename"].isdecimal():
                 file["id"] = text.parse_int(data["filename"])
             if "date" not in file:
-                file["date"] = text.parse_datetime(
-                    file["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+                file["date"] = self.parse_datetime_iso(file["createdAt"])
             if self._meta_generation:
                 file["generation"] = self._extract_meta_generation(file)
             yield data
@@ -211,16 +208,15 @@ class CivitaiExtractor(Extractor):
         try:
             return self.api.image_generationdata(image["id"])
         except Exception as exc:
-            return self.log.debug("", exc_info=exc)
+            return self.log.traceback(exc)
 
     def _extract_meta_post(self, image):
         try:
             post = self.api.post(image["postId"])
-            post["date"] = text.parse_datetime(
-                post["publishedAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            post["date"] = self.parse_datetime_iso(post["publishedAt"])
             return post
         except Exception as exc:
-            return self.log.debug("", exc_info=exc)
+            return self.log.traceback(exc)
 
     def _extract_meta_version(self, item, is_post=True):
         try:
@@ -228,7 +224,7 @@ class CivitaiExtractor(Extractor):
                 version = self.api.model_version(version_id).copy()
                 return version.pop("model", None), version
         except Exception as exc:
-            self.log.debug("", exc_info=exc)
+            self.log.traceback(exc)
         return None, None
 
     def _extract_version_id(self, item, is_post=True):
@@ -252,7 +248,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
     directory_fmt = ("{category}", "{user[username]}",
                      "{model[id]}{model[name]:? //}",
                      "{version[id]}{version[name]:? //}")
-    pattern = BASE_PATTERN + r"/models/(\d+)(?:/?\?modelVersionId=(\d+))?"
+    pattern = rf"{BASE_PATTERN}/models/(\d+)(?:/?\?modelVersionId=(\d+))?"
     example = "https://civitai.com/models/12345/TITLE"
 
     def items(self):
@@ -278,8 +274,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
             versions = (version,)
 
         for version in versions:
-            version["date"] = text.parse_datetime(
-                version["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            version["date"] = self.parse_datetime_iso(version["createdAt"])
 
             data = {
                 "model"  : model,
@@ -342,9 +337,9 @@ class CivitaiModelExtractor(CivitaiExtractor):
             params = {
                 "modelVersionId": version["id"],
                 "prioritizedUserIds": (user["id"],),
-                "period": "AllTime",
-                "sort": "Most Reactions",
-                "limit": 20,
+                "period" : self.api._param_period(),
+                "sort"   : self.api._param_sort(),
+                "limit"  : 20,
                 "pending": True,
             }
             images = self.api.images(params, defaults=False)
@@ -370,7 +365,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
 
 class CivitaiImageExtractor(CivitaiExtractor):
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/images/(\d+)"
+    pattern = rf"{BASE_PATTERN}/images/(\d+)"
     example = "https://civitai.com/images/12345"
 
     def images(self):
@@ -381,7 +376,7 @@ class CivitaiCollectionExtractor(CivitaiExtractor):
     subcategory = "collection"
     directory_fmt = ("{category}", "{user_collection[username]}",
                      "collections", "{collection[id]}{collection[name]:? //}")
-    pattern = BASE_PATTERN + r"/collections/(\d+)"
+    pattern = rf"{BASE_PATTERN}/collections/(\d+)"
     example = "https://civitai.com/collections/12345"
 
     def images(self):
@@ -391,8 +386,8 @@ class CivitaiCollectionExtractor(CivitaiExtractor):
 
         params = {
             "collectionId"  : cid,
-            "period"        : "AllTime",
-            "sort"          : "Newest",
+            "period"        : self.api._param_period(),
+            "sort"          : self.api._param_sort(),
             "browsingLevel" : self.api.nsfw,
             "include"       : ("cosmetics",),
         }
@@ -403,7 +398,7 @@ class CivitaiPostExtractor(CivitaiExtractor):
     subcategory = "post"
     directory_fmt = ("{category}", "{username|user[username]}", "posts",
                      "{post[id]}{post[title]:? //}")
-    pattern = BASE_PATTERN + r"/posts/(\d+)"
+    pattern = rf"{BASE_PATTERN}/posts/(\d+)"
     example = "https://civitai.com/posts/12345"
 
     def posts(self):
@@ -412,7 +407,7 @@ class CivitaiPostExtractor(CivitaiExtractor):
 
 class CivitaiTagExtractor(CivitaiExtractor):
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"/tag/([^/?&#]+)"
+    pattern = rf"{BASE_PATTERN}/tag/([^/?&#]+)"
     example = "https://civitai.com/tag/TAG"
 
     def models(self):
@@ -422,7 +417,7 @@ class CivitaiTagExtractor(CivitaiExtractor):
 
 class CivitaiSearchModelsExtractor(CivitaiExtractor):
     subcategory = "search-models"
-    pattern = BASE_PATTERN + r"/search/models\?([^#]+)"
+    pattern = rf"{BASE_PATTERN}/search/models\?([^#]+)"
     example = "https://civitai.com/search/models?query=QUERY"
 
     def models(self):
@@ -433,7 +428,7 @@ class CivitaiSearchModelsExtractor(CivitaiExtractor):
 
 class CivitaiSearchImagesExtractor(CivitaiExtractor):
     subcategory = "search-images"
-    pattern = BASE_PATTERN + r"/search/images\?([^#]+)"
+    pattern = rf"{BASE_PATTERN}/search/images\?([^#]+)"
     example = "https://civitai.com/search/images?query=QUERY"
 
     def images(self):
@@ -444,7 +439,7 @@ class CivitaiSearchImagesExtractor(CivitaiExtractor):
 
 class CivitaiModelsExtractor(CivitaiExtractor):
     subcategory = "models"
-    pattern = BASE_PATTERN + r"/models(?:/?\?([^#]+))?(?:$|#)"
+    pattern = rf"{BASE_PATTERN}/models(?:/?\?([^#]+))?(?:$|#)"
     example = "https://civitai.com/models"
 
     def models(self):
@@ -454,7 +449,7 @@ class CivitaiModelsExtractor(CivitaiExtractor):
 
 class CivitaiImagesExtractor(CivitaiExtractor):
     subcategory = "images"
-    pattern = BASE_PATTERN + r"/images(?:/?\?([^#]+))?(?:$|#)"
+    pattern = rf"{BASE_PATTERN}/images(?:/?\?([^#]+))?(?:$|#)"
     example = "https://civitai.com/images"
 
     def images(self):
@@ -465,7 +460,7 @@ class CivitaiImagesExtractor(CivitaiExtractor):
 
 class CivitaiVideosExtractor(CivitaiExtractor):
     subcategory = "videos"
-    pattern = BASE_PATTERN + r"/videos(?:/?\?([^#]+))?(?:$|#)"
+    pattern = rf"{BASE_PATTERN}/videos(?:/?\?([^#]+))?(?:$|#)"
     example = "https://civitai.com/videos"
 
     def images(self):
@@ -476,7 +471,7 @@ class CivitaiVideosExtractor(CivitaiExtractor):
 
 class CivitaiPostsExtractor(CivitaiExtractor):
     subcategory = "posts"
-    pattern = BASE_PATTERN + r"/posts(?:/?\?([^#]+))?(?:$|#)"
+    pattern = rf"{BASE_PATTERN}/posts(?:/?\?([^#]+))?(?:$|#)"
     example = "https://civitai.com/posts"
 
     def posts(self):
@@ -485,7 +480,7 @@ class CivitaiPostsExtractor(CivitaiExtractor):
 
 
 class CivitaiUserExtractor(Dispatch, CivitaiExtractor):
-    pattern = USER_PATTERN + r"/?(?:$|\?|#)"
+    pattern = rf"{USER_PATTERN}/?(?:$|\?|#)"
     example = "https://civitai.com/user/USER"
 
     def items(self):
@@ -501,7 +496,7 @@ class CivitaiUserExtractor(Dispatch, CivitaiExtractor):
 
 class CivitaiUserModelsExtractor(CivitaiExtractor):
     subcategory = "user-models"
-    pattern = USER_PATTERN + r"/models/?(?:\?([^#]+))?"
+    pattern = rf"{USER_PATTERN}/models/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/models"
 
     def models(self):
@@ -515,7 +510,7 @@ class CivitaiUserPostsExtractor(CivitaiExtractor):
     subcategory = "user-posts"
     directory_fmt = ("{category}", "{username|user[username]}", "posts",
                      "{post[id]}{post[title]:? //}")
-    pattern = USER_PATTERN + r"/posts/?(?:\?([^#]+))?"
+    pattern = rf"{USER_PATTERN}/posts/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/posts"
 
     def posts(self):
@@ -527,7 +522,7 @@ class CivitaiUserPostsExtractor(CivitaiExtractor):
 
 class CivitaiUserImagesExtractor(CivitaiExtractor):
     subcategory = "user-images"
-    pattern = USER_PATTERN + r"/images/?(?:\?([^#]+))?"
+    pattern = rf"{USER_PATTERN}/images/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/images"
 
     def __init__(self, match):
@@ -548,7 +543,7 @@ class CivitaiUserImagesExtractor(CivitaiExtractor):
 class CivitaiUserVideosExtractor(CivitaiExtractor):
     subcategory = "user-videos"
     directory_fmt = ("{category}", "{username|user[username]}", "videos")
-    pattern = USER_PATTERN + r"/videos/?(?:\?([^#]+))?"
+    pattern = rf"{USER_PATTERN}/videos/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/videos"
 
     def __init__(self, match):
@@ -567,7 +562,7 @@ class CivitaiUserVideosExtractor(CivitaiExtractor):
 
 class CivitaiUserCollectionsExtractor(CivitaiExtractor):
     subcategory = "user-collections"
-    pattern = USER_PATTERN + r"/collections/?(?:\?([^#]+))?"
+    pattern = rf"{USER_PATTERN}/collections/?(?:\?([^#]+))?"
     example = "https://civitai.com/user/USER/collections"
 
     def items(self):
@@ -586,15 +581,14 @@ class CivitaiGeneratedExtractor(CivitaiExtractor):
     subcategory = "generated"
     filename_fmt = "{filename}.{extension}"
     directory_fmt = ("{category}", "generated")
-    pattern = f"{BASE_PATTERN}/generate"
+    pattern = rf"{BASE_PATTERN}/generate"
     example = "https://civitai.com/generate"
 
     def items(self):
         self._require_auth()
 
         for gen in self.api.orchestrator_queryGeneratedImages():
-            gen["date"] = text.parse_datetime(
-                gen["createdAt"], "%Y-%m-%dT%H:%M:%S.%fZ")
+            gen["date"] = self.parse_datetime_iso(gen["createdAt"])
             yield Message.Directory, gen
             for step in gen.pop("steps", ()):
                 for image in step.pop("images", ()):
@@ -719,8 +713,8 @@ class CivitaiTrpcAPI():
         if defaults:
             params = self._merge_params(params, {
                 "useIndex"     : True,
-                "period"       : "AllTime",
-                "sort"         : "Newest",
+                "period"       : self._param_period(),
+                "sort"         : self._param_sort(),
                 "withMeta"     : False,  # Metadata Only
                 "fromPlatform" : False,  # Made On-Site
                 "browsingLevel": self.nsfw,
@@ -733,8 +727,8 @@ class CivitaiTrpcAPI():
     def images_gallery(self, model, version, user):
         endpoint = "image.getImagesAsPostsInfinite"
         params = {
-            "period"        : "AllTime",
-            "sort"          : "Newest",
+            "period"        : self._param_period(),
+            "sort"          : self._param_sort(),
             "modelVersionId": version["id"],
             "modelId"       : model["id"],
             "hidden"        : False,
@@ -768,9 +762,9 @@ class CivitaiTrpcAPI():
 
         if defaults:
             params = self._merge_params(params, {
-                "period"       : "AllTime",
+                "period"       : self._param_period(),
                 "periodMode"   : "published",
-                "sort"         : "Newest",
+                "sort"         : self._param_sort(),
                 "pending"      : False,
                 "hidden"       : False,
                 "followed"     : False,
@@ -797,9 +791,9 @@ class CivitaiTrpcAPI():
         if defaults:
             params = self._merge_params(params, {
                 "browsingLevel": self.nsfw,
-                "period"       : "AllTime",
+                "period"       : self._param_period(),
                 "periodMode"   : "published",
-                "sort"         : "Newest",
+                "sort"         : self._param_sort(),
                 "followed"     : False,
                 "draftOnly"    : False,
                 "pending"      : True,
@@ -807,7 +801,8 @@ class CivitaiTrpcAPI():
             })
 
         params = self._type_params(params)
-        return self._pagination(endpoint, params, meta)
+        return self._pagination(endpoint, params, meta,
+                                user=("username" in params))
 
     def collection(self, collection_id):
         endpoint = "collection.getById"
@@ -820,7 +815,7 @@ class CivitaiTrpcAPI():
         if defaults:
             params = self._merge_params(params, {
                 "browsingLevel": self.nsfw,
-                "sort"         : "Newest",
+                "sort"         : self._param_sort(),
             })
 
         params = self._type_params(params)
@@ -834,7 +829,7 @@ class CivitaiTrpcAPI():
     def orchestrator_queryGeneratedImages(self):
         endpoint = "orchestrator.queryGeneratedImages"
         params = {
-            "ascending": False,
+            "ascending": True if self._param_sort() == "Oldest" else False,
             "tags"     : ("gen",),
             "authed"   : True,
         }
@@ -854,13 +849,17 @@ class CivitaiTrpcAPI():
         return self.extractor.request_json(
             url, params=params, headers=headers)["result"]["data"]["json"]
 
-    def _pagination(self, endpoint, params, meta=None):
+    def _pagination(self, endpoint, params, meta=None, user=False):
         if "cursor" not in params:
             params["cursor"] = None
             meta_ = {"cursor": ("undefined",)}
 
+        data = self._call(endpoint, params, meta_)
+        if user and data["items"] and \
+                data["items"][0]["user"]["username"] != params["username"]:
+            return ()
+
         while True:
-            data = self._call(endpoint, params, meta_)
             yield from data["items"]
 
             try:
@@ -871,6 +870,7 @@ class CivitaiTrpcAPI():
 
             params["cursor"] = data["nextCursor"]
             meta_ = meta
+            data = self._call(endpoint, params, meta_)
 
     def _merge_params(self, params_user, params_default):
         """Combine 'params_user' with 'params_default'"""
@@ -901,6 +901,21 @@ class CivitaiTrpcAPI():
                 type = types[name]
                 params[name] = [type(item) for item in value]
         return params
+
+    def _param_period(self):
+        if period := self.extractor.config("period"):
+            return period
+        return "AllTime"
+
+    def _param_sort(self):
+        if sort := self.extractor.config("sort"):
+            s = sort[0].lower()
+            if s in "drn":
+                return "Newest"
+            if s in "ao":
+                return "Oldest"
+            return sort
+        return "Newest"
 
 
 def _bool(value):

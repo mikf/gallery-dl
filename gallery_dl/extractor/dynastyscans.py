@@ -41,12 +41,12 @@ class DynastyscansBase():
 
 class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
     """Extractor for manga-chapters from dynasty-scans.com"""
-    pattern = BASE_PATTERN + r"(/chapters/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}(/chapters/[^/?#]+)"
     example = "https://dynasty-scans.com/chapters/NAME"
 
     def metadata(self, page):
         extr = text.extract_from(page)
-        match = util.re(
+        match = text.re(
             r"(?:<a[^>]*>)?([^<]+)(?:</a>)?"  # manga name
             r"(?: ch(\d+)([^:<]*))?"  # chapter info
             r"(?:: (.+))?"  # title
@@ -62,7 +62,7 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
             "author"  : text.remove_html(author),
             "group"   : (text.remove_html(group) or
                          text.extr(group, ' alt="', '"')),
-            "date"    : text.parse_datetime(extr(
+            "date"    : self.parse_datetime(extr(
                 '"icon-calendar"></i> ', '<'), "%b %d, %Y"),
             "tags"    : text.split_html(extr(
                 "class='tags'>", "<div id='chapter-actions'")),
@@ -81,7 +81,7 @@ class DynastyscansChapterExtractor(DynastyscansBase, ChapterExtractor):
 class DynastyscansMangaExtractor(DynastyscansBase, MangaExtractor):
     chapterclass = DynastyscansChapterExtractor
     reverse = False
-    pattern = BASE_PATTERN + r"(/series/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}(/series/[^/?#]+)"
     example = "https://dynasty-scans.com/series/NAME"
 
     def chapters(self, page):
@@ -97,7 +97,7 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
     directory_fmt = ("{category}", "Images")
     filename_fmt = "{image_id}.{extension}"
     archive_fmt = "i_{image_id}"
-    pattern = BASE_PATTERN + r"/images/?(?:\?([^#]+))?$"
+    pattern = rf"{BASE_PATTERN}/images/?(?:\?([^#]+))?$"
     example = "https://dynasty-scans.com/images?QUERY"
 
     def __init__(self, match):
@@ -126,7 +126,7 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
 class DynastyscansImageExtractor(DynastyscansSearchExtractor):
     """Extractor for individual images on dynasty-scans.com"""
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/images/(\d+)"
+    pattern = rf"{BASE_PATTERN}/images/(\d+)"
     example = "https://dynasty-scans.com/images/12345"
 
     def images(self):
@@ -136,7 +136,7 @@ class DynastyscansImageExtractor(DynastyscansSearchExtractor):
 class DynastyscansAnthologyExtractor(DynastyscansSearchExtractor):
     """Extractor for dynasty-scans anthologies"""
     subcategory = "anthology"
-    pattern = BASE_PATTERN + r"/anthologies/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/anthologies/([^/?#]+)"
     example = "https://dynasty-scans.com/anthologies/TITLE"
 
     def items(self):
@@ -166,8 +166,6 @@ class DynastyscansAnthologyExtractor(DynastyscansSearchExtractor):
             data["scanlator"] = content[1].text[11:]
             data["tags"] = content[2].text[6:].lower().split(", ")
             data["title"] = element[5].text
-            data["date"] = text.parse_datetime(
-                element[1].text, "%Y-%m-%dT%H:%M:%S%z")
-            data["date_updated"] = text.parse_datetime(
-                element[2].text, "%Y-%m-%dT%H:%M:%S%z")
+            data["date"] = self.parse_datetime_iso(element[1].text)
+            data["date_updated"] = self.parse_datetime_iso(element[2].text)
             yield Message.Queue, element[4].text, data

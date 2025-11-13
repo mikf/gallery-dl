@@ -27,7 +27,7 @@ def find(scheme):
         scheme = "http"
     if scheme in modules:  # prevent unwanted imports
         try:
-            module = __import__(scheme, globals(), None, (), 1)
+            module = __import__(scheme, globals(), None, None, 1)
         except ImportError:
             pass
         else:

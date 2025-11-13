@@ -28,7 +28,7 @@ class DankefuerslesenBase():
 
 class DankefuerslesenChapterExtractor(DankefuerslesenBase, ChapterExtractor):
     """Extractor for Danke fürs Lesen manga chapters"""
-    pattern = BASE_PATTERN + r"/read/manga/([\w-]+)/([\w-]+)"
+    pattern = rf"{BASE_PATTERN}/read/manga/([\w-]+)/([\w-]+)"
     example = "https://danke.moe/read/manga/TITLE/123/1/"
 
     def _init(self):
@@ -68,7 +68,7 @@ class DankefuerslesenChapterExtractor(DankefuerslesenBase, ChapterExtractor):
             "chapter_minor": minor,
             "group"     : manga["groups"][group_id].split(" & "),
             "group_id"  : text.parse_int(group_id),
-            "date"      : text.parse_timestamp(data["release_date"][group_id]),
+            "date"      : self.parse_timestamp(data["release_date"][group_id]),
             "lang"      : util.NONE,
             "language"  : util.NONE,
         }
@@ -95,7 +95,7 @@ class DankefuerslesenMangaExtractor(DankefuerslesenBase, MangaExtractor):
     """Extractor for Danke fürs Lesen manga"""
     chapterclass = DankefuerslesenChapterExtractor
     reverse = False
-    pattern = BASE_PATTERN + r"/read/manga/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/read/manga/([^/?#]+)"
     example = "https://danke.moe/read/manga/TITLE/"
 
     def chapters(self, page):

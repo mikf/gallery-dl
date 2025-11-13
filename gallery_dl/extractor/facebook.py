@@ -11,9 +11,9 @@ from .. import text, util, exception
 from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?facebook\.com"
-USER_PATTERN = (BASE_PATTERN +
-                r"/(?!media/|photo/|photo.php|watch/)"
-                r"(?:profile\.php\?id=|people/[^/?#]+/)?([^/?&#]+)")
+USER_PATTERN = (rf"{BASE_PATTERN}/"
+                rf"(?!media/|photo/|photo.php|watch/)"
+                rf"(?:profile\.php\?id=|people/[^/?#]+/)?([^/?&#]+)")
 
 
 class FacebookExtractor(Extractor):
@@ -108,7 +108,7 @@ class FacebookExtractor(Extractor):
                 '"message":{"delight_ranges"',
                 '"},"message_preferred_body"'
             ).rsplit('],"text":"', 1)[-1]),
-            "date": text.parse_timestamp(
+            "date": self.parse_timestamp(
                 text.extr(photo_page, '\\"publish_time\\":', ',') or
                 text.extr(photo_page, '"created_time":', ',')
             ),
@@ -172,7 +172,7 @@ class FacebookExtractor(Extractor):
             "user_id": text.extr(
                 video_page, '"owner":{"__typename":"User","id":"', '"'
             ),
-            "date": text.parse_timestamp(text.extr(
+            "date": self.parse_timestamp(text.extr(
                 video_page, '\\"publish_time\\":', ','
             )),
             "type": "video"
@@ -369,6 +369,16 @@ class FacebookExtractor(Extractor):
                 for edge in (user["profile_tabs"]["profile_user"]
                              ["timeline_nav_app_sections"]["edges"])
             ]
+
+            if bio := text.extr(page, '"best_description":{"text":"', '"'):
+                user["biography"] = self.decode_all(bio)
+            elif (pos := page.find(
+                    '"__module_operation_ProfileCometTileView_profileT')) >= 0:
+                user["biography"] = self.decode_all(text.rextr(
+                    page, '"text":"', '"', pos))
+            else:
+                user["biography"] = text.unescape(text.remove_html(text.extr(
+                    page, "</span></span></h2>", "<ul>")))
         except Exception:
             if user is None:
                 self.log.debug("Failed to extract user data: %s", data)
@@ -376,40 +386,12 @@ class FacebookExtractor(Extractor):
         return user
 
 
-class FacebookSetExtractor(FacebookExtractor):
-    """Base class for Facebook Set extractors"""
-    subcategory = "set"
-    pattern = (
-        BASE_PATTERN +
-        r"/(?:(?:media/set|photo)/?\?(?:[^&#]+&)*set=([^&#]+)"
-        r"[^/?#]*(?<!&setextract)$"
-        r"|([^/?#]+/posts/[^/?#]+)"
-        r"|photo/\?(?:[^&#]+&)*fbid=([^/?&#]+)&set=([^/?&#]+)&setextract)"
-    )
-    example = "https://www.facebook.com/media/set/?set=SET_ID"
-
-    def items(self):
-        set_id = self.groups[0] or self.groups[3]
-        if path := self.groups[1]:
-            post_url = self.root + "/" + path
-            post_page = self.request(post_url).text
-            set_id = self.parse_post_page(post_page)["set_id"]
-
-        set_url = f"{self.root}/media/set/?set={set_id}"
-        set_page = self.request(set_url).text
-        set_data = self.parse_set_page(set_page)
-        if self.groups[2]:
-            set_data["first_photo_id"] = self.groups[2]
-
-        return self.extract_set(set_data)
-
-
 class FacebookPhotoExtractor(FacebookExtractor):
     """Base class for Facebook Photo extractors"""
     subcategory = "photo"
-    pattern = (BASE_PATTERN +
-               r"/(?:[^/?#]+/photos/[^/?#]+/|photo(?:.php)?/?\?"
-               r"(?:[^&#]+&)*fbid=)([^/?&#]+)[^/?#]*(?<!&setextract)$")
+    pattern = (rf"{BASE_PATTERN}/"
+               rf"(?:[^/?#]+/photos/[^/?#]+/|photo(?:.php)?/?\?"
+               rf"(?:[^&#]+&)*fbid=)([^/?&#]+)[^/?#]*(?<!&setextract)$")
     example = "https://www.facebook.com/photo/?fbid=PHOTO_ID"
 
     def items(self):
@@ -441,11 +423,38 @@ class FacebookPhotoExtractor(FacebookExtractor):
                 yield Message.Url, comment_photo["url"], comment_photo
 
 
+class FacebookSetExtractor(FacebookExtractor):
+    """Base class for Facebook Set extractors"""
+    subcategory = "set"
+    pattern = (
+        rf"{BASE_PATTERN}/"
+        rf"(?:(?:media/set|photo)/?\?(?:[^&#]+&)*set=([^&#]+)"
+        rf"[^/?#]*(?<!&setextract)$"
+        rf"|([^/?#]+/posts/[^/?#]+)"
+        rf"|photo/\?(?:[^&#]+&)*fbid=([^/?&#]+)&set=([^/?&#]+)&setextract)")
+    example = "https://www.facebook.com/media/set/?set=SET_ID"
+
+    def items(self):
+        set_id = self.groups[0] or self.groups[3]
+        if path := self.groups[1]:
+            post_url = self.root + "/" + path
+            post_page = self.request(post_url).text
+            set_id = self.parse_post_page(post_page)["set_id"]
+
+        set_url = f"{self.root}/media/set/?set={set_id}"
+        set_page = self.request(set_url).text
+        set_data = self.parse_set_page(set_page)
+        if self.groups[2]:
+            set_data["first_photo_id"] = self.groups[2]
+
+        return self.extract_set(set_data)
+
+
 class FacebookVideoExtractor(FacebookExtractor):
     """Base class for Facebook Video extractors"""
     subcategory = "video"
     directory_fmt = ("{category}", "{username}", "{subcategory}")
-    pattern = BASE_PATTERN + r"/(?:[^/?#]+/videos/|watch/?\?v=)([^/?&#]+)"
+    pattern = rf"{BASE_PATTERN}/(?:[^/?#]+/videos/|watch/?\?v=)([^/?&#]+)"
     example = "https://www.facebook.com/watch/?v=VIDEO_ID"
 
     def items(self):
@@ -472,7 +481,7 @@ class FacebookInfoExtractor(FacebookExtractor):
     """Extractor for Facebook Profile data"""
     subcategory = "info"
     directory_fmt = ("{category}", "{username}")
-    pattern = USER_PATTERN + r"/info"
+    pattern = rf"{USER_PATTERN}/info"
     example = "https://www.facebook.com/USERNAME/info"
 
     def items(self):
@@ -483,7 +492,7 @@ class FacebookInfoExtractor(FacebookExtractor):
 class FacebookAlbumsExtractor(FacebookExtractor):
     """Extractor for Facebook Profile albums"""
     subcategory = "albums"
-    pattern = USER_PATTERN + r"/photos_albums(?:/([^/?#]+))?"
+    pattern = rf"{USER_PATTERN}/photos_albums(?:/([^/?#]+))?"
     example = "https://www.facebook.com/USERNAME/photos_albums"
 
     def items(self):
@@ -516,7 +525,7 @@ class FacebookAlbumsExtractor(FacebookExtractor):
 class FacebookPhotosExtractor(FacebookExtractor):
     """Extractor for Facebook Profile Photos"""
     subcategory = "photos"
-    pattern = USER_PATTERN + r"/photos(?:_by)?"
+    pattern = rf"{USER_PATTERN}/photos(?:_by)?"
     example = "https://www.facebook.com/USERNAME/photos"
 
     def items(self):
@@ -533,7 +542,7 @@ class FacebookPhotosExtractor(FacebookExtractor):
 class FacebookAvatarExtractor(FacebookExtractor):
     """Extractor for Facebook Profile Avatars"""
     subcategory = "avatar"
-    pattern = USER_PATTERN + r"/avatar"
+    pattern = rf"{USER_PATTERN}/avatar"
     example = "https://www.facebook.com/USERNAME/avatar"
 
     def items(self):
@@ -555,7 +564,7 @@ class FacebookAvatarExtractor(FacebookExtractor):
 
 class FacebookUserExtractor(Dispatch, FacebookExtractor):
     """Extractor for Facebook Profiles"""
-    pattern = USER_PATTERN + r"/?(?:$|\?|#)"
+    pattern = rf"{USER_PATTERN}/?(?:$|\?|#)"
     example = "https://www.facebook.com/USERNAME"
 
     def items(self):

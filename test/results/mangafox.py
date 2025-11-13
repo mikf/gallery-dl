@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import mangafox
-import datetime
 
 
 __tests__ = (
@@ -40,7 +39,7 @@ __tests__ = (
     "chapter"       : int,
     "chapter_minor" : r"re:^(\.\d+)?$",
     "chapter_string": r"re:(v\d+/)?c\d+",
-    "date"          : datetime.datetime,
+    "date"          : "type:datetime",
     "description"   : "High school boy Naoya gets a confession from Momi, a cute and friendly girl. However, Naoya already has a girlfriend, Seki... but Momi is too good a catch to let go. Momi and Nagoya's goal becomes clear: convince Seki to accept being an item with the two of them. Will she budge?",
     "lang"          : "en",
     "language"      : "English",

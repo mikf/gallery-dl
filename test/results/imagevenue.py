@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import imagehosts
+from gallery_dl import exception
 
 
 __tests__ = (
@@ -44,6 +45,14 @@ __tests__ = (
     "#class"   : imagehosts.ImagevenueImageExtractor,
     "#results"     : "https://cdno-data.imagevenue.com/html.img159/upload2328/loc83/73874_203_123_83lo.jpg",
     "#sha1_content": "da39a3ee5e6b4b0d3255bfef95601890afd80709",
+},
+
+{
+    "#url"     : "http://img42.imagevenue.com/img.php?loc=loc1003%E2%84%91=20377_Alessandra_Ambrosio_Celebrity_City_Arriving_Mokai_Nightclub_17_13_1003lo.jpg",
+    "#comment" : "dead link / '404 Image Unavailable' redirect (#8477)",
+    "#category": ("imagehost", "imagevenue", "image"),
+    "#class"   : imagehosts.ImagevenueImageExtractor,
+    "#exception": exception.NotFoundError,
 },
 
 )

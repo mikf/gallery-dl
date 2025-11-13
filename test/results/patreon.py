@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import patreon
-import datetime
 from gallery_dl import exception
 
 
@@ -21,7 +20,7 @@ __tests__ = (
     "comment_count": int,
     "content"      : str,
     "creator"      : dict,
-    "date"         : datetime.datetime,
+    "date"         : "type:datetime",
     "id"           : int,
     "images"       : list,
     "like_count"   : int,
@@ -189,6 +188,47 @@ __tests__ = (
     "#url"     : "https://www.patreon.com/posts/not-found-123",
     "#class"   : patreon.PatreonPostExtractor,
     "#exception": exception.NotFoundError,
+},
+
+{
+    "#url"     : "https://www.patreon.com/collection/15764",
+    "#class"   : patreon.PatreonCollectionExtractor,
+    "#range"   : "1-3",
+    "#pattern" : (
+        r"https://c10.patreonusercontent.com/4/patreon-media/p/post/32798362/957d49296e4f48ef80718d0de98c15a4/eyJhIjoxLCJwIjoxfQ%3D%3D/2.jpg\?token-hash=.+",
+        r"ytdl:https://stream.mux.com/h4DYqFU901qkkAwYmRWZPraVk5DvTJTlcSdhGV00006KBE.m3u8\?token=ey.+",
+        r"https://c10.patreonusercontent.com/4/patreon-media/p/post/32798374/357b0133a476427a99169b4400ee03d4/eyJhIjoxLCJwIjoxfQ%3D%3D/2.jpg\?token-hash=.+",
+    ),
+
+    "campaign"        : {
+        "currency"        : "USD",
+        "is_monthly"      : True,
+        "is_nsfw"         : False,
+        "name"            : "YaBoyRoshi",
+    },
+    "collection"      : {
+        "created_at"     : "2023-08-31T14:10:41.000+00:00",
+        "date"           : "dt:2023-08-31 14:10:41",
+        "default_layout" : "grid",
+        "description"    : "",
+        "edited_at"      : "2025-07-16T22:58:10.834+00:00",
+        "id"             : "15764",
+        "num_draft_posts": 0,
+        "num_posts"      : 207,
+        "num_posts_visible_for_creation": 207,
+        "num_scheduled_posts": 8,
+        "post_sort_type" : "custom",
+        "title"          : "JoJo's Bizarre Adventure",
+        "post_ids"       : list,
+        "thumbnail"      : dict,
+    },
+    "creator"         : {
+        "date"      : "dt:2018-10-17 05:45:19",
+        "first_name": "YaBoyRoshi",
+        "full_name" : "YaBoyRoshi",
+        "id"        : "14264111",
+        "vanity"    : "yaboyroshi",
+    },
 },
 
 )

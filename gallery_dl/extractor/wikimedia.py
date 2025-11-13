@@ -22,41 +22,60 @@ class WikimediaExtractor(BaseExtractor):
     request_interval = (1.0, 2.0)
 
     def __init__(self, match):
-        BaseExtractor.__init__(self, match)
+        self._init_category(match)
 
+        self.format = False
         if self.category == "wikimedia":
-            self.category = self.root.split(".")[-2]
+            labels = self.root.split(".")
+            self.lang = labels[-3][-2:]
+            self.category = labels[-2]
         elif self.category in ("fandom", "wikigg"):
+            self.lang = "en"
+            self.format = "original"
+            self.basesubcategory = self.category
             self.category = (
                 f"{self.category}-"
                 f"{self.root.partition('.')[0].rpartition('/')[2]}")
-
-        self.per_page = self.config("limit", 50)
-        self.subcategories = False
+        else:
+            self.lang = ""
 
         if useragent := self.config_instance("useragent"):
             self.useragent = useragent
 
+        BaseExtractor.__init__(self, match)
+
     def _init(self):
         if api_path := self.config_instance("api-path"):
             if api_path[0] == "/":
-                self.api_url = self.root + api_path
+                self.api_url = f"{self.root}{api_path}"
             else:
                 self.api_url = api_path
         else:
             self.api_url = None
 
+        # note: image revisions are different from page revisions
+        # ref:
+        # https://www.mediawiki.org/wiki/API:Revisions
+        # https://www.mediawiki.org/wiki/API:Imageinfo
+        self.image_revisions = self.config("image-revisions", 1)
+        self.format = self.config("format", self.format)
+        self.per_page = self.config("limit", 50)
+        self.subcategories = False
+
     @cache(maxage=36500*86400, keyarg=1)
     def _search_api_path(self, root):
         self.log.debug("Probing possible API endpoints")
         for path in ("/api.php", "/w/api.php", "/wiki/api.php"):
-            url = root + path
+            url = f"{root}{path}"
             response = self.request(url, method="HEAD", fatal=None)
             if response.status_code < 400:
                 return url
         raise exception.AbortExtraction("Unable to find API endpoint")
 
-    def prepare(self, image):
+    def prepare_info(self, info):
+        """Adjust the content of an image info object"""
+
+    def prepare_image(self, image):
         """Adjust the content of an image object"""
         image["metadata"] = {
             m["name"]: m["value"]
@@ -65,29 +84,48 @@ class WikimediaExtractor(BaseExtractor):
             m["name"]: m["value"]
             for m in image["commonmetadata"] or ()}
 
-        filename = image["canonicaltitle"]
-        image["filename"], _, image["extension"] = \
-            filename.partition(":")[2].rpartition(".")
-        image["date"] = text.parse_datetime(
-            image["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
+        text.nameext_from_name(
+            image["canonicaltitle"].partition(":")[2], image)
+        image["date"] = self.parse_datetime_iso(image["timestamp"])
+
+        if self.format:
+            url = image["url"]
+            image["url"] = (f"{url}{'&' if '?' in url else '?'}"
+                            f"format={self.format}")
 
     def items(self):
-        for info in self._pagination(self.params):
-            try:
-                image = info["imageinfo"][0]
-            except LookupError:
-                self.log.debug("Missing 'imageinfo' for %s", info)
-                continue
+        params = self.params()
 
-            self.prepare(image)
-            yield Message.Directory, image
-            yield Message.Url, image["url"], image
+        for info in self._pagination(params):
+            try:
+                images = info.pop("imageinfo")
+            except KeyError:
+                self.log.debug("Missing 'imageinfo' for %s", info)
+                images = ()
+
+            info["count"] = len(images)
+            self.prepare_info(info)
+            yield Message.Directory, info
+
+            num = 0
+            for image in images:
+                # https://www.mediawiki.org/wiki/Release_notes/1.34
+                if "filemissing" in image:
+                    self.log.warning(
+                        "File %s (or its revision) is missing",
+                        image["canonicaltitle"].partition(":")[2])
+                    continue
+                num += 1
+                image["num"] = num
+                self.prepare_image(image)
+                image.update(info)
+                yield Message.Url, image["url"], image
 
         if self.subcategories:
-            base = self.root + "/wiki/"
-            self.params["gcmtype"] = "subcat"
-            for subcat in self._pagination(self.params):
-                url = base + subcat["title"].replace(" ", "_")
+            base = f"{self.root}/wiki/"
+            params["gcmtype"] = "subcat"
+            for subcat in self._pagination(params):
+                url = f"{base}{subcat['title'].replace(' ', '_')}"
                 subcat["_extractor"] = WikimediaArticleExtractor
                 yield Message.Queue, url, subcat
 
@@ -108,6 +146,7 @@ class WikimediaExtractor(BaseExtractor):
             "timestamp|user|userid|comment|canonicaltitle|url|size|"
             "sha1|mime|metadata|commonmetadata|extmetadata|bitdepth"
         )
+        params["iilimit"] = self.image_revisions
 
         while True:
             data = self.request_json(url, params=params)
@@ -197,7 +236,7 @@ class WikimediaArticleExtractor(WikimediaExtractor):
     """Extractor for wikimedia articles"""
     subcategory = "article"
     directory_fmt = ("{category}", "{page}")
-    pattern = BASE_PATTERN + r"/(?!static/)([^?#]+)"
+    pattern = rf"{BASE_PATTERN}/(?!static/)([^?#]+)"
     example = "https://en.wikipedia.org/wiki/TITLE"
 
     def __init__(self, match):
@@ -205,54 +244,54 @@ class WikimediaArticleExtractor(WikimediaExtractor):
 
         path = self.groups[-1]
         if path[2] == "/":
-            self.root = self.root + "/" + path[:2]
+            self.lang = lang = path[:2]
+            self.root = f"{self.root}/{lang}"
             path = path[3:]
         if path.startswith("wiki/"):
             path = path[5:]
+        self.path = text.unquote(path)
 
         pre, sep, _ = path.partition(":")
-        prefix = pre.lower() if sep else None
-
-        self.title = path = text.unquote(path)
-        if prefix:
+        self.prefix = prefix = pre.lower() if sep else None
+        if prefix is not None:
             self.subcategory = prefix
 
-        if prefix == "category":
+    def params(self):
+        if self.prefix == "category":
             if self.config("subcategories", True):
                 self.subcategories = True
-            self.params = {
+            return {
                 "generator": "categorymembers",
-                "gcmtitle" : path,
+                "gcmtitle" : self.path,
                 "gcmtype"  : "file",
                 "gcmlimit" : self.per_page,
             }
-        elif prefix == "file":
-            self.params = {
-                "titles"   : path,
-            }
-        else:
-            self.params = {
-                "generator": "images",
-                "gimlimit" : self.per_page,
-                "titles"   : path,
+
+        if self.prefix == "file":
+            return {
+                "titles": self.path,
             }
 
-    def prepare(self, image):
-        WikimediaExtractor.prepare(self, image)
-        image["page"] = self.title
+        return {
+            "generator": "images",
+            "gimlimit" : self.per_page,
+            "titles"   : self.path,
+        }
+
+    def prepare_info(self, info):
+        info["page"] = self.path
+        info["lang"] = self.lang
 
 
 class WikimediaWikiExtractor(WikimediaExtractor):
     """Extractor for all files on a MediaWiki instance"""
     subcategory = "wiki"
-    pattern = BASE_PATTERN + r"/?$"
+    pattern = rf"{BASE_PATTERN}/?$"
     example = "https://en.wikipedia.org/"
 
-    def __init__(self, match):
-        WikimediaExtractor.__init__(self, match)
-
+    def params(self):
         # ref: https://www.mediawiki.org/wiki/API:Allpages
-        self.params = {
+        return {
             "generator"   : "allpages",
             "gapnamespace": 6,  # "File" namespace
             "gaplimit"    : self.per_page,

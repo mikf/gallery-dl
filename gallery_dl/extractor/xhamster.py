@@ -31,7 +31,7 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
                      "{gallery[id]} {gallery[title]}")
     filename_fmt = "{num:>03}_{id}.{extension}"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"(/photos/gallery/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}(/photos/gallery/[^/?#]+)"
     example = "https://xhamster.com/photos/gallery/12345"
 
     def items(self):
@@ -67,7 +67,7 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
             {
                 "id"         : text.parse_int(gallery["id"]),
                 "tags"       : [t["label"] for t in info["categoriesTags"]],
-                "date"       : text.parse_timestamp(model["created"]),
+                "date"       : self.parse_timestamp(model["created"]),
                 "views"      : text.parse_int(model["views"]),
                 "likes"      : text.parse_int(model["rating"]["likes"]),
                 "dislikes"   : text.parse_int(model["rating"]["dislikes"]),
@@ -102,7 +102,7 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
 class XhamsterUserExtractor(XhamsterExtractor):
     """Extractor for all galleries of an xhamster user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/users/([^/?#]+)(?:/photos)?/?(?:$|[?#])"
+    pattern = rf"{BASE_PATTERN}/users/([^/?#]+)(?:/photos)?/?(?:$|[?#])"
     example = "https://xhamster.com/users/USER/photos"
 
     def items(self):

@@ -9,7 +9,7 @@
 """Extractors for https://agn.ph/"""
 
 from . import booru
-from .. import text, util
+from .. import text
 import collections
 
 BASE_PATTERN = r"(?:https?://)?agn\.ph"
@@ -33,7 +33,7 @@ class AgnphExtractor(booru.BooruExtractor):
         self.cookies.set("confirmed_age", "true", domain="agn.ph")
 
     def _prepare(self, post):
-        post["date"] = text.parse_timestamp(post["created_at"])
+        post["date"] = self.parse_timestamp(post["created_at"])
         post["status"] = post["status"].strip()
         post["has_children"] = ("true" in post["has_children"])
 
@@ -70,7 +70,7 @@ class AgnphExtractor(booru.BooruExtractor):
             return
 
         tags = collections.defaultdict(list)
-        pattern = util.re(r'class="(.)typetag">([^<]+)')
+        pattern = text.re(r'class="(.)typetag">([^<]+)')
         for tag_type, tag_name in pattern.findall(tag_container):
             tags[tag_type].append(text.unquote(tag_name).replace(" ", "_"))
         for key, value in tags.items():
@@ -81,7 +81,7 @@ class AgnphTagExtractor(AgnphExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/gallery/post/(?:\?([^#]+))?$"
+    pattern = rf"{BASE_PATTERN}/gallery/post/(?:\?([^#]+))?$"
     example = "https://agn.ph/gallery/post/?search=TAG"
 
     def __init__(self, match):
@@ -99,7 +99,7 @@ class AgnphTagExtractor(AgnphExtractor):
 class AgnphPostExtractor(AgnphExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/gallery/post/show/(\d+)"
+    pattern = rf"{BASE_PATTERN}/gallery/post/show/(\d+)"
     example = "https://agn.ph/gallery/post/show/12345/"
 
     def posts(self):

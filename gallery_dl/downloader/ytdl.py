@@ -11,6 +11,7 @@
 from .common import DownloaderBase
 from .. import ytdl, text
 from xml.etree import ElementTree
+from http.cookiejar import Cookie
 import os
 
 
@@ -48,7 +49,7 @@ class YoutubeDLDownloader(DownloaderBase):
                 except (ImportError, SyntaxError) as exc:
                     self.log.error("Cannot import module '%s'",
                                    getattr(exc, "name", ""))
-                    self.log.debug("", exc_info=exc)
+                    self.log.traceback(exc)
                     self.download = lambda u, p: False
                     return False
 
@@ -85,11 +86,12 @@ class YoutubeDLDownloader(DownloaderBase):
                     info_dict = self._extract_manifest(
                         ytdl_instance, url, manifest,
                         kwdict.pop("_ytdl_manifest_data", None),
-                        kwdict.pop("_ytdl_manifest_headers", None))
+                        kwdict.pop("_ytdl_manifest_headers", None),
+                        kwdict.pop("_ytdl_manifest_cookies", None))
                 else:
                     info_dict = self._extract_info(ytdl_instance, url)
             except Exception as exc:
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
                 self.log.warning("%s: %s", exc.__class__.__name__, exc)
 
             if not info_dict:
@@ -162,7 +164,7 @@ class YoutubeDLDownloader(DownloaderBase):
         try:
             ytdl_instance.process_info(info_dict)
         except Exception as exc:
-            self.log.debug("", exc_info=exc)
+            self.log.traceback(exc)
             return False
 
         pathfmt.temppath = info_dict.get("filepath") or info_dict["_filename"]
@@ -186,7 +188,7 @@ class YoutubeDLDownloader(DownloaderBase):
                 ytdl_instance.process_info(entry)
                 status = True
             except Exception as exc:
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
                 self.log.error("%s: %s", exc.__class__.__name__, exc)
         return status
 
@@ -194,9 +196,20 @@ class YoutubeDLDownloader(DownloaderBase):
         return ytdl.extract_info(url, download=False)
 
     def _extract_manifest(self, ytdl, url, manifest_type, manifest_data=None,
-                          headers=None):
+                          headers=None, cookies=None):
         extr = ytdl.get_info_extractor("Generic")
         video_id = extr._generic_id(url)
+
+        if cookies is not None:
+            if isinstance(cookies, dict):
+                cookies = cookies.items()
+            set_cookie = ytdl.cookiejar.set_cookie
+            for name, value in cookies:
+                set_cookie(Cookie(
+                    0, name, value, None, False,
+                    "", False, False, "/", False,
+                    False, None, False, None, None, {},
+                ))
 
         if manifest_type == "hls":
             if manifest_data is None:

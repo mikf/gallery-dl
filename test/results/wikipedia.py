@@ -32,6 +32,7 @@ __tests__ = (
     "extmetadata"   : dict,
     "filename"      : str,
     "height"        : int,
+    "lang"          : "en",
     "metadata"      : dict,
     "mime"          : r"re:image/\w+",
     "page"          : "Athena",
@@ -42,6 +43,19 @@ __tests__ = (
     "user"          : str,
     "userid"        : int,
     "width"         : int,
+},
+
+{
+    "#url"     : "https://en.wikipedia.org/wiki/Title",
+    "#comment" : "force download revisions of images in an article",
+    "#category": ("wikimedia", "wikipedia", "article"),
+    "#class"   : wikimedia.WikimediaArticleExtractor,
+    "#options" : {"image-revisions": 5},
+    "#count"   : "> 8",
+
+    "page" : "Title",
+    "count": {2, 5},
+    "num"  : range(1, 5),
 },
 
 {

@@ -15,7 +15,7 @@ from .. import text, util
 class CheveretoExtractor(BaseExtractor):
     """Base class for chevereto extractors"""
     basecategory = "chevereto"
-    directory_fmt = ("{category}", "{user}", "{album}",)
+    directory_fmt = ("{category}", "{user}", "{album}")
     archive_fmt = "{id}"
 
     def _init(self):
@@ -39,25 +39,25 @@ class CheveretoExtractor(BaseExtractor):
 
 BASE_PATTERN = CheveretoExtractor.update({
     "jpgfish": {
-        "root": "https://jpg5.su",
-        "pattern": r"jpe?g\d?\.(?:su|pet|fish(?:ing)?|church)",
-    },
-    "imgkiwi": {
-        "root": "https://img.kiwi",
-        "pattern": r"img\.kiwi",
+        "root": "https://jpg7.cr",
+        "pattern": r"(?:www\.)?jpe?g\d?\.(?:cr|su|pet|fish(?:ing)?|church)",
     },
     "imagepond": {
         "root": "https://imagepond.net",
-        "pattern": r"imagepond\.net",
+        "pattern": r"(?:www\.)?imagepond\.net",
+    },
+    "imglike": {
+        "root": "https://imglike.com",
+        "pattern": r"(?:www\.)?imglike\.com",
     },
 })
 
 
 class CheveretoImageExtractor(CheveretoExtractor):
-    """Extractor for chevereto Images"""
+    """Extractor for chevereto images"""
     subcategory = "image"
-    pattern = BASE_PATTERN + r"(/im(?:g|age)/[^/?#]+)"
-    example = "https://jpg2.su/img/TITLE.ID"
+    pattern = rf"{BASE_PATTERN}(/im(?:g|age)/[^/?#]+)"
+    example = "https://jpg7.cr/img/TITLE.ID"
 
     def items(self):
         url = self.root + self.path
@@ -74,29 +74,72 @@ class CheveretoImageExtractor(CheveretoExtractor):
                     url, b"seltilovessimpcity@simpcityhatesscrapers",
                     fromhex=True)
 
-        image = {
-            "id"   : self.path.rpartition(".")[2],
+        file = {
+            "id"   : self.path.rpartition("/")[2].rpartition(".")[2],
             "url"  : url,
-            "album": text.extr(extr("Added to <a", "/a>"), ">", "<"),
-            "date" : text.parse_datetime(extr(
-                '<span title="', '"'), "%Y-%m-%d %H:%M:%S"),
+            "album": text.remove_html(extr(
+                "Added to <a", "</a>").rpartition(">")[2]),
+            "date" : self.parse_datetime_iso(extr('<span title="', '"')),
             "user" : extr('username: "', '"'),
         }
 
-        text.nameext_from_url(image["url"], image)
-        yield Message.Directory, image
-        yield Message.Url, image["url"], image
+        text.nameext_from_url(file["url"], file)
+        yield Message.Directory, file
+        yield Message.Url, file["url"], file
 
 
-class CheveretoAlbumExtractor(CheveretoExtractor):
-    """Extractor for chevereto Albums"""
-    subcategory = "album"
-    pattern = BASE_PATTERN + r"(/a(?:lbum)?/[^/?#]+(?:/sub)?)"
-    example = "https://jpg2.su/album/TITLE.ID"
+class CheveretoVideoExtractor(CheveretoExtractor):
+    """Extractor for chevereto videos"""
+    subcategory = "video"
+    pattern = rf"{BASE_PATTERN}(/video/[^/?#]+)"
+    example = "https://imagepond.net/video/TITLE.ID"
 
     def items(self):
         url = self.root + self.path
-        data = {"_extractor": CheveretoImageExtractor}
+        page = self.request(url).text
+        extr = text.extract_from(page)
+
+        file = {
+            "id"       : self.path.rpartition(".")[2],
+            "title"    : text.unescape(extr(
+                'property="og:title" content="', '"')),
+            "thumbnail": extr(
+                'property="og:image" content="', '"'),
+            "url"      : extr(
+                'property="og:video" content="', '"'),
+            "width"    : text.parse_int(extr(
+                'property="video:width" content="', '"')),
+            "height"   : text.parse_int(extr(
+                'property="video:height" content="', '"')),
+            "duration" : extr(
+                'class="far fa-clock"></i>', "—"),
+            "album": text.remove_html(extr(
+                "Added to <a", "</a>").rpartition(">")[2]),
+            "date"     : self.parse_datetime_iso(extr('<span title="', '"')),
+            "user"     : extr('username: "', '"'),
+        }
+
+        try:
+            min, _, sec = file["duration"].partition(":")
+            file["duration"] = int(min) * 60 + int(sec)
+        except Exception:
+            pass
+
+        text.nameext_from_url(file["url"], file)
+        yield Message.Directory, file
+        yield Message.Url, file["url"], file
+
+
+class CheveretoAlbumExtractor(CheveretoExtractor):
+    """Extractor for chevereto albums"""
+    subcategory = "album"
+    pattern = rf"{BASE_PATTERN}(/a(?:lbum)?/[^/?#]+(?:/sub)?)"
+    example = "https://jpg7.cr/album/TITLE.ID"
+
+    def items(self):
+        url = self.root + self.path
+        data_image = {"_extractor": CheveretoImageExtractor}
+        data_video = {"_extractor": CheveretoVideoExtractor}
 
         if self.path.endswith("/sub"):
             albums = self._pagination(url)
@@ -104,23 +147,39 @@ class CheveretoAlbumExtractor(CheveretoExtractor):
             albums = (url,)
 
         for album in albums:
-            for image in self._pagination(album):
-                yield Message.Queue, image, data
+            for item_url in self._pagination(album):
+                data = data_video if "/video/" in item_url else data_image
+                yield Message.Queue, item_url, data
+
+
+class CheveretoCategoryExtractor(CheveretoExtractor):
+    """Extractor for chevereto galleries"""
+    subcategory = "category"
+    pattern = rf"{BASE_PATTERN}(/category/[^/?#]+)"
+    example = "https://imglike.com/category/TITLE"
+
+    def items(self):
+        data = {"_extractor": CheveretoImageExtractor}
+        for image in self._pagination(self.root + self.path):
+            yield Message.Queue, image, data
 
 
 class CheveretoUserExtractor(CheveretoExtractor):
-    """Extractor for chevereto Users"""
+    """Extractor for chevereto users"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"(/(?!img|image|a(?:lbum)?)[^/?#]+(?:/albums)?)"
-    example = "https://jpg2.su/USER"
+    pattern = rf"{BASE_PATTERN}(/[^/?#]+(?:/albums)?)"
+    example = "https://jpg7.cr/USER"
 
     def items(self):
         url = self.root + self.path
 
         if self.path.endswith("/albums"):
             data = {"_extractor": CheveretoAlbumExtractor}
+            for url in self._pagination(url):
+                yield Message.Queue, url, data
         else:
-            data = {"_extractor": CheveretoImageExtractor}
-
-        for url in self._pagination(url):
-            yield Message.Queue, url, data
+            data_image = {"_extractor": CheveretoImageExtractor}
+            data_video = {"_extractor": CheveretoVideoExtractor}
+            for url in self._pagination(url):
+                data = data_video if "/video/" in url else data_image
+                yield Message.Queue, url, data

@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from ..cache import cache
-from .. import text, util, exception
+from .. import text, exception
 
 BASE_PATTERN = r"(?:https?://)?www\.pillowfort\.social"
 
@@ -36,7 +36,7 @@ class PillowfortExtractor(Extractor):
         external = self.config("external", False)
 
         if inline:
-            inline = util.re(r'src="(https://img\d+\.pillowfort\.social'
+            inline = text.re(r'src="(https://img\d+\.pillowfort\.social'
                              r'/posts/[^"]+)').findall
 
         for post in self.posts():
@@ -48,8 +48,7 @@ class PillowfortExtractor(Extractor):
                 for url in inline(post["content"]):
                     files.append({"url": url})
 
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            post["date"] = self.parse_datetime_iso(post["created_at"])
             post["post_id"] = post.pop("id")
             post["count"] = len(files)
             yield Message.Directory, post
@@ -76,8 +75,7 @@ class PillowfortExtractor(Extractor):
                 if "id" not in file:
                     post["id"] = post["hash"]
                 if "created_at" in file:
-                    post["date"] = text.parse_datetime(
-                        file["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+                    post["date"] = self.parse_datetime_iso(file["created_at"])
 
                 yield msgtype, url, post
 
@@ -121,7 +119,7 @@ class PillowfortExtractor(Extractor):
 class PillowfortPostExtractor(PillowfortExtractor):
     """Extractor for a single pillowfort post"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/posts/(\d+)"
+    pattern = rf"{BASE_PATTERN}/posts/(\d+)"
     example = "https://www.pillowfort.social/posts/12345"
 
     def posts(self):
@@ -132,7 +130,7 @@ class PillowfortPostExtractor(PillowfortExtractor):
 class PillowfortUserExtractor(PillowfortExtractor):
     """Extractor for all posts of a pillowfort user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+(?:/tagged/[^/?#]+)?)"
+    pattern = rf"{BASE_PATTERN}/(?!posts/)([^/?#]+(?:/tagged/[^/?#]+)?)"
     example = "https://www.pillowfort.social/USER"
 
     def posts(self):

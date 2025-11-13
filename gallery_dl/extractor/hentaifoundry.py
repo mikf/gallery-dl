@@ -86,7 +86,7 @@ class HentaifoundryExtractor(Extractor):
                 .replace("\r\n", "\n")),
             "ratings"    : [text.unescape(r) for r in text.extract_iter(extr(
                 "class='ratings_box'", "</div>"), "title='", "'")],
-            "date"       : text.parse_datetime(extr("datetime='", "'")),
+            "date"       : self.parse_datetime_iso(extr("datetime='", "'")),
             "views"      : text.parse_int(extr(">Views</span>", "<")),
             "score"      : text.parse_int(extr(">Vote Score</span>", "<")),
             "media"      : text.unescape(extr(">Media</span>", "<").strip()),
@@ -126,7 +126,7 @@ class HentaifoundryExtractor(Extractor):
             "title"   : text.unescape(extr(
                 "<div class='titlebar'>", "</a>").rpartition(">")[2]),
             "author"  : text.unescape(extr('alt="', '"')),
-            "date"    : text.parse_datetime(extr(
+            "date"    : self.parse_datetime(extr(
                 ">Updated<", "</span>").rpartition(">")[2], "%B %d, %Y"),
             "status"  : extr("class='indent'>", "<"),
         }
@@ -136,8 +136,9 @@ class HentaifoundryExtractor(Extractor):
                 ">" + c + ":</span>", "<").replace(",", ""))
 
         data["description"] = text.unescape(extr(
-            "class='storyDescript'>", "<div"))
-        path = extr('href="', '"')
+            "class='storyDescript'>", '<div class="storyRead">')).replace(
+            "\r\n", "\n")
+        path = extr('class="pdfLink" href="', '"')
         data["src"] = self.root + path
         data["index"] = text.parse_int(path.rsplit("/", 2)[1])
         data["ratings"] = [text.unescape(r) for r in text.extract_iter(extr(
@@ -206,7 +207,7 @@ class HentaifoundryExtractor(Extractor):
 
 class HentaifoundryUserExtractor(Dispatch, HentaifoundryExtractor):
     """Extractor for a hentaifoundry user profile"""
-    pattern = BASE_PATTERN + r"/user/([^/?#]+)/profile"
+    pattern = rf"{BASE_PATTERN}/user/([^/?#]+)/profile"
     example = "https://www.hentai-foundry.com/user/USER/profile"
 
     def items(self):
@@ -227,7 +228,7 @@ class HentaifoundryUserExtractor(Dispatch, HentaifoundryExtractor):
 class HentaifoundryPicturesExtractor(HentaifoundryExtractor):
     """Extractor for all pictures of a hentaifoundry user"""
     subcategory = "pictures"
-    pattern = BASE_PATTERN + r"/pictures/user/([^/?#]+)(?:/page/(\d+))?/?$"
+    pattern = rf"{BASE_PATTERN}/pictures/user/([^/?#]+)(?:/page/(\d+))?/?$"
     example = "https://www.hentai-foundry.com/pictures/user/USER"
 
     def __init__(self, match):
@@ -239,7 +240,7 @@ class HentaifoundryScrapsExtractor(HentaifoundryExtractor):
     """Extractor for scraps of a hentaifoundry user"""
     subcategory = "scraps"
     directory_fmt = ("{category}", "{user}", "Scraps")
-    pattern = BASE_PATTERN + r"/pictures/user/([^/?#]+)/scraps"
+    pattern = rf"{BASE_PATTERN}/pictures/user/([^/?#]+)/scraps"
     example = "https://www.hentai-foundry.com/pictures/user/USER/scraps"
 
     def __init__(self, match):
@@ -252,7 +253,7 @@ class HentaifoundryFavoriteExtractor(HentaifoundryExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user}", "Favorites")
     archive_fmt = "f_{user}_{index}"
-    pattern = BASE_PATTERN + r"/user/([^/?#]+)/faves/pictures"
+    pattern = rf"{BASE_PATTERN}/user/([^/?#]+)/faves/pictures"
     example = "https://www.hentai-foundry.com/user/USER/faves/pictures"
 
     def __init__(self, match):
@@ -265,7 +266,7 @@ class HentaifoundryTagExtractor(HentaifoundryExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{index}"
-    pattern = BASE_PATTERN + r"/pictures/tagged/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/pictures/tagged/([^/?#]+)"
     example = "https://www.hentai-foundry.com/pictures/tagged/TAG"
 
     def __init__(self, match):
@@ -281,7 +282,7 @@ class HentaifoundryRecentExtractor(HentaifoundryExtractor):
     subcategory = "recent"
     directory_fmt = ("{category}", "Recent Pictures", "{date}")
     archive_fmt = "r_{index}"
-    pattern = BASE_PATTERN + r"/pictures/recent/(\d\d\d\d-\d\d-\d\d)"
+    pattern = rf"{BASE_PATTERN}/pictures/recent/(\d\d\d\d-\d\d-\d\d)"
     example = "https://www.hentai-foundry.com/pictures/recent/1970-01-01"
 
     def __init__(self, match):
@@ -297,7 +298,7 @@ class HentaifoundryPopularExtractor(HentaifoundryExtractor):
     subcategory = "popular"
     directory_fmt = ("{category}", "Popular Pictures")
     archive_fmt = "p_{index}"
-    pattern = BASE_PATTERN + r"/pictures/popular()"
+    pattern = rf"{BASE_PATTERN}/pictures/popular()"
     example = "https://www.hentai-foundry.com/pictures/popular"
 
     def __init__(self, match):
@@ -331,7 +332,7 @@ class HentaifoundryStoriesExtractor(HentaifoundryExtractor):
     """Extractor for stories of a hentaifoundry user"""
     subcategory = "stories"
     archive_fmt = "s_{index}"
-    pattern = BASE_PATTERN + r"/stories/user/([^/?#]+)(?:/page/(\d+))?/?$"
+    pattern = rf"{BASE_PATTERN}/stories/user/([^/?#]+)(?:/page/(\d+))?/?$"
     example = "https://www.hentai-foundry.com/stories/user/USER"
 
     def items(self):
@@ -350,7 +351,7 @@ class HentaifoundryStoryExtractor(HentaifoundryExtractor):
     """Extractor for a hentaifoundry story"""
     subcategory = "story"
     archive_fmt = "s_{index}"
-    pattern = BASE_PATTERN + r"/stories/user/([^/?#]+)/(\d+)"
+    pattern = rf"{BASE_PATTERN}/stories/user/([^/?#]+)/(\d+)"
     example = "https://www.hentai-foundry.com/stories/user/USER/12345/TITLE"
 
     skip = Extractor.skip

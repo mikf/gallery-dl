@@ -9,8 +9,7 @@
 """Extractors for https://www.plurk.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
-import datetime
+from .. import text, util, dt, exception
 
 
 class PlurkExtractor(Extractor):
@@ -62,7 +61,7 @@ class PlurkExtractor(Extractor):
         if not data:
             raise exception.NotFoundError("user")
         return util.json_loads(
-            util.re(r"new Date\(([^)]+)\)").sub(r"\1", data))
+            text.re(r"new Date\(([^)]+)\)").sub(r"\1", data))
 
 
 class PlurkTimelineExtractor(PlurkExtractor):
@@ -88,12 +87,10 @@ class PlurkTimelineExtractor(PlurkExtractor):
         while plurks:
             yield from plurks
 
-            offset = datetime.datetime.strptime(
-                plurks[-1]["posted"], "%a, %d %b %Y %H:%M:%S %Z")
+            offset = dt.parse(plurks[-1]["posted"], "%a, %d %b %Y %H:%M:%S %Z")
             data["offset"] = offset.strftime("%Y-%m-%dT%H:%M:%S.000Z")
-            response = self.request(
-                url, method="POST", headers=headers, data=data)
-            plurks = response.json()["plurks"]
+            plurks = self.request_json(
+                url, method="POST", headers=headers, data=data)["plurks"]
 
 
 class PlurkPostExtractor(PlurkExtractor):

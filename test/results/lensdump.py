@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"     : "https://lensdump.com/a/1IhJr",
     "#class"   : lensdump.LensdumpAlbumExtractor,
-    "#pattern" : r"https://[abcd]\.l3n\.co/i/tq\w{4}\.png",
+    "#pattern" : r"https://[abcd]\.l3n\.co/(i/)?tq\w{4}\.png",
 
     "extension": "png",
     "name"     : str,
@@ -25,8 +25,8 @@ __tests__ = (
     "#url"     : "https://lensdump.com/a/tA4lA",
     "#comment" : "2 pages",
     "#class"   : lensdump.LensdumpAlbumExtractor,
-    "#pattern" : r"https://[abcd]\.l3n\.co/i/\w{6}\.(jpe?g|png)",
-    "#count"   : range(68, 80),
+    "#pattern" : r"https://[abcd]\.l3n\.co/(i/)?\w{6}\.(jpe?g|png)",
+    "#count"   : range(80, 120),
 },
 
 {
@@ -60,7 +60,7 @@ __tests__ = (
 {
     "#url"     : "https://lensdump.com/i/tyoAyM",
     "#class"   : lensdump.LensdumpImageExtractor,
-    "#results"     : "https://c.l3n.co/i/tyoAyM.webp",
+    "#results"     : "https://c.l3n.co/tyoAyM.webp",
     "#sha1_content": "1aa749ed2c0cf679ec8e1df60068edaf3875de46",
 
     "date"     : "dt:2022-08-01 08:24:28",
@@ -69,14 +69,14 @@ __tests__ = (
     "height"   : 400,
     "id"       : "tyoAyM",
     "title"    : "MYOBI clovis bookcaseset",
-    "url"      : "https://c.l3n.co/i/tyoAyM.webp",
+    "url"      : "https://c.l3n.co/tyoAyM.webp",
     "width"    : 620,
 },
 
 {
     "#url"     : "https://c.l3n.co/i/tyoAyM.webp",
     "#class"   : lensdump.LensdumpImageExtractor,
-    "#results" : "https://c.l3n.co/i/tyoAyM.webp",
+    "#results" : "https://c.l3n.co/tyoAyM.webp",
 
     "date"     : "dt:2022-08-01 08:24:28",
     "extension": "webp",
@@ -84,7 +84,23 @@ __tests__ = (
     "height"   : 400,
     "id"       : "tyoAyM",
     "title"    : "MYOBI clovis bookcaseset",
-    "url"      : "https://c.l3n.co/i/tyoAyM.webp",
+    "url"      : "https://c.l3n.co/tyoAyM.webp",
+    "width"    : 620,
+},
+
+{
+    "#url"     : "https://c.l3n.co/tyoAyM.webp",
+    "#comment" : "direct link without '/i/' (#8251)",
+    "#class"   : lensdump.LensdumpImageExtractor,
+    "#results" : "https://c.l3n.co/tyoAyM.webp",
+
+    "date"     : "dt:2022-08-01 08:24:28",
+    "extension": "webp",
+    "filename" : "tyoAyM",
+    "height"   : 400,
+    "id"       : "tyoAyM",
+    "title"    : "MYOBI clovis bookcaseset",
+    "url"      : "https://c.l3n.co/tyoAyM.webp",
     "width"    : 620,
 },
 

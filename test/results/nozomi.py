@@ -108,4 +108,14 @@ __tests__ = (
     "#count"   : range(5, 10),
 },
 
+{
+    "#url"     : "https://nozomi.la/search.html?q=musume_janakute_mama_ga_sukinano!?",
+    "#comment" : "404 error due to unquoted '?' in search tag (#8328)",
+    "#class"   : nozomi.NozomiSearchExtractor,
+    "#range"   : "1-3",
+    "#count"   : 3,
+
+    "search_tags": ["musume_janakute_mama_ga_sukinano!?"],
+},
+
 )

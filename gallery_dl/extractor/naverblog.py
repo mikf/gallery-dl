@@ -9,8 +9,7 @@
 """Extractors for https://blog.naver.com/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text, util
-import datetime
+from .. import text, util, dt
 import time
 
 
@@ -67,11 +66,11 @@ class NaverBlogPostExtractor(NaverBlogBase, GalleryExtractor):
 
         return data
 
-    def _parse_datetime(self, date_string):
-        if "전" in date_string:
+    def _parse_datetime(self, dt_string):
+        if "전" in dt_string:
             ts = time.gmtime()
-            return datetime.datetime(ts.tm_year, ts.tm_mon, ts.tm_mday)
-        return text.parse_datetime(date_string, "%Y. %m. %d. %H:%M")
+            return dt.datetime(ts.tm_year, ts.tm_mon, ts.tm_mday)
+        return dt.parse(dt_string, "%Y. %m. %d. %H:%M")
 
     def images(self, page):
         files = []
@@ -88,11 +87,11 @@ class NaverBlogPostExtractor(NaverBlogBase, GalleryExtractor):
             files.append((url, None))
 
     def _extract_videos(self, files, page):
-        for module in text.extract_iter(page, " data-module='", "'></"):
+        for module in text.extract_iter(page, " data-module='", "'"):
             if '"v2_video"' not in module:
                 continue
-            media = util.json_loads(module)["data"]
             try:
+                media = util.json_loads(module)["data"]
                 self._extract_media(files, media)
             except Exception as exc:
                 self.log.warning("%s: Failed to extract video '%s' (%s: %s)",

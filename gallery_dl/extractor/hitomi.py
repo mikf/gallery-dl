@@ -84,7 +84,7 @@ class HitomiGalleryExtractor(HitomiExtractor, GalleryExtractor):
             "type"      : info["type"].capitalize(),
             "language"  : language,
             "lang"      : util.language_to_code(language),
-            "date"      : text.parse_datetime(date, "%Y-%m-%d %H:%M:%S%z"),
+            "date"      : self.parse_datetime_iso(date),
             "tags"      : tags,
             "artist"    : [o["artist"] for o in iget("artists") or ()],
             "group"     : [o["group"] for o in iget("groups") or ()],

@@ -48,7 +48,7 @@ class WebtoonsBase():
 class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     """Extractor for an episode on webtoons.com"""
     subcategory = "episode"
-    pattern = (LANG_PATTERN + r"/([^/?#]+)/([^/?#]+)/[^/?#]+)"
+    pattern = (rf"{LANG_PATTERN}/([^/?#]+)/([^/?#]+)/[^/?#]+)"
                r"/viewer\?([^#'\"]+)")
     example = ("https://www.webtoons.com/en/GENRE/TITLE/NAME/viewer"
                "?title_no=123&episode_no=12345")
@@ -73,7 +73,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         else:
             comic_name = episode_name = ""
 
-        if extr('<span class="tx _btnOpenEpisodeList ', '"'):
+        if extr('<span class="tx _btnOpenEpisodeLis', '"'):
             episode = extr(">#", "<")
         else:
             episode = ""
@@ -131,7 +131,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
 
     def assets(self, page):
         if self.config("thumbnails", False):
-            active = text.extr(page, 'class="on ', '</a>')
+            active = text.extr(page, 'class="on', '</a>')
             url = _url(text.extr(active, 'data-url="', '"'))
             return ({"url": url, "type": "thumbnail"},)
 
@@ -142,7 +142,7 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
     categorytransfer = True
     filename_fmt = "{type}.{extension}"
     archive_fmt = "{title_no}_{type}"
-    pattern = LANG_PATTERN + r"/([^/?#]+)/([^/?#]+))/list\?([^#]+)"
+    pattern = rf"{LANG_PATTERN}/([^/?#]+)/([^/?#]+))/list\?([^#]+)"
     example = "https://www.webtoons.com/en/GENRE/TITLE/list?title_no=123"
 
     def items(self):
@@ -197,7 +197,7 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
 class WebtoonsArtistExtractor(WebtoonsBase, Extractor):
     """Extractor for webtoons.com artists"""
     subcategory = "artist"
-    pattern = BASE_PATTERN + r"/p/community/([^/?#]+)/u/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/p/community/([^/?#]+)/u/([^/?#]+)"
     example = "https://www.webtoons.com/p/community/LANG/u/ARTIST"
 
     def items(self):

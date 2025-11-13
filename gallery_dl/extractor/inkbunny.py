@@ -35,8 +35,8 @@ class InkbunnyExtractor(Extractor):
 
         for post in self.posts():
             post.update(metadata)
-            post["date"] = text.parse_datetime(
-                post["create_datetime"] + "00", "%Y-%m-%d %H:%M:%S.%f%z")
+            post["date"] = self.parse_datetime_iso(
+                post["create_datetime"][:19])
             post["tags"] = [kw["keyword_name"] for kw in post["keywords"]]
             post["ratings"] = [r["name"] for r in post["ratings"]]
             files = post["files"]
@@ -52,8 +52,8 @@ class InkbunnyExtractor(Extractor):
             for post["num"], file in enumerate(files, 1):
                 post.update(file)
                 post["deleted"] = (file["deleted"] == "t")
-                post["date"] = text.parse_datetime(
-                    file["create_datetime"] + "00", "%Y-%m-%d %H:%M:%S.%f%z")
+                post["date"] = self.parse_datetime_iso(
+                    file["create_datetime"][:19])
                 text.nameext_from_url(file["file_name"], post)
 
                 url = file["file_url_full"]
@@ -71,7 +71,7 @@ class InkbunnyExtractor(Extractor):
 class InkbunnyUserExtractor(InkbunnyExtractor):
     """Extractor for inkbunny user profiles"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!s/)(gallery/|scraps/)?(\w+)(?:$|[/?#])"
+    pattern = rf"{BASE_PATTERN}/(?!s/)(gallery/|scraps/)?(\w+)(?:$|[/?#])"
     example = "https://inkbunny.net/USER"
 
     def __init__(self, match):
@@ -101,7 +101,7 @@ class InkbunnyUserExtractor(InkbunnyExtractor):
 class InkbunnyPoolExtractor(InkbunnyExtractor):
     """Extractor for inkbunny pools"""
     subcategory = "pool"
-    pattern = (BASE_PATTERN + r"/(?:"
+    pattern = (rf"{BASE_PATTERN}/(?:"
                r"poolview_process\.php\?pool_id=(\d+)|"
                r"submissionsviewall\.php"
                r"\?((?:[^#]+&)?mode=pool(?:&[^#]+)?))")
@@ -132,7 +132,7 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
     """Extractor for inkbunny user favorites"""
     subcategory = "favorite"
     directory_fmt = ("{category}", "{favs_username!l}", "Favorites")
-    pattern = (BASE_PATTERN + r"/(?:"
+    pattern = (rf"{BASE_PATTERN}/(?:"
                r"userfavorites_process\.php\?favs_user_id=(\d+)|"
                r"submissionsviewall\.php"
                r"\?((?:[^#]+&)?mode=userfavs(?:&[^#]+)?))")
@@ -175,7 +175,7 @@ class InkbunnyFavoriteExtractor(InkbunnyExtractor):
 class InkbunnyUnreadExtractor(InkbunnyExtractor):
     """Extractor for unread inkbunny submissions"""
     subcategory = "unread"
-    pattern = (BASE_PATTERN + r"/submissionsviewall\.php"
+    pattern = (rf"{BASE_PATTERN}/submissionsviewall\.php"
                r"\?((?:[^#]+&)?mode=unreadsubs(?:&[^#]+)?)")
     example = ("https://inkbunny.net/submissionsviewall.php"
                "?text=&mode=unreadsubs&type=")
@@ -195,7 +195,7 @@ class InkbunnyUnreadExtractor(InkbunnyExtractor):
 class InkbunnySearchExtractor(InkbunnyExtractor):
     """Extractor for inkbunny search results"""
     subcategory = "search"
-    pattern = (BASE_PATTERN + r"/submissionsviewall\.php"
+    pattern = (rf"{BASE_PATTERN}/submissionsviewall\.php"
                r"\?((?:[^#]+&)?mode=search(?:&[^#]+)?)")
     example = ("https://inkbunny.net/submissionsviewall.php"
                "?text=TAG&mode=search&type=")
@@ -229,7 +229,7 @@ class InkbunnySearchExtractor(InkbunnyExtractor):
 class InkbunnyFollowingExtractor(InkbunnyExtractor):
     """Extractor for inkbunny user watches"""
     subcategory = "following"
-    pattern = (BASE_PATTERN + r"/(?:"
+    pattern = (rf"{BASE_PATTERN}/(?:"
                r"watchlist_process\.php\?mode=watching&user_id=(\d+)|"
                r"usersviewall\.php"
                r"\?((?:[^#]+&)?mode=watching(?:&[^#]+)?))")
@@ -268,7 +268,7 @@ class InkbunnyFollowingExtractor(InkbunnyExtractor):
 class InkbunnyPostExtractor(InkbunnyExtractor):
     """Extractor for individual Inkbunny posts"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/s/(\d+)"
+    pattern = rf"{BASE_PATTERN}/s/(\d+)"
     example = "https://inkbunny.net/s/12345"
 
     def __init__(self, match):

@@ -262,7 +262,7 @@ __tests__ = (
     "#comment" : "missing 'playback_list' (#2792)",
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
-    "#count"   : 10,
+    "#count"   : 9,
 },
 
 {
@@ -306,6 +306,86 @@ __tests__ = (
     "#url"     : "https://m.weibo.cn/5746766133/4339748116375525",
     "#category": ("", "weibo", "status"),
     "#class"   : weibo.WeiboStatusExtractor,
+},
+
+{
+    "#url"     : "https://weibo.com/7926989456/5160875674043425",
+    "#comment" : "'replay_hd' video (live replay #8339)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#results" : "ytdl:https://live.video.weibocdn.com/4817f457-c9be-47f7-a5a0-8591fd363cb1_index.m3u8",
+},
+
+{
+    "#url"     : "https://weibo.com/7117031969/5208376084532264",
+    "#comment" : "'.m3u8' manifest (live replay #8339)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#pattern" : r"ytdl:https://live.video.weibocdn.com/0f9e059c-3438-49ab-a84c-671a04d37b92_index.m3u8\?media_id=5208391172685924&.+&KID=unistore,video",
+    "#count"   : 1,
+},
+
+{
+    "#url"     : "https://weibo.com/2683260651/3774796733364550",
+    "#comment" : "'.m3u8' manifest (from 2014)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#pattern" : r"ytdl:https://us.sinaimg.cn/001xN98Njx06NszB2n15010d0100008H0k01.m3u8\?ori=0&.+&KID=unistore,video",
+    "#count"   : 1,
+},
+
+{
+    "#url"     : "https://weibo.com/3317906495/5217357545080355",
+    "#comment" : "stream as 'wblive-out.api.weibo.com' URL (#8339)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#results" : "ytdl:https://live.video.weibocdn.com/5073cc59-42fc-4b9c-9a61-852d44b0ccc3_index.m3u8",
+},
+
+{
+    "#url"     : "https://weibo.com/7130470964/5217692969600188",
+    "#comment" : "stream without replay (#8339)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#count"   : 0,
+    "#log"     : "HttpError: '404 ' for 'https://wblive-out.api.weibo.com/2/wblive/room/play?id=1022:2321325216257942356128'",
+},
+
+{
+    "#url"     : "https://weibo.com/1893905030/Q9yKt97ID",
+    "#comment" : "truncated 'text' / 'isLongText: true' (#8422)",
+    "#class"   : weibo.WeiboStatusExtractor,
+    "#results" : (
+        "https://wx1.sinaimg.cn/large/70e2b286gy1i6fho7ydx0j20fa08lt8u.jpg",
+        "https://wx1.sinaimg.cn/large/70e2b286gy1i6fho7zwhmj20u00gvmzg.jpg",
+        "https://wx4.sinaimg.cn/large/70e2b286gy1i6fho80b47j21u8112wh3.jpg",
+    ),
+
+    "status"   : {
+        "id"              : 5222785292174627,
+        "isLongText"      : True,
+        "textLength"      : 750,
+        "text"            : """【加快生产速度！曝任天堂明年3月生产2500万台<a href="//s.weibo.com/weibo?q=%23Switch2%23" target="_blank">#Switch2#</a>】据彭博社报道，<a href="//s.weibo.com/weibo?q=%23%E4%BB%BB%E5%A4%A9%E5%A0%82%23" target="_blank">#任天堂#</a>已要求供应商在2026年3月底之前生产多达2500万台Switch 2。<br /><br />知情人士透露，考虑到今年假期旺季（黑色星期五、圣诞节和新年假期）以及明年初的持续需求，任天堂已要求制造合作伙伴加快生产进度。尽管任天堂计划自2024年底开始组装Switch 2，但根据年底购物季的实际需求情况，最终产量目标仍有可能进行调整。<br /><br />彭博社分析认为，任天堂的出货量很可能轻松超越分析师预测的1760万台，甚至超出公司自身更为保守的公开预期。根据组装厂商的发货估算，任天堂在本财年（截至2026年3月）预计将售出约2000万台Switch 2，剩余库存则将结转到下一财年。<br /><br />市场研究机构Circana的数据显示，美国为任天堂最大市场，Switch 2的销售表现比2017年发售的初代Switch高出77%。按照这一趋势，任天堂很可能提前几个月就能超额完成其保守的销售目标。""",
+        "text_raw"        : """\
+【加快生产速度！曝任天堂明年3月生产2500万台#Switch2#】据彭博社报道，#任天堂#已要求供应商在2026年3月底之前生产多达2500万台Switch 2。
+
+知情人士透露，考虑到今年假期旺季（黑色星期五、圣诞节和新年假期）以及明年初的持续需求，任天堂已要求制造合作伙伴加快生产进度。尽管任天堂计划自2024年底开始组装Switch 2，但根据年底购物季的实际需求情况，最终产量目标仍有可能进行调整。
+
+彭博社分析认为，任天堂的出货量很可能轻松超越分析师预测的1760万台，甚至超出公司自身更为保守的公开预期。根据组装厂商的发货估算，任天堂在本财年（截至2026年3月）预计将售出约2000万台Switch 2，剩余库存则将结转到下一财年。
+
+市场研究机构Circana的数据显示，美国为任天堂最大市场，Switch 2的销售表现比2017年发售的初代Switch高出77%。按照这一趋势，任天堂很可能提前几个月就能超额完成其保守的销售目标。\
+""",
+        "longText"        : {
+            "created_at"    : "Fri Oct 17 17:15:11 +0800 2025",
+            "mblog_vip_type": 0,
+            "show_attitude_bar": 0,
+            "weibo_position": 1,
+            "content"       : """\
+【加快生产速度！曝任天堂明年3月生产2500万台#Switch2#】据彭博社报道，#任天堂#已要求供应商在2026年3月底之前生产多达2500万台Switch 2。
+
+知情人士透露，考虑到今年假期旺季（黑色星期五、圣诞节和新年假期）以及明年初的持续需求，任天堂已要求制造合作伙伴加快生产进度。尽管任天堂计划自2024年底开始组装Switch 2，但根据年底购物季的实际需求情况，最终产量目标仍有可能进行调整。
+
+彭博社分析认为，任天堂的出货量很可能轻松超越分析师预测的1760万台，甚至超出公司自身更为保守的公开预期。根据组装厂商的发货估算，任天堂在本财年（截至2026年3月）预计将售出约2000万台Switch 2，剩余库存则将结转到下一财年。
+
+市场研究机构Circana的数据显示，美国为任天堂最大市场，Switch 2的销售表现比2017年发售的初代Switch高出77%。按照这一趋势，任天堂很可能提前几个月就能超额完成其保守的销售目标。\
+""",
+        },
+    },
 },
 
 )

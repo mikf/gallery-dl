@@ -28,18 +28,30 @@ class RealbooruExtractor(booru.BooruExtractor):
         extr('class="container"', '>')
 
         post = {
-            "_html"     : page,
             "id"        : post_id,
             "rating"    : "e" if rating == "adult" else (rating or "?")[0],
-            "tags"      : text.unescape(extr(' alt="', '"')),
             "file_url"  : extr('src="', '"'),
             "created_at": extr(">Posted at ", " by "),
             "uploader"  : extr(">", "<"),
             "score"     : extr('">', "<"),
+            "tags"      : extr('<br />', "</div>"),
             "title"     : extr('id="title" style="width: 100%;" value="', '"'),
             "source"    : extr('d="source" style="width: 100%;" value="', '"'),
         }
 
+        tags_container = post["tags"]
+        tags = []
+        tags_categories = collections.defaultdict(list)
+        pattern = text.re(r'<a class="(?:tag-type-)?([^"]+).*?;tags=([^"&]+)')
+        for tag_type, tag_name in pattern.findall(tags_container):
+            tag = text.unescape(text.unquote(tag_name))
+            tags.append(tag)
+            tags_categories[tag_type].append(tag)
+        for key, value in tags_categories.items():
+            post[f"tags_{key}"] = ", ".join(value)
+        tags.sort()
+
+        post["tags"] = ", ".join(tags)
         post["md5"] = post["file_url"].rpartition("/")[2].partition(".")[0]
         return post
 
@@ -48,7 +60,7 @@ class RealbooruExtractor(booru.BooruExtractor):
         return num
 
     def _prepare(self, post):
-        post["date"] = text.parse_datetime(post["created_at"], "%b, %d %Y")
+        post["date"] = self.parse_datetime(post["created_at"], "%b, %d %Y")
 
     def _pagination(self, params, begin, end):
         url = self.root + "/index.php"
@@ -66,23 +78,13 @@ class RealbooruExtractor(booru.BooruExtractor):
                 return
             params["pid"] += self.per_page
 
-    def _tags(self, post, _):
-        page = post["_html"]
-        tag_container = text.extr(page, 'id="tagLink"', '</div>')
-        tags = collections.defaultdict(list)
-        pattern = util.re(r'<a class="(?:tag-type-)?([^"]+).*?;tags=([^"&]+)')
-        for tag_type, tag_name in pattern.findall(tag_container):
-            tags[tag_type].append(text.unescape(text.unquote(tag_name)))
-        for key, value in tags.items():
-            post["tags_" + key] = " ".join(value)
-
 
 class RealbooruTagExtractor(RealbooruExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
     per_page = 42
-    pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]*)"
+    pattern = rf"{BASE_PATTERN}/index\.php\?page=post&s=list&tags=([^&#]*)"
     example = "https://realbooru.com/index.php?page=post&s=list&tags=TAG"
 
     def metadata(self):
@@ -102,7 +104,7 @@ class RealbooruFavoriteExtractor(RealbooruExtractor):
     directory_fmt = ("{category}", "favorites", "{favorite_id}")
     archive_fmt = "f_{favorite_id}_{id}"
     per_page = 50
-    pattern = BASE_PATTERN + r"/index\.php\?page=favorites&s=view&id=(\d+)"
+    pattern = rf"{BASE_PATTERN}/index\.php\?page=favorites&s=view&id=(\d+)"
     example = "https://realbooru.com/index.php?page=favorites&s=view&id=12345"
 
     def metadata(self):
@@ -120,7 +122,7 @@ class RealbooruPoolExtractor(RealbooruExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool} {pool_name}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = BASE_PATTERN + r"/index\.php\?page=pool&s=show&id=(\d+)"
+    pattern = rf"{BASE_PATTERN}/index\.php\?page=pool&s=show&id=(\d+)"
     example = "https://realbooru.com/index.php?page=pool&s=show&id=12345"
 
     def metadata(self):
@@ -147,7 +149,7 @@ class RealbooruPoolExtractor(RealbooruExtractor):
 class RealbooruPostExtractor(RealbooruExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/index\.php\?page=post&s=view&id=(\d+)"
+    pattern = rf"{BASE_PATTERN}/index\.php\?page=post&s=view&id=(\d+)"
     example = "https://realbooru.com/index.php?page=post&s=view&id=12345"
 
     def posts(self):

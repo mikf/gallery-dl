@@ -21,7 +21,7 @@ class RawkumaBase():
 class RawkumaChapterExtractor(RawkumaBase, ChapterExtractor):
     """Extractor for manga chapters from rawkuma.net"""
     archive_fmt = "{chapter_id}_{page}"
-    pattern = BASE_PATTERN + r"/([^/?#]+-chapter-\d+(?:-\d+)?)"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+-chapter-\d+(?:-\d+)?)"
     example = "https://rawkuma.net/TITLE-chapter-123/"
 
     def __init__(self, match):
@@ -42,7 +42,7 @@ class RawkumaChapterExtractor(RawkumaBase, ChapterExtractor):
             "chapter_minor": sep + minor,
             "chapter_id"   : text.parse_int(item["cid"]),
             "title"        : text.unescape(title),
-            "date"         : text.parse_datetime(
+            "date"         : self.parse_datetime(
                 date, "%Y-%m-%dWIB%H:%M:%S%z"),
             "thumbnail"    : item.get("t"),
             "lang"         : "ja",
@@ -57,7 +57,7 @@ class RawkumaChapterExtractor(RawkumaBase, ChapterExtractor):
 class RawkumaMangaExtractor(RawkumaBase, MangaExtractor):
     """Extractor for manga from rawkuma.net"""
     chapterclass = RawkumaChapterExtractor
-    pattern = BASE_PATTERN + r"/manga/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/manga/([^/?#]+)"
     example = "https://rawkuma.net/manga/TITLE/"
 
     def __init__(self, match):

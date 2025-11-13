@@ -9,7 +9,7 @@
 """Extractors for nijie instances"""
 
 from .common import BaseExtractor, Message, Dispatch, AsynchronousMixin
-from .. import text, exception
+from .. import text, dt, exception
 from ..cache import cache
 
 
@@ -82,8 +82,9 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             "title"      : keywords[0].strip(),
             "description": text.unescape(extr(
                 '"description": "', '"').replace("&amp;", "&")),
-            "date"       : text.parse_datetime(extr(
-                '"datePublished": "', '"'), "%a %b %d %H:%M:%S %Y", 9),
+            "date"       : dt.parse(extr(
+                '"datePublished": "', '"'), "%a %b %d %H:%M:%S %Y"
+            ) - dt.timedelta(hours=9),
             "artist_id"  : text.parse_int(extr('/members.php?id=', '"')),
             "artist_name": keywords[1],
             "tags"       : keywords[2:-1],
@@ -101,9 +102,9 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             "artist_id"  : text.parse_int(extr('members.php?id=', '"')),
             "artist_name": keywords[1],
             "tags"       : keywords[2:-1],
-            "date"       : text.parse_datetime(extr(
-                "itemprop='datePublished' content=", "<").rpartition(">")[2],
-                "%Y-%m-%d %H:%M:%S", 9),
+            "date"       : dt.parse_iso(extr(
+                "itemprop='datePublished' content=", "<").rpartition(">")[2]
+            ) - dt.timedelta(hours=9),
         }
 
     def _extract_images(self, image_id, page):
@@ -177,7 +178,7 @@ BASE_PATTERN = NijieExtractor.update({
 
 class NijieUserExtractor(Dispatch, NijieExtractor):
     """Extractor for nijie user profiles"""
-    pattern = BASE_PATTERN + r"/members\.php\?id=(\d+)"
+    pattern = rf"{BASE_PATTERN}/members\.php\?id=(\d+)"
     example = "https://nijie.info/members.php?id=12345"
 
     def items(self):
@@ -193,7 +194,7 @@ class NijieUserExtractor(Dispatch, NijieExtractor):
 class NijieIllustrationExtractor(NijieExtractor):
     """Extractor for all illustrations of a nijie-user"""
     subcategory = "illustration"
-    pattern = BASE_PATTERN + r"/members_illust\.php\?id=(\d+)"
+    pattern = rf"{BASE_PATTERN}/members_illust\.php\?id=(\d+)"
     example = "https://nijie.info/members_illust.php?id=12345"
 
     def image_ids(self):
@@ -203,7 +204,7 @@ class NijieIllustrationExtractor(NijieExtractor):
 class NijieDoujinExtractor(NijieExtractor):
     """Extractor for doujin entries of a nijie user"""
     subcategory = "doujin"
-    pattern = BASE_PATTERN + r"/members_dojin\.php\?id=(\d+)"
+    pattern = rf"{BASE_PATTERN}/members_dojin\.php\?id=(\d+)"
     example = "https://nijie.info/members_dojin.php?id=12345"
 
     def image_ids(self):
@@ -215,7 +216,7 @@ class NijieFavoriteExtractor(NijieExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "bookmarks", "{user_id}")
     archive_fmt = "f_{user_id}_{image_id}_{num}"
-    pattern = BASE_PATTERN + r"/user_like_illust_view\.php\?id=(\d+)"
+    pattern = rf"{BASE_PATTERN}/user_like_illust_view\.php\?id=(\d+)"
     example = "https://nijie.info/user_like_illust_view.php?id=12345"
 
     def image_ids(self):
@@ -233,7 +234,7 @@ class NijieNuitaExtractor(NijieExtractor):
     subcategory = "nuita"
     directory_fmt = ("{category}", "nuita", "{user_id}")
     archive_fmt = "n_{user_id}_{image_id}_{num}"
-    pattern = BASE_PATTERN + r"/history_nuita\.php\?id=(\d+)"
+    pattern = rf"{BASE_PATTERN}/history_nuita\.php\?id=(\d+)"
     example = "https://nijie.info/history_nuita.php?id=12345"
 
     def image_ids(self):
@@ -252,7 +253,7 @@ class NijieNuitaExtractor(NijieExtractor):
 class NijieFeedExtractor(NijieExtractor):
     """Extractor for nijie liked user feed"""
     subcategory = "feed"
-    pattern = BASE_PATTERN + r"/like_user_view\.php"
+    pattern = rf"{BASE_PATTERN}/like_user_view\.php"
     example = "https://nijie.info/like_user_view.php"
 
     def image_ids(self):
@@ -265,7 +266,7 @@ class NijieFeedExtractor(NijieExtractor):
 class NijieFollowedExtractor(NijieExtractor):
     """Extractor for followed nijie users"""
     subcategory = "followed"
-    pattern = BASE_PATTERN + r"/like_my\.php"
+    pattern = rf"{BASE_PATTERN}/like_my\.php"
     example = "https://nijie.info/like_my.php"
 
     def items(self):
@@ -291,7 +292,7 @@ class NijieFollowedExtractor(NijieExtractor):
 class NijieImageExtractor(NijieExtractor):
     """Extractor for a nijie work/image"""
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/view(?:_popup)?\.php\?id=(\d+)"
+    pattern = rf"{BASE_PATTERN}/view(?:_popup)?\.php\?id=(\d+)"
     example = "https://nijie.info/view.php?id=12345"
 
     def image_ids(self):

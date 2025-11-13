@@ -23,17 +23,19 @@ jobs:
         - "3.11"
         - "3.12"
         - "3.13"
+        - "3.14"
         - "pypy3.9"
+        - "pypy3.11"
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Check file permissions
       run: |
         if [[ "$(find ./gallery_dl -type f -not -perm 644)" ]]; then exit 1; fi
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -45,7 +47,7 @@ jobs:
     - name: Install yt-dlp
       run: |
         case "${{ matrix.python-version }}" in
-            3.8)
+            3.8|3.9|pypy3.9)
                 # install from PyPI
                 pip install yt-dlp
                 ;;

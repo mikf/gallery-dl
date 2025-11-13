@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import imagehosts
+from gallery_dl import exception
 
 
 __tests__ = (
@@ -39,6 +40,14 @@ __tests__ = (
     "#url"     : "https://www.imagehaha.com/f1i2s4vhvbrq/test.png",
     "#category": ("imagehost", "imagetwist", "image"),
     "#class"   : imagehosts.ImagetwistImageExtractor,
+},
+
+{
+    "#url"     : "https://imagetwist.com/tynhxt4ay9rl/9g09tq0e2i1b.jpg",
+    "#comment" : "'Image not found' (#8415)",
+    "#category": ("imagehost", "imagetwist", "image"),
+    "#class"   : imagehosts.ImagetwistImageExtractor,
+    "#exception": exception.NotFoundError,
 },
 
 {

@@ -126,8 +126,7 @@ class ArtstationExtractor(Extractor):
         data["title"] = text.unescape(data["title"])
         data["description"] = text.unescape(text.remove_html(
             data["description"]))
-        data["date"] = text.parse_datetime(
-            data["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        data["date"] = self.parse_datetime_iso(data["created_at"])
 
         assets = data["assets"]
         del data["assets"]

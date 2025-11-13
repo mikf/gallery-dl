@@ -250,4 +250,9 @@ __tests__ = (
     "url"        : str,
 },
 
+{
+    "#url"  : "https://www.sex.com/feed/",
+    "#class": sexcom.SexcomFeedExtractor,
+},
+
 )

@@ -9,7 +9,7 @@
 """Extractors for https://www.patreon.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util, dt, exception
 from ..cache import memcache
 import collections
 import itertools
@@ -177,8 +177,7 @@ class PatreonExtractor(Extractor):
             post, included, "attachments")
         attr["attachments_media"] = self._files(
             post, included, "attachments_media")
-        attr["date"] = text.parse_datetime(
-            attr["published_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        attr["date"] = self.parse_datetime_iso(attr["published_at"])
 
         try:
             attr["campaign"] = (included["campaign"][
@@ -226,8 +225,16 @@ class PatreonExtractor(Extractor):
         user = response.json()["data"]
         attr = user["attributes"]
         attr["id"] = user["id"]
-        attr["date"] = text.parse_datetime(
-            attr["created"], "%Y-%m-%dT%H:%M:%S.%f%z")
+        attr["date"] = self.parse_datetime_iso(attr["created"])
+        return attr
+
+    def _collection(self, collection_id):
+        url = f"{self.root}/api/collection/{collection_id}"
+        data = self.request_json(url)
+        coll = data["data"]
+        attr = coll["attributes"]
+        attr["id"] = coll["id"]
+        attr["date"] = self.parse_datetime_iso(attr["created_at"])
         return attr
 
     def _filename(self, url):
@@ -246,7 +253,7 @@ class PatreonExtractor(Extractor):
                 return part
         return ""
 
-    def _build_url(self, endpoint, query):
+    def _build_url(self, endpoint, sort, query):
         return (
             f"https://www.patreon.com/api/{endpoint}"
 
@@ -281,10 +288,19 @@ class PatreonExtractor(Extractor):
             "preview_views,video_duration"
 
             f"&page[cursor]={self._init_cursor()}"
-            f"{query}"
+            f"{query}{self._order(sort)}"
 
             "&json-api-version=1.0"
         )
+
+    def _order(self, sort):
+        if order := self.config("order-posts"):
+            if order in {"d", "desc"}:
+                order = "-published_at"
+            elif order in {"a", "asc", "r", "reverse"}:
+                order = "published_at"
+            return f"&sort={order}"
+        return f"&sort={sort}" if sort else ""
 
     def _build_file_generators(self, filetypes):
         if filetypes is None:
@@ -333,6 +349,42 @@ class PatreonExtractor(Extractor):
         raise exception.AbortExtraction("Unable to extract bootstrap data")
 
 
+class PatreonCollectionExtractor(PatreonExtractor):
+    """Extractor for a patreon collection"""
+    subcategory = "collection"
+    directory_fmt = ("{category}", "{creator[full_name]}",
+                     "Collections", "{collection[title]} ({collection[id]})")
+    pattern = r"(?:https?://)?(?:www\.)?patreon\.com/collection/(\d+)"
+    example = "https://www.patreon.com/collection/12345"
+
+    def posts(self):
+        collection_id = self.groups[0]
+        self.kwdict["collection"] = collection = \
+            self._collection(collection_id)
+        campaign_id = text.extr(
+            collection["thumbnail"]["url"], "/campaign/", "/")
+
+        url = self._build_url("posts", "collection_order", (
+            # patreon returns '400 Bad Request' without campaign_id filter
+            f"&filter[campaign_id]={campaign_id}"
+            "&filter[contains_exclusive_posts]=true"
+            "&filter[is_draft]=false"
+            f"&filter[collection_id]={collection_id}"
+            "&filter[include_drops]=true"
+        ))
+        return self._pagination(url)
+
+    def _order(self, sort):
+        if order := self.config("order-posts"):
+            if order in {"a", "asc"}:
+                order = "collection_order"
+            elif order in {"d", "desc", "r", "reverse"}:
+                # "-collection_order" results in a '400 Bad Request' error
+                order = "-published_at"
+            return f"&sort={order}"
+        return f"&sort={sort}" if sort else ""
+
+
 class PatreonCreatorExtractor(PatreonExtractor):
     """Extractor for a creator's works"""
     subcategory = "creator"
@@ -350,12 +402,11 @@ class PatreonCreatorExtractor(PatreonExtractor):
         campaign_id = self._get_campaign_id(creator, params)
         self.log.debug("campaign_id: %s", campaign_id)
 
-        url = self._build_url("posts", (
+        url = self._build_url("posts", params.get("sort", "-published_at"), (
             f"&filter[campaign_id]={campaign_id}"
             "&filter[contains_exclusive_posts]=true"
             "&filter[is_draft]=false"
             f"{self._get_filters(params)}"
-            f"&sort={params.get('sort', '-published_at')}"
         ))
         return self._pagination(url)
 
@@ -408,11 +459,10 @@ class PatreonUserExtractor(PatreonExtractor):
 
     def posts(self):
         if date_max := self._get_date_min_max(None, None)[1]:
-            self._cursor = cursor = \
-                util.datetime_from_timestamp(date_max).isoformat()
+            self._cursor = cursor = dt.from_ts(date_max).isoformat()
             self._init_cursor = lambda: cursor
 
-        url = self._build_url("stream", (
+        url = self._build_url("stream", None, (
             "&filter[is_following]=true"
             "&json-api-use-default-includes=false"
         ))

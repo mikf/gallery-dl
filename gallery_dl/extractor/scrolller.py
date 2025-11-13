@@ -136,7 +136,7 @@ class ScrolllerExtractor(Extractor):
 class ScrolllerSubredditExtractor(ScrolllerExtractor):
     """Extractor for media from a scrolller subreddit"""
     subcategory = "subreddit"
-    pattern = BASE_PATTERN + r"(/r/[^/?#]+)(?:/?\?([^#]+))?"
+    pattern = rf"{BASE_PATTERN}(/r/[^/?#]+)(?:/?\?([^#]+))?"
     example = "https://scrolller.com/r/SUBREDDIT"
 
     def posts(self):
@@ -173,7 +173,7 @@ class ScrolllerSubredditExtractor(ScrolllerExtractor):
 class ScrolllerFollowingExtractor(ScrolllerExtractor):
     """Extractor for followed scrolller subreddits"""
     subcategory = "following"
-    pattern = BASE_PATTERN + r"/following"
+    pattern = rf"{BASE_PATTERN}/following"
     example = "https://scrolller.com/following"
 
     def items(self):
@@ -199,7 +199,7 @@ class ScrolllerFollowingExtractor(ScrolllerExtractor):
 class ScrolllerPostExtractor(ScrolllerExtractor):
     """Extractor for media from a single scrolller post"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"/(?!r/|following$)([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/(?!r/|following$)([^/?#]+)"
     example = "https://scrolller.com/TITLE-SLUG-a1b2c3d4f5"
 
     def posts(self):

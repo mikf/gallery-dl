@@ -51,12 +51,17 @@ class E621Extractor(danbooru.DanbooruExtractor):
 
             post["filename"] = file["md5"]
             post["extension"] = file["ext"]
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            post["date"] = self.parse_datetime_iso(post["created_at"])
 
             post.update(data)
             yield Message.Directory, post
             yield Message.Url, file["url"], post
+
+    def items_artists(self):
+        for artist in self.artists():
+            artist["_extractor"] = E621TagExtractor
+            url = f"{self.root}/posts?tags={text.quote(artist['name'])}"
+            yield Message.Queue, url, artist
 
     def _get_notes(self, id):
         return self.request_json(
@@ -89,13 +94,13 @@ BASE_PATTERN = E621Extractor.update({
 
 class E621TagExtractor(E621Extractor, danbooru.DanbooruTagExtractor):
     """Extractor for e621 posts from tag searches"""
-    pattern = BASE_PATTERN + r"/posts?(?:\?[^#]*?tags=|/index/\d+/)([^&#]*)"
+    pattern = rf"{BASE_PATTERN}/posts?(?:\?[^#]*?tags=|/index/\d+/)([^&#]*)"
     example = "https://e621.net/posts?tags=TAG"
 
 
 class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
     """Extractor for e621 pools"""
-    pattern = BASE_PATTERN + r"/pool(?:s|/show)/(\d+)"
+    pattern = rf"{BASE_PATTERN}/pool(?:s|/show)/(\d+)"
     example = "https://e621.net/pools/12345"
 
     def posts(self):
@@ -120,7 +125,7 @@ class E621PoolExtractor(E621Extractor, danbooru.DanbooruPoolExtractor):
 
 class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
     """Extractor for single e621 posts"""
-    pattern = BASE_PATTERN + r"/post(?:s|/show)/(\d+)"
+    pattern = rf"{BASE_PATTERN}/post(?:s|/show)/(\d+)"
     example = "https://e621.net/posts/12345"
 
     def posts(self):
@@ -130,11 +135,30 @@ class E621PostExtractor(E621Extractor, danbooru.DanbooruPostExtractor):
 
 class E621PopularExtractor(E621Extractor, danbooru.DanbooruPopularExtractor):
     """Extractor for popular images from e621"""
-    pattern = BASE_PATTERN + r"/explore/posts/popular(?:\?([^#]*))?"
+    pattern = rf"{BASE_PATTERN}/explore/posts/popular(?:\?([^#]*))?"
     example = "https://e621.net/explore/posts/popular"
 
     def posts(self):
         return self._pagination("/popular.json", self.params)
+
+
+class E621ArtistExtractor(E621Extractor, danbooru.DanbooruArtistExtractor):
+    """Extractor for e621 artists"""
+    subcategory = "artist"
+    pattern = rf"{BASE_PATTERN}/artists/(\d+)"
+    example = "https://e621.net/artists/12345"
+
+    items = E621Extractor.items_artists
+
+
+class E621ArtistSearchExtractor(E621Extractor,
+                                danbooru.DanbooruArtistSearchExtractor):
+    """Extractor for e621 artist searches"""
+    subcategory = "artist-search"
+    pattern = rf"{BASE_PATTERN}/artists/?\?([^#]+)"
+    example = "https://e621.net/artists?QUERY"
+
+    items = E621Extractor.items_artists
 
 
 class E621FavoriteExtractor(E621Extractor):
@@ -142,7 +166,7 @@ class E621FavoriteExtractor(E621Extractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "Favorites", "{user_id}")
     archive_fmt = "f_{user_id}_{id}"
-    pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
+    pattern = rf"{BASE_PATTERN}/favorites(?:\?([^#]*))?"
     example = "https://e621.net/favorites"
 
     def metadata(self):

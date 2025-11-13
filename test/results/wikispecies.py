@@ -12,7 +12,7 @@ __tests__ = (
     "#url"     : "https://species.wikimedia.org/wiki/Geranospiza",
     "#category": ("wikimedia", "wikispecies", "article"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
-    "#results"     : "https://upload.wikimedia.org/wikipedia/commons/0/01/Geranospiza_caerulescens.jpg",
+    "#results"     : "https://upload.wikimedia.org/wikipedia/commons/0/01/Geranospiza_caerulescens.jpg?format=original",
     "#sha1_content": "3a17c14b15489928e4154f826af1c42afb5a523e",
 },
 

@@ -80,7 +80,7 @@ class BatotoBase():
 class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
     """Extractor for batoto manga chapters"""
     archive_fmt = "{chapter_id}_{page}"
-    pattern = BASE_PATTERN + r"/(?:title/[^/?#]+|chapter)/(\d+)"
+    pattern = rf"{BASE_PATTERN}/(?:title/[^/?#]+|chapter)/(\d+)"
     example = "https://xbato.org/title/12345-MANGA/54321"
 
     def __init__(self, match):
@@ -104,7 +104,7 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
             info = text.remove_html(extr('link-hover">', "</"))
         info = text.unescape(info)
 
-        match = util.re(
+        match = text.re(
             r"(?i)(?:(?:Volume|S(?:eason)?)\s*(\d+)\s+)?"
             r"(?:Chapter|Episode)\s*(\d+)([\w.]*)").match(info)
         if match:
@@ -123,7 +123,7 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
             "chapter_minor" : minor,
             "chapter_string": info,
             "chapter_id"    : text.parse_int(self.chapter_id),
-            "date"          : text.parse_timestamp(extr(' time="', '"')[:-3]),
+            "date"          : self.parse_timestamp(extr(' time="', '"')[:-3]),
         }
 
     def images(self, page):
@@ -139,8 +139,8 @@ class BatotoMangaExtractor(BatotoBase, MangaExtractor):
     """Extractor for batoto manga"""
     reverse = False
     chapterclass = BatotoChapterExtractor
-    pattern = (BASE_PATTERN +
-               r"/(?:title/(\d+)[^/?#]*|series/(\d+)(?:/[^/?#]*)?)/?$")
+    pattern = (rf"{BASE_PATTERN}"
+               rf"/(?:title/(\d+)[^/?#]*|series/(\d+)(?:/[^/?#]*)?)/?$")
     example = "https://xbato.org/title/12345-MANGA/"
 
     def __init__(self, match):
@@ -167,8 +167,7 @@ class BatotoMangaExtractor(BatotoBase, MangaExtractor):
 
             data["chapter"] = text.parse_int(chapter)
             data["chapter_minor"] = sep + minor
-            data["date"] = text.parse_datetime(
-                extr('time="', '"'), "%Y-%m-%dT%H:%M:%S.%fZ")
+            data["date"] = self.parse_datetime_iso(extr('time="', '"'))
 
             url = f"{self.root}/title/{href}"
             results.append((url, data.copy()))
@@ -188,9 +187,9 @@ def _manga_info(self, manga_id, page=None):
         "manga"      : data["name"][1],
         "manga_id"   : text.parse_int(manga_id),
         "manga_slug" : data["slug"][1],
-        "manga_date" : text.parse_timestamp(
+        "manga_date" : self.parse_timestamp(
             data["dateCreate"][1] // 1000),
-        "manga_date_updated": text.parse_timestamp(
+        "manga_date_updated": self.parse_timestamp(
             data["dateUpdate"][1] / 1000),
         "author"     : json_list(data["authors"]),
         "artist"     : json_list(data["artists"]),

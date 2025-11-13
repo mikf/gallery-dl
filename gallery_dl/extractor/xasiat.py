@@ -7,7 +7,7 @@
 """Extractors for https://www.xasiat.com"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 import time
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?xasiat\.com((?:/fr|/ja)?/albums"
@@ -29,7 +29,7 @@ class XasiatExtractor(Extractor):
 
     def _pagination(self, path, pnum=1):
         url = f"{self.root}{path}/"
-        find_posts = util.re(r'class="item  ">\s*<a href="([^"]+)').findall
+        find_posts = text.re(r'class="item  ">\s*<a href="([^"]+)').findall
 
         while True:
             params = {
@@ -52,7 +52,7 @@ class XasiatExtractor(Extractor):
 
 class XasiatAlbumExtractor(XasiatExtractor):
     subcategory = "album"
-    pattern = BASE_PATTERN + r"/(\d+)/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/(\d+)/[^/?#]+)"
     example = "https://www.xasiat.com/albums/12345/TITLE/"
 
     def items(self):
@@ -69,11 +69,11 @@ class XasiatAlbumExtractor(XasiatExtractor):
 
         data = {
             "title": text.unescape(title),
-            "model": util.re(
+            "model": text.re(
                 r'top_models1"></i>\s*(.+)\s*</span').findall(info),
-            "tags": util.re(
+            "tags": text.re(
                 r'tags/[^"]+\">\s*(.+)\s*</a').findall(info),
-            "album_category": util.re(
+            "album_category": text.re(
                 r'categories/[^"]+\">\s*(.+)\s*</a').findall(info)[0],
             "album_url": response.url,
             "album_id": text.parse_int(album_id),
@@ -87,17 +87,17 @@ class XasiatAlbumExtractor(XasiatExtractor):
 
 class XasiatTagExtractor(XasiatExtractor):
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"/tags/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/tags/[^/?#]+)"
     example = "https://www.xasiat.com/albums/tags/TAG/"
 
 
 class XasiatCategoryExtractor(XasiatExtractor):
     subcategory = "category"
-    pattern = BASE_PATTERN + r"/categories/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/categories/[^/?#]+)"
     example = "https://www.xasiat.com/albums/categories/CATEGORY/"
 
 
 class XasiatModelExtractor(XasiatExtractor):
     subcategory = "model"
-    pattern = BASE_PATTERN + r"/models/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/models/[^/?#]+)"
     example = "https://www.xasiat.com/albums/models/MODEL/"

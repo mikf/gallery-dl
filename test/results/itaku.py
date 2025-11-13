@@ -50,6 +50,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://itaku.ee/profile/piku/gallery/7391",
+    "#comment" : "'order' option",
+    "#class"   : itaku.ItakuGalleryExtractor,
+    "#options" : {"order": "reverse"},
+    "#results" : (
+        "https://itaku.ee/api/media/gallery_imgs/bea_alpha_N0YGfeT.png",
+        "https://itaku.ee/api/media/gallery_imgs/misty-psyduck_IWbYdwT.png",
+    ),
+
+    "sections" : ["Fanart/Pokemon"],
+},
+
+{
     "#url"     : "https://itaku.ee/profile/piku/posts",
     "#class"   : itaku.ItakuPostsExtractor,
     "#results" : (

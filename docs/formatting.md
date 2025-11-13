@@ -294,6 +294,16 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>long</code></td>
 </tr>
 <tr>
+    <td rowspan="2"><code>Lb&lt;maxlen&gt;/&lt;ext&gt;/</code></td>
+    <td rowspan="2">Same as <code>L</code>, but applies to the <a href="https://docs.python.org/3/library/stdtypes.html#bytes"><code>bytes()</code></a> representation of a string in <a href="https://docs.python.org/3/library/sys.html#sys.getfilesystemencoding">filesystem encoding</a></td>
+    <td><code>{foo_ja:Lb15/長い/}</code></td>
+    <td><code>フー・バー</code></td>
+</tr>
+<tr>
+    <td><code>{foo_ja:Lb8/長い/}</code></td>
+    <td><code>長い</code></td>
+</tr>
+<tr>
     <td rowspan="2"><code>X&lt;maxlen&gt;/&lt;ext&gt;/</code></td>
     <td rowspan="2">Limit output to <code>&lt;maxlen&gt;</code> characters. Cut output and add <code>&lt;ext&gt;</code> to its end if its length exceeds <code>&lt;maxlen&gt;</code></td>
     <td><code>{foo:X15/&nbsp;.../}</code></td>
@@ -302,6 +312,16 @@ Format specifiers can be used for advanced formatting by using the options provi
 <tr>
     <td><code>{foo:X6/&nbsp;.../}</code></td>
     <td><code>Fo&nbsp;...</code></td>
+</tr>
+<tr>
+    <td rowspan="2"><code>Xb&lt;maxlen&gt;/&lt;ext&gt;/</code></td>
+    <td rowspan="2">Same as <code>X</code>, but applies to the <a href="https://docs.python.org/3/library/stdtypes.html#bytes"><code>bytes()</code></a> representation of a string in <a href="https://docs.python.org/3/library/sys.html#sys.getfilesystemencoding">filesystem encoding</a></td>
+    <td><code>{foo_ja:Xb15/〜/}</code></td>
+    <td><code>フー・バー</code></td>
+</tr>
+<tr>
+    <td><code>{foo_ja:Xb8/〜/}</code></td>
+    <td><code>フ〜</code></td>
 </tr>
 <tr>
     <td><code>J&lt;separator&gt;/</code></td>

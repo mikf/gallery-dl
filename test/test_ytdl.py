@@ -42,8 +42,6 @@ class Test_CommandlineArguments(unittest.TestCase):
     def test_proxy(self):
         self._(["--proxy", "socks5://127.0.0.1:1080/"],
                "proxy", "socks5://127.0.0.1:1080/")
-        self._(["--cn-verification-proxy", "https://127.0.0.1"],
-               "cn_verification_proxy", "https://127.0.0.1")
         self._(["--geo-verification-proxy", "127.0.0.1"],
                "geo_verification_proxy", "127.0.0.1")
 
@@ -105,7 +103,10 @@ class Test_CommandlineArguments(unittest.TestCase):
                "geo_bypass_ip_block", "198.51.100.14/24")
 
     def test_headers(self):
-        headers = self.module.std_headers
+        try:
+            headers = self.module.utils.networking.std_headers
+        except AttributeError:
+            headers = self.module.std_headers
 
         self.assertNotEqual(headers["User-Agent"], "Foo/1.0")
         self._(["--user-agent", "Foo/1.0"])
@@ -194,8 +195,6 @@ class Test_CommandlineArguments(unittest.TestCase):
         })
 
     def test_xattr(self):
-        self._("--xattr-set-filesize", "xattr_set_filesize", True)
-
         opts = self._("--xattrs")
         self.assertEqual(opts["postprocessors"][0], {"key": "XAttrMetadata"})
 

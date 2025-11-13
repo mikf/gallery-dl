@@ -19,7 +19,7 @@ __tests__ = (
     "#url"     : "https://mushishi.fandom.com/wiki/Yahagi",
     "#category": ("wikimedia", "fandom-mushishi", "article"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
-    "#results" : "https://static.wikia.nocookie.net/mushi-shi/images/f/f8/Yahagi.png/revision/latest?cb=20150128052255",
+    "#results" : "https://static.wikia.nocookie.net/mushi-shi/images/f/f8/Yahagi.png/revision/latest?cb=20150128052255&format=original",
 
     "bitdepth"      : 8,
     "canonicaltitle": "File:Yahagi.png",
@@ -75,7 +75,7 @@ __tests__ = (
     "sha1"          : "e3078a97976215323dbabb0c86b7acc55b512d16",
     "size"          : 429912,
     "timestamp"     : "2015-01-28T05:22:55Z",
-    "url"           : "https://static.wikia.nocookie.net/mushi-shi/images/f/f8/Yahagi.png/revision/latest?cb=20150128052255",
+    "url"           : "https://static.wikia.nocookie.net/mushi-shi/images/f/f8/Yahagi.png/revision/latest?cb=20150128052255&format=original",
     "user"          : "ITHYRIAL",
     "userid"        : 4637089,
     "width"         : 728,
@@ -91,17 +91,43 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://hildatheseries.fandom.com/wiki/Burku",
+    "#comment" : "'.webp' file without 'format=original' (#5512)",
+    "#category": ("wikimedia", "fandom-hildatheseries", "article"),
+    "#class"   : wikimedia.WikimediaArticleExtractor,
+    "#options" : {"format": ""},
+    "#range"   : "1",
+    "#results" : "https://static.wikia.nocookie.net/hildatheseries/images/2/24/Burku.png/revision/latest?cb=20251010033752",
+    "#sha1_content": "36dce0e511fa8f6e1f834b92150126804fde971f",
+},
+
+{
     "#url"     : "https://discogs.fandom.com/zh/wiki/File:CH-0430D2.jpg",
     "#comment" : "non-English language prefix (#6370)",
     "#category": ("wikimedia", "fandom-discogs", "file"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
-    "#results" : "https://static.wikia.nocookie.net/discogs/images/a/ab/CH-0430D2.jpg/revision/latest?cb=20241007150151&path-prefix=zh",
+    "#results" : "https://static.wikia.nocookie.net/discogs/images/a/ab/CH-0430D2.jpg/revision/latest?cb=20241007150151&path-prefix=zh&format=original",
+
+    "lang": "zh",
 },
 
 {
     "#url"     : "https://projectsekai.fandom.com/wiki/Project_SEKAI_Wiki",
     "#category": ("wikimedia", "fandom-projectsekai", "article"),
     "#class"   : wikimedia.WikimediaArticleExtractor,
+},
+
+{
+    "#url"     : "https://youtube.fandom.com/wiki/File:(500)_Montage_-_Reason_2_Die_Awakening",
+    "#comment" : "file without extension",
+    "#category": ("wikimedia", "fandom-youtube", "file"),
+    "#class"   : wikimedia.WikimediaArticleExtractor,
+
+    "extension": "",
+    "filename" : "(500) Montage - Reason 2 Die Awakening",
+    "page"     : "File:(500)_Montage_-_Reason_2_Die_Awakening",
+    "sha1"     : "6819869792d85927d60cc0a0cdc9e33dbd446731",
+    "size"     : 81905,
 },
 
 {

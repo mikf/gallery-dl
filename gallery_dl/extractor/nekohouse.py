@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text
 
 BASE_PATTERN = r"(?:https?://)?nekohouse\.su"
-USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
+USER_PATTERN = rf"{BASE_PATTERN}/([^/?#]+)/user/([^/?#]+)"
 
 
 class NekohouseExtractor(Extractor):
@@ -27,7 +27,7 @@ class NekohousePostExtractor(NekohouseExtractor):
                      "{post_id} {date} {title[b:230]}")
     filename_fmt = "{num:>02} {id|filename}.{extension}"
     archive_fmt = "{service}_{user_id}_{post_id}_{hash}"
-    pattern = USER_PATTERN + r"/post/([^/?#]+)"
+    pattern = rf"{USER_PATTERN}/post/([^/?#]+)"
     example = "https://nekohouse.su/SERVICE/user/12345/post/12345"
 
     def items(self):
@@ -59,8 +59,8 @@ class NekohousePostExtractor(NekohouseExtractor):
                 'class="scrape__user-name', '</').rpartition(">")[2].strip()),
             "title"   : text.unescape(extr(
                 'class="scrape__title', '</').rpartition(">")[2]),
-            "date"   : text.parse_datetime(extr(
-                'datetime="', '"')[:19], "%Y-%m-%d %H:%M:%S"),
+            "date"   : self.parse_datetime_iso(extr(
+                'datetime="', '"')[:19]),
             "content": text.unescape(extr(
                 'class="scrape__content">', "</div>").strip()),
         }
@@ -98,7 +98,7 @@ class NekohousePostExtractor(NekohouseExtractor):
 
 class NekohouseUserExtractor(NekohouseExtractor):
     subcategory = "user"
-    pattern = USER_PATTERN + r"/?(?:\?([^#]+))?(?:$|\?|#)"
+    pattern = rf"{USER_PATTERN}/?(?:\?([^#]+))?(?:$|\?|#)"
     example = "https://nekohouse.su/SERVICE/user/12345"
 
     def items(self):

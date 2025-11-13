@@ -364,7 +364,7 @@ __tests__ = (
     },
     "user": {
         "avatar"        : "https://cdn.bsky.app/img/avatar/plain/did:plc:eclio37ymobqex2ncko63h4r/bafkreidvvqj5jymmpaeklwkpq6gi532el447mjy2yultuukypzqm5ohfju@jpeg",
-        "banner"        : "https://cdn.bsky.app/img/banner/plain/did:plc:eclio37ymobqex2ncko63h4r/bafkreiaiorkgl6t2j5w3sf6nj37drvwuvriq3e3vqwf4yn3pchpwfbekta@jpeg",
+        "banner"        : "https://cdn.bsky.app/img/banner/plain/did:plc:eclio37ymobqex2ncko63h4r/bafkreidlzzmt7sy2n6imz5mg7siygb3cy4e526nvbjucczeu5cutqro5ni@jpeg",
         "createdAt"     : "2023-06-05T18:50:31.498Z",
         "description"   : "In-depth, independent reporting to better understand the world, now on Bluesky. News tips? Share them here: http://nyti.ms/2FVHq9v",
         "did"           : "did:plc:eclio37ymobqex2ncko63h4r",
@@ -373,7 +373,7 @@ __tests__ = (
         "followsCount"  : int,
         "handle"        : "nytimes.com",
         "instance"      : "nytimes.com",
-        "indexedAt"     : "2024-01-20T05:04:46.757Z",
+        "indexedAt"     : "iso:datetime",
         "labels"        : [],
         "postsCount"    : int,
     },
@@ -441,6 +441,18 @@ __tests__ = (
     "#url"     : "https://vxbsky.app/profile/bsky.app/post/3kh5rarr3gn2n",
     "#category": ("", "bluesky", "post"),
     "#class"   : bluesky.BlueskyPostExtractor,
+},
+
+{
+    "#url"     : "https://bsky.app/profile/jacksonlab.bsky.social/post/3m2ms33o6p52k",
+    "#comment" : "'external' embed - 'images': [], 'video': null",
+    "#class"   : bluesky.BlueskyPostExtractor,
+    "#count"   : 0,
+},
+
+{
+    "#url"     : "https://bsky.app/saved",
+    "#class"   : bluesky.BlueskyBookmarkExtractor,
 },
 
 )

@@ -57,8 +57,7 @@ class SzurubooruExtractor(booru.BooruExtractor):
         return url
 
     def _prepare(self, post):
-        post["date"] = text.parse_datetime(
-            post["creationTime"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        post["date"] = self.parse_datetime_iso(post["creationTime"])
 
         tags = []
         tags_categories = collections.defaultdict(list)
@@ -94,7 +93,7 @@ class SzurubooruTagExtractor(SzurubooruExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}_{version}"
-    pattern = BASE_PATTERN + r"/posts(?:/query=([^/?#]*))?"
+    pattern = rf"{BASE_PATTERN}/posts(?:/query=([^/?#]*))?"
     example = "https://booru.bcbnsfw.space/posts/query=TAG"
 
     def __init__(self, match):
@@ -117,7 +116,7 @@ class SzurubooruTagExtractor(SzurubooruExtractor):
 class SzurubooruPostExtractor(SzurubooruExtractor):
     subcategory = "post"
     archive_fmt = "{id}_{version}"
-    pattern = BASE_PATTERN + r"/post/(\d+)"
+    pattern = rf"{BASE_PATTERN}/post/(\d+)"
     example = "https://booru.bcbnsfw.space/post/12345"
 
     def posts(self):

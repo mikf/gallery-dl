@@ -36,7 +36,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
     directory_fmt = ("{category}", "{boardSlug}")
     filename_fmt = "{id}_{num}{title:? //[b:230]}.{extension}"
     archive_fmt = "{id}_{num}"
-    pattern = BASE_PATTERN + r"/b/(?:\w+)/(\d+)"
+    pattern = rf"{BASE_PATTERN}/b/(?:\w+)/(\d+)"
     example = "https://arca.live/b/breaking/123456789"
 
     def items(self):
@@ -49,8 +49,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
         files = self._extract_files(post)
 
         post["count"] = len(files)
-        post["date"] = text.parse_datetime(
-            post["createdAt"][:19], "%Y-%m-%dT%H:%M:%S")
+        post["date"] = self.parse_datetime_iso(post["createdAt"][:19])
         post["post_url"] = post_url = \
             f"{self.root}/b/{post['boardSlug']}/{post['id']}"
         post["_http_headers"] = {"Referer": post_url + "?p=1"}
@@ -64,7 +63,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
     def _extract_files(self, post):
         files = []
 
-        for video, media in util.re(r"<(?:img|vide(o)) ([^>]+)").findall(
+        for video, media in text.re(r"<(?:img|vide(o)) ([^>]+)").findall(
                 post["content"]):
             if not self.emoticons and 'class="arca-emoticon"' in media:
                 continue
@@ -116,7 +115,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
 class ArcaliveBoardExtractor(ArcaliveExtractor):
     """Extractor for an arca.live board's posts"""
     subcategory = "board"
-    pattern = BASE_PATTERN + r"/b/([^/?#]+)/?(?:\?([^#]+))?$"
+    pattern = rf"{BASE_PATTERN}/b/([^/?#]+)/?(?:\?([^#]+))?$"
     example = "https://arca.live/b/breaking"
 
     def articles(self):
@@ -128,7 +127,7 @@ class ArcaliveBoardExtractor(ArcaliveExtractor):
 class ArcaliveUserExtractor(ArcaliveExtractor):
     """Extractor for an arca.live users's posts"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/u/@([^/?#]+)/?(?:\?([^#]+))?$"
+    pattern = rf"{BASE_PATTERN}/u/@([^/?#]+)/?(?:\?([^#]+))?$"
     example = "https://arca.live/u/@USER"
 
     def articles(self):

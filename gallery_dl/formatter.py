@@ -13,9 +13,8 @@ import sys
 import time
 import string
 import _string
-import datetime
 import operator
-from . import text, util
+from . import text, util, dt
 
 NONE = util.NONE
 
@@ -40,7 +39,15 @@ def parse(format_string, default=NONE, fmt=format):
     else:
         cls = StringFormatter
 
-    formatter = _CACHE[key] = cls(format_string, default, fmt)
+    try:
+        formatter = _CACHE[key] = cls(format_string, default, fmt)
+    except Exception as exc:
+        import logging
+        logging.getLogger("formatter").error(
+            "Invalid format string '%s' (%s: %s)",
+            format_string, exc.__class__.__name__, exc)
+        raise
+
     return formatter
 
 
@@ -60,8 +67,8 @@ class StringFormatter():
     - "g": calls text.slugify()
     - "j": calls json.dumps
     - "t": calls str.strip
-    - "T": calls util.datetime_to_timestamp_string()
-    - "d": calls text.parse_timestamp
+    - "T": calls dt.to_ts_string()
+    - "d": calls dt.parse_ts()
     - "s": calls str()
     - "S": calls util.to_string()
     - "U": calls urllib.parse.unescape
@@ -259,7 +266,7 @@ class TemplateFormatter(StringFormatter):
     """Read format_string from file"""
 
     def __init__(self, path, default=NONE, fmt=format):
-        with open(util.expand_path(path)) as fp:
+        with open(util.expand_path(path), encoding="utf-8") as fp:
             format_string = fp.read()
         StringFormatter.__init__(self, format_string, default, fmt)
 
@@ -268,7 +275,7 @@ class TemplateFStringFormatter(FStringFormatter):
     """Read f-string from file"""
 
     def __init__(self, path, default=NONE, fmt=None):
-        with open(util.expand_path(path)) as fp:
+        with open(util.expand_path(path), encoding="utf-8") as fp:
             fstring = fp.read()
         FStringFormatter.__init__(self, fstring, default, fmt)
 
@@ -277,7 +284,7 @@ class TemplateJinjaFormatter(JinjaFormatter):
     """Generate text by evaluating a Jinja template"""
 
     def __init__(self, path, default=NONE, fmt=None):
-        with open(util.expand_path(path)) as fp:
+        with open(util.expand_path(path), encoding="utf-8") as fp:
             source = fp.read()
         JinjaFormatter.__init__(self, source, default, fmt)
 
@@ -301,6 +308,8 @@ def parse_field_name(field_name):
                         key = _slice(key[1:])
                     else:
                         key = _slice(key)
+                elif key[0] == "-":
+                    key = int(key)
                 else:
                     key = key.strip("\"'")
             except TypeError:
@@ -321,10 +330,10 @@ def _slice(indices):
     )
 
 
-def _bytesgetter(slice, encoding=sys.getfilesystemencoding()):
+def _bytesgetter(slice):
 
     def apply_slice_bytes(obj):
-        return obj.encode(encoding)[slice].decode(encoding, "ignore")
+        return obj.encode(_ENCODING)[slice].decode(_ENCODING, "ignore")
 
     return apply_slice_bytes
 
@@ -404,12 +413,20 @@ def _parse_conversion(format_spec, default):
 
 def _parse_maxlen(format_spec, default):
     maxlen, replacement, format_spec = format_spec.split(_SEPARATOR, 2)
-    maxlen = text.parse_int(maxlen[1:])
     fmt = _build_format_func(format_spec, default)
 
-    def mlen(obj):
-        obj = fmt(obj)
-        return obj if len(obj) <= maxlen else replacement
+    if maxlen[1] == "b":
+        maxlen = text.parse_int(maxlen[2:])
+
+        def mlen(obj):
+            obj = fmt(obj)
+            return obj if len(obj.encode(_ENCODING)) <= maxlen else replacement
+    else:
+        maxlen = text.parse_int(maxlen[1:])
+
+        def mlen(obj):
+            obj = fmt(obj)
+            return obj if len(obj) <= maxlen else replacement
     return mlen
 
 
@@ -461,9 +478,9 @@ def _parse_datetime(format_spec, default):
     dt_format = dt_format[1:]
     fmt = _build_format_func(format_spec, default)
 
-    def dt(obj):
-        return fmt(text.parse_datetime(obj, dt_format))
-    return dt
+    def dt_parse(obj):
+        return fmt(dt.parse(obj, dt_format))
+    return dt_parse
 
 
 def _parse_offset(format_spec, default):
@@ -472,15 +489,15 @@ def _parse_offset(format_spec, default):
     fmt = _build_format_func(format_spec, default)
 
     if not offset or offset == "local":
-        def off(dt):
-            local = time.localtime(util.datetime_to_timestamp(dt))
-            return fmt(dt + datetime.timedelta(0, local.tm_gmtoff))
+        def off(dt_utc):
+            local = time.localtime(dt.to_ts(dt_utc))
+            return fmt(dt_utc + dt.timedelta(0, local.tm_gmtoff))
     else:
         hours, _, minutes = offset.partition(":")
         offset = 3600 * int(hours)
         if minutes:
             offset += 60 * (int(minutes) if offset > 0 else -int(minutes))
-        offset = datetime.timedelta(0, offset)
+        offset = dt.timedelta(0, offset)
 
         def off(obj):
             return fmt(obj + offset)
@@ -492,25 +509,36 @@ def _parse_sort(format_spec, default):
     fmt = _build_format_func(format_spec, default)
 
     if "d" in args or "r" in args:
-        def sort_desc(obj):
+        def sort(obj):
             return fmt(sorted(obj, reverse=True))
-        return sort_desc
     else:
-        def sort_asc(obj):
+        def sort(obj):
             return fmt(sorted(obj))
-        return sort_asc
+    return sort
 
 
 def _parse_limit(format_spec, default):
     limit, hint, format_spec = format_spec.split(_SEPARATOR, 2)
-    limit = int(limit[1:])
-    limit_hint = limit - len(hint)
     fmt = _build_format_func(format_spec, default)
 
-    def apply_limit(obj):
-        if len(obj) > limit:
-            obj = obj[:limit_hint] + hint
-        return fmt(obj)
+    if limit[1] == "b":
+        hint = hint.encode(_ENCODING)
+        limit = int(limit[2:])
+        limit_hint = limit - len(hint)
+
+        def apply_limit(obj):
+            objb = obj.encode(_ENCODING)
+            if len(objb) > limit:
+                obj = (objb[:limit_hint] + hint).decode(_ENCODING, "ignore")
+            return fmt(obj)
+    else:
+        limit = int(limit[1:])
+        limit_hint = limit - len(hint)
+
+        def apply_limit(obj):
+            if len(obj) > limit:
+                obj = obj[:limit_hint] + hint
+            return fmt(obj)
     return apply_limit
 
 
@@ -531,6 +559,7 @@ class Literal():
 _literal = Literal()
 
 _CACHE = {}
+_ENCODING = sys.getfilesystemencoding()
 _SEPARATOR = "/"
 _FORMATTERS = {
     "E" : ExpressionFormatter,
@@ -547,7 +576,7 @@ _FORMATTERS = {
 _GLOBALS = {
     "_env": lambda: os.environ,
     "_lit": lambda: _literal,
-    "_now": datetime.datetime.now,
+    "_now": dt.datetime.now,
     "_nul": lambda: util.NONE,
 }
 _CONVERSIONS = {
@@ -559,13 +588,13 @@ _CONVERSIONS = {
     "t": str.strip,
     "n": len,
     "L": util.code_to_language,
-    "T": util.datetime_to_timestamp_string,
-    "d": text.parse_timestamp,
-    "D": util.to_datetime,
+    "T": dt.to_ts_string,
+    "d": dt.parse_ts,
+    "D": dt.convert,
     "U": text.unescape,
     "H": lambda s: text.unescape(text.remove_html(s)),
     "g": text.slugify,
-    "R": text.re(r"https?://[^\s\"']+").findall,
+    "R": text.re(r"https?://[^\s\"'<>\\]+").findall,
     "W": text.sanitize_whitespace,
     "S": util.to_string,
     "s": str,

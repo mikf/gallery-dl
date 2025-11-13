@@ -180,6 +180,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.reddit.com/comments/1nz2ic5",
+    "#comment" : "comment share URL",
+    "#category": ("", "reddit", "submission"),
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#pattern" : r"https://i\.redd\.it/\w+\.png",
+    "#count"   : 2,
+},
+
+{
     "#url"     : "https://www.reddit.com/r/RobloxArt/comments/15ko0qu/",
     "#comment" : "comment embeds (#5366)",
     "#class"   : reddit.RedditSubmissionExtractor,
@@ -265,6 +274,14 @@ __tests__ = (
     "#url"     : "https://redd.it/2a00np/",
     "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,
+},
+
+{
+    "#url"     : "https://www.reddit.com/user/-frogchamp-/comments/1n260wh/osc_art_request_timelapsespeed_draw_so_far_flash/",
+    "#comment" : "video embed (#8139)",
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#options" : {"api": "rest"},
+    "#results" : "ytdl:https://v.redd.it/link/1n260wh/asset/8q50b220tplf1/DASHPlaylist.mpd?a=1759085227%2CYTU2NGJjNTlmNjBlOGE2NWUwYWI0MjRjZDYzZjllZjk4Nzc3Y2Y4Nzc1NDMzOTBkYTNkOWFjOGMzZjUzZDAzMQ%3D%3D&v=1&f=sd",
 },
 
 {

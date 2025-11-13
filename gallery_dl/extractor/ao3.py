@@ -102,8 +102,11 @@ class Ao3Extractor(Extractor):
     def _pagination(self, path, needle='<li id="work_'):
         while True:
             page = self.request(self.root + path).text
+
             yield from text.extract_iter(page, needle, '"')
-            path = text.extr(page, '<a rel="next" href="', '"')
+
+            path = (text.extr(page, '<a rel="next" href="', '"') or
+                    text.extr(page, '<li class="next"><a href="', '"'))
             if not path:
                 return
             path = text.unescape(path)
@@ -115,7 +118,7 @@ class Ao3WorkExtractor(Ao3Extractor):
     directory_fmt = ("{category}", "{author}")
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}.{extension}"
-    pattern = BASE_PATTERN + r"/works/(\d+)"
+    pattern = rf"{BASE_PATTERN}/works/(\d+)"
     example = "https://archiveofourown.org/works/12345"
 
     def _init(self):
@@ -179,11 +182,11 @@ class Ao3WorkExtractor(Ao3Extractor):
                 extr('<dd class="freeform tags">', "</dd>")),
             "lang"         : extr('<dd class="language" lang="', '"'),
             "series"       : extr('<dd class="series">', "</dd>"),
-            "date"         : text.parse_datetime(
-                extr('<dd class="published">', "<"), "%Y-%m-%d"),
-            "date_completed": text.parse_datetime(
-                extr('>Completed:</dt><dd class="status">', "<"), "%Y-%m-%d"),
-            "date_updated" : text.parse_timestamp(
+            "date"         : self.parse_datetime_iso(extr(
+                '<dd class="published">', "<")),
+            "date_completed": self.parse_datetime_iso(extr(
+                '>Completed:</dt><dd class="status">', "<")),
+            "date_updated" : self.parse_timestamp(
                 path.rpartition("updated_at=")[2]),
             "words"        : text.parse_int(
                 extr('<dd class="words">', "<").replace(",", "")),
@@ -230,28 +233,28 @@ class Ao3WorkExtractor(Ao3Extractor):
 class Ao3SeriesExtractor(Ao3Extractor):
     """Extractor for AO3 works of a series"""
     subcategory = "series"
-    pattern = BASE_PATTERN + r"(/series/(\d+))"
+    pattern = rf"{BASE_PATTERN}(/series/(\d+))"
     example = "https://archiveofourown.org/series/12345"
 
 
 class Ao3TagExtractor(Ao3Extractor):
     """Extractor for AO3 works by tag"""
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"(/tags/([^/?#]+)/works(?:/?\?.+)?)"
+    pattern = rf"{BASE_PATTERN}(/tags/([^/?#]+)/works(?:/?\?.+)?)"
     example = "https://archiveofourown.org/tags/TAG/works"
 
 
 class Ao3SearchExtractor(Ao3Extractor):
     """Extractor for AO3 search results"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"(/works/search/?\?.+)"
+    pattern = rf"{BASE_PATTERN}(/works/search/?\?.+)"
     example = "https://archiveofourown.org/works/search?work_search[query]=air"
 
 
 class Ao3UserExtractor(Dispatch, Ao3Extractor):
     """Extractor for an AO3 user profile"""
-    pattern = (BASE_PATTERN + r"/users/([^/?#]+(?:/pseuds/[^/?#]+)?)"
-               r"(?:/profile)?/?(?:$|\?|#)")
+    pattern = (rf"{BASE_PATTERN}/users/([^/?#]+(?:/pseuds/[^/?#]+)?)"
+               rf"(?:/profile)?/?(?:$|\?|#)")
     example = "https://archiveofourown.org/users/USER"
 
     def items(self):
@@ -266,16 +269,16 @@ class Ao3UserExtractor(Dispatch, Ao3Extractor):
 class Ao3UserWorksExtractor(Ao3Extractor):
     """Extractor for works of an AO3 user"""
     subcategory = "user-works"
-    pattern = (BASE_PATTERN + r"(/users/([^/?#]+)/(?:pseuds/([^/?#]+)/)?"
-               r"works(?:/?\?.+)?)")
+    pattern = (rf"{BASE_PATTERN}(/users/([^/?#]+)/(?:pseuds/([^/?#]+)/)?"
+               rf"works(?:/?\?.+)?)")
     example = "https://archiveofourown.org/users/USER/works"
 
 
 class Ao3UserSeriesExtractor(Ao3Extractor):
     """Extractor for series of an AO3 user"""
     subcategory = "user-series"
-    pattern = (BASE_PATTERN + r"(/users/([^/?#]+)/(?:pseuds/([^/?#]+)/)?"
-               r"series(?:/?\?.+)?)")
+    pattern = (rf"{BASE_PATTERN}(/users/([^/?#]+)/(?:pseuds/([^/?#]+)/)?"
+               rf"series(?:/?\?.+)?)")
     example = "https://archiveofourown.org/users/USER/series"
 
     def items(self):
@@ -294,8 +297,8 @@ class Ao3UserSeriesExtractor(Ao3Extractor):
 class Ao3UserBookmarkExtractor(Ao3Extractor):
     """Extractor for bookmarked works of an AO3 user"""
     subcategory = "user-bookmark"
-    pattern = (BASE_PATTERN + r"(/users/([^/?#]+)/(?:pseuds/([^/?#]+)/)?"
-               r"bookmarks(?:/?\?.+)?)")
+    pattern = (rf"{BASE_PATTERN}(/users/([^/?#]+)/(?:pseuds/([^/?#]+)/)?"
+               rf"bookmarks(?:/?\?.+)?)")
     example = "https://archiveofourown.org/users/USER/bookmarks"
 
     def items(self):
@@ -305,7 +308,7 @@ class Ao3UserBookmarkExtractor(Ao3Extractor):
 class Ao3SubscriptionsExtractor(Ao3Extractor):
     """Extractor for your AO3 account's subscriptions"""
     subcategory = "subscriptions"
-    pattern = BASE_PATTERN + r"(/users/([^/?#]+)/subscriptions(?:/?\?.+)?)"
+    pattern = rf"{BASE_PATTERN}(/users/([^/?#]+)/subscriptions(?:/?\?.+)?)"
     example = "https://archiveofourown.org/users/USER/subscriptions"
 
     def items(self):

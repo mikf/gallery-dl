@@ -118,21 +118,31 @@ class PathFormat():
         if WINDOWS:
             self.extended = config("path-extended", True)
 
+        self.basedirectory_conditions = None
         basedir = extractor._parentdir
         if not basedir:
             basedir = config("base-directory")
-            sep = os.sep
             if basedir is None:
-                basedir = f".{sep}gallery-dl{sep}"
+                basedir = self.clean_path(f".{os.sep}gallery-dl{os.sep}")
             elif basedir:
-                basedir = util.expand_path(basedir)
-                altsep = os.altsep
-                if altsep and altsep in basedir:
-                    basedir = basedir.replace(altsep, sep)
-                if basedir[-1] != sep:
-                    basedir += sep
-            basedir = self.clean_path(basedir)
+                if isinstance(basedir, dict):
+                    self.basedirectory_conditions = conds = []
+                    for expr, bdir in basedir.items():
+                        if not expr:
+                            basedir = bdir
+                            continue
+                        conds.append((util.compile_filter(expr),
+                                      self._prepare_basedirectory(bdir)))
+                basedir = self._prepare_basedirectory(basedir)
         self.basedirectory = basedir
+
+    def _prepare_basedirectory(self, basedir):
+        basedir = util.expand_path(basedir)
+        if os.altsep and os.altsep in basedir:
+            basedir = basedir.replace(os.altsep, os.sep)
+        if basedir[-1] != os.sep:
+            basedir += os.sep
+        return self.clean_path(basedir)
 
     def __str__(self):
         return self.realpath
@@ -150,8 +160,12 @@ class PathFormat():
 
     def exists(self):
         """Return True if the file exists on disk"""
-        if self.extension and os.path.exists(self.realpath):
-            return self.check_file()
+        if self.extension:
+            try:
+                os.lstat(self.realpath)  # raises OSError if file doesn't exist
+                return self.check_file()
+            except OSError:
+                pass
         return False
 
     def check_file(self):
@@ -164,7 +178,7 @@ class PathFormat():
                 prefix = format(num) + "."
                 self.kwdict["extension"] = prefix + self.extension
                 self.build_path()
-                os.stat(self.realpath)  # raises OSError if file doesn't exist
+                os.lstat(self.realpath)  # raises OSError if file doesn't exist
                 num += 1
         except OSError:
             pass
@@ -175,11 +189,20 @@ class PathFormat():
         """Build directory path and create it if necessary"""
         self.kwdict = kwdict
 
-        if segments := self.build_directory(kwdict):
-            self.directory = directory = self.basedirectory + self.clean_path(
-                os.sep.join(segments) + os.sep)
+        if self.basedirectory_conditions is None:
+            basedir = self.basedirectory
         else:
-            self.directory = directory = self.basedirectory
+            for condition, basedir in self.basedirectory_conditions:
+                if condition(kwdict):
+                    break
+            else:
+                basedir = self.basedirectory
+
+        if segments := self.build_directory(kwdict):
+            self.directory = directory = \
+                f"{basedir}{self.clean_path(os.sep.join(segments))}{os.sep}"
+        else:
+            self.directory = directory = basedir
 
         if WINDOWS and self.extended:
             directory = self._extended_path(directory)

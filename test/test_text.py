@@ -11,8 +11,6 @@ import os
 import sys
 import unittest
 
-import datetime
-
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import text, util  # noqa E402
 
@@ -203,6 +201,10 @@ class TestText(unittest.TestCase):
         self.assertEqual(f("http://example.org/v2/filename.ext"), result)
         self.assertEqual(
             f("http://example.org/v2/filename.ext?param=value#frag"), result)
+        self.assertEqual(
+            f("http://example.org/v2/foo%202?bar&<>.ext?param=value#frag"),
+            {"filename": "foo 2", "extension": ""},
+        )
 
         # long "extension"
         fn = "httpswww.example.orgpath-path-path-path-path-path-path-path"
@@ -211,6 +213,24 @@ class TestText(unittest.TestCase):
         # invalid arguments
         for value in INVALID:
             self.assertEqual(f(value), empty)
+
+    def test_nameext_from_name(self, f=text.nameext_from_name):
+        self.assertEqual(
+            f(""),
+            {"filename": "", "extension": ""},
+        )
+        self.assertEqual(
+            f("filename.ext"),
+            {"filename": "filename", "extension": "ext"},
+        )
+        self.assertEqual(
+            f("foo%202?bar&<>.ext"),
+            {"filename": "foo%202?bar&<>", "extension": "ext"},
+        )
+
+        # long "extension"
+        fn = "httpswww.example.orgpath-path-path-path-path-path-path-path"
+        self.assertEqual(f(fn), {"filename": fn, "extension": ""})
 
     def test_extract(self, f=text.extract):
         txt = "<a><b>"
@@ -459,10 +479,14 @@ class TestText(unittest.TestCase):
         # missing value
         self.assertEqual(f("bar"), {})
         self.assertEqual(f("bar="), {"bar": ""})
+        self.assertEqual(f("bar", empty=True), {"bar": ""})
         self.assertEqual(f("foo=1&bar"), {"foo": "1"})
         self.assertEqual(f("foo=1&bar="), {"foo": "1", "bar": ""})
+        self.assertEqual(f("foo=1&bar", True), {"foo": "1", "bar": ""})
         self.assertEqual(f("foo=1&bar&baz=3"), {"foo": "1", "baz": "3"})
         self.assertEqual(f("foo=1&bar=&baz=3"),
+                         {"foo": "1", "bar": "", "baz": "3"})
+        self.assertEqual(f("foo=1&bar&baz=3", True),
                          {"foo": "1", "bar": "", "baz": "3"})
 
         # keys with identical names
@@ -514,51 +538,6 @@ class TestText(unittest.TestCase):
 
         self.assertEqual(f({"ä&": "あと", "#": "?"}),
                          "%C3%A4%26=%E3%81%82%E3%81%A8&%23=%3F")
-
-    def test_parse_timestamp(self, f=text.parse_timestamp):
-        null = util.datetime_utcfromtimestamp(0)
-        value = util.datetime_utcfromtimestamp(1555816235)
-
-        self.assertEqual(f(0)           , null)
-        self.assertEqual(f("0")         , null)
-        self.assertEqual(f(1555816235)  , value)
-        self.assertEqual(f("1555816235"), value)
-
-        for value in INVALID_ALT:
-            self.assertEqual(f(value), None)
-            self.assertEqual(f(value, "foo"), "foo")
-
-    def test_parse_datetime(self, f=text.parse_datetime):
-        null = util.datetime_utcfromtimestamp(0)
-
-        self.assertEqual(f("1970-01-01T00:00:00+00:00"), null)
-        self.assertEqual(f("1970-01-01T00:00:00+0000") , null)
-        self.assertEqual(f("1970.01.01", "%Y.%m.%d")   , null)
-
-        self.assertEqual(
-            f("2019-05-07T21:25:02+09:00"),
-            datetime.datetime(2019, 5, 7, 12, 25, 2),
-        )
-        self.assertEqual(
-            f("2019-05-07T21:25:02+0900"),
-            datetime.datetime(2019, 5, 7, 12, 25, 2),
-        )
-        self.assertEqual(
-            f("2019-05-07T21:25:02.753+0900", "%Y-%m-%dT%H:%M:%S.%f%z"),
-            datetime.datetime(2019, 5, 7, 12, 25, 2),
-        )
-        self.assertEqual(
-            f("2019-05-07T21:25:02", "%Y-%m-%dT%H:%M:%S", utcoffset=9),
-            datetime.datetime(2019, 5, 7, 12, 25, 2),
-        )
-        self.assertEqual(
-            f("2019-05-07 21:25:02"),
-            "2019-05-07 21:25:02",
-        )
-
-        for value in INVALID:
-            self.assertEqual(f(value), None)
-        self.assertEqual(f("1970.01.01"), "1970.01.01")
 
 
 if __name__ == "__main__":

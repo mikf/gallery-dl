@@ -9,14 +9,13 @@
 """Extractors for https://www.pixiv.net/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, util, dt, exception
 from ..cache import cache, memcache
-from datetime import datetime, timedelta
 import itertools
 import hashlib
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|touch\.)?ph?ixiv\.net"
-USER_PATTERN = BASE_PATTERN + r"/(?:en/)?users/(\d+)"
+USER_PATTERN = rf"{BASE_PATTERN}/(?:en/)?users/(\d+)"
 
 
 class PixivExtractor(Extractor):
@@ -44,7 +43,7 @@ class PixivExtractor(Extractor):
         self.meta_captions = self.config("captions")
 
         if self.sanity_workaround or self.meta_captions:
-            self.meta_captions_sub = util.re(
+            self.meta_captions_sub = text.re(
                 r'<a href="/jump\.php\?([^"]+)').sub
 
     def items(self):
@@ -96,7 +95,7 @@ class PixivExtractor(Extractor):
             if transform_tags:
                 transform_tags(work)
             work["num"] = 0
-            work["date"] = text.parse_datetime(work["create_date"])
+            work["date"] = dt.parse_iso(work["create_date"])
             work["rating"] = ratings.get(work["x_restrict"])
             work["suffix"] = ""
             work.update(metadata)
@@ -149,7 +148,7 @@ class PixivExtractor(Extractor):
                             self._extract_ajax(work, body)
                             return self._extract_ugoira(work, url)
                         except Exception as exc:
-                            self.log.debug("", exc_info=exc)
+                            self.log.traceback(exc)
                             self.log.warning(
                                 "%s: Unable to extract Ugoira URL. Provide "
                                 "logged-in cookies to access it", work["id"])
@@ -274,6 +273,9 @@ class PixivExtractor(Extractor):
             "profile_image_urls": {},
         }
 
+        if "is_bookmarked" not in work:
+            work["is_bookmarked"] = True if body.get("bookmarkData") else False
+
         work["tags"] = tags = []
         for tag in body["tags"]["tags"]:
             name = tag["tag"]
@@ -350,10 +352,10 @@ class PixivExtractor(Extractor):
             if fmt in urls:
                 yield urls[fmt]
 
-    def _date_from_url(self, url, offset=timedelta(hours=9)):
+    def _date_from_url(self, url, offset=dt.timedelta(hours=9)):
         try:
             _, _, _, _, _, y, m, d, H, M, S, _ = url.split("/")
-            return datetime(
+            return dt.datetime(
                 int(y), int(m), int(d), int(H), int(M), int(S)) - offset
         except Exception:
             return None
@@ -388,7 +390,7 @@ class PixivExtractor(Extractor):
 
 class PixivUserExtractor(Dispatch, PixivExtractor):
     """Extractor for a pixiv user profile"""
-    pattern = (BASE_PATTERN + r"/(?:"
+    pattern = (rf"{BASE_PATTERN}/(?:"
                r"(?:en/)?u(?:sers)?/|member\.php\?id=|(?:mypage\.php)?#id="
                r")(\d+)(?:$|[?#])")
     example = "https://www.pixiv.net/en/users/12345"
@@ -411,7 +413,7 @@ class PixivUserExtractor(Dispatch, PixivExtractor):
 class PixivArtworksExtractor(PixivExtractor):
     """Extractor for artworks of a pixiv user"""
     subcategory = "artworks"
-    pattern = (BASE_PATTERN + r"/(?:"
+    pattern = (rf"{BASE_PATTERN}/(?:"
                r"(?:en/)?users/(\d+)/(?:artworks|illustrations|manga)"
                r"(?:/([^/?#]+))?/?(?:$|[?#])"
                r"|member_illust\.php\?id=(\d+)(?:&([^#]+))?)")
@@ -450,7 +452,7 @@ class PixivArtworksExtractor(PixivExtractor):
                 ajax_ids.extend(map(int, body["manga"]))
                 ajax_ids.sort()
             except Exception as exc:
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
                 self.log.warning("u%s: Failed to collect artwork IDs "
                                  "using AJAX API", self.user_id)
             else:
@@ -500,7 +502,7 @@ class PixivAvatarExtractor(PixivExtractor):
     subcategory = "avatar"
     filename_fmt = "avatar{date:?_//%Y-%m-%d}.{extension}"
     archive_fmt = "avatar_{user[id]}_{date}"
-    pattern = USER_PATTERN + r"/avatar"
+    pattern = rf"{USER_PATTERN}/avatar"
     example = "https://www.pixiv.net/en/users/12345/avatar"
 
     def _init(self):
@@ -518,7 +520,7 @@ class PixivBackgroundExtractor(PixivExtractor):
     subcategory = "background"
     filename_fmt = "background{date:?_//%Y-%m-%d}.{extension}"
     archive_fmt = "background_{user[id]}_{date}"
-    pattern = USER_PATTERN + "/background"
+    pattern = rf"{USER_PATTERN}/background"
     example = "https://www.pixiv.net/en/users/12345/background"
 
     def _init(self):
@@ -580,7 +582,7 @@ class PixivWorkExtractor(PixivExtractor):
 class PixivUnlistedExtractor(PixivExtractor):
     """Extractor for a unlisted pixiv illustrations"""
     subcategory = "unlisted"
-    pattern = BASE_PATTERN + r"/(?:en/)?artworks/unlisted/(\w+)"
+    pattern = rf"{BASE_PATTERN}/(?:en/)?artworks/unlisted/(\w+)"
     example = "https://www.pixiv.net/en/artworks/unlisted/a1b2c3d4e5f6g7h8i9j0"
 
     def _extract_files(self, work):
@@ -599,7 +601,7 @@ class PixivFavoriteExtractor(PixivExtractor):
     directory_fmt = ("{category}", "bookmarks",
                      "{user_bookmark[id]} {user_bookmark[account]}")
     archive_fmt = "f_{user_bookmark[id]}_{id}{num}.{extension}"
-    pattern = (BASE_PATTERN + r"/(?:(?:en/)?"
+    pattern = (rf"{BASE_PATTERN}/(?:(?:en/)?"
                r"users/(\d+)/(bookmarks/artworks|following)(?:/([^/?#]+))?"
                r"|bookmark\.php)(?:\?([^#]*))?")
     example = "https://www.pixiv.net/en/users/12345/bookmarks/artworks"
@@ -662,7 +664,7 @@ class PixivRankingExtractor(PixivExtractor):
     archive_fmt = "r_{ranking[mode]}_{ranking[date]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "rankings",
                      "{ranking[mode]}", "{ranking[date]}")
-    pattern = BASE_PATTERN + r"/ranking\.php(?:\?([^#]*))?"
+    pattern = rf"{BASE_PATTERN}/ranking\.php(?:\?([^#]*))?"
     example = "https://www.pixiv.net/ranking.php"
 
     def __init__(self, match):
@@ -712,8 +714,7 @@ class PixivRankingExtractor(PixivExtractor):
                 self.log.warning("invalid date '%s'", date)
                 date = None
         if not date:
-            now = util.datetime_utcnow()
-            date = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+            date = (dt.now() - dt.timedelta(days=1)).strftime("%Y-%m-%d")
         self.date = date
 
         self.type = type = query.get("content")
@@ -732,7 +733,7 @@ class PixivSearchExtractor(PixivExtractor):
     subcategory = "search"
     archive_fmt = "s_{search[word]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "search", "{search[word]}")
-    pattern = (BASE_PATTERN + r"/(?:(?:en/)?tags/([^/?#]+)(?:/[^/?#]+)?/?"
+    pattern = (rf"{BASE_PATTERN}/(?:(?:en/)?tags/([^/?#]+)(?:/[^/?#]+)?/?"
                r"|search\.php)(?:\?([^#]+))?")
     example = "https://www.pixiv.net/en/tags/TAG"
 
@@ -798,7 +799,7 @@ class PixivFollowExtractor(PixivExtractor):
     subcategory = "follow"
     archive_fmt = "F_{user_follow[id]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "following")
-    pattern = BASE_PATTERN + r"/bookmark_new_illust\.php"
+    pattern = rf"{BASE_PATTERN}/bookmark_new_illust\.php"
     example = "https://www.pixiv.net/bookmark_new_illust.php"
 
     def works(self):
@@ -847,7 +848,7 @@ class PixivSeriesExtractor(PixivExtractor):
     directory_fmt = ("{category}", "{user[id]} {user[account]}",
                      "{series[id]} {series[title]}")
     filename_fmt = "{num_series:>03}_{id}_p{num}.{extension}"
-    pattern = BASE_PATTERN + r"/user/(\d+)/series/(\d+)"
+    pattern = rf"{BASE_PATTERN}/user/(\d+)/series/(\d+)"
     example = "https://www.pixiv.net/user/12345/series/12345"
 
     def __init__(self, match):
@@ -888,8 +889,7 @@ class PixivSketchExtractor(Extractor):
         for post in self.posts():
             media = post["media"]
             post["post_id"] = post["id"]
-            post["date"] = text.parse_datetime(
-                post["created_at"], "%Y-%m-%dT%H:%M:%S.%f%z")
+            post["date"] = dt.parse_iso(post["created_at"])
             util.delete_items(post, ("id", "media", "_links"))
 
             yield Message.Directory, post
@@ -969,7 +969,7 @@ class PixivNovelExtractor(PixivExtractor):
             if transform_tags:
                 transform_tags(novel)
             novel["num"] = 0
-            novel["date"] = text.parse_datetime(novel["create_date"])
+            novel["date"] = dt.parse_iso(novel["create_date"])
             novel["rating"] = ratings.get(novel["x_restrict"])
             novel["suffix"] = ""
 
@@ -1039,7 +1039,7 @@ class PixivNovelExtractor(PixivExtractor):
 class PixivNovelNovelExtractor(PixivNovelExtractor):
     """Extractor for pixiv novels"""
     subcategory = "novel"
-    pattern = BASE_PATTERN + r"/n(?:ovel/show\.php\?id=|/)(\d+)"
+    pattern = rf"{BASE_PATTERN}/n(?:ovel/show\.php\?id=|/)(\d+)"
     example = "https://www.pixiv.net/novel/show.php?id=12345"
 
     def novels(self):
@@ -1053,7 +1053,7 @@ class PixivNovelNovelExtractor(PixivNovelExtractor):
 class PixivNovelUserExtractor(PixivNovelExtractor):
     """Extractor for pixiv users' novels"""
     subcategory = "user"
-    pattern = USER_PATTERN + r"/novels"
+    pattern = rf"{USER_PATTERN}/novels"
     example = "https://www.pixiv.net/en/users/12345/novels"
 
     def novels(self):
@@ -1063,7 +1063,7 @@ class PixivNovelUserExtractor(PixivNovelExtractor):
 class PixivNovelSeriesExtractor(PixivNovelExtractor):
     """Extractor for pixiv novel series"""
     subcategory = "series"
-    pattern = BASE_PATTERN + r"/novel/series/(\d+)"
+    pattern = rf"{BASE_PATTERN}/novel/series/(\d+)"
     example = "https://www.pixiv.net/novel/series/12345"
 
     def novels(self):
@@ -1073,7 +1073,7 @@ class PixivNovelSeriesExtractor(PixivNovelExtractor):
 class PixivNovelBookmarkExtractor(PixivNovelExtractor):
     """Extractor for bookmarked pixiv novels"""
     subcategory = "bookmark"
-    pattern = (USER_PATTERN + r"/bookmarks/novels"
+    pattern = (rf"{USER_PATTERN}/bookmarks/novels"
                r"(?:/([^/?#]+))?(?:/?\?([^#]+))?")
     example = "https://www.pixiv.net/en/users/12345/bookmarks/novels"
 
@@ -1151,7 +1151,7 @@ class PixivAppAPI():
             "get_secure_url": "1",
         }
 
-        time = util.datetime_utcnow().strftime("%Y-%m-%dT%H:%M:%S+00:00")
+        time = dt.now().strftime("%Y-%m-%dT%H:%M:%S+00:00")
         headers = {
             "X-Client-Time": time,
             "X-Client-Hash": hashlib.md5(
@@ -1232,7 +1232,7 @@ class PixivAppAPI():
         params = {"word": word, "search_target": target,
                   "sort": sort, "duration": duration,
                   "start_date": date_start, "end_date": date_end}
-        return self._pagination("/v1/search/illust", params)
+        return self._pagination_search("/v1/search/illust", params)
 
     def user_bookmarks_illust(self, user_id, tag=None, restrict="public"):
         """Return illusts bookmarked by a user"""
@@ -1321,6 +1321,48 @@ class PixivAppAPI():
             query = data["next_url"].rpartition("?")[2]
             params = text.parse_query(query)
             data = self._call(endpoint, params)
+
+    def _pagination_search(self, endpoint, params):
+        sort = params["sort"]
+        if sort == "date_desc":
+            date_key = "end_date"
+            date_off = dt.timedelta(days=1)
+            date_cmp = lambda lhs, rhs: lhs >= rhs  # noqa E731
+        elif sort == "date_asc":
+            date_key = "start_date"
+            date_off = dt.timedelta(days=-1)
+            date_cmp = lambda lhs, rhs: lhs <= rhs  # noqa E731
+        else:
+            date_key = None
+        date_last = None
+
+        while True:
+            data = self._call(endpoint, params)
+
+            if date_last is None:
+                yield from data["illusts"]
+            else:
+                works = data["illusts"]
+                if date_cmp(date_last, works[-1]["create_date"]):
+                    for work in works:
+                        if date_last is None:
+                            yield work
+                        elif date_cmp(date_last, work["create_date"]):
+                            date_last = None
+
+            if not (next_url := data.get("next_url")):
+                return
+            query = next_url.rpartition("?")[2]
+            params = text.parse_query(query)
+
+            if date_key and text.parse_int(params.get("offset")) >= 5000:
+                date_last = data["illusts"][-1]["create_date"]
+                date_val = (dt.parse_iso(date_last) + date_off).strftime(
+                    "%Y-%m-%d")
+                self.log.info("Reached 'offset' >= 5000; "
+                              "Updating '%s' to '%s'", date_key, date_val)
+                params[date_key] = date_val
+                params.pop("offset", None)
 
 
 @cache(maxage=36500*86400, keyarg=0)

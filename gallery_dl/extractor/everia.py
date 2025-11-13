@@ -7,7 +7,7 @@
 """Extractors for https://everia.club"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?everia\.club"
 
@@ -25,7 +25,7 @@ class EveriaExtractor(Extractor):
         return self._pagination(self.groups[0])
 
     def _pagination(self, path, params=None, pnum=1):
-        find_posts = util.re(r'thumbnail">\s*<a href="([^"]+)').findall
+        find_posts = text.re(r'thumbnail">\s*<a href="([^"]+)').findall
 
         while True:
             if pnum == 1:
@@ -45,14 +45,14 @@ class EveriaPostExtractor(EveriaExtractor):
     subcategory = "post"
     directory_fmt = ("{category}", "{title}")
     archive_fmt = "{post_url}_{num}"
-    pattern = BASE_PATTERN + r"(/\d{4}/\d{2}/\d{2}/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}(/\d{{4}}/\d{{2}}/\d{{2}}/[^/?#]+)"
     example = "https://everia.club/0000/00/00/TITLE"
 
     def items(self):
         url = self.root + self.groups[0] + "/"
         page = self.request(url).text
         content = text.extr(page, 'itemprop="text">', "<h3")
-        urls = util.re(r'img.*?lazy-src="([^"]+)').findall(content)
+        urls = text.re(r'img.*?lazy-src="([^"]+)').findall(content)
 
         data = {
             "title": text.unescape(
@@ -72,26 +72,26 @@ class EveriaPostExtractor(EveriaExtractor):
 
 class EveriaTagExtractor(EveriaExtractor):
     subcategory = "tag"
-    pattern = BASE_PATTERN + r"(/tag/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}(/tag/[^/?#]+)"
     example = "https://everia.club/tag/TAG"
 
 
 class EveriaCategoryExtractor(EveriaExtractor):
     subcategory = "category"
-    pattern = BASE_PATTERN + r"(/category/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}(/category/[^/?#]+)"
     example = "https://everia.club/category/CATEGORY"
 
 
 class EveriaDateExtractor(EveriaExtractor):
     subcategory = "date"
-    pattern = (BASE_PATTERN +
-               r"(/\d{4}(?:/\d{2})?(?:/\d{2})?)(?:/page/\d+)?/?$")
+    pattern = (rf"{BASE_PATTERN}"
+               rf"(/\d{{4}}(?:/\d{{2}})?(?:/\d{{2}})?)(?:/page/\d+)?/?$")
     example = "https://everia.club/0000/00/00"
 
 
 class EveriaSearchExtractor(EveriaExtractor):
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/(?:page/\d+/)?\?s=([^&#]+)"
+    pattern = rf"{BASE_PATTERN}/(?:page/\d+/)?\?s=([^&#]+)"
     example = "https://everia.club/?s=SEARCH"
 
     def posts(self):

@@ -55,8 +55,7 @@ class YiffverseExtractor(BooruExtractor):
 
     def _prepare(self, post):
         post.pop("files", None)
-        post["date"] = text.parse_datetime(
-            post["created"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        post["date"] = self.parse_datetime_iso(post["created"])
         post["filename"], _, post["format"] = post["filename"].rpartition(".")
         if "tags" in post:
             post["tags"] = [t["value"] for t in post["tags"]]
@@ -99,7 +98,7 @@ class YiffverseExtractor(BooruExtractor):
 class YiffversePostExtractor(YiffverseExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = BASE_PATTERN + r"/post/(\d+)"
+    pattern = rf"{BASE_PATTERN}/post/(\d+)"
     example = "https://yiffverse.com/post/12345"
 
     def posts(self):
@@ -110,7 +109,7 @@ class YiffversePlaylistExtractor(YiffverseExtractor):
     subcategory = "playlist"
     directory_fmt = ("{category}", "{playlist_id}")
     archive_fmt = "p_{playlist_id}_{id}"
-    pattern = BASE_PATTERN + r"/playlist/(\d+)"
+    pattern = rf"{BASE_PATTERN}/playlist/(\d+)"
     example = "https://yiffverse.com/playlist/12345"
 
     def metadata(self):
@@ -125,7 +124,7 @@ class YiffverseTagExtractor(YiffverseExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = BASE_PATTERN + r"/(?:tag/([^/?#]+))?(?:/?\?([^#]+))?(?:$|#)"
+    pattern = rf"{BASE_PATTERN}/(?:tag/([^/?#]+))?(?:/?\?([^#]+))?(?:$|#)"
     example = "https://yiffverse.com/tag/TAG"
 
     def _init(self):

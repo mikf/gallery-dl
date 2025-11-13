@@ -9,7 +9,7 @@
 """Extractors for https://www.deviantart.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, util, dt, exception
 from ..cache import cache, memcache
 import collections
 import mimetypes
@@ -64,13 +64,13 @@ class DeviantartExtractor(Extractor):
         if self.quality:
             if self.quality == "png":
                 self.quality = "-fullview.png?"
-                self.quality_sub = util.re(r"-fullview\.[a-z0-9]+\?").sub
+                self.quality_sub = text.re(r"-fullview\.[a-z0-9]+\?").sub
             else:
                 self.quality = f",q_{self.quality}"
-                self.quality_sub = util.re(r",q_\d+").sub
+                self.quality_sub = text.re(r",q_\d+").sub
 
         if self.intermediary:
-            self.intermediary_subn = util.re(r"(/f/[^/]+/[^/]+)/v\d+/.*").subn
+            self.intermediary_subn = text.re(r"(/f/[^/]+/[^/]+)/v\d+/.*").subn
 
         if isinstance(self.original, str) and \
                 self.original.lower().startswith("image"):
@@ -259,7 +259,7 @@ class DeviantartExtractor(Extractor):
 
         deviation["published_time"] = text.parse_int(
             deviation["published_time"])
-        deviation["date"] = text.parse_timestamp(
+        deviation["date"] = self.parse_timestamp(
             deviation["published_time"])
 
         if self.comments:
@@ -269,7 +269,7 @@ class DeviantartExtractor(Extractor):
             )
 
         # filename metadata
-        sub = util.re(r"\W").sub
+        sub = text.re(r"\W").sub
         deviation["filename"] = "".join((
             sub("_", deviation["title"].lower()), "_by_",
             sub("_", deviation["author"]["username"].lower()), "-d",
@@ -404,7 +404,7 @@ class DeviantartExtractor(Extractor):
             try:
                 return self._tiptap_to_html(markup)
             except Exception as exc:
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
                 self.log.error("%s: '%s: %s'", deviation["index"],
                                exc.__class__.__name__, exc)
 
@@ -675,7 +675,7 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
 
     def _find_folder(self, folders, name, uuid):
         if uuid.isdecimal():
-            match = util.re(
+            match = text.re(
                 "(?i)" + name.replace("-", "[^a-z0-9]+") + "$").match
             for folder in folders:
                 if match(folder["name"]):
@@ -864,7 +864,7 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
 
 class DeviantartUserExtractor(Dispatch, DeviantartExtractor):
     """Extractor for an artist's user profile"""
-    pattern = BASE_PATTERN + r"/?$"
+    pattern = rf"{BASE_PATTERN}/?$"
     example = "https://www.deviantart.com/USER"
 
     def items(self):
@@ -887,8 +887,8 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     """Extractor for all deviations from an artist's gallery"""
     subcategory = "gallery"
     archive_fmt = "g_{_username}_{index}.{extension}"
-    pattern = (BASE_PATTERN + r"/gallery"
-               r"(?:/all|/recommended-for-you|/?\?catpath=)?/?$")
+    pattern = (rf"{BASE_PATTERN}/gallery"
+               r"(?:/all|/recommended-for-you)?/?(\?(?!q=).*)?$")
     example = "https://www.deviantart.com/USER/gallery/"
 
     def deviations(self):
@@ -902,7 +902,7 @@ class DeviantartAvatarExtractor(DeviantartExtractor):
     """Extractor for an artist's avatar"""
     subcategory = "avatar"
     archive_fmt = "a_{_username}_{index}"
-    pattern = BASE_PATTERN + r"/avatar"
+    pattern = rf"{BASE_PATTERN}/avatar"
     example = "https://www.deviantart.com/USER/avatar/"
 
     def deviations(self):
@@ -956,7 +956,7 @@ class DeviantartBackgroundExtractor(DeviantartExtractor):
     """Extractor for an artist's banner"""
     subcategory = "background"
     archive_fmt = "b_{index}"
-    pattern = BASE_PATTERN + r"/ba(?:nner|ckground)"
+    pattern = rf"{BASE_PATTERN}/ba(?:nner|ckground)"
     example = "https://www.deviantart.com/USER/banner/"
 
     def deviations(self):
@@ -972,7 +972,7 @@ class DeviantartFolderExtractor(DeviantartExtractor):
     subcategory = "folder"
     directory_fmt = ("{category}", "{username}", "{folder[title]}")
     archive_fmt = "F_{folder[uuid]}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/gallery/([^/?#]+)/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/gallery/([^/?#]+)/([^/?#]+)"
     example = "https://www.deviantart.com/USER/gallery/12345/TITLE"
 
     def __init__(self, match):
@@ -1088,7 +1088,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{username}", "Favourites")
     archive_fmt = "f_{_username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/favourites(?:/all|/?\?catpath=)?/?$"
+    pattern = rf"{BASE_PATTERN}/favourites(?:/all|/?\?catpath=)?/?$"
     example = "https://www.deviantart.com/USER/favourites/"
 
     def deviations(self):
@@ -1105,7 +1105,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
     directory_fmt = ("{category}", "{username}", "Favourites",
                      "{collection[title]}")
     archive_fmt = "C_{collection[uuid]}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/favourites/([^/?#]+)/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/favourites/([^/?#]+)/([^/?#]+)"
     example = "https://www.deviantart.com/USER/favourites/12345/TITLE"
 
     def __init__(self, match):
@@ -1136,7 +1136,7 @@ class DeviantartJournalExtractor(DeviantartExtractor):
     subcategory = "journal"
     directory_fmt = ("{category}", "{username}", "Journal")
     archive_fmt = "j_{_username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/(?:posts(?:/journals)?|journal)/?(?:\?.*)?$"
+    pattern = rf"{BASE_PATTERN}/(?:posts(?:/journals)?|journal)/?(?:\?.*)?$"
     example = "https://www.deviantart.com/USER/posts/journals/"
 
     def deviations(self):
@@ -1149,7 +1149,7 @@ class DeviantartStatusExtractor(DeviantartExtractor):
     directory_fmt = ("{category}", "{username}", "Status")
     filename_fmt = "{category}_{index}_{title}_{date}.{extension}"
     archive_fmt = "S_{_username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/posts/statuses"
+    pattern = rf"{BASE_PATTERN}/posts/statuses"
     example = "https://www.deviantart.com/USER/posts/statuses/"
 
     def deviations(self):
@@ -1187,8 +1187,8 @@ class DeviantartStatusExtractor(DeviantartExtractor):
             deviation["username"] = deviation["author"]["username"]
             deviation["_username"] = deviation["username"].lower()
 
-        deviation["date"] = dt = text.parse_datetime(deviation["ts"])
-        deviation["published_time"] = int(util.datetime_to_timestamp(dt))
+        deviation["date"] = d = self.parse_datetime_iso(deviation["ts"])
+        deviation["published_time"] = int(dt.to_ts(d))
 
         deviation["da_category"] = "Status"
         deviation["category_path"] = "status"
@@ -1253,7 +1253,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
     """Extractor for single deviations"""
     subcategory = "deviation"
     archive_fmt = "g_{_username}_{index}.{extension}"
-    pattern = (BASE_PATTERN + r"/(art|journal)/(?:[^/?#]+-)?(\d+)"
+    pattern = (rf"{BASE_PATTERN}/(art|journal)/(?:[^/?#]+-)?(\d+)"
                r"|(?:https?://)?(?:www\.)?(?:fx)?deviantart\.com/"
                r"(?:view/|deviation/|view(?:-full)?\.php/*\?(?:[^#]+&)?id=)"
                r"(\d+)"  # bare deviation ID without slug
@@ -1315,7 +1315,7 @@ class DeviantartScrapsExtractor(DeviantartExtractor):
     subcategory = "scraps"
     directory_fmt = ("{category}", "{username}", "Scraps")
     archive_fmt = "s_{_username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/gallery/(?:\?catpath=)?scraps\b"
+    pattern = rf"{BASE_PATTERN}/gallery/(?:\?catpath=)?scraps\b"
     example = "https://www.deviantart.com/USER/gallery/scraps"
 
     def deviations(self):
@@ -1382,7 +1382,7 @@ class DeviantartGallerySearchExtractor(DeviantartExtractor):
     """Extractor for deviantart gallery searches"""
     subcategory = "gallery-search"
     archive_fmt = "g_{_username}_{index}.{extension}"
-    pattern = BASE_PATTERN + r"/gallery/?\?(q=[^#]+)"
+    pattern = rf"{BASE_PATTERN}/gallery/?\?(q=[^#]+)"
     example = "https://www.deviantart.com/USER/gallery?q=QUERY"
 
     def __init__(self, match):
@@ -1412,7 +1412,7 @@ class DeviantartGallerySearchExtractor(DeviantartExtractor):
 class DeviantartFollowingExtractor(DeviantartExtractor):
     """Extractor for user's watched users"""
     subcategory = "following"
-    pattern = BASE_PATTERN + "/(?:about#)?watching"
+    pattern = rf"{BASE_PATTERN}/(?:about#)?watching"
     example = "https://www.deviantart.com/USER/about#watching"
 
     def items(self):

@@ -25,6 +25,8 @@ class Shimmie2Extractor(BaseExtractor):
 
         if file_url := self.config_instance("file_url"):
             self.file_url_fmt = file_url
+        if quote := self.config_instance("quote"):
+            self._quote_type = lambda _: quote
 
     def items(self):
         data = self.metadata()
@@ -81,6 +83,15 @@ BASE_PATTERN = Shimmie2Extractor.update({
         "root": "https://noz.rip/booru",
         "pattern": r"noz\.rip/booru",
     },
+    "thecollectionS": {
+        "root": "https://co.llection.pics",
+        "pattern": r"co\.llection\.pics",
+    },
+    "soybooru": {
+        "root": "https://soybooru.com",
+        "pattern": r"soybooru\.com",
+        "quote": "'",
+    },
 }) + r"/(?:index\.php\?q=/?)?"
 
 
@@ -89,7 +100,7 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     file_url_fmt = "{}/_images/{}/{}%20-%20{}.{}"
-    pattern = BASE_PATTERN + r"post/list/([^/?#]+)(?:/(\d+))?"
+    pattern = rf"{BASE_PATTERN}post/list/([^/?#]+)(?:/(\d+))?"
     example = "https://vidya.pics/post/list/TAG/1"
 
     def metadata(self):
@@ -146,15 +157,14 @@ class Shimmie2TagExtractor(Shimmie2Extractor):
                 }
 
             pnum += 1
-            if not extr(">Next<", ">"):
-                if not extr(f"/{pnum}'>{pnum}<", ">"):
-                    return
+            if not extr(f"/{pnum}{quote}>Next</", ">"):
+                return
 
 
 class Shimmie2PostExtractor(Shimmie2Extractor):
     """Extractor for single shimmie2 posts"""
     subcategory = "post"
-    pattern = BASE_PATTERN + r"post/view/(\d+)"
+    pattern = rf"{BASE_PATTERN}post/view/(\d+)"
     example = "https://vidya.pics/post/view/12345"
 
     def posts(self):

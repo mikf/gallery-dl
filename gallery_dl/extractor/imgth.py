@@ -31,7 +31,7 @@ class ImgthGalleryExtractor(GalleryExtractor):
             "title": text.unescape(extr("<h1>", "</h1>")),
             "count": text.parse_int(extr(
                 "total of images in this gallery: ", " ")),
-            "date" : text.parse_datetime(
+            "date" : self.parse_datetime(
                 extr("created on ", " by <")
                 .replace("th, ", " ", 1).replace("nd, ", " ", 1)
                 .replace("st, ", " ", 1), "%B %d %Y at %H:%M"),

@@ -46,7 +46,7 @@ class PinterestExtractor(Extractor):
             try:
                 files = self._extract_files(pin)
             except Exception as exc:
-                self.log.debug("", exc_info=exc)
+                self.log.traceback(exc)
                 self.log.warning(
                     "%s: Error when extracting download URLs (%s: %s)",
                     pin.get("id"), exc.__class__.__name__, exc)
@@ -204,62 +204,10 @@ class PinterestExtractor(Extractor):
         return media
 
 
-class PinterestPinExtractor(PinterestExtractor):
-    """Extractor for images from a single pin from pinterest.com"""
-    subcategory = "pin"
-    pattern = BASE_PATTERN + r"/pin/([^/?#]+)(?!.*#related$)"
-    example = "https://www.pinterest.com/pin/12345/"
-
-    def __init__(self, match):
-        PinterestExtractor.__init__(self, match)
-        self.pin_id = match[1]
-        self.pin = None
-
-    def metadata(self):
-        self.pin = self.api.pin(self.pin_id)
-        return self.pin
-
-    def pins(self):
-        return (self.pin,)
-
-
-class PinterestBoardExtractor(PinterestExtractor):
-    """Extractor for images from a board from pinterest.com"""
-    subcategory = "board"
-    directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
-    archive_fmt = "{board[id]}_{id}"
-    pattern = (BASE_PATTERN + r"/(?!pin/)([^/?#]+)"
-               r"/(?!_saved|_created|pins/)([^/?#]+)/?(?:$|\?|#)")
-    example = "https://www.pinterest.com/USER/BOARD/"
-
-    def __init__(self, match):
-        PinterestExtractor.__init__(self, match)
-        self.user = text.unquote(match[1])
-        self.board_name = text.unquote(match[2])
-        self.board = None
-
-    def metadata(self):
-        self.board = self.api.board(self.user, self.board_name)
-        return {"board": self.board}
-
-    def pins(self):
-        board = self.board
-        pins = self.api.board_pins(board["id"])
-
-        if board["section_count"] and self.config("sections", True):
-            base = f"{self.root}{board['url']}id:"
-            data = {"_extractor": PinterestSectionExtractor}
-            sections = [(base + section["id"], data)
-                        for section in self.api.board_sections(board["id"])]
-            pins = itertools.chain(pins, sections)
-
-        return pins
-
-
 class PinterestUserExtractor(PinterestExtractor):
     """Extractor for a user's boards"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)(?:/_saved)?/?$"
+    pattern = rf"{BASE_PATTERN}/(?!pin/)([^/?#]+)(?:/_saved)?/?$"
     example = "https://www.pinterest.com/USER/"
 
     def __init__(self, match):
@@ -277,7 +225,7 @@ class PinterestAllpinsExtractor(PinterestExtractor):
     """Extractor for a user's 'All Pins' feed"""
     subcategory = "allpins"
     directory_fmt = ("{category}", "{user}")
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/pins/?$"
+    pattern = rf"{BASE_PATTERN}/(?!pin/)([^/?#]+)/pins/?$"
     example = "https://www.pinterest.com/USER/pins/"
 
     def __init__(self, match):
@@ -295,7 +243,7 @@ class PinterestCreatedExtractor(PinterestExtractor):
     """Extractor for a user's created pins"""
     subcategory = "created"
     directory_fmt = ("{category}", "{user}")
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/_created/?$"
+    pattern = rf"{BASE_PATTERN}/(?!pin/)([^/?#]+)/_created/?$"
     example = "https://www.pinterest.com/USER/_created/"
 
     def __init__(self, match):
@@ -315,7 +263,7 @@ class PinterestSectionExtractor(PinterestExtractor):
     directory_fmt = ("{category}", "{board[owner][username]}",
                      "{board[name]}", "{section[title]}")
     archive_fmt = "{board[id]}_{id}"
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/([^/?#]+)/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/(?!pin/)([^/?#]+)/([^/?#]+)/([^/?#]+)"
     example = "https://www.pinterest.com/USER/BOARD/SECTION"
 
     def __init__(self, match):
@@ -343,7 +291,7 @@ class PinterestSearchExtractor(PinterestExtractor):
     """Extractor for Pinterest search results"""
     subcategory = "search"
     directory_fmt = ("{category}", "Search", "{search}")
-    pattern = BASE_PATTERN + r"/search/pins/?\?q=([^&#]+)"
+    pattern = rf"{BASE_PATTERN}/search/pins/?\?q=([^&#]+)"
     example = "https://www.pinterest.com/search/pins/?q=QUERY"
 
     def __init__(self, match):
@@ -357,11 +305,63 @@ class PinterestSearchExtractor(PinterestExtractor):
         return self.api.search(self.search)
 
 
+class PinterestPinExtractor(PinterestExtractor):
+    """Extractor for images from a single pin from pinterest.com"""
+    subcategory = "pin"
+    pattern = rf"{BASE_PATTERN}/pin/([^/?#]+)(?!.*#related$)"
+    example = "https://www.pinterest.com/pin/12345/"
+
+    def __init__(self, match):
+        PinterestExtractor.__init__(self, match)
+        self.pin_id = match[1]
+        self.pin = None
+
+    def metadata(self):
+        self.pin = self.api.pin(self.pin_id)
+        return self.pin
+
+    def pins(self):
+        return (self.pin,)
+
+
+class PinterestBoardExtractor(PinterestExtractor):
+    """Extractor for images from a board from pinterest.com"""
+    subcategory = "board"
+    directory_fmt = ("{category}", "{board[owner][username]}", "{board[name]}")
+    archive_fmt = "{board[id]}_{id}"
+    pattern = (rf"{BASE_PATTERN}/(?!pin/)([^/?#]+)"
+               r"/([^/?#]+)/?(?!.*#related$)")
+    example = "https://www.pinterest.com/USER/BOARD/"
+
+    def __init__(self, match):
+        PinterestExtractor.__init__(self, match)
+        self.user = text.unquote(match[1])
+        self.board_name = text.unquote(match[2])
+        self.board = None
+
+    def metadata(self):
+        self.board = self.api.board(self.user, self.board_name)
+        return {"board": self.board}
+
+    def pins(self):
+        board = self.board
+        pins = self.api.board_pins(board["id"])
+
+        if board["section_count"] and self.config("sections", True):
+            base = f"{self.root}{board['url']}id:"
+            data = {"_extractor": PinterestSectionExtractor}
+            sections = [(base + section["id"], data)
+                        for section in self.api.board_sections(board["id"])]
+            pins = itertools.chain(pins, sections)
+
+        return pins
+
+
 class PinterestRelatedPinExtractor(PinterestPinExtractor):
     """Extractor for related pins of another pin from pinterest.com"""
     subcategory = "related-pin"
     directory_fmt = ("{category}", "related {original_pin[id]}")
-    pattern = BASE_PATTERN + r"/pin/([^/?#]+).*#related$"
+    pattern = rf"{BASE_PATTERN}/pin/([^/?#]+).*#related$"
     example = "https://www.pinterest.com/pin/12345/#related"
 
     def metadata(self):
@@ -376,7 +376,7 @@ class PinterestRelatedBoardExtractor(PinterestBoardExtractor):
     subcategory = "related-board"
     directory_fmt = ("{category}", "{board[owner][username]}",
                      "{board[name]}", "related")
-    pattern = BASE_PATTERN + r"/(?!pin/)([^/?#]+)/([^/?#]+)/?#related$"
+    pattern = rf"{BASE_PATTERN}/(?!pin/)([^/?#]+)/([^/?#]+)/?#related$"
     example = "https://www.pinterest.com/USER/BOARD/#related"
 
     def pins(self):

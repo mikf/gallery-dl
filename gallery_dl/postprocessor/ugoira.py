@@ -151,7 +151,7 @@ class UgoiraPP(PostProcessor):
                         "%s: Unable to extract frames from %s (%s: %s)",
                         pathfmt.kwdict.get("id"), pathfmt.filename,
                         exc.__class__.__name__, exc)
-                    return self.log.debug("", exc_info=exc)
+                    return self.log.traceback(exc)
 
             if self.convert(pathfmt, tempdir):
                 if self.delete:
@@ -227,12 +227,12 @@ class UgoiraPP(PostProcessor):
             output.stderr_write("\n")
             self.log.error("Unable to invoke FFmpeg (%s: %s)",
                            exc.__class__.__name__, exc)
-            self.log.debug("", exc_info=exc)
+            self.log.traceback(exc)
             pathfmt.realpath = pathfmt.temppath
         except Exception as exc:
             output.stderr_write("\n")
             self.log.error("%s: %s", exc.__class__.__name__, exc)
-            self.log.debug("", exc_info=exc)
+            self.log.traceback(exc)
             pathfmt.realpath = pathfmt.temppath
         else:
             if self.mtime:
@@ -386,7 +386,7 @@ class UgoiraPP(PostProcessor):
         content.append("")
 
         ffconcat = tempdir + "/ffconcat.txt"
-        with open(ffconcat, "w") as fp:
+        with open(ffconcat, "w", encoding="utf-8") as fp:
             fp.write("\n".join(content))
         return ffconcat
 
@@ -401,7 +401,7 @@ class UgoiraPP(PostProcessor):
         content.append("")
 
         timecodes = tempdir + "/timecodes.tc"
-        with open(timecodes, "w") as fp:
+        with open(timecodes, "w", encoding="utf-8") as fp:
             fp.write("\n".join(content))
         return timecodes
 

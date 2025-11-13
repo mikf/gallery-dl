@@ -20,7 +20,7 @@ class _2chenThreadExtractor(Extractor):
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{time} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{hash}_{time}"
-    pattern = BASE_PATTERN + r"/([^/?#]+)/(\d+)"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)/(\d+)"
     example = "https://sturdychan.help/a/12345/"
 
     def __init__(self, match):
@@ -65,7 +65,7 @@ class _2chenThreadExtractor(Extractor):
         extr = text.extract_from(post)
         return {
             "name"    : text.unescape(extr("<span>", "</span>")),
-            "date"    : text.parse_datetime(
+            "date"    : self.parse_datetime(
                 extr("<time", "<").partition(">")[2],
                 "%d %b %Y (%a) %H:%M:%S"
             ),
@@ -81,7 +81,7 @@ class _2chenBoardExtractor(Extractor):
     category = "2chen"
     subcategory = "board"
     root = "https://sturdychan.help"
-    pattern = BASE_PATTERN + r"/([^/?#]+)(?:/catalog|/?$)"
+    pattern = rf"{BASE_PATTERN}/([^/?#]+)(?:/catalog|/?$)"
     example = "https://sturdychan.help/a/"
 
     def __init__(self, match):

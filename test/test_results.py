@@ -53,6 +53,7 @@ AUTH_REQUIRED = {
     "fantia",
     "instagram",
     "twitter",
+    "poipiku",
 }
 
 AUTH_KEYS = (
@@ -309,10 +310,13 @@ class TestExtractorResults(unittest.TestCase):
         elif isinstance(test, range):
             self.assertRange(value, test, msg=path)
         elif isinstance(test, set):
-            try:
-                self.assertIn(value, test, msg=path)
-            except AssertionError:
-                self.assertIn(type(value), test, msg=path)
+            for item in test:
+                if isinstance(item, type) and isinstance(value, item) or \
+                        value == item:
+                    break
+            else:
+                v = type(value) if len(str(value)) > 64 else value
+                self.fail(f"{v!r} not in {test}: {path}")
         elif isinstance(test, list):
             subtest = False
             for idx, item in enumerate(test):
@@ -348,6 +352,17 @@ class TestExtractorResults(unittest.TestCase):
                     for _ in value:
                         len_value += 1
                 self.assertEqual(int(length), len_value, msg=path)
+            elif test.startswith("hash:"):
+                digest = test[5:].lower()
+                msg = f"{path} / {digest}"
+                if digest == "md5":
+                    self.assertRegex(value, r"^[0-9a-fA-F]{32}$", msg)
+                elif digest == "sha1":
+                    self.assertRegex(value, r"^[0-9a-fA-F]{40}$", msg)
+                elif digest == "sha256":
+                    self.assertRegex(value, r"^[0-9a-fA-F]{64}$", msg)
+                elif digest == "sha512":
+                    self.assertRegex(value, r"^[0-9a-fA-F]{128}$", msg)
             elif test.startswith("iso:"):
                 iso = test[4:]
                 if iso in ("dt", "datetime", "8601"):
@@ -361,6 +376,12 @@ class TestExtractorResults(unittest.TestCase):
                     msg = f"{path} / ISO 639-1"
                     self.assertIsInstance(value, str, msg=msg)
                     self.assertRegex(value, r"^[a-z]{2}(-\w+)?$", msg=msg)
+                elif iso in ("uuid", "11578", "11578:1996", "4122"):
+                    msg = f"{path} / ISO 11578:1996"
+                    pat = (r"(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-"
+                           r"[0-9a-f]{4}-[0-9a-f]{12}")
+                    self.assertIsInstance(value, str, msg=msg)
+                    self.assertRegex(value, pat, msg=msg)
                 else:
                     self.fail(f"Unsupported ISO test '{test}'")
             else:

@@ -122,7 +122,16 @@ __tests__ = (
     "#category": ("IMHentai", "hentaienvy", "search"),
     "#class"   : imhentai.ImhentaiSearchExtractor,
     "#pattern" : imhentai.ImhentaiGalleryExtractor.pattern,
-    "#count"   : range(45, 50),
+    "#count"   : range(45, 60),
+},
+
+{
+    "#url"     : "https://hentaienvy.com/advanced-search/?key=%2Btag%3A%22Monster+Girl%22+%2Bcharacter%3A%22Gardevoir%22&lt=1&m=1&d=1&w=1&i=1&a=1&g=1&en=1",
+    "#comment" : "'/advanced-search/' URL (#8507)",
+    "#category": ("IMHentai", "hentaienvy", "search"),
+    "#class"   : imhentai.ImhentaiSearchExtractor,
+    "#pattern" : imhentai.ImhentaiGalleryExtractor.pattern,
+    "#count"   : range(185, 200),
 },
 
 )

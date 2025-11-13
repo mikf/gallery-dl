@@ -114,7 +114,7 @@ class NitterExtractor(BaseExtractor):
         return {
             "author"  : author,
             "user"    : self.user_obj or author,
-            "date"    : text.parse_datetime(
+            "date"    : self.parse_datetime(
                 extr('title="', '"'), "%b %d, %Y · %I:%M %p %Z"),
             "tweet_id": link.rpartition("/")[2].partition("#")[0],
             "content": extr('class="tweet-content', "</div").partition(">")[2],
@@ -142,7 +142,7 @@ class NitterExtractor(BaseExtractor):
         return {
             "author"  : author,
             "user"    : self.user_obj or author,
-            "date"    : text.parse_datetime(
+            "date"    : self.parse_datetime(
                 extr('title="', '"'), "%b %d, %Y · %I:%M %p %Z"),
             "tweet_id": link.rpartition("/")[2].partition("#")[0],
             "content" : extr('class="quote-text', "</div").partition(">")[2],
@@ -173,7 +173,7 @@ class NitterExtractor(BaseExtractor):
             "nick"            : extr('title="', '"'),
             "name"            : extr('title="@', '"'),
             "description"     : extr('<p dir="auto">', '<'),
-            "date"            : text.parse_datetime(
+            "date"            : self.parse_datetime(
                 extr('class="profile-joindate"><span title="', '"'),
                 "%I:%M %p - %d %b %Y"),
             "statuses_count"  : text.parse_int(extr(
@@ -229,12 +229,12 @@ class NitterExtractor(BaseExtractor):
 BASE_PATTERN = NitterExtractor.update({
 })
 
-USER_PATTERN = BASE_PATTERN + r"/(i(?:/user/|d:)(\d+)|[^/?#]+)"
+USER_PATTERN = rf"{BASE_PATTERN}/(i(?:/user/|d:)(\d+)|[^/?#]+)"
 
 
 class NitterTweetsExtractor(NitterExtractor):
     subcategory = "tweets"
-    pattern = USER_PATTERN + r"(?:/tweets)?(?:$|\?|#)"
+    pattern = rf"{USER_PATTERN}(?:/tweets)?(?:$|\?|#)"
     example = "https://nitter.net/USER"
 
     def tweets(self):
@@ -243,7 +243,7 @@ class NitterTweetsExtractor(NitterExtractor):
 
 class NitterRepliesExtractor(NitterExtractor):
     subcategory = "replies"
-    pattern = USER_PATTERN + r"/with_replies"
+    pattern = rf"{USER_PATTERN}/with_replies"
     example = "https://nitter.net/USER/with_replies"
 
     def tweets(self):
@@ -252,7 +252,7 @@ class NitterRepliesExtractor(NitterExtractor):
 
 class NitterMediaExtractor(NitterExtractor):
     subcategory = "media"
-    pattern = USER_PATTERN + r"/media"
+    pattern = rf"{USER_PATTERN}/media"
     example = "https://nitter.net/USER/media"
 
     def tweets(self):
@@ -261,7 +261,7 @@ class NitterMediaExtractor(NitterExtractor):
 
 class NitterSearchExtractor(NitterExtractor):
     subcategory = "search"
-    pattern = USER_PATTERN + r"/search"
+    pattern = rf"{USER_PATTERN}/search"
     example = "https://nitter.net/USER/search"
 
     def tweets(self):
@@ -274,7 +274,7 @@ class NitterTweetExtractor(NitterExtractor):
     directory_fmt = ("{category}", "{user[name]}")
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{num}"
-    pattern = BASE_PATTERN + r"/(i/web|[^/?#]+)/status/(\d+())"
+    pattern = rf"{BASE_PATTERN}/(i/web|[^/?#]+)/status/(\d+())"
     example = "https://nitter.net/USER/status/12345"
 
     def tweets(self):

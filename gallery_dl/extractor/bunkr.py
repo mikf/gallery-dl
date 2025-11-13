@@ -11,6 +11,7 @@
 from .common import Extractor
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text, util, config, exception
+from ..cache import memcache
 import random
 
 if config.get(("extractor", "bunkr"), "tlds"):
@@ -62,8 +63,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     root = "https://bunkr.si"
     root_dl = "https://get.bunkrr.su"
     root_api = "https://apidl.bunkr.ru"
-    archive_fmt = "{album_id}_{id|id_url}"
-    pattern = BASE_PATTERN + r"/a/([^/?#]+)"
+    archive_fmt = "{album_id}_{id|id_url|slug}"
+    pattern = rf"{BASE_PATTERN}/a/([^/?#]+)"
     example = "https://bunkr.si/a/ID"
 
     def __init__(self, match):
@@ -134,13 +135,13 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
     def fetch_album(self, album_id):
         # album metadata
-        page = self.request(self.root + "/a/" + album_id).text
+        page = self.request(f"{self.root}/a/{album_id}?advanced=1").text
         title = text.unescape(text.unescape(text.extr(
             page, 'property="og:title" content="', '"')))
 
         # files
-        items = list(text.extract_iter(
-            page, '<div class="grid-images_box', "</a>"))
+        items = text.extr(
+            page, "window.albumFiles = [", "</script>").split("\n},\n")
 
         return self._extract_files(items), {
             "album_id"   : album_id,
@@ -156,30 +157,29 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
 
         for item in items:
             try:
-                url = text.unescape(text.extr(item, ' href="', '"'))
-                if url[0] == "/":
-                    url = self.root + url
+                data_id = text.extr(item, " id: ", ",").strip()
+                file = self._extract_file(data_id)
 
-                file = self._extract_file(url)
-                info = text.split_html(item)
-                if not file["name"]:
-                    file["name"] = info[-3]
-                file["size"] = info[-2]
-                file["date"] = text.parse_datetime(
-                    info[-1], "%H:%M:%S %d/%m/%Y")
+                file["name"] = util.json_loads(text.extr(
+                    item, 'original:', ',\n').replace("\\'", "'"))
+                file["slug"] = util.json_loads(text.extr(
+                    item, 'slug: ', ',\n').replace("\\'", "'"))
+                file["uuid"] = text.extr(
+                    item, 'name: "', ".")
+                file["size"] = text.parse_int(text.extr(
+                    item, "size:  ", " ,\n"))
+                file["date"] = self.parse_datetime(text.extr(
+                    item, 'timestamp: "', '"'), "%H:%M:%S %d/%m/%Y")
 
                 yield file
             except exception.ControlException:
                 raise
             except Exception as exc:
                 self.log.error("%s: %s", exc.__class__.__name__, exc)
-                self.log.debug("", exc_info=exc)
+                self.log.debug("%s", item, exc_info=exc)
 
-    def _extract_file(self, webpage_url):
-        page = self.request(webpage_url).text
-        data_id = text.extr(page, 'data-file-id="', '"')
-        referer = self.root_dl + "/file/" + data_id
-
+    def _extract_file(self, data_id):
+        referer = f"{self.root_dl}/file/{data_id}"
         headers = {"Referer": referer, "Origin": self.root_dl}
         data = self.request_json(self.endpoint, method="POST", headers=headers,
                                  json={"id": data_id})
@@ -190,14 +190,9 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         else:
             file_url = data["url"]
 
-        file_name = text.extr(page, "<h1", "<").rpartition(">")[2]
-        fallback = text.extr(page, 'property="og:url" content="', '"')
-
         return {
             "file"          : file_url,
-            "name"          : text.unescape(file_name),
             "id_url"        : data_id,
-            "_fallback"     : (fallback,) if fallback else (),
             "_http_headers" : {"Referer": referer},
             "_http_validate": self._validate,
         }
@@ -217,20 +212,42 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
     """Extractor for bunkr.si media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"(/[fvid]/[^/?#]+)"
+    pattern = rf"{BASE_PATTERN}(/[fvid]/[^/?#]+)"
     example = "https://bunkr.si/f/FILENAME"
 
     def fetch_album(self, album_id):
         try:
-            file = self._extract_file(self.root + album_id)
+            page = self.request(f"{self.root}{album_id}").text
+            data_id = text.extr(page, 'data-file-id="', '"')
+            file = self._extract_file(data_id)
+            file["name"] = text.unquote(text.unescape(text.extr(
+                page, "<h1", "<").rpartition(">")[2]))
+            file["slug"] = album_id.rpartition("/")[2]
+            file["uuid"] = text.extr(page, "/thumbs/", ".")
         except Exception as exc:
             self.log.error("%s: %s", exc.__class__.__name__, exc)
             return (), {}
 
+        album_id, album_name, album_size = self._album_info(text.extr(
+            page, ' href="../a/', '"'))
         return (file,), {
-            "album_id"   : "",
-            "album_name" : "",
-            "album_size" : -1,
-            "description": "",
-            "count"      : 1,
+            "album_id"  : album_id,
+            "album_name": album_name,
+            "album_size": album_size,
+            "count"     : 1,
         }
+
+    @memcache(keyarg=1)
+    def _album_info(self, album_id):
+        if album_id:
+            try:
+                page = self.request(f"{self.root}/a/{album_id}").text
+                return (
+                    album_id,
+                    text.unescape(text.unescape(text.extr(
+                        page, 'property="og:title" content="', '"'))),
+                    text.extr(page, '<span class="font-semibold">(', ')'),
+                )
+            except Exception:
+                pass
+        return album_id, "", -1

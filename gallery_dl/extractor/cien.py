@@ -34,7 +34,7 @@ class CienExtractor(Extractor):
             page = self.request(url, params=params).text
 
             for card in text.extract_iter(
-                    page, ' class="c-cardCase-item', '</div>'):
+                    page, ' class="c-cardCase-item', '</figure>'):
                 article_url = text.extr(card, ' href="', '"')
                 yield Message.Queue, article_url, data
 
@@ -48,7 +48,7 @@ class CienArticleExtractor(CienExtractor):
     filename_fmt = "{num:>02} {filename}.{extension}"
     directory_fmt = ("{category}", "{author[name]}", "{post_id} {name}")
     archive_fmt = "{post_id}_{num}"
-    pattern = BASE_PATTERN + r"/creator/(\d+)/article/(\d+)"
+    pattern = rf"{BASE_PATTERN}/creator/(\d+)/article/(\d+)"
     example = "https://ci-en.net/creator/123/article/12345"
 
     def items(self):
@@ -61,7 +61,7 @@ class CienArticleExtractor(CienExtractor):
         post["post_url"] = url
         post["post_id"] = text.parse_int(post_id)
         post["count"] = len(files)
-        post["date"] = text.parse_datetime(post["datePublished"])
+        post["date"] = self.parse_datetime_iso(post["datePublished"])
 
         try:
             post["author"]["id"] = text.parse_int(author_id)
@@ -160,7 +160,7 @@ class CienArticleExtractor(CienExtractor):
 
 class CienCreatorExtractor(CienExtractor):
     subcategory = "creator"
-    pattern = BASE_PATTERN + r"/creator/(\d+)(?:/article(?:\?([^#]+))?)?/?$"
+    pattern = rf"{BASE_PATTERN}/creator/(\d+)(?:/article(?:\?([^#]+))?)?/?$"
     example = "https://ci-en.net/creator/123"
 
     def items(self):
@@ -172,7 +172,7 @@ class CienCreatorExtractor(CienExtractor):
 
 class CienRecentExtractor(CienExtractor):
     subcategory = "recent"
-    pattern = BASE_PATTERN + r"/mypage/recent(?:\?([^#]+))?"
+    pattern = rf"{BASE_PATTERN}/mypage/recent(?:\?([^#]+))?"
     example = "https://ci-en.net/mypage/recent"
 
     def items(self):
@@ -183,7 +183,7 @@ class CienRecentExtractor(CienExtractor):
 
 class CienFollowingExtractor(CienExtractor):
     subcategory = "following"
-    pattern = BASE_PATTERN + r"/mypage/subscription(/following)?"
+    pattern = rf"{BASE_PATTERN}/mypage/subscription(/following)?"
     example = "https://ci-en.net/mypage/subscription"
 
     def items(self):

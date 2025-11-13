@@ -115,9 +115,9 @@ class ExhentaiExtractor(Extractor):
 class ExhentaiGalleryExtractor(ExhentaiExtractor):
     """Extractor for image galleries from exhentai.org"""
     subcategory = "gallery"
-    pattern = (BASE_PATTERN +
-               r"(?:/g/(\d+)/([\da-f]{10})"
-               r"|/s/([\da-f]{10})/(\d+)-(\d+))")
+    pattern = (rf"{BASE_PATTERN}/(?:"
+               rf"g/(\d+)/([\da-f]{{10}})|"
+               rf"s/([\da-f]{{10}})/(\d+)-(\d+))")
     example = "https://e-hentai.org/g/12345/67890abcde/"
 
     def __init__(self, match):
@@ -216,7 +216,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     def _items_hitomi(self):
         if self.config("metadata", False):
             data = self.metadata_from_api()
-            data["date"] = text.parse_timestamp(data["posted"])
+            data["date"] = self.parse_timestamp(data["posted"])
         else:
             data = {}
 
@@ -233,7 +233,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         data = self.metadata_from_page(page)
         if self.config("metadata", False):
             data.update(self.metadata_from_api())
-            data["date"] = text.parse_timestamp(data["posted"])
+            data["date"] = self.parse_timestamp(data["posted"])
         if self.config("tags", False):
             tags = collections.defaultdict(list)
             for tag in data["tags"]:
@@ -258,8 +258,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             "_"            : extr('<div id="gdc"><div class="cs ct', '"'),
             "eh_category"  : extr('>', '<'),
             "uploader"     : extr('<div id="gdn">', '</div>'),
-            "date"         : text.parse_datetime(extr(
-                '>Posted:</td><td class="gdt2">', '</td>'), "%Y-%m-%d %H:%M"),
+            "date"         : self.parse_datetime_iso(extr(
+                '>Posted:</td><td class="gdt2">', '</td>')),
             "parent"       : extr(
                 '>Parent:</td><td class="gdt2"><a href="', '"'),
             "expunged"     : "Yes" != extr(
@@ -563,7 +563,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 class ExhentaiSearchExtractor(ExhentaiExtractor):
     """Extractor for exhentai search results"""
     subcategory = "search"
-    pattern = BASE_PATTERN + r"/(?:\?([^#]*)|tag/([^/?#]+))"
+    pattern = rf"{BASE_PATTERN}/(?:\?([^#]*)|tag/([^/?#]+))"
     example = "https://e-hentai.org/?f_search=QUERY"
 
     def __init__(self, match):
@@ -620,7 +620,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
 class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
     """Extractor for favorited exhentai galleries"""
     subcategory = "favorite"
-    pattern = BASE_PATTERN + r"/favorites\.php(?:\?([^#]*)())?"
+    pattern = rf"{BASE_PATTERN}/favorites\.php(?:\?([^#]*)())?"
     example = "https://e-hentai.org/favorites.php"
 
     def _init(self):
