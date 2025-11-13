@@ -87,19 +87,22 @@ class Job():
                 "current_git_head": util.git_head()
             }
         # user-supplied metadata
-        if kwdict := extr.config("keywords-global"):
+        kwdict = extr.config("keywords")
+        if kwdict_global := extr.config("keywords-global"):
+            kwdict = {**kwdict_global, **kwdict} if kwdict else kwdict_global
+        elif not kwdict:
+            return
+
+        if extr.config("keywords-eval"):
+            self.kwdict_eval = []
+            for key, value in kwdict.items():
+                if isinstance(value, str):
+                    fmt = formatter.parse(value, None, util.identity)
+                    self.kwdict_eval.append((key, fmt.format_map))
+                else:
+                    self.kwdict[key] = value
+        else:
             self.kwdict.update(kwdict)
-        if kwdict := extr.config("keywords"):
-            if extr.config("keywords-eval"):
-                self.kwdict_eval = []
-                for key, value in kwdict.items():
-                    if isinstance(value, str):
-                        fmt = formatter.parse(value, None, util.identity)
-                        self.kwdict_eval.append((key, fmt.format_map))
-                    else:
-                        self.kwdict[key] = value
-            else:
-                self.kwdict.update(kwdict)
 
     def _build_config_path(self, parent):
         extr = self.extractor

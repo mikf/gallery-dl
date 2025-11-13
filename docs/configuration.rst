@@ -976,8 +976,11 @@ Type
 Default
     ``false``
 Description
-    Evaluate each `keywords <extractor.*.keywords_>`__ ``string`` value
-    as a `Format String`_.
+    Evaluate each
+    `keywords <extractor.*.keywords_>`__
+    and
+    `keywords-global <extractor.*.keywords-global_>`__
+    ``string`` value as a `Format String`_.
 
 
 extractor.*.keywords-global
@@ -9653,6 +9656,7 @@ Reference
 .. |open()| replace:: the built-in ``open()`` function
 .. |json.dump()| replace:: ``json.dump()``
 .. |ISO 639-1| replace:: `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language
+.. |ISO 8601| replace:: `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`__ language
 
 .. _directory: `extractor.*.directory`_
 .. _base-directory: `extractor.*.base-directory`_
