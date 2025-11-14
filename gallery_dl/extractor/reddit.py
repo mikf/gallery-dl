@@ -86,7 +86,7 @@ class RedditExtractor(Extractor):
                             yield Message.Url, url, submission
 
                     elif embeds and "media_metadata" in media:
-                        for embed in self._extract_embed(submission):
+                        for embed in self._extract_embed(submission, media):
                             submission["num"] += 1
                             text.nameext_from_url(embed, submission)
                             yield Message.Url, embed, submission
@@ -128,7 +128,7 @@ class RedditExtractor(Extractor):
                             comment["created_utc"])
 
                         if media:
-                            for url in self._extract_embed(comment):
+                            for url in self._extract_embed(data, comment):
                                 data["num"] += 1
                                 text.nameext_from_url(url, data)
                                 yield Message.Url, url, data
@@ -199,8 +199,8 @@ class RedditExtractor(Extractor):
                     submission["id"], item["media_id"])
                 self.log.debug(src)
 
-    def _extract_embed(self, submission):
-        meta = submission["media_metadata"]
+    def _extract_embed(self, submission, media):
+        meta = media["media_metadata"]
         if not meta:
             return
 
