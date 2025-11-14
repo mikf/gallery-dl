@@ -258,11 +258,13 @@ class OAuthFlickr(OAuthBase):
 
     def items(self):
         yield Message.Version, 1
-        from . import flickr
+        #  from . import flickr
 
         self._oauth1_authorization_flow(
-            flickr.FlickrAPI.API_KEY,
-            flickr.FlickrAPI.API_SECRET,
+            #  flickr.FlickrAPI.API_KEY,
+            #  flickr.FlickrAPI.API_SECRET,
+            "",
+            "",
             "https://www.flickr.com/services/oauth/request_token",
             "https://www.flickr.com/services/oauth/authorize",
             "https://www.flickr.com/services/oauth/access_token",
