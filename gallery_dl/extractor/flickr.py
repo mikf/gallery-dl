@@ -10,6 +10,7 @@
 
 from .common import Extractor, Message
 from .. import text, oauth, util, exception
+from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|secure\.|m\.)?flickr\.com"
 
@@ -17,6 +18,7 @@ BASE_PATTERN = r"(?:https?://)?(?:www\.|secure\.|m\.)?flickr\.com"
 class FlickrExtractor(Extractor):
     """Base class for flickr extractors"""
     category = "flickr"
+    root = "https://www.flickr.com"
     filename_fmt = "{category}_{id}.{extension}"
     directory_fmt = ("{category}", "{user[username]}")
     archive_fmt = "{id}"
@@ -24,11 +26,12 @@ class FlickrExtractor(Extractor):
     request_interval_min = 0.5
 
     def _init(self):
-        self.api = FlickrAPI(self)
         self.user = None
         self.item_id = self.groups[0]
 
     def items(self):
+        self.api = FlickrAPI(self)
+
         data = self.metadata()
         extract = self.api._extract_format
         for photo in self.photos():
@@ -75,6 +78,8 @@ class FlickrImageExtractor(FlickrExtractor):
     example = "https://www.flickr.com/photos/USER/12345"
 
     def items(self):
+        self.api = FlickrAPI(self)
+
         item_id, enc_id = self.groups
         if enc_id is not None:
             alphabet = ("123456789abcdefghijkmnopqrstu"
@@ -129,6 +134,8 @@ class FlickrAlbumExtractor(FlickrExtractor):
         return self._album_items()
 
     def _album_items(self):
+        self.api = FlickrAPI(self)
+
         data = FlickrExtractor.metadata(self)
         data["_extractor"] = FlickrAlbumExtractor
 
@@ -236,8 +243,8 @@ class FlickrAPI(oauth.OAuth1API):
     """
 
     API_URL = "https://api.flickr.com/services/rest/"
-    API_KEY = "90c368449018a0cb880ea4889cbb8681"
-    API_SECRET = "e4b83e319c11e9e1"
+    #  API_KEY = ""
+    API_SECRET = ""
     FORMATS = [
         ("o" , "Original"    , None),
         ("6k", "X-Large 6K"  , 6144),
@@ -281,6 +288,14 @@ class FlickrAPI(oauth.OAuth1API):
         "9": "Public Domain Dedication (CC0)",
         "10": "Public Domain Mark",
     }
+
+    @property
+    @memcache(maxage=3600)
+    def API_KEY(self):
+        extr = self.extractor
+        extr.log.info("Retrieving public API key")
+        page = extr.request(extr.root + "/prints").text
+        return text.extr(page, '.flickr.api.site_key = "', '"')
 
     def __init__(self, extractor):
         oauth.OAuth1API.__init__(self, extractor)
@@ -489,7 +504,7 @@ class FlickrAPI(oauth.OAuth1API):
     def _extract_format(self, photo):
         photo["description"] = photo["description"]["_content"].strip()
         photo["views"] = text.parse_int(photo["views"])
-        photo["date"] = self.parse_timestamp(photo["dateupload"])
+        photo["date"] = self.extractor.parse_timestamp(photo["dateupload"])
         photo["tags"] = photo["tags"].split()
 
         self._extract_metadata(photo)
