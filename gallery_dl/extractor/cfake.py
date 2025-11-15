@@ -8,8 +8,6 @@
 
 from .common import Extractor, Message
 from .. import text
-from urllib.parse import unquote
-
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?cfake\.com"
 
@@ -18,9 +16,44 @@ class CfakeExtractor(Extractor):
     """Base class for cfake extractors"""
     category = "cfake"
     root = "https://cfake.com"
-    directory_fmt = ("{category}", "{type}", "{name}")
-    filename_fmt = "{category}_{name}_{id}_{num}.{extension}"
+    directory_fmt = ("{category}", "{type}", "{type_name} ({type_id})")
+    filename_fmt = "{category}_{type_name}_{id}.{extension}"
     archive_fmt = "{id}"
+
+    def items(self):
+        type, type_name, type_id, sub_id, pnum = self.groups
+
+        if type.endswith("ies"):
+            type = type[:-3] + "y"
+
+        kwdict = self.kwdict
+        kwdict["type"] = type
+        kwdict["type_id"] = text.parse_int(type_id)
+        kwdict["type_name"] = text.unquote(type_name).replace("_", " ")
+        kwdict["sub_id"] = text.parse_int(sub_id)
+        kwdict["page"] = pnum = text.parse_int(pnum, 1)
+        yield Message.Directory, {}
+
+        base = f"{self.root}/images/{type}/{type_name}/{type_id}"
+        if sub_id:
+            base = f"{base}/{sub_id}"
+
+        while True:
+            url = base if pnum < 2 else f"{base}/p{pnum}"
+            page = self.request(url).text
+
+            # Extract and yield images
+            num = 0
+            for image in self._extract_images(page):
+                num += 1
+                image["num"] = num + (pnum - 1) * 50
+                url = image["url"]
+                yield Message.Url, url, text.nameext_from_url(url, image)
+
+            # Check for next page
+            if not num or not (pnum := self._check_pagination(page)):
+                return
+            kwdict["page"] = pnum
 
     def _extract_images(self, page):
         """Extract image URLs and metadata from a gallery page"""
@@ -87,227 +120,30 @@ class CfakeExtractor(Extractor):
 class CfakeCelebrityExtractor(CfakeExtractor):
     """Extractor for celebrity image galleries from cfake.com"""
     subcategory = "celebrity"
-    pattern = BASE_PATTERN + r"/images/celebrity/([^/]+)/(\d+)(?:/p(\d+))?"
-    example = "https://cfake.com/images/celebrity/Kaley_Cuoco/631/"
-
-    def __init__(self, match):
-        CfakeExtractor.__init__(self, match)
-        self.celebrity_name = match.group(1)
-        self.celebrity_id = match.group(2)
-        self.page_num = text.parse_int(match.group(3), 1)
-
-    def items(self):
-        page_num = self.page_num
-
-        while True:
-            if page_num == 1:
-                url = (f"{self.root}/images/celebrity/"
-                       f"{self.celebrity_name}/{self.celebrity_id}/")
-            else:
-                url = (f"{self.root}/images/celebrity/"
-                       f"{self.celebrity_name}/{self.celebrity_id}/"
-                       f"p{page_num}")
-
-            page = self.request(url).text
-
-            data = {
-                "type": "celebrity",
-                "name": unquote(self.celebrity_name).replace("_", " "),
-                "celebrity_id": text.parse_int(self.celebrity_id),
-                "page": page_num,
-            }
-
-            # Yield directory on first page
-            if page_num == self.page_num:
-                yield Message.Directory, data
-
-            # Extract and yield images
-            num = 0
-            for image_data in self._extract_images(page):
-                num += 1
-                image_data.update(data)
-                image_data["num"] = num + (page_num - 1) * 50
-                url = image_data.pop("url")
-                yield Message.Url, url, text.nameext_from_url(
-                    url, image_data)
-
-            # Check for next page
-            next_page = self._check_pagination(page)
-            if not next_page or num == 0:
-                break
-
-            page_num = next_page
+    pattern = (BASE_PATTERN + r"/images/(celebrity)"
+               r"/([^/?#]+)/(\d+)()(?:/p(\d+))?")
+    example = "https://cfake.com/images/celebrity/NAME/123"
 
 
 class CfakeCategoryExtractor(CfakeExtractor):
     """Extractor for category image galleries from cfake.com"""
     subcategory = "category"
-    pattern = (BASE_PATTERN +
-               r"/images/categories/([^/]+)/(\d+)(?:/p(\d+))?")
-    example = "https://cfake.com/images/categories/Facial/25/"
-
-    def __init__(self, match):
-        CfakeExtractor.__init__(self, match)
-        self.category_name = match.group(1)
-        self.category_id = match.group(2)
-        self.page_num = text.parse_int(match.group(3), 1)
-
-    def items(self):
-        page_num = self.page_num
-
-        while True:
-            if page_num == 1:
-                url = (f"{self.root}/images/categories/"
-                       f"{self.category_name}/{self.category_id}/")
-            else:
-                url = (f"{self.root}/images/categories/"
-                       f"{self.category_name}/{self.category_id}/"
-                       f"p{page_num}")
-
-            page = self.request(url).text
-
-            data = {
-                "type": "category",
-                "name": unquote(self.category_name).replace("_", " "),
-                "category_id": text.parse_int(self.category_id),
-                "page": page_num,
-            }
-
-            # Yield directory on first page
-            if page_num == self.page_num:
-                yield Message.Directory, data
-
-            # Extract and yield images
-            num = 0
-            for image_data in self._extract_images(page):
-                num += 1
-                image_data.update(data)
-                image_data["num"] = num + (page_num - 1) * 50
-                url = image_data.pop("url")
-                yield Message.Url, url, text.nameext_from_url(
-                    url, image_data)
-
-            # Check for next page
-            next_page = self._check_pagination(page)
-            if not next_page or num == 0:
-                break
-
-            page_num = next_page
+    pattern = (BASE_PATTERN + r"/images/(categories)"
+               r"/([^/?#]+)/(\d+)()(?:/p(\d+))?")
+    example = "https://cfake.com/images/categories/NAME/123"
 
 
 class CfakeCreatedExtractor(CfakeExtractor):
     """Extractor for 'created' image galleries from cfake.com"""
     subcategory = "created"
-    pattern = (BASE_PATTERN +
-               r"/images/created/([^/]+)/(\d+)/(\d+)(?:/p(\d+))?")
-    example = "https://cfake.com/images/created/Spice_Girls_%28band%29/72/4"
-
-    def __init__(self, match):
-        CfakeExtractor.__init__(self, match)
-        self.created_name = match.group(1)
-        self.created_id = match.group(2)
-        self.sub_id = match.group(3)
-        self.page_num = text.parse_int(match.group(4), 1)
-
-    def items(self):
-        page_num = self.page_num
-
-        while True:
-            if page_num == 1:
-                url = (f"{self.root}/images/created/"
-                       f"{self.created_name}/{self.created_id}/"
-                       f"{self.sub_id}")
-            else:
-                url = (f"{self.root}/images/created/"
-                       f"{self.created_name}/{self.created_id}/"
-                       f"{self.sub_id}/p{page_num}")
-
-            page = self.request(url).text
-
-            data = {
-                "type": "created",
-                "name": unquote(self.created_name).replace("_", " "),
-                "created_id": text.parse_int(self.created_id),
-                "sub_id": text.parse_int(self.sub_id),
-                "page": page_num,
-            }
-
-            # Yield directory on first page
-            if page_num == self.page_num:
-                yield Message.Directory, data
-
-            # Extract and yield images
-            num = 0
-            for image_data in self._extract_images(page):
-                num += 1
-                image_data.update(data)
-                image_data["num"] = num + (page_num - 1) * 50
-                url = image_data.pop("url")
-                yield Message.Url, url, text.nameext_from_url(
-                    url, image_data)
-
-            # Check for next page
-            next_page = self._check_pagination(page)
-            if not next_page or num == 0:
-                break
-
-            page_num = next_page
+    pattern = (BASE_PATTERN + r"/images/(created)"
+               r"/([^/?#]+)/(\d+)/(\d+)(?:/p(\d+))?")
+    example = "https://cfake.com/images/created/NAME/12345/123"
 
 
 class CfakeCountryExtractor(CfakeExtractor):
     """Extractor for country image galleries from cfake.com"""
     subcategory = "country"
-    pattern = (BASE_PATTERN +
-               r"/images/country/([^/]+)/(\d+)/(\d+)(?:/p(\d+))?")
-    example = "https://cfake.com/images/country/Australia/12/5"
-
-    def __init__(self, match):
-        CfakeExtractor.__init__(self, match)
-        self.country_name = match.group(1)
-        self.country_id = match.group(2)
-        self.sub_id = match.group(3)
-        self.page_num = text.parse_int(match.group(4), 1)
-
-    def items(self):
-        page_num = self.page_num
-
-        while True:
-            if page_num == 1:
-                url = (f"{self.root}/images/country/"
-                       f"{self.country_name}/{self.country_id}/"
-                       f"{self.sub_id}")
-            else:
-                url = (f"{self.root}/images/country/"
-                       f"{self.country_name}/{self.country_id}/"
-                       f"{self.sub_id}/p{page_num}")
-
-            page = self.request(url).text
-
-            data = {
-                "type": "country",
-                "name": unquote(self.country_name).replace("_", " "),
-                "country_id": text.parse_int(self.country_id),
-                "sub_id": text.parse_int(self.sub_id),
-                "page": page_num,
-            }
-
-            # Yield directory on first page
-            if page_num == self.page_num:
-                yield Message.Directory, data
-
-            # Extract and yield images
-            num = 0
-            for image_data in self._extract_images(page):
-                num += 1
-                image_data.update(data)
-                image_data["num"] = num + (page_num - 1) * 50
-                url = image_data.pop("url")
-                yield Message.Url, url, text.nameext_from_url(
-                    url, image_data)
-
-            # Check for next page
-            next_page = self._check_pagination(page)
-            if not next_page or num == 0:
-                break
-
-            page_num = next_page
+    pattern = (BASE_PATTERN + r"/images/(country)"
+               r"/([^/?#]+)/(\d+)/(\d+)(?:/p(\d+))?")
+    example = "https://cfake.com/images/country/NAME/12345/123"
