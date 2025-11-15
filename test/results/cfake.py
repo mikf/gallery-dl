@@ -17,8 +17,8 @@ __tests__ = (
     "#count"   : 20,
 
     "type"         : "celebrity",
-    "name"         : "Kaley Cuoco",
-    "celebrity_id" : 631,
+    "type_id"      : 631,
+    "type_name"    : "Kaley Cuoco",
     "page"         : 1,
     "id"           : int,
     "num"          : int,
@@ -35,8 +35,8 @@ __tests__ = (
     "#range"   : "1-5",
 
     "type"         : "celebrity",
-    "name"         : "Kaley Cuoco",
-    "celebrity_id" : 631,
+    "type_id"      : 631,
+    "type_name"    : "Kaley Cuoco",
     "page"         : 2,
 },
 
@@ -55,8 +55,8 @@ __tests__ = (
     "#count"   : 10,
 
     "type"        : "category",
-    "name"        : "Facial",
-    "category_id" : 25,
+    "type_id"     : 25,
+    "type_name"   : "Facial",
     "page"        : 1,
     "id"          : int,
     "num"         : int,
@@ -84,8 +84,8 @@ __tests__ = (
     "#count"   : 10,
 
     "type"       : "created",
-    "name"       : "Spice Girls (band)",
-    "created_id" : 72,
+    "type_id"    : 72,
+    "type_name"  : "Spice Girls (band)",
     "sub_id"     : 4,
     "page"       : 1,
     "id"         : int,
@@ -114,8 +114,8 @@ __tests__ = (
     "#count"   : 10,
 
     "type"       : "country",
-    "name"       : "Australia",
-    "country_id" : 12,
+    "type_id"    : 12,
+    "type_name"  : "Australia",
     "sub_id"     : 5,
     "page"       : 1,
     "id"         : int,
