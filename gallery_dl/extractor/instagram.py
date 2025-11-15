@@ -64,6 +64,8 @@ class InstagramExtractor(Extractor):
         if videos := self.config("videos", True):
             self.videos_dash = videos_dash = (videos != "merged")
             videos_headers = {"User-Agent": "Mozilla/5.0"}
+        else:
+            self.videos_dash = False
         previews = self.config("previews", False)
         max_posts = self.config("max-posts")
 
