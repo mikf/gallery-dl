@@ -181,6 +181,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, Files</td>
     <td></td>
 </tr>
+<tr id="cfake" title="cfake">
+    <td>Celebrity Fakes</td>
+    <td>https://cfake.com/</td>
+    <td>Categories, Celebrities, Countries, Created</td>
+    <td></td>
+</tr>
 <tr id="naver-chzzk" title="naver-chzzk">
     <td>CHZZK</td>
     <td>https://chzzk.naver.com/</td>
