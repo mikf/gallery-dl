@@ -394,7 +394,7 @@ class RedditAPI():
         self.morecomments = config("morecomments", False)
         self._warn_429 = False
 
-        if config("api") == "rest":
+        if config("api") != "oauth":
             self.root = "https://www.reddit.com"
             self.headers = None
             self.authenticate = util.noop

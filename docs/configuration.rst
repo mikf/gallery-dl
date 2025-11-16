@@ -4984,7 +4984,7 @@ extractor.reddit.api
 Type
     ``string``
 Default
-    ``"oauth"``
+    ``"rest"``
 Description
     Selects which API endpoints to use.
 
