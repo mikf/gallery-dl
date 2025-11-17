@@ -414,6 +414,7 @@ class FanboxRedirectExtractor(Extractor):
     """Extractor for pixiv redirects to fanbox.cc"""
     category = "fanbox"
     subcategory = "redirect"
+    cookies_domain = None
     pattern = r"(?:https?://)?(?:www\.)?pixiv\.net/fanbox/creator/(\d+)"
     example = "https://www.pixiv.net/fanbox/creator/12345"
 
