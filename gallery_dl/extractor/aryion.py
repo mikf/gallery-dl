@@ -108,44 +108,6 @@ class AryionExtractor(Extractor):
                 return
             url = self.root + text.rextr(page, "href='", "'", pos)
 
-    def _pagination_search(self, query):
-        url = f"{self.root}/g4/search.php"
-
-        data = {
-            "q": "",
-            "tags": "",
-            "type_search": "",
-            "user": "",
-            "search_favs": "",
-            "from_date": "",
-            "to_date": "",
-            "sort": "ctime",
-            "p": 1,
-        }
-
-        data.update(query)
-        if "p" in query:
-            data["p"] = text.parse_int(query["p"])
-
-        while True:
-            page = self.request(url, method="POST", data=data).text
-
-            post_id = None
-
-            # Beyond a certain page count, pages after the "last"
-            # just repeat the last page's content. This works *every* time.
-            if "<strong>" not in text.extract(
-                page, "class='pagejumps'>", "</span"
-            )[0]:
-                return
-
-            for post_id in text.extract_iter(
-                page, "thumb' href='/g4/view/", "'"
-            ):
-                yield post_id
-
-            data["p"] += 1
-
     def _parse_post(self, post_id):
         url = f"{self.root}/g4/data.php?id={post_id}"
         with self.request(url, method="HEAD", fatal=False) as response:
@@ -275,34 +237,26 @@ class AryionTagExtractor(AryionExtractor):
 class AryionSearchExtractor(AryionExtractor):
     """Extractor for searches on eka's portal"""
     subcategory = "search"
-    directory_fmt = ("{category}", "searches", "{search|search_tags_f|user_f}")
-    archive_fmt = "s_{search|search_tags_f|user_f}_{id}"
+    directory_fmt = ("{category}", "searches", "{search[prefix]:?/_/}"
+                     "{search[q]|search[tags]|search[user]}")
+    archive_fmt = ("s_{search[prefix]:?/_/}"
+                   "{search[q]|search[tags]|search[user]}_{id}")
     pattern = rf"{BASE_PATTERN}/search\.php\?([^#]+)"
     example = "https://aryion.com/g4/search.php?q=TEXT&tags=TAGS&user=USER"
 
-    def _init(self):
-        self.params = text.parse_query(self.user)
-        self.user = None
-
     def metadata(self):
-        md = {
-            "search": self.params.get("q"),
-            "search_tags": self.params.get("tags"),
-            "search_type": self.params.get("type_search"),
-            "user": self.params.get("user")
-        }
+        self.params = params = text.parse_query(self.user)
 
-        md["search_tags_f"] = (
-            "t_" + self.params.get("tags") if md["search_tags"] else None
-        )
-        md["user_f"] = (
-            "u_" + self.params.get("user") if md["user"] else None
-        )
-
-        return md
+        return {"search": {
+            **params,
+            "prefix": ("" if params.get("q") else
+                       "t" if params.get("tags") else
+                       "u" if params.get("user") else ""),
+        }}
 
     def posts(self):
-        return self._pagination_search(self.params)
+        url = f"{self.root}/g4/search.php?{text.build_query(self.params)}"
+        return self._pagination_next(url)
 
 
 class AryionPostExtractor(AryionExtractor):
