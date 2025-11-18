@@ -237,25 +237,24 @@ class AryionTagExtractor(AryionExtractor):
 class AryionSearchExtractor(AryionExtractor):
     """Extractor for searches on eka's portal"""
     subcategory = "search"
-    directory_fmt = ("{category}", "searches", "{search[prefix]:?/_/}"
+    directory_fmt = ("{category}", "searches", "{search[prefix]}"
                      "{search[q]|search[tags]|search[user]}")
-    archive_fmt = ("s_{search[prefix]:?/_/}"
+    archive_fmt = ("s_{search[prefix]}"
                    "{search[q]|search[tags]|search[user]}_{id}")
     pattern = rf"{BASE_PATTERN}/search\.php\?([^#]+)"
     example = "https://aryion.com/g4/search.php?q=TEXT&tags=TAGS&user=USER"
 
     def metadata(self):
-        self.params = params = text.parse_query(self.user)
-
+        params = text.parse_query(self.user)
         return {"search": {
             **params,
             "prefix": ("" if params.get("q") else
-                       "t" if params.get("tags") else
-                       "u" if params.get("user") else ""),
+                       "t_" if params.get("tags") else
+                       "u_" if params.get("user") else ""),
         }}
 
     def posts(self):
-        url = f"{self.root}/g4/search.php?{text.build_query(self.params)}"
+        url = f"{self.root}/g4/search.php?{self.user}"
         return self._pagination_next(url)
 
 
