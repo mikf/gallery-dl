@@ -94,4 +94,44 @@ __tests__ = (
     "#count"   : 2,
 },
 
+{
+    "#url"     : "https://aryion.com/g4/search.php?q=forest1",
+    "#class"   : aryion.AryionSearchExtractor,
+    "#results" : (
+        "https://aryion.com/g4/data.php?id=165068",
+        "https://aryion.com/g4/data.php?id=165069",
+        "https://aryion.com/g4/data.php?id=165070",
+        "https://aryion.com/g4/data.php?id=165071",
+        "https://aryion.com/g4/data.php?id=165064",
+    ),
+
+    "search"     : {
+        "prefix": "",
+        "q"     : "forest1",
+    },
+},
+
+{
+    "#url"     : "https://aryion.com/g4/search.php?q=&tags=water%2C+&type_search=&user=&from_date=04%2F01%2F2025&to_date=07%2F01%2F2025&sort=view_count&p=2",
+    "#class"   : aryion.AryionSearchExtractor,
+    "#range"   : "1-3",
+    "#results" : (
+        "https://aryion.com/g4/data.php?id=1134439",
+        "https://aryion.com/g4/data.php?id=1124899",
+        "https://aryion.com/g4/data.php?id=1133691",
+    ),
+
+    "search"     : {
+        "from_date"  : "04/01/2025",
+        "p"          : "2",
+        "prefix"     : "t",
+        "q"          : "",
+        "sort"       : "view_count",
+        "tags"       : "water, ",
+        "to_date"    : "07/01/2025",
+        "type_search": "",
+        "user"       : "",
+    },
+},
+
 )
