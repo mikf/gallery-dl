@@ -274,7 +274,7 @@ class AryionSearchExtractor(AryionExtractor):
     directory_fmt = ("{category}", "searches", "{search|search_tags_f|user_f}")
     archive_fmt = "s_{search|search_tags_f|user_f}_{id}"
     pattern = rf"{BASE_PATTERN}/search\.php\?([^#]+)"
-    example = "https://aryion.com/g4/search.php?q=TEXT"
+    example = "https://aryion.com/g4/search.php?q=TEXT&tags=TAGS&user=USER"
 
     def _init(self):
         self.params = text.parse_query(self.user)
