@@ -59,6 +59,26 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.xasiat.com/albums/30478/gekkan-young-magazine-2025-no-11/",
+    "#comment" : "no 'album_category' (#8569)",
+    "#class"   : xasiat.XasiatAlbumExtractor,
+    "#pattern" : r"https://www\.xasiat\.com/get_image/\d+/\w+",
+    "#count"   : 13,
+
+    "album_category": "",
+    "album_id"      : 30478,
+    "album_url"     : "https://www.xasiat.com/albums/30478/gekkan-young-magazine-2025-no-11/",
+    "count"         : 13,
+    "extension"     : "jpg",
+    "model"         : [],
+    "title"         : "[Gekkan Young Magazine] 2025 No.11",
+    "tags"          : [
+        "Young Magazine",
+        "Teen",
+    ],
+},
+
+{
     "#url"    : "https://www.xasiat.com/albums/categories/gravure-idols/",
     "#class"  : xasiat.XasiatCategoryExtractor,
     "#pattern": xasiat.XasiatAlbumExtractor.pattern,
