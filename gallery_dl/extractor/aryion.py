@@ -234,6 +234,31 @@ class AryionTagExtractor(AryionExtractor):
         return self._pagination_params(url, self.params)
 
 
+class AryionSearchExtractor(AryionExtractor):
+    """Extractor for searches on eka's portal"""
+    subcategory = "search"
+    directory_fmt = ("{category}", "searches", "{search[prefix]:?/_/}"
+                     "{search[q]|search[tags]|search[user]}")
+    archive_fmt = ("s_{search[prefix]:?/_/}"
+                   "{search[q]|search[tags]|search[user]}_{id}")
+    pattern = rf"{BASE_PATTERN}/search\.php\?([^#]+)"
+    example = "https://aryion.com/g4/search.php?q=TEXT&tags=TAGS&user=USER"
+
+    def metadata(self):
+        self.params = params = text.parse_query(self.user)
+
+        return {"search": {
+            **params,
+            "prefix": ("" if params.get("q") else
+                       "t" if params.get("tags") else
+                       "u" if params.get("user") else ""),
+        }}
+
+    def posts(self):
+        url = f"{self.root}/g4/search.php?{text.build_query(self.params)}"
+        return self._pagination_next(url)
+
+
 class AryionPostExtractor(AryionExtractor):
     """Extractor for individual posts on eka's portal"""
     subcategory = "post"
