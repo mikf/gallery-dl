@@ -134,12 +134,16 @@ class AryionExtractor(Extractor):
 
             # Beyond a certain page count, pages after the "last"
             # just repeat the last page's content. This works *every* time.
-            if not "<strong>" in text.extract(page, "class='pagejumps'>", "</span")[0]:
+            if "<strong>" not in text.extract(
+                page, "class='pagejumps'>", "</span"
+            )[0]:
                 return
 
-            for post_id in text.extract_iter(page, "thumb' href='/g4/view/", "'"):
+            for post_id in text.extract_iter(
+                page, "thumb' href='/g4/view/", "'"
+            ):
                 yield post_id
-            
+
             data["p"] += 1
 
     def _parse_post(self, post_id):
@@ -266,8 +270,8 @@ class AryionTagExtractor(AryionExtractor):
     def posts(self):
         url = self.root + "/g4/tags.php"
         return self._pagination_params(url, self.params)
-    
-    
+
+
 class AryionSearchExtractor(AryionExtractor):
     """Extractor for searches on eka's portal"""
     subcategory = "search"
@@ -288,8 +292,12 @@ class AryionSearchExtractor(AryionExtractor):
             "user": self.params.get("user")
         }
 
-        md["search_tags_f"] = "t_" + self.params.get("tags") if md["search_tags"] else None
-        md["user_f"] = "u_" + self.params.get("user") if md["user"] else None
+        md["search_tags_f"] = (
+            "t_" + self.params.get("tags") if md["search_tags"] else None
+        )
+        md["user_f"] = (
+            "u_" + self.params.get("user") if md["user"] else None
+        )
 
         return md
 
