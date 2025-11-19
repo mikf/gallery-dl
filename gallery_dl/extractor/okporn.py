@@ -6,7 +6,7 @@
 
 """Extractors for https://ok.porn/"""
 
-from .common import GalleryExtractor, Message
+from .common import GalleryExtractor
 from .. import text
 
 
@@ -14,23 +14,26 @@ class OkpornGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from ok.porn"""
     category = "okporn"
     root = "https://ok.porn"
-    pattern = r"(?:https?://)?(?:www\.)?(ok\.porn/albums/(\d+/))"
-    example = "https://ok.porn/albums/66141/"
+    pattern = r"(?:https?://)?(?:www\.)?ok\.porn/albums/(\d+)"
+    example = "https://ok.porn/albums/12345/"
 
     def __init__(self, match):
-        GalleryExtractor.__init__(self, match)
-        self.page_url = f"https://{match[1]}"
+        url = f"{self.root}/albums/{match[1]}/"
+        GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        title = text.extract(page, "h1 class=title>", "</h1>")[0]
-        description = text.extract(page, '<div class="desc"', '.</div>')[0]
         return {
-            "gallery_id" : text.parse_int(self.page_url.split("/")[-2]),
-            "title"      : title,
-            "description": description,
+            "gallery_id" : text.parse_int(self.groups[0]),
+            "title"      : text.unescape(text.extr(
+                page, "h1 class=title>", "</h1>")),
+            "description": text.unescape(text.extr(
+                page, 'name="description" content="', '"')),
+            "tags": text.extr(
+                page, 'name="keywords" content="', '"').split(", "),
         }
 
     def images(self, page):
-        page = self.request(self.page_url).text
-        for url in text.extract_iter(page, 'data-original="', '"'):
-            yield url, None
+        return [
+            (url, None)
+            for url in text.extract_iter(page, 'data-original="', '"')
+        ]
