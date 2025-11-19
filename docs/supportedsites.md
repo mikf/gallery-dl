@@ -728,7 +728,7 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr id="okporn" title="okporn">
-    <td>Okporn</td>
+    <td>OK.PORN</td>
     <td>https://ok.porn/</td>
     <td>Galleries</td>
     <td></td>
