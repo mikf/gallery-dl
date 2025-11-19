@@ -150,6 +150,7 @@ CATEGORY_MAP = {
     "pornimage"      : "Porn Image",
     "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
+    "pornstarstube"  : "PORNSTARS.TUBE",
     "postimg"        : "Postimages",
     "readcomiconline": "Read Comic Online",
     "redbust"        : "RedBust",

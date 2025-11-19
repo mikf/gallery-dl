@@ -836,8 +836,8 @@ Consider all listed sites to potentially be NSFW.
     <td></td>
 </tr>
 <tr id="pornstarstube" title="pornstarstube">
-    <td>pornstars.tube</td>
-    <td>https://www.pornstars.tube/</td>
+    <td>PORNSTARS.TUBE</td>
+    <td>https://pornstars.tube/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
