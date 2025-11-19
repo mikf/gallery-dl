@@ -61,7 +61,8 @@ class FanslyExtractor(Extractor):
             yield from self.posts_wall(account, wall)
 
     def _extract_files(self, post):
-        files = []
+        if "attachments" not in post:
+            return ()
 
         if "_extra" in post:
             extra = post.pop("_extra", ())
@@ -75,6 +76,7 @@ class FanslyExtractor(Extractor):
                 if mid in media
             )
 
+        files = []
         for attachment in post.pop("attachments"):
             try:
                 self._extract_attachment(files, post, attachment)
@@ -331,12 +333,20 @@ class FanslyAPI():
 
         posts = response["posts"]
         for post in posts:
-            post["account"] = accounts[post.pop("accountId")]
+            try:
+                post["account"] = accounts[post.pop("accountId")]
+            except KeyError:
+                pass
 
             extra = None
             attachments = []
             for attachment in post["attachments"]:
-                cid = attachment["contentId"]
+                try:
+                    cid = attachment["contentId"]
+                except KeyError:
+                    attachments.append(attachment)
+                    continue
+
                 if cid in media:
                     attachments.append(media[cid])
                 elif cid in bundles:

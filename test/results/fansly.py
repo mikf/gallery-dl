@@ -119,6 +119,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://fansly.com/VchiBan/media",
+    "#comment" : "posts without 'accountId' or 'contentId'",
+    "#class"   : fansly.FanslyCreatorMediaExtractor,
+},
+
+{
     "#url"     : "https://fansly.com/home",
     "#class"   : fansly.FanslyHomeExtractor,
 },
