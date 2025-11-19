@@ -192,6 +192,7 @@ modules = [
     "speakerdeck",
     "steamgriddb",
     "subscribestar",
+    "sxypix",
     "szurubooru",
     "tapas",
     "tcbscans",
