@@ -12,22 +12,32 @@ from .. import text
 
 class PornstarsTubeGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from pornstars.tube"""
-    root = "https://pornstars.tube"
     category = "pornstarstube"
-    pattern = r"(?:https?://)?(?:www\.)?(pornstars\.tube/albums/(\d+))/[\w-]+"
-    example = "https://pornstars.tube/albums/40771/cleaning-leads-to-delicious-mess/"
+    root = "https://pornstars.tube"
+    pattern = (r"(?:https?://)?(?:www\.)?pornstars\.tube"
+               r"/albums/(\d+)(?:/([\w-]+))?")
+    example = "https://pornstars.tube/albums/12345/SLUG/"
 
     def __init__(self, match):
-        GalleryExtractor.__init__(self, match)
-        self.page_url = match[0]
+        url = f"{self.root}/albums/{match[1]}/{match[2] or 'a'}/"
+        GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
+        gid, slug = self.groups
         return {
-            "gallery_id": self.match[2],
-            "title": text.extract(page, '<title>', ' - PORNSTARS.TUBE</title>')[0],
+            "gallery_id": text.parse_int(gid),
+            "slug"      : slug or "",
+            "title"     : text.unescape(text.extr(
+                page, "<title>", " - PORNSTARS.TUBE</title>")),
+            "description": text.unescape(text.extr(
+                page, 'name="description" content="', '"')),
+            "tags": text.extr(
+                page, 'name="keywords" content="', '"').split(", "),
         }
 
     def images(self, page):
-        page = self.request(self.page_url).text
-        for url in text.extract_iter(page, ' href="', '" class="img-holder lg-lg"'):
-            yield url, None
+        album = text.extr(page, 'class="block-album"', "\n</div>")
+        return [
+            (url, None)
+            for url in text.extract_iter(album, ' href="', '"')
+        ]
