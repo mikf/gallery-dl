@@ -13,7 +13,13 @@ __tests__ = (
     "#category": ("", "sxypix", "gallery"),
     "#class"   : sxypix.SxypixGalleryExtractor,
     "#count"   : 35,
-    "#sha1_content" : "cb3014162c252d4f6979cf987f7f669cef459d74",
-    "#sha1_metadata": "7598ecfeec98d7949589d46e0daf6e4bf0b5e4cd",
+
+    "count"     : 35,
+    "num"       : range(1, 35),
+    "filename"  : "hash:md5",
+    "extension" : "webp",
+    "gallery_id": "c42ec529474789f812dd8ba26103855f",
+    "title"     : "#MommysBoy - Penny Barber - Coddling Her Boy",
 },
+
 )
