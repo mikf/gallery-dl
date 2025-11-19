@@ -1009,6 +1009,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
+<tr id="sxypix" title="sxypix">
+    <td>Sxypix</td>
+    <td>https://sxypix.com/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
 <tr id="tapas" title="tapas">
     <td>Tapas</td>
     <td>https://tapas.io/</td>
