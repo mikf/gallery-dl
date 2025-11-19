@@ -10,10 +10,49 @@ from gallery_dl.extractor import pornstarstube
 __tests__ = (
 {
     "#url"     : "https://pornstars.tube/albums/40771/cleaning-leads-to-delicious-mess/",
-    "#category": ("", "pornstarstube", "gallery"),
     "#class"   : pornstarstube.PornstarsTubeGalleryExtractor,
-    "#sha1_content" : "39695e6b0fd8c775db2a6c52b0e2ca3d4268f499",
-    "#sha1_metadata": "d54ef0f4d31d2ed571cc28b06bf2495cd3dee183",
+    "#pattern" : r"https://pics\-storage\-1\.pornhat\.com/contents/albums/main/1920x1080/40000/40771/\d+\.jpg",
+    "#count"   : 100,
+
+    "count"      : 100,
+    "num"        : range(1, 100),
+    "description": "When stepson Brad Sterling decides to help out his stepmom Cali Lee and do a deep clean of the kitchen, he wasn’t expecting her to be so grateful for it. Cali offers to reward him for all his hard work in a much devious way. Who knew that a little bit of cleaning would lead to such messy results!",
+    "extension"  : "jpg",
+    "filename"   : r"re:^\d+$",
+    "gallery_id" : 40771,
+    "slug"       : "cleaning-leads-to-delicious-mess",
+    "title"      : "Cleaning Leads To Delicious Mess",
+    "tags"       : [
+        "blowjob",
+        "oral",
+        "brunette",
+        "teen (18+)",
+        "cowgirl",
+        "latina",
+        "missionary",
+        "handjob",
+        "babe",
+        "standing doggystyle",
+        "side fuck",
+        "reverse cowgirl",
+        "deep throat",
+        "kitchen",
+        "posing",
+        "stripping",
+        "firm ass",
+        "legs on shoulders",
+        "Cali Lee",
+    ],
+},
+
+{
+    "#url"     : "https://pornstars.tube/albums/40771/cleaning",
+    "#class"   : pornstarstube.PornstarsTubeGalleryExtractor,
+},
+
+{
+    "#url"     : "https://pornstars.tube/albums/40771-O",
+    "#class"   : pornstarstube.PornstarsTubeGalleryExtractor,
 },
 
 )
