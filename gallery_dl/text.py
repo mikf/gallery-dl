@@ -11,6 +11,7 @@
 import html
 import urllib.parse
 import re as re_module
+from typing import Generator, Tuple, Union
 
 try:
     re_compile = re_module._compiler.compile
@@ -135,7 +136,7 @@ def nameext_from_name(filename, data=None):
     return data
 
 
-def extract(txt, begin, end, pos=None):
+def extract(txt: str, begin: str, end: str, pos: Union[int, None] = None) -> Tuple[Union[str, None], int]:
     """Extract the text between 'begin' and 'end' from 'txt'
 
     Args:
@@ -163,7 +164,7 @@ def extract(txt, begin, end, pos=None):
         return None, 0 if pos is None else pos
 
 
-def extr(txt, begin, end, default=""):
+def extr(txt: str, begin: str, end: str, default: str ="") -> str:
     """Stripped-down version of 'extract()'"""
     try:
         first = txt.index(begin) + len(begin)
@@ -202,7 +203,7 @@ def extract_all(txt, rules, pos=None, values=None):
     return values, 0 if pos is None else pos
 
 
-def extract_iter(txt, begin, end, pos=None):
+def extract_iter(txt: str, begin: str, end: str, pos: Union[int, None] = None) -> Generator[str, None, None]:
     """Yield values that would be returned by repeated calls of extract()"""
     try:
         index = txt.index

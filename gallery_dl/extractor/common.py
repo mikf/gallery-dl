@@ -19,6 +19,7 @@ import getpass
 import logging
 import requests
 import threading
+from typing import Any, Dict, Iterable, Tuple, Union
 from xml.etree import ElementTree
 from requests.adapters import HTTPAdapter
 from .message import Message
@@ -824,13 +825,13 @@ class GalleryExtractor(Extractor):
     def login(self):
         """Login and set necessary cookies"""
 
-    def metadata(self, page):
+    def metadata(self, page: str) -> Dict[str, Any]:
         """Return a dict with general metadata"""
 
-    def images(self, page):
+    def images(self, page: str) -> Iterable[Tuple[str, Union[str, None]]]:
         """Return a list or iterable of all (image-url, metadata)-tuples"""
 
-    def assets(self, page):
+    def assets(self, page: str) -> Iterable[Dict[str, Any]]:
         """Return an iterable of additional gallery assets
 
         Each asset must be a 'dict' containing at least 'url' and 'type'

@@ -7,6 +7,7 @@
 # published by the Free Software Foundation.
 
 import sys
+from typing import Type, Union
 from ..text import re_compile
 
 modules = [
@@ -253,7 +254,7 @@ modules = [
 ]
 
 
-def find(url):
+def find(url: str) -> Union[Type, None]:
     """Find a suitable extractor for the given URL"""
     for cls in _list_classes():
         if match := cls.pattern.match(url):
