@@ -100,7 +100,7 @@ __tests__ = (
         "ap" : "souten-no-koumori",
         "kt" : "2065",
         "mal": "948",
-        "mu" : "4786",
+        "mu" : "opk9cgi",
     },
 },
 
@@ -116,6 +116,19 @@ __tests__ = (
     "#comment" : "'externalUrl', but *was* still downloadable, now 404 (#2503)",
     "#class"   : mangadex.MangadexChapterExtractor,
     "#exception": exception.AbortExtraction,
+},
+
+{
+    "#url"     : "https://mangadex.org/chapter/f946ac53-0b71-4b5d-aeb2-7931b13c4aaa",
+    "#class"   : mangadex.MangadexChapterExtractor,
+    "#options" : {"data-saver": True},
+    "#results" : (
+        "https://cmdxd98sb0x3yprd.mangadex.network/data-saver/2780e594c3519e6858f76dfc018c8c1a/x1-d5962a0770b39faf73154b428be473752b4c379020916ecb5f0ffeac9639b6bf.jpg",
+        "https://cmdxd98sb0x3yprd.mangadex.network/data-saver/2780e594c3519e6858f76dfc018c8c1a/x2-c9fcaf38888e38c48ff3cff0e2b342f68b7aaed2ea9e2a2a5446dc49b6a4d86e.jpg",
+        "https://cmdxd98sb0x3yprd.mangadex.network/data-saver/2780e594c3519e6858f76dfc018c8c1a/x3-9ea5e06a4ba27b37dd66b75f1d267e3a6f8d21bb14a0163f669cf7f40ede315f.jpg",
+        "https://cmdxd98sb0x3yprd.mangadex.network/data-saver/2780e594c3519e6858f76dfc018c8c1a/x4-605c869a362a19d016d7fb777908c9336fec995965cb59853cb7f9b3e128f70e.jpg",
+        "https://cmdxd98sb0x3yprd.mangadex.network/data-saver/2780e594c3519e6858f76dfc018c8c1a/x5-dc40bd2b45d0ce26c7a401d74c2006a239f5839bc4f4a55893d035d6819627d7.jpg",
+    ),
 },
 
 {
@@ -286,7 +299,7 @@ __tests__ = (
     "#url"     : "https://mangadex.org/title/192aa767-2479-42c1-9780-8d65a2efd36a/gachiakuta?tab=art",
     "#class"   : mangadex.MangadexCoversExtractor,
     "#pattern" : r"https://mangadex\.org/covers/192aa767-2479-42c1-9780-8d65a2efd36a/[\w-]+\.jpg",
-    "#count"   : 19,
+    "#count"   : 20,
 
     "artist"      : ["Urana Kei"],
     "author"      : ["Urana Kei"],
@@ -296,10 +309,10 @@ __tests__ = (
     "extension"   : {"jpg", "png"},
     "filename"    : str,
     "lang"        : {"ja", "fa"},
-    "manga"       : "Gachiakuta",
+    "manga"       : "GACHIAKUTA",
     "manga_id"    : "192aa767-2479-42c1-9780-8d65a2efd36a",
     "status"      : "ongoing",
-    "volume"      : range(1, 16),
+    "volume"      : range(1, 20),
     "tags"        : [
         "Monsters",
         "Action",
