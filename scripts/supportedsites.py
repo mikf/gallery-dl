@@ -53,6 +53,7 @@ CATEGORY_MAP = {
     "e926"           : "e926",
     "e6ai"           : "e6AI",
     "erome"          : "EroMe",
+    "eporner"        : "eporner",
     "everia"         : "EVERIA.CLUB",
     "e-hentai"       : "E-Hentai",
     "exhentai"       : "ExHentai",
