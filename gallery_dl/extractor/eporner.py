@@ -16,7 +16,11 @@ class EpornerGalleryExtractor(GalleryExtractor):
     root = "https://eporner.com"
     pattern = (r"(?:https?://)?(?:www\.)?eporner\.com"
                r"/gallery/(\w+)(?:/([\w-]+))?")
-    example = "https://www.eporner.com/gallery/mHNhErACQFE/NaughtyAmerica-Lolly-Dames-My-Wife-s-Hot-Friend-Big-Booty-Big-Tits-Lolly-Dames-Gets-Her-Pussy-Slammed-Hard/"
+    example = (
+        "https://www.eporner.com/gallery/mHNhErACQFE/"
+        "NaughtyAmerica-Lolly-Dames-My-Wife-s-Hot-Friend-"
+        "Big-Booty-Big-Tits-Lolly-Dames-Gets-Her-Pussy-Slammed-Hard/"
+    )
 
     def __init__(self, match):
         url = f"{self.root}/gallery/{match[1]}/{match[2]}/"
@@ -36,7 +40,8 @@ class EpornerGalleryExtractor(GalleryExtractor):
         }
 
     def images(self, page):
-        album = text.extr(page, 'class="photosgrid gallerygrid"', "id='gallerySlideBox'")
+        album = text.extr(page, 'class="photosgrid gallerygrid"',
+            "id='gallerySlideBox'")
         urls = []
         for url in text.extract_iter(album, ' src="', '"'):
             url, _, ext = url.rpartition(".")
