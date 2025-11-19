@@ -10,7 +10,7 @@ from gallery_dl.extractor import pornstarstube
 __tests__ = (
 {
     "#url"     : "https://pornstars.tube/albums/40771/cleaning-leads-to-delicious-mess/",
-    "#class"   : pornstarstube.PornstarsTubeGalleryExtractor,
+    "#class"   : pornstarstube.PornstarstubeGalleryExtractor,
     "#pattern" : r"https://pics\-storage\-1\.pornhat\.com/contents/albums/main/1920x1080/40000/40771/\d+\.jpg",
     "#count"   : 100,
 
@@ -47,12 +47,12 @@ __tests__ = (
 
 {
     "#url"     : "https://pornstars.tube/albums/40771/cleaning",
-    "#class"   : pornstarstube.PornstarsTubeGalleryExtractor,
+    "#class"   : pornstarstube.PornstarstubeGalleryExtractor,
 },
 
 {
     "#url"     : "https://pornstars.tube/albums/40771-O",
-    "#class"   : pornstarstube.PornstarsTubeGalleryExtractor,
+    "#class"   : pornstarstube.PornstarstubeGalleryExtractor,
 },
 
 )

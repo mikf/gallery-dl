@@ -10,7 +10,7 @@ from .common import GalleryExtractor
 from .. import text
 
 
-class PornstarsTubeGalleryExtractor(GalleryExtractor):
+class PornstarstubeGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from pornstars.tube"""
     category = "pornstarstube"
     root = "https://pornstars.tube"
