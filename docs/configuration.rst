@@ -4032,6 +4032,16 @@ Description
     and `/user/follows/manga/feed <https://api.mangadex.org/docs/swagger.html#/Feed/get-user-follows-manga-feed>`__)
 
 
+extractor.mangadex.data-saver
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Enable `Data Saver` mode and download lower quality versions of chapters.
+
+
 extractor.mangadex.lang
 -----------------------
 Type
