@@ -727,6 +727,12 @@ Consider all listed sites to potentially be NSFW.
     <td>individual Images, Models</td>
     <td></td>
 </tr>
+<tr id="okporn" title="okporn">
+    <td>OK.PORN</td>
+    <td>https://ok.porn/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
 <tr id="patreon" title="patreon">
     <td>Patreon</td>
     <td>https://www.patreon.com/</td>
