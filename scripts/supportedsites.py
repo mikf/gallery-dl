@@ -139,6 +139,7 @@ CATEGORY_MAP = {
     "nozrip"         : "GaryC Booru",
     "nsfwalbum"      : "NSFWalbum.com",
     "nudostar"       : "NudoStar.TV",
+    "okporn"         : "OK.PORN",
     "paheal"         : "Rule 34",
     "photovogue"     : "PhotoVogue",
     "picstate"       : "PicState",
