@@ -160,6 +160,7 @@ modules = [
     "poringa",
     "pornhub",
     "pornpics",
+    "pornstarstube",
     "postmill",
     "rawkuma",
     "reactor",

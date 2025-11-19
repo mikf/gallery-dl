@@ -835,6 +835,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
+<tr id="pornstarstube" title="pornstarstube">
+    <td>pornstars.tube</td>
+    <td>https://www.pornstars.tube/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
 <tr id="rule34vault" title="rule34vault">
     <td>R34 Vault</td>
     <td>https://rule34vault.com/</td>
