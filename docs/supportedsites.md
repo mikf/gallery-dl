@@ -284,10 +284,10 @@ Consider all listed sites to potentially be NSFW.
     <td>Supported</td>
 </tr>
 <tr id="eporner" title="eporner">
-    <td>eporner</td>
-    <td>https://eporner.com/</td>
+    <td>EPORNER</td>
+    <td>https://www.eporner.com/</td>
     <td>Galleries</td>
-    <td>Supported</td>
+    <td></td>
 </tr>
 <tr id="erome" title="erome">
     <td>EroMe</td>
