@@ -53,13 +53,14 @@ class PatreonExtractor(Extractor):
 
             post["num"] = 0
             hashes = set()
-            for kind, url, name in itertools.chain.from_iterable(
+            for kind, file, url, name in itertools.chain.from_iterable(
                     g(post) for g in generators):
                 fhash = self._filehash(url)
                 if fhash not in hashes or not fhash:
                     hashes.add(fhash)
                     post["hash"] = fhash
                     post["type"] = kind
+                    post["file"] = file
                     post["num"] += 1
                     text.nameext_from_url(name, post)
                     if text.ext_from_url(url) == "m3u8":
@@ -86,7 +87,7 @@ class PatreonExtractor(Extractor):
                     name = url
                 else:
                     name = self._filename(url) or url
-            return (("postfile", url, name),)
+            return (("postfile", postfile, url, name),)
         return ()
 
     def _images(self, post):
@@ -94,7 +95,7 @@ class PatreonExtractor(Extractor):
             for image in images:
                 if url := self._images_url(image):
                     name = image.get("file_name") or self._filename(url) or url
-                    yield "image", url, name
+                    yield "image", image, url, name
 
     def _images_url(self, image):
         return image.get("download_url")
@@ -109,24 +110,24 @@ class PatreonExtractor(Extractor):
         if image := post.get("image"):
             if url := image.get("large_url"):
                 name = image.get("file_name") or self._filename(url) or url
-                return (("image_large", url, name),)
+                return (("image_large", image, url, name),)
         return ()
 
     def _attachments(self, post):
         for attachment in post.get("attachments") or ():
             if url := self.request_location(attachment["url"], fatal=False):
-                yield "attachment", url, attachment["name"]
+                yield "attachment", attachment, url, attachment["name"]
 
         for attachment in post.get("attachments_media") or ():
             if url := attachment.get("download_url"):
-                yield "attachment", url, attachment["file_name"]
+                yield "attachment", attachment, url, attachment["file_name"]
 
     def _content(self, post):
         if content := post.get("content"):
             for img in text.extract_iter(
                     content, '<img data-media-id="', '>'):
                 if url := text.extr(img, 'src="', '"'):
-                    yield "content", url, self._filename(url) or url
+                    yield "content", None, url, self._filename(url) or url
 
     def posts(self):
         """Return all relevant post objects"""
