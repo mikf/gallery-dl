@@ -317,7 +317,7 @@ def parse_args(args=None):
 
     parser.add_argument(
         "-s", "--subcategory",
-        dest="subcategories", metavar="SUBCaT", action="append")
+        dest="subcategories", metavar="SUBCaT", action="append", default=[])
     parser.add_argument(
         "-n", "--name",
         dest="site_name", metavar="TITLE")
