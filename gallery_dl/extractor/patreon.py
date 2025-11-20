@@ -53,15 +53,14 @@ class PatreonExtractor(Extractor):
 
             post["num"] = 0
             hashes = set()
-            for kind, url_metadata, url, name in itertools.chain.from_iterable(
+            for kind, file, url, name in itertools.chain.from_iterable(
                     g(post) for g in generators):
                 fhash = self._filehash(url)
                 if fhash not in hashes or not fhash:
                     hashes.add(fhash)
                     post["hash"] = fhash
                     post["type"] = kind
-                    if url_metadata is not None:
-                        post["url_metadata"] = url_metadata
+                    post["file"] = file
                     post["num"] += 1
                     text.nameext_from_url(name, post)
                     if text.ext_from_url(url) == "m3u8":

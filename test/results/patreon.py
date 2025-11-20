@@ -119,7 +119,7 @@ __tests__ = (
     "#class"   : patreon.PatreonPostExtractor,
     "#count"   : 4,
 
-    "url_metadata": dict,
+    "file": {dict, None},
 },
 
 {
