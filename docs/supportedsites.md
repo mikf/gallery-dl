@@ -283,6 +283,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Favorites, Galleries, Posts, Search Results, Tag Searches</td>
     <td>Supported</td>
 </tr>
+<tr id="eporner" title="eporner">
+    <td>EPORNER</td>
+    <td>https://www.eporner.com/</td>
+    <td>Galleries</td>
+    <td></td>
+</tr>
 <tr id="erome" title="erome">
     <td>EroMe</td>
     <td>https://www.erome.com/</td>

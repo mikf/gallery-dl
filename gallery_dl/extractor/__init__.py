@@ -56,6 +56,7 @@ modules = [
     "discord",
     "dynastyscans",
     "e621",
+    "eporner",
     "erome",
     "everia",
     "exhentai",
