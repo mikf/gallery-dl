@@ -70,8 +70,7 @@ class TiktokExtractor(Extractor):
                 if self.audio and "music" in post:
                     if self.audio == "ytdl":
                         ytdl_media = "audio"
-                    else:
-                        url = self._extract_audio(post)
+                    elif url := self._extract_audio(post):
                         yield Message.Url, url, post
 
             elif self.video and "video" in post:
