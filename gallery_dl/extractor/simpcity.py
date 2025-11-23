@@ -102,7 +102,7 @@ class SimpcityExtractor(Extractor):
     def _pagination_reverse(self, base, pnum=None):
         base = f"{self.root}{base}"
 
-        url = f"{base}/page-9999"  # force redirect to last page
+        url = f"{base}/page-{'9999' if pnum is None else pnum}"
         with self.request_page(url) as response:
             url = response.url
             if url[-1] == "/":
