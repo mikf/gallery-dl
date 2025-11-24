@@ -161,8 +161,11 @@ class SimpcityExtractor(Extractor):
             "id": extr('data-content="post-', '"'),
             "author_url": extr('itemprop="url" content="', '"'),
             "date": self.parse_datetime_iso(extr('datetime="', '"')),
-            "content": extr('<div itemprop="text">',
-                            '<div class="js-selectToQuote').strip(),
+            "content": (
+                extr('<div itemprop="text">',
+                     '<div class="js-selectToQuote') or
+                extr('<div >',
+                     '<div class="js-selectToQuote')).strip(),
         }
 
         url_a = post["author_url"]
@@ -184,7 +187,7 @@ class SimpcityPostExtractor(SimpcityExtractor):
         pos = page.find(f'data-content="post-{post_id}"')
         if pos < 0:
             raise exception.NotFoundError("post")
-        html = text.extract(page, "<article ", "</article>", pos-200)[0]
+        html = text.extract(page, "<article ", "<footer", pos-200)[0]
 
         self.kwdict["thread"] = self._parse_thread(page)
         return (self._parse_post(html),)
@@ -207,7 +210,7 @@ class SimpcityThreadExtractor(SimpcityExtractor):
         for page in pages:
             if "thread" not in self.kwdict:
                 self.kwdict["thread"] = self._parse_thread(page)
-            posts = text.extract_iter(page, "<article ", "</article>")
+            posts = text.extract_iter(page, "<article ", "<footer")
             if reverse:
                 posts = list(posts)
                 posts.reverse()
