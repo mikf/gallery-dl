@@ -49,7 +49,7 @@ class MotherlessExtractor(Extractor):
                 for tag in text.extract_iter(
                     extr('class="media-meta-tags">', "</div>"), ">#", "<")
             ],
-            "title": text.unescape(extr("<h1>", "<")),
+            "title": text.unescape(extr("<h2>", "<")),
             "views": text.parse_int(extr(
                 'class="count">', " ").replace(",", "")),
             "favorites": text.parse_int(extr(
