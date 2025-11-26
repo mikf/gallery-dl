@@ -6333,6 +6333,20 @@ Description
         to the Tweet ID value of the last retrieved Tweet.
 
 
+extractor.twitter.search-results
+--------------------------------
+Type
+    ``string``
+Default
+    ``"latest"``
+Description
+    Determines the target of search results.
+Supported Values
+    * ``"top"``
+    * ``"media"``
+    * ``"latest"`` | ``"live"``
+
+
 extractor.twitter.search-stop
 -----------------------------
 Type
