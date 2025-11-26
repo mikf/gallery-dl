@@ -1450,23 +1450,36 @@ class TwitterAPI():
             endpoint, variables, ("bookmark_timeline_v2", "timeline"),
             stop_tweets=128)
 
-    def search_timeline(self, query, product="Latest"):
+    def search_timeline(self, query, product=None):
+        cfg = self.extractor.config
+
+        if product is None:
+            if product := cfg("search-results"):
+                product = {
+                    "top"  : "Top",
+                    "live" : "Latest",
+                    "user" : "People",
+                    "media": "Media",
+                    "list" : "Lists",
+                }.get(product.lower(), product).capitalize()
+            else:
+                product = "Latest"
+
         endpoint = "/graphql/4fpceYZ6-YQCx_JSl_Cn_A/SearchTimeline"
         variables = {
             "rawQuery": query,
-            "count": self.extractor.config("search-limit", 20),
+            "count": cfg("search-limit", 20),
             "querySource": "typed_query",
             "product": product,
             "withGrokTranslatedBio": False,
         }
 
-        if self.extractor.config("search-pagination") in (
-                "max_id", "maxid", "id"):
+        if cfg("search-pagination") in ("max_id", "maxid", "id"):
             update_variables = self._update_variables_search
         else:
             update_variables = None
 
-        stop_tweets = self.extractor.config("search-stop")
+        stop_tweets = cfg("search-stop")
         if stop_tweets is None or stop_tweets == "auto":
             stop_tweets = 3 if update_variables is None else 0
 
