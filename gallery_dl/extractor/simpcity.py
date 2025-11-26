@@ -30,11 +30,14 @@ class SimpcityExtractor(Extractor):
         self.login()
 
         extract_urls = text.re(
-            r'(?s)<(?:'
-            r'video (.*?\ssrc="[^"]+".*?)</video>'
-            r'|a [^>]*?href="(?:https://[^"]+)?(/attachments/[^"]+".*?)</a>'
-            r'|div [^>]*?ata-src="(?:https://[^"]+)?(/attachments/[^"]+".*?)/>'
-            r'|(?:a [^>]*?href|iframe [^>]*?src)="([^"]+)'
+            r'(?s)(?:'
+            r'<video (.*?\ssrc="[^"]+".*?)</video>'
+            r'|<a [^>]*?href="'
+            r'(?:https://[^"]+)?(/attachments/[^"]+".*?)</a>'
+            r'|<div [^>]*?data-src="'
+            r'(?:https://[^"]+)?(/attachments/[^"]+".*?)/>'
+            r'|(?:<a [^>]*?href="|<iframe [^>]*?src="|'
+            r'''onclick="loadMedia\(this, ')([^"']+)'''
             r')'
         ).findall
 
@@ -53,6 +56,8 @@ class SimpcityExtractor(Extractor):
                     data["num"] += 1
                     data["num_external"] += 1
                     data["type"] = "external"
+                    if ext.startswith("//"):
+                        ext = "https:" + ext
                     yield Message.Queue, ext, data
 
                 elif video:

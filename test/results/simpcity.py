@@ -206,6 +206,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://simpcity.cr/threads/lustn4lexi-hot4lexi-lexi-2-legit-hott4lexi-lexi.175167/post-2512729",
+    "#comment" : "'Click here to load redgifs media' (#8609)",
+    "#class"   : simpcity.SimpcityPostExtractor,
+    "#auth"    : True,
+    "#results" : "https://redgifs.com/ifr/unusedsubmissivemullet",
+},
+
+{
     "#url"     : "https://simpcity.cr/threads/alua-tatakai.89490/",
     "#class"   : simpcity.SimpcityThreadExtractor,
     "#auth"    : True,
