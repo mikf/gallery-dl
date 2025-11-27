@@ -291,7 +291,7 @@ def main():
 
             # error file logging handler
             if handler := output.setup_logging_handler(
-                    "errorfile", fmt="{message}", mode="a"):
+                    "errorfile", fmt="{message}", mode="a", defer=True):
                 elog = input_manager.err = logging.getLogger("errorfile")
                 elog.addHandler(handler)
                 elog.propagate = False

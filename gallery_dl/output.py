@@ -176,6 +176,48 @@ class Formatter(logging.Formatter):
         return msg
 
 
+class FileHandler(logging.StreamHandler):
+    def __init__(self, path, mode, encoding, delay=True):
+        self.path = path
+        self.mode = mode
+        self.errors = None
+        self.encoding = encoding
+
+        if delay:
+            logging.Handler.__init__(self)
+            self.stream = None
+            self.emit = self.emit_delayed
+        else:
+            logging.StreamHandler.__init__(self, self._open())
+
+    def close(self):
+        with self.lock:
+            try:
+                if self.stream:
+                    try:
+                        self.flush()
+                        self.stream.close()
+                    finally:
+                        self.stream = None
+            finally:
+                logging.StreamHandler.close(self)
+
+    def _open(self):
+        try:
+            return open(self.path, self.mode,
+                        encoding=self.encoding, errors=self.errors)
+        except FileNotFoundError:
+            os.makedirs(os.path.dirname(self.path))
+            return open(self.path, self.mode,
+                        encoding=self.encoding, errors=self.errors)
+
+    def emit_delayed(self, record):
+        if self.mode != "w" or not self._closed:
+            self.stream = self._open()
+        self.emit = logging.StreamHandler.emit.__get__(self)
+        self.emit(record)
+
+
 def initialize_logging(loglevel):
     """Setup basic logging functionality before configfiles have been loaded"""
     # convert levelnames to lowercase
@@ -247,7 +289,8 @@ def configure_logging(loglevel):
     root.setLevel(minlevel)
 
 
-def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL, mode="w"):
+def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL, mode="w",
+                          defer=False):
     """Setup a new logging handler"""
     opts = config.interpolate(("output",), key)
     if not opts:
@@ -258,12 +301,10 @@ def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL, mode="w"):
     path = opts.get("path")
     mode = opts.get("mode", mode)
     encoding = opts.get("encoding", "utf-8")
+    delay = opts.get("defer", defer)
     try:
         path = util.expand_path(path)
-        handler = logging.FileHandler(path, mode, encoding)
-    except FileNotFoundError:
-        os.makedirs(os.path.dirname(path))
-        handler = logging.FileHandler(path, mode, encoding)
+        handler = FileHandler(path, mode, encoding, delay)
     except (OSError, ValueError) as exc:
         logging.getLogger("gallery-dl").warning(
             "%s: %s", key, exc)
