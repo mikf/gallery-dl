@@ -6294,6 +6294,18 @@ Note
     <extractor.*.image-filter_>`__.
 
 
+extractor.twitter.retries-api
+-----------------------------
+Type
+    ``integer``
+Default
+    ``4``
+Description
+    Maximum number of retries
+    for API requests when encountering server ``errors``,
+    or ``-1`` for infinite retries.
+
+
 extractor.twitter.retweets
 --------------------------
 Type

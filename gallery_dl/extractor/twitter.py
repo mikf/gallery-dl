@@ -1902,14 +1902,14 @@ class TwitterAPI():
 
         while True:
             params["variables"] = self._json_dumps(variables)
-            data = self._call(endpoint, params)["data"]
+            data = self._call(endpoint, params)
 
             try:
                 if path is None:
-                    instructions = (data["user"]["result"]["timeline"]
+                    instructions = (data["data"]["user"]["result"]["timeline"]
                                     ["timeline"]["instructions"])
                 else:
-                    instructions = data
+                    instructions = data["data"]
                     for key in path:
                         instructions = instructions[key]
                     instructions = instructions["instructions"]
@@ -1939,6 +1939,26 @@ class TwitterAPI():
 
             except LookupError:
                 extr.log.debug(data)
+
+                if errors := data.get("errors"):
+                    if "api_retries" not in locals():
+                        api_tries = 1
+                        api_retries = extr.config("retries-api", 4)
+                        if api_retries < 0:
+                            api_retries = float("inf")
+
+                    err = []
+                    srv = False
+                    for e in errors:
+                        err.append(f"- '{e.get('message') or e.get('name')}'")
+                        if e.get("source") == "Server":
+                            srv = True
+
+                    self.log.warning("API errors (%s/%s):\n%s",
+                                     api_tries, api_retries+1, "\n".join(err))
+                    if srv and api_tries <= api_retries:
+                        api_tries += 1
+                        continue
 
                 if user := extr._user_obj:
                     user = user["legacy"]
