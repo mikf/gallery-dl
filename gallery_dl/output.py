@@ -247,7 +247,8 @@ def configure_logging(loglevel):
     root.setLevel(minlevel)
 
 
-def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL, mode="w"):
+def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL, mode="w",
+                          defer=False):
     """Setup a new logging handler"""
     opts = config.interpolate(("output",), key)
     if not opts:
@@ -260,10 +261,10 @@ def setup_logging_handler(key, fmt=LOG_FORMAT, lvl=LOG_LEVEL, mode="w"):
     encoding = opts.get("encoding", "utf-8")
     try:
         path = util.expand_path(path)
-        handler = logging.FileHandler(path, mode, encoding)
+        handler = logging.FileHandler(path, mode, encoding, delay=defer)
     except FileNotFoundError:
         os.makedirs(os.path.dirname(path))
-        handler = logging.FileHandler(path, mode, encoding)
+        handler = logging.FileHandler(path, mode, encoding, delay=defer)
     except (OSError, ValueError) as exc:
         logging.getLogger("gallery-dl").warning(
             "%s: %s", key, exc)
