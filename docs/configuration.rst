@@ -9425,7 +9425,8 @@ Example
             "format"     : "{asctime} {name}: {message}",
             "format-date": "%H:%M:%S",
             "path"       : "~/log.txt",
-            "encoding"   : "ascii"
+            "encoding"   : "ascii",
+            "defer"      : true
         }
 
     .. code:: json
@@ -9474,9 +9475,15 @@ Description
     * encoding
         * File encoding
         * Default: ``"utf-8"``
+    * defer
+        * Defer file opening/creation until writing the first logging message
+        * Default:
+          ``true`` for `errorfile <output.errorfile_>`__,
+          ``false`` otherwise
 Note
-    path, mode, and encoding are only applied when configuring
-    logging output to a file.
+    path, mode, encoding, and defer
+    are only applied when configuring logging output to a file.
+    (See `logging.FileHandler <https://docs.python.org/3/library/logging.handlers.html#filehandler>`__)
 
 
 Postprocessor Configuration
