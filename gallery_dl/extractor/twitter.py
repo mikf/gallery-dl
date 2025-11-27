@@ -1666,10 +1666,8 @@ class TwitterAPI():
             self.extractor._assign_user(user)
             return user["rest_id"]
         except KeyError:
-            if "unavailable_message" in user:
-                raise exception.NotFoundError(
-                    f"{user['unavailable_message'].get('text')} "
-                    f"({user.get('reason')})", False)
+            if user and user.get("__typename") == "UserUnavailable":
+                raise exception.NotFoundError(user["message"], False)
             else:
                 raise exception.NotFoundError("user")
 
