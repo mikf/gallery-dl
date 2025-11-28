@@ -41,6 +41,8 @@ class MotherlessExtractor(Extractor):
         path, _, media_id = path.rpartition("/")
         data = {
             "id"   : media_id,
+            "title": text.unescape(
+                (t := extr("<title>", "<")) and t[:t.rfind(" | ")]),
             "type" : extr("__mediatype = '", "'"),
             "group": extr("__group = '", "'"),
             "url"  : extr("__fileurl = '", "'"),
@@ -49,7 +51,6 @@ class MotherlessExtractor(Extractor):
                 for tag in text.extract_iter(
                     extr('class="media-meta-tags">', "</div>"), ">#", "<")
             ],
-            "title": text.unescape(extr("<h1>", "<")),
             "views": text.parse_int(extr(
                 'class="count">', " ").replace(",", "")),
             "favorites": text.parse_int(extr(
@@ -131,10 +132,9 @@ class MotherlessExtractor(Extractor):
         if title:
             return text.unescape(title.strip())
 
-        pos = page.find(f' href="/G{gallery_id}"')
-        if pos >= 0:
-            return text.unescape(text.extract(
-                page, ' title="', '"', pos)[0])
+        if f' href="/G{gallery_id}"' in page:
+            return text.unescape(
+                (t := text.extr(page, "<title>", "<")) and t[:t.rfind(" | ")])
 
         return ""
 
