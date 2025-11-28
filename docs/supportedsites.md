@@ -121,6 +121,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, Artwork Listings, Challenges, Collections, Followed Users, individual Images, Likes, Search Results, User Profiles</td>
     <td></td>
 </tr>
+<tr id="audiochan" title="audiochan">
+    <td>Audiochan</td>
+    <td>https://audiochan.com/</td>
+    <td>Audios, Collections, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="batoto" title="batoto">
     <td>BATO.TO</td>
     <td>https://bato.to/</td>

@@ -245,6 +245,9 @@ SUBCATEGORY_MAP = {
         "artwork": "Artwork Listings",
         "collections": "",
     },
+    "audiochan": {
+        "audio": "Audios",
+    },
     "bilibili": {
         "user-articles-favorite": "User Article Favorites",
     },
