@@ -374,6 +374,40 @@ class ExecTest(BasePostprocessorTest):
         m_aa.assert_called_once_with(self.pathfmt.kwdict)
         m_ac.assert_called_once()
 
+    def test_verbose_string(self):
+        self._create({
+            "command": "echo foo bar",
+            "verbose": False,
+        })
+
+        with patch("gallery_dl.util.Popen") as p, \
+                self.assertLogs(level=10) as log_info:
+            i = Mock()
+            i.wait.return_value = 123
+            p.return_value = i
+            self._trigger(("after",))
+
+        msg = "DEBUG:postprocessor.exec:Running 'echo'"
+        self.assertEqual(log_info.output[0], msg)
+        self.assertIn("'echo' returned with non-zero ", log_info.output[1])
+
+    def test_verbose_list(self):
+        self._create({
+            "command": ["echo", "foo", "bar"],
+            "verbose": False,
+        })
+
+        with patch("gallery_dl.util.Popen") as p, \
+                self.assertLogs(level=10) as log_info:
+            i = Mock()
+            i.wait.return_value = 123
+            p.return_value = i
+            self._trigger(("after",))
+
+        msg = "DEBUG:postprocessor.exec:Running 'echo'"
+        self.assertEqual(log_info.output[0], msg)
+        self.assertIn("'echo' returned with non-zero ", log_info.output[1])
+
 
 class HashTest(BasePostprocessorTest):
 
