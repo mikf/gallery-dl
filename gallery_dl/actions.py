@@ -148,6 +148,11 @@ class LoggerAdapter():
                 if cond(msg):
                     action(args)
 
+    def traceback(self, exc):
+        if self.logger.isEnabledFor(logging.DEBUG):
+            self.logger._log(
+                logging.DEBUG, "", None, exc_info=exc, extra=self.extra)
+
 
 def _level_to_int(level):
     try:
