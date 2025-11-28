@@ -8018,6 +8018,17 @@ Description
     to have it call ``setsid()``.
 
 
+exec.verbose
+------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include `command <exec.command_>`__
+    arguments in logging messages.
+
+
 hash.chunk-size
 ---------------
 Type
