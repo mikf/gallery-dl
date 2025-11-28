@@ -1889,6 +1889,7 @@ class TwitterAPI():
         original_retweets = (extr.retweets == "original")
         pinned_tweet = extr.pinned
         stop_tweets_max = stop_tweets
+        api_retries = None
 
         params = {"variables": None}
         if cursor := extr._init_cursor():
@@ -1941,7 +1942,7 @@ class TwitterAPI():
                 extr.log.debug(data)
 
                 if errors := data.get("errors"):
-                    if "api_retries" not in locals():
+                    if api_retries is None:
                         api_tries = 1
                         api_retries = extr.config("retries-api", 4)
                         if api_retries < 0:
@@ -1981,6 +1982,7 @@ class TwitterAPI():
 
             tweets = []
             tweet = None
+            api_tries = 1
 
             if pinned_tweet:
                 if isinstance(pinned_tweet, dict):
