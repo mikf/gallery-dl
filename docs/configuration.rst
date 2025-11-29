@@ -2090,12 +2090,18 @@ Type
 Default
     ``false``
 Example
-    * ``"generation,post,version"``
+    * ``"generation,tags,post,version"``
     * ``["version", "generation"]``
 Description
-    Extract additional ``generation``, ``version``, and ``post`` metadata.
+    Extract additional metadata.
+Supported Values
+    * ``generation``
+    * ``post``
+    * ``tags``
+    * ``version``
 Note
-    This requires 1 or more additional API requests per image or video.
+    This requires 1 additional API request
+    for each selected value per image or video.
 
 
 extractor.civitai.nsfw
