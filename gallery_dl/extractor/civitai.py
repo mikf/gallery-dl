@@ -61,13 +61,14 @@ class CivitaiExtractor(Extractor):
             if isinstance(metadata, str):
                 metadata = metadata.split(",")
             elif not isinstance(metadata, (list, tuple)):
-                metadata = ("generation", "version", "post")
+                metadata = {"generation", "version", "post", "tags"}
             self._meta_generation = ("generation" in metadata)
             self._meta_version = ("version" in metadata)
             self._meta_post = ("post" in metadata)
+            self._meta_tags = ("tags" in metadata)
         else:
             self._meta_generation = self._meta_version = self._meta_post = \
-                False
+                self._meta_tags = False
 
     def items(self):
         if models := self.models():
@@ -110,8 +111,9 @@ class CivitaiExtractor(Extractor):
                 }
 
                 if self._meta_generation:
-                    data["generation"] = \
-                        self._extract_meta_generation(file)
+                    data["generation"] = self._extract_meta_generation(file)
+                if self._meta_tags:
+                    data["tags"] = self._extract_meta_tags(file)
                 if self._meta_version:
                     data["model"], data["version"] = \
                         self._extract_meta_version(file, False)
@@ -181,6 +183,8 @@ class CivitaiExtractor(Extractor):
                 file["date"] = self.parse_datetime_iso(file["createdAt"])
             if self._meta_generation:
                 file["generation"] = self._extract_meta_generation(file)
+            if self._meta_tags:
+                file["tags"] = self._extract_meta_tags(file)
             yield data
 
     def _image_reactions(self):
@@ -215,6 +219,12 @@ class CivitaiExtractor(Extractor):
             post = self.api.post(image["postId"])
             post["date"] = self.parse_datetime_iso(post["publishedAt"])
             return post
+        except Exception as exc:
+            return self.log.traceback(exc)
+
+    def _extract_meta_tags(self, image):
+        try:
+            return self.api.tag_getvotabletags(image["id"])
         except Exception as exc:
             return self.log.traceback(exc)
 
@@ -820,6 +830,11 @@ class CivitaiTrpcAPI():
 
         params = self._type_params(params)
         return self._pagination(endpoint, params)
+
+    def tag_getvotabletags(self, image_id):
+        endpoint = "tag.getVotableTags"
+        params = {"id": int(image_id), "type": "image"}
+        return self._call(endpoint, params)
 
     def user(self, username):
         endpoint = "user.getCreator"
