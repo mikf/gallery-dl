@@ -391,6 +391,13 @@ Consider all listed sites to potentially be NSFW.
     <td>Models, Sets, Sites</td>
     <td></td>
 </tr>
+<tr>
+    <td>Girlygirlpic</td>
+    <td>https://girlygirlpic.com</td>
+    <td>Albums, Models, Regions, Search Results, Studios, Tag Searches</td>
+    <td></td>
+</tr>
+<tr>
 <tr id="gofile" title="gofile">
     <td>Gofile</td>
     <td>https://gofile.io/</td>
