@@ -131,6 +131,7 @@ class TestDownloaderConfig(unittest.TestCase):
         self.assertEqual(dl.minsize, None)
         self.assertEqual(dl.maxsize, None)
         self.assertEqual(dl.mtime, True)
+        self.assertEqual(dl.dirmtime, True)
         self.assertEqual(dl.rate, None)
         self.assertEqual(dl.part, True)
         self.assertEqual(dl.partdir, None)
@@ -145,6 +146,7 @@ class TestDownloaderConfig(unittest.TestCase):
     def test_config_http(self):
         config.set((), "rate", 42)
         config.set((), "mtime", False)
+        config.set((), "dirmtime", False)
         config.set((), "headers", {"foo": "bar"})
         config.set(("downloader",), "retries", -1)
         config.set(("downloader", "http"), "filesize-min", "10k")
@@ -163,6 +165,7 @@ class TestDownloaderConfig(unittest.TestCase):
         self.assertEqual(dl.timeout, 10)
         self.assertEqual(dl.verify, False)
         self.assertEqual(dl.mtime, False)
+        self.assertEqual(dl.dirmtime, False)
         self.assertEqual(dl.rate(), 42)
         self.assertEqual(dl.part, False)
 
