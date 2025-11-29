@@ -11,15 +11,23 @@ __tests__ = (
 {
     "#url"     : "https://audiochan.com/a/pBP1V1ODEV2od9CjLu",
     "#class"   : audiochan.AudiochanAudioExtractor,
-    "#pattern" : r"https://stream.audiochan.com/v\?token=YXVkaW9zL2Q4YjA1ZWEzLWU0ZGItNGU2NC05MzZiLTQzNmI3MmM4OTViMS9sOTBCOFI0ajhjS0NFSmNwa2kubXAz&exp=\d+&st=\w+",
+    "#pattern" : r"https://stream.audiochan.com/v\?token=YXVkaW9zL2Q4YjA1ZWEzLWU0ZGItNGU2NC05MzZiLTQzNmI3MmM4OTViMS9sOTBCOFI0ajhjS0NFSmNwa2kubXAz&exp=\d+&st=.+",
     "#count"   : 1,
+
+    "user": {
+        "username": "lil_lovergirl",
+    },
 },
 
 {
     "#url"     : "https://audiochan.com/u/lil_lovergirl",
     "#class"   : audiochan.AudiochanUserExtractor,
-    "#pattern" : r"https://stream\.audiochan\.com/v\?token=\w+\&exp=\d+\&st=\w+",
-    "#count"   : 35,
+    "#pattern" : r"https://stream\.audiochan\.com/v\?token=\w+\&exp=\d+\&st=.+",
+    "#count"   : range(35, 50),
+
+    "user": {
+        "username": "lil_lovergirl",
+    },
 },
 
 {
@@ -34,6 +42,25 @@ __tests__ = (
         "https://content.audiochan.com/audios/d8b05ea3-e4db-4e64-936b-436b72c895b1/Fwy5YxgK4zc7sQ9xx3.mp3",
         "https://content.audiochan.com/audios/d8b05ea3-e4db-4e64-936b-436b72c895b1/P3YrtAdKVekYb3BTgy.mp3",
     ),
+
+    "collection": {
+        "id": "6d7a89a4-e752-4772-923d-65783aee332e",
+        "slug": "qzrByaXAwTLVXRgC9m",
+        "title": "💗SFW",
+    },
+    "user": {
+        "username": "lil_lovergirl",
+    },
+},
+
+{
+    "#url"     : "https://audiochan.com/search?q=Cozy&sort=trending&timeRange=all",
+    "#class"   : audiochan.AudiochanSearchExtractor,
+    "#count"   : range(25, 40),
+
+    "search_tags": "Cozy",
+    "user": dict,
+    "tags": list,
 },
 
 )

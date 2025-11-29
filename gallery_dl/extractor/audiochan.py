@@ -24,6 +24,7 @@ class AudiochanExtractor(Extractor):
     archive_fmt = "{audioFile[id]}"
 
     def _init(self):
+        self.user = False
         self.headers_api = {
             "content-type"   : "application/json",
             "Origin"         : self.root,
@@ -34,7 +35,6 @@ class AudiochanExtractor(Extractor):
         self.headers_dl = {
             "Accept": "audio/webm,audio/ogg,audio/wav,audio/*;q=0.9,"
                       "application/ogg;q=0.7,video/*;q=0.6,*/*;q=0.5",
-            #  "Range"          : "bytes=0-",
             "Sec-Fetch-Dest" : "audio",
             "Sec-Fetch-Mode" : "no-cors",
             "Sec-Fetch-Site" : "same-site",
@@ -48,8 +48,16 @@ class AudiochanExtractor(Extractor):
             post["_http_headers"] = self.headers_dl
             post["date"] = self.parse_datetime_iso(file["created_at"])
             post["date_updated"] = self.parse_datetime_iso(file["updated_at"])
-            post["tags"] = [f"{tag['category']}:{tag['name']}"
-                            for tag in post["tags"]]
+
+            tags = []
+            for tag in post["tags"]:
+                if "tag" in tag:
+                    tag = tag["tag"]
+                tags.append(f"{tag['category']}:{tag['name']}")
+            post["tags"] = tags
+
+            if self.user:
+                post["user"] = post["credits"][0]["user"]
 
             yield Message.Directory, post
             text.nameext_from_name(file["filename"], post)
@@ -59,12 +67,14 @@ class AudiochanExtractor(Extractor):
         url = self.root_api + endpoint
         return self.request_json(url, params=params, headers=self.headers_api)
 
-    def _pagination(self, endpoint, params):
+    def _pagination(self, endpoint, params, key=None):
         params["page"] = 1
         params["limit"] = "12"
 
         while True:
             data = self.request_api(endpoint, params)
+            if key is not None:
+                data = data[key]
 
             yield from data["data"]
 
@@ -79,8 +89,8 @@ class AudiochanAudioExtractor(AudiochanExtractor):
     example = "https://audiochan.com/a/SLUG"
 
     def posts(self):
+        self.user = True
         audio = self.request_api("/audios/slug/" + self.groups[0])
-        audio["user"] = audio["credits"][0]["user"]
         return (audio,)
 
 
@@ -110,6 +120,21 @@ class AudiochanCollectionExtractor(AudiochanExtractor):
         endpoint = "/collections/" + slug
         self.kwdict["collection"] = col = self.request_api(endpoint)
         col.pop("audios", None)
+        col.pop("items", None)
 
         endpoint = f"/collections/slug/{slug}/items"
         return self._pagination(endpoint, {})
+
+
+class AudiochanSearchExtractor(AudiochanExtractor):
+    subcategory = "search"
+    pattern = rf"{BASE_PATTERN}/search/?\?([^#]+)"
+    example = "https://audiochan.com/search?q=QUERY"
+
+    def posts(self):
+        self.user = True
+        endpoint = "/search"
+        params = text.parse_query(self.groups[0])
+        params["sfw_only"] = "false"
+        self.kwdict["search_tags"] = params.get("q")
+        return self._pagination(endpoint, params, "audios")

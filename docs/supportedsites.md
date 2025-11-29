@@ -124,7 +124,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="audiochan" title="audiochan">
     <td>Audiochan</td>
     <td>https://audiochan.com/</td>
-    <td>Audios, Collections, User Profiles</td>
+    <td>Audios, Collections, Search Results, User Profiles</td>
     <td></td>
 </tr>
 <tr id="batoto" title="batoto">
