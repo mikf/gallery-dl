@@ -4,28 +4,28 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://2ch.su/"""
+"""Extractors for https://2ch.org/"""
 
 from .common import Extractor, Message
 from .. import text, util
 
-BASE_PATTERN = r"(?:https?://)?2ch\.(su|life|hk)"
+BASE_PATTERN = r"(?:https?://)?2ch\.(org|su|life|hk)"
 
 
 class _2chThreadExtractor(Extractor):
     """Extractor for 2ch threads"""
     category = "2ch"
     subcategory = "thread"
-    root = "https://2ch.su"
+    root = "https://2ch.org"
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{tim}{filename:? //}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
     pattern = rf"{BASE_PATTERN}/([^/?#]+)/res/(\d+)"
-    example = "https://2ch.su/a/res/12345.html"
+    example = "https://2ch.org/a/res/12345.html"
 
     def __init__(self, match):
         tld = match[1]
-        self.root = f"https://2ch.{'su' if tld == 'hk' else tld}"
+        self.root = f"https://2ch.{'org' if tld == 'hk' else tld}"
         Extractor.__init__(self, match)
 
     def items(self):
@@ -65,9 +65,9 @@ class _2chBoardExtractor(Extractor):
     """Extractor for 2ch boards"""
     category = "2ch"
     subcategory = "board"
-    root = "https://2ch.su"
+    root = "https://2ch.org"
     pattern = rf"{BASE_PATTERN}/([^/?#]+)/?$"
-    example = "https://2ch.su/a/"
+    example = "https://2ch.org/a/"
 
     def __init__(self, match):
         tld = match[1]

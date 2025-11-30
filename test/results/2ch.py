@@ -13,7 +13,7 @@ __tests__ = (
     "#url"     : "https://2ch.hk/a/res/6202876.html",
     "#category": ("", "2ch", "thread"),
     "#class"   : _2ch._2chThreadExtractor,
-    "#pattern" : r"https://2ch\.su/a/src/6202876/\d+\.\w+",
+    "#pattern" : r"https://2ch\.org/a/src/6202876/\d+\.\w+",
     "#count"   : range(450, 1000),
 
     "banned"   : 0,
@@ -54,6 +54,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://2ch.org/a/res/6202876.html",
+    "#class"   : _2ch._2chThreadExtractor,
+},
+
+{
+    "#url"     : "https://2ch.su/a/res/6202876.html",
+    "#class"   : _2ch._2chThreadExtractor,
+},
+
+{
     "#url"     : "https://2ch.life/a/res/6202876.html",
     "#class"   : _2ch._2chThreadExtractor,
     "#pattern" : r"https://2ch\.life/a/src/6202876/\d+\.\w+",
@@ -63,8 +73,15 @@ __tests__ = (
 {
     "#url"     : "https://2ch.hk/a/res/6202876.html",
     "#class"   : _2ch._2chThreadExtractor,
-    "#pattern" : r"https://2ch\.su/a/src/6202876/\d+\.\w+",
+    "#pattern" : r"https://2ch\.org/a/src/6202876/\d+\.\w+",
     "#count"   : range(450, 1000),
+},
+
+{
+    "#url"     : "https://2ch.org/a/",
+    "#class"   : _2ch._2chBoardExtractor,
+    "#pattern" : _2ch._2chThreadExtractor.pattern,
+    "#count"   : range(200, 400),
 },
 
 {
