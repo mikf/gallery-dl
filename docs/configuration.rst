@@ -6305,7 +6305,7 @@ extractor.twitter.retries-api
 Type
     ``integer``
 Default
-    ``4``
+    ``9``
 Description
     Maximum number of retries
     for API requests when encountering server ``errors``,
