@@ -1944,7 +1944,7 @@ class TwitterAPI():
                 if errors := data.get("errors"):
                     if api_retries is None:
                         api_tries = 1
-                        api_retries = extr.config("retries-api", 4)
+                        api_retries = extr.config("retries-api", 9)
                         if api_retries < 0:
                             api_retries = float("inf")
 
