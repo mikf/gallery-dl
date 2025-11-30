@@ -59,9 +59,13 @@ class AudiochanExtractor(Extractor):
             if self.user:
                 post["user"] = post["credits"][0]["user"]
 
+            if not (url := file["url"]):
+                post["_http_segmented"] = 600000
+                url = file["stream_url"]
+
             yield Message.Directory, post
             text.nameext_from_name(file["filename"], post)
-            yield Message.Url, file["url"] or file["stream_url"], post
+            yield Message.Url, url, post
 
     def request_api(self, endpoint, params=None):
         url = self.root_api + endpoint
