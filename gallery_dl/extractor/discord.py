@@ -19,7 +19,7 @@ class DiscordExtractor(Extractor):
     root = "https://discord.com"
     directory_fmt = ("{category}", "{server_id}_{server}",
                      "{channel_id}_{channel}")
-    filename_fmt = "{message_id}_{num:>02}_{filename}.{extension}"
+    filename_fmt = "{message_id}_{num:>02}_{filename[:220]}.{extension}"
     archive_fmt = "{message_id}_{num}"
 
     server_metadata = {}
