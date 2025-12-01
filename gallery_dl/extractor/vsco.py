@@ -22,7 +22,7 @@ class VscoExtractor(Extractor):
     directory_fmt = ("{category}", "{user}")
     filename_fmt = "{id}.{extension}"
     archive_fmt = "{id}"
-    tls12 = False
+    browser = "firefox"
 
     def __init__(self, match):
         Extractor.__init__(self, match)

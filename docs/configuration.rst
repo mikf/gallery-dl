@@ -821,7 +821,8 @@ Default
         ``artstation`` |
         ``behance``    |
         ``fanbox``     |
-        ``twitter``
+        ``twitter``    |
+        ``vsco``
     ``null``
         otherwise
 Example
@@ -937,8 +938,7 @@ Type
 Default
     ``false``
         ``artstation`` |
-        ``behance``    |
-        ``vsco``
+        ``behance``
     ``true``
         otherwise
 Description
