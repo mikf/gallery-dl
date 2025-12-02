@@ -2233,7 +2233,7 @@ class TwitterAPI():
             else:
                 variables["rawQuery"] = f"{query} {max_id}"
 
-            if prefix := self.extractor._cursor_prefix:
+            if prefix := getattr(self.extractor, "_cursor_prefix", None):
                 self.extractor._cursor_prefix = \
                     f"{prefix.partition('_')[0]}_{tweet_id}/"
             variables["cursor"] = None
