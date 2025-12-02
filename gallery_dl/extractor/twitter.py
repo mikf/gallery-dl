@@ -1370,7 +1370,7 @@ class TwitterAPI():
         endpoint = "/graphql/E8Wq-_jFSaU7hxVcuOPR9g/UserTweets"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "withQuickPromoteEligibilityTweetFields": False,
             "withVoice": True,
@@ -1385,7 +1385,7 @@ class TwitterAPI():
         endpoint = "/graphql/-O3QOHrVn1aOm_cF5wyTCQ/UserTweetsAndReplies"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "withCommunity": True,
             "withVoice": True,
@@ -1400,7 +1400,7 @@ class TwitterAPI():
         endpoint = "/graphql/gmHw9geMTncZ7jeLLUUNOw/UserHighlightsTweets"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "withVoice": True,
         }
@@ -1414,7 +1414,7 @@ class TwitterAPI():
         endpoint = "/graphql/jCRhbOzdgOHp6u9H4g2tEg/UserMedia"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "withClientEventToken": False,
             "withBirdwatchNotes": False,
@@ -1430,7 +1430,7 @@ class TwitterAPI():
         endpoint = "/graphql/TGEKkJG_meudeaFcqaxM-Q/Likes"
         variables = {
             "userId": self._user_id_by_screen_name(screen_name),
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "withClientEventToken": False,
             "withBirdwatchNotes": False,
@@ -1445,7 +1445,7 @@ class TwitterAPI():
     def user_bookmarks(self):
         endpoint = "/graphql/pLtjrO4ubNh996M_Cubwsg/Bookmarks"
         variables = {
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
         }
         return self._pagination_tweets(
@@ -1508,7 +1508,7 @@ class TwitterAPI():
         endpoint = "/graphql/Nyt-88UX4-pPCImZNUl9RQ/CommunityTweetsTimeline"
         variables = {
             "communityId": community_id,
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "displayLocation": "Community",
             "rankingMode": "Recency",
             "withCommunity": True,
@@ -1522,7 +1522,7 @@ class TwitterAPI():
         endpoint = "/graphql/ZniZ7AAK_VVu1xtSx1V-gQ/CommunityMediaTimeline"
         variables = {
             "communityId": community_id,
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "withCommunity": True,
         }
         return self._pagination_tweets(
@@ -1534,7 +1534,7 @@ class TwitterAPI():
         endpoint = ("/graphql/p048a9n3hTPppQyK7FQTFw"
                     "/CommunitiesMainPageTimeline")
         variables = {
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "withCommunity": True,
         }
         return self._pagination_tweets(
@@ -1544,7 +1544,7 @@ class TwitterAPI():
     def home_timeline(self):
         endpoint = "/graphql/DXmgQYmIft1oLP6vMkJixw/HomeTimeline"
         variables = {
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "latestControlAvailable": True,
             "withCommunity": True,
@@ -1555,7 +1555,7 @@ class TwitterAPI():
     def home_latest_timeline(self):
         endpoint = "/graphql/SFxmNKWfN9ySJcXG_tjX8g/HomeLatestTimeline"
         variables = {
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
             "includePromotedContent": False,
             "latestControlAvailable": True,
         }
@@ -1582,7 +1582,7 @@ class TwitterAPI():
         endpoint = "/graphql/06JtmwM8k_1cthpFZITVVA/ListLatestTweetsTimeline"
         variables = {
             "listId": list_id,
-            "count": 100,
+            "count": self.extractor.config("limit", 50),
         }
         return self._pagination_tweets(
             endpoint, variables, ("list", "tweets_timeline", "timeline"))
