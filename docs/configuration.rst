@@ -6215,6 +6215,23 @@ Description
     * ``360x360``
 
 
+extractor.twitter.limit
+-----------------------
+Type
+    * ``integer``
+    * ``list`` of ``integers``
+Default
+    ``50``
+Example
+    ``[40, 30, 20, 10, 5]``
+Description
+    Number of requested results per API query.
+
+    When given as a ``list``,
+    start with the first element as ``count`` parameter
+    and switch to the next element whenever no results are returned.
+
+
 extractor.twitter.logout
 ------------------------
 Type
