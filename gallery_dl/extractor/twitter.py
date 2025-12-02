@@ -438,6 +438,8 @@ class TwitterExtractor(Extractor):
         txt, _, tco = content.rpartition(" ")
         tdata["content"] = txt if tco.startswith("https://t.co/") else content
 
+        if "pinned" in tweet:
+            tdata["pinned"] = True
         if "birdwatch_pivot" in tweet:
             try:
                 tdata["birdwatch"] = \
@@ -1887,7 +1889,7 @@ class TwitterAPI():
                            features=None, field_toggles=None):
         extr = self.extractor
         original_retweets = (extr.retweets == "original")
-        pinned_tweet = extr.pinned
+        pinned_tweet = True if extr.pinned else None
         stop_tweets_max = stop_tweets
         api_retries = None
 
@@ -1927,7 +1929,7 @@ class TwitterAPI():
                     elif instr_type == "TimelineAddToModule":
                         entries = instr["moduleItems"]
                     elif instr_type == "TimelinePinEntry":
-                        if pinned_tweet:
+                        if pinned_tweet is not None:
                             pinned_tweet = instr["entry"]
                     elif instr_type == "TimelineReplaceEntry":
                         entry = instr["entry"]
@@ -1984,12 +1986,10 @@ class TwitterAPI():
             tweet = None
             api_tries = 1
 
-            if pinned_tweet:
-                if isinstance(pinned_tweet, dict):
-                    tweets.append(pinned_tweet)
-                elif instructions[-1]["type"] == "TimelinePinEntry":
-                    tweets.append(instructions[-1]["entry"])
-                pinned_tweet = False
+            if pinned_tweet is not None and isinstance(pinned_tweet, dict):
+                pinned_tweet["pinned"] = True
+                tweets.append(pinned_tweet)
+                pinned_tweet = None
 
             for entry in entries:
                 esw = entry["entryId"].startswith
@@ -2019,6 +2019,26 @@ class TwitterAPI():
                         # keep going even if there are no tweets
                         tweet = True
                     cursor = cursor.get("value")
+
+            if pinned_tweet is not None:
+                if pinned := extr._user_obj["legacy"].get(
+                        "pinned_tweet_ids_str"):
+                    pinned = f"-tweet-{pinned[0]}"
+                    for idx, entry in enumerate(tweets):
+                        if entry["entryId"].endswith(pinned):
+                            # mark as pinned / set 'pinned = True'
+                            pinned_tweet = (
+                                (entry.get("content") or entry["item"])
+                                ["itemContent"]["tweet_results"]["result"])
+                            if "tweet" in pinned_tweet:
+                                pinned_tweet = pinned_tweet["tweet"]
+                            pinned_tweet["pinned"] = True
+                            # move to front of 'tweets'
+                            del tweets[idx]
+                            tweets.insert(0, entry)
+                            break
+                del pinned
+                pinned_tweet = None
 
             for entry in tweets:
                 try:
