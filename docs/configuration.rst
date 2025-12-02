@@ -6328,11 +6328,20 @@ Description
 extractor.twitter.search-limit
 ------------------------------
 Type
-    ``integer``
+    * ``integer``
+    * ``list`` of ``integers``
 Default
     ``20``
+Example
+    ``[50, 20, 10, 5, 2]``
 Description
     Number of requested results per search query.
+
+    When given as a ``list``,
+    start with the first element as ``count`` parameter
+    and switch to the next element when
+    `search-stop <extractor.twitter.search-stop_>`__
+    is reached.
 
 
 extractor.twitter.search-pagination

@@ -1712,7 +1712,7 @@ class TwitterAPI():
             self.client_transaction.generate_transaction_id(method, path)
 
     def _call(self, endpoint, params, method="GET", auth=True, root=None):
-        url = (root or self.root) + endpoint
+        url = (self.root if root is None else root) + endpoint
 
         while True:
             if auth:
@@ -1892,6 +1892,14 @@ class TwitterAPI():
         pinned_tweet = True if extr.pinned else None
         stop_tweets_max = stop_tweets
         api_retries = None
+
+        if isinstance(count := variables.get("count"), list):
+            count = count.copy()
+            count.reverse()
+            self.log.debug("Using 'count: %s'", count[-1])
+            variables["count"] = count.pop()
+        else:
+            count = False
 
         params = {"variables": None}
         if cursor := extr._init_cursor():
@@ -2126,15 +2134,19 @@ class TwitterAPI():
             if tweet:
                 stop_tweets = stop_tweets_max
                 last_tweet = tweet
-            else:
-                if stop_tweets <= 0:
+            elif stop_tweets <= 0:
+                if not count:
                     return extr._update_cursor(None)
+                self.log.debug("Switching to 'count: %s'", count[-1])
+                variables["count"] = count.pop()
+            else:
                 self.log.debug(
                     "No Tweet results (%s/%s)",
                     stop_tweets_max - stop_tweets + 1, stop_tweets_max)
                 stop_tweets -= 1
 
             if not cursor or cursor == variables.get("cursor"):
+                self.log.debug("No continuation cursor")
                 return extr._update_cursor(None)
 
             if update_variables is None:
