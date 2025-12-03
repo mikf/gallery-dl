@@ -7202,15 +7202,29 @@ Description
 downloader.*.part-directory
 ---------------------------
 Type
-    |Path|_
+    * |Path|_
+    * ``object`` (Condition_ → |Path|_)
 Default
     ``null``
-Description
-    Alternate location for ``.part`` files.
+Example
+    .. code:: json
 
-    Missing directories will be created as needed.
-    If this value is ``null``, ``.part`` files are going to be stored
-    alongside the actual output files.
+        "/tmp/.gdl"
+
+    .. code:: json
+
+        {
+            "size > 100000": "~/.gdl/part",
+            "duration"     : "/tmp/.gdl/video",
+        }
+
+Description
+    Alternate location(s) for ``.part`` files.
+Note
+    If this value is ``null`` or no Conditions_ apply,
+    ``.part`` files are stored alongside the actual output files.
+
+    For a single |Path|_, missing directories will be created as needed
 
 
 downloader.*.progress
