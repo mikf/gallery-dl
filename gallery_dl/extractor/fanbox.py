@@ -66,17 +66,16 @@ class FanboxExtractor(Extractor):
             if fee_max is not None and fee_max < item["feeRequired"]:
                 self.log.warning("Skipping post %s (feeRequired of %s > %s)",
                                  item["id"], item["feeRequired"], fee_max)
-                continue
+            else:
+                try:
+                    url = ("https://api.fanbox.cc/post.info?postId=" +
+                           item["id"])
+                    item = self.request_json(url, headers=self.headers)["body"]
+                except Exception as exc:
+                    self.log.warning("Skipping post %s (%s: %s)",
+                                     item["id"], exc.__class__.__name__, exc)
 
-            try:
-                url = "https://api.fanbox.cc/post.info?postId=" + item["id"]
-                body = self.request_json(url, headers=self.headers)["body"]
-                content_body, post = self._extract_post(body)
-            except Exception as exc:
-                self.log.warning("Skipping post %s (%s: %s)",
-                                 item["id"], exc.__class__.__name__, exc)
-                continue
-
+            content_body, post = self._extract_post(item)
             yield Message.Directory, post
             yield from self._get_urls_from_post(content_body, post)
 
