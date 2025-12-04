@@ -85,11 +85,7 @@ class YoutubeDLDownloader(DownloaderBase):
                         ytdl_instance, url)
                 else:
                     info_dict = self._extract_manifest(
-                        ytdl_instance, url,
-                        manifest,
-                        kwdict.get("_ytdl_manifest_data"),
-                        kwdict.get("_ytdl_manifest_headers"),
-                        kwdict.get("_ytdl_manifest_cookies"))
+                        ytdl_instance, url, kwdict)
             except Exception as exc:
                 self.log.traceback(exc)
                 self.log.warning("%s: %s", exc.__class__.__name__, exc)
@@ -113,12 +109,11 @@ class YoutubeDLDownloader(DownloaderBase):
     def _extract_url(self, ytdl, url):
         return ytdl.extract_info(url, download=False)
 
-    def _extract_manifest(self, ytdl, url, manifest_type, manifest_data=None,
-                          headers=None, cookies=None):
+    def _extract_manifest(self, ytdl, url, kwdict):
         extr = ytdl.get_info_extractor("Generic")
         video_id = extr._generic_id(url)
 
-        if cookies is not None:
+        if cookies := kwdict.get("_ytdl_manifest_cookies"):
             if isinstance(cookies, dict):
                 cookies = cookies.items()
             set_cookie = ytdl.cookiejar.set_cookie
@@ -129,8 +124,11 @@ class YoutubeDLDownloader(DownloaderBase):
                     False, None, False, None, None, {},
                 ))
 
-        if manifest_type == "hls":
-            if manifest_data is None:
+        type = kwdict["_ytdl_manifest"]
+        data = kwdict.get("_ytdl_manifest_data")
+        headers = kwdict.get("_ytdl_manifest_headers")
+        if type == "hls":
+            if data is None:
                 try:
                     fmts, subs = extr._extract_m3u8_formats_and_subtitles(
                         url, video_id, "mp4", headers=headers)
@@ -141,13 +139,14 @@ class YoutubeDLDownloader(DownloaderBase):
             else:
                 try:
                     fmts, subs = extr._parse_m3u8_formats_and_subtitles(
-                        url, video_id, "mp4")
+                        data, url, "mp4", headers=headers)
                 except AttributeError:
-                    fmts = extr._parse_m3u8_formats(url, video_id, "mp4")
+                    fmts = extr._parse_m3u8_formats(
+                        data, url, "mp4", headers=headers)
                     subs = None
 
-        elif manifest_type == "dash":
-            if manifest_data is None:
+        elif type == "dash":
+            if data is None:
                 try:
                     fmts, subs = extr._extract_mpd_formats_and_subtitles(
                         url, video_id, headers=headers)
@@ -156,18 +155,18 @@ class YoutubeDLDownloader(DownloaderBase):
                         url, video_id, headers=headers)
                     subs = None
             else:
-                if isinstance(manifest_data, str):
-                    manifest_data = ElementTree.fromstring(manifest_data)
+                if isinstance(data, str):
+                    data = ElementTree.fromstring(data)
                 try:
                     fmts, subs = extr._parse_mpd_formats_and_subtitles(
-                        manifest_data, mpd_id="dash")
+                        data, mpd_id="dash")
                 except AttributeError:
                     fmts = extr._parse_mpd_formats(
-                        manifest_data, mpd_id="dash")
+                        data, mpd_id="dash")
                     subs = None
 
         else:
-            raise ValueError(f"Unsupported manifest type '{manifest_type}'")
+            raise ValueError(f"Unsupported manifest type '{type}'")
 
         info_dict = {
             "extractor": "",
