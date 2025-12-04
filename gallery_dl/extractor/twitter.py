@@ -2029,7 +2029,9 @@ class TwitterAPI():
                     cursor = cursor.get("value")
 
             if pinned_tweet is not None:
-                if pinned := extr._user_obj["legacy"].get(
+                if extr._user_obj is None:
+                    pinned = None
+                elif pinned := extr._user_obj["legacy"].get(
                         "pinned_tweet_ids_str"):
                     pinned = f"-tweet-{pinned[0]}"
                     for idx, entry in enumerate(tweets):
