@@ -40,8 +40,11 @@ class YoutubeDLDownloader(DownloaderBase):
     def download(self, url, pathfmt):
         kwdict = pathfmt.kwdict
 
-        ytdl_instance = kwdict.pop("_ytdl_instance", None)
-        if not ytdl_instance:
+        if ytdl_instance := kwdict.pop("_ytdl_instance", None):
+            # 'ytdl' extractor
+            info_dict = kwdict.pop("_ytdl_info_dict")
+        else:
+            # other extractors
             ytdl_instance = self.ytdl_instance
             if not ytdl_instance:
                 try:
@@ -63,12 +66,31 @@ class YoutubeDLDownloader(DownloaderBase):
                     module, self, self.ytdl_opts)
                 if self.outtmpl == "default":
                     self.outtmpl = module.DEFAULT_OUTTMPL
+
             if self.forward_cookies:
                 self.log.debug("Forwarding cookies to %s",
                                ytdl_instance.__module__)
                 set_cookie = ytdl_instance.cookiejar.set_cookie
                 for cookie in self.session.cookies:
                     set_cookie(cookie)
+
+            url = url[5:]
+            manifest = kwdict.get("_ytdl_manifest")
+            try:
+                if manifest is None:
+                    info_dict = self._extract_url(
+                        ytdl_instance, url)
+                else:
+                    info_dict = self._extract_manifest(
+                        ytdl_instance, url,
+                        manifest,
+                        kwdict.get("_ytdl_manifest_data"),
+                        kwdict.get("_ytdl_manifest_headers"),
+                        kwdict.get("_ytdl_manifest_cookies"))
+            except Exception as exc:
+                self.log.traceback(exc)
+                self.log.warning("%s: %s", exc.__class__.__name__, exc)
+                return False
 
         if "__gdl_initialize" in ytdl_instance.params:
             del ytdl_instance.params["__gdl_initialize"]
@@ -78,121 +100,14 @@ class YoutubeDLDownloader(DownloaderBase):
             if rlf := ytdl_instance.params.pop("__gdl_ratelimit_func", False):
                 self.rate_dyn = rlf
 
-        info_dict = kwdict.pop("_ytdl_info_dict", None)
-        if not info_dict:
-            url = url[5:]
-            try:
-                if manifest := kwdict.pop("_ytdl_manifest", None):
-                    info_dict = self._extract_manifest(
-                        ytdl_instance, url, manifest,
-                        kwdict.pop("_ytdl_manifest_data", None),
-                        kwdict.pop("_ytdl_manifest_headers", None),
-                        kwdict.pop("_ytdl_manifest_cookies", None))
-                else:
-                    info_dict = self._extract_info(ytdl_instance, url)
-            except Exception as exc:
-                self.log.traceback(exc)
-                self.log.warning("%s: %s", exc.__class__.__name__, exc)
-
-            if not info_dict:
-                return False
-
-        if "entries" in info_dict:
-            index = kwdict.get("_ytdl_index")
-            if index is None:
-                return self._download_playlist(
-                    ytdl_instance, pathfmt, info_dict)
-            else:
-                info_dict = info_dict["entries"][index]
-
         if extra := kwdict.get("_ytdl_extra"):
             info_dict.update(extra)
 
+        if "entries" in info_dict:
+            return self._download_playlist(ytdl_instance, pathfmt, info_dict)
         return self._download_video(ytdl_instance, pathfmt, info_dict)
 
-    def _download_video(self, ytdl_instance, pathfmt, info_dict):
-        if "url" in info_dict:
-            if "filename" in pathfmt.kwdict:
-                pathfmt.kwdict["extension"] = \
-                    text.ext_from_url(info_dict["url"])
-            else:
-                text.nameext_from_url(info_dict["url"], pathfmt.kwdict)
-
-        formats = info_dict.get("requested_formats")
-        if formats and not compatible_formats(formats):
-            info_dict["ext"] = "mkv"
-        elif "ext" not in info_dict:
-            try:
-                info_dict["ext"] = info_dict["formats"][0]["ext"]
-            except LookupError:
-                info_dict["ext"] = "mp4"
-
-        if self.outtmpl:
-            self._set_outtmpl(ytdl_instance, self.outtmpl)
-            pathfmt.filename = filename = \
-                ytdl_instance.prepare_filename(info_dict)
-            pathfmt.extension = info_dict["ext"]
-            pathfmt.path = pathfmt.directory + filename
-            pathfmt.realpath = pathfmt.temppath = (
-                pathfmt.realdirectory + filename)
-        else:
-            pathfmt.set_extension(info_dict["ext"])
-            pathfmt.build_path()
-
-        if pathfmt.exists():
-            pathfmt.temppath = ""
-            return True
-
-        if self.rate_dyn is not None:
-            # static ratelimits are set in ytdl.construct_YoutubeDL
-            ytdl_instance.params["ratelimit"] = self.rate_dyn()
-
-        self.out.start(pathfmt.path)
-        if self.part:
-            pathfmt.kwdict["extension"] = pathfmt.prefix
-            filename = pathfmt.build_filename(pathfmt.kwdict)
-            pathfmt.kwdict["extension"] = info_dict["ext"]
-            if self.partdir:
-                path = os.path.join(self.partdir, filename)
-            else:
-                path = pathfmt.realdirectory + filename
-            path = path.replace("%", "%%") + "%(ext)s"
-        else:
-            path = pathfmt.realpath.replace("%", "%%")
-
-        self._set_outtmpl(ytdl_instance, path)
-        try:
-            ytdl_instance.process_info(info_dict)
-        except Exception as exc:
-            self.log.traceback(exc)
-            return False
-
-        pathfmt.temppath = info_dict.get("filepath") or info_dict["_filename"]
-        return True
-
-    def _download_playlist(self, ytdl_instance, pathfmt, info_dict):
-        pathfmt.kwdict["extension"] = pathfmt.prefix
-        filename = pathfmt.build_filename(pathfmt.kwdict)
-        pathfmt.kwdict["extension"] = pathfmt.extension
-        path = pathfmt.realdirectory + filename
-        path = path.replace("%", "%%") + "%(playlist_index)s.%(ext)s"
-        self._set_outtmpl(ytdl_instance, path)
-
-        status = False
-        for entry in info_dict["entries"]:
-            if not entry:
-                continue
-            if self.rate_dyn is not None:
-                ytdl_instance.params["ratelimit"] = self.rate_dyn()
-            try:
-                ytdl_instance.process_info(entry)
-                status = True
-            except Exception as exc:
-                self.log.traceback(exc)
-                self.log.error("%s: %s", exc.__class__.__name__, exc)
-        return status
-
-    def _extract_info(self, ytdl, url):
+    def _extract_url(self, ytdl, url):
         return ytdl.extract_info(url, download=False)
 
     def _extract_manifest(self, ytdl, url, manifest_type, manifest_data=None,
@@ -249,8 +164,7 @@ class YoutubeDLDownloader(DownloaderBase):
                     subs = None
 
         else:
-            self.log.error("Unsupported manifest type '%s'", manifest_type)
-            return None
+            raise ValueError(f"Unsupported manifest type '{manifest_type}'")
 
         info_dict = {
             "extractor": "",
@@ -260,6 +174,83 @@ class YoutubeDLDownloader(DownloaderBase):
             "subtitles": subs,
         }
         return ytdl.process_ie_result(info_dict, download=False)
+
+    def _download_video(self, ytdl_instance, pathfmt, info_dict):
+        if "url" in info_dict:
+            if "filename" in pathfmt.kwdict:
+                pathfmt.kwdict["extension"] = \
+                    text.ext_from_url(info_dict["url"])
+            else:
+                text.nameext_from_url(info_dict["url"], pathfmt.kwdict)
+
+        formats = info_dict.get("requested_formats")
+        if formats and not compatible_formats(formats):
+            info_dict["ext"] = "mkv"
+        elif "ext" not in info_dict:
+            try:
+                info_dict["ext"] = info_dict["formats"][0]["ext"]
+            except LookupError:
+                info_dict["ext"] = "mp4"
+
+        if self.outtmpl:
+            self._set_outtmpl(ytdl_instance, self.outtmpl)
+            pathfmt.filename = filename = \
+                ytdl_instance.prepare_filename(info_dict)
+            pathfmt.extension = info_dict["ext"]
+            pathfmt.path = pathfmt.directory + filename
+            pathfmt.realpath = pathfmt.temppath = (
+                pathfmt.realdirectory + filename)
+        else:
+            pathfmt.set_extension(info_dict["ext"])
+            pathfmt.build_path()
+
+        if pathfmt.exists():
+            pathfmt.temppath = ""
+            return True
+
+        if self.rate_dyn is not None:
+            # static ratelimits are set in ytdl.construct_YoutubeDL
+            ytdl_instance.params["ratelimit"] = self.rate_dyn()
+
+        self.out.start(pathfmt.path)
+        if self.part:
+            pathfmt.kwdict["extension"] = pathfmt.prefix
+            filename = pathfmt.build_filename(pathfmt.kwdict)
+            pathfmt.kwdict["extension"] = info_dict["ext"]
+            if self.partdir:
+                path = os.path.join(self.partdir, filename)
+            else:
+                path = pathfmt.realdirectory + filename
+            path = path.replace("%", "%%") + "%(ext)s"
+        else:
+            path = pathfmt.realpath.replace("%", "%%")
+
+        self._set_outtmpl(ytdl_instance, path)
+        ytdl_instance.process_info(info_dict)
+        pathfmt.temppath = info_dict.get("filepath") or info_dict["_filename"]
+        return True
+
+    def _download_playlist(self, ytdl_instance, pathfmt, info_dict):
+        pathfmt.kwdict["extension"] = pathfmt.prefix
+        filename = pathfmt.build_filename(pathfmt.kwdict)
+        pathfmt.kwdict["extension"] = pathfmt.extension
+        path = pathfmt.realdirectory + filename
+        path = path.replace("%", "%%") + "%(playlist_index)s.%(ext)s"
+        self._set_outtmpl(ytdl_instance, path)
+
+        status = False
+        for entry in info_dict["entries"]:
+            if not entry:
+                continue
+            if self.rate_dyn is not None:
+                ytdl_instance.params["ratelimit"] = self.rate_dyn()
+            try:
+                ytdl_instance.process_info(entry)
+                status = True
+            except Exception as exc:
+                self.log.traceback(exc)
+                self.log.error("%s: %s", exc.__class__.__name__, exc)
+        return status
 
     def _progress_hook(self, info):
         if info["status"] == "downloading" and \
