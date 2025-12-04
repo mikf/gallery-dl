@@ -22,9 +22,9 @@ class YoutubeDLDownloader(DownloaderBase):
         DownloaderBase.__init__(self, job)
 
         extractor = job.extractor
-        retries = self.config("retries", extractor._retries)
+        self.retries = self.config("retries", extractor._retries)
         self.ytdl_opts = {
-            "retries": retries+1 if retries >= 0 else float("inf"),
+            "retries": self.retries+1 if self.retries >= 0 else float("inf"),
             "socket_timeout": self.config("timeout", extractor._timeout),
             "nocheckcertificate": not self.config("verify", extractor._verify),
             "proxy": self.proxies.get("http") if self.proxies else None,
@@ -77,19 +77,26 @@ class YoutubeDLDownloader(DownloaderBase):
                 for cookie in self.session.cookies:
                     set_cookie(cookie)
 
+            tries = 0
             url = url[5:]
             manifest = kwdict.get("_ytdl_manifest")
-            try:
-                if manifest is None:
-                    info_dict = self._extract_url(
-                        ytdl_instance, url)
-                else:
-                    info_dict = self._extract_manifest(
-                        ytdl_instance, url, kwdict)
-            except Exception as exc:
-                self.log.traceback(exc)
-                self.log.warning("%s: %s", exc.__class__.__name__, exc)
-                return False
+            while True:
+                try:
+                    if manifest is None:
+                        info_dict = self._extract_url(
+                            ytdl_instance, url)
+                    else:
+                        info_dict = self._extract_manifest(
+                            ytdl_instance, url, kwdict)
+                    break
+                except Exception as exc:
+                    tries += 1
+                    self.log.traceback(exc)
+                    self.log.error("%s: %s (%s/%s)",
+                                   exc.__class__.__name__, exc,
+                                   tries, self.retries+1)
+                    if tries > self.retries:
+                        return False
 
         if "__gdl_initialize" in ytdl_instance.params:
             del ytdl_instance.params["__gdl_initialize"]
@@ -102,9 +109,21 @@ class YoutubeDLDownloader(DownloaderBase):
         if extra := kwdict.get("_ytdl_extra"):
             info_dict.update(extra)
 
-        if "entries" in info_dict:
-            return self._download_playlist(ytdl_instance, pathfmt, info_dict)
-        return self._download_video(ytdl_instance, pathfmt, info_dict)
+        while True:
+            try:
+                if "entries" in info_dict:
+                    return self._download_playlist(
+                        ytdl_instance, pathfmt, info_dict)
+                return self._download_video(
+                    ytdl_instance, pathfmt, info_dict)
+            except Exception as exc:
+                tries += 1
+                self.log.traceback(exc)
+                self.log.error("%s: %s (%s/%s)",
+                               exc.__class__.__name__, exc,
+                               tries, self.retries+1)
+                if tries > self.retries:
+                    return False
 
     def _extract_url(self, ytdl, url):
         return ytdl.extract_info(url, download=False)
