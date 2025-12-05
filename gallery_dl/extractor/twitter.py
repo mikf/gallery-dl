@@ -2005,6 +2005,7 @@ class TwitterAPI():
                 if esw("tweet-"):
                     tweets.append(entry)
                 elif esw(("profile-grid-",
+                          "search-grid-",
                           "communities-grid-")):
                     if "content" in entry:
                         tweets.extend(entry["content"]["items"])
