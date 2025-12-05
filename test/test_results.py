@@ -426,8 +426,7 @@ class ResultJob(job.DownloadJob):
 
     def run(self):
         self._init()
-        for msg in self.extractor:
-            self.dispatch(msg)
+        self.dispatch(self.extractor)
 
     def handle_url(self, url, kwdict, fallback=None):
         self._update_url(url)
