@@ -6,9 +6,9 @@
 
 """Extractors for https://www.facebook.com/"""
 
+import json
 from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
-from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?facebook\.com"
 USER_PATTERN = (rf"{BASE_PATTERN}/"
@@ -123,6 +123,11 @@ class FacebookExtractor(Extractor):
                 photo_page,
                 '"nextMedia":{"edges":[{"node":{"__typename":"Photo","id":"',
                 '"'
+            ),
+            "taggedids": text.extr(
+                photo_page,
+                '"tags":{"edges":[',
+                ']}'
             )
         }
 
@@ -145,6 +150,14 @@ class FacebookExtractor(Extractor):
                     '"'
                 ))
 
+        if photo.get("taggedids"):
+            taggedids = set()
+            photo["taggedids"] = f"[{photo['taggedids']}]"
+            data = json.loads(photo["taggedids"])
+            for row in data:
+                if row.get("node", {}).get("__typename", "") == "User":
+                    taggedids.add(row["node"]["id"])
+            photo["taggedids"] = taggedids
         return photo
 
     def parse_post_page(self, post_page):
@@ -250,71 +263,68 @@ class FacebookExtractor(Extractor):
 
         return res
 
-    def extract_set(self, set_data):
+    def extract_set(self, set_data, tagged=False):
         set_id = set_data["set_id"]
-        all_photo_ids = [set_data["first_photo_id"]]
+        queue = [set_data["first_photo_id"]]
+        seen_ids = set(queue)
+        user_id = self._extract_profile(self.groups[0], True)["id"]
 
         retries = 0
-        i = 0
+        index = 0
 
-        while i < len(all_photo_ids):
-            photo_id = all_photo_ids[i]
+        while queue:
+            photo_id = queue.pop(0)
             photo_url = f"{self.root}/photo/?fbid={photo_id}&set={set_id}"
             photo_page = self.photo_page_request_wrapper(photo_url).text
 
             photo = self.parse_photo_page(photo_page)
-            photo["num"] = i + 1
 
             if self.author_followups:
                 for followup_id in photo["followups_ids"]:
-                    if followup_id not in all_photo_ids:
+                    if followup_id not in seen_ids:
                         self.log.debug(
                             "Found a followup in comments: %s", followup_id
                         )
-                        all_photo_ids.append(followup_id)
+                        queue.append(followup_id)
+                        seen_ids.add(followup_id)
 
-            if not photo["url"]:
-                if retries < self.fallback_retries and self._interval_429:
-                    seconds = self._interval_429()
-                    self.log.warning(
-                        "Failed to find photo download URL for %s. "
-                        "Retrying in %s seconds.", photo_url, seconds,
-                    )
-                    self.wait(seconds=seconds, reason="429 Too Many Requests")
-                    retries += 1
-                    continue
+            if tagged and user_id not in photo.get("taggedids", []):
+                pass
+            else:
+                if not photo["url"]:
+                    if retries < self.fallback_retries and self._interval_429:
+                        seconds = self._interval_429()
+                        self.log.warning(
+                            "Failed to find photo download URL for %s. "
+                            "Retrying in %s seconds.", photo_url, seconds,
+                        )
+                        self.wait(seconds=seconds, reason="429 Too Many Requests")
+                        retries += 1
+                        continue
+                    else:
+                        self.log.error(
+                            "Failed to find photo download URL for " + photo_url +
+                            ". Skipping."
+                        )
+                        retries = 0
                 else:
-                    self.log.error(
-                        "Failed to find photo download URL for " + photo_url +
-                        ". Skipping."
-                    )
                     retries = 0
-            else:
-                retries = 0
-                photo.update(set_data)
-                yield Message.Directory, photo
-                yield Message.Url, photo["url"], photo
+                    photo["num"] = index
+                    index += 1
+                    photo.update(set_data)
+                    yield Message.Directory, photo
+                    yield Message.Url, photo["url"], photo
 
-            if not photo["next_photo_id"]:
-                self.log.debug(
-                    "Can't find next image in the set. "
-                    "Extraction is over."
-                )
-            elif photo["next_photo_id"] in all_photo_ids:
-                if photo["next_photo_id"] != photo["id"]:
-                    self.log.debug(
-                        "Detected a loop in the set, it's likely finished. "
-                        "Extraction is over."
-                    )
-            else:
-                all_photo_ids.append(photo["next_photo_id"])
+            next_id = photo.get("next_photo_id")
+            if next_id and next_id not in seen_ids:
+                queue.append(next_id)
+                seen_ids.add(next_id)
 
-            i += 1
-
-    @memcache(keyarg=1)
-    def _extract_profile(self, profile, set_id=False):
-        if set_id:
+    def _extract_profile(self, profile, set_id=False, tagged=False):
+        if set_id and not tagged:
             url = f"{self.root}/{profile}/photos_by"
+        elif set_id and tagged:
+            url = f"{self.root}/{profile}/photos_of"
         else:
             url = f"{self.root}/{profile}"
         return self._extract_profile_page(url)
@@ -525,7 +535,7 @@ class FacebookAlbumsExtractor(FacebookExtractor):
 class FacebookPhotosExtractor(FacebookExtractor):
     """Extractor for Facebook Profile Photos"""
     subcategory = "photos"
-    pattern = rf"{USER_PATTERN}/photos(?:_by)?"
+    pattern = rf"{USER_PATTERN}/photos(?:_by)?$"
     example = "https://www.facebook.com/USERNAME/photos"
 
     def items(self):
@@ -537,6 +547,24 @@ class FacebookPhotosExtractor(FacebookExtractor):
         set_page = self.request(set_url).text
         set_data = self.parse_set_page(set_page)
         return self.extract_set(set_data)
+
+
+class FacebookPhotostaggedExtractor(FacebookExtractor):
+    """Extractor for Facebook Tagged Photos"""
+
+    subcategory = "photostagged"
+    pattern = rf"{USER_PATTERN}/photos_of"
+    example = "https://www.facebook.com/USERNAME/photos_of"
+
+    def items(self):
+        set_id = self._extract_profile(self.groups[0], True, tagged=True)["set_id"]
+        if not set_id:
+            return iter(())
+
+        set_url = f"{self.root}/media/set/?set={set_id}"
+        set_page = self.request(set_url).text
+        set_data = self.parse_set_page(set_page)
+        return self.extract_set(set_data, tagged=True)
 
 
 class FacebookAvatarExtractor(FacebookExtractor):
@@ -573,5 +601,6 @@ class FacebookUserExtractor(Dispatch, FacebookExtractor):
             (FacebookInfoExtractor  , base + "info"),
             (FacebookAvatarExtractor, base + "avatar"),
             (FacebookPhotosExtractor, base + "photos"),
+            (FacebookPhotostaggedExtractor, base + "photos_of"),
             (FacebookAlbumsExtractor, base + "photos_albums"),
         ), ("photos",))

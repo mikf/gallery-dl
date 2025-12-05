@@ -316,7 +316,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="facebook" title="facebook">
     <td>Facebook</td>
     <td>https://www.facebook.com/</td>
-    <td>Albums, Avatars, User Profile Information, Photos, Profile Photos, Sets, User Profiles, Videos</td>
+    <td>Albums, Avatars, User Profile Information, Photos, Tagged Photos, Profile Photos, Sets, User Profiles, Videos</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr id="fansly" title="fansly">
