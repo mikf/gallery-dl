@@ -81,7 +81,7 @@ class SmugmugAlbumExtractor(SmugmugExtractor):
         del album["Uris"]
         data = {"Album": album, "User": user}
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
 
         for image in self.api.album_images(self.album_id, "ImageSizeDetails"):
             url = self._select_format(image)
@@ -107,7 +107,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
         data = {"Image": image}
         text.nameext_from_url(url, data)
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, url, data
 
 

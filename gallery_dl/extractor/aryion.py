@@ -63,7 +63,7 @@ class AryionExtractor(Extractor):
             if post := self._parse_post(post_id):
                 if data:
                     post.update(data)
-                yield Message.Directory, post
+                yield Message.Directory, "", post
                 yield Message.Url, post["url"], post
             elif post is False and self.recursive:
                 base = self.root + "/g4/view/"

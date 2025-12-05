@@ -377,7 +377,7 @@ class TestExtractor(Extractor):
         root = "https://example.org"
         user = self.user
 
-        yield Message.Directory, {
+        yield Message.Directory, "", {
             "user": user,
             "author": user,
         }

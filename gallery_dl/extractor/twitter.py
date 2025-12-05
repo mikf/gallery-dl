@@ -124,7 +124,7 @@ class TwitterExtractor(Extractor):
             tdata = self._transform_tweet(tweet)
             tdata.update(metadata)
             tdata["count"] = len(files)
-            yield Message.Directory, tdata
+            yield Message.Directory, "", tdata
 
             tdata.pop("source_id", None)
             tdata.pop("source_user", None)
@@ -1097,7 +1097,7 @@ class TwitterInfoExtractor(TwitterExtractor):
         else:
             user = api.user_by_screen_name(screen_name)
 
-        return iter(((Message.Directory, self._transform_user(user)),))
+        return iter(((Message.Directory, "", self._transform_user(user)),))
 
 
 class TwitterAvatarExtractor(TwitterExtractor):
@@ -1163,7 +1163,7 @@ class TwitterImageExtractor(Extractor):
             "_fallback": TwitterExtractor._image_fallback(self, base),
         }
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, base + self._size_image, data
 
 

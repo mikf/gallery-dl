@@ -43,7 +43,7 @@ class HentaifoundryExtractor(Extractor):
         for post_url in util.advance(self.posts(), self.start_post):
             image = self._parse_post(post_url)
             image.update(data)
-            yield Message.Directory, image
+            yield Message.Directory, "", image
             yield Message.Url, image["src"], image
 
     def skip(self, num):
@@ -324,7 +324,7 @@ class HentaifoundryImageExtractor(HentaifoundryExtractor):
                     f"/{self.index}/?enterAgree=1")
         image = self._parse_post(post_url)
         image["user"] = self.user
-        yield Message.Directory, image
+        yield Message.Directory, "", image
         yield Message.Url, image["src"], image
 
 
@@ -339,7 +339,7 @@ class HentaifoundryStoriesExtractor(HentaifoundryExtractor):
         self._init_site_filters()
         for story_html in util.advance(self.stories(), self.start_post):
             story = self._parse_story(story_html)
-            yield Message.Directory, story
+            yield Message.Directory, "", story
             yield Message.Url, story["src"], story
 
     def stories(self):
@@ -364,5 +364,5 @@ class HentaifoundryStoryExtractor(HentaifoundryExtractor):
         story_url = (f"{self.root}/stories/user/{self.user}"
                      f"/{self.index}/x?enterAgree=1")
         story = self._parse_story(self.request(story_url).text)
-        yield Message.Directory, story
+        yield Message.Directory, "", story
         yield Message.Url, story["src"], story

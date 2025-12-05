@@ -292,7 +292,7 @@ class FacebookExtractor(Extractor):
             else:
                 retries = 0
                 photo.update(set_data)
-                yield Message.Directory, photo
+                yield Message.Directory, "", photo
                 yield Message.Url, photo["url"], photo
 
             if not photo["next_photo_id"]:
@@ -408,7 +408,7 @@ class FacebookPhotoExtractor(FacebookExtractor):
 
         directory = self.parse_set_page(set_page)
 
-        yield Message.Directory, directory
+        yield Message.Directory, "", directory
         yield Message.Url, photo["url"], photo
 
         if self.author_followups:
@@ -467,7 +467,7 @@ class FacebookVideoExtractor(FacebookExtractor):
         if "url" not in video:
             return
 
-        yield Message.Directory, video
+        yield Message.Directory, "", video
 
         if self.videos == "ytdl":
             yield Message.Url, "ytdl:" + video_url, video
@@ -486,7 +486,7 @@ class FacebookInfoExtractor(FacebookExtractor):
 
     def items(self):
         user = self._extract_profile(self.groups[0])
-        return iter(((Message.Directory, user),))
+        return iter(((Message.Directory, "", user),))
 
 
 class FacebookAlbumsExtractor(FacebookExtractor):
@@ -558,7 +558,7 @@ class FacebookAvatarExtractor(FacebookExtractor):
         set_page = self.request(set_url).text
         directory = self.parse_set_page(set_page)
 
-        yield Message.Directory, directory
+        yield Message.Directory, "", directory
         yield Message.Url, avatar["url"], avatar
 
 

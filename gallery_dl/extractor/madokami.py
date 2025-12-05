@@ -88,5 +88,5 @@ class MadokamiMangaExtractor(MadokamiExtractor):
             url = f"{self.root}{ch['path']}"
             text.nameext_from_url(url, ch)
 
-            yield Message.Directory, ch
+            yield Message.Directory, "", ch
             yield Message.Url, url, ch

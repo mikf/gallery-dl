@@ -46,7 +46,7 @@ class TiktokExtractor(Extractor):
             post["date"] = self.parse_timestamp(post["createTime"])
             original_title = title = post["desc"]
 
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             ytdl_media = False
 
             if "imagePost" in post:
@@ -253,7 +253,7 @@ class TiktokUserExtractor(TiktokExtractor):
                 self.log.warning("Unable to extract 'avatar' URL (%s: %s)",
                                  exc.__class__.__name__, exc)
             else:
-                yield Message.Directory, avatar
+                yield Message.Directory, "", avatar
                 yield Message.Url, avatar_url, avatar
 
         with ytdl_instance as ydl:

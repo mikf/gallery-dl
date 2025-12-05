@@ -26,7 +26,7 @@ class TungstenExtractor(Extractor):
             post["date"] = self.parse_datetime_iso(post["created_at"])
             post["filename"] = url[url.rfind("/")+1:]
             post["extension"] = "webp"
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             yield Message.Url, url, post
 
     def _pagination(self, url, params):

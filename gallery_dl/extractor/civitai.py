@@ -96,7 +96,7 @@ class CivitaiExtractor(Extractor):
                     data["model"], data["version"] = \
                         self._extract_meta_version(post)
 
-                yield Message.Directory, data
+                yield Message.Directory, "", data
                 for file in self._image_results(images):
                     file.update(data)
                     yield Message.Url, file["url"], file
@@ -131,7 +131,7 @@ class CivitaiExtractor(Extractor):
                     data["extension"] = (
                         self._video_ext if file.get("type") == "video" else
                         self._image_ext)
-                yield Message.Directory, data
+                yield Message.Directory, "", data
                 yield Message.Url, url, data
             return
 
@@ -292,7 +292,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
                 "user"   : user,
             }
 
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             for file in self._extract_files(model, version, user):
                 file.update(data)
                 yield Message.Url, file["url"], file
@@ -599,7 +599,7 @@ class CivitaiGeneratedExtractor(CivitaiExtractor):
 
         for gen in self.api.orchestrator_queryGeneratedImages():
             gen["date"] = self.parse_datetime_iso(gen["createdAt"])
-            yield Message.Directory, gen
+            yield Message.Directory, "", gen
             for step in gen.pop("steps", ()):
                 for image in step.pop("images", ()):
                     data = {"file": image, **step, **gen}

@@ -56,7 +56,7 @@ class HatenablogExtractor(Extractor):
             "title": title,
             "count": len(images),
         }
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for data["num"], url in enumerate(images, 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
 

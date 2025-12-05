@@ -100,7 +100,7 @@ class PixivExtractor(Extractor):
             work["suffix"] = ""
             work.update(metadata)
 
-            yield Message.Directory, work
+            yield Message.Directory, "", work
             for work["num"], file in enumerate(files):
                 url = file["url"]
                 work.update(file)
@@ -892,7 +892,7 @@ class PixivSketchExtractor(Extractor):
             post["date"] = dt.parse_iso(post["created_at"])
             util.delete_items(post, ("id", "media", "_links"))
 
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             post["_http_headers"] = headers
 
             for photo in media:
@@ -973,7 +973,7 @@ class PixivNovelExtractor(PixivExtractor):
             novel["rating"] = ratings.get(novel["x_restrict"])
             novel["suffix"] = ""
 
-            yield Message.Directory, novel
+            yield Message.Directory, "", novel
 
             try:
                 content = self.api.novel_webview(novel["id"])["text"]

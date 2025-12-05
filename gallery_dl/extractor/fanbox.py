@@ -76,7 +76,7 @@ class FanboxExtractor(Extractor):
                                      item["id"], exc.__class__.__name__, exc)
 
             content_body, post = self._extract_post(item)
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             yield from self._get_urls_from_post(content_body, post)
 
     def posts(self):

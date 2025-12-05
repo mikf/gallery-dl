@@ -64,7 +64,7 @@ class EveriaPostExtractor(EveriaExtractor):
             "count": len(urls),
         }
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for data["num"], url in enumerate(urls, 1):
             url = text.unquote(url)
             yield Message.Url, url, text.nameext_from_url(url, data)

@@ -39,7 +39,7 @@ class GofileFolderExtractor(Extractor):
                               self._get_website_token())
 
         folder = self._get_content(self.content_id, password)
-        yield Message.Directory, folder
+        yield Message.Directory, "", folder
 
         try:
             contents = folder.pop("children")

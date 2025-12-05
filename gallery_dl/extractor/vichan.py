@@ -58,7 +58,7 @@ class VichanThreadExtractor(VichanExtractor):
             "num"   : 0,
         }
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for post in posts:
             if "filename" in post:
                 yield process(post, data)

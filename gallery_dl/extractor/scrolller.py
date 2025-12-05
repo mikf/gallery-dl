@@ -34,7 +34,7 @@ class ScrolllerExtractor(Extractor):
             files = self._extract_files(post)
             post["count"] = len(files)
 
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             for file in files:
                 url = file["url"]
                 post.update(file)

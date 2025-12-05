@@ -57,7 +57,7 @@ class BooruExtractor(BaseExtractor):
             post.update(data)
             self._prepare(post)
 
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             yield Message.Url, url, post
 
     def skip(self, num):

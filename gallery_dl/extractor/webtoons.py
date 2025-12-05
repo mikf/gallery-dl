@@ -160,7 +160,7 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
         page = response.text
 
         if self.config("banners") and (asset := self._asset_banner(page)):
-            yield Message.Directory, asset
+            yield Message.Directory, "", asset
             yield Message.Url, asset["url"], asset
 
         data = {"_extractor": WebtoonsEpisodeExtractor}

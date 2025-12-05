@@ -110,7 +110,7 @@ class EromeAlbumExtractor(EromeExtractor):
             "_http_headers": {"Referer": url},
         }
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for data["num"], url in enumerate(urls, 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
 

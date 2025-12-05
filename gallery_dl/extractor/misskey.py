@@ -46,7 +46,7 @@ class MisskeyExtractor(BaseExtractor):
             note["count"] = len(files)
             note["date"] = self.parse_datetime_iso(note["createdAt"])
 
-            yield Message.Directory, note
+            yield Message.Directory, "", note
             for note["num"], file in enumerate(files, 1):
                 file["date"] = self.parse_datetime_iso(file["createdAt"])
                 note["file"] = file
@@ -134,7 +134,7 @@ class MisskeyInfoExtractor(MisskeyExtractor):
 
     def items(self):
         user = self.api.users_show(self.groups[-1])
-        return iter(((Message.Directory, user),))
+        return iter(((Message.Directory, "", user),))
 
 
 class MisskeyAvatarExtractor(MisskeyExtractor):

@@ -47,7 +47,7 @@ class ArtstationExtractor(Extractor):
                 asset.update(data)
                 adict = asset["asset"]
                 asset["num"] = num
-                yield Message.Directory, asset
+                yield Message.Directory, "", asset
 
                 if adict["has_embedded_player"]:
                     if url := self._extract_embed(asset):
@@ -333,7 +333,7 @@ class ArtstationChallengeExtractor(ArtstationExtractor):
         update_url = f"{self.root}/contests/submission_updates.json"
 
         challenge = self.request_json(challenge_url)
-        yield Message.Directory, {"challenge": challenge}
+        yield Message.Directory, "", {"challenge": challenge}
 
         params = {"sorting": self.sorting}
         for submission in self._pagination(submission_url, params):

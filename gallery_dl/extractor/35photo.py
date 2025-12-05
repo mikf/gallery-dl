@@ -29,7 +29,7 @@ class _35photoExtractor(Extractor):
                 url = photo["url"]
                 if first:
                     first = False
-                    yield Message.Directory, photo
+                    yield Message.Directory, "", photo
                 yield Message.Url, url, text.nameext_from_url(url, photo)
 
     def metadata(self):

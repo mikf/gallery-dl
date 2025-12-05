@@ -42,7 +42,7 @@ class _2chThreadExtractor(Extractor):
             "title" : text.unescape(title)[:50],
         }
 
-        yield Message.Directory, thread
+        yield Message.Directory, "", thread
         for post in posts:
             if files := post.get("files"):
                 post["post_name"] = post["name"]

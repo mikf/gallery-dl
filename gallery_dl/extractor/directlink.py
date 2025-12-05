@@ -40,5 +40,5 @@ class DirectlinkExtractor(Extractor):
         data["_http_headers"] = {
             "Referer": self.url.encode("latin-1", "ignore")}
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, self.url, data

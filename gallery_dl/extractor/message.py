@@ -20,7 +20,8 @@ class Message():
 
     - Message.Directory:
       - Sets the target directory for all following images
-      - 2nd element is a dictionary containing general metadata
+      - 2nd element is unused
+      - 3rd element is a dictionary containing general metadata
 
     - Message.Url:
       - Image URL and its metadata

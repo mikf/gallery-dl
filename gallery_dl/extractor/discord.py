@@ -120,7 +120,7 @@ class DiscordExtractor(Extractor):
                     text.nameext_from_url(file["url"], file)
                     file["num"] = num
 
-                yield Message.Directory, message_metadata
+                yield Message.Directory, "", message_metadata
 
                 for file in message_metadata["files"]:
                     message_metadata_file = message_metadata.copy()

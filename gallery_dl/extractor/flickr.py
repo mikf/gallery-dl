@@ -45,7 +45,7 @@ class FlickrExtractor(Extractor):
             else:
                 photo.update(data)
                 url = self._file_url(photo)
-                yield Message.Directory, photo
+                yield Message.Directory, "", photo
                 yield Message.Url, url, text.nameext_from_url(url, photo)
 
     def metadata(self):
@@ -114,7 +114,7 @@ class FlickrImageExtractor(FlickrExtractor):
                     location[key] = value["_content"]
 
         url = self._file_url(photo)
-        yield Message.Directory, photo
+        yield Message.Directory, "", photo
         yield Message.Url, url, text.nameext_from_url(url, photo)
 
 

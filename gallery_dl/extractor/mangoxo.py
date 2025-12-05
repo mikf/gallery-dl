@@ -91,7 +91,7 @@ class MangoxoAlbumExtractor(MangoxoExtractor):
         data = self.metadata(page)
         imgs = self.images(url, page)
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
 
         data["extension"] = None
         for data["num"], path in enumerate(imgs, 1):

@@ -40,7 +40,7 @@ class VkExtractor(Extractor):
         sizes = "wzyxrqpo"
 
         data = self.metadata()
-        yield Message.Directory, data
+        yield Message.Directory, "", data
 
         for photo in self.photos():
 

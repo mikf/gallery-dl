@@ -800,7 +800,7 @@ class GalleryExtractor(Extractor):
                     enum = util.enumerate_reversed
             images = enum(imgs, 1)
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         enum_key = self.enum
 
         if assets:

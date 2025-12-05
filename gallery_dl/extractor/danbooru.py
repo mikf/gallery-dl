@@ -63,7 +63,7 @@ class DanbooruExtractor(BaseExtractor):
             except KeyError:
                 if self.external and post["source"]:
                     post.update(data)
-                    yield Message.Directory, post
+                    yield Message.Directory, "", post
                     yield Message.Queue, post["source"], post
                 continue
 
@@ -106,7 +106,7 @@ class DanbooruExtractor(BaseExtractor):
                     url = self.root + url
 
             post.update(data)
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             yield Message.Url, url, post
 
     def items_artists(self):

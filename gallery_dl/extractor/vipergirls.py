@@ -75,7 +75,7 @@ class VipergirlsExtractor(Extractor):
             data["count"] = len(images)
             del data["imagecount"]
 
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             if images:
                 for data["num"], image in enumerate(images, 1):
                     yield Message.Queue, image.attrib["main_url"], data

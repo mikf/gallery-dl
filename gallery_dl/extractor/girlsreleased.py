@@ -56,7 +56,7 @@ class GirlsreleasedSetExtractor(GirlsreleasedExtractor):
             "count": len(json["images"]),
             "url": "https://girlsreleased.com/set/" + json["id"],
         }
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for data["num"], image in enumerate(json["images"], 1):
             text.nameext_from_url(image[5], data)
             yield Message.Queue, image[3], data
