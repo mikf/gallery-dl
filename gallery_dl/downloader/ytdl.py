@@ -197,6 +197,12 @@ class YoutubeDLDownloader(DownloaderBase):
         return ytdl.process_ie_result(info_dict, download=False)
 
     def _download_video(self, ytdl_instance, pathfmt, info_dict):
+
+        filesize = info_dict.get(
+            "filesize") or info_dict.get("filesize_approx")
+        if filesize is not None:
+            pathfmt.kwdict["_filesize"] = filesize
+
         if "url" in info_dict:
             if "filename" in pathfmt.kwdict:
                 pathfmt.kwdict["extension"] = \
@@ -238,8 +244,11 @@ class YoutubeDLDownloader(DownloaderBase):
             pathfmt.kwdict["extension"] = pathfmt.prefix
             filename = pathfmt.build_filename(pathfmt.kwdict)
             pathfmt.kwdict["extension"] = info_dict["ext"]
-            if self.partdir:
-                path = os.path.join(self.partdir, filename)
+
+            partdir = self.get_part_directory(pathfmt.kwdict)
+            if partdir:
+                os.makedirs(partdir, exist_ok=True)
+                path = os.path.join(partdir, filename)
             else:
                 path = pathfmt.realdirectory + filename
             path = path.replace("%", "%%") + "%(ext)s"

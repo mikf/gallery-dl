@@ -347,6 +347,67 @@ class HttpRequestHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(output)
 
 
+class TestHttpDownloaderPartdir(TestDownloaderBase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.partdir = tempfile.TemporaryDirectory()
+
+        # Set up a local HTTP server
+        host = "127.0.0.1"
+        port = 0
+        try:
+            server = http.server.HTTPServer((host, port), HttpRequestHandler)
+        except OSError as exc:
+            raise unittest.SkipTest(f"cannot spawn local HTTP server ({exc})")
+        host, port = server.server_address
+        cls.address = f"http://{host}:{port}"
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+        cls.partdir.cleanup()
+
+    def tearDown(self):
+        config.clear()
+
+    def test_partdir_condition_met(self):
+        """Test a download where the partdir condition is met."""
+        config.set(("downloader", "http"), "part-directory",
+                   {"_filesize >= 1000": self.partdir.name})
+        dl = downloader.find("http")(self.job)
+
+        pathfmt = self._prepare_destination(extension="jpg")
+        part_path = os.path.join(self.partdir.name, pathfmt.filename + ".part")
+
+        success = dl.download(f"{self.address}/jpg", pathfmt)
+        self.assertTrue(success)
+
+        os.rename(pathfmt.temppath, pathfmt.realpath)
+
+        self.assertTrue(os.path.exists(pathfmt.realpath))
+        self.assertFalse(os.path.exists(part_path))
+        with open(pathfmt.realpath, "rb") as f:
+            self.assertEqual(f.read(), DATA["jpg"])
+
+    def test_partdir_condition_not_met(self):
+        """Test a download where the partdir condition is NOT met."""
+        config.set(("downloader", "http"), "part-directory",
+                   {"_filesize >= 1000": self.partdir.name})
+        dl = downloader.find("http")(self.job)
+
+        pathfmt = self._prepare_destination(extension="png")
+
+        success = dl.download(f"{self.address}/png", pathfmt)
+        self.assertTrue(success)
+
+        os.rename(pathfmt.temppath, pathfmt.realpath)
+
+        self.assertTrue(os.path.exists(pathfmt.realpath))
+        self.assertEqual(len(os.listdir(self.partdir.name)), 0)
+
+
 SAMPLES = {
     ("jpg" , binascii.a2b_base64(
         "/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEB"
