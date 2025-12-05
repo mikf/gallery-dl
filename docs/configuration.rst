@@ -1455,13 +1455,22 @@ Note
     The index of the first file is ``1``.
 
 
+extractor.*.post-range
+----------------------
+Type
+    ``string``
+Description
+    Like `image-range <extractor.*.image-range_>`__,
+    but for posts.
+
+
 extractor.*.chapter-range
 -------------------------
 Type
     ``string``
 Description
     Like `image-range <extractor.*.image-range_>`__,
-    but applies to delegated URLs like manga chapters, etc.
+    but for child extractors handling manga chapters, external URLs, etc.
 
 
 extractor.*.image-filter
@@ -1480,6 +1489,19 @@ Description
     Available values are the filename-specific ones listed by ``-K`` or ``-j``.
 
 
+extractor.*.post-filter
+-----------------------
+Type
+    * Condition_
+    * ``list`` of Conditions_
+Example
+    * ``"post['id'] > 12345"``
+    * ``["date >= datetime(2025, 5, 1)", "print(post_id)"]``
+Description
+    Like `image-filter <extractor.*.image-filter_>`__,
+    but for posts.
+
+
 extractor.*.chapter-filter
 --------------------------
 Type
@@ -1490,7 +1512,7 @@ Example
     * ``["language == 'French'", "10 <= chapter < 20"]``
 Description
     Like `image-filter <extractor.*.image-filter_>`__,
-    but applies to delegated URLs like manga chapters, etc.
+    but for child extractors handling manga chapters, external URLs, etc.
 
 
 extractor.*.image-unique

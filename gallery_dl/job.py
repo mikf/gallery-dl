@@ -204,9 +204,12 @@ class Job():
     def dispatch(self, messages):
         """Call the appropriate message handler"""
         msg = None
+        process = True
 
         for msg in messages:
             if msg[0] == Message.Url:
+                if process is None:
+                    continue
                 _, url, kwdict = msg
                 if self.metadata_url:
                     kwdict[self.metadata_url] = url
@@ -217,10 +220,19 @@ class Job():
                     FLAGS.process("FILE")
 
             elif msg[0] == Message.Directory:
-                self.update_kwdict(msg[1])
-                self.handle_directory(msg[1])
+                kwdict = msg[1]
+                if self.pred_post("", kwdict):
+                    process = True
+                    self.update_kwdict(kwdict)
+                    self.handle_directory(kwdict)
+                else:
+                    process = None
+                if FLAGS.POST is not None:
+                    FLAGS.process("POST")
 
             elif msg[0] == Message.Queue:
+                if process is None:
+                    continue
                 _, url, kwdict = msg
                 if self.metadata_url:
                     kwdict[self.metadata_url] = url
@@ -262,6 +274,7 @@ class Job():
     def _init(self):
         self.extractor.initialize()
         self.pred_url = self._prepare_predicates("image", True)
+        self.pred_post = self._prepare_predicates("post", False)
         self.pred_queue = self._prepare_predicates("chapter", False)
 
     def _prepare_predicates(self, target, skip=True):

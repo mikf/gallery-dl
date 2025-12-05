@@ -145,16 +145,18 @@
     --range RANGE               Index range(s) specifying which files to
                                 download. These can be either a constant value,
                                 range, or slice (e.g. '5', '8-20', or '1:24:3')
-    --chapter-range RANGE       Like '--range', but applies to manga chapters
-                                and other delegated URLs
+    --post-range RANGE          Like '--range', but for posts
+    --chapter-range RANGE       Like '--range', but for child extractors
+                                handling manga chapters, external URLs, etc.
     --filter EXPR               Python expression controlling which files to
                                 download. Files for which the expression
                                 evaluates to False are ignored. Available keys
                                 are the filename-specific ones listed by '-K'.
                                 Example: --filter "image_width >= 1000 and
                                 rating in ('s', 'q')"
-    --chapter-filter EXPR       Like '--filter', but applies to manga chapters
-                                and other delegated URLs
+    --post-filter EXPR          Like '--filter', but for posts
+    --chapter-filter EXPR       Like '--filter', but for child extractors
+                                handling manga chapters, external URLs, etc.
 
 ## Post-processing Options:
     -P, --postprocessor NAME    Activate the specified post processor
