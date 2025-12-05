@@ -10,6 +10,7 @@
 
 import time
 import mimetypes
+import os
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
 from .. import text, util, output, exception
@@ -108,14 +109,18 @@ class HttpDownloader(DownloaderBase):
         msg = ""
 
         metadata = self.metadata
+        setup_pass = True
         kwdict = pathfmt.kwdict
         expected_status = kwdict.get(
             "_http_expected_status", ())
         adjust_extension = kwdict.get(
             "_http_adjust_extension", self.adjust_extension)
 
-        if self.part and not metadata:
-            pathfmt.part_enable(self.partdir)
+        if self.part and not self.partdir_conditions:
+            partdir = self.get_part_directory(kwdict)
+            if partdir:
+                os.makedirs(partdir, exist_ok=True)
+            pathfmt.part_enable(partdir)
 
         while True:
             if tries:
@@ -230,6 +235,7 @@ class HttpDownloader(DownloaderBase):
             # check file size
             size = text.parse_int(size, None)
             if size is not None:
+                kwdict["_filesize"] = size
                 if self.minsize and size < self.minsize:
                     self.release_conn(response)
                     self.log.warning(
@@ -247,14 +253,34 @@ class HttpDownloader(DownloaderBase):
 
             build_path = False
 
-            # set missing filename extension from MIME type
-            if not pathfmt.extension:
-                pathfmt.set_extension(self._find_extension(response))
-                build_path = True
+            if setup_pass:
+                # set metadata from HTTP headers
+                if metadata:
+                    kwdict[metadata] = util.extract_headers(response)
+                    build_path = True
 
-            # set metadata from HTTP headers
-            if metadata:
-                kwdict[metadata] = util.extract_headers(response)
+                # handle part directory
+                if self.part and not pathfmt.temppath.endswith(".part"):
+                    partdir = self.get_part_directory(kwdict)
+                    self.log.debug("Determined part-directory: %s",
+                                   partdir)
+                    if partdir:
+                        os.makedirs(partdir, exist_ok=True)
+                    pathfmt.part_enable(partdir)
+
+                setup_pass = False
+
+                # handle resumption with conditional part directory (two-pass)
+                if not offset and (file_size := pathfmt.part_size()):
+                    if size and file_size >= size:
+                        break
+                    response.close()
+                    tries -= 1
+                    continue
+
+            # set missing filename extension from MIME type
+            if not pathfmt.extension and not setup_pass:
+                pathfmt.set_extension(self._find_extension(response))
                 build_path = True
 
             # build and check file path
@@ -271,9 +297,6 @@ class HttpDownloader(DownloaderBase):
                     # than consuming the whole response
                     response.close()
                     return True
-                if self.part and metadata:
-                    pathfmt.part_enable(self.partdir)
-                metadata = False
 
             content = response.iter_content(self.chunk_size)
 

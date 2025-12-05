@@ -8,9 +8,12 @@
 
 """Common classes and constants used by downloader modules."""
 
-import os
-from .. import config, util
+from .. import config, util, text
 _config = config._config
+
+FILTER_GLOBALS = {
+    'parse_bytes': text.parse_bytes
+}
 
 
 class DownloaderBase():
@@ -29,17 +32,14 @@ class DownloaderBase():
         self.session = extractor.session
         self.part = self.config("part", True)
         self.partdir = self.config("part-directory")
+        self.partdir_conditions = None
 
-        if self.partdir:
-            if isinstance(self.partdir, dict):
-                self.partdir = [
-                    (util.compile_filter(expr) if expr else util.true,
-                     util.expand_path(pdir))
-                    for expr, pdir in self.partdir.items()
-                ]
-            else:
-                self.partdir = util.expand_path(self.partdir)
-                os.makedirs(self.partdir, exist_ok=True)
+        if isinstance(self.partdir, dict):
+            self.partdir_conditions = [
+                (util.compile_filter(expr, globals=FILTER_GLOBALS), path)
+                for expr, path in self.partdir.items() if expr
+            ]
+            self.partdir = self.partdir.get("", None)
 
         proxies = self.config("proxy", util.SENTINEL)
         if proxies is util.SENTINEL:
@@ -97,6 +97,19 @@ class DownloaderBase():
     def _report_config_error(self, subcategory, value):
         config.log.warning("Subcategory '%s' set to '%s' instead of object",
                            subcategory, util.json_dumps(value).strip('"'))
+
+    def get_part_directory(self, kwdict):
+        """Evaluate part-directory conditions and return the target path."""
+        path = self.partdir
+        if self.partdir_conditions:
+            for condition, cond_path in self.partdir_conditions:
+                if condition(kwdict):
+                    path = cond_path
+                    break
+
+        if path:
+            return util.expand_path(path)
+        return None
 
     def download(self, url, pathfmt):
         """Write data from 'url' into the file specified by 'pathfmt'"""
