@@ -93,7 +93,8 @@ class Extractor():
         pass
 
     def items(self):
-        yield Message.Version, 1
+        return
+        yield
 
     def skip(self, num):
         return 0
@@ -919,7 +920,7 @@ class Dispatch():
         elif isinstance(include, str):
             include = include.replace(" ", "").split(",")
 
-        results = [(Message.Version, 1)]
+        results = []
         for category in include:
             try:
                 extr, url = extractors[category]
