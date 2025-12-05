@@ -143,6 +143,7 @@ class VscoUserExtractor(Dispatch, VscoExtractor):
             (VscoGalleryExtractor   , base + "gallery"),
             (VscoSpacesExtractor    , base + "spaces"),
             (VscoCollectionExtractor, base + "collection"),
+            (VscoJournalExtractor, base + "journal"),
         ), ("gallery",))
 
 
@@ -161,7 +162,7 @@ class VscoGalleryExtractor(VscoExtractor):
         url = f"{self.root}/api/3.0/medias/profile"
         params = {
             "site_id"  : sid,
-            "limit"    : "14",
+            "limit"    : "30",
             "cursor"   : None,
         }
 
@@ -181,15 +182,17 @@ class VscoCollectionExtractor(VscoExtractor):
         data = self._extract_preload_state(url)
 
         tkn = data["users"]["currentUser"]["tkn"]
-        cid = (data["sites"]["siteByUsername"][self.user]
-               ["site"]["siteCollectionId"])
+        cid = (
+            data["sites"]["siteByUsername"][self.user]
+            ["site"]["siteCollectionId"]
+        )
 
         url = f"{self.root}/api/2.0/collections/{cid}/medias"
         params = {"page": 2, "size": "20"}
+        collection_data = data["collections"]["byId"][cid]["1"]["collection"]
         return self._pagination(url, params, tkn, "medias", (
             data["medias"]["byId"][mid["id"]]["media"]
-            for mid in data
-            ["collections"]["byId"][cid]["1"]["collection"]
+            for mid in collection_data
         ))
 
 
@@ -336,3 +339,46 @@ class VscoVideoExtractor(VscoExtractor):
             "height"        : media["height"],
             "description"   : media["description"],
         },)
+
+
+class VscoJournalExtractor(VscoExtractor):
+    """Extractor for a vsco user's journal articles"""
+    subcategory = "journal"
+    pattern = USER_PATTERN + r"/journal(?:/p/(\d+))?"
+    example = "https://vsco.co/USER/journal"
+
+    def images(self):
+        url = f"{self.root}/{self.user}/journal"
+        data = self._extract_preload_state(url)
+        tkn = data["users"]["currentUser"]["tkn"]
+        sid = str(data["sites"]["siteByUsername"][self.user]["site"]["id"])
+
+        url = f"{self.root}/api/2.0/articles"
+        params = {"site_id": sid, "size": 12, "page": 1}
+        headers = {"Authorization": "Bearer " + tkn}
+
+        while True:
+            data = self.request_json(url, params=params, headers=headers)
+            if not data.get("articles"):
+                break
+
+            for article in data["articles"]:
+                for item in article.get("body", []):
+                    if item.get("type") == "image":
+                        for img in item.get("content", []):
+                            if "responsive_url" in img:
+                                yield {
+                                    "_id": img["id"],
+                                    "is_video": False,
+                                    "grid_name": "",
+                                    "upload_date": article.get(
+                                        "created_at", 0),
+                                    "responsive_url": img["responsive_url"],
+                                    "width": img.get("width", 0),
+                                    "height": img.get("height", 0),
+                                    "description": article.get("title", ""),
+                                }
+
+            if len(data["articles"]) < params["size"]:
+                break
+            params["page"] += 1
