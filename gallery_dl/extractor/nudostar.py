@@ -67,5 +67,5 @@ class NudostarImageExtractor(NudostarExtractor):
         data["num"] = text.parse_int(self.groups[2])
         data["url"] = img_url
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, img_url, data

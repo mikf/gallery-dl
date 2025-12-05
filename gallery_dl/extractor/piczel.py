@@ -32,7 +32,7 @@ class PiczelExtractor(Extractor):
                 images = post["images"]
                 del post["images"]
                 post["count"] = len(images)
-                yield Message.Directory, post
+                yield Message.Directory, "", post
                 for post["num"], image in enumerate(images):
                     if "id" in image:
                         del image["id"]
@@ -42,7 +42,7 @@ class PiczelExtractor(Extractor):
 
             else:
                 post["count"] = 1
-                yield Message.Directory, post
+                yield Message.Directory, "", post
                 post["num"] = 0
                 url = post["image"]["url"]
                 yield Message.Url, url, text.nameext_from_url(url, post)

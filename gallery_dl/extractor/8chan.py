@@ -91,7 +91,7 @@ class _8chanThreadExtractor(_8chanExtractor):
 
         # download files
         posts = thread.pop("posts", ())
-        yield Message.Directory, thread
+        yield Message.Directory, "", thread
         for post in itertools.chain((thread,), posts):
             files = post.pop("files", ())
             if not files:

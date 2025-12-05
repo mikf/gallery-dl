@@ -57,7 +57,7 @@ class SkebExtractor(Extractor):
 
             files = self._get_files_from_post(response)
             post["count"] = len(files)
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             for post["num"], file in enumerate(files, 1):
                 post.update(file)
                 url = file["file_url"]

@@ -31,7 +31,7 @@ class PhotovogueUserExtractor(Extractor):
             photo["title"] = photo["title"].strip()
             photo["date"] = self.parse_datetime_iso(photo["date"])
 
-            yield Message.Directory, photo
+            yield Message.Directory, "", photo
             yield Message.Url, url, text.nameext_from_url(url, photo)
 
     def photos(self):

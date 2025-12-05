@@ -48,7 +48,7 @@ class LynxchanThreadExtractor(LynxchanExtractor):
         thread["postId"] = thread["threadId"]
         posts = thread.pop("posts", ())
 
-        yield Message.Directory, thread
+        yield Message.Directory, "", thread
         for post in itertools.chain((thread,), posts):
             if files := post.pop("files", ()):
                 thread.update(post)

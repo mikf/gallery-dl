@@ -80,7 +80,7 @@ class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
             metadata["type"] = "video"
 
         text.nameext_from_url(url, metadata)
-        yield Message.Directory, metadata
+        yield Message.Directory, "", metadata
         yield Message.Url, url, metadata
 
     def metadata(self, page):

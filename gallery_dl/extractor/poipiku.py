@@ -81,7 +81,7 @@ class PoipikuExtractor(Extractor):
                     "PasswordIcon", ">"):
                 post["password"] = True
 
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             for post["num"], url in enumerate(extract_files(
                     post, thumb, extr), 1):
                 yield Message.Url, url, text.nameext_from_url(url, post)

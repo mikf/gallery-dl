@@ -31,7 +31,7 @@ class SeigaExtractor(Extractor):
         images = iter(self.get_images())
         data = next(images)
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for image in util.advance(images, self.start_image):
             data.update(image)
             data["extension"] = None

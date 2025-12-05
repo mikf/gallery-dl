@@ -59,7 +59,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
             urls = self._extract_images(image_id, page)
             data["count"] = len(urls)
 
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             for num, url in enumerate(urls):
                 image = text.nameext_from_url(url, {
                     "num": num,

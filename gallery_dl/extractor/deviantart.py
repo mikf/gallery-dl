@@ -154,7 +154,7 @@ class DeviantartExtractor(Extractor):
                 deviation.update(data)
 
             self.prepare(deviation)
-            yield Message.Directory, deviation
+            yield Message.Directory, "", deviation
 
             if "content" in deviation:
                 content = self._extract_content(deviation)

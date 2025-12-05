@@ -95,7 +95,7 @@ class MangadexCoversExtractor(MangadexExtractor):
             name = data["cover"]
             text.nameext_from_url(name, data)
             data["cover_id"] = data["filename"]
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             yield Message.Url, f"{base}{name}", data
 
     def _transform_cover(self, cover):
@@ -134,7 +134,7 @@ class MangadexChapterExtractor(MangadexExtractor):
                 f"available on MangaDex and can instead be read on the "
                 f"official publisher's website at {data['_external_url']}.")
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
 
         if self.config("data-saver", False):
             path = "data-saver"

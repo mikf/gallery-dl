@@ -27,7 +27,7 @@ class WikiartExtractor(Extractor):
 
     def items(self):
         data = self.metadata()
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for painting in self.paintings():
             url = painting["image"]
             painting.update(data)

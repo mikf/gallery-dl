@@ -37,7 +37,7 @@ class LeakgalleryExtractor(Extractor):
 
             media["url"] = url = f"https://cdn.leakgallery.com/{path}"
             text.nameext_from_url(url, media)
-            yield Message.Directory, media
+            yield Message.Directory, "", media
             yield Message.Url, url, media
 
     def _pagination(self, type, base, params=None, creator=None, pnum=1):
@@ -134,7 +134,7 @@ class LeakgalleryPostExtractor(LeakgalleryExtractor):
                     "url": url,
                 }
                 text.nameext_from_url(url, data)
-                yield Message.Directory, data
+                yield Message.Directory, "", data
                 yield Message.Url, url, data
         except Exception as exc:
             self.log.error("Failed to extract post page %s/%s: %s",

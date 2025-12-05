@@ -48,7 +48,7 @@ class InkbunnyExtractor(Extractor):
             del post["keywords"]
             del post["files"]
 
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             for post["num"], file in enumerate(files, 1):
                 post.update(file)
                 post["deleted"] = (file["deleted"] == "t")

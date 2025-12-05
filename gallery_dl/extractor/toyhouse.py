@@ -34,7 +34,7 @@ class ToyhouseExtractor(Extractor):
                 post.update(metadata)
             text.nameext_from_url(post["url"], post)
             post["id"], _, post["hash"] = post["filename"].partition("_")
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             yield Message.Url, post["url"], post
 
     def posts(self):

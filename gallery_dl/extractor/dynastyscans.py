@@ -105,7 +105,7 @@ class DynastyscansSearchExtractor(DynastyscansBase, Extractor):
         self.query = match[1] or ""
 
     def items(self):
-        yield Message.Directory, {}
+        yield Message.Directory, "", {}
         for image_id in self.images():
             image = self._parse_image_page(image_id)
             url = image["url"]

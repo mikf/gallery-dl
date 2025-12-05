@@ -31,7 +31,7 @@ class _2chenThreadExtractor(Extractor):
         url = f"{self.root}/{self.board}/{self.thread}"
         page = self.request(url, encoding="utf-8", notfound="thread").text
         data = self.metadata(page)
-        yield Message.Directory, data
+        yield Message.Directory, "", data
 
         for post in self.posts(page):
 

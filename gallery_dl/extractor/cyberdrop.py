@@ -24,7 +24,7 @@ class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
     def items(self):
         files, data = self.fetch_album(self.album_id)
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for data["num"], file in enumerate(files, 1):
             file.update(data)
             text.nameext_from_url(file["name"], file)

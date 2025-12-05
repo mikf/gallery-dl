@@ -49,7 +49,7 @@ class MyportfolioGalleryExtractor(Extractor):
             data = self.metadata(page)
             imgs = self.images(page)
             data["count"] = len(imgs)
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             for data["num"], url in enumerate(imgs, 1):
                 yield Message.Url, url, text.nameext_from_url(url, data)
 

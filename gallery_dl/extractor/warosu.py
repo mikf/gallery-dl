@@ -37,7 +37,7 @@ class WarosuThreadExtractor(Extractor):
             data["title"] = text.unescape(text.remove_html(
                 posts[0]["com"]))[:50]
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for post in posts:
             if "image" in post:
                 for key in ("w", "h", "no", "time", "tim"):

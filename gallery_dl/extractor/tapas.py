@@ -90,7 +90,7 @@ class TapasEpisodeExtractor(TapasExtractor):
         html = data["html"]
         episode["series"] = self._extract_series(html)
         episode["date"] = self.parse_datetime_iso(episode["publish_date"])
-        yield Message.Directory, episode
+        yield Message.Directory, "", episode
 
         if episode["book"]:
             content = text.extr(

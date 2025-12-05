@@ -51,7 +51,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
         url = f"{self.root}/gallery/{self.gid}"
         page = self.request(url).text
         data = self.get_job_metadata(page)
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for url, image in self.get_images():
             data.update(image)
             yield Message.Url, url, data
@@ -119,7 +119,7 @@ class ImagefapImageExtractor(ImagefapExtractor):
 
     def items(self):
         url, data = self.get_image()
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, url, data
 
     def get_image(self):

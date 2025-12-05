@@ -29,7 +29,7 @@ class WallhavenExtractor(Extractor):
             self._transform(wp)
             wp.update(metadata)
             url = wp["url"]
-            yield Message.Directory, wp
+            yield Message.Directory, "", wp
             yield Message.Url, url, text.nameext_from_url(url, wp)
 
     def wallpapers(self):

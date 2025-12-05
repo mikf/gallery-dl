@@ -68,7 +68,7 @@ class PoringaExtractor(Extractor):
                 main_post, '<img class="imagen" border="0" src="', '"'))
             data["count"] = len(urls)
 
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             for data["num"], url in enumerate(urls, 1):
                 yield Message.Url, url, text.nameext_from_url(url, data)
 

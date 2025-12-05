@@ -19,7 +19,7 @@ class ImgboxExtractor(Extractor):
 
     def items(self):
         data = self.get_job_metadata()
-        yield Message.Directory, data
+        yield Message.Directory, "", data
 
         for image_key in self.get_image_keys():
             imgpage = self.request(self.root + "/" + image_key).text

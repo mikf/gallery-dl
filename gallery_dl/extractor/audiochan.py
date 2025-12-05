@@ -63,7 +63,7 @@ class AudiochanExtractor(Extractor):
                 post["_http_segmented"] = 600000
                 url = file["stream_url"]
 
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             text.nameext_from_name(file["filename"], post)
             yield Message.Url, url, post
 

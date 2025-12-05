@@ -51,7 +51,7 @@ class ItakuExtractor(Extractor):
                 else:
                     url = image["image"]
 
-                yield Message.Directory, image
+                yield Message.Directory, "", image
                 yield Message.Url, url, text.nameext_from_url(url, image)
             return
 
@@ -62,7 +62,7 @@ class ItakuExtractor(Extractor):
                 post["date"] = self.parse_datetime_iso(post["date_added"])
                 post["tags"] = [t["name"] for t in post["tags"]]
 
-                yield Message.Directory, post
+                yield Message.Directory, "", post
                 for post["num"], image in enumerate(images, 1):
                     post["file"] = image
                     image["date"] = self.parse_datetime_iso(

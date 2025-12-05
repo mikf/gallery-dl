@@ -36,7 +36,7 @@ class S3ndpicsExtractor(Extractor):
             files = post.pop("files", ())
             post["count"] = len(files)
 
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             for post["num"], file in enumerate(files, 1):
                 post["type"] = file["type"]
                 path = file["url"]

@@ -49,7 +49,7 @@ class TenorExtractor(Extractor):
             gif["description"] = gif.pop("content_description", "")
             gif["date"] = self.parse_timestamp(gif["created"])
 
-            yield Message.Directory, gif
+            yield Message.Directory, "", gif
             yield Message.Url, url, text.nameext_from_url(url, gif)
 
     def _extract_format(self, gif):

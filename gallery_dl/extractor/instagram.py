@@ -88,7 +88,7 @@ class InstagramExtractor(Extractor):
             files = post.pop("_files")
 
             post["count"] = len(files)
-            yield Message.Directory, post
+            yield Message.Directory, "", post
 
             if "date" in post:
                 del post["date"]
@@ -759,7 +759,7 @@ class InstagramInfoExtractor(InstagramExtractor):
         else:
             user = self.api.user_by_name(screen_name)
 
-        return iter(((Message.Directory, user),))
+        return iter(((Message.Directory, "", user),))
 
 
 class InstagramAvatarExtractor(InstagramExtractor):

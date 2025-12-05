@@ -46,7 +46,7 @@ class BellazonExtractor(Extractor):
             data = {"post": post}
             post["count"] = data["count"] = len(urls)
 
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             data["num"] = data["num_internal"] = data["num_external"] = 0
             for info, url, url_img in urls:
                 url = text.unescape(url or url_img)

@@ -20,7 +20,7 @@ class ShopifyExtractor(BaseExtractor):
 
     def items(self):
         data = self.metadata()
-        yield Message.Directory, data
+        yield Message.Directory, "", data
 
         for product in self.products():
             for num, image in enumerate(product.pop("images"), 1):

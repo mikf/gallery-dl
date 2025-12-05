@@ -56,7 +56,7 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
         data["count"] = len(images)
         data["gallery_key"] = self.path.rpartition("/")[2]
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for data["num"], path in enumerate(images, 1):
             image = self._parse_image_page(path)
             image.update(data)
@@ -94,5 +94,5 @@ class ImagebamImageExtractor(ImagebamExtractor):
             path = ("/view/" if path[10] == "M" else "/image/") + path[10:]
 
         image = self._parse_image_page(path)
-        yield Message.Directory, image
+        yield Message.Directory, "", image
         yield Message.Url, image["url"], image

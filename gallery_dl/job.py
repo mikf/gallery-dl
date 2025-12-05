@@ -206,22 +206,10 @@ class Job():
         msg = None
         process = True
 
-        for msg in messages:
-            if msg[0] == Message.Url:
-                if process is None:
-                    continue
-                _, url, kwdict = msg
-                if self.metadata_url:
-                    kwdict[self.metadata_url] = url
-                if self.pred_url(url, kwdict):
-                    self.update_kwdict(kwdict)
-                    self.handle_url(url, kwdict)
-                if FLAGS.FILE is not None:
-                    FLAGS.process("FILE")
+        for msg, url, kwdict in messages:
 
-            elif msg[0] == Message.Directory:
-                kwdict = msg[1]
-                if self.pred_post("", kwdict):
+            if msg == Message.Directory:
+                if self.pred_post(url, kwdict):
                     process = True
                     self.update_kwdict(kwdict)
                     self.handle_directory(kwdict)
@@ -230,10 +218,21 @@ class Job():
                 if FLAGS.POST is not None:
                     FLAGS.process("POST")
 
-            elif msg[0] == Message.Queue:
+            elif process is None:
+                continue
+
+            elif msg == Message.Url:
+                if self.metadata_url:
+                    kwdict[self.metadata_url] = url
+                if self.pred_url(url, kwdict):
+                    self.update_kwdict(kwdict)
+                    self.handle_url(url, kwdict)
+                if FLAGS.FILE is not None:
+                    FLAGS.process("FILE")
+
+            elif msg == Message.Queue:
                 if process is None:
                     continue
-                _, url, kwdict = msg
                 if self.metadata_url:
                     kwdict[self.metadata_url] = url
                 if self.pred_queue(url, kwdict):

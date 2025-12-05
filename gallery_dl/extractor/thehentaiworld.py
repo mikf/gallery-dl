@@ -36,12 +36,12 @@ class ThehentaiworldExtractor(Extractor):
             if "file_urls" in post:
                 urls = post["file_urls"]
                 post["count"] = len(urls)
-                yield Message.Directory, post
+                yield Message.Directory, "", post
                 for post["num"], url in enumerate(urls, 1):
                     text.nameext_from_url(url, post)
                     yield Message.Url, url, post
             else:
-                yield Message.Directory, post
+                yield Message.Directory, "", post
                 url = post["file_url"]
                 text.nameext_from_url(url, post)
                 yield Message.Url, url, post

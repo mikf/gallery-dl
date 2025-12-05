@@ -84,7 +84,7 @@ class CheveretoImageExtractor(CheveretoExtractor):
         }
 
         text.nameext_from_url(file["url"], file)
-        yield Message.Directory, file
+        yield Message.Directory, "", file
         yield Message.Url, file["url"], file
 
 
@@ -126,7 +126,7 @@ class CheveretoVideoExtractor(CheveretoExtractor):
             pass
 
         text.nameext_from_url(file["url"], file)
-        yield Message.Directory, file
+        yield Message.Directory, "", file
         yield Message.Url, file["url"], file
 
 

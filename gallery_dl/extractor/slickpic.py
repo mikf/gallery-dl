@@ -56,7 +56,7 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
             "count": len(imgs),
         }
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for num, img in enumerate(imgs, 1):
             url = img["url_rsz"] + "/o/" + img["fname"]
             img = text.nameext_from_url(img["fname"], {

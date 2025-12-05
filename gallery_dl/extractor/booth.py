@@ -83,7 +83,7 @@ class BoothItemExtractor(BoothExtractor):
             item["count"] = 0
             shop["uuid"] = util.NONE
 
-        yield Message.Directory, item
+        yield Message.Directory, "", item
         for num, file in enumerate(files, 1):
             url = file["url"]
             file["num"] = num

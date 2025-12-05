@@ -39,7 +39,7 @@ class JschanThreadExtractor(JschanExtractor):
         thread["threadId"] = thread["postId"]
         posts = thread.pop("replies", ())
 
-        yield Message.Directory, thread
+        yield Message.Directory, "", thread
         for post in itertools.chain((thread,), posts):
             if files := post.pop("files", ()):
                 thread.update(post)

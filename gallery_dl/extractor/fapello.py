@@ -44,7 +44,7 @@ class FapelloPostExtractor(Extractor):
         }
         url = text.extr(page, 'src="', '"').replace(
             ".md", "").replace(".th", "")
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, url, text.nameext_from_url(url, data)
 
 

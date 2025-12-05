@@ -57,5 +57,5 @@ class ItchioGameExtractor(Extractor):
             game = {"game": game, "user": user, "id": upload_id}
 
             url = info["url"]
-            yield Message.Directory, game
+            yield Message.Directory, "", game
             yield Message.Url, url, text.nameext_from_url(url, game)

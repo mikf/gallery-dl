@@ -160,7 +160,7 @@ class MotherlessMediaExtractor(MotherlessExtractor):
     def items(self):
         file = self._extract_media(self.groups[0])
         url = file["url"]
-        yield Message.Directory, file
+        yield Message.Directory, "", file
         yield Message.Url, url, text.nameext_from_url(url, file)
 
 
@@ -197,7 +197,7 @@ class MotherlessGalleryExtractor(MotherlessExtractor):
             file["num"] = num
             file["thumbnail"] = thumbnail
             url = file["url"]
-            yield Message.Directory, file
+            yield Message.Directory, "", file
             yield Message.Url, url, text.nameext_from_url(url, file)
 
 
@@ -235,5 +235,5 @@ class MotherlessGroupExtractor(MotherlessExtractor):
             file["uploader"] = uploader
             file["group"] = file["group_id"]
             url = file["url"]
-            yield Message.Directory, file
+            yield Message.Directory, "", file
             yield Message.Url, url, text.nameext_from_url(url, file)

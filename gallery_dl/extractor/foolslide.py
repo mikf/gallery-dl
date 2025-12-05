@@ -58,7 +58,7 @@ class FoolslideChapterExtractor(FoolslideExtractor):
         data["count"] = len(imgs)
         data["chapter_id"] = text.parse_int(imgs[0]["chapter_id"])
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         enum = util.enumerate_reversed if self.config(
             "page-reverse") else enumerate
         for data["page"], image in enum(imgs, 1):

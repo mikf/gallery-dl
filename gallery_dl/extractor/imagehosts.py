@@ -74,7 +74,7 @@ class ImagehostImageExtractor(Extractor):
         if self._validate is not None:
             data["_http_validate"] = self._validate
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, url, data
 
     def get_info(self, page):

@@ -32,7 +32,7 @@ class CfakeExtractor(Extractor):
         kwdict["type_name"] = text.unquote(type_name).replace("_", " ")
         kwdict["sub_id"] = text.parse_int(sub_id)
         kwdict["page"] = pnum = text.parse_int(pnum, 1)
-        yield Message.Directory, {}
+        yield Message.Directory, "", {}
 
         base = f"{self.root}/images/{type}/{type_name}/{type_id}"
         if sub_id:

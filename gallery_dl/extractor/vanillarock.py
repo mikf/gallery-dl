@@ -53,7 +53,7 @@ class VanillarockPostExtractor(VanillarockExtractor):
                 '<div class="cat-tag">', '</div>'))[::2],
         }
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for data["num"], url in enumerate(imgs, 1):
             yield Message.Url, url, text.nameext_from_url(url, data)
 

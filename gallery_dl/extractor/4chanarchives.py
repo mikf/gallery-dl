@@ -40,7 +40,7 @@ class _4chanarchivesThreadExtractor(Extractor):
 
         for post in posts:
             post.update(data)
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             if "url" in post:
                 yield Message.Url, post["url"], post
 

@@ -59,7 +59,7 @@ class RedditExtractor(Extractor):
                     submission["comment"] = None
                     submission["date"] = self.parse_timestamp(
                         submission["created_utc"])
-                    yield Message.Directory, submission
+                    yield Message.Directory, "", submission
                     visited.add(submission["id"])
                     submission["num"] = 0
 
@@ -105,14 +105,14 @@ class RedditExtractor(Extractor):
                             urls.append((url, submission))
 
                 elif parentdir:
-                    yield Message.Directory, comments[0]
+                    yield Message.Directory, "", comments[0]
 
                 if self.api.comments:
                     if comments and not submission:
                         submission = comments[0]
                         submission.setdefault("num", 0)
                         if not parentdir:
-                            yield Message.Directory, submission
+                            yield Message.Directory, "", submission
 
                     for comment in comments:
                         media = (embeds and "media_metadata" in comment)
@@ -352,7 +352,7 @@ class RedditImageExtractor(Extractor):
     def items(self):
         url = f"https://{self.domain}/{self.path}{self.query}"
         data = text.nameext_from_url(url)
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, url, data
 
 

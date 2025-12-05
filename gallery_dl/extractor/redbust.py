@@ -182,5 +182,5 @@ class RedbustImageExtractor(RedbustExtractor):
             "url"         : img_url,
         })
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, img_url, data

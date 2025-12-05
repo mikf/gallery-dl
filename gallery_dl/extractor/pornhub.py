@@ -64,7 +64,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
 
     def items(self):
         data = self.metadata()
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for num, img in enumerate(self.images(), 1):
 
             image = {
@@ -157,7 +157,7 @@ class PornhubGifExtractor(PornhubExtractor):
             "user" : text.remove_html(extr("Created by:", "</div>")),
         }
 
-        yield Message.Directory, gif
+        yield Message.Directory, "", gif
         yield Message.Url, gif["url"], text.nameext_from_url(gif["url"], gif)
 
 

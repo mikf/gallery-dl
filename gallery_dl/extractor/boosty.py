@@ -63,7 +63,7 @@ class BoostyExtractor(Extractor):
                 "count": len(files),
             }
 
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             for data["num"], file in enumerate(files, 1):
                 data["file"] = file
                 url = file["url"]
@@ -260,7 +260,7 @@ class BoostyDirectMessagesExtractor(BoostyExtractor):
                 "count": len(files),
             }
 
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             for data["num"], file in enumerate(files, 1):
                 data["file"] = file
                 url = file["url"]

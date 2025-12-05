@@ -36,7 +36,7 @@ class LexicaSearchExtractor(Extractor):
             image["filename"] = image["id"]
             image["extension"] = "jpg"
             image["search_tags"] = tags
-            yield Message.Directory, image
+            yield Message.Directory, "", image
             yield Message.Url, base + image["id"], image
 
     def posts(self):

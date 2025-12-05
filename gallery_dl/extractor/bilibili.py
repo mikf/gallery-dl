@@ -74,7 +74,7 @@ class BilibiliArticleExtractor(BilibiliExtractor):
                     pass
 
         article["count"] = len(pics)
-        yield Message.Directory, article
+        yield Message.Directory, "", article
         for article["num"], pic in enumerate(pics, 1):
             url = pic["url"]
             article.update(pic)

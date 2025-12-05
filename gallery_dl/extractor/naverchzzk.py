@@ -34,7 +34,7 @@ class NaverChzzkExtractor(Extractor):
             data["date"] = self.parse_datetime(
                 data["createdDate"], "%Y%m%d%H%M%S")
 
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             for data["num"], file in enumerate(files, 1):
                 if extra := file.get("extraJson"):
                     file.update(util.json_loads(extra))

@@ -36,7 +36,7 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
 
     def items(self):
         data = self.metadata()
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for num, image in enumerate(self.images(), 1):
             url = image["imageURL"]
             image.update(data)

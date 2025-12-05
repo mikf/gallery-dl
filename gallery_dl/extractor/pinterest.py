@@ -63,7 +63,7 @@ class PinterestExtractor(Extractor):
                 if value := pin.get(key):
                     pin[key] = value.strip()
 
-            yield Message.Directory, pin
+            yield Message.Directory, "", pin
             for pin["num"], file in enumerate(files, 1):
                 url = file["url"]
                 text.nameext_from_url(url, pin)

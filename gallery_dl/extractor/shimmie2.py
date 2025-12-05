@@ -46,7 +46,7 @@ class Shimmie2Extractor(BaseExtractor):
             else:
                 text.nameext_from_url(url, post)
 
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             yield Message.Url, url, post
 
     def metadata(self):

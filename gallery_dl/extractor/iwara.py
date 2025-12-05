@@ -47,7 +47,7 @@ class IwaraExtractor(Extractor):
 
             group_info["type"] = "image"
             group_info["count"] = len(files)
-            yield Message.Directory, group_info
+            yield Message.Directory, "", group_info
             for num, file in enumerate(files, 1):
                 file_info = self.extract_media_info(file, None)
                 file_id = file_info["file_id"]
@@ -78,7 +78,7 @@ class IwaraExtractor(Extractor):
                                video["id"], exc.__class__.__name__, exc)
                 continue
 
-            yield Message.Directory, info
+            yield Message.Directory, "", info
             yield Message.Url, f"https:{download_url}", info
 
     def items_user(self, users, key=None):

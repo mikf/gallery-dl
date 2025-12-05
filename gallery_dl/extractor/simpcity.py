@@ -48,7 +48,7 @@ class SimpcityExtractor(Extractor):
 
             data = {"post": post}
             post["count"] = data["count"] = len(urls)
-            yield Message.Directory, data
+            yield Message.Directory, "", data
 
             data["num"] = data["num_internal"] = data["num_external"] = 0
             for video, inl1, inl2, ext in urls:

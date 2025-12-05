@@ -182,7 +182,7 @@ class KemonoExtractor(Extractor):
                 files.append(file)
 
             post["count"] = len(files)
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             for post["num"], file in enumerate(files, 1):
                 if "id" in file:
                     del file["id"]
@@ -440,7 +440,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
             post.update(data)
             post["date"] = self._parse_datetime(post["published"])
             post["count"] = len(files)
-            yield Message.Directory, post
+            yield Message.Directory, "", post
 
             for post["num"], file in enumerate(files, 1):
                 post["hash"] = file["hash"]

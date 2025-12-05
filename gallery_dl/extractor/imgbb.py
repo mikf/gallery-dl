@@ -30,7 +30,7 @@ class ImgbbExtractor(Extractor):
         for image in self.posts():
             url = image["url"]
             text.nameext_from_url(url, image)
-            yield Message.Directory, image
+            yield Message.Directory, "", image
             yield Message.Url, url, image
 
     def login(self):

@@ -72,7 +72,7 @@ class PostmillExtractor(BaseExtractor):
                 urls.append((Message.Queue, url))
 
             data["count"] = len(urls)
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             for data["num"], (msg, url) in enumerate(urls, 1):
                 if url.startswith("text:"):
                     data["filename"], data["extension"] = "", "htm"

@@ -97,7 +97,7 @@ class NitterExtractor(BaseExtractor):
                 files = ()
             tweet["count"] = len(files)
 
-            yield Message.Directory, tweet
+            yield Message.Directory, "", tweet
             for tweet["num"], file in enumerate(files, 1):
                 url = file["url"]
                 file.update(tweet)

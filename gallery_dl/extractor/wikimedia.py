@@ -105,7 +105,7 @@ class WikimediaExtractor(BaseExtractor):
 
             info["count"] = len(images)
             self.prepare_info(info)
-            yield Message.Directory, info
+            yield Message.Directory, "", info
 
             num = 0
             for image in images:

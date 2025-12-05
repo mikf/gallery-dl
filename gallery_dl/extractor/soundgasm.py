@@ -26,7 +26,7 @@ class SoundgasmExtractor(Extractor):
     def items(self):
         for sound in map(self._extract_sound, self.sounds()):
             url = sound["url"]
-            yield Message.Directory, sound
+            yield Message.Directory, "", sound
             yield Message.Url, url, text.nameext_from_url(url, sound)
 
     def _extract_sound(self, url):

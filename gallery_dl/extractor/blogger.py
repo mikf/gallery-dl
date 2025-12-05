@@ -72,7 +72,7 @@ class BloggerExtractor(BaseExtractor):
             data = {"blog": blog, "post": post}
             if metadata:
                 data.update(metadata)
-            yield Message.Directory, data
+            yield Message.Directory, "", data
 
             for data["num"], url in enumerate(files, 1):
                 data["url"] = url

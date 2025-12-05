@@ -38,7 +38,7 @@ class _4chanThreadExtractor(Extractor):
             "title" : text.unescape(title)[:50],
         }
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for post in posts:
             if "filename" in post:
                 post.update(data)

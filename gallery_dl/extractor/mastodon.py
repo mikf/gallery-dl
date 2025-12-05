@@ -66,7 +66,7 @@ class MastodonExtractor(BaseExtractor):
             status["tags"] = [tag["name"] for tag in status["tags"]]
             status["date"] = self.parse_datetime_iso(status["created_at"][:19])
 
-            yield Message.Directory, status
+            yield Message.Directory, "", status
             for status["num"], media in enumerate(attachments, 1):
                 status["media"] = media
                 url = media["url"]

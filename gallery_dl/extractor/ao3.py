@@ -220,7 +220,7 @@ class Ao3WorkExtractor(Ao3Extractor):
         else:
             data["series"] = None
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for fmt in self.formats:
             try:
                 url = text.urljoin(self.root, fmts[fmt])

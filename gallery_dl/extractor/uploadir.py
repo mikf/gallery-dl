@@ -53,5 +53,5 @@ class UploadirFileExtractor(Extractor):
             data = text.nameext_from_url(name)
 
         data["id"] = self.file_id
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, url, data

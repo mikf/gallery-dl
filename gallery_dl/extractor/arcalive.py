@@ -54,7 +54,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
             f"{self.root}/b/{post['boardSlug']}/{post['id']}"
         post["_http_headers"] = {"Referer": post_url + "?p=1"}
 
-        yield Message.Directory, post
+        yield Message.Directory, "", post
         for post["num"], file in enumerate(files, 1):
             post.update(file)
             url = file["url"]

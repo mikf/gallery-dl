@@ -54,7 +54,7 @@ class ImgpilePostExtractor(ImgpileExtractor):
         data = {"post": post}
         data["count"] = post["count"] = len(files)
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for data["num"], file in enumerate(files, 1):
             data.update(file)
             url = file["url"]

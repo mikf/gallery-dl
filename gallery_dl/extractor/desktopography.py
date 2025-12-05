@@ -82,7 +82,7 @@ class DesktopographyEntryExtractor(DesktopographyExtractor):
         page = self.request(url).text
 
         entry_data = {"entry": self.entry}
-        yield Message.Directory, entry_data
+        yield Message.Directory, "", entry_data
 
         for image_data in text.extract_iter(
                 page,

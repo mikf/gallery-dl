@@ -31,7 +31,7 @@ class _2chanThreadExtractor(Extractor):
                f"/{self.board}/res/{self.thread}.htm")
         page = self.request(url).text
         data = self.metadata(page)
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for post in self.posts(page):
             if "filename" not in post:
                 continue

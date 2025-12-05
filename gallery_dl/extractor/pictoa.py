@@ -43,7 +43,7 @@ class PictoaImageExtractor(PictoaExtractor):
         }
 
         text.nameext_from_url(image_url, data)
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, image_url, data
 
 

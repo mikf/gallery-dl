@@ -31,7 +31,7 @@ class PahealExtractor(Extractor):
             post["width"] = text.parse_int(post["width"])
             post["height"] = text.parse_int(post["height"])
             post.update(data)
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             yield Message.Url, post["file_url"], post
 
     def get_metadata(self):

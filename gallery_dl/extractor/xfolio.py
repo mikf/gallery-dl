@@ -57,7 +57,7 @@ class XfolioWorkExtractor(XfolioExtractor):
         files = self._extract_files(html, work)
         work["count"] = len(files)
 
-        yield Message.Directory, work
+        yield Message.Directory, "", work
         for work["num"], file in enumerate(files, 1):
             file.update(work)
             yield Message.Url, file["url"], file

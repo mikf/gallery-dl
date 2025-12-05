@@ -46,7 +46,7 @@ class SubscribestarExtractor(Extractor):
                     content, "<body>", "</body>")
             data["title"] = text.unescape(text.rextr(content, "<h1>", "</h1>"))
 
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             for num, item in enumerate(media, 1):
                 item.update(data)
                 item["num"] = num
