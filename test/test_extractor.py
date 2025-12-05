@@ -39,7 +39,7 @@ class FakeExtractor(Extractor):
     pattern = "fake:"
 
     def items(self):
-        yield Message.Version, 1
+        yield Message.Noop
         yield Message.Url, "text:foobar", {}
 
 
