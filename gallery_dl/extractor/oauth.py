@@ -12,9 +12,6 @@ from .common import Extractor
 from .. import text, oauth, util, config, exception
 from ..output import stdout_write
 from ..cache import cache, memcache
-import urllib.parse
-import binascii
-import hashlib
 
 REDIRECT_URI_LOCALHOST = "http://localhost:6414/"
 REDIRECT_URI_HTTPS = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
@@ -87,7 +84,7 @@ class OAuthBase(Extractor):
 
     def open(self, url, params, recv=None):
         """Open 'url' in browser amd return response parameters"""
-        url += "?" + urllib.parse.urlencode(params)
+        url = f"{url}?{text.build_query(params)}"
 
         if browser := self.config("browser", True):
             try:
@@ -420,6 +417,8 @@ class OAuthPixiv(OAuthBase):
 
     def items(self):
         from . import pixiv
+        import binascii
+        import hashlib
 
         code_verifier = util.generate_token(32)
         digest = hashlib.sha256(code_verifier.encode()).digest()
