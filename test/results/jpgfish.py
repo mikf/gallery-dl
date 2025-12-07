@@ -16,6 +16,8 @@ __tests__ = (
     "#sha1_content": "098e5e9b17ad634358426e0ffd1c93871474d13c",
 
     "album"    : "",
+    "album_id" : "",
+    "album_slug": "",
     "date"     : "dt:2022-06-05 03:24:25",
     "extension": "jpg",
     "filename" : "funnymeme",
@@ -62,8 +64,11 @@ __tests__ = (
     "#class"   : chevereto.CheveretoImageExtractor,
     "#results" : "https://simp2.selti-delivery.ru/hannahowo_00457.jpg",
 
-    "album": "401-500",
-    "date" : "dt:2022-03-23 13:50:52",
+    "album"     : "401-500",
+    "album_id"  : "atYaG",
+    "album_slug": "401-500",
+    "date"      : "dt:2022-03-23 13:50:52",
+    "id"        : "auCruA",
 },
 
 {
