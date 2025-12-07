@@ -74,14 +74,17 @@ class CheveretoImageExtractor(CheveretoExtractor):
                     url, b"seltilovessimpcity@simpcityhatesscrapers",
                     fromhex=True)
 
+        album_url, _, album_name = extr("Added to <a", "</a>").rpartition(">")
         file = {
             "id"   : self.path.rpartition("/")[2].rpartition(".")[2],
             "url"  : url,
-            "album": text.remove_html(extr(
-                "Added to <a", "</a>").rpartition(">")[2]),
+            "album": text.remove_html(album_name),
             "date" : self.parse_datetime_iso(extr('<span title="', '"')),
             "user" : extr('username: "', '"'),
         }
+
+        file["album_slug"], _, file["album_id"] = text.rextr(
+            album_url, "/", '"').rpartition(".")
 
         text.nameext_from_url(file["url"], file)
         yield Message.Directory, "", file
@@ -113,11 +116,16 @@ class CheveretoVideoExtractor(CheveretoExtractor):
                 'property="video:height" content="', '"')),
             "duration" : extr(
                 'class="far fa-clock"></i>', "—"),
-            "album": text.remove_html(extr(
-                "Added to <a", "</a>").rpartition(">")[2]),
+            "album"    : extr(
+                "Added to <a", "</a>"),
             "date"     : self.parse_datetime_iso(extr('<span title="', '"')),
             "user"     : extr('username: "', '"'),
         }
+
+        album_url, _, album_name = file["album"].rpartition(">")
+        file["album"] = text.remove_html(album_name)
+        file["album_slug"], _, file["album_id"] = text.rextr(
+            album_url, "/", '"').rpartition(".")
 
         try:
             min, _, sec = file["duration"].partition(":")
