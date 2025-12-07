@@ -651,6 +651,10 @@ class DownloadJob(Job):
             if self.archive is not None:
                 self.archive.check = pathfmt.exists
 
+        # Apply ignore-extension option if enabled
+        if pathfmt.ignore_extension:
+            pathfmt.exists = pathfmt.exists_ignore_extension
+
         if not cfg("postprocess", True):
             return
 

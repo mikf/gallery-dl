@@ -118,6 +118,8 @@ class PathFormat():
         if WINDOWS:
             self.extended = config("path-extended", True)
 
+        self.ignore_extension = config("ignore-extension", False)
+
         self.basedirectory_conditions = None
         basedir = extractor._parentdir
         if not basedir:
@@ -167,6 +169,26 @@ class PathFormat():
             except OSError:
                 pass
         return False
+
+    def exists_ignore_extension(self):
+        """Return True if a file with the same basename exists on disk (any extension)"""
+        if not self.extension:
+            return False
+        
+        try:
+            # Get the filename without extension
+            realpath_base = self.realpath.rsplit(".", 1)[0]
+            directory = os.path.dirname(self.realpath)
+            basename = os.path.basename(realpath_base)
+            
+            # Check if any file with same base name exists
+            for entry in os.listdir(directory):
+                entry_base = entry.rsplit(".", 1)[0]
+                if entry_base == basename:
+                    return self.check_file()
+            return False
+        except OSError:
+            return False
 
     def check_file(self):
         return True
