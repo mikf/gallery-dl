@@ -7842,8 +7842,6 @@ Type
 Description
     File to write external URLs unsupported by *gallery-dl* to.
 
-    The default `Format String`_ here is ``"{message}"``.
-
 
 output.errorfile
 ----------------
@@ -7852,8 +7850,6 @@ Type
     * |Logging Configuration|_
 Description
     File to write input URLs which returned an error to.
-
-    The default `Format String`_ here is also ``"{message}"``.
 
     When combined with
     ``-I``/``--input-file-comment`` or
@@ -9547,7 +9543,12 @@ Description
           `path <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/path.py#L27>`__,
           and `keywords` objects and their attributes, for example
           ``"{extractor.url}"``, ``"{path.filename}"``, ``"{keywords.title}"``
-        * Default: ``"[{name}][{levelname}] {message}"``
+        * Default:
+          ``"[{name}][{levelname}] {message}"`` for
+          `logfile <output.logfile_>`__,
+          ``"{message}"`` for
+          `unsupportedfile <output.unsupportedfile_>`__ and
+          `errorfile <output.errorfile_>`__
     * format-date
         * Format string for ``{asctime}`` fields in logging messages
           (see `strftime() directives <https://docs.python.org/3/library/time.html#time.strftime>`__)
@@ -9562,15 +9563,24 @@ Description
         * Mode in which the file is opened;
           use ``"w"`` to truncate or ``"a"`` to append
           (see |open()|_)
-        * Default: ``"w"``
+        * Default:
+          ``"w"`` for
+          `logfile <output.logfile_>`__ and
+          `unsupportedfile <output.unsupportedfile_>`__,
+          ``"a"`` for
+          `errorfile <output.errorfile_>`__
     * encoding
         * File encoding
         * Default: ``"utf-8"``
     * defer
         * Defer file opening/creation until writing the first logging message
         * Default:
-          ``true`` for `errorfile <output.errorfile_>`__,
-          ``false`` otherwise
+          ``false`` for
+          `logfile <output.logfile_>`__,
+          ``true`` for
+          `unsupportedfile <output.unsupportedfile_>`__ and
+          `errorfile <output.errorfile_>`__
+
 Note
     path, mode, encoding, and defer
     are only applied when configuring logging output to a file.
