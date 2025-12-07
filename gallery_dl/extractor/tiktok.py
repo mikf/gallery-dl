@@ -25,6 +25,7 @@ class TiktokExtractor(Extractor):
     def _init(self):
         self.audio = self.config("audio", True)
         self.video = self.config("videos", True)
+        self.cover = self.config("covers", False)
 
     def items(self):
         for tiktok_url in self.urls():
@@ -73,8 +74,11 @@ class TiktokExtractor(Extractor):
                     elif url := self._extract_audio(post):
                         yield Message.Url, url, post
 
-            elif self.video and "video" in post:
-                ytdl_media = "video"
+            elif "video" in post:
+                if self.video:
+                    ytdl_media = "video"
+                if self.cover and (url := self._extract_cover(post, "video")):
+                    yield Message.Url, url, post
 
             else:
                 self.log.info("%s: Skipping post", tiktok_url)
@@ -141,6 +145,30 @@ class TiktokExtractor(Extractor):
         })
         if not post["extension"]:
             post["extension"] = "mp3"
+        return url
+
+    def _extract_cover(self, post, type):
+        media = post[type]
+
+        for cover_id in ("thumbnail", "cover", "originCover", "dynamicCover"):
+            if url := media.get(cover_id):
+                break
+        else:
+            return
+
+        text.nameext_from_url(url, post)
+        post.update({
+            "type"     : "cover",
+            "extension": "jpg",
+            "image"    : url,
+            "title"    : post["desc"] or f"TikTok {type} cover #{post['id']}",
+            "duration" : media.get("duration"),
+            "num"      : 0,
+            "img_id"   : "",
+            "cover_id" : cover_id,
+            "width"    : 0,
+            "height"   : 0,
+        })
         return url
 
     def _check_status_code(self, detail, url):

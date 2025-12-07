@@ -5782,6 +5782,16 @@ Description
         Ignore audio tracks
 
 
+extractor.tiktok.covers
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download video covers.
+
+
 extractor.tiktok.videos
 -----------------------
 Type
