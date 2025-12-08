@@ -76,24 +76,24 @@ class HentaifoundryExtractor(Extractor):
         extr = text.extract_from(page, page.index('id="picBox"'))
 
         data = {
-            "index"        : text.parse_int(path.rsplit("/", 2)[1]),
-            "title"        : text.unescape(extr('class="imageTitle">', '<')),
-            "artist"       : text.unescape(extr('/profile">', '<')),
-            "_body"        : extr(
+            "index"      : text.parse_int(path.rsplit("/", 2)[1]),
+            "title"      : text.unescape(extr('class="imageTitle">', '<')),
+            "artist"     : text.unescape(extr('/profile">', '<')),
+            "_body"      : extr(
                 '<div class="boxbody"', '<div class="boxfooter"'),
-            "description"  : self._process_description(extr(
+            "description": self._process_description(extr(
                 "<div class='picDescript'>", '</section>')
                 .replace("\r\n", "\n")),
-            "ratings"      : [text.unescape(r) for r in text.extract_iter(extr(
+            "ratings"    : [text.unescape(r) for r in text.extract_iter(extr(
                 "class='ratings_box'", "</div>"), "title='", "'")],
-            "hf_categories": [text.unescape(text.remove_html((c.strip())))
+            "categories" : [text.unescape(text.remove_html((c.strip())))
                 for c in extr('class="categoryBreadcrumbs">',
                 "</span>").split("&raquo;")],
-            "date"         : self.parse_datetime_iso(extr("datetime='", "'")),
-            "views"        : text.parse_int(extr(">Views</span>", "<")),
-            "score"        : text.parse_int(extr(">Vote Score</span>", "<")),
-            "media"        : text.unescape(extr(">Media</span>", "<").strip()),
-            "tags"         : text.split_html(extr(
+            "date"       : self.parse_datetime_iso(extr("datetime='", "'")),
+            "views"      : text.parse_int(extr(">Views</span>", "<")),
+            "score"      : text.parse_int(extr(">Vote Score</span>", "<")),
+            "media"      : text.unescape(extr(">Media</span>", "<").strip()),
+            "tags"       : text.split_html(extr(
                 ">Tags </span>", "</div>")),
         }
 
@@ -144,7 +144,7 @@ class HentaifoundryExtractor(Extractor):
         path = extr('class="pdfLink" href="', '"')
         data["src"] = self.root + path
         data["index"] = text.parse_int(path.rsplit("/", 2)[1])
-        data["hf_categories"] = [text.unescape(text.remove_html((c.strip())))
+        data["categories"] = [text.unescape(text.remove_html((c.strip())))
             for c in extr('class="categoryBreadcrumbs">', "</span>")
             .split("&raquo;")]
         data["ratings"] = [text.unescape(r) for r in text.extract_iter(extr(
