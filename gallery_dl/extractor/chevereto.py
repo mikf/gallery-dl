@@ -17,6 +17,7 @@ class CheveretoExtractor(BaseExtractor):
     basecategory = "chevereto"
     directory_fmt = ("{category}", "{user}", "{album}")
     archive_fmt = "{id}"
+    parent = True
 
     def _init(self):
         self.path = self.groups[-1]
