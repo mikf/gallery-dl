@@ -33,6 +33,7 @@ class Extractor():
     basecategory = ""
     basesubcategory = ""
     categorytransfer = False
+    parent = False
     directory_fmt = ("{category}",)
     filename_fmt = "{filename}.{extension}"
     archive_fmt = ""

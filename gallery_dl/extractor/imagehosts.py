@@ -19,6 +19,7 @@ class ImagehostImageExtractor(Extractor):
     basecategory = "imagehost"
     subcategory = "image"
     archive_fmt = "{token}"
+    parent = True
     _https = True
     _params = None
     _cookies = None

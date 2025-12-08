@@ -231,10 +231,13 @@ Type
     * ``bool``
     * ``string``
 Default
+    ``true``
+        ``[chevereto]`` |
+        ``[imagehost]``
     ``false``
+        otherwise
 Description
-    If ``true``, overwrite any metadata provided by a child extractor
-    with its parent's.
+    Forward a parent's metadata to its child extractors.
 
     | If this is a ``string``, add a parent's metadata to its children's
       to a field named after said string.

@@ -452,7 +452,8 @@ class DownloadJob(Job):
             else:
                 extr._parentdir = pextr._parentdir
 
-            if pmeta := pextr.config2("parent-metadata", "metadata-parent"):
+            if pmeta := pextr.config2(
+                    "parent-metadata", "metadata-parent", pextr.parent):
                 if isinstance(pmeta, str):
                     data = self.kwdict.copy()
                     if kwdict:
