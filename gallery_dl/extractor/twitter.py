@@ -1483,7 +1483,7 @@ class TwitterAPI():
 
         stop_tweets = cfg("search-stop")
         if stop_tweets is None or stop_tweets == "auto":
-            stop_tweets = 3 if update_variables is None else 0
+            stop_tweets = 3
 
         return self._pagination_tweets(
             endpoint, variables,

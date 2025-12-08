@@ -6431,8 +6431,7 @@ extractor.twitter.search-stop
 Type
     ``integer``
 Default
-    * ``3`` if `search-pagination <extractor.twitter.search-pagination_>`__ is set to ``"cursor"``
-    * ``0`` otherwise
+    ``3``
 Description
     Number of empty search result batches
     to accept before stopping.
