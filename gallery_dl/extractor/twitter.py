@@ -1991,7 +1991,7 @@ class TwitterAPI():
                     "Unable to retrieve Tweets from this timeline")
 
             tweets = []
-            tweet = None
+            tweet = last_tweet = None
             api_tries = 1
 
             if pinned_tweet is not None and isinstance(pinned_tweet, dict):
@@ -2142,6 +2142,7 @@ class TwitterAPI():
                     return extr._update_cursor(None)
                 self.log.debug("Switching to 'count: %s'", count[-1])
                 variables["count"] = count.pop()
+                continue
             else:
                 self.log.debug(
                     "No Tweet results (%s/%s)",
