@@ -1011,6 +1011,8 @@ class RangePredicate():
 
         if isinstance(rangespec, str):
             rangespec = rangespec.split(",")
+        elif isinstance(rangespec, int):
+            rangespec = (str(rangespec),)
 
         for group in rangespec:
             if not group:
