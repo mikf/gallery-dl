@@ -86,9 +86,7 @@ class HentaifoundryExtractor(Extractor):
                 .replace("\r\n", "\n")),
             "ratings"    : [text.unescape(r) for r in text.extract_iter(extr(
                 "class='ratings_box'", "</div>"), "title='", "'")],
-            "categories" : [text.unescape(text.remove_html((c.strip())))
-                for c in extr('class="categoryBreadcrumbs">',
-                "</span>").split("&raquo;")],
+            "categories" : self._extract_categories(extr),
             "date"       : self.parse_datetime_iso(extr("datetime='", "'")),
             "views"      : text.parse_int(extr(">Views</span>", "<")),
             "score"      : text.parse_int(extr(">Vote Score</span>", "<")),
@@ -144,13 +142,16 @@ class HentaifoundryExtractor(Extractor):
         path = extr('class="pdfLink" href="', '"')
         data["src"] = self.root + path
         data["index"] = text.parse_int(path.rsplit("/", 2)[1])
-        data["categories"] = [text.unescape(text.remove_html((c.strip())))
-            for c in extr('class="categoryBreadcrumbs">', "</span>")
-            .split("&raquo;")]
+        data["categories"] = self._extract_categories(extr)
         data["ratings"] = [text.unescape(r) for r in text.extract_iter(extr(
             "class='ratings_box'", "</div>"), "title='", "'")]
 
         return text.nameext_from_url(data["src"], data)
+
+    def _extract_categories(self, extr):
+        return [text.unescape(text.remove_html((c.strip())))
+                for c in extr('class="categoryBreadcrumbs">', "</span>")
+                .split("&raquo;")]
 
     def _request_check(self, url, **kwargs):
         self.request = self._request_original
