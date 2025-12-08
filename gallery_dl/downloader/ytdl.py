@@ -81,6 +81,7 @@ class YoutubeDLDownloader(DownloaderBase):
             url = url[5:]
             manifest = kwdict.get("_ytdl_manifest")
             while True:
+                tries += 1
                 try:
                     if manifest is None:
                         info_dict = self._extract_url(
@@ -88,15 +89,18 @@ class YoutubeDLDownloader(DownloaderBase):
                     else:
                         info_dict = self._extract_manifest(
                             ytdl_instance, url, kwdict)
-                    break
+                    if info_dict:
+                        break
                 except Exception as exc:
-                    tries += 1
                     self.log.traceback(exc)
                     self.log.error("%s: %s (%s/%s)",
                                    exc.__class__.__name__, exc,
                                    tries, self.retries+1)
-                    if tries > self.retries:
-                        return False
+                else:
+                    self.log.error("Empty 'info_dict' data (%s/%s)",
+                                   tries, self.retries+1)
+                if tries > self.retries:
+                    return False
 
         if "__gdl_initialize" in ytdl_instance.params:
             del ytdl_instance.params["__gdl_initialize"]
