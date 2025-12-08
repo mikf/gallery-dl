@@ -144,6 +144,7 @@ modules = [
     "nozomi",
     "nsfwalbum",
     "nudostar",
+    "nudostarforum",
     "okporn",
     "paheal",
     "patreon",
