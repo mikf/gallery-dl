@@ -149,7 +149,7 @@ class HentaifoundryExtractor(Extractor):
         return text.nameext_from_url(data["src"], data)
 
     def _extract_categories(self, extr):
-        return [text.unescape(text.remove_html((c.strip())))
+        return [text.unescape(text.extr(c, ">", "<"))
                 for c in extr('class="categoryBreadcrumbs">', "</span>")
                 .split("&raquo;")]
 
