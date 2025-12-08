@@ -118,6 +118,10 @@ __tests__ = (
     "#category": ("chevereto", "jpgfish", "album"),
     "#class"   : chevereto.CheveretoAlbumExtractor,
     "#count"   : 2,
+
+    "album"     : "funny meme album",
+    "album_id"  : "CDilP",
+    "album_slug": "funny-meme-album",
 },
 
 {
@@ -125,6 +129,10 @@ __tests__ = (
     "#category": ("chevereto", "jpgfish", "album"),
     "#class"   : chevereto.CheveretoAlbumExtractor,
     "#count"   : 114,
+
+    "album"     : "Gunggingnsk OF",
+    "album_id"  : "N9OOI",
+    "album_slug": "gunggingnsk",
 },
 
 {
@@ -132,6 +140,10 @@ __tests__ = (
     "#category": ("chevereto", "jpgfish", "album"),
     "#class"   : chevereto.CheveretoAlbumExtractor,
     "#count"   : 100,
+
+    "album"     : "101-200",
+    "album_id"  : "aNJ6A",
+    "album_slug": "101-200",
 },
 
 {
@@ -139,6 +151,10 @@ __tests__ = (
     "#category": ("chevereto", "jpgfish", "album"),
     "#class"   : chevereto.CheveretoAlbumExtractor,
     "#count"   : 606,
+
+    "album"     : "re:([12345]0)?1-[123456]00",
+    "album_id"  : str,
+    "album_slug": str,
 },
 
 {

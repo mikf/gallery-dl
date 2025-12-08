@@ -21,10 +21,12 @@ class CheveretoExtractor(BaseExtractor):
     def _init(self):
         self.path = self.groups[-1]
 
-    def _pagination(self, url):
-        while True:
-            page = self.request(url).text
+    def _pagination(self, url, callback=None):
+        page = self.request(url).text
+        if callback is not None:
+            callback(page)
 
+        while True:
             for item in text.extract_iter(
                     page, '<div class="list-item-image ', 'image-container'):
                 yield text.urljoin(self.root, text.extr(
@@ -35,6 +37,7 @@ class CheveretoExtractor(BaseExtractor):
                 return
             if url[0] == "/":
                 url = self.root + url
+            page = self.request(url).text
 
 
 BASE_PATTERN = CheveretoExtractor.update({
@@ -155,9 +158,20 @@ class CheveretoAlbumExtractor(CheveretoExtractor):
             albums = (url,)
 
         for album in albums:
-            for item_url in self._pagination(album):
+            for item_url in self._pagination(
+                    album, self._extract_metadata_album):
                 data = data_video if "/video/" in item_url else data_image
                 yield Message.Queue, item_url, data
+
+    def _extract_metadata_album(self, page):
+        url, pos = text.extract(
+            page, 'property="og:url" content="', '"')
+
+        kwdict = self.kwdict
+        kwdict["album_slug"], _, kwdict["album_id"] = \
+            url[url.rfind("/")+1:].rpartition(".")
+        kwdict["album"] = text.unescape(text.extract(
+            page, 'property="og:title" content="', '"', pos)[0])
 
 
 class CheveretoCategoryExtractor(CheveretoExtractor):
