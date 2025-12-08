@@ -116,3 +116,39 @@ class PornpicsSearchExtractor(PornpicsExtractor):
             "offset": 0,
         }
         return self._pagination(url, params)
+
+
+class PornpicsCategoryExtractor(PornpicsExtractor):
+    """Extractor for galleries from pornpics categories"""
+    subcategory = "category"
+    # exclude listing pages (popular, recent, etc.) - they don't support
+    # JSON pagination and use different HTML structure (single quotes)
+    pattern = (rf"{BASE_PATTERN}"
+               rf"/(?!galleries/|tags/|pornstars/|channels/|videos/"
+               rf"|popular/?$|recent/?$|rating/?$|likes/?$|views/?$"
+               rf"|comments/?$)"
+               rf"([^/?#]+)/?$")
+    example = "https://www.pornpics.com/ass/"
+
+    def galleries(self):
+        url = f"{self.root}/{self.groups[0]}/"
+        return self._pagination(url)
+
+
+class PornpicsListingExtractor(PornpicsExtractor):
+    """Extractor for galleries from pornpics listing pages
+
+    These pages (popular, recent, etc.) don't support JSON pagination
+    and use single quotes in HTML, unlike category pages.
+    """
+    subcategory = "listing"
+    pattern = (rf"{BASE_PATTERN}"
+               rf"/(popular|recent|rating|likes|views|comments)/?$")
+    example = "https://www.pornpics.com/popular/"
+
+    def galleries(self):
+        url = f"{self.root}/{self.groups[0]}/"
+        page = self.request(url).text
+        for href in text.extract_iter(
+                page, "class='rel-link' href='", "'"):
+            yield {"g_url": href}
