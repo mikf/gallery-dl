@@ -67,6 +67,7 @@ modules = [
     "fantia",
     "fapello",
     "fapachi",
+    "fitnakedgirls",
     "flickr",
     "furaffinity",
     "furry34",
