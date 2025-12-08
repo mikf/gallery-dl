@@ -346,21 +346,24 @@ class TwitterExtractor(Extractor):
                 files.append({"url": url})
 
     def _transform_tweet(self, tweet):
-        if "author" in tweet:
-            author = tweet["author"]
-        elif "core" in tweet:
-            author = tweet["core"]["user_results"]["result"]
-        else:
-            author = tweet["user"]
-        author = self._transform_user(author)
-
         if "legacy" in tweet:
             legacy = tweet["legacy"]
         else:
             legacy = tweet
-        tget = legacy.get
-
         tweet_id = int(legacy["id_str"])
+
+        if "author" in tweet:
+            author = tweet["author"]
+        elif "core" in tweet:
+            try:
+                author = tweet["core"]["user_results"]["result"]
+            except KeyError:
+                self.log.warning("%s: Missing 'author' data", tweet_id)
+                author = util.NONE
+        else:
+            author = tweet["user"]
+        author = self._transform_user(author)
+
         if tweet_id >= 300000000000000:
             date = self.parse_timestamp(
                 ((tweet_id >> 22) + 1288834974657) // 1000)
@@ -372,6 +375,7 @@ class TwitterExtractor(Extractor):
                 date = util.NONE
         source = tweet.get("source")
 
+        tget = legacy.get
         tdata = {
             "tweet_id"      : tweet_id,
             "retweet_id"    : text.parse_int(
@@ -1991,7 +1995,7 @@ class TwitterAPI():
                     "Unable to retrieve Tweets from this timeline")
 
             tweets = []
-            tweet = last_tweet = None
+            tweet = last_tweet = retry = None
             api_tries = 1
 
             if pinned_tweet is not None and isinstance(pinned_tweet, dict):
@@ -2078,6 +2082,16 @@ class TwitterAPI():
                         (entry.get("entryId") or "").rpartition("-")[2])
                     continue
 
+                if retry is None:
+                    try:
+                        tweet["core"]["user_results"]["result"]
+                        retry = False
+                    except KeyError:
+                        self.log.warning("Received Tweet results without "
+                                         "'core' data ... Retrying")
+                        retry = True
+                        break
+
                 if "retweeted_status_result" in legacy:
                     try:
                         retweet = legacy["retweeted_status_result"]["result"]
@@ -2134,7 +2148,9 @@ class TwitterAPI():
                             tweet.get("rest_id"))
                         continue
 
-            if tweet:
+            if retry:
+                continue
+            elif tweet:
                 stop_tweets = stop_tweets_max
                 last_tweet = tweet
             elif stop_tweets <= 0:
