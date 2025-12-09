@@ -162,6 +162,13 @@ Pulling image from `GitHub Container Registry <https://github.com/mikf/gallery-d
     docker pull ghcr.io/mikf/gallery-dl
     docker tag ghcr.io/mikf/gallery-dl gallery-dl
 
+Pulling *Nightly Build* images built from the latest commit by using the ``dev`` tag:
+
+.. code:: bash
+
+    docker pull mikf123/gallery-dl:dev
+    docker pull ghcr.io/mikf/gallery-dl:dev
+
 To run the container you will probably want to attach some directories on the host so that the config file and downloads can persist across runs.
 
 Make sure to either download the example config file reference in the repo and place it in the mounted volume location or touch an empty file there.
