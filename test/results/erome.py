@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import erome
+from gallery_dl import exception
 
 
 __tests__ = (
@@ -36,6 +37,20 @@ __tests__ = (
     "num"     : int,
     "title"   : "82e78cfbb461ad87198f927fcb1fda9a1efac9ff.",
     "user"    : "yYgWBZw8o8qsMzM",
+},
+
+{
+    "#url"     : "https://www.erome.com/a/qlV5z90y",
+    "#comment" : "deleted album (#8665)",
+    "#class"   : erome.EromeAlbumExtractor,
+    "#exception": exception.AbortExtraction,
+},
+
+{
+    "#url"     : "https://www.erome.com/a/ACGo2Pmy",
+    "#comment" : "copyrighted album (#8665)",
+    "#class"   : erome.EromeAlbumExtractor,
+    "#exception": exception.AbortExtraction,
 },
 
 {

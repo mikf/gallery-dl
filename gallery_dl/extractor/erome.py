@@ -74,8 +74,12 @@ class EromeAlbumExtractor(EromeExtractor):
         try:
             page = self.request(url).text
         except exception.HttpError as exc:
+            if exc.status == 410:
+                msg = text.extr(exc.response.text, "<h1>", "<")
+            else:
+                msg = "Unable to fetch album page"
             raise exception.AbortExtraction(
-                f"{album_id}: Unable to fetch album page ({exc})")
+                f"{album_id}: {msg} ({exc})")
 
         title, pos = text.extract(
             page, 'property="og:title" content="', '"')
