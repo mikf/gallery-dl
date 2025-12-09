@@ -30,7 +30,8 @@ class RealbooruExtractor(booru.BooruExtractor):
         post = {
             "id"        : post_id,
             "rating"    : "e" if rating == "adult" else (rating or "?")[0],
-            "file_url"  : extr('src="', '"'),
+            "file_url"  : (s := extr('src="', '"')),
+            "_fallback" : (extr('src="', '"'),) if s.endswith(".mp4") else (),
             "created_at": extr(">Posted at ", " by "),
             "uploader"  : extr(">", "<"),
             "score"     : extr('">', "<"),
