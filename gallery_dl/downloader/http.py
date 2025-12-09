@@ -230,6 +230,10 @@ class HttpDownloader(DownloaderBase):
             # check file size
             size = text.parse_int(size, None)
             if size is not None:
+                if not size:
+                    self.release_conn(response)
+                    self.log.warning("Empty file")
+                    return False
                 if self.minsize and size < self.minsize:
                     self.release_conn(response)
                     self.log.warning(
