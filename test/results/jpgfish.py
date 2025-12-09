@@ -122,6 +122,8 @@ __tests__ = (
     "album"     : "funny meme album",
     "album_id"  : "CDilP",
     "album_slug": "funny-meme-album",
+    "count"     : 2,
+    "num"       : range(1, 2),
 },
 
 {
@@ -133,6 +135,8 @@ __tests__ = (
     "album"     : "Gunggingnsk OF",
     "album_id"  : "N9OOI",
     "album_slug": "gunggingnsk",
+    "count"     : 114,
+    "num"       : range(1, 114),
 },
 
 {
@@ -144,6 +148,8 @@ __tests__ = (
     "album"     : "101-200",
     "album_id"  : "aNJ6A",
     "album_slug": "101-200",
+    "count"     : 100,
+    "num"       : range(1, 100),
 },
 
 {
@@ -152,9 +158,11 @@ __tests__ = (
     "#class"   : chevereto.CheveretoAlbumExtractor,
     "#count"   : 606,
 
-    "album"     : "re:([12345]0)?1-[123456]00",
+    "album"     : "re:([1-5]0)?1-[1-6]00",
     "album_id"  : str,
     "album_slug": str,
+    "count"     : {100, 106},
+    "num"       : range(1, 106),
 },
 
 {

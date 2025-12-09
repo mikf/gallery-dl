@@ -158,21 +158,25 @@ class CheveretoAlbumExtractor(CheveretoExtractor):
         else:
             albums = (url,)
 
+        kwdict = self.kwdict
         for album in albums:
-            for item_url in self._pagination(
-                    album, self._extract_metadata_album):
+            for kwdict["num"], item_url in enumerate(self._pagination(
+                    album, self._extract_metadata_album), 1):
                 data = data_video if "/video/" in item_url else data_image
                 yield Message.Queue, item_url, data
 
     def _extract_metadata_album(self, page):
         url, pos = text.extract(
             page, 'property="og:url" content="', '"')
+        title, pos = text.extract(
+            page, 'property="og:title" content="', '"', pos)
 
         kwdict = self.kwdict
         kwdict["album_slug"], _, kwdict["album_id"] = \
             url[url.rfind("/")+1:].rpartition(".")
-        kwdict["album"] = text.unescape(text.extract(
-            page, 'property="og:title" content="', '"', pos)[0])
+        kwdict["album"] = text.unescape(title)
+        kwdict["count"] = text.parse_int(text.extract(
+            page, 'data-text="image-count">', "<", pos)[0])
 
 
 class CheveretoCategoryExtractor(CheveretoExtractor):
