@@ -49,12 +49,28 @@ __tests__ = (
 
 {
     "#url"     : "https://sankaku.app/ja?tags=order%3Apopularity",
+    "#comment" : "ISO 639-1",
     "#category": ("booru", "sankaku", "tag"),
     "#class"   : sankaku.SankakuTagExtractor,
 },
 
 {
     "#url"     : "https://sankaku.app/no/?tags=order%3Apopularity",
+    "#comment" : "ISO 639-1 with trailing '/'",
+    "#category": ("booru", "sankaku", "tag"),
+    "#class"   : sankaku.SankakuTagExtractor,
+},
+
+{
+    "#url"     : "https://sankaku.app/zh-CN/?tags=order%3Apopularity",
+    "#comment" : "locale code (ISO 639-1 + ISO 3166-1) (#8667)",
+    "#category": ("booru", "sankaku", "tag"),
+    "#class"   : sankaku.SankakuTagExtractor,
+},
+
+{
+    "#url"     : "https://sankaku.app/zh_CN/?tags=order%3Apopularity",
+    "#comment" : "locale code (ISO 639-1 + ISO 3166-1) (#8667)",
     "#category": ("booru", "sankaku", "tag"),
     "#class"   : sankaku.SankakuTagExtractor,
 },

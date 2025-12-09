@@ -16,7 +16,7 @@ import collections
 
 BASE_PATTERN = r"(?:https?://)?" \
     r"(?:(?:chan|www|beta|black|white)\.sankakucomplex\.com|sankaku\.app)" \
-    r"(?:/[a-z]{2})?"
+    r"(?:/[a-z]{2}(?:[-_][A-Z]{2})?)?"
 
 
 class SankakuExtractor(BooruExtractor):

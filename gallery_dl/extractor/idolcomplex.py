@@ -11,7 +11,8 @@
 from . import sankaku
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.)?"
-                r"idol(?:\.sankaku)?complex\.com(?:/[a-z]{2})?")
+                r"idol(?:\.sankaku)?complex\.com"
+                r"(?:/[a-z]{2}(?:[-_][A-Z]{2})?)?")
 
 
 class IdolcomplexBase():
