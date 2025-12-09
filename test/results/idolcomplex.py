@@ -19,6 +19,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.idolcomplex.com/zh-CN/posts?tags=lyumos",
+    "#comment" : "locale code (ISO 639-1 + ISO 3166-1) (#8667)",
+    "#category": ("booru", "idolcomplex", "tag"),
+    "#class"   : idolcomplex.IdolcomplexTagExtractor,
+},
+
+{
     "#url"     : "https://idolcomplex.com/posts?tags=lyumos",
     "#category": ("booru", "idolcomplex", "tag"),
     "#class"   : idolcomplex.IdolcomplexTagExtractor,
