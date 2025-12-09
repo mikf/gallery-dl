@@ -400,7 +400,9 @@ class BlueskyAPI():
         self.headers = {"Accept": "application/json"}
 
         self.username, self.password = extractor._get_auth_info()
-        if self.username:
+        if srv := extractor.config("api-server", False):
+            self.root = srv.rstrip("/")
+        elif self.username:
             self.root = "https://bsky.social"
         else:
             self.root = "https://api.bsky.app"
