@@ -349,6 +349,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, User Profiles</td>
     <td></td>
 </tr>
+<tr id="fitnakedgirls" title="fitnakedgirls">
+    <td>FitNakedGirls</td>
+    <td>https://fitnakedgirls.com/</td>
+    <td>Blogs, Categories, Galleries, Tag Searches, Videos</td>
+    <td></td>
+</tr>
 <tr id="flickr" title="flickr">
     <td>Flickr</td>
     <td>https://www.flickr.com/</td>
