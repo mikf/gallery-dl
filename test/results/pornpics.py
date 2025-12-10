@@ -145,4 +145,46 @@ __tests__ = (
     "#class"   : pornpics.PornpicsSearchExtractor,
 },
 
+{
+    "#url"     : "https://www.pornpics.com/ass/",
+    "#category": ("", "pornpics", "category"),
+    "#class"   : pornpics.PornpicsCategoryExtractor,
+    "#pattern" : pornpics.PornpicsGalleryExtractor.pattern,
+    "#range"   : "1-50",
+    "#count"   : 50,
+},
+
+{
+    "#url"     : "https://www.pornpics.com/milf/",
+    "#category": ("", "pornpics", "category"),
+    "#class"   : pornpics.PornpicsCategoryExtractor,
+},
+
+{
+    "#url"     : "https://pornpics.com/de/blonde",
+    "#category": ("", "pornpics", "category"),
+    "#class"   : pornpics.PornpicsCategoryExtractor,
+},
+
+{
+    "#url"     : "https://www.pornpics.com/popular/",
+    "#category": ("", "pornpics", "listing"),
+    "#class"   : pornpics.PornpicsListingExtractor,
+    "#pattern" : pornpics.PornpicsGalleryExtractor.pattern,
+    "#range"   : "1-20",
+    "#count"   : 20,
+},
+
+{
+    "#url"     : "https://www.pornpics.com/recent/",
+    "#category": ("", "pornpics", "listing"),
+    "#class"   : pornpics.PornpicsListingExtractor,
+},
+
+{
+    "#url"     : "https://pornpics.com/fr/rating",
+    "#category": ("", "pornpics", "listing"),
+    "#class"   : pornpics.PornpicsListingExtractor,
+},
+
 )
