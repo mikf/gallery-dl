@@ -12,7 +12,7 @@ from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?facebook\.com"
 USER_PATTERN = (rf"{BASE_PATTERN}/"
-                rf"(?!media/|photo/|photo.php|watch/)"
+                rf"(?!media/|photo/|photo.php|watch/|permalink.php)"
                 rf"(?:profile\.php\?id=|people/[^/?#]+/)?([^/?&#]+)")
 
 
