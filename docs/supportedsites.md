@@ -343,6 +343,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Models, Videos, Trending Posts, Popular Videos, Top Models, Posts</td>
     <td></td>
 </tr>
+<tr id="fikfap" title="fikfap">
+    <td>FikFap</td>
+    <td>https://fikfap.com/</td>
+    <td>Posts, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="flickr" title="flickr">
     <td>Flickr</td>
     <td>https://www.flickr.com/</td>
