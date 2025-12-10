@@ -191,6 +191,10 @@ class YoutubeDLDownloader(DownloaderBase):
         else:
             raise ValueError(f"Unsupported manifest type '{type}'")
 
+        if headers:
+            for fmt in fmts:
+                fmt["http_headers"] = headers
+
         info_dict = {
             "extractor": "",
             "id"       : video_id,

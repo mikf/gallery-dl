@@ -61,6 +61,7 @@ CATEGORY_MAP = {
     "fanbox"         : "pixivFANBOX",
     "fappic"         : "Fappic.com",
     "fashionnova"    : "Fashion Nova",
+    "fikfap"         : "FikFap",
     "furaffinity"    : "Fur Affinity",
     "furry34"        : "Furry 34 com",
     "girlswithmuscle": "Girls with Muscle",
@@ -155,7 +156,6 @@ CATEGORY_MAP = {
     "pornstarstube"  : "PORNSTARS.TUBE",
     "postimg"        : "Postimages",
     "readcomiconline": "Read Comic Online",
-    "redbust"        : "RedBust",
     "rbt"            : "RebeccaBlackTech",
     "redgifs"        : "RedGIFs",
     "rozenarcana"    : "Rozen Arcana",
@@ -383,9 +383,6 @@ SUBCATEGORY_MAP = {
         "usersubmissions": "User Profiles",
         "post"           : "Individual Posts",
         "shorturl"       : "",
-    },
-    "redbust": {
-        "gallery": ("Galleries", "Categories"),
     },
     "redgifs": {
         "collections": "",

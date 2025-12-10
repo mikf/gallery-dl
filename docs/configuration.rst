@@ -1810,6 +1810,22 @@ Description
     Download embedded videos hosted on https://www.blogger.com/
 
 
+extractor.bluesky.api-server
+----------------------------
+Type
+    ``string``
+Default
+    | ``"https://bsky.social"`` if a
+      `username <extractor.*.username & .password_>`__
+      is provided
+    | ``"https://api.bsky.app"`` otherwise
+Description
+    Server address for API requests.
+
+    Can be used when self-hosting a
+    `PDS <https://github.com/bluesky-social/pds>`__
+
+
 extractor.bluesky.include
 -------------------------
 Type

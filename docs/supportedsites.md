@@ -343,6 +343,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Models, Videos, Trending Posts, Popular Videos, Top Models, Posts</td>
     <td></td>
 </tr>
+<tr id="fikfap" title="fikfap">
+    <td>FikFap</td>
+    <td>https://fikfap.com/</td>
+    <td>Posts, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="flickr" title="flickr">
     <td>Flickr</td>
     <td>https://www.flickr.com/</td>
@@ -850,7 +856,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="pornpics" title="pornpics">
     <td>PornPics.com</td>
     <td>https://www.pornpics.com/</td>
-    <td>Galleries, Search Results, Tag Searches</td>
+    <td>Categories, Galleries, Listings, Search Results, Tag Searches</td>
     <td></td>
 </tr>
 <tr id="pornstarstube" title="pornstarstube">
@@ -881,12 +887,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Realbooru</td>
     <td>https://realbooru.com/</td>
     <td>Favorites, Pools, Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr id="redbust" title="redbust">
-    <td>RedBust</td>
-    <td>https://redbust.com/</td>
-    <td>Archives, Galleries, Categories, individual Images, Tag Searches</td>
     <td></td>
 </tr>
 <tr id="reddit" title="reddit">
