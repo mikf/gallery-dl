@@ -850,7 +850,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="pornpics" title="pornpics">
     <td>PornPics.com</td>
     <td>https://www.pornpics.com/</td>
-    <td>Galleries, Search Results, Tag Searches</td>
+    <td>Categories, Galleries, Listings, Search Results, Tag Searches</td>
     <td></td>
 </tr>
 <tr id="pornstarstube" title="pornstarstube">
