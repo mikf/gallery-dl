@@ -883,12 +883,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Favorites, Pools, Posts, Tag Searches</td>
     <td></td>
 </tr>
-<tr id="redbust" title="redbust">
-    <td>RedBust</td>
-    <td>https://redbust.com/</td>
-    <td>Archives, Galleries, Categories, individual Images, Tag Searches</td>
-    <td></td>
-</tr>
 <tr id="reddit" title="reddit">
     <td>Reddit</td>
     <td>https://www.reddit.com/</td>
