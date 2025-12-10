@@ -46,7 +46,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://fitnakedgirls.com/photos/tag/blonde/",
+    "#url"     : "https://fitnakedgirls.com/photos/gallery/tag/blonde/",
     "#category": ("", "fitnakedgirls", "tag"),
     "#class"   : fitnakedgirls.FitnakedgirlsTagExtractor,
     "#pattern" : fitnakedgirls.FitnakedgirlsGalleryExtractor.pattern,

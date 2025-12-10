@@ -17,10 +17,36 @@ class FitnakedgirlsExtractor(Extractor):
     category = "fitnakedgirls"
     root = "https://fitnakedgirls.com"
 
+    def items(self):
+        data = {"_extractor": FitnakedgirlsGalleryExtractor}
+        for url in self.galleries():
+            yield Message.Queue, url, data
+
+    def _pagination(self, base):
+        url = base
+        pnum = 1
+
+        while True:
+            page = self.request(url).text
+
+            for post in text.extract_iter(
+                    page, 'class="entry-body', "</a>"):
+                yield text.extr(post, 'href="', '"')
+
+            pnum += 1
+            url = f"{base}page/{pnum}/"
+            if f'href="{url}"' not in page:
+                return
+
+    def _extract_title(self, extr, sep=" - "):
+        title = text.unescape(extr("<title>", "<"))
+        if sep in title:
+            title = title.rpartition(sep)[0]
+        return title.strip()
+
 
 class FitnakedgirlsGalleryExtractor(GalleryExtractor, FitnakedgirlsExtractor):
     """Extractor for fitnakedgirls galleries"""
-    subcategory = "gallery"
     directory_fmt = ("{category}", "{title}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{gallery_id}_{filename}"
@@ -28,42 +54,33 @@ class FitnakedgirlsGalleryExtractor(GalleryExtractor, FitnakedgirlsExtractor):
     example = "https://fitnakedgirls.com/photos/gallery/MODEL-nude/"
 
     def __init__(self, match):
-        self.gallery_slug = match.group(1)
-        url = f"{self.root}/photos/gallery/{self.gallery_slug}/"
+        url = f"{self.root}/photos/gallery/{match[1]}/"
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
         extr = text.extract_from(page)
-
-        title = text.unescape(extr("<title>", "<"))
-        if " - " in title:
-            title = title.rpartition(" - ")[0]
-        title = title.strip()
+        title = self._extract_title(extr)
 
         # Strip common patterns to get cleaner model name
-        model = title
         for pattern in (" Nudes", " Nude", " nudes", " nude"):
-            if pattern in model:
-                model = model.partition(pattern)[0]
+            if pattern in title:
+                title = title.partition(pattern)[0]
                 break
 
         return {
-            "gallery_id": text.parse_int(extr('data-post-id="', '"')),
-            "gallery_slug": self.gallery_slug,
-            "model": model,
-            "title": model,
-            "date": self.parse_datetime_iso(
-                extr('article:published_time" content="', '"')),
+            "gallery_id"  : text.parse_int(extr('data-post-id="', '"')),
+            "gallery_slug": self.groups[0],
+            "model": title,
+            "title": title,
+            "date" : self.parse_datetime_iso(extr(
+                'article:published_time" content="', '"')),
         }
 
     def images(self, page):
         results = []
 
-        # Extract content from articleBody only (avoid sidebar thumbnails)
         content = text.extr(
-            page, 'itemprop="articleBody"', '<!-- .entry-content -->')
-        if not content:
-            content = page
+            page, 'itemprop="articleBody"', '<!-- .entry-content -->') or page
 
         # Extract videos from wp-block-video figures
         for figure in text.extract_iter(
@@ -96,56 +113,20 @@ class FitnakedgirlsCategoryExtractor(FitnakedgirlsExtractor):
     pattern = rf"{BASE_PATTERN}/photos/gallery/category/([\w-]+)"
     example = "https://fitnakedgirls.com/photos/gallery/category/CATEGORY/"
 
-    def items(self):
-        data = {"_extractor": FitnakedgirlsGalleryExtractor}
+    def galleries(self):
         base = f"{self.root}/photos/gallery/category/{self.groups[0]}/"
-        for url in self._pagination(base):
-            yield Message.Queue, url, data
-
-    def _pagination(self, base):
-        url = base
-        pnum = 1
-
-        while True:
-            page = self.request(url).text
-
-            for post in text.extract_iter(
-                    page, 'class="entry-title', "</a>"):
-                yield text.extr(post, 'href="', '"')
-
-            pnum += 1
-            url = f"{base}page/{pnum}/"
-            if f'href="{url}"' not in page:
-                return
+        return self._pagination(base)
 
 
 class FitnakedgirlsTagExtractor(FitnakedgirlsExtractor):
     """Extractor for fitnakedgirls tag pages"""
     subcategory = "tag"
-    pattern = rf"{BASE_PATTERN}/photos/tag/([\w-]+)"
-    example = "https://fitnakedgirls.com/photos/tag/blonde/"
+    pattern = rf"{BASE_PATTERN}/photos/gallery/tag/([\w-]+)"
+    example = "https://fitnakedgirls.com/photos/gallery/tag/TAG/"
 
-    def items(self):
-        data = {"_extractor": FitnakedgirlsGalleryExtractor}
-        base = f"{self.root}/photos/tag/{self.groups[0]}/"
-        for url in self._pagination(base):
-            yield Message.Queue, url, data
-
-    def _pagination(self, base):
-        url = base
-        pnum = 1
-
-        while True:
-            page = self.request(url).text
-
-            for post in text.extract_iter(
-                    page, 'class="entry-title', "</a>"):
-                yield text.extr(post, 'href="', '"')
-
-            pnum += 1
-            url = f"{base}page/{pnum}/"
-            if f'href="{url}"' not in page:
-                return
+    def galleries(self):
+        base = f"{self.root}/photos/gallery/tag/{self.groups[0]}/"
+        return self._pagination(base)
 
 
 class FitnakedgirlsVideoExtractor(FitnakedgirlsExtractor):
@@ -163,29 +144,18 @@ class FitnakedgirlsVideoExtractor(FitnakedgirlsExtractor):
         page = self.request(url).text
 
         extr = text.extract_from(page)
-
-        title = text.unescape(extr("<title>", "<"))
-        if " | " in title:
-            title = title.rpartition(" | ")[0]
-        title = title.strip()
-
         data = {
+            "slug"    : slug,
+            "title"   : self._extract_title(extr, " | "),
             "video_id": text.parse_int(extr('data-post-id="', '"')),
-            "slug": slug,
-            "title": title,
-            "date": self.parse_datetime_iso(
+            "date"    : self.parse_datetime_iso(
                 extr('article:published_time" content="', '"')),
         }
 
-        # Extract video from articleBody
-        content = text.extr(
-            page, 'itemprop="articleBody"', '<!-- .entry-content -->')
-        if not content:
-            content = page
-
         yield Message.Directory, "", data
 
-        # Extract video URL
+        content = text.extr(
+            page, 'itemprop="articleBody"', '<!-- .entry-content -->') or page
         for video in text.extract_iter(content, "<video ", "</video>"):
             if src := text.extr(video, 'src="', '"'):
                 if "/wp-content/uploads/" in src:
@@ -207,29 +177,19 @@ class FitnakedgirlsBlogExtractor(FitnakedgirlsExtractor):
         page = self.request(url).text
 
         extr = text.extract_from(page)
-
-        title = text.unescape(extr("<title>", "<"))
-        if " - " in title:
-            title = title.rpartition(" - ")[0]
-        title = title.strip()
-
         data = {
+            "slug"   : slug,
+            "title"  : self._extract_title(extr),
             "post_id": text.parse_int(extr('data-post-id="', '"')),
-            "slug": slug,
-            "title": title,
-            "date": self.parse_datetime_iso(
+            "date"   : self.parse_datetime_iso(
                 extr('article:published_time" content="', '"')),
         }
-
-        # Extract content from articleBody
-        content = text.extr(
-            page, 'itemprop="articleBody"', '<!-- .entry-content -->')
-        if not content:
-            content = page
 
         yield Message.Directory, "", data
 
         # Extract images from wp-block-image figures
+        content = text.extr(
+            page, 'itemprop="articleBody"', '<!-- .entry-content -->') or page
         for figure in text.extract_iter(
                 content, '<figure class="wp-block-image', '</figure>'):
             # Try srcset first for highest resolution
