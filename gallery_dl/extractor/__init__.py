@@ -68,6 +68,7 @@ modules = [
     "fapello",
     "fapachi",
     "fikfap",
+    "fitnakedgirls",
     "flickr",
     "furaffinity",
     "furry34",
