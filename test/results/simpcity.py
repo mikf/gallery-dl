@@ -4,14 +4,15 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from gallery_dl.extractor import simpcity
+from gallery_dl.extractor import xenforo
 from gallery_dl import exception
 
 
 __tests__ = (
 {
     "#url"     : "https://simpcity.cr/threads/ririkana-rr_loveit.10731/post-1753131",
-    "#class"   : simpcity.SimpcityPostExtractor,
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
     "#auth"    : True,
     "#results" : "https://jpg6.su/img/coWRwo",
 
@@ -54,7 +55,8 @@ __tests__ = (
 
 {
     "#url"     : "https://simpcity.cr/threads/ririkana-rr_loveit.10731/post-1753131",
-    "#class"   : simpcity.SimpcityPostExtractor,
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
     "#auth"     : False,
     "#exception": exception.AuthRequired,
 },
@@ -62,7 +64,8 @@ __tests__ = (
 {
     "#url"     : "https://simpcity.cr/threads/puutin_cos.219873/post-26053409",
     "#comment" : "iframe embeds (#8214)",
-    "#class"   : simpcity.SimpcityPostExtractor,
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
     "#auth"    : True,
     "#results" : (
         "https://jpg6.su/img/NNFssUg",
@@ -76,7 +79,8 @@ __tests__ = (
 {
     "#url"     : "https://simpcity.cr/threads/shinhashimoto00-shinhashimoto01.184378/post-13389764",
     "#comment" : "quote in post content (#8214)",
-    "#class"   : simpcity.SimpcityPostExtractor,
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
     "#auth"    : True,
     "#results" : (
         "/goto/post?id=13358068",
@@ -87,9 +91,11 @@ __tests__ = (
 {
     "#url"     : "https://simpcity.cr/threads/kayle-oralglory.36572/post-12065490",
     "#comment" : "deleted thread author (#8323)",
-    "#class"   : simpcity.SimpcityPostExtractor,
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
     "#auth"    : True,
     "#results" : (
+        "https://redgifs.com/ifr/trainedovercookedsquid",
         "https://jpg6.su/img/aKroBJp",
         "https://jpg6.su/img/aKroy2E",
         "https://jpg6.su/img/aKrofqa",
@@ -101,7 +107,7 @@ __tests__ = (
         "author"    : "Hexorium",
         "author_id" : "3715883",
         "author_url": "https://simpcity.cr/members/hexorium.3715883/",
-        "count"     : 5,
+        "count"     : 6,
         "date"      : "dt:2024-12-15 21:37:05",
         "id"        : "12065490",
     },
@@ -119,7 +125,8 @@ __tests__ = (
 
 {
     "#url"     : "https://simpcity.cr/threads/sophia-diamond.10049/post-10891",
-    "#class"   : simpcity.SimpcityPostExtractor,
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
     "#auth"    : True,
     "#results" : (
         "https://brandarmy.com/SophiaDiamond",
@@ -136,8 +143,8 @@ __tests__ = (
     "post"        : {
         "attachments": "",
         "author"     : "inoncognito",
-        "author_id"  : "",
-        "author_url" : "",
+        "author_id"  : "53824",
+        "author_url" : "/members/inoncognito.53824/",
         "count"      : 4,
         "date"       : "dt:2022-03-11 00:41:28",
         "id"         : "10891",
@@ -170,7 +177,8 @@ __tests__ = (
 
 {
     "#url"     : "https://simpcity.cr/threads/sophia-diamond.10049/post-18744",
-    "#class"   : simpcity.SimpcityPostExtractor,
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
     "#auth"    : True,
     "#results" : "https://simpcity.cr/attachments/sophiadiamondcancunbikiniwp-png.36179/",
 
@@ -190,12 +198,7 @@ __tests__ = (
         "date"       : "dt:2022-03-11 22:39:06",
         "id"         : "18744",
         "attachments": str,
-        "content"    : """\
-<div class="bbWrapper">Collage</div>
-
-
-            </div>\
-""",
+        "content"    : r're:<div class="bbWrapper">Collage</div>\s+</div>',
     },
     "thread"      : {
         "date"      : "dt:2022-03-11 00:41:28",
@@ -208,14 +211,16 @@ __tests__ = (
 {
     "#url"     : "https://simpcity.cr/threads/lustn4lexi-hot4lexi-lexi-2-legit-hott4lexi-lexi.175167/post-2512729",
     "#comment" : "'Click here to load redgifs media' (#8609)",
-    "#class"   : simpcity.SimpcityPostExtractor,
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
     "#auth"    : True,
     "#results" : "https://redgifs.com/ifr/unusedsubmissivemullet",
 },
 
 {
     "#url"     : "https://simpcity.cr/threads/alua-tatakai.89490/",
-    "#class"   : simpcity.SimpcityThreadExtractor,
+    "#category": ("xenforo", "simpcity", "thread"),
+    "#class"   : xenforo.XenforoThreadExtractor,
     "#auth"    : True,
     "#pattern" : r"https://(jpg6\.su/img/\w+|bunkr\.\w+/[fiv]/\w+|pixeldrain.com/l/\w+|alua.com/tatakai)|/goto/post",
     "#count"   : range(100, 300),
@@ -252,13 +257,15 @@ __tests__ = (
 
 {
     "#url"     : "https://simpcity.su/threads/angel-chan-wlep-wlop-menruinyanko_.12948/",
-    "#class"   : simpcity.SimpcityThreadExtractor,
+    "#category": ("xenforo", "simpcity", "thread"),
+    "#class"   : xenforo.XenforoThreadExtractor,
 },
 
 {
     "#url"     : "https://simpcity.cr/forums/asians.48/",
-    "#class"   : simpcity.SimpcityForumExtractor,
-    "#pattern" : simpcity.SimpcityThreadExtractor.pattern,
+    "#category": ("xenforo", "simpcity", "forum"),
+    "#class"   : xenforo.XenforoForumExtractor,
+    "#pattern" : xenforo.XenforoThreadExtractor.pattern,
     "#range"   : "1-100",
     "#count"   : 100,
 },
