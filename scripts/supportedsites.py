@@ -142,6 +142,7 @@ CATEGORY_MAP = {
     "nozrip"         : "GaryC Booru",
     "nsfwalbum"      : "NSFWalbum.com",
     "nudostar"       : "NudoStar.TV",
+    "nudostarforum"  : "NudoStar Forums",
     "okporn"         : "OK.PORN",
     "paheal"         : "Rule 34",
     "photovogue"     : "PhotoVogue",
@@ -472,6 +473,7 @@ BASE_MAP = {
     "szurubooru"  : "szurubooru Instances",
     "urlshortener": "URL Shorteners",
     "vichan"      : "vichan Imageboards",
+    "xenforo"     : "XenForo Forums",
 }
 
 URL_MAP = {
@@ -526,6 +528,7 @@ AUTH_MAP = {
     "mastodon.social": _OAUTH,
     "newgrounds"     : "Supported",
     "nijie"          : "Required",
+    "nudostarforum"  : "Supported",
     "patreon"        : _COOKIES,
     "pawoo"          : _OAUTH,
     "pillowfort"     : "Supported",

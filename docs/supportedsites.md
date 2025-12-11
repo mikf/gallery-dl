@@ -973,12 +973,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Boards, Feed, Likes, Pins, User Pins, related Pins, Search Results</td>
     <td></td>
 </tr>
-<tr id="simpcity" title="simpcity">
-    <td>SimpCity Forums</td>
-    <td>https://simpcity.cr/</td>
-    <td>Forums, Posts, Threads</td>
-    <td>Supported</td>
-</tr>
 <tr id="simplyhentai" title="simplyhentai">
     <td>Simply Hentai</td>
     <td>https://www.simply-hentai.com/</td>
@@ -1834,6 +1828,22 @@ Consider all listed sites to potentially be NSFW.
     <td>https://azurlane.koumakan.jp/</td>
     <td>Articles, Categories, Files, Wikis</td>
     <td></td>
+</tr>
+
+<tr id="xenforo" title="xenforo">
+    <td colspan="4"><strong>XenForo Forums</strong></td>
+</tr>
+<tr id="simpcity" title="simpcity">
+    <td>SimpCity Forums</td>
+    <td>https://simpcity.cr/</td>
+    <td>Forums, Posts, Threads</td>
+    <td>Supported</td>
+</tr>
+<tr id="nudostarforum" title="nudostarforum">
+    <td>NudoStar Forums</td>
+    <td>https://nudostar.com/forum/</td>
+    <td>Forums, Posts, Threads</td>
+    <td>Supported</td>
 </tr>
 
 <tr id="moebooru" title="moebooru">
