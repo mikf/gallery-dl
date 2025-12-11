@@ -94,6 +94,8 @@ class RedditExtractor(Extractor):
                     elif media["is_video"]:
                         if videos:
                             text.nameext_from_url(url, submission)
+                            if not submission["extension"]:
+                                submission["extension"] = "mp4"
                             url = "ytdl:" + self._extract_video(media)
                             yield Message.Url, url, submission
 
