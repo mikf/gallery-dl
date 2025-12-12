@@ -53,6 +53,8 @@ class XenforoExtractor(BaseExtractor):
             yield Message.Directory, "", data
 
             id_last = None
+            data["_http_expected_status"] = (403,)
+            data["_http_validate"] = self._validate
             data["num"] = data["num_internal"] = data["num_external"] = 0
             for video, inl1, inl2, ext in urls:
                 if ext:
@@ -100,9 +102,7 @@ class XenforoExtractor(BaseExtractor):
             return self.request(url)
         except exception.HttpError as exc:
             if exc.status == 403 and b">Log in<" in exc.response.content:
-                raise exception.AuthRequired(
-                    ("username & password", "authenticated cookies"), None,
-                    self._extract_error(exc.response.text))
+                self._require_auth(exc.response)
             raise
 
     def login(self):
@@ -246,6 +246,16 @@ class XenforoExtractor(BaseExtractor):
         post["content"] = con.strip()
 
         return post
+
+    def _require_auth(self, response):
+        raise exception.AuthRequired(
+            ("username & password", "authenticated cookies"), None,
+            self._extract_error(response.text))
+
+    def _validate(self, response):
+        if response.status_code == 403 and b">Log in<" in response.content:
+            self._require_auth(response)
+        return True
 
 
 BASE_PATTERN = XenforoExtractor.update({
