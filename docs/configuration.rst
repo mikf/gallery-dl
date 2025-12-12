@@ -585,6 +585,7 @@ Description
     * ``mangoxo``
     * ``newgrounds``
     * ``nijie`` (`R <pw-required_>`__)
+    * ``nudostarforum``
     * ``pillowfort``
     * ``rule34xyz``
     * ``sankaku``
@@ -5437,22 +5438,6 @@ Description
     Download animated images as ``.gif`` instead of ``.webp``
 
 
-extractor.simpcity.order-posts
-------------------------------
-Type
-    ``string``
-Default
-    ``"desc"``
-Description
-    Controls the order in which
-    posts of a ``thread`` are processed.
-
-    ``"asc"``
-        Ascending order (oldest first)
-    ``"desc"`` | ``"reverse"``
-        Descending order (newest first)
-
-
 extractor.sizebooru.metadata
 ----------------------------
 Type
@@ -6924,6 +6909,22 @@ Default
     ``true``
 Description
     For ``Category:`` pages, recursively descent into subcategories.
+
+
+extractor.[xenforo].order-posts
+-------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    posts of a ``thread`` are processed.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"`` | ``"reverse"``
+        Descending order (newest first)
 
 
 extractor.ytdl.cmdline-args
