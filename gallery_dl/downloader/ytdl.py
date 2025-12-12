@@ -42,6 +42,7 @@ class YoutubeDLDownloader(DownloaderBase):
 
         if ytdl_instance := kwdict.pop("_ytdl_instance", None):
             # 'ytdl' extractor
+            self._prepare(ytdl_instance)
             info_dict = kwdict.pop("_ytdl_info_dict")
         else:
             # other extractors
@@ -69,6 +70,7 @@ class YoutubeDLDownloader(DownloaderBase):
                     module, self, self.ytdl_opts)
                 if self.outtmpl == "default":
                     self.outtmpl = module.DEFAULT_OUTTMPL
+                self._prepare(ytdl_instance)
 
             if self.forward_cookies:
                 self.log.debug("Forwarding cookies to %s",
@@ -80,8 +82,10 @@ class YoutubeDLDownloader(DownloaderBase):
             tries = 0
             url = url[5:]
             manifest = kwdict.get("_ytdl_manifest")
+
             while True:
                 tries += 1
+                self.error = None
                 try:
                     if manifest is None:
                         info_dict = self._extract_url(
@@ -89,45 +93,63 @@ class YoutubeDLDownloader(DownloaderBase):
                     else:
                         info_dict = self._extract_manifest(
                             ytdl_instance, url, kwdict)
-                    if info_dict:
-                        break
                 except Exception as exc:
                     self.log.traceback(exc)
-                    self.log.error("%s: %s (%s/%s)",
-                                   exc.__class__.__name__, exc,
-                                   tries, self.retries+1)
+                    cls = exc.__class__
+                    if cls.__module__ == "builtins":
+                        tries = False
+                    msg = f"{cls.__name__}: {exc}"
                 else:
-                    self.log.error("Empty 'info_dict' data (%s/%s)",
-                                   tries, self.retries+1)
+                    if self.error is not None:
+                        msg = self.error
+                    elif not info_dict:
+                        msg = "Empty 'info_dict' data"
+                    else:
+                        break
+
+                if tries:
+                    self.log.error("%s (%s/%s)", msg, tries, self.retries+1)
+                else:
+                    self.log.error(msg)
+                    return False
                 if tries > self.retries:
                     return False
-
-        if "__gdl_initialize" in ytdl_instance.params:
-            del ytdl_instance.params["__gdl_initialize"]
-
-            if self.progress is not None:
-                ytdl_instance.add_progress_hook(self._progress_hook)
-            if rlf := ytdl_instance.params.pop("__gdl_ratelimit_func", False):
-                self.rate_dyn = rlf
 
         if extra := kwdict.get("_ytdl_extra"):
             info_dict.update(extra)
 
         while True:
+            tries += 1
+            self.error = None
             try:
                 if "entries" in info_dict:
-                    return self._download_playlist(
+                    success = self._download_playlist(
                         ytdl_instance, pathfmt, info_dict)
-                return self._download_video(
-                    ytdl_instance, pathfmt, info_dict)
+                else:
+                    success = self._download_video(
+                        ytdl_instance, pathfmt, info_dict)
             except Exception as exc:
-                tries += 1
                 self.log.traceback(exc)
-                self.log.error("%s: %s (%s/%s)",
-                               exc.__class__.__name__, exc,
-                               tries, self.retries+1)
-                if tries > self.retries:
-                    return False
+                cls = exc.__class__
+                if cls.__module__ == "builtins":
+                    tries = False
+                msg = f"{cls.__name__}: {exc}"
+            else:
+                if self.error is not None:
+                    msg = self.error
+                elif not success:
+                    msg = "Error"
+                else:
+                    break
+
+            if tries:
+                self.log.error("%s (%s/%s)", msg, tries, self.retries+1)
+            else:
+                self.log.error(msg)
+                return False
+            if tries > self.retries:
+                return False
+        return True
 
     def _extract_url(self, ytdl, url):
         return ytdl.extract_info(url, download=False)
@@ -281,6 +303,17 @@ class YoutubeDLDownloader(DownloaderBase):
                 self.log.error("%s: %s", exc.__class__.__name__, exc)
         return status
 
+    def _prepare(self, ytdl_instance):
+        if "__gdl_initialize" not in ytdl_instance.params:
+            return
+
+        del ytdl_instance.params["__gdl_initialize"]
+        if self.progress is not None:
+            ytdl_instance.add_progress_hook(self._progress_hook)
+        if rlf := ytdl_instance.params.pop("__gdl_ratelimit_func", False):
+            self.rate_dyn = rlf
+        ytdl_instance.params["logger"] = LoggerAdapter(self, ytdl_instance)
+
     def _progress_hook(self, info):
         if info["status"] == "downloading" and \
                 info["elapsed"] >= self.progress:
@@ -302,6 +335,31 @@ class YoutubeDLDownloader(DownloaderBase):
                 ytdl_instance.params["outtmpl"] = outtmpl
         else:
             ytdl_instance.params["outtmpl"] = {"default": outtmpl}
+
+
+class LoggerAdapter():
+    __slots__ = ("obj", "log")
+
+    def __init__(self, obj, ytdl_instance):
+        self.obj = obj
+        self.log = ytdl_instance.params.get("logger")
+
+    def debug(self, msg):
+        if self.log is not None:
+            if msg[0] == "[":
+                msg = msg[msg.find("]")+2:]
+            self.log.debug(msg)
+
+    def warning(self, msg):
+        if self.log is not None:
+            if "WARNING:" in msg:
+                msg = msg[msg.find(" ")+1:]
+            self.log.warning(msg)
+
+    def error(self, msg):
+        if "ERROR:" in msg:
+            msg = msg[msg.find(" ")+1:]
+        self.obj.error = msg
 
 
 def compatible_formats(formats):
