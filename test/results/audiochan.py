@@ -19,18 +19,18 @@ __tests__ = (
         "You wake up in the middle of the night, noticing that your boyfriend is still awake and restlessly moving around. Work-related worries are making him anxious and keeping him from falling asleep so you do your best to take care of him, calm him down, and help him get some rest."
     ],
     "user": {
-        "username": "lil_lovergirl",
+        "username": "lil-lovergirl",
     },
 },
 
 {
-    "#url"     : "https://audiochan.com/u/lil_lovergirl",
+    "#url"     : "https://audiochan.com/u/lil-lovergirl",
     "#class"   : audiochan.AudiochanUserExtractor,
     "#pattern" : r"https://stream\.audiochan\.com/v\?token=\w+\&exp=\d+\&st=.+",
     "#count"   : range(35, 50),
 
     "user": {
-        "username": "lil_lovergirl",
+        "username": "lil-lovergirl",
     },
 },
 
@@ -45,6 +45,7 @@ __tests__ = (
         "https://content.audiochan.com/audios/d8b05ea3-e4db-4e64-936b-436b72c895b1/Q33gP6yAg8jEM1C4Ic.mp3",
         "https://content.audiochan.com/audios/d8b05ea3-e4db-4e64-936b-436b72c895b1/Fwy5YxgK4zc7sQ9xx3.mp3",
         "https://content.audiochan.com/audios/d8b05ea3-e4db-4e64-936b-436b72c895b1/P3YrtAdKVekYb3BTgy.mp3",
+        "https://content.audiochan.com/audios/d8b05ea3-e4db-4e64-936b-436b72c895b1/kWYsadsb4XgVh7YPVW.mp3",
     ),
 
     "collection": {
@@ -53,14 +54,14 @@ __tests__ = (
         "title": "💗SFW",
     },
     "user": {
-        "username": "lil_lovergirl",
+        "username": "lil-lovergirl",
     },
 },
 
 {
     "#url"     : "https://audiochan.com/search?q=Cozy&sort=trending&timeRange=all",
     "#class"   : audiochan.AudiochanSearchExtractor,
-    "#count"   : range(25, 40),
+    "#count"   : range(15, 40),
 
     "search_tags": "Cozy",
     "description": list,

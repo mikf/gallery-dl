@@ -103,7 +103,7 @@ class AudiochanExtractor(Extractor):
 
 class AudiochanAudioExtractor(AudiochanExtractor):
     subcategory = "audio"
-    pattern = rf"{BASE_PATTERN}/a/(\w+)"
+    pattern = rf"{BASE_PATTERN}/a/([^/?#]+)"
     example = "https://audiochan.com/a/SLUG"
 
     def posts(self):
@@ -114,7 +114,7 @@ class AudiochanAudioExtractor(AudiochanExtractor):
 
 class AudiochanUserExtractor(AudiochanExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/u/(\w+)"
+    pattern = rf"{BASE_PATTERN}/u/([^/?#]+)"
     example = "https://audiochan.com/u/USER"
 
     def posts(self):
@@ -130,7 +130,7 @@ class AudiochanUserExtractor(AudiochanExtractor):
 
 class AudiochanCollectionExtractor(AudiochanExtractor):
     subcategory = "collection"
-    pattern = rf"{BASE_PATTERN}/c/(\w+)"
+    pattern = rf"{BASE_PATTERN}/c/([^/?#]+)"
     example = "https://audiochan.com/c/SLUG"
 
     def posts(self):
