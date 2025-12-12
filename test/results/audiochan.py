@@ -14,6 +14,10 @@ __tests__ = (
     "#pattern" : r"https://stream.audiochan.com/v\?token=YXVkaW9zL2Q4YjA1ZWEzLWU0ZGItNGU2NC05MzZiLTQzNmI3MmM4OTViMS9sOTBCOFI0ajhjS0NFSmNwa2kubXAz&exp=\d+&st=.+",
     "#count"   : 1,
 
+    "description": [
+        "author summary: ",
+        "You wake up in the middle of the night, noticing that your boyfriend is still awake and restlessly moving around. Work-related worries are making him anxious and keeping him from falling asleep so you do your best to take care of him, calm him down, and help him get some rest."
+    ],
     "user": {
         "username": "lil_lovergirl",
     },
@@ -59,6 +63,7 @@ __tests__ = (
     "#count"   : range(25, 40),
 
     "search_tags": "Cozy",
+    "description": list,
     "user": dict,
     "tags": list,
 },

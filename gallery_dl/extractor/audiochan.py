@@ -48,6 +48,8 @@ class AudiochanExtractor(Extractor):
             post["_http_headers"] = self.headers_dl
             post["date"] = self.parse_datetime_iso(file["created_at"])
             post["date_updated"] = self.parse_datetime_iso(file["updated_at"])
+            post["description"] = self._extract_description(
+                post["description"])
 
             tags = []
             for tag in post["tags"]:
@@ -85,6 +87,18 @@ class AudiochanExtractor(Extractor):
             if not data["has_more"]:
                 break
             params["page"] += 1
+
+    def _extract_description(self, description, asd=None):
+        if asd is None:
+            asd = []
+
+        if "text" in description:
+            asd.append(description["text"])
+        elif "content" in description:
+            for desc in description["content"]:
+                self._extract_description(desc, asd)
+
+        return asd
 
 
 class AudiochanAudioExtractor(AudiochanExtractor):
