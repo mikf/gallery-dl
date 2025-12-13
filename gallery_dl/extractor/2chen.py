@@ -1,40 +1,55 @@
 # -*- coding: utf-8 -*-
 
+# Copyright 2022-2025 Mike Fährmann
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://sturdychan.help/"""
+"""Extractors for 2chen boards"""
 
-from .common import Extractor, Message
+from .common import BaseExtractor, Message
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?(?:sturdychan.help|2chen\.(?:moe|club))"
+
+class _2chenExtractor(BaseExtractor):
+    basecategory = "2chen"
 
 
-class _2chenThreadExtractor(Extractor):
+BASE_PATTERN = _2chenExtractor.update({
+    "sturdychan": {
+        "root": "https://sturdychan.help",
+        "pattern": r"(?:sturdychan\.help|2chen\.(?:moe|club))",
+    },
+    "schan": {
+        "root": "https://schan.help/",
+        "pattern": r"schan\.help",
+    },
+})
+
+
+class _2chenThreadExtractor(_2chenExtractor):
     """Extractor for 2chen threads"""
-    category = "2chen"
     subcategory = "thread"
-    root = "https://sturdychan.help"
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{time} {filename}.{extension}"
-    archive_fmt = "{board}_{thread}_{hash}_{time}"
+    archive_fmt = "{board}_{thread}_{no}_{time}"
     pattern = rf"{BASE_PATTERN}/([^/?#]+)/(\d+)"
     example = "https://sturdychan.help/a/12345/"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.board, self.thread = match.groups()
-
     def items(self):
-        url = f"{self.root}/{self.board}/{self.thread}"
+        board = self.groups[-2]
+        thread = self.kwdict["thread"] = self.groups[-1]
+        url = f"{self.root}/{board}/{thread}"
         page = self.request(url, encoding="utf-8", notfound="thread").text
-        data = self.metadata(page)
-        yield Message.Directory, "", data
 
+        self.kwdict["board"], pos = text.extract(
+            page, 'class="board">/', '/<')
+        self.kwdict["title"] = text.unescape(text.extract(
+            page, "<h3>", "</h3>", pos)[0])
+
+        yield Message.Directory, "", {}
         for post in self.posts(page):
-
             url = post["url"]
             if not url:
                 continue
@@ -42,19 +57,9 @@ class _2chenThreadExtractor(Extractor):
                 url = self.root + url
             post["url"] = url = url.partition("?")[0]
 
-            post.update(data)
             post["time"] = text.parse_int(post["date"].timestamp())
             yield Message.Url, url, text.nameext_from_url(
                 post["filename"], post)
-
-    def metadata(self, page):
-        board, pos = text.extract(page, 'class="board">/', '/<')
-        title = text.extract(page, "<h3>", "</h3>", pos)[0]
-        return {
-            "board" : board,
-            "thread": self.thread,
-            "title" : text.unescape(title),
-        }
 
     def posts(self, page):
         """Return iterable with relevant posts"""
@@ -70,26 +75,20 @@ class _2chenThreadExtractor(Extractor):
                 "%d %b %Y (%a) %H:%M:%S"
             ),
             "no"      : extr('href="#p', '"'),
-            "url"     : extr('</a><a href="', '"'),
             "filename": text.unescape(extr('download="', '"')),
+            "url"     : text.extr(extr("<figure>", "</"), 'href="', '"'),
             "hash"    : extr('data-hash="', '"'),
         }
 
 
-class _2chenBoardExtractor(Extractor):
+class _2chenBoardExtractor(_2chenExtractor):
     """Extractor for 2chen boards"""
-    category = "2chen"
     subcategory = "board"
-    root = "https://sturdychan.help"
     pattern = rf"{BASE_PATTERN}/([^/?#]+)(?:/catalog|/?$)"
     example = "https://sturdychan.help/a/"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.board = match[1]
-
     def items(self):
-        url = f"{self.root}/{self.board}/catalog"
+        url = f"{self.root}/{self.groups[-1]}/catalog"
         page = self.request(url, notfound="board").text
         data = {"_extractor": _2chenThreadExtractor}
         for thread in text.extract_iter(

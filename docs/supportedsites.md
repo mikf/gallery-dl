@@ -19,12 +19,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Boards, Threads</td>
     <td></td>
 </tr>
-<tr id="2chen" title="2chen">
-    <td>2chen</td>
-    <td>https://sturdychan.help/</td>
-    <td>Boards, Threads</td>
-    <td></td>
-</tr>
 <tr id="35photo" title="35photo">
     <td>35PHOTO</td>
     <td>https://35photo.pro/</td>
@@ -1271,6 +1265,22 @@ Consider all listed sites to potentially be NSFW.
     <td>もえぴりあ</td>
     <td>https://vanilla-rock.com/</td>
     <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+
+<tr id="2chen" title="2chen">
+    <td colspan="4"><strong>2chen Instances</strong></td>
+</tr>
+<tr id="sturdychan" title="sturdychan">
+    <td>Sturdychan</td>
+    <td>https://sturdychan.help/</td>
+    <td>Boards, Threads</td>
+    <td></td>
+</tr>
+<tr id="schan" title="schan">
+    <td>Schan</td>
+    <td>https://schan.help/</td>
+    <td>Boards, Threads</td>
     <td></td>
 </tr>
 

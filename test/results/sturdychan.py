@@ -11,7 +11,7 @@ _2chen = getattr(gallery_dl.extractor, "2chen")
 __tests__ = (
 {
     "#url"     : "https://sturdychan.help/tv/268929",
-    "#category": ("", "2chen", "thread"),
+    "#category": ("2chen", "sturdychan", "thread"),
     "#class"   : _2chen._2chenThreadExtractor,
     "#pattern" : r"https://sturdychan\.help/assets/images/src/\w{40}\.\w+$",
     "#count"   : ">= 179",
@@ -29,38 +29,38 @@ __tests__ = (
 
 {
     "#url"     : "https://2chen.club/tv/1",
-    "#category": ("", "2chen", "thread"),
+    "#category": ("2chen", "sturdychan", "thread"),
     "#class"   : _2chen._2chenThreadExtractor,
 },
 
 {
     "#url"     : "https://2chen.moe/jp/303786",
-    "#category": ("", "2chen", "thread"),
+    "#category": ("2chen", "sturdychan", "thread"),
     "#class"   : _2chen._2chenThreadExtractor,
 },
 
 {
     "#url"     : "https://sturdychan.help/co/",
-    "#category": ("", "2chen", "board"),
+    "#category": ("2chen", "sturdychan", "board"),
     "#class"   : _2chen._2chenBoardExtractor,
     "#pattern" : _2chen._2chenThreadExtractor.pattern,
 },
 
 {
     "#url"     : "https://2chen.moe/co",
-    "#category": ("", "2chen", "board"),
+    "#category": ("2chen", "sturdychan", "board"),
     "#class"   : _2chen._2chenBoardExtractor,
 },
 
 {
     "#url"     : "https://2chen.club/tv",
-    "#category": ("", "2chen", "board"),
+    "#category": ("2chen", "sturdychan", "board"),
     "#class"   : _2chen._2chenBoardExtractor,
 },
 
 {
     "#url"     : "https://2chen.moe/co/catalog",
-    "#category": ("", "2chen", "board"),
+    "#category": ("2chen", "sturdychan", "board"),
     "#class"   : _2chen._2chenBoardExtractor,
 },
 
