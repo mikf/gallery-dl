@@ -26,7 +26,7 @@ Optional
 --------
 
 - yt-dlp_ or youtube-dl_: HLS/DASH video downloads, ``ytdl`` integration
-- FFmpeg_: Pixiv Ugoira conversion
+- FFmpeg_: Video length filters & Pixiv Ugoira conversion
 - mkvmerge_: Accurate Ugoira frame timecodes
 - PySocks_: SOCKS proxy support
 - brotli_ or brotlicffi_: Brotli compression support
