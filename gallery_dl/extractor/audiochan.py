@@ -88,17 +88,17 @@ class AudiochanExtractor(Extractor):
                 break
             params["page"] += 1
 
-    def _extract_description(self, description, asd=None):
-        if asd is None:
-            asd = []
+    def _extract_description(self, description, texts=None):
+        if texts is None:
+            texts = []
 
         if "text" in description:
-            asd.append(description["text"])
+            texts.append(description["text"])
         elif "content" in description:
             for desc in description["content"]:
-                self._extract_description(desc, asd)
+                self._extract_description(desc, texts)
 
-        return asd
+        return texts
 
 
 class AudiochanAudioExtractor(AudiochanExtractor):
