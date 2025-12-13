@@ -4252,6 +4252,21 @@ Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.[misskey].order-posts
+-------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which posts are processed.
+
+    ``"asc"`` | ``"reverse"``
+        Ascending order (oldest first)
+    ``"desc"``
+        Descending order (newest first)
+
+
 extractor.[misskey].renotes
 ---------------------------
 Type
