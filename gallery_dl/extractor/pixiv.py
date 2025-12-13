@@ -237,10 +237,13 @@ class PixivExtractor(Extractor):
                 return data["body"]
 
             self.log.debug("Server response: %s", util.json_dumps(data))
-            return self.log.error(
-                "'%s'", data.get("message") or "General Error")
+            if (msg := data.get("message")) == "An unknown error occurred":
+                msg = "Invalid 'PHPSESSID' cookie"
+            else:
+                msg = f"'{msg or 'General Error'}'"
+            self.log.error("%s", msg)
         except Exception:
-            return None
+            pass
 
     def _extract_ajax(self, work, body):
         work["_ajax"] = True
