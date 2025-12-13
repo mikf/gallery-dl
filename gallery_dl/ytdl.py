@@ -55,6 +55,8 @@ def construct_YoutubeDL(module, obj, user_opts, system_opts=None):
         opts["min_filesize"] = text.parse_bytes(config("filesize-min"), None)
     if opts.get("max_filesize") is None:
         opts["max_filesize"] = text.parse_bytes(config("filesize-max"), None)
+    if opts.get("overwrites") is None and not config("skip", True):
+        opts["overwrites"] = True
     if opts.get("ratelimit") is None:
         if rate := config("rate"):
             func = util.build_selection_func(rate, 0, text.parse_bytes)
