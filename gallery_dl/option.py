@@ -728,6 +728,12 @@ def build_parser():
         help=("Like '--filter', but for child extractors handling "
               "manga chapters, external URLs, etc."),
     )
+    selection.add_argument(
+        "--max-downloads",
+        dest="max-downloads", metavar="N", type=int, action=ConfigAction,
+        help=("Stop downloading after N files have been downloaded "
+              "(default: 0, no limit)"),
+    )
 
     infojson = {
         "name"    : "metadata",
