@@ -58,7 +58,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
 
     def items(self):
         album = self.metadata()
-        yield Message.Directory, {"album": album}
+        yield Message.Directory, "", {"album": album}
         for num, image in enumerate(self.images(), 1):
             image["num"] = num
             image["album"] = album

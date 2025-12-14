@@ -19,6 +19,7 @@ class ImagehostImageExtractor(Extractor):
     basecategory = "imagehost"
     subcategory = "image"
     archive_fmt = "{token}"
+    parent = True
     _https = True
     _params = None
     _cookies = None
@@ -74,7 +75,7 @@ class ImagehostImageExtractor(Extractor):
         if self._validate is not None:
             data["_http_validate"] = self._validate
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, url, data
 
     def get_info(self, page):

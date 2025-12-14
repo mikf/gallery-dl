@@ -161,5 +161,5 @@ class CyberfileFileExtractor(CyberfileExtractor):
 
         file["file_url"] = url = extr("openUrl('", "'")
         text.nameext_from_url(file["name"] or url, file)
-        yield Message.Directory, file
+        yield Message.Directory, "", file
         yield Message.Url, url, file

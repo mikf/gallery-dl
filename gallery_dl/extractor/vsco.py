@@ -22,7 +22,7 @@ class VscoExtractor(Extractor):
     directory_fmt = ("{category}", "{user}")
     filename_fmt = "{id}.{extension}"
     archive_fmt = "{id}"
-    tls12 = False
+    browser = "firefox"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -30,7 +30,7 @@ class VscoExtractor(Extractor):
 
     def items(self):
         videos = self.config("videos", True)
-        yield Message.Directory, {"user": self.user}
+        yield Message.Directory, "", {"user": self.user}
         for img in self.images():
 
             if not img:

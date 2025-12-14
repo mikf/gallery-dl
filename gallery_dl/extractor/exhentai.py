@@ -193,7 +193,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         self.data = data = self.get_metadata(gpage)
         self.count = text.parse_int(data["filecount"])
-        yield Message.Directory, data
+        yield Message.Directory, "", data
 
         images = itertools.chain(
             (self.image_from_page(ipage),), self.images_from_api())
@@ -226,7 +226,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         yield Message.Queue, url, data
 
     def _items_metadata(self):
-        yield Message.Directory, self.metadata_from_api()
+        yield Message.Directory, "", self.metadata_from_api()
 
     def get_metadata(self, page):
         """Extract gallery metadata"""

@@ -35,7 +35,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
             raise exception.NotFoundError("soundtrack")
 
         data = self.metadata(page)
-        yield Message.Directory, data
+        yield Message.Directory, "", data
 
         if self.config("covers", False):
             for num, url in enumerate(self._extract_covers(page), 1):

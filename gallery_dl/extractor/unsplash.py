@@ -45,7 +45,7 @@ class UnsplashExtractor(Extractor):
             if "tags" in photo:
                 photo["tags"] = [t["title"] for t in photo["tags"]]
 
-            yield Message.Directory, photo
+            yield Message.Directory, "", photo
             yield Message.Url, url, photo
 
     def metadata(self):

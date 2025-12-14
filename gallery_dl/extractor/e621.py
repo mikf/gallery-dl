@@ -54,7 +54,7 @@ class E621Extractor(danbooru.DanbooruExtractor):
             post["date"] = self.parse_datetime_iso(post["created_at"])
 
             post.update(data)
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             yield Message.Url, file["url"], post
 
     def items_artists(self):

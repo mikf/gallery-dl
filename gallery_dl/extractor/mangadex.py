@@ -95,7 +95,7 @@ class MangadexCoversExtractor(MangadexExtractor):
             name = data["cover"]
             text.nameext_from_url(name, data)
             data["cover_id"] = data["filename"]
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             yield Message.Url, f"{base}{name}", data
 
     def _transform_cover(self, cover):
@@ -134,15 +134,21 @@ class MangadexChapterExtractor(MangadexExtractor):
                 f"available on MangaDex and can instead be read on the "
                 f"official publisher's website at {data['_external_url']}.")
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
+
+        if self.config("data-saver", False):
+            path = "data-saver"
+            key = "dataSaver"
+        else:
+            path = key = "data"
 
         server = self.api.athome_server(self.uuid)
         chapter = server["chapter"]
-        base = f"{server['baseUrl']}/data/{chapter['hash']}/"
+        base = f"{server['baseUrl']}/{path}/{chapter['hash']}/"
 
         enum = util.enumerate_reversed if self.config(
             "page-reverse") else enumerate
-        for data["page"], page in enum(chapter["data"], 1):
+        for data["page"], page in enum(chapter[key], 1):
             text.nameext_from_url(page, data)
             yield Message.Url, f"{base}{page}", data
 

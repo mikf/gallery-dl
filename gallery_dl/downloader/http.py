@@ -246,6 +246,10 @@ class HttpDownloader(DownloaderBase):
             # check file size
             size = text.parse_int(size, None)
             if size is not None:
+                if not size:
+                    self.release_conn(response)
+                    self.log.warning("Empty file")
+                    return False
                 if self.minsize and size < self.minsize:
                     self.release_conn(response)
                     self.log.warning(
@@ -380,9 +384,15 @@ class HttpDownloader(DownloaderBase):
                     raise
 
                 # check file size
-                if size and fp.tell() < size:
-                    msg = f"file size mismatch ({fp.tell()} < {size})"
-                    output.stderr_write("\n")
+                if size and (fsize := fp.tell()) < size:
+                    if (segmented := kwdict.get("_http_segmented")) and \
+                            segmented is True or segmented == fsize:
+                        tries -= 1
+                        msg = "Resuming segmented download"
+                        output.stdout_write("\r")
+                    else:
+                        msg = f"file size mismatch ({fsize} < {size})"
+                        output.stderr_write("\n")
                     continue
 
             break

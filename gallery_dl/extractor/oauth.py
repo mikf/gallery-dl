@@ -8,16 +8,14 @@
 
 """Utility classes to setup OAuth and link accounts to gallery-dl"""
 
-from .common import Extractor, Message
+from .common import Extractor
 from .. import text, oauth, util, config, exception
 from ..output import stdout_write
 from ..cache import cache, memcache
-import urllib.parse
-import binascii
-import hashlib
 
 REDIRECT_URI_LOCALHOST = "http://localhost:6414/"
 REDIRECT_URI_HTTPS = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
+NOOP = ((-1, "", None),)
 
 
 class OAuthBase(Extractor):
@@ -86,7 +84,7 @@ class OAuthBase(Extractor):
 
     def open(self, url, params, recv=None):
         """Open 'url' in browser amd return response parameters"""
-        url += "?" + urllib.parse.urlencode(params)
+        url = f"{url}?{text.build_query(params)}"
 
         if browser := self.config("browser", True):
             try:
@@ -257,16 +255,18 @@ class OAuthFlickr(OAuthBase):
     redirect_uri = REDIRECT_URI_HTTPS
 
     def items(self):
-        yield Message.Version, 1
-        from . import flickr
+        #  from . import flickr
 
         self._oauth1_authorization_flow(
-            flickr.FlickrAPI.API_KEY,
-            flickr.FlickrAPI.API_SECRET,
+            #  flickr.FlickrAPI.API_KEY,
+            #  flickr.FlickrAPI.API_SECRET,
+            "",
+            "",
             "https://www.flickr.com/services/oauth/request_token",
             "https://www.flickr.com/services/oauth/authorize",
             "https://www.flickr.com/services/oauth/access_token",
         )
+        return iter(NOOP)
 
 
 class OAuthSmugmug(OAuthBase):
@@ -275,7 +275,6 @@ class OAuthSmugmug(OAuthBase):
     example = "oauth:smugmug"
 
     def items(self):
-        yield Message.Version, 1
         from . import smugmug
 
         self._oauth1_authorization_flow(
@@ -285,6 +284,7 @@ class OAuthSmugmug(OAuthBase):
             "https://api.smugmug.com/services/oauth/1.0a/authorize",
             "https://api.smugmug.com/services/oauth/1.0a/getAccessToken",
         )
+        return iter(NOOP)
 
 
 class OAuthTumblr(OAuthBase):
@@ -293,7 +293,6 @@ class OAuthTumblr(OAuthBase):
     example = "oauth:tumblr"
 
     def items(self):
-        yield Message.Version, 1
         from . import tumblr
 
         self._oauth1_authorization_flow(
@@ -303,6 +302,7 @@ class OAuthTumblr(OAuthBase):
             "https://www.tumblr.com/oauth/authorize",
             "https://www.tumblr.com/oauth/access_token",
         )
+        return iter(NOOP)
 
 
 # --------------------------------------------------------------------
@@ -315,7 +315,6 @@ class OAuthDeviantart(OAuthBase):
     redirect_uri = REDIRECT_URI_HTTPS
 
     def items(self):
-        yield Message.Version, 1
         from . import deviantart
 
         self._oauth2_authorization_code_grant(
@@ -328,6 +327,7 @@ class OAuthDeviantart(OAuthBase):
             scope="browse user.manage",
             cache=deviantart._refresh_token_cache,
         )
+        return iter(NOOP)
 
 
 class OAuthReddit(OAuthBase):
@@ -336,7 +336,6 @@ class OAuthReddit(OAuthBase):
     example = "oauth:reddit"
 
     def items(self):
-        yield Message.Version, 1
         from . import reddit
 
         self.session.headers["User-Agent"] = reddit.RedditAPI.USER_AGENT
@@ -350,6 +349,7 @@ class OAuthReddit(OAuthBase):
             scope="read history",
             cache=reddit._refresh_token_cache,
         )
+        return iter(NOOP)
 
 
 class OAuthMastodon(OAuthBase):
@@ -362,7 +362,6 @@ class OAuthMastodon(OAuthBase):
         self.instance = match[1]
 
     def items(self):
-        yield Message.Version, 1
         from . import mastodon
 
         for _, root, application in mastodon.MastodonExtractor.instances:
@@ -382,6 +381,7 @@ class OAuthMastodon(OAuthBase):
             key="access_token",
             cache=mastodon._access_token_cache,
         )
+        return iter(NOOP)
 
     @cache(maxage=36500*86400, keyarg=1)
     def _register(self, instance):
@@ -416,8 +416,9 @@ class OAuthPixiv(OAuthBase):
     example = "oauth:pixiv"
 
     def items(self):
-        yield Message.Version, 1
         from . import pixiv
+        import binascii
+        import hashlib
 
         code_verifier = util.generate_token(32)
         digest = hashlib.sha256(code_verifier.encode()).digest()
@@ -464,6 +465,7 @@ class OAuthPixiv(OAuthBase):
             self.log.info("Writing 'refresh-token' to cache")
 
         stdout_write(self._generate_message(("refresh-token",), (token,)))
+        return iter(NOOP)
 
     def _input_code(self):
         stdout_write("""\

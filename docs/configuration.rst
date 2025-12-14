@@ -231,10 +231,13 @@ Type
     * ``bool``
     * ``string``
 Default
+    ``true``
+        ``[chevereto]`` |
+        ``[imagehost]``
     ``false``
+        otherwise
 Description
-    If ``true``, overwrite any metadata provided by a child extractor
-    with its parent's.
+    Forward a parent's metadata to its child extractors.
 
     | If this is a ``string``, add a parent's metadata to its children's
       to a field named after said string.
@@ -582,6 +585,7 @@ Description
     * ``mangoxo``
     * ``newgrounds``
     * ``nijie`` (`R <pw-required_>`__)
+    * ``nudostarforum``
     * ``pillowfort``
     * ``rule34xyz``
     * ``sankaku``
@@ -821,7 +825,8 @@ Default
         ``artstation`` |
         ``behance``    |
         ``fanbox``     |
-        ``twitter``
+        ``twitter``    |
+        ``vsco``
     ``null``
         otherwise
 Example
@@ -937,8 +942,7 @@ Type
 Default
     ``false``
         ``artstation`` |
-        ``behance``    |
-        ``vsco``
+        ``behance``
     ``true``
         otherwise
 Description
@@ -976,8 +980,11 @@ Type
 Default
     ``false``
 Description
-    Evaluate each `keywords <extractor.*.keywords_>`__ ``string`` value
-    as a `Format String`_.
+    Evaluate each
+    `keywords <extractor.*.keywords_>`__
+    and
+    `keywords-global <extractor.*.keywords-global_>`__
+    ``string`` value as a `Format String`_.
 
 
 extractor.*.keywords-global
@@ -1452,13 +1459,22 @@ Note
     The index of the first file is ``1``.
 
 
+extractor.*.post-range
+----------------------
+Type
+    ``string``
+Description
+    Like `image-range <extractor.*.image-range_>`__,
+    but for posts.
+
+
 extractor.*.chapter-range
 -------------------------
 Type
     ``string``
 Description
     Like `image-range <extractor.*.image-range_>`__,
-    but applies to delegated URLs like manga chapters, etc.
+    but for child extractors handling manga chapters, external URLs, etc.
 
 
 extractor.*.image-filter
@@ -1477,6 +1493,19 @@ Description
     Available values are the filename-specific ones listed by ``-K`` or ``-j``.
 
 
+extractor.*.post-filter
+-----------------------
+Type
+    * Condition_
+    * ``list`` of Conditions_
+Example
+    * ``"post['id'] > 12345"``
+    * ``["date >= datetime(2025, 5, 1)", "print(post_id)"]``
+Description
+    Like `image-filter <extractor.*.image-filter_>`__,
+    but for posts.
+
+
 extractor.*.chapter-filter
 --------------------------
 Type
@@ -1487,7 +1516,7 @@ Example
     * ``["language == 'French'", "10 <= chapter < 20"]``
 Description
     Like `image-filter <extractor.*.image-filter_>`__,
-    but applies to delegated URLs like manga chapters, etc.
+    but for child extractors handling manga chapters, external URLs, etc.
 
 
 extractor.*.image-unique
@@ -1780,6 +1809,22 @@ Default
     ``true``
 Description
     Download embedded videos hosted on https://www.blogger.com/
+
+
+extractor.bluesky.api-server
+----------------------------
+Type
+    ``string``
+Default
+    | ``"https://bsky.social"`` if a
+      `username <extractor.*.username & .password_>`__
+      is provided
+    | ``"https://api.bsky.app"`` otherwise
+Description
+    Server address for API requests.
+
+    Can be used when self-hosting a
+    `PDS <https://github.com/bluesky-social/pds>`__
 
 
 extractor.bluesky.include
@@ -2087,12 +2132,18 @@ Type
 Default
     ``false``
 Example
-    * ``"generation,post,version"``
+    * ``"generation,tags,post,version"``
     * ``["version", "generation"]``
 Description
-    Extract additional ``generation``, ``version``, and ``post`` metadata.
+    Extract additional metadata.
+Supported Values
+    * ``generation``
+    * ``post``
+    * ``tags``
+    * ``version``
 Note
-    This requires 1 or more additional API requests per image or video.
+    This requires 1 additional API request
+    for each selected value per image or video.
 
 
 extractor.civitai.nsfw
@@ -4029,6 +4080,16 @@ Description
     and `/user/follows/manga/feed <https://api.mangadex.org/docs/swagger.html#/Feed/get-user-follows-manga-feed>`__)
 
 
+extractor.mangadex.data-saver
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Enable `Data Saver` mode and download lower quality versions of chapters.
+
+
 extractor.mangadex.lang
 -----------------------
 Type
@@ -4981,7 +5042,7 @@ extractor.reddit.api
 Type
     ``string``
 Default
-    ``"oauth"``
+    ``"rest"``
 Description
     Selects which API endpoints to use.
 
@@ -5377,22 +5438,6 @@ Description
     Download animated images as ``.gif`` instead of ``.webp``
 
 
-extractor.simpcity.order-posts
-------------------------------
-Type
-    ``string``
-Default
-    ``"desc"``
-Description
-    Controls the order in which
-    posts of a ``thread`` are processed.
-
-    ``"asc"``
-        Ascending order (oldest first)
-    ``"desc"`` | ``"reverse"``
-        Descending order (newest first)
-
-
 extractor.sizebooru.metadata
 ----------------------------
 Type
@@ -5739,6 +5784,16 @@ Description
         Download audio tracks using |ytdl|
     ``false``
         Ignore audio tracks
+
+
+extractor.tiktok.covers
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download video covers.
 
 
 extractor.tiktok.videos
@@ -6196,6 +6251,23 @@ Description
     * ``360x360``
 
 
+extractor.twitter.limit
+-----------------------
+Type
+    * ``integer``
+    * ``list`` of ``integers``
+Default
+    ``50``
+Example
+    ``[40, 30, 20, 10, 5]``
+Description
+    Number of requested results per API query.
+
+    When given as a ``list``,
+    start with the first element as ``count`` parameter
+    and switch to the next element whenever no results are returned.
+
+
 extractor.twitter.logout
 ------------------------
 Type
@@ -6281,6 +6353,18 @@ Note
     <extractor.*.image-filter_>`__.
 
 
+extractor.twitter.retries-api
+-----------------------------
+Type
+    ``integer``
+Default
+    ``9``
+Description
+    Maximum number of retries
+    for API requests when encountering server ``errors``,
+    or ``-1`` for infinite retries.
+
+
 extractor.twitter.retweets
 --------------------------
 Type
@@ -6297,11 +6381,20 @@ Description
 extractor.twitter.search-limit
 ------------------------------
 Type
-    ``integer``
+    * ``integer``
+    * ``list`` of ``integers``
 Default
     ``20``
+Example
+    ``[50, 20, 10, 5, 2]``
 Description
     Number of requested results per search query.
+
+    When given as a ``list``,
+    start with the first element as ``count`` parameter
+    and switch to the next element when
+    `search-stop <extractor.twitter.search-stop_>`__
+    is reached.
 
 
 extractor.twitter.search-pagination
@@ -6320,13 +6413,26 @@ Description
         to the Tweet ID value of the last retrieved Tweet.
 
 
+extractor.twitter.search-results
+--------------------------------
+Type
+    ``string``
+Default
+    ``"latest"``
+Description
+    Determines the target of search results.
+Supported Values
+    * ``"top"``
+    * ``"media"``
+    * ``"latest"`` | ``"live"``
+
+
 extractor.twitter.search-stop
 -----------------------------
 Type
     ``integer``
 Default
-    * ``3`` if `search-pagination <extractor.twitter.search-pagination_>`__ is set to ``"cursor"``
-    * ``0`` otherwise
+    ``3``
 Description
     Number of empty search result batches
     to accept before stopping.
@@ -6405,12 +6511,12 @@ Type
 Default
     ``"user"``
 Example
-    ``"https://twitter.com/search?q=from:{legacy[screen_name]}"``
+    ``"https://twitter.com/search?q=from:{core[screen_name]}"``
 Description
     | Basic format string for user URLs generated from
       ``following`` and ``list-members`` queries,
     | whose replacement field values come from Twitter ``user`` objects
-      (`Example <https://gist.githubusercontent.com/mikf/99d2719b3845023326c7a4b6fb88dd04/raw/275b4f0541a2c7dc0a86d3998f7d253e8f10a588/github.json>`_)
+      (`Example <https://gist.githubusercontent.com/mikf/99d2719b3845023326c7a4b6fb88dd04/raw/01b5324cf2367bcd437730186ec0f36d5c8c683c/github.json>`_)
 Special Values
     ``"user"``
         ``https://twitter.com/i/user/{rest_id}``
@@ -6805,6 +6911,22 @@ Description
     For ``Category:`` pages, recursively descent into subcategories.
 
 
+extractor.[xenforo].order-posts
+-------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    posts of a ``thread`` are processed.
+
+    ``"asc"``
+        Ascending order (oldest first)
+    ``"desc"`` | ``"reverse"``
+        Descending order (newest first)
+
+
 extractor.ytdl.cmdline-args
 ---------------------------
 Type
@@ -7165,15 +7287,29 @@ Description
 downloader.*.part-directory
 ---------------------------
 Type
-    |Path|_
+    * |Path|_
+    * ``object`` (Condition_ → |Path|_)
 Default
     ``null``
-Description
-    Alternate location for ``.part`` files.
+Example
+    .. code:: json
 
-    Missing directories will be created as needed.
-    If this value is ``null``, ``.part`` files are going to be stored
-    alongside the actual output files.
+        "/tmp/.gdl"
+
+    .. code:: json
+
+        {
+            "size > 100000": "~/.gdl/part",
+            "duration"     : "/tmp/.gdl/video",
+        }
+
+Description
+    Alternate location(s) for ``.part`` files.
+Note
+    If this value is ``null`` or no Conditions_ apply,
+    ``.part`` files are stored alongside the actual output files.
+
+    For a single |Path|_, missing directories will be created as needed
 
 
 downloader.*.progress
@@ -7769,8 +7905,6 @@ Type
 Description
     File to write external URLs unsupported by *gallery-dl* to.
 
-    The default `Format String`_ here is ``"{message}"``.
-
 
 output.errorfile
 ----------------
@@ -7779,8 +7913,6 @@ Type
     * |Logging Configuration|_
 Description
     File to write input URLs which returned an error to.
-
-    The default `Format String`_ here is also ``"{message}"``.
 
     When combined with
     ``-I``/``--input-file-comment`` or
@@ -8011,6 +8143,17 @@ Description
     ``start_new_session`` argument of
     `subprocess.Popen <https://docs.python.org/3/library/subprocess.html#subprocess.Popen>`__
     to have it call ``setsid()``.
+
+
+exec.verbose
+------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Include `command <exec.command_>`__
+    arguments in logging messages.
 
 
 hash.chunk-size
@@ -9432,7 +9575,8 @@ Example
             "format"     : "{asctime} {name}: {message}",
             "format-date": "%H:%M:%S",
             "path"       : "~/log.txt",
-            "encoding"   : "ascii"
+            "encoding"   : "ascii",
+            "defer"      : true
         }
 
     .. code:: json
@@ -9462,7 +9606,12 @@ Description
           `path <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/path.py#L27>`__,
           and `keywords` objects and their attributes, for example
           ``"{extractor.url}"``, ``"{path.filename}"``, ``"{keywords.title}"``
-        * Default: ``"[{name}][{levelname}] {message}"``
+        * Default:
+          ``"[{name}][{levelname}] {message}"`` for
+          `logfile <output.logfile_>`__,
+          ``"{message}"`` for
+          `unsupportedfile <output.unsupportedfile_>`__ and
+          `errorfile <output.errorfile_>`__
     * format-date
         * Format string for ``{asctime}`` fields in logging messages
           (see `strftime() directives <https://docs.python.org/3/library/time.html#time.strftime>`__)
@@ -9477,13 +9626,28 @@ Description
         * Mode in which the file is opened;
           use ``"w"`` to truncate or ``"a"`` to append
           (see |open()|_)
-        * Default: ``"w"``
+        * Default:
+          ``"w"`` for
+          `logfile <output.logfile_>`__ and
+          `unsupportedfile <output.unsupportedfile_>`__,
+          ``"a"`` for
+          `errorfile <output.errorfile_>`__
     * encoding
         * File encoding
         * Default: ``"utf-8"``
+    * defer
+        * Defer file opening/creation until writing the first logging message
+        * Default:
+          ``false`` for
+          `logfile <output.logfile_>`__,
+          ``true`` for
+          `unsupportedfile <output.unsupportedfile_>`__ and
+          `errorfile <output.errorfile_>`__
+
 Note
-    path, mode, and encoding are only applied when configuring
-    logging output to a file.
+    path, mode, encoding, and defer
+    are only applied when configuring logging output to a file.
+    (See `logging.FileHandler <https://docs.python.org/3/library/logging.handlers.html#filehandler>`__)
 
 
 Postprocessor Configuration
@@ -9687,6 +9851,7 @@ Reference
 .. |open()| replace:: the built-in ``open()`` function
 .. |json.dump()| replace:: ``json.dump()``
 .. |ISO 639-1| replace:: `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language
+.. |ISO 8601| replace:: `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`__ language
 
 .. _directory: `extractor.*.directory`_
 .. _base-directory: `extractor.*.base-directory`_

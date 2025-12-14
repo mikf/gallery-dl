@@ -177,6 +177,10 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
             except Exception as exc:
                 self.log.error("%s: %s", exc.__class__.__name__, exc)
                 self.log.debug("%s", item, exc_info=exc)
+                if isinstance(exc, exception.HttpError) and \
+                        exc.status == 400 and \
+                        exc.response.url.startswith(self.root_api):
+                    raise exception.AbortExtraction("Album deleted")
 
     def _extract_file(self, data_id):
         referer = f"{self.root_dl}/file/{data_id}"

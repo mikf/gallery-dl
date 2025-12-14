@@ -46,7 +46,7 @@ class BellazonExtractor(Extractor):
             data = {"post": post}
             post["count"] = data["count"] = len(urls)
 
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             data["num"] = data["num_internal"] = data["num_external"] = 0
             for info, url, url_img in urls:
                 url = text.unescape(url or url_img)
@@ -114,7 +114,7 @@ class BellazonExtractor(Extractor):
     def _pagination_reverse(self, base, pnum=None):
         base = f"{self.root}{base}"
 
-        url = f"{base}/page/9999/"  # force redirect to highest page number
+        url = f"{base}/page/{'9999' if pnum is None else pnum}/"
         with self.request(url) as response:
             parts = response.url.rsplit("/", 3)
             pnum = text.parse_int(parts[2]) if parts[1] == "page" else 1

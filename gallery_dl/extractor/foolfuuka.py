@@ -31,7 +31,7 @@ class FoolfuukaExtractor(BaseExtractor):
             self.fixup_redirect = False
 
     def items(self):
-        yield Message.Directory, self.metadata()
+        yield Message.Directory, "", self.metadata()
         for post in self.posts():
             media = post["media"]
             if not media:

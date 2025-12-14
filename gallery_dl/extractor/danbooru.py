@@ -63,7 +63,7 @@ class DanbooruExtractor(BaseExtractor):
             except KeyError:
                 if self.external and post["source"]:
                     post.update(data)
-                    yield Message.Directory, post
+                    yield Message.Directory, "", post
                     yield Message.Queue, post["source"], post
                 continue
 
@@ -106,7 +106,7 @@ class DanbooruExtractor(BaseExtractor):
                     url = self.root + url
 
             post.update(data)
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             yield Message.Url, url, post
 
     def items_artists(self):
@@ -342,6 +342,32 @@ class DanbooruPostExtractor(DanbooruExtractor):
             params = {"only": self.includes}
             post.update(self.request_json(url, params=params))
         return (post,)
+
+
+class DanbooruMediaassetExtractor(DanbooruExtractor):
+    """Extractor for a danbooru media asset"""
+    subcategory = "media-asset"
+    filename_fmt = "{category}_ma{id}_{filename}.{extension}"
+    archive_fmt = "m{id}"
+    pattern = rf"{BASE_PATTERN}/media_assets/(\d+)"
+    example = "https://danbooru.donmai.us/media_assets/12345"
+
+    def posts(self):
+        url = f"{self.root}/media_assets/{self.groups[-1]}.json"
+        asset = self.request_json(url)
+
+        asset["file_url"] = asset["variants"][-1]["url"]
+        asset["tag_string"] = \
+            asset["tag_string_artist"] = \
+            asset["tag_string_character"] = \
+            asset["tag_string_copyright"] = \
+            asset["tag_string_general"] = \
+            asset["tag_string_meta"] = ""
+
+        if self.includes:
+            params = {"only": self.includes}
+            asset.update(self.request_json(url, params=params))
+        return (asset,)
 
 
 class DanbooruPopularExtractor(DanbooruExtractor):

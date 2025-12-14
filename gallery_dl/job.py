@@ -87,19 +87,22 @@ class Job():
                 "current_git_head": util.git_head()
             }
         # user-supplied metadata
-        if kwdict := extr.config("keywords-global"):
+        kwdict = extr.config("keywords")
+        if kwdict_global := extr.config("keywords-global"):
+            kwdict = {**kwdict_global, **kwdict} if kwdict else kwdict_global
+        elif not kwdict:
+            return
+
+        if extr.config("keywords-eval"):
+            self.kwdict_eval = []
+            for key, value in kwdict.items():
+                if isinstance(value, str):
+                    fmt = formatter.parse(value, None, util.identity)
+                    self.kwdict_eval.append((key, fmt.format_map))
+                else:
+                    self.kwdict[key] = value
+        else:
             self.kwdict.update(kwdict)
-        if kwdict := extr.config("keywords"):
-            if extr.config("keywords-eval"):
-                self.kwdict_eval = []
-                for key, value in kwdict.items():
-                    if isinstance(value, str):
-                        fmt = formatter.parse(value, None, util.identity)
-                        self.kwdict_eval.append((key, fmt.format_map))
-                    else:
-                        self.kwdict[key] = value
-            else:
-                self.kwdict.update(kwdict)
 
     def _build_config_path(self, parent):
         extr = self.extractor
@@ -142,7 +145,6 @@ class Job():
         """Execute or run the job"""
         extractor = self.extractor
         log = extractor.log
-        msg = None
 
         self._init()
 
@@ -153,8 +155,7 @@ class Job():
             extractor.sleep(sleep(), "extractor")
 
         try:
-            for msg in extractor:
-                self.dispatch(msg)
+            msg = self.dispatch(extractor)
         except exception.StopExtraction as exc:
             if exc.depth > 1 and exc.target != extractor.__class__.subcategory:
                 exc.depth -= 1
@@ -200,31 +201,47 @@ class Job():
             self.status |= s
         return self.status
 
-    def dispatch(self, msg):
+    def dispatch(self, messages):
         """Call the appropriate message handler"""
-        if msg[0] == Message.Url:
-            _, url, kwdict = msg
-            if self.metadata_url:
-                kwdict[self.metadata_url] = url
-            if self.pred_url(url, kwdict):
-                self.update_kwdict(kwdict)
-                self.handle_url(url, kwdict)
-            if FLAGS.FILE is not None:
-                FLAGS.process("FILE")
+        msg = None
+        process = True
 
-        elif msg[0] == Message.Directory:
-            self.update_kwdict(msg[1])
-            self.handle_directory(msg[1])
+        for msg, url, kwdict in messages:
 
-        elif msg[0] == Message.Queue:
-            _, url, kwdict = msg
-            if self.metadata_url:
-                kwdict[self.metadata_url] = url
-            if self.pred_queue(url, kwdict):
-                self.update_kwdict(kwdict)
-                self.handle_queue(url, kwdict)
-            if FLAGS.CHILD is not None:
-                FLAGS.process("CHILD")
+            if msg == Message.Directory:
+                if self.pred_post(url, kwdict):
+                    process = True
+                    self.update_kwdict(kwdict)
+                    self.handle_directory(kwdict)
+                else:
+                    process = None
+                if FLAGS.POST is not None:
+                    FLAGS.process("POST")
+
+            elif process is None:
+                continue
+
+            elif msg == Message.Url:
+                if self.metadata_url:
+                    kwdict[self.metadata_url] = url
+                if self.pred_url(url, kwdict):
+                    self.update_kwdict(kwdict)
+                    self.handle_url(url, kwdict)
+                if FLAGS.FILE is not None:
+                    FLAGS.process("FILE")
+
+            elif msg == Message.Queue:
+                if process is None:
+                    continue
+                if self.metadata_url:
+                    kwdict[self.metadata_url] = url
+                if self.pred_queue(url, kwdict):
+                    self.update_kwdict(kwdict)
+                    self.handle_queue(url, kwdict)
+                if FLAGS.CHILD is not None:
+                    FLAGS.process("CHILD")
+
+        return msg
 
     def handle_url(self, url, kwdict):
         """Handle Message.Url"""
@@ -256,6 +273,7 @@ class Job():
     def _init(self):
         self.extractor.initialize()
         self.pred_url = self._prepare_predicates("image", True)
+        self.pred_post = self._prepare_predicates("post", False)
         self.pred_queue = self._prepare_predicates("chapter", False)
 
     def _prepare_predicates(self, target, skip=True):
@@ -434,7 +452,8 @@ class DownloadJob(Job):
             else:
                 extr._parentdir = pextr._parentdir
 
-            if pmeta := pextr.config2("parent-metadata", "metadata-parent"):
+            if pmeta := pextr.config2(
+                    "parent-metadata", "metadata-parent", pextr.parent):
                 if isinstance(pmeta, str):
                     data = self.kwdict.copy()
                     if kwdict:
@@ -945,8 +964,7 @@ class DataJob(Job):
 
         # collect data
         try:
-            for msg in extractor:
-                self.dispatch(msg)
+            self.dispatch(extractor)
         except exception.StopExtraction:
             pass
         except Exception as exc:

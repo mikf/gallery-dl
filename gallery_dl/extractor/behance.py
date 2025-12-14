@@ -109,7 +109,7 @@ class BehanceGalleryExtractor(BehanceExtractor):
         imgs = self.get_images(data)
         data["count"] = len(imgs)
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for data["num"], (url, module) in enumerate(imgs, 1):
             data["module"] = module
             data["extension"] = (module.get("extension") or

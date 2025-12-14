@@ -25,7 +25,7 @@ class SexcomExtractor(Extractor):
     def items(self):
         self.gifs = self.config("gifs", True)
 
-        yield Message.Directory, self.metadata()
+        yield Message.Directory, "", self.metadata()
         for pin in map(self._parse_pin, self.pins()):
             if not pin:
                 continue
@@ -345,7 +345,7 @@ class SexcomSearchExtractor(SexcomExtractor):
                         path = f"{path[:-4]}gif"
 
                 pin["url"] = f"{root}{path}"
-                yield Message.Directory, pin
+                yield Message.Directory, "", pin
                 yield Message.Url, pin["url"], pin
 
             if params["page"] >= data["paging"]["numberOfPages"]:

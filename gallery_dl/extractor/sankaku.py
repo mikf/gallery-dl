@@ -16,7 +16,7 @@ import collections
 
 BASE_PATTERN = r"(?:https?://)?" \
     r"(?:(?:chan|www|beta|black|white)\.sankakucomplex\.com|sankaku\.app)" \
-    r"(?:/[a-z]{2})?"
+    r"(?:/[a-z]{2}(?:[-_][A-Z]{2})?)?"
 
 
 class SankakuExtractor(BooruExtractor):
@@ -61,8 +61,8 @@ class SankakuExtractor(BooruExtractor):
                 self.log.warning(
                     "Login required to download 'contentious_content' posts")
                 SankakuExtractor._warning = False
-        elif url[8] == "v":
-            url = "https://s.sankakucomplex.com" + url[url.index("/", 8):]
+        elif url[4] != "s":
+            url = "https" + url[4:]
         return url
 
     def _prepare(self, post):

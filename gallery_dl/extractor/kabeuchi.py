@@ -33,7 +33,7 @@ class KabeuchiUserExtractor(Extractor):
                 continue
 
             post["date"] = self.parse_datetime_iso(post["created_at"])
-            yield Message.Directory, post
+            yield Message.Directory, "", post
 
             for key in keys:
                 name = post[key]

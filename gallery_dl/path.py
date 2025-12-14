@@ -325,7 +325,15 @@ class PathFormat():
             self.kwdict["extension"] = self.prefix + self.extension_map(
                 "part", "part")
             self.build_path()
-        if part_directory:
+
+        if part_directory is not None:
+            if isinstance(part_directory, list):
+                for condition, part_directory in part_directory:
+                    if condition(self.kwdict):
+                        break
+                else:
+                    return
+
             self.temppath = os.path.join(
                 part_directory,
                 os.path.basename(self.temppath),

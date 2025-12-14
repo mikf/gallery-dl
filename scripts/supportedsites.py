@@ -40,6 +40,7 @@ CATEGORY_MAP = {
     "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
     "booth"          : "BOOTH",
+    "cfake"          : "Celebrity Fakes",
     "cien"           : "Ci-en",
     "cohost"         : "cohost!",
     "comicvine"      : "Comic Vine",
@@ -52,6 +53,7 @@ CATEGORY_MAP = {
     "e926"           : "e926",
     "e6ai"           : "e6AI",
     "erome"          : "EroMe",
+    "eporner"        : "EPORNER",
     "everia"         : "EVERIA.CLUB",
     "e-hentai"       : "E-Hentai",
     "exhentai"       : "ExHentai",
@@ -59,6 +61,8 @@ CATEGORY_MAP = {
     "fanbox"         : "pixivFANBOX",
     "fappic"         : "Fappic.com",
     "fashionnova"    : "Fashion Nova",
+    "fikfap"         : "FikFap",
+    "fitnakedgirls"  : "FitNakedGirls",
     "furaffinity"    : "Fur Affinity",
     "furry34"        : "Furry 34 com",
     "girlswithmuscle": "Girls with Muscle",
@@ -138,6 +142,8 @@ CATEGORY_MAP = {
     "nozrip"         : "GaryC Booru",
     "nsfwalbum"      : "NSFWalbum.com",
     "nudostar"       : "NudoStar.TV",
+    "nudostarforum"  : "NudoStar Forums",
+    "okporn"         : "OK.PORN",
     "paheal"         : "Rule 34",
     "photovogue"     : "PhotoVogue",
     "picstate"       : "PicState",
@@ -149,9 +155,9 @@ CATEGORY_MAP = {
     "pornimage"      : "Porn Image",
     "pornpics"       : "PornPics.com",
     "pornreactor"    : "PornReactor",
+    "pornstarstube"  : "PORNSTARS.TUBE",
     "postimg"        : "Postimages",
     "readcomiconline": "Read Comic Online",
-    "redbust"        : "RedBust",
     "rbt"            : "RebeccaBlackTech",
     "redgifs"        : "RedGIFs",
     "rozenarcana"    : "Rozen Arcana",
@@ -241,6 +247,9 @@ SUBCATEGORY_MAP = {
         "artwork": "Artwork Listings",
         "collections": "",
     },
+    "audiochan": {
+        "audio": "Audios",
+    },
     "bilibili": {
         "user-articles-favorite": "User Article Favorites",
     },
@@ -249,6 +258,9 @@ SUBCATEGORY_MAP = {
     },
     "boosty": {
         "feed": "Subscriptions Feed",
+    },
+    "cfake": {
+        "created": "Created",
     },
     "civitai": {
         "models": "Model Listings",
@@ -374,9 +386,6 @@ SUBCATEGORY_MAP = {
         "post"           : "Individual Posts",
         "shorturl"       : "",
     },
-    "redbust": {
-        "gallery": ("Galleries", "Categories"),
-    },
     "redgifs": {
         "collections": "",
     },
@@ -464,6 +473,7 @@ BASE_MAP = {
     "szurubooru"  : "szurubooru Instances",
     "urlshortener": "URL Shorteners",
     "vichan"      : "vichan Imageboards",
+    "xenforo"     : "XenForo Forums",
 }
 
 URL_MAP = {
@@ -518,6 +528,7 @@ AUTH_MAP = {
     "mastodon.social": _OAUTH,
     "newgrounds"     : "Supported",
     "nijie"          : "Required",
+    "nudostarforum"  : "Supported",
     "patreon"        : _COOKIES,
     "pawoo"          : _OAUTH,
     "pillowfort"     : "Supported",

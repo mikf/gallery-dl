@@ -298,6 +298,15 @@ class TestHTTPDownloader(TestDownloaderBase):
         self.assertTrue(success)
         self.assertEqual(pathfmt.temppath, "")
 
+    def test_http_empty(self):
+        url = f"{self.address}/~NUL"
+        pathfmt = self._prepare_destination(None, extension=None)
+        with self.assertLogs(self.downloader.log, "WARNING") as log_info:
+            success = self.downloader.download(url, pathfmt)
+        self.assertFalse(success)
+        self.assertEqual(log_info.output[0],
+                         "WARNING:downloader.http:Empty file")
+
 
 class TestTextDownloader(TestDownloaderBase):
 
@@ -400,6 +409,7 @@ SAMPLES = {
     ("blend", b"BLENDER-v303RENDH"),
     ("obj" , b"# Blender v3.2.0 OBJ File: 'foo.blend'"),
     ("clip", b"CSFCHUNK\x00\x00\x00\x00"),
+    ("~NUL", b""),
 }
 
 
@@ -428,8 +438,9 @@ def generate_tests():
         return test
 
     for idx, (ext, content) in enumerate(SAMPLES):
-        test = generate_test(idx, ext, content)
-        setattr(TestHTTPDownloader, test.__name__, test)
+        if ext[0].isalnum():
+            test = generate_test(idx, ext, content)
+            setattr(TestHTTPDownloader, test.__name__, test)
 
 
 generate_tests()

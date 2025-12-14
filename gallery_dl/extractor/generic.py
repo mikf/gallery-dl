@@ -75,7 +75,7 @@ class GenericExtractor(Extractor):
             pass
         images = enumerate(imgs, 1)
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
 
         for data["num"], (url, imgdata) in images:
             if imgdata:

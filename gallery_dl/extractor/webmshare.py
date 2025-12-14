@@ -51,5 +51,5 @@ class WebmshareVideoExtractor(Extractor):
         if data["title"] == "webmshare":
             data["title"] = ""
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, data["url"], data

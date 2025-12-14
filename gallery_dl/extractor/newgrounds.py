@@ -64,7 +64,7 @@ class NewgroundsExtractor(Extractor):
             if url:
                 if metadata:
                     post.update(metadata)
-                yield Message.Directory, post
+                yield Message.Directory, "", post
                 post["num"] = 0
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
@@ -88,6 +88,7 @@ class NewgroundsExtractor(Extractor):
                     text.nameext_from_url(url, post)
                     yield Message.Url, url, post
             else:
+                self.status |= 1
                 self.log.warning(
                     "Unable to get download URL for '%s'", post_url)
 

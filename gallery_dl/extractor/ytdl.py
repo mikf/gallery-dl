@@ -114,7 +114,7 @@ class YoutubeDLExtractor(Extractor):
                              info_dict.get("webpage_url") or
                              self.ytdl_url)
 
-            yield Message.Directory, info_dict
+            yield Message.Directory, "", info_dict
             yield Message.Url, url, info_dict
 
     def _process_entries(self, ytdl_module, ytdl_instance, entries):

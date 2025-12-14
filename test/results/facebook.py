@@ -40,6 +40,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/permalink.php?story_fbid=pfbid034C2PVBhr311C2jo91sBMNwfvcBeLmspzTXLikp37aEqKsdh47mW7ZX8hcS3Ba8Uul&id=61573780995993&rdid=eV7e4pTWFxWb6Evx",
+    "#comment" : "post URL (#8679)",
+    "#class"   : facebook.FacebookUserExtractor,
+    "#fail"    : True,
+},
+
+
+{
     "#url"     : "https://www.facebook.com/facebook/photos",
     "#class"   : facebook.FacebookPhotosExtractor,
 

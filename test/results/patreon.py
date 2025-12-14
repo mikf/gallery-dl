@@ -118,6 +118,8 @@ __tests__ = (
     "#comment" : "postfile + attachments",
     "#class"   : patreon.PatreonPostExtractor,
     "#count"   : 4,
+
+    "file": {dict, None},
 },
 
 {

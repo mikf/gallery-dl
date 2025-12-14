@@ -123,5 +123,5 @@ class LensdumpImageExtractor(LensdumpBase, Extractor):
         }
 
         text.nameext_from_url(data["url"], data)
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, data["url"], data

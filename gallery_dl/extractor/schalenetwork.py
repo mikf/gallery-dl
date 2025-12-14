@@ -138,14 +138,13 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
             name = tag["name"]
             namespace = tag.get("namespace", 0)
             tags.append(types[namespace] + ":" + name)
-        data["tags"] = tags
-
         if self.config("tags", False):
-            tags = collections.defaultdict(list)
+            categories = collections.defaultdict(list)
             for tag in data["tags"]:
-                tags[tag.get("namespace", 0)].append(tag["name"])
-            for type, values in tags.items():
+                categories[tag.get("namespace", 0)].append(tag["name"])
+            for type, values in categories.items():
                 data["tags_" + types[type]] = values
+        data["tags"] = tags
 
         url = f"{self.root_api}/books/detail/{gid}/{gkey}?crt={self._crt()}"
         if token := self._token(False):

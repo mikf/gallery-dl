@@ -212,5 +212,5 @@ class UpdateExtractor(Extractor):
         url = (f"{self.root}/{path_repo}/releases/download"
                f"/{data['tag_name']}/{binary_name}")
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, url, data

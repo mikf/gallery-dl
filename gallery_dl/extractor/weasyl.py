@@ -80,7 +80,7 @@ class WeasylSubmissionExtractor(WeasylExtractor):
     def items(self):
         data = self.request_submission(self.submitid)
         if self.populate_submission(data):
-            yield Message.Directory, data
+            yield Message.Directory, "", data
             yield Message.Url, data["url"], data
 
 
@@ -94,7 +94,7 @@ class WeasylSubmissionsExtractor(WeasylExtractor):
         self.owner_login = match[1]
 
     def items(self):
-        yield Message.Directory, {"owner_login": self.owner_login}
+        yield Message.Directory, "", {"owner_login": self.owner_login}
         yield from self.submissions(self.owner_login)
 
 
@@ -113,7 +113,7 @@ class WeasylFolderExtractor(WeasylExtractor):
         # Folder names are only on single submission api calls
         msg, url, data = next(iter)
         details = self.request_submission(data["submitid"])
-        yield Message.Directory, details
+        yield Message.Directory, "", details
         yield msg, url, data
         yield from iter
 
@@ -131,7 +131,7 @@ class WeasylJournalExtractor(WeasylExtractor):
 
     def items(self):
         data = self.retrieve_journal(self.journalid)
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         yield Message.Url, data["html"], data
 
 
@@ -147,7 +147,7 @@ class WeasylJournalsExtractor(WeasylExtractor):
         self.owner_login = match[1]
 
     def items(self):
-        yield Message.Directory, {"owner_login": self.owner_login}
+        yield Message.Directory, "", {"owner_login": self.owner_login}
 
         url = f"{self.root}/journals/{self.owner_login}"
         page = self.request(url).text
@@ -191,7 +191,7 @@ class WeasylFavoriteExtractor(WeasylExtractor):
                 submission = self.request_submission(submitid)
                 if self.populate_submission(submission):
                     submission["user"] = owner_login
-                    yield Message.Directory, submission
+                    yield Message.Directory, "", submission
                     yield Message.Url, submission["url"], submission
 
             try:

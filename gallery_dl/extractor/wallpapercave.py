@@ -27,7 +27,7 @@ class WallpapercaveImageExtractor(Extractor):
         path = None
         for path in text.extract_iter(page, 'class="download" href="', '"'):
             image = text.nameext_from_url(path)
-            yield Message.Directory, image
+            yield Message.Directory, "", image
             yield Message.Url, self.root + path, image
 
         if path is None:
@@ -38,7 +38,7 @@ class WallpapercaveImageExtractor(Extractor):
                 pass
             else:
                 image = text.nameext_from_url(path)
-                yield Message.Directory, image
+                yield Message.Directory, "", image
                 yield Message.Url, self.root + path, image
 
         if path is None:
@@ -46,5 +46,5 @@ class WallpapercaveImageExtractor(Extractor):
                     page, 'class="wallpaper" id="wp', '</picture>'):
                 if path := text.rextr(wp, ' src="', '"'):
                     image = text.nameext_from_url(path)
-                    yield Message.Directory, image
+                    yield Message.Directory, "", image
                     yield Message.Url, self.root + path, image

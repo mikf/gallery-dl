@@ -87,7 +87,7 @@ class TumblrExtractor(Extractor):
 
                     if self.avatar:
                         url = self.api.avatar(self.blog)
-                        yield Message.Directory, {"blog": blog}
+                        yield Message.Directory, "", {"blog": blog}
                         yield self._prepare_avatar(url, post.copy(), blog)
 
                 post["blog"] = blog
@@ -160,7 +160,7 @@ class TumblrExtractor(Extractor):
                     del post["extension"]
 
             post["count"] = len(posts)
-            yield Message.Directory, post
+            yield Message.Directory, "", post
 
             for num, (msg, url, post) in enumerate(posts, 1):
                 post["num"] = num

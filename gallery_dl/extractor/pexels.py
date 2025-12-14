@@ -48,7 +48,7 @@ class PexelsExtractor(Extractor):
                 self.log.warning("%s: Unsupported post type", post.get("id"))
                 continue
 
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             yield Message.Url, url, text.nameext_from_url(name, post)
 
     def posts(self):

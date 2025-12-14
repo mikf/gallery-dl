@@ -37,6 +37,8 @@ __tests__ = (
     "#results" : "https://media.imagepond.net/media/100042393993a6bfa75fc505e9.mp4",
 
     "album"    : "",
+    "album_id" : "",
+    "album_slug": "",
     "date"     : "dt:2025-08-29 18:01:20",
     "duration" : 7,
     "extension": "mp4",

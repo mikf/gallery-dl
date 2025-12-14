@@ -41,6 +41,8 @@ class MotherlessExtractor(Extractor):
         path, _, media_id = path.rpartition("/")
         data = {
             "id"   : media_id,
+            "title": text.unescape(
+                (t := extr("<title>", "<")) and t[:t.rfind(" | ")]),
             "type" : extr("__mediatype = '", "'"),
             "group": extr("__group = '", "'"),
             "url"  : extr("__fileurl = '", "'"),
@@ -49,7 +51,6 @@ class MotherlessExtractor(Extractor):
                 for tag in text.extract_iter(
                     extr('class="media-meta-tags">', "</div>"), ">#", "<")
             ],
-            "title": text.unescape(extr("<h1>", "<")),
             "views": text.parse_int(extr(
                 'class="count">', " ").replace(",", "")),
             "favorites": text.parse_int(extr(
@@ -131,10 +132,9 @@ class MotherlessExtractor(Extractor):
         if title:
             return text.unescape(title.strip())
 
-        pos = page.find(f' href="/G{gallery_id}"')
-        if pos >= 0:
-            return text.unescape(text.extract(
-                page, ' title="', '"', pos)[0])
+        if f' href="/G{gallery_id}"' in page:
+            return text.unescape(
+                (t := text.extr(page, "<title>", "<")) and t[:t.rfind(" | ")])
 
         return ""
 
@@ -160,7 +160,7 @@ class MotherlessMediaExtractor(MotherlessExtractor):
     def items(self):
         file = self._extract_media(self.groups[0])
         url = file["url"]
-        yield Message.Directory, file
+        yield Message.Directory, "", file
         yield Message.Url, url, text.nameext_from_url(url, file)
 
 
@@ -197,7 +197,7 @@ class MotherlessGalleryExtractor(MotherlessExtractor):
             file["num"] = num
             file["thumbnail"] = thumbnail
             url = file["url"]
-            yield Message.Directory, file
+            yield Message.Directory, "", file
             yield Message.Url, url, text.nameext_from_url(url, file)
 
 
@@ -235,5 +235,5 @@ class MotherlessGroupExtractor(MotherlessExtractor):
             file["uploader"] = uploader
             file["group"] = file["group_id"]
             url = file["url"]
-            yield Message.Directory, file
+            yield Message.Directory, "", file
             yield Message.Url, url, text.nameext_from_url(url, file)

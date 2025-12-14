@@ -79,9 +79,9 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.30.10/gallery-dl.exe>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.31.0/gallery-dl.exe>`__
   (Requires `Microsoft Visual C++ Redistributable Package (x86) <https://aka.ms/vs/17/release/vc_redist.x86.exe>`__)
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.30.10/gallery-dl.bin>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.31.0/gallery-dl.bin>`__
 
 
 Nightly Builds
@@ -161,6 +161,13 @@ Pulling image from `GitHub Container Registry <https://github.com/mikf/gallery-d
 
     docker pull ghcr.io/mikf/gallery-dl
     docker tag ghcr.io/mikf/gallery-dl gallery-dl
+
+Pulling *Nightly Build* images built from the latest commit by using the ``dev`` tag:
+
+.. code:: bash
+
+    docker pull mikf123/gallery-dl:dev
+    docker pull ghcr.io/mikf/gallery-dl:dev
 
 To run the container you will probably want to attach some directories on the host so that the config file and downloads can persist across runs.
 

@@ -33,6 +33,7 @@ class Extractor():
     basecategory = ""
     basesubcategory = ""
     categorytransfer = False
+    parent = False
     directory_fmt = ("{category}",)
     filename_fmt = "{filename}.{extension}"
     archive_fmt = ""
@@ -93,7 +94,8 @@ class Extractor():
         pass
 
     def items(self):
-        yield Message.Version, 1
+        return
+        yield
 
     def skip(self, num):
         return 0
@@ -800,7 +802,7 @@ class GalleryExtractor(Extractor):
                     enum = util.enumerate_reversed
             images = enum(imgs, 1)
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         enum_key = self.enum
 
         if assets:
@@ -919,7 +921,7 @@ class Dispatch():
         elif isinstance(include, str):
             include = include.replace(" ", "").split(",")
 
-        results = [(Message.Version, 1)]
+        results = []
         for category in include:
             try:
                 extr, url = extractors[category]

@@ -698,10 +698,15 @@ def build_parser():
               "(e.g. '5', '8-20', or '1:24:3')"),
     )
     selection.add_argument(
+        "--post-range",
+        dest="post-range", metavar="RANGE", action=ConfigAction,
+        help=("Like '--range', but for posts"),
+    )
+    selection.add_argument(
         "--chapter-range",
         dest="chapter-range", metavar="RANGE", action=ConfigAction,
-        help=("Like '--range', but applies to manga chapters "
-              "and other delegated URLs"),
+        help=("Like '--range', but for child extractors handling "
+              "manga chapters, external URLs, etc."),
     )
     selection.add_argument(
         "--filter",
@@ -713,10 +718,15 @@ def build_parser():
               "rating in ('s', 'q')\""),
     )
     selection.add_argument(
+        "--post-filter",
+        dest="post-filter", metavar="EXPR", action=ConfigAction,
+        help=("Like '--filter', but for posts"),
+    )
+    selection.add_argument(
         "--chapter-filter",
         dest="chapter-filter", metavar="EXPR", action=ConfigAction,
-        help=("Like '--filter', but applies to manga chapters "
-              "and other delegated URLs"),
+        help=("Like '--filter', but for child extractors handling "
+              "manga chapters, external URLs, etc."),
     )
 
     infojson = {

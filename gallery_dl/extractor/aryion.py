@@ -63,7 +63,7 @@ class AryionExtractor(Extractor):
             if post := self._parse_post(post_id):
                 if data:
                     post.update(data)
-                yield Message.Directory, post
+                yield Message.Directory, "", post
                 yield Message.Url, post["url"], post
             elif post is False and self.recursive:
                 base = self.root + "/g4/view/"
@@ -232,6 +232,30 @@ class AryionTagExtractor(AryionExtractor):
     def posts(self):
         url = self.root + "/g4/tags.php"
         return self._pagination_params(url, self.params)
+
+
+class AryionSearchExtractor(AryionExtractor):
+    """Extractor for searches on eka's portal"""
+    subcategory = "search"
+    directory_fmt = ("{category}", "searches", "{search[prefix]}"
+                     "{search[q]|search[tags]|search[user]}")
+    archive_fmt = ("s_{search[prefix]}"
+                   "{search[q]|search[tags]|search[user]}_{id}")
+    pattern = rf"{BASE_PATTERN}/search\.php\?([^#]+)"
+    example = "https://aryion.com/g4/search.php?q=TEXT&tags=TAGS&user=USER"
+
+    def metadata(self):
+        params = text.parse_query(self.user)
+        return {"search": {
+            **params,
+            "prefix": ("" if params.get("q") else
+                       "t_" if params.get("tags") else
+                       "u_" if params.get("user") else ""),
+        }}
+
+    def posts(self):
+        url = f"{self.root}/g4/search.php?{self.user}"
+        return self._pagination_next(url)
 
 
 class AryionPostExtractor(AryionExtractor):

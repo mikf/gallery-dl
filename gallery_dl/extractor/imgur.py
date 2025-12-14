@@ -83,7 +83,7 @@ class ImgurImageExtractor(ImgurExtractor):
         image.update(image["media"][0])
         del image["media"]
         url = self._prepare(image)
-        yield Message.Directory, image
+        yield Message.Directory, "", image
         yield Message.Url, url, image
 
 
@@ -119,7 +119,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
             image["num"] = num
             image["count"] = count
             image["album"] = album
-            yield Message.Directory, image
+            yield Message.Directory, "", image
             yield Message.Url, url, image
 
 

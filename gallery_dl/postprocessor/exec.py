@@ -22,6 +22,10 @@ else:
     from shlex import quote
 
 
+def trim(args):
+    return (args.partition(" ") if isinstance(args, str) else args)[0]
+
+
 class ExecPP(PostProcessor):
 
     def __init__(self, job, options):
@@ -35,6 +39,7 @@ class ExecPP(PostProcessor):
             if options.get("async", False):
                 self._exec = self._popen
 
+        self.verbose = options.get("verbose", True)
         self.session = False
         self.creationflags = 0
         if options.get("session"):
@@ -115,11 +120,11 @@ class ExecPP(PostProcessor):
     def _exec(self, args, shell):
         if retcode := self._popen(args, shell).wait():
             self.log.warning("'%s' returned with non-zero exit status (%d)",
-                             args, retcode)
+                             args if self.verbose else trim(args), retcode)
         return retcode
 
     def _popen(self, args, shell):
-        self.log.debug("Running '%s'", args)
+        self.log.debug("Running '%s'", args if self.verbose else trim(args))
         return util.Popen(
             args,
             shell=shell,

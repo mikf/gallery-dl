@@ -53,7 +53,7 @@ class SankakucomplexArticleExtractor(SankakucomplexExtractor):
             files += self._extract_embeds(content)
         data["count"] = len(files)
 
-        yield Message.Directory, data
+        yield Message.Directory, "", data
         for num, url in enumerate(files, 1):
             file = text.nameext_from_url(url)
             if url[0] == "/":

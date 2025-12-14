@@ -42,7 +42,7 @@ class NekohousePostExtractor(NekohouseExtractor):
         post["post_id"] = post_id
         post["count"] = len(files)
 
-        yield Message.Directory, post
+        yield Message.Directory, "", post
         for post["num"], file in enumerate(files, 1):
             url = file["url"]
             text.nameext_from_url(url, file)

@@ -60,7 +60,7 @@ class BlueskyExtractor(Extractor):
                 self._prepare(post)
                 files = self._extract_files(post)
 
-                yield Message.Directory, post
+                yield Message.Directory, "", post
                 if files:
                     did = post["author"]["did"]
                     base = (f"{self.api.service_endpoint(did)}/xrpc"
@@ -336,7 +336,7 @@ class BlueskyInfoExtractor(BlueskyExtractor):
     def items(self):
         self._metadata_user = True
         self.api._did_from_actor(self.groups[0])
-        return iter(((Message.Directory, self._user),))
+        return iter(((Message.Directory, "", self._user),))
 
 
 class BlueskyAvatarExtractor(BlueskyExtractor):
@@ -400,7 +400,9 @@ class BlueskyAPI():
         self.headers = {"Accept": "application/json"}
 
         self.username, self.password = extractor._get_auth_info()
-        if self.username:
+        if srv := extractor.config("api-server", False):
+            self.root = srv.rstrip("/")
+        elif self.username:
             self.root = "https://bsky.social"
         else:
             self.root = "https://api.bsky.app"

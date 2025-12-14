@@ -59,7 +59,7 @@ class SteamgriddbExtractor(Extractor):
             fake_png = download_fake_png and asset.get("fake_png")
 
             asset["count"] = 2 if fake_png else 1
-            yield Message.Directory, asset
+            yield Message.Directory, "", asset
 
             asset["num"] = 1
             url = asset["url"]

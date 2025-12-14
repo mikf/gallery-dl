@@ -19,7 +19,7 @@ class DiscordExtractor(Extractor):
     root = "https://discord.com"
     directory_fmt = ("{category}", "{server_id}_{server}",
                      "{channel_id}_{channel}")
-    filename_fmt = "{message_id}_{num:>02}_{filename}.{extension}"
+    filename_fmt = "{message_id}_{num:>02}_{filename[:220]}.{extension}"
     archive_fmt = "{message_id}_{num}"
 
     server_metadata = {}
@@ -120,7 +120,7 @@ class DiscordExtractor(Extractor):
                     text.nameext_from_url(file["url"], file)
                     file["num"] = num
 
-                yield Message.Directory, message_metadata
+                yield Message.Directory, "", message_metadata
 
                 for file in message_metadata["files"]:
                     message_metadata_file = message_metadata.copy()

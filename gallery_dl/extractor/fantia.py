@@ -48,7 +48,7 @@ class FantiaExtractor(Extractor):
 
             for content in contents:
                 files = self._process_content(post, content)
-                yield Message.Directory, post
+                yield Message.Directory, "", post
 
                 if content["visible_status"] != "visible":
                     self.log.warning(

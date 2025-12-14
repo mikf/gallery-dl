@@ -70,7 +70,7 @@ class CienArticleExtractor(CienExtractor):
         except Exception:
             pass
 
-        yield Message.Directory, post
+        yield Message.Directory, "", post
         for post["num"], file in enumerate(files, 1):
             post.update(file)
             if "extension" not in file:

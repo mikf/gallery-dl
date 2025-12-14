@@ -31,7 +31,7 @@ class _500pxExtractor(Extractor):
             photo["extension"] = photo["image_format"]
             if data:
                 photo.update(data)
-            yield Message.Directory, photo
+            yield Message.Directory, "", photo
             yield Message.Url, url, photo
 
     def metadata(self):

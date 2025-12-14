@@ -60,7 +60,7 @@ class NozomiExtractor(Extractor):
                 if key in post:
                     del post[key]
 
-            yield Message.Directory, post
+            yield Message.Directory, "", post
             for post["num"], image in enumerate(images, 1):
                 post["filename"] = post["dataid"] = did = image["dataid"]
                 post["is_video"] = video = \

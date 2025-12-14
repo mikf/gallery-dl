@@ -40,10 +40,17 @@ class TestRange(unittest.TestCase):
     def test_parse_digit(self):
         f = self.predicate._parse
 
+        self.assertEqual(f(2), [range(2, 3)])
         self.assertEqual(f("2"), [range(2, 3)])
 
         self.assertEqual(
             f("2, 3, 4"),
+            [range(2, 3),
+             range(3, 4),
+             range(4, 5)],
+        )
+        self.assertEqual(
+            f(["2", "3", "4"]),
             [range(2, 3),
              range(3, 4),
              range(4, 5)],

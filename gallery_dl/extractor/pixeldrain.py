@@ -44,7 +44,7 @@ class PixeldrainFileExtractor(PixeldrainExtractor):
         file["date"] = self.parse_datetime_iso(file["date_upload"])
 
         text.nameext_from_url(file["name"], file)
-        yield Message.Directory, file
+        yield Message.Directory, "", file
         yield Message.Url, file["url"], file
 
 
@@ -82,7 +82,7 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
         del album["files"]
         del album["file_count"]
 
-        yield Message.Directory, {"album": album}
+        yield Message.Directory, "", {"album": album}
         for num, file in enumerate(files, idx+1):
             file["album"] = album
             file["num"] = num
@@ -131,7 +131,7 @@ class PixeldrainFolderExtractor(PixeldrainExtractor):
         folder = self.metadata(path)
         folder["id"] = paths[0]["id"]
 
-        yield Message.Directory, folder
+        yield Message.Directory, "", folder
 
         num = 0
         for child in children:
