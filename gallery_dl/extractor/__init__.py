@@ -113,6 +113,7 @@ modules = [
     "kemono",
     "khinsider",
     "komikcast",
+    "koofr",
     "leakgallery",
     "lensdump",
     "lexica",

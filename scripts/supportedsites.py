@@ -341,6 +341,9 @@ SUBCATEGORY_MAP = {
         "discord-server": "",
         "posts"         : "",
     },
+    "koofr": {
+        "shared": "Shared Links",
+    },
     "leakgallery": {
         "trending" : "Trending Medias",
         "mostliked": "Most Liked Posts",
