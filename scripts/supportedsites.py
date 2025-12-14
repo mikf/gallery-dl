@@ -43,6 +43,7 @@ CATEGORY_MAP = {
     "cfake"          : "Celebrity Fakes",
     "cien"           : "Ci-en",
     "cohost"         : "cohost!",
+    "comedywildlifephoto": "Comedy Wildlife Photography Awards",
     "comicvine"      : "Comic Vine",
     "cyberfile"      : "CyberFile",
     "dankefuerslesen": "Danke fürs Lesen",
