@@ -45,6 +45,7 @@ modules = [
     "chevereto",
     "cien",
     "civitai",
+    "comedywildlifephoto",
     "comick",
     "comicvine",
     "cyberdrop",
