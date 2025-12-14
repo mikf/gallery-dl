@@ -596,9 +596,12 @@ class TwitterExtractor(Extractor):
             obj = tweet["legacy"] if "legacy" in tweet else tweet
             cid = obj.get("conversation_id_str")
             if not cid:
-                tid = obj["id_str"]
-                self.log.warning(
-                    "Unable to expand %s (no 'conversation_id')", tid)
+                if cid is False:
+                    yield tweet
+                else:
+                    tid = obj["id_str"]
+                    self.log.warning(
+                        "Unable to expand %s (no 'conversation_id')", tid)
                 continue
             if cid in seen:
                 self.log.debug(
@@ -613,6 +616,7 @@ class TwitterExtractor(Extractor):
     def _make_tweet(self, user, url, id_str):
         return {
             "id_str": id_str,
+            "conversation_id_str": False,
             "lang": None,
             "user": user,
             "source": "><",
