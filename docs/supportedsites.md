@@ -583,6 +583,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
+<tr id="koofr" title="koofr">
+    <td>Koofr</td>
+    <td>https://koofr.net/</td>
+    <td>Shared Links</td>
+    <td></td>
+</tr>
 <tr id="leakgallery" title="leakgallery">
     <td>Leak Gallery</td>
     <td>https://leakgallery.com</td>
