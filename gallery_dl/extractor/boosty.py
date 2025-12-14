@@ -280,8 +280,12 @@ class BoostyAPI():
 
         if not access_token:
             if auth := self.extractor.cookies.get("auth", domain=".boosty.to"):
-                access_token = text.extr(
-                    text.unquote(auth), '"accessToken":"', '"')
+                auth = text.unquote(auth)
+                access_token = text.extr(auth, '"accessToken":"', '"')
+                if expires := text.extr(auth, '"expiresAt":', ','):
+                    import time
+                    if text.parse_int(expires) < time.time() * 1000:
+                        extractor.log.warning("'auth' cookie tokens expired")
         if access_token:
             self.headers["Authorization"] = "Bearer " + access_token
 
