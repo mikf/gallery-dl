@@ -82,10 +82,7 @@ __tests__ = (
     "#category": ("xenforo", "simpcity", "post"),
     "#class"   : xenforo.XenforoPostExtractor,
     "#auth"    : True,
-    "#results" : (
-        "/goto/post?id=13358068",
-        "https://cyberdrop.cr/a/Sh9GlG38",
-    ),
+    "#results" : "https://cyberdrop.cr/a/Sh9GlG38",
 },
 
 {
@@ -222,7 +219,7 @@ __tests__ = (
     "#category": ("xenforo", "simpcity", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
     "#auth"    : True,
-    "#pattern" : r"https://(jpg6\.su/img/\w+|bunkr\.\w+/[fiv]/\w+|pixeldrain.com/l/\w+|alua.com/tatakai)|/goto/post",
+    "#pattern" : r"https://(jpg6\.su/img/\w+|bunkr\.\w+/[fiv]/\w+|pixeldrain.com/l/\w+|alua.com/tatakai)|saint2.cr/embed",
     "#count"   : range(100, 300),
 
     "count" : int,
