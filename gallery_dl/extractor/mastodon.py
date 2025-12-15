@@ -318,7 +318,7 @@ class MastodonAPI():
             if code == 404:
                 raise exception.NotFoundError()
             if code == 429:
-                self.extractor.wait(until=self.parse_datetime_iso(
+                self.extractor.wait(until=self.extractor.parse_datetime_iso(
                     response.headers["x-ratelimit-reset"]))
                 continue
             raise exception.AbortExtraction(response.json().get("error"))
