@@ -39,6 +39,7 @@ class YoutubeDLDownloader(DownloaderBase):
 
     def download(self, url, pathfmt):
         kwdict = pathfmt.kwdict
+        tries = 0
 
         if ytdl_instance := kwdict.pop("_ytdl_instance", None):
             # 'ytdl' extractor
@@ -79,10 +80,8 @@ class YoutubeDLDownloader(DownloaderBase):
                 for cookie in self.session.cookies:
                     set_cookie(cookie)
 
-            tries = 0
             url = url[5:]
             manifest = kwdict.get("_ytdl_manifest")
-
             while True:
                 tries += 1
                 self.error = None
