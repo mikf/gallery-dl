@@ -1867,6 +1867,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Forums, Posts, Threads</td>
     <td>Supported</td>
 </tr>
+<tr id="atfforum" title="atfforum">
+    <td>All The Fallen</td>
+    <td>https://allthefallen.moe/forum/</td>
+    <td>Forums, Posts, Threads</td>
+    <td></td>
+</tr>
 
 <tr id="moebooru" title="moebooru">
     <td colspan="4"><strong>Moebooru and MyImouto</strong></td>
