@@ -49,6 +49,9 @@ class BoostyExtractor(Extractor):
         self.videos = videos
 
     def items(self):
+        headers = self.api.headers.copy()
+        del headers["Accept"]
+
         for post in self.posts():
             if not post.get("hasAccess"):
                 self.log.warning("Not allowed to access post %s", post["id"])
@@ -61,6 +64,7 @@ class BoostyExtractor(Extractor):
                 "post" : post,
                 "user" : post.pop("user", None),
                 "count": len(files),
+                "_http_headers": headers,
             }
 
             yield Message.Directory, "", data
