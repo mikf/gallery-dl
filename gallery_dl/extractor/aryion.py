@@ -200,10 +200,10 @@ class AryionGalleryExtractor(AryionExtractor):
 class AryionFavoriteExtractor(AryionExtractor):
     """Extractor for a user's favorites gallery"""
     subcategory = "favorite"
-    directory_fmt = ("{category}", "{user!l}", "favorites")
+    directory_fmt = ("{category}", "{user!l}", "favorites", "{folder}")
     archive_fmt = "f_{user}_{id}"
     categorytransfer = True
-    pattern = rf"{BASE_PATTERN}/favorites/([^/?#]+)"
+    pattern = rf"{BASE_PATTERN}/favorites/([^/?#]+)(?:/([^?#]+))?"
     example = "https://aryion.com/g4/favorites/USER"
 
     def _init(self):
@@ -211,11 +211,17 @@ class AryionFavoriteExtractor(AryionExtractor):
 
     def posts(self):
         url = f"{self.root}/g4/favorites/{self.user}"
-        return self._pagination(url)
+        return self._pagination(url, self.groups[1])
 
-    def _pagination(self, url):
+    def _pagination(self, url, folder=None):
+        if folder is None:
+            self.kwdict["folder"] = ""
+        else:
+            url = f"{url}/{folder}"
+            self.kwdict["folder"] = folder = text.unquote(folder)
+            self.log.debug("Descending into folder '%s'", folder)
+
         params = {"p": 1}
-
         while True:
             page = self.request(url, params=params).text
 
@@ -224,23 +230,19 @@ class AryionFavoriteExtractor(AryionExtractor):
                     page, "<li class='gallery-item", "</li>"):
                 cnt += 1
                 if text.extr(item, 'data-item-type="', '"') == "Folders":
-                    folder_url = text.extr(item, "href='", "'")
-                    folder_name = text.unquote(
-                        folder_url[folder_url.rfind("/")+1:])
+                    folder = text.extr(item, "href='", "'").rpartition("/")[2]
                     if self.recursive:
-                        self.log.debug(
-                            "Descending into folder '%s'", folder_name)
-                        self.kwdict["folder"] = folder_name
-                        yield from self._pagination(self.root + folder_url)
-                        del self.kwdict["folder"]
+                        yield from self._pagination(url, folder)
                     else:
-                        self.log.debug("Skipping folder '%s'", folder_name)
+                        self.log.debug("Skipping folder '%s'", folder)
                 else:
                     yield text.extr(item, "data-item-id='", "'")
 
             if cnt < 40 and ">Next &gt;&gt;<" not in page:
-                return
+                break
             params["p"] += 1
+
+        self.kwdict["folder"] = ""
 
 
 class AryionTagExtractor(AryionExtractor):
