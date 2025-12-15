@@ -153,6 +153,8 @@ class AryionExtractor(Extractor):
             "user"  : self.user or artist,
             "title" : title,
             "artist": artist,
+            "description": text.unescape(extr(
+                'property="og:description" content="', '"')),
             "path"  : text.split_html(extr(
                 "cookiecrumb'>", '</span'))[4:-1:2],
             "date"  : dt.datetime(*parsedate_tz(lmod)[:6]),
@@ -163,8 +165,6 @@ class AryionExtractor(Extractor):
             "comments" : text.parse_int(extr("Comments</b>:", "<")),
             "favorites": text.parse_int(extr("Favorites</b>:", "<")),
             "tags"     : text.split_html(extr("class='taglist'>", "</span>")),
-            "description": text.unescape(text.remove_html(extr(
-                "<p>", "</p>"), "", "")),
             "filename" : fname,
             "extension": ext,
             "_http_lastmodified": lmod,
