@@ -75,8 +75,10 @@ class TiktokExtractor(Extractor):
                         yield Message.Url, url, post
 
             elif "video" in post:
-                if self.video:
+                if self.video == "ytdl":
                     ytdl_media = "video"
+                elif self.video and (url := self._extract_video(post)):
+                    yield Message.Url, url, post
                 if self.cover and (url := self._extract_cover(post, "video")):
                     yield Message.Url, url, post
 
@@ -127,6 +129,25 @@ class TiktokExtractor(Extractor):
                                  "(%s/%s)", url.rpartition("/")[2], tries,
                                  self._retries)
                 self.sleep(self._timeout, "retry")
+
+    def _extract_video(self, post):
+        video = post["video"]
+        url = video["playAddr"]
+        text.nameext_from_url(url, post)
+        post.update({
+            "type"     : "video",
+            "image"    : None,
+            "title"    : post["desc"] or f"TikTok video #{post['id']}",
+            "duration" : video.get("duration"),
+            "num"      : 0,
+            "img_id"   : "",
+            "audio_id" : "",
+            "width"    : video.get("width"),
+            "height"   : video.get("height"),
+        })
+        if not post["extension"]:
+            post["extension"] = video.get("format", "mp4")
+        return url
 
     def _extract_audio(self, post):
         audio = post["music"]
