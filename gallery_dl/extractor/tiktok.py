@@ -143,7 +143,11 @@ class TiktokExtractor(Extractor):
 
     def _extract_video(self, post):
         video = post["video"]
-        url = video["playAddr"]
+        try:
+            url = video["playAddr"]
+        except KeyError:
+            raise exception.ExtractionError("Failed to extract video URL, you "
+                                            "may need cookies to continue")
         text.nameext_from_url(url, post)
         post.update({
             "type"     : "video",
@@ -316,7 +320,8 @@ class TiktokUserExtractor(TiktokExtractor):
             yield Message.Queue, video, data
 
     def _extract_user_rehydration_data(self, profile_url):
-        return self._extract_rehydration_data(profile_url, ["webapp.user-detail"])
+        return self._extract_rehydration_data(profile_url,
+                                              ["webapp.user-detail"])
 
     def _generate_avatar(self, user_name, data):
         data = data["userInfo"]["user"]
@@ -378,20 +383,23 @@ class TiktokUserExtractor(TiktokExtractor):
                                                     data)
         if not sec_uid:
             raise exception.ExtractionError(
-                "Unable to extract secondary user ID")
+                f"{user_name}: unable to extract secondary user ID, or this "
+                "user has no posts")
 
         # Once we've extracted the secondary user ID, we can begin extracting
         # item lists of the user.
         seen_ids = set()
         item_details = {}
+        device_id = str(randint(7250000000000000000, 7325099899999994577))
+        cursor = int(time() * 1e3)
+
         def generate_urls():
             with open("debug-2.json", mode="w", encoding="utf-8") as f:
                 f.write(util.json_dumps(item_details))
             return [f"{profile_url}/video/{id}"
                     for id in reversed(sorted(seen_ids))
                     if self._matches_filters(item_details.get(id))]
-        device_id = str(randint(7250000000000000000, 7325099899999994577))
-        cursor = int(time() * 1e3)
+
         for page in count(start=1):
             self.log.info("%s: retrieving page %d", profile_url, page)
             tries = 0
@@ -425,8 +433,8 @@ class TiktokUserExtractor(TiktokExtractor):
                         cursor = old_cursor - 7 * 86_400_000
                     # In case 'hasMorePrevious' is wrong, break if we have gone
                     # back before TikTok existed.
-                    if cursor < 1472706000000 or not data.get(
-                        "hasMorePrevious"):
+                    has_more_previous = data.get("hasMorePrevious")
+                    if cursor < 1472706000000 or not has_more_previous:
                         return generate_urls()
 
                     # This code path is ideally only reached when one of the
@@ -477,8 +485,7 @@ class TiktokUserExtractor(TiktokExtractor):
                 if self._check_status_code(data, profile_url, "profile"):
                     self.log.warning("%s: This profile has no known posts",
                                      profile_url)
-                else:
-                    return sec_uid, fail_early
+                return sec_uid, fail_early
             sec_uid = str(user_info["user"]["secUid"])
             fail_early = not user_info.get("itemList")
         return sec_uid, fail_early
@@ -514,7 +521,8 @@ class TiktokUserExtractor(TiktokExtractor):
             "screen_height": "1080",
             "screen_width": "1920",
             "secUid": f"{sec_uid}",
-            "type": "1", # pagination type: 0 == oldest-to-newest, 1 == newest-to-oldest
+            # Pagination type: 0 == oldest-to-newest, 1 == newest-to-oldest.
+            "type": "1",
             "tz_name": "UTC",
             "verifyFp": verify_fp,
             "webcast_language": "en",

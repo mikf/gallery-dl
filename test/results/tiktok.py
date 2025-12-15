@@ -4,10 +4,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+from gallery_dl.exception import ExtractionError
 from gallery_dl.extractor import tiktok
 
 PATTERN = r"https://p1[69]-[^/?#.]+\.tiktokcdn[^/?#.]*\.com/[^/?#]+/\w+~.*\.jpe?g"
 PATTERN_WITH_AUDIO = r"(?:" + PATTERN + r"|https://v\d+m?\.tiktokcdn[^/?#.]*\.com/[^?#]+\?[^/?#]+)"
+VIDEO_PATTERN = r"https://v1[69]-webapp-prime.tiktok.com/video/tos/[^?#]+\?[^/?#]+"
+OLD_VIDEO_PATTERN = r"https://www.tiktok.com/aweme/v1/play/\?[^/?#]+"
+COMBINED_VIDEO_PATTERN = r"(?:" + VIDEO_PATTERN + r")|(?:" + OLD_VIDEO_PATTERN + r")"
 USER_PATTERN = r"(https://www.tiktok.com/@([\w_.-]+)/video/(\d+)|" + PATTERN + r")"
 
 
@@ -40,7 +44,7 @@ __tests__ = (
 },
 
 {
-    "#url"      : "https://www.tiktok.com/@d4vinefem/photo/7449575367024626974",
+    "#url"      : "https://www.tiktok.com/@hullcity/photo/7557376330036153622",
     "#comment"  : "/photo/ link: single photo",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
@@ -49,7 +53,7 @@ __tests__ = (
 },
 
 {
-    "#url"      : "https://www.tiktok.com/@d4vinefem/video/7449575367024626974",
+    "#url"      : "https://www.tiktok.com/@hullcity/video/7557376330036153622",
     "#comment"  : "/video/ link: single photo",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
@@ -58,7 +62,7 @@ __tests__ = (
 },
 
 {
-    "#url"      : "https://www.tiktokv.com/share/video/7449575367024626974",
+    "#url"      : "https://www.tiktokv.com/share/video/7557376330036153622",
     "#comment"  : "www.tiktokv.com link: single photo",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
@@ -67,7 +71,7 @@ __tests__ = (
 },
 
 {
-    "#url"      : "https://www.tiktok.com/@.mcfc.central/photo/7449701420934122785",
+    "#url"      : "https://www.tiktok.com/@hullcity/photo/7553302113757990166",
     "#comment"  : "/photo/ link: few photos",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
@@ -76,7 +80,7 @@ __tests__ = (
 },
 
 {
-    "#url"      : "https://www.tiktok.com/@.mcfc.central/video/7449701420934122785",
+    "#url"      : "https://www.tiktok.com/@hullcity/video/7553302113757990166",
     "#comment"  : "/video/ link: few photos",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
@@ -85,7 +89,7 @@ __tests__ = (
 },
 
 {
-    "#url"      : "https://www.tiktokv.com/share/video/7449701420934122785",
+    "#url"      : "https://www.tiktokv.com/share/video/7553302113757990166",
     "#comment"  : "www.tiktokv.com link: few photos",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
@@ -107,8 +111,17 @@ __tests__ = (
     "#comment"  : "Video post",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
-    "#results"  : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
+    "#pattern"  : COMBINED_VIDEO_PATTERN,
     "#options"  : {"videos": True, "audio": True},
+},
+
+{
+    "#url"      : "https://www.tiktok.com/@memezar/video/7449708266168274208",
+    "#comment"  : "Video post (via yt-dlp)",
+    "#category" : ("", "tiktok", "post"),
+    "#class"    : tiktok.TiktokPostExtractor,
+    "#results"  : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
+    "#options"  : {"videos": "ytdl", "audio": True},
 },
 
 {
@@ -126,7 +139,7 @@ __tests__ = (
     "#comment"  : "Video post as a /photo/ link",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
-    "#results"  : "ytdl:https://www.tiktok.com/@memezar/video/7449708266168274208",
+    "#pattern"  : COMBINED_VIDEO_PATTERN,
     "#options"  : {"videos": True, "audio": True},
 },
 
@@ -155,7 +168,7 @@ __tests__ = (
     "#comment"  : "Video post as a share link",
     "#category" : ("", "tiktok", "post"),
     "#class"    : tiktok.TiktokPostExtractor,
-    "#results"  : "ytdl:https://www.tiktok.com/@/video/7449708266168274208",
+    "#pattern"  : COMBINED_VIDEO_PATTERN,
     "#options"  : {"videos": True},
 },
 
@@ -196,6 +209,7 @@ __tests__ = (
     "#comment" : "no 'author' (#8189)",
     "#class"   : tiktok.TiktokPostExtractor,
     "#results" : "ytdl:https://www.tiktok.com/@veronicaperasso_1/video/7212008840433274118",
+    "#options" : {"videos": "ytdl"},
 },
 
 {
@@ -260,17 +274,26 @@ __tests__ = (
     "#category" : ("", "tiktok", "user"),
     "#class"    : tiktok.TiktokUserExtractor,
     "#pattern"  : USER_PATTERN,
-    "#options"  : {"videos": True, "audio": True, "tiktok-range": "1-10"},
+    "#options"  : {"videos": True, "audio": True},
 },
 
 {
-    "#url"      : "https://www.tiktok.com/@joeysc14/",
-    "#comment"  : "Public user profile with no content",
+    "#url"      : "https://www.tiktok.com/@chillezy",
+    "#comment"  : "User profile via yt-dlp",
     "#category" : ("", "tiktok", "user"),
     "#class"    : tiktok.TiktokUserExtractor,
-    "#pattern"  : PATTERN,
-    "#options"  : {"videos": False, "tiktok-range": "1"},
-    "#count"    : 1,
+    "#pattern"  : USER_PATTERN,
+    "#options"  : {"videos": True, "audio": True, "tiktok-range": "1-10", "tiktok-user-extractor": "ytdl"},
+},
+
+{
+    "#url"       : "https://www.tiktok.com/@joeysc14/",
+    "#comment"   : "Public user profile with no content",
+    "#category"  : ("", "tiktok", "user"),
+    "#class"     : tiktok.TiktokUserExtractor,
+    "#pattern"   : PATTERN,
+    "#options"   : {"videos": False},
+    "#exception" : ExtractionError,
 },
 
 )
