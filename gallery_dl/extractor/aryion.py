@@ -178,11 +178,8 @@ class AryionGalleryExtractor(AryionExtractor):
     pattern = rf"{BASE_PATTERN}/(?:gallery/|user/|latest.php\?name=)([^/?#]+)"
     example = "https://aryion.com/g4/gallery/USER"
 
-    def __init__(self, match):
-        AryionExtractor.__init__(self, match)
-        self.offset = 0
-
     def _init(self):
+        self.offset = 0
         self.recursive = self.config("recursive", True)
 
     def skip(self, num):
@@ -209,9 +206,41 @@ class AryionFavoriteExtractor(AryionExtractor):
     pattern = rf"{BASE_PATTERN}/favorites/([^/?#]+)"
     example = "https://aryion.com/g4/favorites/USER"
 
+    def _init(self):
+        self.recursive = self.config("recursive", True)
+
     def posts(self):
         url = f"{self.root}/g4/favorites/{self.user}"
-        return self._pagination_params(url, None, "data-item-id='")
+        return self._pagination(url)
+
+    def _pagination(self, url):
+        params = {"p": 1}
+
+        while True:
+            page = self.request(url, params=params).text
+
+            cnt = 0
+            for item in text.extract_iter(
+                    page, "<li class='gallery-item", "</li>"):
+                cnt += 1
+                if text.extr(item, 'data-item-type="', '"') == "Folders":
+                    folder_url = text.extr(item, "href='", "'")
+                    folder_name = text.unquote(
+                        folder_url[folder_url.rfind("/")+1:])
+                    if self.recursive:
+                        self.log.debug(
+                            "Descending into folder '%s'", folder_name)
+                        self.kwdict["folder"] = folder_name
+                        yield from self._pagination(self.root + folder_url)
+                        del self.kwdict["folder"]
+                    else:
+                        self.log.debug("Skipping folder '%s'", folder_name)
+                else:
+                    yield text.extr(item, "data-item-id='", "'")
+
+            if cnt < 40 and ">Next &gt;&gt;<" not in page:
+                return
+            params["p"] += 1
 
 
 class AryionTagExtractor(AryionExtractor):
