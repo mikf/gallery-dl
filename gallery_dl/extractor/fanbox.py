@@ -127,15 +127,19 @@ class FanboxExtractor(Extractor):
                         if file.get("extension", "").lower() in exts
                     ]
 
-        post["date"] = self.parse_datetime_iso(post["publishedDatetime"])
+        try:
+            post["date"] = self.parse_datetime_iso(post["publishedDatetime"])
+        except Exception:
+            post["date"] = None
         post["text"] = content_body.get("text") if content_body else None
         post["isCoverImage"] = False
 
-        if self._meta_user:
-            post["user"] = self._get_user_data(post["creatorId"])
-        if self._meta_plan:
+        cid = post.get("creatorId")
+        if self._meta_user and cid is not None:
+            post["user"] = self._get_user_data(cid)
+        if self._meta_plan and cid is not None:
             plans = self._get_plan_data(post["creatorId"])
-            fee = post["feeRequired"]
+            fee = post.get("feeRequired") or 0
             try:
                 post["plan"] = plans[fee]
             except KeyError:
@@ -146,7 +150,7 @@ class FanboxExtractor(Extractor):
                     plan["fee"] = fee
                 post["plan"] = plans[fee] = plan
         if self._meta_comments:
-            if post["commentCount"]:
+            if post.get("commentCount"):
                 post["comments"] = list(self._get_comment_data(post["id"]))
             else:
                 post["commentd"] = ()
