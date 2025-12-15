@@ -6,10 +6,18 @@
 
 """Extractors for https://www.tiktok.com/"""
 
+from itertools import count
+from math import floor
+from random import choices, randint
+from re import fullmatch
+from string import hexdigits
+from time import time
+from urllib.parse import quote
 from .common import Extractor, Message
 from .. import text, util, ytdl, exception
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktokv?\.com"
+SEC_UID_PATTERN = r"MS4wLjABAAAA[\w-]{64}"
 
 
 class TiktokExtractor(Extractor):
@@ -39,7 +47,7 @@ class TiktokExtractor(Extractor):
                 data = self._extract_rehydration_data(tiktok_url)
             video_detail = data["webapp.video-detail"]
 
-            if not self._check_status_code(video_detail, tiktok_url):
+            if not self._check_status_code(video_detail, tiktok_url, "post"):
                 continue
 
             post = video_detail["itemInfo"]["itemStruct"]
@@ -104,7 +112,7 @@ class TiktokExtractor(Extractor):
     def _sanitize_url(self, url):
         return text.ensure_http_scheme(url.replace("/photo/", "/video/", 1))
 
-    def _extract_rehydration_data(self, url):
+    def _extract_rehydration_data(self, url, additional_keys=[]):
         tries = 0
         while True:
             try:
@@ -117,8 +125,11 @@ class TiktokExtractor(Extractor):
                 data = text.extr(
                     html, '<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__" '
                     'type="application/json">', '</script>')
-                return util.json_loads(data)["__DEFAULT_SCOPE__"]
-            except ValueError:
+                data = util.json_loads(data)["__DEFAULT_SCOPE__"]
+                for key in additional_keys:
+                    data = data[key]
+                return data
+            except (ValueError, KeyError):
                 # We failed to retrieve rehydration data. This happens
                 # relatively frequently when making many requests, so
                 # retry.
@@ -192,15 +203,16 @@ class TiktokExtractor(Extractor):
         })
         return url
 
-    def _check_status_code(self, detail, url):
+    def _check_status_code(self, detail, url, type_of_url):
         status = detail.get("statusCode")
         if not status:
             return True
 
         if status == 10222:
-            self.log.error("%s: Login required to access this post", url)
+            self.log.error("%s: Login required to access this %s", url,
+                           type_of_url)
         elif status == 10204:
-            self.log.error("%s: Requested post not available", url)
+            self.log.error("%s: Requested %s not available", url, type_of_url)
         elif status == 10231:
             self.log.error("%s: Region locked - Try downloading with a "
                            "VPN/proxy connection", url)
@@ -251,24 +263,83 @@ class TiktokUserExtractor(TiktokExtractor):
     example = "https://www.tiktok.com/@USER"
 
     def _init(self):
+        super()._init()
         self.avatar = self.config("avatar", True)
+        self.photo = self.config("photos", True)
+        # If set to "ytdl", we shall first go via yt-dlp. If that fails,
+        # we shall attempt to extract directly.
+        self.ytdl = self.config("tiktok-user-extractor") == "ytdl"
+        self.range = self.config("tiktok-range")
+        if self.range is None or not self.range and self.range != 0:
+            self.range = ""
 
     def items(self):
-        """Attempt to use yt-dlp/youtube-dl to extract links from a
+        """Attempt to [use yt-dlp/youtube-dl to] extract links from a
         user's page"""
 
+        user_name = self.groups[0]
+        profile_url = f"{self.root}/@{user_name}"
+        rehydration_data = None
+
+        if self.avatar:
+            try:
+                rehydration_data = self._extract_user_rehydration_data(
+                    profile_url)
+                avatar_url, avatar = self._generate_avatar(
+                    user_name, rehydration_data)
+            except Exception as exc:
+                self.log.warning("Unable to extract 'avatar' URL (%s: %s)",
+                                 exc.__class__.__name__, exc)
+            else:
+                yield Message.Directory, "", avatar
+                yield Message.Url, avatar_url, avatar
+
+        entries = []
+        if self.ytdl:
+            entries = self._extract_entries_via_ytdl(profile_url)
+            if not entries:
+                self.log.warning(f"Could not extract TikTok user {user_name} "
+                                 "via yt-dlp or youtube-dl, attempting the "
+                                 "extraction directly")
+        if not entries:
+            entries = self._extract_entries(profile_url, user_name,
+                                            rehydration_data)
+            if not entries:
+                self.log.warning("Could not extract any video or photo "
+                                 f"entries from TikTok user {user_name}, "
+                                 "try extracting user information using "
+                                 "yt-dlp using the -o "
+                                 "tiktok-user-extractor=ytdl argument")
+
+        for video in entries:
+            data = {"_extractor": TiktokPostExtractor}
+            yield Message.Queue, video, data
+
+    def _extract_user_rehydration_data(self, profile_url):
+        return self._extract_rehydration_data(profile_url, ["webapp.user-detail"])
+
+    def _generate_avatar(self, user_name, data):
+        data = data["userInfo"]["user"]
+        data["user"] = user_name
+        avatar_url = data["avatarLarger"]
+        avatar = text.nameext_from_url(avatar_url, data.copy())
+        avatar.update({
+            "type"  : "avatar",
+            "title" : "@" + user_name,
+            "id"    : data["id"],
+            "img_id": avatar["filename"].partition("~")[0],
+            "num"   : 0,
+        })
+        return (avatar_url, avatar)
+
+    def _extract_entries_via_ytdl(self, profile_url):
         try:
             module = ytdl.import_module(self.config("module"))
         except (ImportError, SyntaxError) as exc:
             self.log.error("Cannot import module '%s'",
                            getattr(exc, "name", ""))
             self.log.traceback(exc)
-            raise exception.ExtractionError("yt-dlp or youtube-dl is required "
-                                            "for this feature!")
-
-        ytdl_range = self.config("tiktok-range")
-        if ytdl_range is None or not ytdl_range and ytdl_range != 0:
-            ytdl_range = ""
+            return False
 
         extr_opts = {
             "extract_flat"           : True,
@@ -278,7 +349,7 @@ class TiktokUserExtractor(TiktokExtractor):
             "retries"                : self._retries,
             "socket_timeout"         : self._timeout,
             "nocheckcertificate"     : not self._verify,
-            "playlist_items"         : str(ytdl_range),
+            "playlist_items"         : str(self.range),
         }
         if self._proxies:
             user_opts["proxy"] = self._proxies.get("http")
@@ -292,39 +363,172 @@ class TiktokUserExtractor(TiktokExtractor):
             for cookie in self.cookies:
                 set_cookie(cookie)
 
-        user_name = self.groups[0]
-        profile_url = f"{self.root}/@{user_name}"
-        if self.avatar:
-            try:
-                avatar_url, avatar = self._generate_avatar(
-                    user_name, profile_url)
-            except Exception as exc:
-                self.log.warning("Unable to extract 'avatar' URL (%s: %s)",
-                                 exc.__class__.__name__, exc)
-            else:
-                yield Message.Directory, "", avatar
-                yield Message.Url, avatar_url, avatar
-
         with ytdl_instance as ydl:
             info_dict = ydl._YoutubeDL__extract_info(
                 profile_url, ydl.get_info_extractor("TikTokUser"),
                 False, {}, True)
-            # This should include video and photo posts in /video/ URL form.
-            for video in info_dict["entries"]:
-                data = {"_extractor": TiktokPostExtractor}
-                yield Message.Queue, video["url"].partition("?")[0], data
+            # This should be a list of video and photo post URLs in /video/
+            # format.
+            return [video["url"].partition("?")[0]
+                    for video in info_dict["entries"]]
 
-    def _generate_avatar(self, user_name, profile_url):
-        data = self._extract_rehydration_data(profile_url)
-        data = data["webapp.user-detail"]["userInfo"]["user"]
-        data["user"] = user_name
-        avatar_url = data["avatarLarger"]
-        avatar = text.nameext_from_url(avatar_url, data.copy())
-        avatar.update({
-            "type"  : "avatar",
-            "title" : "@" + user_name,
-            "id"    : data["id"],
-            "img_id": avatar["filename"].partition("~")[0],
-            "num"   : 0,
-        })
-        return (avatar_url, avatar)
+    def _extract_entries(self, profile_url, user_name, data):
+        # First, we need to extract the secUid of the user.
+        sec_uid, fail_early = self._extract_sec_uid(profile_url, user_name,
+                                                    data)
+        if not sec_uid:
+            raise exception.ExtractionError(
+                "Unable to extract secondary user ID")
+
+        # Once we've extracted the secondary user ID, we can begin extracting
+        # item lists of the user.
+        seen_ids = set()
+        item_details = {}
+        def generate_urls():
+            with open("debug-2.json", mode="w", encoding="utf-8") as f:
+                f.write(util.json_dumps(item_details))
+            return [f"{profile_url}/video/{id}"
+                    for id in reversed(sorted(seen_ids))
+                    if self._matches_filters(item_details.get(id))]
+        device_id = str(randint(7250000000000000000, 7325099899999994577))
+        cursor = int(time() * 1e3)
+        for page in count(start=1):
+            self.log.info("%s: retrieving page %d", profile_url, page)
+            tries = 0
+            while True:
+                try:
+                    url = self._build_api_request_url(cursor, device_id,
+                                                      sec_uid)
+                    response = self.request(url)
+                    data = util.json_loads(response.text)
+                    ids = set([item["id"] for item in data["itemList"]])
+                    if seen_ids and len(ids.difference(seen_ids)) == 0:
+                        # TikTok API keeps sending the same page/s, likely due
+                        # to a bad device ID. Generate a new one and try again.
+                        device_id = str(randint(7250000000000000000,
+                                                7325099899999994577))
+                        self.log.warning("%s: TikTok API keeps sending the "
+                                         "same page. Taking measures to avoid "
+                                         "an infinite loop", profile_url)
+                        raise exception.ExtractionError(
+                            "TikTok API keeps sending the same page")
+                    seen_ids = seen_ids.union(ids)
+                    incoming_item_details = dict(
+                        (item["id"], item) for item in data["itemList"])
+                    item_details = dict(item_details, **incoming_item_details)
+
+                    old_cursor = cursor
+                    cursor = int(data["itemList"][-1]["createTime"]) * 1e3
+                    if not cursor or old_cursor == cursor:
+                        # User may not have posted within this ~1 week look
+                        # back, so manually adjust cursor.
+                        cursor = old_cursor - 7 * 86_400_000
+                    # In case 'hasMorePrevious' is wrong, break if we have gone
+                    # back before TikTok existed.
+                    if cursor < 1472706000000 or not data.get(
+                        "hasMorePrevious"):
+                        return generate_urls()
+
+                    # This code path is ideally only reached when one of the
+                    # following is true:
+                    # 1. TikTok profile is private and webpage detection was
+                    #    bypassed due to a profile URL containing a sec_uid.
+                    # 2. TikTok profile is *not* private but all of their
+                    #    videos are private.
+                    if fail_early and not seen_ids:
+                        self.log.error("%s: this user's account is likely "
+                                       "either private or all of their videos "
+                                       "are private. Log into an account that "
+                                       "has access", profile_url)
+                        return generate_urls()
+
+                    # Continue to next page and reset retry counter.
+                    break
+                except Exception:
+                    if tries >= self._retries:
+                        raise
+                    tries += 1
+                    self.log.warning("%s: Failed to retrieve page %d (%s/%s)",
+                                     url, page, tries, self._retries)
+                    self.sleep(self._timeout, "retry")
+
+    def _extract_sec_uid(self, profile_url, user_name, data):
+        sec_uid, fail_early = None, False
+        if fullmatch(SEC_UID_PATTERN, user_name):
+            # If it was provided in the URL, then we can skip this step.
+            sec_uid = user_name
+            fail_early = True
+        else:
+            if not data:
+                # If we haven't extracted rehydration data yet, do so now.
+                data = self._extract_user_rehydration_data(profile_url)
+            # Video count workaround ported from yt-dlp: sometimes TikTok
+            # reports a profile as private even though we have the cookies to
+            # access it. We know that we can access it if we can see the videos
+            # stats. If we can't, we assume that we don't have access to the
+            # profile.
+            user_info = data["userInfo"]
+            if "stats" not in user_info:
+                video_count = user_info["statsV2"]["videoCount"]
+            else:
+                video_count = user_info["stats"]["videoCount"]
+            video_count = int(video_count)
+            if not video_count:
+                if self._check_status_code(data, profile_url, "profile"):
+                    self.log.warning("%s: This profile has no known posts",
+                                     profile_url)
+                else:
+                    return sec_uid, fail_early
+            sec_uid = str(user_info["user"]["secUid"])
+            fail_early = not user_info.get("itemList")
+        return sec_uid, fail_early
+
+    def _build_api_request_url(self, cursor, device_id, sec_uid):
+        verify_fp = f"verify_{''.join(choices(hexdigits, k=7))}"
+        query_parameters = {
+            "aid": "1988",
+            "app_language": "en",
+            "app_name": "tiktok_web",
+            "browser_language": "en-US",
+            "browser_name": "Mozilla",
+            "browser_online": "true",
+            "browser_platform": "Win32",
+            "browser_version": "5.0+(Windows)",
+            "channel": "tiktok_web",
+            "cookie_enabled": "true",
+            "count": "15",
+            # We must not write this as a floating-point number:
+            "cursor": f"{floor(cursor)}",
+            "device_id": f"{device_id}",
+            "device_platform": "web_pc",
+            "focus_state": "true",
+            "from_page": "user",
+            "history_len": "2",
+            "is_fullscreen": "false",
+            "is_page_visible": "true",
+            "language": "en",
+            "os": "windows",
+            "priority_region": "",
+            "referer": "",
+            "region": "US",
+            "screen_height": "1080",
+            "screen_width": "1920",
+            "secUid": f"{sec_uid}",
+            "type": "1", # pagination type: 0 == oldest-to-newest, 1 == newest-to-oldest
+            "tz_name": "UTC",
+            "verifyFp": verify_fp,
+            "webcast_language": "en",
+        }
+        query_string = "&".join([f"{name}={quote(value, safe='+')}"
+                                 for name, value in query_parameters.items()])
+        return f"https://www.tiktok.com/api/creator/item_list/?{query_string}"
+
+    def _matches_filters(self, item):
+        if not item:
+            return True
+        is_image_post = "imagePost" in item
+        if not self.photo and is_image_post:
+            return False
+        if not self.video and not is_image_post:
+            return False
+        return True
