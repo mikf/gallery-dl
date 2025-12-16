@@ -4,7 +4,8 @@ from .common import Extractor, Message
 from .. import text
 
 
-class PicazorExtractor(Extractor):
+class PicazorUserExtractor(Extractor):
+
     """Extractor for picazor.com"""
     category = "picazor"
     subcategory = "user"

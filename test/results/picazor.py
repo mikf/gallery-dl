@@ -6,7 +6,8 @@ __tests__ = (
     {
         "#url": "https://picazor.com/en/kailey-mae",
 
-        "#class": picazor.PicazorExtractor,
+        "#class": picazor.PicazorUserExtractor,
+
 
         "user": "kailey-mae",
         "path": "re:/uploads/.+",
