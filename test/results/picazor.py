@@ -30,4 +30,10 @@ __tests__ = (
     },
 },
 
+{
+    "#url"     : "https://picazor.com/vi/badassnugget",
+    "#comment" : "non-'en' language code",
+    "#class"   : picazor.PicazorUserExtractor,
+},
+
 )
