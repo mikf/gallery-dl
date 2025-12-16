@@ -4,7 +4,6 @@ from .common import Extractor, Message
 from .. import text
 
 
-
 class PicazorExtractor(Extractor):
     """Extractor for picazor.com"""
     category = "picazor"
@@ -23,25 +22,25 @@ class PicazorExtractor(Extractor):
         self.referer = f"{self.root}/en/{self.user}"
 
     def items(self):
-        yield Message.Directory, "", {"category": self.category, "user": self.user}
+        yield Message.Directory, "", {
+            "category": self.category,
+            "user": self.user,
+        }
         page = 1
         while True:
             url = f"{self.root}/api/files/{self.user}/sfiles"
             data = self.request_json(url, params={"page": page})
-            
+
             if not data:
                 break
-                
+
             for item in data:
                 path = item.get("path")
                 if not path:
                     continue
-                    
+
                 file_url = f"{self.root}{path}"
-                
-                # Extract extension from path if possible, otherwise let nameext_from_url handle it
-                # item["path"] example: /uploads/may25/sa31/kailey-mae/onlyfans/8i9u3/kailey-mae-onlyfans-p7ltb-12.jpg
-                
+
                 info = {
                     "user": self.user,
                     "id": item.get("id"),
@@ -51,10 +50,8 @@ class PicazorExtractor(Extractor):
                     "subject_uri": item.get("subject", {}).get("uri"),
                     "visible": item.get("visible"),
                 }
-                
+
                 text.nameext_from_url(file_url, info)
-                
                 yield Message.Url, file_url, info
 
-            
             page += 1
