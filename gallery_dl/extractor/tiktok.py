@@ -272,6 +272,7 @@ class TiktokUserExtractor(TiktokExtractor):
 
     def _init(self):
         super()._init()
+        self.log.warning(util.json_dumps(self.kwdict))
         self.avatar = self.config("avatar", True)
         self.stories = self.config("stories", True)
         if type(self.stories) is str:
@@ -282,6 +283,8 @@ class TiktokUserExtractor(TiktokExtractor):
         self.range = self.config("tiktok-range")
         if self.range is None or not self.range and self.range != 0:
             self.range = ""
+        self.COUNT_QUERY_PARAMETER = 15
+        self.rehydration_data = None
 
     def items(self):
         """Attempt to [use yt-dlp/youtube-dl to] extract links from a
@@ -289,7 +292,6 @@ class TiktokUserExtractor(TiktokExtractor):
 
         user_name = self.groups[0]
         profile_url = f"{self.root}/@{user_name}"
-        self.rehydration_data = None
 
         if self.avatar:
             try:
@@ -406,7 +408,7 @@ class TiktokUserExtractor(TiktokExtractor):
         }
         return self._extract_urls_from_pages(
             profile_url,
-            "creator",
+            "creator/item_list",
             query_parameters,
             range_predicate=range_predicate,
             fail_early=fail_early
@@ -425,13 +427,10 @@ class TiktokUserExtractor(TiktokExtractor):
         query_parameters = {
             "authorId": author_id,
             "loadBackward": "false",
-            # We will need to override the cursor as TikTok doesn't seem to
-            # like anything beyond 0 for stories.
-            "cursor": 0,
         }
         return self._extract_urls_from_pages(
             profile_url,
-            "story",
+            "story/item_list",
             query_parameters
         )
 
@@ -489,14 +488,14 @@ class TiktokUserExtractor(TiktokExtractor):
             "browser_version": "5.0 (Windows)",
             "channel": "tiktok_web",
             "cookie_enabled": "true",
-            "count": "15",  # 4.
+            "count": f"{floor(self.COUNT_QUERY_PARAMETER)}",
             # We must not write this as a floating-point number:
             "cursor": f"{floor(cursor)}",
             "device_id": f"{device_id}",
             "device_platform": "web_pc",
             "focus_state": "true",
             "from_page": "user",
-            "history_len": "2",  # 6.
+            "history_len": "2",
             "is_fullscreen": "false",
             "is_page_visible": "true",
             "language": "en",
@@ -514,7 +513,7 @@ class TiktokUserExtractor(TiktokExtractor):
             query_parameters[key] = f"{value}"
         query_str = "&".join([f"{name}={quote(value, safe='')}"
                               for name, value in query_parameters.items()])
-        return f"https://www.tiktok.com/api/{endpoint}/item_list/?{query_str}"
+        return f"https://www.tiktok.com/api/{endpoint}/?{query_str}"
 
     def _matches_filters(self, range_predicate, item, index):
         # First, check if this index falls within any of our configured ranges.
@@ -558,21 +557,22 @@ class TiktokUserExtractor(TiktokExtractor):
         return True
 
     def _extract_urls_from_pages(self, profile_url, endpoint, query_parameters,
-                                 *, range_predicate=None, fail_early=False):
+                                 *, range_predicate=None, fail_early=False,
+                                 id_extractor=None, url_generator=None):
+        if not id_extractor:
+            id_extractor = self._id_extractor
+        if not url_generator:
+            url_generator = self._url_generator
         seen_ids = set()
         item_details = {}
         device_id = str(randint(7250000000000000000, 7325099899999994577))
-        cursor = int(time() * 1e3)
-        cursor_override = None
-        if "cursor" in query_parameters:
-            cursor_override = query_parameters["cursor"]
-            del query_parameters["cursor"]
+        cursor_type = "time" if "creator" in endpoint else "count"
+        cursor = int(time() * 1e3) if cursor_type == "time" else 0
 
         def generate_urls():
-            return [f"{profile_url}/video/{id}"
-                    for index, id in enumerate(reversed(sorted(seen_ids)))
-                    if self._matches_filters(range_predicate,
-                                             item_details.get(id), index + 1)]
+            sorted_ids = reversed(sorted(seen_ids))
+            return url_generator(sorted_ids, item_details, profile_url,
+                                 range_predicate)
 
         for page in count(start=1):
             self.log.info("%s: retrieving %s page %d", profile_url, endpoint,
@@ -580,9 +580,7 @@ class TiktokUserExtractor(TiktokExtractor):
             tries = 0
             while True:
                 try:
-                    final_cursor = \
-                        cursor if cursor_override is None else cursor_override
-                    url = self._build_api_request_url(endpoint, final_cursor,
+                    url = self._build_api_request_url(endpoint, cursor,
                                                       device_id,
                                                       **query_parameters)
                     response = self.request(url)
@@ -596,7 +594,9 @@ class TiktokUserExtractor(TiktokExtractor):
                                 return generate_urls()
                         except ValueError:
                             pass
-                    ids = set([item["id"] for item in data["itemList"]])
+                    incoming_items = id_extractor(data)
+                    item_details.update(incoming_items)
+                    ids = set(incoming_items.keys())
                     if ids and sorted(ids) == sorted(seen_ids):
                         # TikTok API keeps sending the same page, likely due to
                         # a bad device ID. Generate a new one and try again.
@@ -608,23 +608,28 @@ class TiktokUserExtractor(TiktokExtractor):
                         raise exception.ExtractionError(
                             "TikTok API keeps sending the same page")
                     seen_ids = seen_ids.union(ids)
-                    incoming_item_details = dict(
-                        (item["id"], item) for item in data["itemList"])
-                    item_details = dict(item_details, **incoming_item_details)
 
-                    old_cursor = cursor
-                    cursor = int(data["itemList"][-1]["createTime"]) * 1e3
-                    if not cursor or old_cursor == cursor:
-                        # User may not have posted within this ~1 week look
-                        # back, so manually adjust cursor.
-                        cursor = old_cursor - 7 * 86_400_000
+                    if cursor_type == "time":
+                        old_cursor = cursor
+                        cursor = int(data["itemList"][-1]["createTime"]) * 1e3
+                        if not cursor or old_cursor == cursor:
+                            # User may not have posted within this ~1 week look
+                            # back, so manually adjust cursor.
+                            cursor = old_cursor - 7 * 86_400_000
 
-                    # In case 'hasMorePrevious' is wrong, break if we have gone
-                    # back before TikTok existed.
-                    has_more_previous = data.get("hasMorePrevious",
-                                                 data.get("hasMore"))
-                    if cursor < 1472706000000 or not has_more_previous:
-                        return generate_urls()
+                        # In case 'hasMorePrevious' is wrong, break if we have
+                        # gone back before TikTok existed.
+                        has_more_previous = data.get("hasMorePrevious")
+                        if cursor < 1472706000000 or not has_more_previous:
+                            return generate_urls()
+                    else:
+                        if data.get("hasMore"):
+                            cursor += int(
+                                data.get("TotalCount",
+                                         self.COUNT_QUERY_PARAMETER)
+                            )
+                        else:
+                            return generate_urls()
 
                     # This code path is ideally only reached when one of the
                     # following is true:
@@ -647,6 +652,8 @@ class TiktokUserExtractor(TiktokExtractor):
 
                     # Continue to next page and reset retry counter.
                     break
+                except exception.ExtractionError:
+                    raise
                 except Exception as exc:
                     if tries >= self._retries:
                         # We don't want to fail the entire extraction if we
@@ -661,3 +668,67 @@ class TiktokUserExtractor(TiktokExtractor):
                                      "(%s/%s)", url, endpoint, page, tries,
                                      self._retries)
                     self.sleep(self._timeout, "retry")
+
+    def _id_extractor(self, data):
+        return dict((item["id"], item) for item in data["itemList"])
+
+    def _url_generator(self, ids, item_details, profile_url, range_predicate):
+        urls = [f"{profile_url}/video/{id}"
+                for index, id in enumerate(ids)
+                if self._matches_filters(range_predicate,
+                                         item_details.get(id), index + 1)]
+
+        return urls
+
+
+class TiktokFollowingExtractor(TiktokUserExtractor):
+    """Extract all of the stories of all of the users you follow"""
+    subcategory = "following"
+    pattern = rf"{BASE_PATTERN}/following"
+    example = "https://www.tiktok.com/following"
+
+    def items(self):
+        """Attempt to extract all of the stories of all of the accounts
+        the user follows"""
+
+        query_parameters = {
+            "storyFeedScene": "3",
+        }
+        users = self._extract_urls_from_pages(
+            self.url,
+            "story/user_list",
+            query_parameters,
+            id_extractor=self._user_list_id_extractor,
+            url_generator=self._user_list_url_generator
+        )
+        if len(users) == 0:
+            self.log.warning("No followers with stories could be extracted")
+
+        entries = []
+        # TODO: we could improve the performance of this using the
+        #       /api/story/batch/item_list endpoint.
+        for user_name, profile_url in users:
+            entries += self._extract_stories(profile_url, user_name)
+            # We must clear the rehydration data every time, as each stories
+            # request will be for a different user.
+            self.rehydration_data = None
+
+        for video in entries:
+            data = {"_extractor": TiktokPostExtractor}
+            yield Message.Queue, video, data
+
+    def _user_list_id_extractor(self, data):
+        if "storyUsers" not in data:
+            raise exception.ExtractionError("You must provide cookies to "
+                                            "extract the stories of your "
+                                            "following list")
+        return dict((item["user"]["id"], item["user"]["uniqueId"])
+                    for item in data["storyUsers"])
+
+    def _user_list_url_generator(self, ids, item_details, _profile_url,
+                                 _range_predicate):
+        tuples = []
+        for id in ids:
+            name = item_details.get(id, id)
+            tuples.append((name, f"https://www.tiktok.com/@{name}"))
+        return tuples
