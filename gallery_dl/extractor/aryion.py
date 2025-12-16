@@ -77,20 +77,20 @@ class AryionExtractor(Extractor):
     def metadata(self):
         """Return general metadata"""
 
-    def _pagination_params(self, url, params=None, needle=None):
+    def _pagination_params(self, url, params=None, needle=None, quote="'"):
         if params is None:
             params = {"p": 1}
         else:
             params["p"] = text.parse_int(params.get("p"), 1)
 
         if needle is None:
-            needle = "class='gallery-item' id='"
+            needle = "class='gallery-item' id=" + quote
 
         while True:
             page = self.request(url, params=params).text
 
             cnt = 0
-            for post_id in text.extract_iter(page, needle, "'"):
+            for post_id in text.extract_iter(page, needle, quote):
                 cnt += 1
                 yield post_id
 
@@ -107,6 +107,37 @@ class AryionExtractor(Extractor):
             if pos < 0:
                 return
             url = self.root + text.rextr(page, "href='", "'", pos)
+
+    def _pagination_folders(self, url, folder=None):
+        if folder is None:
+            self.kwdict["folder"] = ""
+        else:
+            url = f"{url}/{folder}"
+            self.kwdict["folder"] = folder = text.unquote(folder)
+            self.log.debug("Descending into folder '%s'", folder)
+
+        params = {"p": 1}
+        while True:
+            page = self.request(url, params=params).text
+
+            cnt = 0
+            for item in text.extract_iter(
+                    page, "<li class='gallery-item", "</li>"):
+                cnt += 1
+                if text.extr(item, 'data-item-type="', '"') == "Folders":
+                    folder = text.extr(item, "href='", "'").rpartition("/")[2]
+                    if self.recursive:
+                        yield from self._pagination(url, folder)
+                    else:
+                        self.log.debug("Skipping folder '%s'", folder)
+                else:
+                    yield text.extr(item, "data-item-id='", "'")
+
+            if cnt < 40 and ">Next &gt;&gt;<" not in page:
+                break
+            params["p"] += 1
+
+        self.kwdict["folder"] = ""
 
     def _parse_post(self, post_id):
         url = f"{self.root}/g4/data.php?id={post_id}"
@@ -202,7 +233,6 @@ class AryionFavoriteExtractor(AryionExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user!l}", "favorites", "{folder}")
     archive_fmt = "f_{user}_{id}"
-    categorytransfer = True
     pattern = rf"{BASE_PATTERN}/favorites/([^/?#]+)(?:/([^?#]+))?"
     example = "https://aryion.com/g4/favorites/USER"
 
@@ -211,38 +241,24 @@ class AryionFavoriteExtractor(AryionExtractor):
 
     def posts(self):
         url = f"{self.root}/g4/favorites/{self.user}"
-        return self._pagination(url, self.groups[1])
+        return self._pagination_folders(url, self.groups[1])
 
-    def _pagination(self, url, folder=None):
-        if folder is None:
-            self.kwdict["folder"] = ""
-        else:
-            url = f"{url}/{folder}"
-            self.kwdict["folder"] = folder = text.unquote(folder)
-            self.log.debug("Descending into folder '%s'", folder)
 
-        params = {"p": 1}
-        while True:
-            page = self.request(url, params=params).text
+class AryionWatchExtractor(AryionExtractor):
+    """Extractor for your watched users and tags"""
+    subcategory = "watch"
+    directory_fmt = ("{category}", "{user!l}",)
+    pattern = rf"{BASE_PATTERN}/messagepage\.php()"
+    example = "https://aryion.com/g4/messagepage.php"
 
-            cnt = 0
-            for item in text.extract_iter(
-                    page, "<li class='gallery-item", "</li>"):
-                cnt += 1
-                if text.extr(item, 'data-item-type="', '"') == "Folders":
-                    folder = text.extr(item, "href='", "'").rpartition("/")[2]
-                    if self.recursive:
-                        yield from self._pagination(url, folder)
-                    else:
-                        self.log.debug("Skipping folder '%s'", folder)
-                else:
-                    yield text.extr(item, "data-item-id='", "'")
-
-            if cnt < 40 and ">Next &gt;&gt;<" not in page:
-                break
-            params["p"] += 1
-
-        self.kwdict["folder"] = ""
+    def posts(self):
+        if not self.cookies_check(self.cookies_names):
+            raise exception.AuthRequired(
+                ("username & password", "authenticated cookies"),
+                "watched Submissions")
+        self.cookies.set("g4p_msgpage_style", "plain", domain="aryion.com")
+        url = self.root + "/g4/messagepage.php"
+        return self._pagination_params(url, None, 'data-item-id="', '"')
 
 
 class AryionTagExtractor(AryionExtractor):
