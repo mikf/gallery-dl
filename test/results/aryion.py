@@ -167,4 +167,9 @@ __tests__ = (
     },
 },
 
+{
+    "#url"     : "https://aryion.com/g4/messagepage.php",
+    "#class"   : aryion.AryionWatchExtractor,
+},
+
 )
