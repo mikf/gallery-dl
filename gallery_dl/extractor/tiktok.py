@@ -11,6 +11,7 @@ from math import floor
 from random import choices, randint
 from re import fullmatch
 from string import hexdigits
+from sys import maxsize
 from time import time
 from urllib.parse import quote
 from .common import Extractor, Message
@@ -388,6 +389,7 @@ class TiktokUserExtractor(TiktokExtractor):
 
         # Once we've extracted the secondary user ID, we can begin extracting
         # item lists of the user.
+        self.range_predicate = util.RangePredicate(self.range)
         seen_ids = set()
         item_details = {}
         device_id = str(randint(7250000000000000000, 7325099899999994577))
@@ -397,8 +399,8 @@ class TiktokUserExtractor(TiktokExtractor):
             with open("debug-2.json", mode="w", encoding="utf-8") as f:
                 f.write(util.json_dumps(item_details))
             return [f"{profile_url}/video/{id}"
-                    for id in reversed(sorted(seen_ids))
-                    if self._matches_filters(item_details.get(id))]
+                    for index, id in enumerate(reversed(sorted(seen_ids)))
+                    if self._matches_filters(item_details.get(id), index + 1)]
 
         for page in count(start=1):
             self.log.info("%s: retrieving page %d", profile_url, page)
@@ -431,6 +433,7 @@ class TiktokUserExtractor(TiktokExtractor):
                         # User may not have posted within this ~1 week look
                         # back, so manually adjust cursor.
                         cursor = old_cursor - 7 * 86_400_000
+
                     # In case 'hasMorePrevious' is wrong, break if we have gone
                     # back before TikTok existed.
                     has_more_previous = data.get("hasMorePrevious")
@@ -442,12 +445,18 @@ class TiktokUserExtractor(TiktokExtractor):
                     # 1. TikTok profile is private and webpage detection was
                     #    bypassed due to a profile URL containing a sec_uid.
                     # 2. TikTok profile is *not* private but all of their
-                    #    videos are private.
+                    #    posts are private.
                     if fail_early and not seen_ids:
                         self.log.error("%s: this user's account is likely "
-                                       "either private or all of their videos "
+                                       "either private or all of their posts "
                                        "are private. Log into an account that "
                                        "has access", profile_url)
+                        return generate_urls()
+
+                    # If we've encountered all of the posts that satisfy our
+                    # range/s, exit early.
+                    sorted_ids = list(reversed(sorted(seen_ids)))
+                    if self._all_ranges_satisfied(sorted_ids):
                         return generate_urls()
 
                     # Continue to next page and reset retry counter.
@@ -531,7 +540,18 @@ class TiktokUserExtractor(TiktokExtractor):
                                  for name, value in query_parameters.items()])
         return f"https://www.tiktok.com/api/creator/item_list/?{query_string}"
 
-    def _matches_filters(self, item):
+    def _matches_filters(self, item, index):
+        # First, check if this index falls within any of our configured ranges.
+        # If it doesn't, we filter it out.
+        range_match = False
+        for range in self.range_predicate.ranges:
+            if index in range:
+                range_match = True
+                break
+        if not range_match:
+            return False
+
+        # Then, we apply basic video/photo filtering.
         if not item:
             return True
         is_image_post = "imagePost" in item
@@ -539,4 +559,21 @@ class TiktokUserExtractor(TiktokExtractor):
             return False
         if not self.video and not is_image_post:
             return False
+        return True
+
+    def _all_ranges_satisfied(self, sorted_ids):
+        range_count = len(self.range_predicate.ranges)
+        if range_count == 0 or self.range_predicate.upper == maxsize:
+            # Avoid looping through ranges that have no upper bound.
+            # We need to extract every post first in this case anyway.
+            # This is also the case if we don't have any ranges configured.
+            return False
+        max_index = len(sorted_ids)
+        for range in self.range_predicate.ranges:
+            for index in range:
+                if index > max_index:
+                    # At least this portion of this range can't be satisfied
+                    # with our current selection of IDs, keep extracting.
+                    return False
+        # We have enough IDs to satisfy all of the configured ranges.
         return True

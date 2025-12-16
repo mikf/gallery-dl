@@ -274,7 +274,8 @@ __tests__ = (
     "#category" : ("", "tiktok", "user"),
     "#class"    : tiktok.TiktokUserExtractor,
     "#pattern"  : USER_PATTERN,
-    "#options"  : {"videos": True, "audio": True},
+    "#count"    : 11,  # 10 posts + 1 avatar
+    "#options"  : {"videos": True, "audio": True, "tiktok-range": "1-10"},
 },
 
 {
@@ -283,7 +284,18 @@ __tests__ = (
     "#category" : ("", "tiktok", "user"),
     "#class"    : tiktok.TiktokUserExtractor,
     "#pattern"  : USER_PATTERN,
+    "#count"    : 11,  # 10 posts + 1 avatar
     "#options"  : {"videos": True, "audio": True, "tiktok-range": "1-10", "tiktok-user-extractor": "ytdl"},
+},
+
+{
+    "#url"      : "https://www.tiktok.com/@chillezy",
+    "#comment"  : "User profile without avatar",
+    "#category" : ("", "tiktok", "user"),
+    "#class"    : tiktok.TiktokUserExtractor,
+    "#pattern"  : USER_PATTERN,
+    "#count"    : 10,  # 10 posts
+    "#options"  : {"videos": True, "audio": True, "avatar": False, "tiktok-range": "1-10"},
 },
 
 {
