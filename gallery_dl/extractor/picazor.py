@@ -1,37 +1,37 @@
 # -*- coding: utf-8 -*-
 
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+"""Extractors for https://picazor.com/"""
+
 from .common import Extractor, Message
 from .. import text
 
 
 class PicazorUserExtractor(Extractor):
-
-    """Extractor for picazor.com"""
+    """Extractor for picazor users"""
     category = "picazor"
     subcategory = "user"
     root = "https://picazor.com"
+    browser = "firefox"
     directory_fmt = ("{category}", "{user}")
-    filename_fmt = "{id}_{order:>03}.{extension}"
-    archive_fmt = "{id}_{order}"
-    pattern = r"(?:https?://)?(?:www\.)?picazor\.com/en/([^/?#]+)"
+    filename_fmt = "{id}_{num:>03}.{extension}"
+    archive_fmt = "{id}_{num}"
+    pattern = r"(?:https?://)?(?:www\.)?picazor\.com/[a-z]{2}/([^/?#]+)"
     example = "https://picazor.com/en/USERNAME"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.user = match.group(1)
-        self.browser = "firefox"
-        self.referer = f"{self.root}/en/{self.user}"
-
     def items(self):
-        yield Message.Directory, "", {
-            "category": self.category,
-            "user": self.user,
-        }
-        page = 1
-        while True:
-            url = f"{self.root}/api/files/{self.user}/sfiles"
-            data = self.request_json(url, params={"page": page})
+        user = self.groups[0]
+        first = True
 
+        url = f"{self.root}/api/files/{user}/sfiles"
+        params = {"page": 1}
+        headers = {"Referer": f"{self.root}/en/{user}"}
+
+        while True:
+            data = self.request_json(url, params=params, headers=headers)
             if not data:
                 break
 
@@ -40,19 +40,20 @@ class PicazorUserExtractor(Extractor):
                 if not path:
                     continue
 
-                file_url = f"{self.root}{path}"
+                if first:
+                    first = False
+                    self.kwdict["user"] = user
+                    self.kwdict["count"] = item.get("order")
+                    yield Message.Directory, "", {
+                        "subject": item.get("subject"),
+                        "user"   : user,
+                    }
 
-                info = {
-                    "user": self.user,
-                    "id": item.get("id"),
-                    "path": path,
-                    "order": item.get("order"),
-                    "subject_id": item.get("subject", {}).get("id"),
-                    "subject_uri": item.get("subject", {}).get("uri"),
-                    "visible": item.get("visible"),
-                }
+                item.pop("blurDataURL", None)
+                item["num"] = item["order"]
 
-                text.nameext_from_url(file_url, info)
-                yield Message.Url, file_url, info
+                file_url = self.root + path
+                text.nameext_from_url(file_url, item)
+                yield Message.Url, file_url, item
 
-            page += 1
+            params["page"] += 1
