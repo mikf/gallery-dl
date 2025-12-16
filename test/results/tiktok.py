@@ -4,7 +4,6 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from gallery_dl.exception import ExtractionError
 from gallery_dl.extractor import tiktok
 
 PATTERN = r"https://p1[69]-[^/?#.]+\.tiktokcdn[^/?#.]*\.com/[^/?#]+/\w+~.*\.jpe?g"
@@ -299,13 +298,13 @@ __tests__ = (
 },
 
 {
-    "#url"       : "https://www.tiktok.com/@joeysc14/",
-    "#comment"   : "Public user profile with no content",
-    "#category"  : ("", "tiktok", "user"),
-    "#class"     : tiktok.TiktokUserExtractor,
-    "#pattern"   : PATTERN,
-    "#options"   : {"videos": False},
-    "#exception" : ExtractionError,
+    "#url"      : "https://www.tiktok.com/@joeysc14/",
+    "#comment"  : "Public user profile with no content",
+    "#category" : ("", "tiktok", "user"),
+    "#class"    : tiktok.TiktokUserExtractor,
+    "#pattern"  : PATTERN,
+    "#options"  : {"videos": False},
+    "#count"    : 1,
 },
 
 )
