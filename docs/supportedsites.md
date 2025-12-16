@@ -787,6 +787,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries</td>
     <td></td>
 </tr>
+<tr id="picazor" title="picazor">
+    <td>Picazor</td>
+    <td>https://picazor.com/</td>
+    <td>User Profiles</td>
+    <td></td>
+</tr>
 <tr id="pictoa" title="pictoa">
     <td>Pictoa</td>
     <td>https://pictoa.com/</td>
