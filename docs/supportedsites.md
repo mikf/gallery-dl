@@ -793,6 +793,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, individual Images</td>
     <td></td>
 </tr>
+<tr id="picazor" title="picazor">
+    <td>Picazor</td>
+    <td>https://picazor.com/</td>
+    <td>User Profiles</td>
+    <td></td>
+</tr>
 <tr id="piczel" title="piczel">
     <td>Piczel</td>
     <td>https://piczel.tv/</td>

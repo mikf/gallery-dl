@@ -156,6 +156,7 @@ modules = [
     "photovogue",
     "picarto",
     "pictoa",
+    "picazor",
     "piczel",
     "pillowfort",
     "pinterest",
