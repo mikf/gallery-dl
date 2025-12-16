@@ -114,6 +114,7 @@ modules = [
     "khinsider",
     "komikcast",
     "koofr",
+    "linkedin",
     "leakgallery",
     "lensdump",
     "lexica",
