@@ -40,13 +40,14 @@ class TenorExtractor(Extractor):
                 continue
 
             url = fmt["url"]
+            title = gif.pop("h1_title", "")
+            gif["title"] = title[:-4] if title.endswith(" GIF") else title
+            gif["width"], gif["height"] = fmt.pop("dims") or (0, 0)
+            gif["description"] = gif.pop("content_description", "")
             gif["id_format"] = url.rsplit("/", 2)[1]
             gif["format"] = fmt["name"]
-            gif["width"], gif["height"] = fmt["dims"]
             gif["duration"] = fmt["duration"]
             gif["size"] = fmt["size"]
-            gif["title"] = gif["h1_title"][:-4]
-            gif["description"] = gif.pop("content_description", "")
             gif["date"] = self.parse_timestamp(gif["created"])
 
             yield Message.Directory, "", gif
