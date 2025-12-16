@@ -543,7 +543,7 @@ class TiktokUserExtractor(TiktokExtractor):
     def _matches_filters(self, item, index):
         # First, check if this index falls within any of our configured ranges.
         # If it doesn't, we filter it out.
-        range_match = False
+        range_match = len(self.range_predicate.ranges) == 0
         for range in self.range_predicate.ranges:
             if index in range:
                 range_match = True
