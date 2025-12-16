@@ -1078,7 +1078,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="tiktok" title="tiktok">
     <td>TikTok</td>
     <td>https://www.tiktok.com/</td>
-    <td>Posts, User Profiles, VM Posts</td>
+    <td>Followed Users (Stories Only), Posts, User Profiles and Stories, VM Posts</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr id="tmohentai" title="tmohentai">
