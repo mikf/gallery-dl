@@ -155,6 +155,7 @@ modules = [
     "philomena",
     "photovogue",
     "picarto",
+    "picazor",
     "pictoa",
     "piczel",
     "pillowfort",
