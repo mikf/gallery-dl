@@ -9,5 +9,7 @@ __tests__ = (
         "#class": picazor.PicazorExtractor,
 
         "user": "kailey-mae",
+        "path": "re:/uploads/.+",
+
     },
 )

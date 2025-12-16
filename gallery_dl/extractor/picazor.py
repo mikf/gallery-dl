@@ -45,6 +45,7 @@ class PicazorExtractor(Extractor):
                 info = {
                     "user": self.user,
                     "id": item.get("id"),
+                    "path": path,
                     "order": item.get("order"),
                     "subject_id": item.get("subject", {}).get("id"),
                     "subject_uri": item.get("subject", {}).get("uri"),
