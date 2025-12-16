@@ -410,9 +410,9 @@ class TiktokUserExtractor(TiktokExtractor):
                     response = self.request(url)
                     data = util.json_loads(response.text)
                     ids = set([item["id"] for item in data["itemList"]])
-                    if seen_ids and len(ids.difference(seen_ids)) == 0:
-                        # TikTok API keeps sending the same page/s, likely due
-                        # to a bad device ID. Generate a new one and try again.
+                    if ids and sorted(ids) == sorted(seen_ids):
+                        # TikTok API keeps sending the same page, likely due to
+                        # a bad device ID. Generate a new one and try again.
                         device_id = str(randint(7250000000000000000,
                                                 7325099899999994577))
                         self.log.warning("%s: TikTok API keeps sending the "
