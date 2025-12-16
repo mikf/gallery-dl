@@ -396,8 +396,6 @@ class TiktokUserExtractor(TiktokExtractor):
         cursor = int(time() * 1e3)
 
         def generate_urls():
-            with open("debug-2.json", mode="w", encoding="utf-8") as f:
-                f.write(util.json_dumps(item_details))
             return [f"{profile_url}/video/{id}"
                     for index, id in enumerate(reversed(sorted(seen_ids)))
                     if self._matches_filters(item_details.get(id), index + 1)]
