@@ -33,6 +33,7 @@ class TiktokExtractor(Extractor):
     cookies_domain = ".tiktok.com"
 
     def _init(self):
+        self.photo = self.config("photos", True)
         self.audio = self.config("audio", True)
         self.video = self.config("videos", True)
         self.cover = self.config("covers", False)
@@ -61,22 +62,23 @@ class TiktokExtractor(Extractor):
             ytdl_media = False
 
             if "imagePost" in post:
-                if not original_title:
-                    title = f"TikTok photo #{post['id']}"
-                img_list = post["imagePost"]["images"]
-                for i, img in enumerate(img_list, 1):
-                    url = img["imageURL"]["urlList"][0]
-                    text.nameext_from_url(url, post)
-                    post.update({
-                        "type"  : "image",
-                        "image" : img,
-                        "title" : title,
-                        "num"   : i,
-                        "img_id": post["filename"].partition("~")[0],
-                        "width" : img["imageWidth"],
-                        "height": img["imageHeight"],
-                    })
-                    yield Message.Url, url, post
+                if self.photo:
+                    if not original_title:
+                        title = f"TikTok photo #{post['id']}"
+                    img_list = post["imagePost"]["images"]
+                    for i, img in enumerate(img_list, 1):
+                        url = img["imageURL"]["urlList"][0]
+                        text.nameext_from_url(url, post)
+                        post.update({
+                            "type"  : "image",
+                            "image" : img,
+                            "title" : title,
+                            "num"   : i,
+                            "img_id": post["filename"].partition("~")[0],
+                            "width" : img["imageWidth"],
+                            "height": img["imageHeight"],
+                        })
+                        yield Message.Url, url, post
 
                 if self.audio and "music" in post:
                     if self.audio == "ytdl":
@@ -271,7 +273,6 @@ class TiktokUserExtractor(TiktokExtractor):
     def _init(self):
         super()._init()
         self.avatar = self.config("avatar", True)
-        self.photo = self.config("photos", True)
         self.stories = self.config("stories", True)
         if type(self.stories) is str:
             self.stories = self.stories.lower()
@@ -531,7 +532,7 @@ class TiktokUserExtractor(TiktokExtractor):
         if not item:
             return True
         is_image_post = "imagePost" in item
-        if not self.photo and is_image_post:
+        if not self.photo and not self.audio and is_image_post:
             return False
         if not self.video and not is_image_post:
             return False
