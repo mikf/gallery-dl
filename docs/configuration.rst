@@ -5218,7 +5218,7 @@ Type
     * ``bool``
     * ``string``
 Default
-    ``true``
+    ``"dash"``
 Description
     Control video download behavior.
 
