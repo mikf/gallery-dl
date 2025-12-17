@@ -33,11 +33,11 @@ class RedditExtractor(Extractor):
         previews = self.config("previews", True)
         embeds = self.config("embeds", True)
 
-        if videos := self.config("videos", True):
-            if videos == "ytdl":
-                self._extract_video = self._extract_video_ytdl
-            elif videos == "dash":
+        if videos := self.config("videos", "dash"):
+            if videos == "dash":
                 self._extract_video = self._extract_video_dash
+            elif videos == "ytdl":
+                self._extract_video = self._extract_video_ytdl
             videos = True
 
         selftext = self.config("selftext")
