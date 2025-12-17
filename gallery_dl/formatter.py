@@ -430,6 +430,10 @@ def _parse_maxlen(format_spec, default):
     return mlen
 
 
+def _parse_identity(format_spec, default):
+    return util.identity
+
+
 def _parse_join(format_spec, default):
     separator, _, format_spec = format_spec.partition(_SEPARATOR)
     join = separator[1:].join
@@ -609,6 +613,7 @@ _FORMAT_SPECIFIERS = {
     "A": _parse_arithmetic,
     "C": _parse_conversion,
     "D": _parse_datetime,
+    "I": _parse_identity,
     "J": _parse_join,
     "L": _parse_maxlen,
     "M": _parse_map,

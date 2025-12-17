@@ -369,6 +369,15 @@ class TestFormatter(unittest.TestCase):
         with self.assertRaises(ValueError):
             self._run_test("{t:Mname", "")
 
+    def test_specifier_identity(self):
+        self._run_test("{a:I}", self.kwdict["a"])
+        self._run_test("{i:I}", self.kwdict["i"])
+        self._run_test("{dt:I}", self.kwdict["dt"])
+
+        self._run_test("{t!D:I}", self.kwdict["dt"])
+        self._run_test("{t!D:I/O+01:30}", self.kwdict["dt"])
+        self._run_test("{i:A+1/I}", self.kwdict["i"]+1)
+
     def test_chain_special(self):
         # multiple replacements
         self._run_test("{a:Rh/C/RE/e/RL/l/}", "Cello wOrld")
