@@ -317,7 +317,6 @@ class TiktokUserExtractor(TiktokExtractor):
         self.range = self.config("tiktok-range")
         if self.range is None or not self.range and self.range != 0:
             self.range = ""
-        self.COUNT_QUERY_PARAMETER = 15
         self.rehydration_data_cache = {}
         self.rehydration_data_app_context_cache = {}
 
