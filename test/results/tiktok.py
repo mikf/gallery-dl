@@ -303,8 +303,8 @@ __tests__ = (
     "#category" : ("", "tiktok", "user"),
     "#class"    : tiktok.TiktokUserExtractor,
     "#pattern"  : PATTERN,
-    "#options"  : {"videos": False},
-    "#count"    : 1,
+    "#options"  : {"videos": False, "tiktok-range": "1"},
+    "#count"    : 1,  # 1 avatar
 },
 
 )
