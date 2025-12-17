@@ -550,7 +550,7 @@ class TiktokFollowingExtractor(TiktokUserExtractor):
 
 # MARK: Cursors
 class TiktokPaginationCursor:
-    def current_page(self) -> int:
+    def current_page(self):
         """Must return the page the cursor is currently pointing to.
 
         Returns
@@ -561,7 +561,7 @@ class TiktokPaginationCursor:
 
         return 0
 
-    def next_page(self, data: dict, query_parameters: dict) -> bool:
+    def next_page(self, data, query_parameters):
         """Must progress the cursor to the next page.
 
         Parameters
@@ -621,15 +621,13 @@ class TiktokItemCursor(TiktokPaginationCursor):
 
 # MARK: Requests
 class TiktokPaginationRequest:
-    def __init__(self, endpoint: str,
-                 cursor_type: type[TiktokPaginationCursor]):
+    def __init__(self, endpoint, cursor_type):
         self.endpoint = endpoint
         self.cursor_type = cursor_type
         self._regenerate_device_id()
         self.items = {}
 
-    def execute(self, extractor: TiktokExtractor, url: str,
-                query_parameters: dict[str, str]):
+    def execute(self, extractor, url, query_parameters):
         """Performs requests until all pages have been retrieved.
 
         The items retrieved from this request are stored in self.items.
@@ -645,7 +643,7 @@ class TiktokPaginationRequest:
             The TikTok extractor performing the request.
         url : str
             The URL associated with this request for logging purposes.
-        query_parameters : dict[str,str]
+        query_parameters : dict[str, str]
             The query parameters to apply to this request.
 
         Returns
@@ -659,7 +657,6 @@ class TiktokPaginationRequest:
         self.validate_query_parameters(query_parameters)
         self.items = {}
         cursor = self.cursor_type()
-
         for page in count(start=1):
             extractor.log.info("%s: retrieving %s page %d", url, self.endpoint,
                                page)
@@ -695,7 +692,7 @@ class TiktokPaginationRequest:
 
     # MARK: Interface
 
-    def validate_query_parameters(self, query_parameters: dict[str, str]):
+    def validate_query_parameters(self, query_parameters):
         """Used to validate the given parameters for this type of
         pagination request.
 
@@ -720,7 +717,7 @@ class TiktokPaginationRequest:
         assert query_parameters["count"].isdigit()
         assert query_parameters["count"] != "0"
 
-    def extract_items(self, data: dict):
+    def extract_items(self, data):
         """Used to extract data from the response of a request.
 
         Parameters
@@ -741,7 +738,7 @@ class TiktokPaginationRequest:
 
         return {}
 
-    def exit_early(self, extractor: TiktokExtractor, url: str):
+    def exit_early(self, extractor, url):
         """Used to determine if we should exit early from the request.
 
         You have access to the items extracted so far (self.items).
@@ -780,16 +777,13 @@ class TiktokPaginationRequest:
     def _regenerate_device_id(self):
         self.device_id = str(randint(7250000000000000000, 7325099899999994577))
 
-    def _request_data(self, extractor: TiktokExtractor,
-                      cursor: TiktokPaginationCursor,
-                      query_parameters: dict[str, str]):
+    def _request_data(self, extractor, cursor, query_parameters):
         url, final_parameters = self._build_api_request_url(cursor,
                                                             query_parameters)
         response = extractor.request(url)
         return (util.json_loads(response.text), final_parameters)
 
-    def _build_api_request_url(self, cursor: TiktokPaginationCursor,
-                               extra_parameters: dict[str, str]):
+    def _build_api_request_url(self, cursor, extra_parameters):
         verify_fp = f"verify_{''.join(choices(hexdigits, k=7))}"
         query_parameters = {
             "aid": "1988",
@@ -829,8 +823,7 @@ class TiktokPaginationRequest:
         return (f"https://www.tiktok.com/api/{self.endpoint}/?{query_str}",
                 query_parameters)
 
-    def _detect_duplicate_pages(self, extractor: TiktokExtractor, url: str,
-                                seen_ids: set[str], incoming_ids: set[str]):
+    def _detect_duplicate_pages(self, extractor, url, seen_ids, incoming_ids):
         if incoming_ids and incoming_ids == seen_ids:
             # TikTok API keeps sending the same page, likely due to
             # a bad device ID. Generate a new one and try again.
@@ -844,8 +837,7 @@ class TiktokPaginationRequest:
 
 # MARK: XYZ/item_list
 class TiktokItemListRequest(TiktokPaginationRequest):
-    def __init__(self, endpoint, cursor_type, type_of_items: str,
-                 range_predicate: util.RangePredicate | None):
+    def __init__(self, endpoint, cursor_type, type_of_items, range_predicate):
         super().__init__(endpoint, cursor_type)
         self.type_of_items = type_of_items
         self.range_predicate = range_predicate
@@ -903,7 +895,7 @@ class TiktokItemListRequest(TiktokPaginationRequest):
 
 # MARK: creator/item_list
 class TiktokCreatorItemListRequest(TiktokItemListRequest):
-    def __init__(self, range_predicate: util.RangePredicate):
+    def __init__(self, range_predicate):
         super().__init__("creator/item_list", TiktokTimeCursor, "posts",
                          range_predicate)
 
