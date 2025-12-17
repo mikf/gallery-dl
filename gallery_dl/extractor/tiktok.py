@@ -396,6 +396,13 @@ class TiktokUserExtractor(TiktokExtractor):
         return data
 
     # MARK: Helpers
+    def _ensure_rehydration_data_app_context_cache_is_populated(self):
+        if not self.rehydration_data_app_context_cache:
+            self.rehydration_data_app_context_cache = \
+                super()._extract_rehydration_data(
+                    "https://www.tiktok.com/", ["webapp.app-context"]
+                )
+
     def _extract_avatar(self, profile_url, user_name):
         data = self._extract_rehydration_data(
             profile_url, ["userInfo", "user"]
@@ -526,26 +533,55 @@ class TiktokFollowingExtractor(TiktokUserExtractor):
             self.log.warning("No followers with stories could be extracted")
 
         entries = []
-        # TODO: we could improve the performance of this using the
-        #       /api/story/batch/item_list endpoint.
-        for user_name, profile_url in users:
-            if self._is_current_user(user_name):
-                # The response to the story user list request may also include
-                # the user themselves, so skip them if they turn up.
-                continue
-            entries += self._extract_stories(profile_url, user_name)
+        # Batch all of the users up into groups of at most ten and use the
+        # batch endpoint to improve performance. The response to the story user
+        # list request may also include the user themselves, so skip them if
+        # they ever turn up.
+        for batch_number, user_batch in enumerate(util.chunk(users, 10),
+                                                  start=1):
+            # Handle edge case where final batch is composed of a single user
+            # and that user is the one we need to skip. If we don't handle this
+            # here (or when we generate the author ID list later), we will
+            # trigger an AssertionError for an empty author ID list.
+            if len(user_batch) == 1 and self._is_current_user(
+                user_batch[0][0]): continue
+
+            self.log.info("TikTok user stories, batch %d: %s", batch_number,
+                          ", ".join([profile_url for user_id, profile_url in
+                                     user_batch if not self._is_current_user(
+                                         user_id)]))
+
+            # Since we've already extracted all of the author IDs, we should be
+            # able to avoid having to request rehydration data (except for one
+            # time, since it's required to make _is_current_user() work), but
+            # we should keep this mechanism in place for safety.
+            author_ids = [self._extract_author_id(profile_url, user_id)
+                          for user_id, profile_url in user_batch
+                          if not self._is_current_user(user_id)]
+            query_parameters = {
+                "authorIds": ",".join(author_ids),
+                "storyCallScene": "2",
+            }
+            request = TiktokStoryBatchItemListRequest()
+            request.execute(self, f"Batch {batch_number}", query_parameters)
+            # We technically don't need to have the correct user name in the
+            # URL and it's easier to just ignore it here.
+            entries += request.generate_urls("https://www.tiktok.com/@_",
+                                             self.video, self.photo,
+                                             self.audio)
 
         for video in entries:
             data = {"_extractor": TiktokPostExtractor}
             yield Message.Queue, video, data
 
-    def _is_current_user(self, user_name):
+    def _is_current_user(self, user_id):
+        self._ensure_rehydration_data_app_context_cache_is_populated()
         if "user" not in self.rehydration_data_app_context_cache:
             return False
-        if "uniqueId" not in self.rehydration_data_app_context_cache["user"]:
+        if "uid" not in self.rehydration_data_app_context_cache["user"]:
             return False
-        return self.rehydration_data_app_context_cache["user"]["uniqueId"] == \
-            user_name
+        return self.rehydration_data_app_context_cache["user"]["uid"] == \
+            user_id
 
 
 # MARK: Cursors
@@ -656,7 +692,7 @@ class TiktokPaginationRequest:
 
         self.validate_query_parameters(query_parameters)
         self.items = {}
-        cursor = self.cursor_type()
+        cursor = self.cursor_type() if self.cursor_type else None
         for page in count(start=1):
             extractor.log.info("%s: retrieving %s page %d", url, self.endpoint,
                                page)
@@ -673,12 +709,17 @@ class TiktokPaginationRequest:
                                                  set(self.items.keys()),
                                                  set(incoming_items.keys()))
                     self.items.update(incoming_items)
-                    final_page_reached = cursor.next_page(data,
-                                                          final_parameters)
-                    if self.exit_early(extractor, url) or final_page_reached:
+                    if cursor:
+                        final_page_reached = cursor.next_page(data,
+                                                              final_parameters)
+                        exit_early = self.exit_early(extractor, url)
+                        if exit_early or final_page_reached:
+                            return True
+                        # Continue to next page and reset tries counter.
+                        break
+                    else:
+                        # This request has no cursor: return immediately.
                         return True
-                    # Continue to next page and reset tries counter.
-                    break
                 except Exception as exc:
                     if tries >= extractor._retries:
                         extractor.log.error("%s: failed to retrieve %s page "
@@ -796,8 +837,6 @@ class TiktokPaginationRequest:
             "browser_version": "5.0 (Windows)",
             "channel": "tiktok_web",
             "cookie_enabled": "true",
-            # We must not write this as a floating-point number:
-            "cursor": f"{floor(cursor.current_page())}",
             "device_id": self.device_id,
             "device_platform": "web_pc",
             "focus_state": "true",
@@ -816,6 +855,9 @@ class TiktokPaginationRequest:
             "verifyFp": verify_fp,
             "webcast_language": "en",
         }
+        if cursor:
+            # We must not write this as a floating-point number:
+            query_parameters["cursor"] = f"{floor(cursor.current_page())}"
         for key, value in extra_parameters.items():
             query_parameters[key] = f"{value}"
         query_str = "&".join([f"{name}={quote(value, safe='')}"
@@ -921,6 +963,38 @@ class TiktokStoryItemListRequest(TiktokItemListRequest):
             query_parameters["loadBackward"] == "true"
 
 
+# MARK: story/batch/item_list
+class TiktokStoryBatchItemListRequest(TiktokItemListRequest):
+    def __init__(self):
+        super().__init__("story/batch/item_list", None, "stories", None)
+
+    def validate_query_parameters(self, query_parameters):
+        # This request type does not need a count parameter so don't invoke
+        # super().validate_query_parameters().
+        assert "authorIds" in query_parameters
+        # I'd recommend between 1-10 users at a time, as that's what I see in
+        # the webapp.
+        author_count = query_parameters["authorIds"].count(",") + 1
+        assert author_count >= 1 and author_count <= 10
+        # Not sure what this parameter does.
+        assert "storyCallScene" in query_parameters
+        assert query_parameters["storyCallScene"] == "2"
+
+    def extract_items(self, data):
+        # We need to extract each itemList within the response and combine each
+        # of them into a single list of items. If even one of the users doesn't
+        # have an item list, "exit early," but continue to gather the rest
+        # (this request doesn't use a cursor anyway so there is no concept of
+        # exiting early).
+        items = {}
+        if type(data.get("batchStoryItemLists")) is not list:
+            self.exit_early_due_to_no_items = True
+            return items
+        for userStories in data["batchStoryItemLists"]:
+            items.update(super().extract_items(userStories))
+        return items
+
+
 # MARK: story/user_list
 class TiktokStoryUserListRequest(TiktokPaginationRequest):
     def __init__(self):
@@ -947,5 +1021,5 @@ class TiktokStoryUserListRequest(TiktokPaginationRequest):
         return self.exit_early_due_to_no_cookies
 
     def generate_urls(self):
-        return [(name, f"https://www.tiktok.com/@{name}")
-                for name in self.items.values()]
+        return [(id, f"https://www.tiktok.com/@{name}")
+                for id, name in self.items.items()]
