@@ -543,8 +543,9 @@ class TiktokFollowingExtractor(TiktokUserExtractor):
             # and that user is the one we need to skip. If we don't handle this
             # here (or when we generate the author ID list later), we will
             # trigger an AssertionError for an empty author ID list.
-            if len(user_batch) == 1 and self._is_current_user(
-                user_batch[0][0]): continue
+            if len(user_batch) == 1:
+                if self._is_current_user(user_batch[0][0]):
+                    continue
 
             self.log.info("TikTok user stories, batch %d: %s", batch_number,
                           ", ".join([profile_url for user_id, profile_url in
