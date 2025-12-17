@@ -11,7 +11,6 @@ from math import floor
 from random import choices, randint
 from re import fullmatch
 from string import hexdigits
-from sys import maxsize
 from time import time
 from urllib.parse import quote
 from .common import Extractor, Message
@@ -22,6 +21,7 @@ SEC_UID_PATTERN = r"MS4wLjABAAAA[\w-]{64}"
 AUTHOR_ID_PATTERN = r"[0-9]+"
 
 
+# MARK: TiktokExtractor
 class TiktokExtractor(Extractor):
     """Base class for TikTok extractors"""
     category = "tiktok"
@@ -116,7 +116,8 @@ class TiktokExtractor(Extractor):
     def _sanitize_url(self, url):
         return text.ensure_http_scheme(url.replace("/photo/", "/video/", 1))
 
-    def _extract_rehydration_data(self, url, additional_keys=[]):
+    def _extract_rehydration_data(self, url, additional_keys=[], *,
+                                  has_keys=[]):
         tries = 0
         while True:
             try:
@@ -132,6 +133,9 @@ class TiktokExtractor(Extractor):
                 data = util.json_loads(data)["__DEFAULT_SCOPE__"]
                 for key in additional_keys:
                     data = data[key]
+                for assert_key in has_keys:
+                    if assert_key not in data:
+                        raise KeyError(assert_key)
                 return data
             except (ValueError, KeyError):
                 # We failed to retrieve rehydration data. This happens
@@ -217,8 +221,24 @@ class TiktokExtractor(Extractor):
             return True
 
         if status == 10222:
-            self.log.error("%s: Login required to access this %s", url,
-                           type_of_url)
+            # Video count workaround ported from yt-dlp: sometimes TikTok
+            # reports a profile as private even though we have the cookies to
+            # access it. We know that we can access it if we can see the
+            # videos stats. If we can't, we assume that we don't have access
+            # to the profile.
+            # We only care about this workaround for webapp.user-detail
+            # objects, so always fail the workaround for e.g.
+            # webapp.video-detail objects.
+            video_count = self._extract_video_count_from_user_detail(detail)
+            if video_count is None:
+                self.log.error("%s: Login required to access this %s", url,
+                               type_of_url)
+            elif video_count > 0:
+                return True
+            else:
+                self.log.error("%s: Login required to access this %s, or this "
+                               "profile has no videos posted", url,
+                               type_of_url)
         elif status == 10204:
             self.log.error("%s: Requested %s not available", url, type_of_url)
         elif status == 10231:
@@ -230,7 +250,20 @@ class TiktokExtractor(Extractor):
                 url, status, detail.get("statusMsg") or "")
         return False
 
+    def _extract_video_count_from_user_detail(self, detail):
+        user_info = detail.get("userInfo")
+        if not user_info:
+            return None
+        stats = user_info.get("stats") or user_info.get("statsV2")
+        try:
+            # stats.videoCount is an int, but statsV2.videoCount is a
+            # string, so we must explicitly convert the attribute.
+            return int(stats["videoCount"])
+        except (KeyError, ValueError):
+            return None
 
+
+# MARK: TiktokPostExtractor
 class TiktokPostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok link"""
     subcategory = "post"
@@ -243,6 +276,7 @@ class TiktokPostExtractor(TiktokExtractor):
         return (url,)
 
 
+# MARK: TiktokVmpostExtractor
 class TiktokVmpostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok VM link"""
     subcategory = "vmpost"
@@ -264,6 +298,7 @@ class TiktokVmpostExtractor(TiktokExtractor):
         yield Message.Queue, url.partition("?")[0], data
 
 
+# MARK: TiktokUserExtractor
 class TiktokUserExtractor(TiktokExtractor):
     """Extract a TikTok user's profile"""
     subcategory = "user"
@@ -272,7 +307,6 @@ class TiktokUserExtractor(TiktokExtractor):
 
     def _init(self):
         super()._init()
-        self.log.warning(util.json_dumps(self.kwdict))
         self.avatar = self.config("avatar", True)
         self.stories = self.config("stories", True)
         if type(self.stories) is str:
@@ -284,8 +318,10 @@ class TiktokUserExtractor(TiktokExtractor):
         if self.range is None or not self.range and self.range != 0:
             self.range = ""
         self.COUNT_QUERY_PARAMETER = 15
-        self.rehydration_data = None
+        self.rehydration_data_cache = {}
+        self.rehydration_data_app_context_cache = {}
 
+    # MARK: Overrides
     def items(self):
         """Attempt to [use yt-dlp/youtube-dl to] extract links from a
         user's page"""
@@ -295,12 +331,11 @@ class TiktokUserExtractor(TiktokExtractor):
 
         if self.avatar:
             try:
-                self.rehydration_data = self._extract_user_rehydration_data(
-                    profile_url)
-                avatar_url, avatar = self._generate_avatar(user_name)
+                avatar_url, avatar = self._extract_avatar(profile_url,
+                                                          user_name)
             except Exception as exc:
-                self.log.warning("Unable to extract 'avatar' URL (%s: %s)",
-                                 exc.__class__.__name__, exc)
+                self.log.warning("%s: unable to extract 'avatar' URL (%s: %s)",
+                                 profile_url, exc.__class__.__name__, exc)
             else:
                 yield Message.Directory, "", avatar
                 yield Message.Url, avatar_url, avatar
@@ -308,55 +343,84 @@ class TiktokUserExtractor(TiktokExtractor):
         entries = []
         if self.stories != "only":
             if self.ytdl:
-                entries = self._extract_entries_via_ytdl(profile_url)
+                entries = self._extract_posts_via_ytdl(profile_url)
                 if not entries:
                     self.log.warning("Could not extract TikTok user "
                                      f"{user_name} via yt-dlp or youtube-dl, "
                                      "attempting the extraction directly")
             if not entries:
-                entries = self._extract_entries(profile_url, user_name)
+                entries = self._extract_posts(profile_url, user_name)
                 if not entries:
-                    self.log.warning("Could not extract any video or photo "
-                                     f"entries from TikTok user {user_name}, "
-                                     "try extracting user information using "
-                                     "yt-dlp using the -o "
-                                     "tiktok-user-extractor=ytdl argument")
+                    message = "Could not extract any video or photo entries " \
+                              f"from TikTok user {user_name}"
+                    if not self.ytdl:
+                        message += ", try extracting user information using " \
+                                   "yt-dlp with the -o " \
+                                   "tiktok-user-extractor=ytdl argument"
+                    self.log.warning(message)
 
         if self.stories:
             entries += self._extract_stories(profile_url, user_name)
-            if self.stories == "only" and len(entries) == 0:
+            if self.stories == "only" and not entries:
                 self.log.warning(f"TikTok user {user_name} has no stories")
 
         for video in entries:
             data = {"_extractor": TiktokPostExtractor}
             yield Message.Queue, video, data
 
-    def _extract_user_rehydration_data(self, profile_url):
-        return self._extract_rehydration_data(profile_url,
-                                              ["webapp.user-detail"])
+    def _extract_rehydration_data(self, profile_url, additional_keys=[]):
+        if profile_url in self.rehydration_data_cache:
+            data = self.rehydration_data_cache[profile_url]
+        else:
+            data = super()._extract_rehydration_data(
+                profile_url,
+                has_keys=["webapp.user-detail", "webapp.app-context"]
+            )
+            self.rehydration_data_cache[profile_url] = \
+                data["webapp.user-detail"]
+            self.rehydration_data_app_context_cache = \
+                data["webapp.app-context"]
+            data = data["webapp.user-detail"]
+        if not self._check_status_code(data, profile_url, "profile"):
+            raise exception.ExtractionError("%s: could not extract "
+                                            "rehydration data", profile_url)
+        try:
+            for key in additional_keys:
+                data = data[key]
+        except KeyError as exc:
+            self.log.traceback(exc)
+            raise exception.ExtractionError("%s: could not extract "
+                                            "rehydration data (%s)",
+                                            profile_url,
+                                            ", ".join(additional_keys))
+        return data
 
-    def _generate_avatar(self, user_name):
-        data = self.rehydration_data["userInfo"]["user"].copy()
-        data["user"] = user_name
-        avatar_url = data["avatarLarger"]
+    # MARK: Helpers
+    def _extract_avatar(self, profile_url, user_name):
+        data = self._extract_rehydration_data(
+            profile_url, ["userInfo", "user"]
+        ).copy()
+        data["user"] = data.get("uniqueId", user_name)
+        avatar_url = data.get("avatarLarger") or data.get("avatarMedium") \
+            or data["avatarThumb"]
         avatar = text.nameext_from_url(avatar_url, data.copy())
         avatar.update({
-            "type"  : "avatar",
-            "title" : "@" + user_name,
-            "id"    : data["id"],
-            "img_id": avatar["filename"].partition("~")[0],
-            "num"   : 0,
+            "type"   : "avatar",
+            "title"  : "@" + data["user"],
+            "id"     : data["id"],
+            "img_id" : avatar["filename"].partition("~")[0],
+            "num"    : 0,
         })
         return (avatar_url, avatar)
 
-    def _extract_entries_via_ytdl(self, profile_url):
+    def _extract_posts_via_ytdl(self, profile_url):
         try:
             module = ytdl.import_module(self.config("module"))
         except (ImportError, SyntaxError) as exc:
             self.log.error("Cannot import module '%s'",
                            getattr(exc, "name", ""))
             self.log.traceback(exc)
-            return False
+            return []
 
         extr_opts = {
             "extract_flat"           : True,
@@ -389,93 +453,343 @@ class TiktokUserExtractor(TiktokExtractor):
             return [video["url"].partition("?")[0]
                     for video in info_dict["entries"]]
 
-    def _extract_entries(self, profile_url, user_name):
-        # First, we need to extract the secUid of the user.
-        sec_uid, fail_early = self._extract_id("sec_uid", profile_url,
-                                               user_name)
-        if not sec_uid:
-            self.log.error("%s: unable to extract secondary user ID, or this "
-                           "user has no posts", user_name)
-            return []
-
-        # Once we've extracted the secondary user ID, we can begin extracting
-        # item lists of the user.
+    def _extract_posts(self, profile_url, user_name):
+        sec_uid = self._extract_sec_uid(profile_url, user_name)
         range_predicate = util.RangePredicate(self.range)
         query_parameters = {
             "secUid": sec_uid,
-            # Pagination type: 0 == oldest-to-newest, 1 == newest-to-oldest.
             "type": "1",
+            "count": "15",
         }
-        return self._extract_urls_from_pages(
-            profile_url,
-            "creator/item_list",
-            query_parameters,
-            range_predicate=range_predicate,
-            fail_early=fail_early
-        )
+        request = TiktokCreatorItemListRequest(range_predicate)
+        request.execute(self, profile_url, query_parameters)
+        return request.generate_urls(profile_url, self.video, self.photo,
+                                     self.audio)
 
     def _extract_stories(self, profile_url, user_name):
-        # First, we need to extract the author ID of the user.
-        author_id, _ = self._extract_id("author_id", profile_url, user_name,
-                                        video_count_check=False)
-        if not author_id:
-            self.log.error("%s: unable to extract user ID", user_name)
-            return []
-
-        # Once we've extracted the user's ID, we can make a request to the
-        # story endpoint for posts.
+        author_id = self._extract_author_id(profile_url, user_name)
         query_parameters = {
             "authorId": author_id,
             "loadBackward": "false",
+            "count": "5",
         }
-        return self._extract_urls_from_pages(
-            profile_url,
-            "story/item_list",
-            query_parameters
-        )
+        request = TiktokStoryItemListRequest()
+        request.execute(self, profile_url, query_parameters)
+        return request.generate_urls(profile_url, self.video, self.photo,
+                                     self.audio)
 
-    def _extract_id(self, id_type, profile_url, user_name, *,
-                    video_count_check=True):
-        assert id_type == "sec_uid" or id_type == "author_id"
-        regex = SEC_UID_PATTERN if id_type == "sec_uid" else AUTHOR_ID_PATTERN
-        id_key = "secUid" if id_type == "sec_uid" else "id"
-        user_id, fail_early = None, False
+    def _extract_sec_uid(self, profile_url, user_name):
+        sec_uid = self._extract_id(profile_url, user_name, SEC_UID_PATTERN,
+                                   "secUid")
+        if not fullmatch(SEC_UID_PATTERN, sec_uid):
+            raise exception.ExtractionError("%s: unable to extract secondary "
+                                            "user ID", user_name)
+        return sec_uid
+
+    def _extract_author_id(self, profile_url, user_name):
+        author_id = self._extract_id(profile_url, user_name, AUTHOR_ID_PATTERN,
+                                     "id")
+        if not fullmatch(AUTHOR_ID_PATTERN, author_id):
+            raise exception.ExtractionError("%s: unable to extract user ID",
+                                            user_name)
+        return author_id
+
+    def _extract_id(self, profile_url, user_name, regex, id_key):
         if fullmatch(regex, user_name):
-            # If it was provided in the URL, then we can skip this step.
-            user_id = user_name
-            fail_early = True
+            # If it was provided in the URL, then we can skip extracting it
+            # from the rehydration data.
+            return user_name
         else:
-            if not self.rehydration_data:
-                # If we haven't extracted rehydration data yet, do so now.
-                self.rehydration_data = self._extract_user_rehydration_data(
-                    profile_url)
-            # Video count workaround ported from yt-dlp: sometimes TikTok
-            # reports a profile as private even though we have the cookies to
-            # access it. We know that we can access it if we can see the videos
-            # stats. If we can't, we assume that we don't have access to the
-            # profile.
-            user_info = self.rehydration_data["userInfo"]
-            if video_count_check:
-                if "stats" not in user_info:
-                    video_count = user_info["statsV2"]["videoCount"]
-                else:
-                    video_count = user_info["stats"]["videoCount"]
-                video_count = int(video_count)
-                if not video_count:
-                    if self._check_status_code(self.rehydration_data,
-                                               profile_url, "profile"):
-                        self.log.warning("%s: This profile has no known posts",
-                                         profile_url)
-                    return user_id, fail_early
-            elif not self._check_status_code(self.rehydration_data,
-                                             profile_url, "profile"):
-                return user_id, fail_early
-            user_id = str(user_info["user"][id_key])
-            fail_early = not user_info.get("itemList")
-        return user_id, fail_early
+            return self._extract_rehydration_data(profile_url,
+                                                  ["userInfo", "user", id_key])
 
-    def _build_api_request_url(self, endpoint, cursor, device_id,
-                               **extra_parameters):
+
+# MARK: TiktokFollowingExtractor
+class TiktokFollowingExtractor(TiktokUserExtractor):
+    """Extract all of the stories of all of the users you follow"""
+    subcategory = "following"
+    pattern = rf"{BASE_PATTERN}/following"
+    example = "https://www.tiktok.com/following"
+
+    def items(self):
+        """Attempt to extract all of the stories of all of the accounts
+        the user follows"""
+
+        query_parameters = {
+            "storyFeedScene": "3",
+            "count": "15",
+        }
+        request = TiktokStoryUserListRequest()
+        request.execute(self, self.url, query_parameters)
+        users = request.generate_urls()
+        if len(users) == 0:
+            self.log.warning("No followers with stories could be extracted")
+
+        entries = []
+        # TODO: we could improve the performance of this using the
+        #       /api/story/batch/item_list endpoint.
+        for user_name, profile_url in users:
+            if self._is_current_user(user_name):
+                # The response to the story user list request may also include
+                # the user themselves, so skip them if they turn up.
+                continue
+            entries += self._extract_stories(profile_url, user_name)
+
+        for video in entries:
+            data = {"_extractor": TiktokPostExtractor}
+            yield Message.Queue, video, data
+
+    def _is_current_user(self, user_name):
+        if "user" not in self.rehydration_data_app_context_cache:
+            return False
+        if "uniqueId" not in self.rehydration_data_app_context_cache["user"]:
+            return False
+        return self.rehydration_data_app_context_cache["user"]["uniqueId"] == \
+            user_name
+
+
+# MARK: Cursors
+class TiktokPaginationCursor:
+    def current_page(self) -> int:
+        """Must return the page the cursor is currently pointing to.
+
+        Returns
+        -------
+        int
+            The current value of the cursor.
+        """
+
+        return 0
+
+    def next_page(self, data: dict, query_parameters: dict) -> bool:
+        """Must progress the cursor to the next page.
+
+        Parameters
+        ----------
+        data : dict
+            The response of the most recent request.
+        query_parameters : dict
+            All of the query parameters used for the most recent
+            request.
+
+        Returns
+        -------
+        bool
+            True if the cursor detects that we've reached the end, False
+            otherwise.
+        """
+
+        return True
+
+
+class TiktokTimeCursor(TiktokPaginationCursor):
+    def __init__(self):
+        super().__init__()
+        self.cursor = int(time() * 1e3)
+
+    def current_page(self):
+        return self.cursor
+
+    def next_page(self, data, query_parameters):
+        old_cursor = self.cursor
+        try:
+            self.cursor = int(int(data["itemList"][-1]["createTime"]) * 1e3)
+        except (IndexError, KeyError, ValueError):
+            self.cursor = 0
+        if not self.cursor or old_cursor == self.cursor:
+            # User may not have posted within this ~1 week look back,
+            # so manually adjust the cursor.
+            self.cursor = old_cursor - 7 * 86_400_000
+        # In case 'hasMorePrevious' is wrong, break if we have
+        # gone back before TikTok existed.
+        has_more_previous = data.get("hasMorePrevious")
+        return self.cursor < 1472706000000 or not has_more_previous
+
+
+class TiktokItemCursor(TiktokPaginationCursor):
+    def __init__(self):
+        super().__init__()
+        self.cursor = 0
+
+    def current_page(self):
+        return self.cursor
+
+    def next_page(self, data, query_parameters):
+        self.cursor += int(data.get("TotalCount", query_parameters["count"]))
+        return not data.get("hasMore", False)
+
+
+# MARK: Requests
+class TiktokPaginationRequest:
+    def __init__(self, endpoint: str,
+                 cursor_type: type[TiktokPaginationCursor]):
+        self.endpoint = endpoint
+        self.cursor_type = cursor_type
+        self._regenerate_device_id()
+        self.items = {}
+
+    def execute(self, extractor: TiktokExtractor, url: str,
+                query_parameters: dict[str, str]):
+        """Performs requests until all pages have been retrieved.
+
+        The items retrieved from this request are stored in self.items.
+        Each call to execute() will clear the previous value of
+        self.items.
+
+        Usually extractors want a simple list of URLs. For this, each
+        request subtype is to implement generate_urls().
+
+        Parameters
+        ----------
+        extractor : TiktokExtractor
+            The TikTok extractor performing the request.
+        url : str
+            The URL associated with this request for logging purposes.
+        query_parameters : dict[str,str]
+            The query parameters to apply to this request.
+
+        Returns
+        -------
+        bool
+            True if the request was performed successfully and all items
+            were retrieved, False if no items or only some items could
+            be retrieved.
+        """
+
+        self.validate_query_parameters(query_parameters)
+        self.items = {}
+        cursor = self.cursor_type()
+
+        for page in count(start=1):
+            extractor.log.info("%s: retrieving %s page %d", url, self.endpoint,
+                               page)
+            tries = 0
+            while True:
+                try:
+                    data, final_parameters = self._request_data(
+                        extractor,
+                        cursor,
+                        query_parameters
+                    )
+                    incoming_items = self.extract_items(data)
+                    self._detect_duplicate_pages(extractor, url,
+                                                 set(self.items.keys()),
+                                                 set(incoming_items.keys()))
+                    self.items.update(incoming_items)
+                    final_page_reached = cursor.next_page(data,
+                                                          final_parameters)
+                    if self.exit_early(extractor, url) or final_page_reached:
+                        return True
+                    # Continue to next page and reset tries counter.
+                    break
+                except Exception as exc:
+                    if tries >= extractor._retries:
+                        extractor.log.error("%s: failed to retrieve %s page "
+                                            "%d", url, self.endpoint, page)
+                        extractor.log.traceback(exc)
+                        return False
+                    tries += 1
+                    extractor.log.warning("%s: failed to retrieve %s page %d",
+                                          url, self.endpoint, page)
+                    extractor.sleep(extractor._timeout, "retry")
+
+    # MARK: Interface
+
+    def validate_query_parameters(self, query_parameters: dict[str, str]):
+        """Used to validate the given parameters for this type of
+        pagination request.
+
+        For developer purposes only. You should call
+        super().validate_query_parameters() for most requests as they
+        will usually have a count parameter.
+
+        Parameters
+        ----------
+        query_parameters : dict[str, str]
+            The query parameters to validate.
+
+        Raises
+        -------
+        AssertionError
+            If mandatory query parameters are not given, or they are
+            given in the wrong format.
+        """
+
+        assert "count" in query_parameters
+        assert type(query_parameters["count"]) is str
+        assert query_parameters["count"].isdigit()
+        assert query_parameters["count"] != "0"
+
+    def extract_items(self, data: dict):
+        """Used to extract data from the response of a request.
+
+        Parameters
+        ----------
+        data : dict
+            The data given by TikTok.
+
+        Returns
+        -------
+        dict
+            Each item from the response data, keyed on a unique ID.
+
+        Raises
+        ------
+        Exception
+            If items could not be extracted.
+        """
+
+        return {}
+
+    def exit_early(self, extractor: TiktokExtractor, url: str):
+        """Used to determine if we should exit early from the request.
+
+        You have access to the items extracted so far (self.items).
+
+        Parameters
+        ----------
+        extractor : TiktokExtractor
+            The extractor making the requests.
+        url : str
+            The URL associated with the executing request for logging
+            purposes.
+
+        Returns
+        -------
+        bool
+            True if we should exit early, False otherwise.
+        """
+
+        return False
+
+    def generate_urls(self):
+        """Used to convert the items retrieved from the request into a
+        list of URLs.
+
+        Returns
+        -------
+        list
+            Ideally one URL for each item, although subclasses are
+            permitted to return a list of any format they wish.
+        """
+
+        return []
+
+    # MARK: Helpers
+
+    def _regenerate_device_id(self):
+        self.device_id = str(randint(7250000000000000000, 7325099899999994577))
+
+    def _request_data(self, extractor: TiktokExtractor,
+                      cursor: TiktokPaginationCursor,
+                      query_parameters: dict[str, str]):
+        url, final_parameters = self._build_api_request_url(cursor,
+                                                            query_parameters)
+        response = extractor.request(url)
+        return (util.json_loads(response.text), final_parameters)
+
+    def _build_api_request_url(self, cursor: TiktokPaginationCursor,
+                               extra_parameters: dict[str, str]):
         verify_fp = f"verify_{''.join(choices(hexdigits, k=7))}"
         query_parameters = {
             "aid": "1988",
@@ -488,10 +802,9 @@ class TiktokUserExtractor(TiktokExtractor):
             "browser_version": "5.0 (Windows)",
             "channel": "tiktok_web",
             "cookie_enabled": "true",
-            "count": f"{floor(self.COUNT_QUERY_PARAMETER)}",
             # We must not write this as a floating-point number:
-            "cursor": f"{floor(cursor)}",
-            "device_id": f"{device_id}",
+            "cursor": f"{floor(cursor.current_page())}",
+            "device_id": self.device_id,
             "device_platform": "web_pc",
             "focus_state": "true",
             "from_page": "user",
@@ -513,14 +826,64 @@ class TiktokUserExtractor(TiktokExtractor):
             query_parameters[key] = f"{value}"
         query_str = "&".join([f"{name}={quote(value, safe='')}"
                               for name, value in query_parameters.items()])
-        return f"https://www.tiktok.com/api/{endpoint}/?{query_str}"
+        return (f"https://www.tiktok.com/api/{self.endpoint}/?{query_str}",
+                query_parameters)
 
-    def _matches_filters(self, range_predicate, item, index):
+    def _detect_duplicate_pages(self, extractor: TiktokExtractor, url: str,
+                                seen_ids: set[str], incoming_ids: set[str]):
+        if incoming_ids and incoming_ids == seen_ids:
+            # TikTok API keeps sending the same page, likely due to
+            # a bad device ID. Generate a new one and try again.
+            self._regenerate_device_id()
+            extractor.log.warning("%s: TikTok API keeps sending the same "
+                                  "page. Taking measures to avoid an infinite "
+                                  "loop", url)
+            raise exception.ExtractionError(
+                "TikTok API keeps sending the same page")
+
+
+# MARK: XYZ/item_list
+class TiktokItemListRequest(TiktokPaginationRequest):
+    def __init__(self, endpoint, cursor_type, type_of_items: str,
+                 range_predicate: util.RangePredicate | None):
+        super().__init__(endpoint, cursor_type)
+        self.type_of_items = type_of_items
+        self.range_predicate = range_predicate
+        self.exit_early_due_to_no_items = False
+
+    def extract_items(self, data):
+        if "itemList" not in data:
+            self.exit_early_due_to_no_items = True
+            return {}
+        return dict((item["id"], item) for item in data["itemList"])
+
+    def exit_early(self, extractor, url):
+        if self.exit_early_due_to_no_items:
+            extractor.log.warning("%s: could not extract any %s for this user",
+                                  url, self.type_of_items)
+            return True
+        if not self.range_predicate:
+            # No range predicate given.
+            return False
+        if len(self.range_predicate.ranges) == 0:
+            # No range predicates given in the predicate object.
+            return False
+        # If our current selection of items can't satisfy the upper bound of
+        # the predicate, we must continue extracting them until we can.
+        return len(self.items) > self.range_predicate.upper
+
+    def generate_urls(self, profile_url, video, photo, audio):
+        return [f"{profile_url}/video/{id}"
+                for index, id in enumerate(reversed(sorted(self.items.keys())))
+                if self._matches_filters(self.items.get(id), index + 1, video,
+                                         photo, audio)]
+
+    def _matches_filters(self, item, index, video, photo, audio):
         # First, check if this index falls within any of our configured ranges.
         # If it doesn't, we filter it out.
-        if range_predicate:
-            range_match = len(range_predicate.ranges) == 0
-            for range in range_predicate.ranges:
+        if self.range_predicate:
+            range_match = len(self.range_predicate.ranges) == 0
+            for range in self.range_predicate.ranges:
                 if index in range:
                     range_match = True
                     break
@@ -531,204 +894,66 @@ class TiktokUserExtractor(TiktokExtractor):
         if not item:
             return True
         is_image_post = "imagePost" in item
-        if not self.photo and not self.audio and is_image_post:
+        if not photo and not audio and is_image_post:
             return False
-        if not self.video and not is_image_post:
+        if not video and not is_image_post:
             return False
         return True
 
-    def _all_ranges_satisfied(self, range_predicate, sorted_ids):
-        if not range_predicate:
-            return False
-        range_count = len(range_predicate.ranges)
-        if range_count == 0 or range_predicate.upper == maxsize:
-            # Avoid looping through ranges that have no upper bound.
-            # We need to extract every post first in this case anyway.
-            # This is also the case if we don't have any ranges configured.
-            return False
-        max_index = len(sorted_ids)
-        for range in range_predicate.ranges:
-            for index in range:
-                if index > max_index:
-                    # At least this portion of this range can't be satisfied
-                    # with our current selection of IDs, keep extracting.
-                    return False
-        # We have enough IDs to satisfy all of the configured ranges.
-        return True
 
-    def _extract_urls_from_pages(self, profile_url, endpoint, query_parameters,
-                                 *, range_predicate=None, fail_early=False,
-                                 id_extractor=None, url_generator=None):
-        if not id_extractor:
-            id_extractor = self._id_extractor
-        if not url_generator:
-            url_generator = self._url_generator
-        seen_ids = set()
-        item_details = {}
-        device_id = str(randint(7250000000000000000, 7325099899999994577))
-        cursor_type = "time" if "creator" in endpoint else "count"
-        cursor = int(time() * 1e3) if cursor_type == "time" else 0
+# MARK: creator/item_list
+class TiktokCreatorItemListRequest(TiktokItemListRequest):
+    def __init__(self, range_predicate: util.RangePredicate):
+        super().__init__("creator/item_list", TiktokTimeCursor, "posts",
+                         range_predicate)
 
-        def generate_urls():
-            sorted_ids = reversed(sorted(seen_ids))
-            return url_generator(sorted_ids, item_details, profile_url,
-                                 range_predicate)
-
-        for page in count(start=1):
-            self.log.info("%s: retrieving %s page %d", profile_url, endpoint,
-                          page)
-            tries = 0
-            while True:
-                try:
-                    url = self._build_api_request_url(endpoint, cursor,
-                                                      device_id,
-                                                      **query_parameters)
-                    response = self.request(url)
-                    data = util.json_loads(response.text)
-                    # Hack for users that have no stories posted. They won't
-                    # have any itemList, but their TotalCount should be 0.
-                    if "TotalCount" in data:
-                        try:
-                            story_count = int(data["TotalCount"])
-                            if story_count == 0:
-                                return generate_urls()
-                        except ValueError:
-                            pass
-                    incoming_items = id_extractor(data)
-                    item_details.update(incoming_items)
-                    ids = set(incoming_items.keys())
-                    if ids and sorted(ids) == sorted(seen_ids):
-                        # TikTok API keeps sending the same page, likely due to
-                        # a bad device ID. Generate a new one and try again.
-                        device_id = str(randint(7250000000000000000,
-                                                7325099899999994577))
-                        self.log.warning("%s: TikTok API keeps sending the "
-                                         "same page. Taking measures to avoid "
-                                         "an infinite loop", profile_url)
-                        raise exception.ExtractionError(
-                            "TikTok API keeps sending the same page")
-                    seen_ids = seen_ids.union(ids)
-
-                    if cursor_type == "time":
-                        old_cursor = cursor
-                        cursor = int(data["itemList"][-1]["createTime"]) * 1e3
-                        if not cursor or old_cursor == cursor:
-                            # User may not have posted within this ~1 week look
-                            # back, so manually adjust cursor.
-                            cursor = old_cursor - 7 * 86_400_000
-
-                        # In case 'hasMorePrevious' is wrong, break if we have
-                        # gone back before TikTok existed.
-                        has_more_previous = data.get("hasMorePrevious")
-                        if cursor < 1472706000000 or not has_more_previous:
-                            return generate_urls()
-                    else:
-                        if data.get("hasMore"):
-                            cursor += int(
-                                data.get("TotalCount",
-                                         self.COUNT_QUERY_PARAMETER)
-                            )
-                        else:
-                            return generate_urls()
-
-                    # This code path is ideally only reached when one of the
-                    # following is true:
-                    # 1. TikTok profile is private and webpage detection was
-                    #    bypassed due to a profile URL containing a sec_uid.
-                    # 2. TikTok profile is *not* private but all of their
-                    #    posts are private.
-                    if fail_early and not seen_ids:
-                        self.log.error("%s: this user's account is likely "
-                                       "either private or all of their posts "
-                                       "are private. Log into an account that "
-                                       "has access", profile_url)
-                        return generate_urls()
-
-                    # If we've encountered all of the posts that satisfy our
-                    # range/s, exit early.
-                    sorted_ids = list(reversed(sorted(seen_ids)))
-                    if self._all_ranges_satisfied(range_predicate, sorted_ids):
-                        return generate_urls()
-
-                    # Continue to next page and reset retry counter.
-                    break
-                except exception.ExtractionError:
-                    raise
-                except Exception as exc:
-                    if tries >= self._retries:
-                        # We don't want to fail the entire extraction if we
-                        # can't continue, just report the exception and make
-                        # do with the URLs we have.
-                        self.log.error("%s: Failed to retrieve %s page %d",
-                                       url, endpoint, page)
-                        self.log.traceback(exc)
-                        return generate_urls()
-                    tries += 1
-                    self.log.warning("%s: Failed to retrieve %s page %d "
-                                     "(%s/%s)", url, endpoint, page, tries,
-                                     self._retries)
-                    self.sleep(self._timeout, "retry")
-
-    def _id_extractor(self, data):
-        return dict((item["id"], item) for item in data["itemList"])
-
-    def _url_generator(self, ids, item_details, profile_url, range_predicate):
-        urls = [f"{profile_url}/video/{id}"
-                for index, id in enumerate(ids)
-                if self._matches_filters(range_predicate,
-                                         item_details.get(id), index + 1)]
-
-        return urls
+    def validate_query_parameters(self, query_parameters):
+        super().validate_query_parameters(query_parameters)
+        assert "secUid" in query_parameters
+        assert "type" in query_parameters
+        # Pagination type: 0 == oldest-to-newest, 1 == newest-to-oldest.
+        assert query_parameters["type"] == "0" or \
+            query_parameters["type"] == "1"
 
 
-class TiktokFollowingExtractor(TiktokUserExtractor):
-    """Extract all of the stories of all of the users you follow"""
-    subcategory = "following"
-    pattern = rf"{BASE_PATTERN}/following"
-    example = "https://www.tiktok.com/following"
+# MARK: story/item_list
+class TiktokStoryItemListRequest(TiktokItemListRequest):
+    def __init__(self):
+        super().__init__("story/item_list", TiktokItemCursor, "stories", None)
 
-    def items(self):
-        """Attempt to extract all of the stories of all of the accounts
-        the user follows"""
+    def validate_query_parameters(self, query_parameters):
+        super().validate_query_parameters(query_parameters)
+        assert "authorId" in query_parameters
+        assert "loadBackward" in query_parameters
+        assert query_parameters["loadBackward"] == "false" or \
+            query_parameters["loadBackward"] == "true"
 
-        query_parameters = {
-            "storyFeedScene": "3",
-        }
-        users = self._extract_urls_from_pages(
-            self.url,
-            "story/user_list",
-            query_parameters,
-            id_extractor=self._user_list_id_extractor,
-            url_generator=self._user_list_url_generator
-        )
-        if len(users) == 0:
-            self.log.warning("No followers with stories could be extracted")
 
-        entries = []
-        # TODO: we could improve the performance of this using the
-        #       /api/story/batch/item_list endpoint.
-        for user_name, profile_url in users:
-            entries += self._extract_stories(profile_url, user_name)
-            # We must clear the rehydration data every time, as each stories
-            # request will be for a different user.
-            self.rehydration_data = None
+# MARK: story/user_list
+class TiktokStoryUserListRequest(TiktokPaginationRequest):
+    def __init__(self):
+        super().__init__("story/user_list", TiktokItemCursor)
+        self.exit_early_due_to_no_cookies = False
 
-        for video in entries:
-            data = {"_extractor": TiktokPostExtractor}
-            yield Message.Queue, video, data
+    def validate_query_parameters(self, query_parameters):
+        super().validate_query_parameters(query_parameters)
+        # Not sure what this parameter does.
+        assert "storyFeedScene" in query_parameters
+        assert query_parameters["storyFeedScene"] == "3"
 
-    def _user_list_id_extractor(self, data):
+    def extract_items(self, data):
         if "storyUsers" not in data:
-            raise exception.ExtractionError("You must provide cookies to "
-                                            "extract the stories of your "
-                                            "following list")
+            self.exit_early_due_to_no_cookies = True
+            return {}
         return dict((item["user"]["id"], item["user"]["uniqueId"])
                     for item in data["storyUsers"])
 
-    def _user_list_url_generator(self, ids, item_details, _profile_url,
-                                 _range_predicate):
-        tuples = []
-        for id in ids:
-            name = item_details.get(id, id)
-            tuples.append((name, f"https://www.tiktok.com/@{name}"))
-        return tuples
+    def exit_early(self, extractor, url):
+        if self.exit_early_due_to_no_cookies:
+            extractor.log.error("You must provide cookies to extract the "
+                                "stories of your following list")
+        return self.exit_early_due_to_no_cookies
+
+    def generate_urls(self):
+        return [(name, f"https://www.tiktok.com/@{name}")
+                for name in self.items.values()]
