@@ -127,7 +127,7 @@ class AryionExtractor(Extractor):
                 if text.extr(item, 'data-item-type="', '"') == "Folders":
                     folder = text.extr(item, "href='", "'").rpartition("/")[2]
                     if self.recursive:
-                        yield from self._pagination(url, folder)
+                        yield from self._pagination_folders(url, folder)
                     else:
                         self.log.debug("Skipping folder '%s'", folder)
                 else:
