@@ -95,7 +95,7 @@ class FuraffinityExtractor(Extractor):
 
         if self._new_layout:
             data["tags"] = text.split_html(extr(
-                'class="tags-row">', '</section>'))
+                "<h3>Keywords</h3>", "</section>"))
             data["scraps"] = (extr(' submissions">', "<") == "Scraps")
             data["title"] = text.unescape(extr("<h2><p>", "</p></h2>"))
             data["artist_url"] = extr('title="', '"').strip()
