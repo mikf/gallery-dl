@@ -282,12 +282,20 @@ class PathFormat():
             segments = []
             strip = self.strip
             for fmt in formatters:
-                segment = fmt(kwdict).strip()
-                if strip and segment not in {".", ".."}:
-                    # remove trailing dots and spaces (#647)
-                    segment = segment.rstrip(strip)
-                if segment:
-                    segments.append(self.clean_segment(segment))
+                segment = fmt(kwdict)
+                if segment.__class__ is str:
+                    segment = segment.strip()
+                    if strip and segment not in {".", ".."}:
+                        segment = segment.rstrip(strip)
+                    if segment:
+                        segments.append(self.clean_segment(segment))
+                else:  # assume list
+                    for segment in segment:
+                        segment = segment.strip()
+                        if strip and segment not in {".", ".."}:
+                            segment = segment.rstrip(strip)
+                        if segment:
+                            segments.append(self.clean_segment(segment))
             return segments
         except Exception as exc:
             raise exception.DirectoryFormatError(exc)
