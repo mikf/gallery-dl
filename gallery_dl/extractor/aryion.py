@@ -108,7 +108,7 @@ class AryionExtractor(Extractor):
                 return
             url = self.root + text.rextr(page, "href='", "'", pos)
 
-    def _pagination_folders(self, url, folder=None):
+    def _pagination_folders(self, url, folder=None, seen=None):
         if folder is None:
             self.kwdict["folder"] = ""
         else:
@@ -126,10 +126,15 @@ class AryionExtractor(Extractor):
                 cnt += 1
                 if text.extr(item, 'data-item-type="', '"') == "Folders":
                     folder = text.extr(item, "href='", "'").rpartition("/")[2]
-                    if self.recursive:
-                        yield from self._pagination_folders(url, folder)
-                    else:
-                        self.log.debug("Skipping folder '%s'", folder)
+                    if seen is None:
+                        seen = set()
+                    if folder not in seen:
+                        seen.add(folder)
+                        if self.recursive:
+                            yield from self._pagination_folders(
+                                url, folder, seen)
+                        else:
+                            self.log.debug("Skipping folder '%s'", folder)
                 else:
                     yield text.extr(item, "data-item-id='", "'")
 
