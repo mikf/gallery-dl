@@ -207,6 +207,7 @@ CATEGORY_MAP = {
     "webmshare"      : "webmshare",
     "webtoons"       : "WEBTOON",
     "weebcentral"    : "Weeb Central",
+    "weebdex"        : "WeebDex",
     "wikiart"        : "WikiArt.org",
     "wikigg"         : "wiki.gg",
     "wikimediacommons": "Wikimedia Commons",

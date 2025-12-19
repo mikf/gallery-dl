@@ -231,6 +231,7 @@ modules = [
     "webmshare",
     "webtoons",
     "weebcentral",
+    "weebdex",
     "weibo",
     "wikiart",
     "wikifeet",
