@@ -59,7 +59,7 @@ class S3ndpicsExtractor(Extractor):
 
 class S3ndpicsPostExtractor(S3ndpicsExtractor):
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/post/([0-9a-f]+)"
+    pattern = BASE_PATTERN + r"/post/([0-9a-f]+)"
     example = "https://s3nd.pics/post/0123456789abcdef01234567"
 
     def posts(self):
@@ -69,7 +69,7 @@ class S3ndpicsPostExtractor(S3ndpicsExtractor):
 
 class S3ndpicsUserExtractor(S3ndpicsExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/user/(\w+)"
+    pattern = BASE_PATTERN + r"/user/(\w+)"
     example = "https://s3nd.pics/user/USER"
 
     def posts(self):
@@ -87,7 +87,7 @@ class S3ndpicsUserExtractor(S3ndpicsExtractor):
 
 class S3ndpicsSearchExtractor(S3ndpicsExtractor):
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/search/?\?([^#]+)"
+    pattern = BASE_PATTERN + r"/search/?\?([^#]+)"
     example = "https://s3nd.pics/search?QUERY"
 
     def posts(self):

@@ -349,7 +349,7 @@ class DanbooruMediaassetExtractor(DanbooruExtractor):
     subcategory = "media-asset"
     filename_fmt = "{category}_ma{id}_{filename}.{extension}"
     archive_fmt = "m{id}"
-    pattern = rf"{BASE_PATTERN}/media_assets/(\d+)"
+    pattern = BASE_PATTERN + r"/media_assets/(\d+)"
     example = "https://danbooru.donmai.us/media_assets/12345"
 
     def posts(self):

@@ -28,7 +28,7 @@ class ImgpileExtractor(Extractor):
 
 class ImgpilePostExtractor(ImgpileExtractor):
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/p/(\w+)"
+    pattern = BASE_PATTERN + r"/p/(\w+)"
     example = "https://imgpile.com/p/AbCdEfG"
 
     def items(self):
@@ -78,7 +78,7 @@ class ImgpilePostExtractor(ImgpileExtractor):
 
 class ImgpileUserExtractor(ImgpileExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/u/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/u/([^/?#]+)"
     example = "https://imgpile.com/u/USER"
 
     def items(self):

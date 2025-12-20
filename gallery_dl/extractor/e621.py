@@ -145,7 +145,7 @@ class E621PopularExtractor(E621Extractor, danbooru.DanbooruPopularExtractor):
 class E621ArtistExtractor(E621Extractor, danbooru.DanbooruArtistExtractor):
     """Extractor for e621 artists"""
     subcategory = "artist"
-    pattern = rf"{BASE_PATTERN}/artists/(\d+)"
+    pattern = BASE_PATTERN + r"/artists/(\d+)"
     example = "https://e621.net/artists/12345"
 
     items = E621Extractor.items_artists
@@ -155,7 +155,7 @@ class E621ArtistSearchExtractor(E621Extractor,
                                 danbooru.DanbooruArtistSearchExtractor):
     """Extractor for e621 artist searches"""
     subcategory = "artist-search"
-    pattern = rf"{BASE_PATTERN}/artists/?\?([^#]+)"
+    pattern = BASE_PATTERN + r"/artists/?\?([^#]+)"
     example = "https://e621.net/artists?QUERY"
 
     items = E621Extractor.items_artists

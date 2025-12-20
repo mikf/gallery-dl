@@ -632,7 +632,7 @@ class InstagramCollectionExtractor(InstagramExtractor):
 class InstagramStoriesTrayExtractor(InstagramExtractor):
     """Extractor for your Instagram account's stories tray"""
     subcategory = "stories-tray"
-    pattern = rf"{BASE_PATTERN}/stories/me/?$()"
+    pattern = BASE_PATTERN + r"/stories/me/?$()"
     example = "https://www.instagram.com/stories/me/"
 
     def items(self):

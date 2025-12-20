@@ -12,7 +12,7 @@ from ..cache import cache, memcache
 import hashlib
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?iwara\.tv"
-USER_PATTERN = rf"{BASE_PATTERN}/profile/([^/?#]+)"
+USER_PATTERN = BASE_PATTERN + r"/profile/([^/?#]+)"
 
 
 class IwaraExtractor(Extractor):
@@ -158,7 +158,7 @@ class IwaraExtractor(Extractor):
 
 class IwaraUserExtractor(Dispatch, IwaraExtractor):
     """Extractor for iwara.tv profile pages"""
-    pattern = rf"{USER_PATTERN}/?$"
+    pattern = USER_PATTERN + r"/?$"
     example = "https://www.iwara.tv/profile/USERNAME"
 
     def items(self):
@@ -172,7 +172,7 @@ class IwaraUserExtractor(Dispatch, IwaraExtractor):
 
 class IwaraUserImagesExtractor(IwaraExtractor):
     subcategory = "user-images"
-    pattern = rf"{USER_PATTERN}/images(?:\?([^#]+))?"
+    pattern = USER_PATTERN + r"/images(?:\?([^#]+))?"
     example = "https://www.iwara.tv/profile/USERNAME/images"
 
     def items(self):
@@ -182,7 +182,7 @@ class IwaraUserImagesExtractor(IwaraExtractor):
 
 class IwaraUserVideosExtractor(IwaraExtractor):
     subcategory = "user-videos"
-    pattern = rf"{USER_PATTERN}/videos(?:\?([^#]+))?"
+    pattern = USER_PATTERN + r"/videos(?:\?([^#]+))?"
     example = "https://www.iwara.tv/profile/USERNAME/videos"
 
     def items(self):
@@ -192,7 +192,7 @@ class IwaraUserVideosExtractor(IwaraExtractor):
 
 class IwaraUserPlaylistsExtractor(IwaraExtractor):
     subcategory = "user-playlists"
-    pattern = rf"{USER_PATTERN}/playlists(?:\?([^#]+))?"
+    pattern = USER_PATTERN + r"/playlists(?:\?([^#]+))?"
     example = "https://www.iwara.tv/profile/USERNAME/playlists"
 
     def items(self):
@@ -207,7 +207,7 @@ class IwaraUserPlaylistsExtractor(IwaraExtractor):
 
 class IwaraFollowingExtractor(IwaraExtractor):
     subcategory = "following"
-    pattern = rf"{USER_PATTERN}/following"
+    pattern = USER_PATTERN + r"/following"
     example = "https://www.iwara.tv/profile/USERNAME/following"
 
     def items(self):
@@ -217,7 +217,7 @@ class IwaraFollowingExtractor(IwaraExtractor):
 
 class IwaraFollowersExtractor(IwaraExtractor):
     subcategory = "followers"
-    pattern = rf"{USER_PATTERN}/followers"
+    pattern = USER_PATTERN + r"/followers"
     example = "https://www.iwara.tv/profile/USERNAME/followers"
 
     def items(self):
@@ -228,7 +228,7 @@ class IwaraFollowersExtractor(IwaraExtractor):
 class IwaraImageExtractor(IwaraExtractor):
     """Extractor for individual iwara.tv image pages"""
     subcategory = "image"
-    pattern = rf"{BASE_PATTERN}/image/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/image/([^/?#]+)"
     example = "https://www.iwara.tv/image/ID"
 
     def items(self):
@@ -238,7 +238,7 @@ class IwaraImageExtractor(IwaraExtractor):
 class IwaraVideoExtractor(IwaraExtractor):
     """Extractor for individual iwara.tv videos"""
     subcategory = "video"
-    pattern = rf"{BASE_PATTERN}/video/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/video/([^/?#]+)"
     example = "https://www.iwara.tv/video/ID"
 
     def items(self):
@@ -248,7 +248,7 @@ class IwaraVideoExtractor(IwaraExtractor):
 class IwaraPlaylistExtractor(IwaraExtractor):
     """Extractor for individual iwara.tv playlist pages"""
     subcategory = "playlist"
-    pattern = rf"{BASE_PATTERN}/playlist/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/playlist/([^/?#]+)"
     example = "https://www.iwara.tv/playlist/ID"
 
     def items(self):
@@ -257,7 +257,7 @@ class IwaraPlaylistExtractor(IwaraExtractor):
 
 class IwaraFavoriteExtractor(IwaraExtractor):
     subcategory = "favorite"
-    pattern = rf"{BASE_PATTERN}/favorites(?:/(image|video)s)?"
+    pattern = BASE_PATTERN + r"/favorites(?:/(image|video)s)?"
     example = "https://www.iwara.tv/favorites/videos"
 
     def items(self):
@@ -268,7 +268,7 @@ class IwaraFavoriteExtractor(IwaraExtractor):
 class IwaraSearchExtractor(IwaraExtractor):
     """Extractor for iwara.tv search pages"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/search\?([^#]+)"
+    pattern = BASE_PATTERN + r"/search\?([^#]+)"
     example = "https://www.iwara.tv/search?query=QUERY&type=TYPE"
 
     def items(self):
@@ -281,7 +281,7 @@ class IwaraSearchExtractor(IwaraExtractor):
 class IwaraTagExtractor(IwaraExtractor):
     """Extractor for iwara.tv tag search"""
     subcategory = "tag"
-    pattern = rf"{BASE_PATTERN}/(image|video)s(?:\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/(image|video)s(?:\?([^#]+))?"
     example = "https://www.iwara.tv/videos?tags=TAGS"
 
     def items(self):

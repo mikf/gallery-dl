@@ -282,8 +282,8 @@ BASE_PATTERN = XenforoExtractor.update({
 
 class XenforoPostExtractor(XenforoExtractor):
     subcategory = "post"
-    pattern = (rf"{BASE_PATTERN}(/(?:index\.php\?)?threads"
-               rf"/[^/?#]+/post-|/posts/)(\d+)")
+    pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?threads"
+               r"/[^/?#]+/post-|/posts/)(\d+)")
     example = "https://simpcity.cr/threads/TITLE.12345/post-54321"
 
     def posts(self):
@@ -303,8 +303,8 @@ class XenforoPostExtractor(XenforoExtractor):
 
 class XenforoThreadExtractor(XenforoExtractor):
     subcategory = "thread"
-    pattern = (rf"{BASE_PATTERN}(/(?:index\.php\?)?threads"
-               rf"/(?:[^/?#]+\.)?\d+)(?:/page-(\d+))?")
+    pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?threads"
+               r"/(?:[^/?#]+\.)?\d+)(?:/page-(\d+))?")
     example = "https://simpcity.cr/threads/TITLE.12345/"
 
     def posts(self):
@@ -332,8 +332,8 @@ class XenforoThreadExtractor(XenforoExtractor):
 
 class XenforoForumExtractor(XenforoExtractor):
     subcategory = "forum"
-    pattern = (rf"{BASE_PATTERN}(/(?:index\.php\?)?forums"
-               rf"/(?:[^/?#]+\.)?[^/?#]+)(?:/page-(\d+))?")
+    pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?forums"
+               r"/(?:[^/?#]+\.)?[^/?#]+)(?:/page-(\d+))?")
     example = "https://simpcity.cr/forums/TITLE.123/"
 
     def items(self):

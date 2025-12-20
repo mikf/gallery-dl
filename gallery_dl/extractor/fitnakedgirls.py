@@ -50,7 +50,7 @@ class FitnakedgirlsGalleryExtractor(GalleryExtractor, FitnakedgirlsExtractor):
     directory_fmt = ("{category}", "{title}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{gallery_id}_{filename}"
-    pattern = rf"{BASE_PATTERN}/photos/gallery/([\w-]+)/?$"
+    pattern = BASE_PATTERN + r"/photos/gallery/([\w-]+)/?$"
     example = "https://fitnakedgirls.com/photos/gallery/MODEL-nude/"
 
     def __init__(self, match):
@@ -110,7 +110,7 @@ class FitnakedgirlsGalleryExtractor(GalleryExtractor, FitnakedgirlsExtractor):
 class FitnakedgirlsCategoryExtractor(FitnakedgirlsExtractor):
     """Extractor for fitnakedgirls category pages"""
     subcategory = "category"
-    pattern = rf"{BASE_PATTERN}/photos/gallery/category/([\w-]+)"
+    pattern = BASE_PATTERN + r"/photos/gallery/category/([\w-]+)"
     example = "https://fitnakedgirls.com/photos/gallery/category/CATEGORY/"
 
     def galleries(self):
@@ -121,7 +121,7 @@ class FitnakedgirlsCategoryExtractor(FitnakedgirlsExtractor):
 class FitnakedgirlsTagExtractor(FitnakedgirlsExtractor):
     """Extractor for fitnakedgirls tag pages"""
     subcategory = "tag"
-    pattern = rf"{BASE_PATTERN}/photos/gallery/tag/([\w-]+)"
+    pattern = BASE_PATTERN + r"/photos/gallery/tag/([\w-]+)"
     example = "https://fitnakedgirls.com/photos/gallery/tag/TAG/"
 
     def galleries(self):
@@ -135,7 +135,7 @@ class FitnakedgirlsVideoExtractor(FitnakedgirlsExtractor):
     directory_fmt = ("{category}", "{title}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{video_id}_{filename}"
-    pattern = rf"{BASE_PATTERN}/videos/(\d+)/(\d+)/([\w-]+)"
+    pattern = BASE_PATTERN + r"/videos/(\d+)/(\d+)/([\w-]+)"
     example = "https://fitnakedgirls.com/videos/2025/08/VIDEO-TITLE/"
 
     def items(self):
@@ -168,7 +168,7 @@ class FitnakedgirlsBlogExtractor(FitnakedgirlsExtractor):
     directory_fmt = ("{category}", "{title}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{post_id}_{filename}"
-    pattern = rf"{BASE_PATTERN}/fitblog/([\w-]+)"
+    pattern = BASE_PATTERN + r"/fitblog/([\w-]+)"
     example = "https://fitnakedgirls.com/fitblog/MODEL-NAME/"
 
     def items(self):
