@@ -90,6 +90,8 @@
     --sleep SECONDS             Number of seconds to wait before each download.
                                 This can be either a constant value or a range
                                 (e.g. 2.7 or 2.0-3.5)
+    --sleep-skip SECONDS        Number of seconds to wait after skipping a file
+                                download
     --sleep-request SECONDS     Number of seconds to wait between HTTP requests
                                 during data extraction
     --sleep-429 SECONDS         Number of seconds to wait when receiving a '429

@@ -533,11 +533,14 @@ class DownloadJob(Job):
                 callback(pathfmt)
         self.out.skip(pathfmt.path)
 
-        if self._skipexc:
+        if self._skipexc is not None:
             if self._skipftr is None or self._skipftr(pathfmt.kwdict):
                 self._skipcnt += 1
                 if self._skipcnt >= self._skipmax:
                     raise self._skipexc
+
+        if self.sleep_skip is not None:
+            self.extractor.sleep(self.sleep_skip(), "skip")
 
     def download(self, url):
         """Download 'url'"""
@@ -582,6 +585,7 @@ class DownloadJob(Job):
             pathfmt.set_directory(kwdict)
 
         self.sleep = util.build_duration_func(cfg("sleep"))
+        self.sleep_skip = util.build_duration_func(cfg("sleep-skip"))
         self.fallback = cfg("fallback", True)
         if not cfg("download", True):
             # monkey-patch method to do nothing and always return True
