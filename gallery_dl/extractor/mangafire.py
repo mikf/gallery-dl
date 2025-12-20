@@ -31,8 +31,8 @@ class MangafireChapterExtractor(MangafireBase, ChapterExtractor):
         "{page:>03}.{extension}")
     archive_fmt = (
         "{manga_id}_{chapter_id}_{page}")
-    pattern = (rf"{BASE_PATTERN}/read/([\w-]+\.(\w+))/([\w-]+)"
-               rf"/((chapter|volume)-\d+(?:\D.*)?)")
+    pattern = (BASE_PATTERN + r"/read/([\w-]+\.(\w+))/([\w-]+)"
+               r"/((chapter|volume)-\d+(?:\D.*)?)")
     example = "https://mangafire.to/read/MANGA.ID/LANG/chapter-123"
 
     def metadata(self, _):
@@ -64,7 +64,7 @@ class MangafireChapterExtractor(MangafireBase, ChapterExtractor):
 class MangafireMangaExtractor(MangafireBase, MangaExtractor):
     """Extractor for mangafire manga"""
     chapterclass = MangafireChapterExtractor
-    pattern = rf"{BASE_PATTERN}/manga/([\w-]+)\.(\w+)"
+    pattern = BASE_PATTERN + r"/manga/([\w-]+)\.(\w+)"
     example = "https://mangafire.to/manga/MANGA.ID"
 
     def chapters(self, page):

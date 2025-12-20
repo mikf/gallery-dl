@@ -31,8 +31,8 @@ class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
         "{page:>03}.{extension}")
     archive_fmt = (
         "{manga_id}_{chapter_id}_{page}")
-    pattern = (rf"{BASE_PATTERN}/read/([\w-]+-\d+)/([^/?#]+)"
-               rf"/(chapter|volume)-(\d+[^/?#]*)")
+    pattern = (BASE_PATTERN + r"/read/([\w-]+-\d+)/([^/?#]+)"
+               r"/(chapter|volume)-(\d+[^/?#]*)")
     example = "https://mangareader.to/read/MANGA-123/LANG/chapter-123"
 
     def metadata(self, _):
@@ -81,7 +81,7 @@ class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
 class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
     """Extractor for mangareader manga"""
     chapterclass = MangareaderChapterExtractor
-    pattern = rf"{BASE_PATTERN}/([\w-]+-\d+)"
+    pattern = BASE_PATTERN + r"/([\w-]+-\d+)"
     example = "https://mangareader.to/MANGA-123"
 
     def chapters(self, page):

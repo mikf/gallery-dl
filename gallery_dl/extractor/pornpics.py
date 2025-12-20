@@ -125,8 +125,8 @@ class PornpicsListingExtractor(PornpicsExtractor):
     and use single quotes in HTML, unlike category pages.
     """
     subcategory = "listing"
-    pattern = (rf"{BASE_PATTERN}"
-               rf"/(popular|recent|rating|likes|views|comments)/?$")
+    pattern = (BASE_PATTERN +
+               r"/(popular|recent|rating|likes|views|comments)/?$")
     example = "https://www.pornpics.com/popular/"
 
     def galleries(self):
@@ -142,7 +142,7 @@ class PornpicsListingExtractor(PornpicsExtractor):
 class PornpicsCategoryExtractor(PornpicsExtractor):
     """Extractor for galleries from pornpics categories"""
     subcategory = "category"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/?$"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/?$"
     example = "https://www.pornpics.com/ass/"
 
     def galleries(self):

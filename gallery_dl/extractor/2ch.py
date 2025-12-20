@@ -20,7 +20,7 @@ class _2chThreadExtractor(Extractor):
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{tim}{filename:? //}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/res/(\d+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
     example = "https://2ch.org/a/res/12345.html"
 
     def __init__(self, match):
@@ -66,7 +66,7 @@ class _2chBoardExtractor(Extractor):
     category = "2ch"
     subcategory = "board"
     root = "https://2ch.org"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/?$"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/?$"
     example = "https://2ch.org/a/"
 
     def __init__(self, match):

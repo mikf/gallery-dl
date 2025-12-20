@@ -16,7 +16,7 @@ import json
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|beta\.)?"
                 r"(kemono|coomer)\.(cr|s[tu]|party)")
-USER_PATTERN = rf"{BASE_PATTERN}/([^/?#]+)/user/([^/?#]+)"
+USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
 HASH_PATTERN = r"/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})"
 
 
@@ -322,7 +322,7 @@ def _validate(response):
 class KemonoUserExtractor(KemonoExtractor):
     """Extractor for all posts from a kemono.cr user listing"""
     subcategory = "user"
-    pattern = rf"{USER_PATTERN}/?(?:\?([^#]+))?(?:$|\?|#)"
+    pattern = USER_PATTERN + r"/?(?:\?([^#]+))?(?:$|\?|#)"
     example = "https://kemono.cr/SERVICE/user/12345"
 
     def __init__(self, match):
@@ -345,7 +345,7 @@ class KemonoUserExtractor(KemonoExtractor):
 class KemonoPostsExtractor(KemonoExtractor):
     """Extractor for kemono.cr post listings"""
     subcategory = "posts"
-    pattern = rf"{BASE_PATTERN}/posts()()(?:/?\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/posts()()(?:/?\?([^#]+))?"
     example = "https://kemono.cr/posts"
 
     def posts(self):
@@ -357,7 +357,7 @@ class KemonoPostsExtractor(KemonoExtractor):
 class KemonoPostExtractor(KemonoExtractor):
     """Extractor for a single kemono.cr post"""
     subcategory = "post"
-    pattern = rf"{USER_PATTERN}/post/([^/?#]+)(/revisions?(?:/(\d*))?)?"
+    pattern = USER_PATTERN + r"/post/([^/?#]+)(/revisions?(?:/(\d*))?)?"
     example = "https://kemono.cr/SERVICE/user/12345/post/12345"
 
     def __init__(self, match):
@@ -390,7 +390,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
                      "{server_id} {server}", "{channel_id} {channel}")
     filename_fmt = "{id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "discord_{server_id}_{id}_{num}"
-    pattern = rf"{BASE_PATTERN}/discord/server/(\d+)[/#](?:channel/)?(\d+)"
+    pattern = BASE_PATTERN + r"/discord/server/(\d+)[/#](?:channel/)?(\d+)"
     example = "https://kemono.cr/discord/server/12345/12345"
 
     def items(self):
@@ -460,7 +460,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
 
 class KemonoDiscordServerExtractor(KemonoExtractor):
     subcategory = "discord-server"
-    pattern = rf"{BASE_PATTERN}/discord/server/(\d+)$"
+    pattern = BASE_PATTERN + r"/discord/server/(\d+)$"
     example = "https://kemono.cr/discord/server/12345"
 
     def items(self):
@@ -488,7 +488,7 @@ def discord_server_info(extr, server_id):
 class KemonoFavoriteExtractor(KemonoExtractor):
     """Extractor for kemono.cr favorites"""
     subcategory = "favorite"
-    pattern = rf"{BASE_PATTERN}/(?:account/)?favorites()()(?:/?\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/(?:account/)?favorites()()(?:/?\?([^#]+))?"
     example = "https://kemono.cr/account/favorites/artists"
 
     def items(self):
@@ -536,7 +536,7 @@ class KemonoFavoriteExtractor(KemonoExtractor):
 class KemonoArtistsExtractor(KemonoExtractor):
     """Extractor for kemono artists"""
     subcategory = "artists"
-    pattern = rf"{BASE_PATTERN}/artists(?:\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/artists(?:\?([^#]+))?"
     example = "https://kemono.cr/artists"
 
     def items(self):

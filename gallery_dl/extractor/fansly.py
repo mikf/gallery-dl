@@ -155,7 +155,7 @@ class FanslyExtractor(Extractor):
 
 class FanslyPostExtractor(FanslyExtractor):
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/post/(\d+)"
+    pattern = BASE_PATTERN + r"/post/(\d+)"
     example = "https://fansly.com/post/1234567890"
 
     def posts(self):
@@ -164,7 +164,7 @@ class FanslyPostExtractor(FanslyExtractor):
 
 class FanslyHomeExtractor(FanslyExtractor):
     subcategory = "home"
-    pattern = rf"{BASE_PATTERN}/home(?:/(?:subscribed()|list/(\d+)))?"
+    pattern = BASE_PATTERN + r"/home(?:/(?:subscribed()|list/(\d+)))?"
     example = "https://fansly.com/home"
 
     def posts(self):
@@ -180,7 +180,7 @@ class FanslyHomeExtractor(FanslyExtractor):
 
 class FanslyListExtractor(FanslyExtractor):
     subcategory = "list"
-    pattern = rf"{BASE_PATTERN}/lists/(\d+)"
+    pattern = BASE_PATTERN + r"/lists/(\d+)"
     example = "https://fansly.com/lists/1234567890"
 
     def items(self):
@@ -193,7 +193,7 @@ class FanslyListExtractor(FanslyExtractor):
 
 class FanslyListsExtractor(FanslyExtractor):
     subcategory = "lists"
-    pattern = rf"{BASE_PATTERN}/lists"
+    pattern = BASE_PATTERN + r"/lists"
     example = "https://fansly.com/lists"
 
     def items(self):
@@ -206,7 +206,7 @@ class FanslyListsExtractor(FanslyExtractor):
 
 class FanslyCreatorPostsExtractor(FanslyExtractor):
     subcategory = "creator-posts"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/posts(?:/wall/(\d+))?"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/posts(?:/wall/(\d+))?"
     example = "https://fansly.com/CREATOR/posts"
 
     def posts_wall(self, account, wall):
@@ -215,7 +215,7 @@ class FanslyCreatorPostsExtractor(FanslyExtractor):
 
 class FanslyCreatorMediaExtractor(FanslyExtractor):
     subcategory = "creator-media"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/media(?:/wall/(\d+))?"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/media(?:/wall/(\d+))?"
     example = "https://fansly.com/CREATOR/media"
 
     def posts_wall(self, account, wall):

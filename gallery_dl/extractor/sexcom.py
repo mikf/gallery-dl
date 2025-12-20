@@ -273,7 +273,7 @@ class SexcomFeedExtractor(SexcomExtractor):
     """Extractor for pins from your account's main feed on www.sex.com"""
     subcategory = "feed"
     directory_fmt = ("{category}", "feed")
-    pattern = rf"{BASE_PATTERN}/feed"
+    pattern = BASE_PATTERN + r"/feed"
     example = "https://www.sex.com/feed/"
 
     def metadata(self):

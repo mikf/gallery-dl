@@ -98,7 +98,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
     directory_fmt = ("{category}", "{id} {title}")
     archive_fmt = "{id}_{num}"
     request_interval = 0.0
-    pattern = rf"{BASE_PATTERN}/(?:g|reader)/(\d+)/(\w+)"
+    pattern = BASE_PATTERN + r"/(?:g|reader)/(\d+)/(\w+)"
     example = "https://niyaniya.moe/g/12345/67890abcde/"
 
     TAG_TYPES = {
@@ -227,7 +227,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
 class SchalenetworkSearchExtractor(SchalenetworkExtractor):
     """Extractor for schale.network search results"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/(?:tag/([^/?#]+)|browse)?(?:/?\?([^#]*))?$"
+    pattern = BASE_PATTERN + r"/(?:tag/([^/?#]+)|browse)?(?:/?\?([^#]*))?$"
     example = "https://niyaniya.moe/browse?s=QUERY"
 
     def items(self):
@@ -252,7 +252,7 @@ class SchalenetworkSearchExtractor(SchalenetworkExtractor):
 class SchalenetworkFavoriteExtractor(SchalenetworkExtractor):
     """Extractor for schale.network favorites"""
     subcategory = "favorite"
-    pattern = rf"{BASE_PATTERN}/favorites(?:\?([^#]*))?"
+    pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
     example = "https://niyaniya.moe/favorites"
 
     def items(self):

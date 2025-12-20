@@ -116,7 +116,7 @@ class ThehentaiworldTagExtractor(ThehentaiworldExtractor):
     page_start = 1
     post_start = 0
     directory_fmt = ("{category}", "{search_tags}")
-    pattern = rf"{BASE_PATTERN}/tag/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/tag/([^/?#]+)"
     example = "https://thehentaiworld.com/tag/TAG/"
 
     def posts(self):
@@ -132,8 +132,8 @@ class ThehentaiworldTagExtractor(ThehentaiworldExtractor):
 
 class ThehentaiworldPostExtractor(ThehentaiworldExtractor):
     subcategory = "post"
-    pattern = (rf"{BASE_PATTERN}("
-               rf"/(?:video|(?:[\w-]+-)?hentai-image)s/([^/?#]+))")
+    pattern = (BASE_PATTERN +
+               r"(/(?:video|(?:[\w-]+-)?hentai-image)s/([^/?#]+))")
     example = "https://thehentaiworld.com/hentai-images/SLUG/"
 
     def posts(self):

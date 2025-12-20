@@ -176,8 +176,8 @@ class PoipikuExtractor(Extractor):
 class PoipikuUserExtractor(PoipikuExtractor):
     """Extractor for posts from a poipiku user"""
     subcategory = "user"
-    pattern = (rf"{BASE_PATTERN}/(?:IllustListPcV\.jsp\?PG=(\d+)&ID=)?"
-               rf"(\d+)/?(?:$|[?&#])")
+    pattern = (BASE_PATTERN + r"/(?:IllustListPcV\.jsp\?PG=(\d+)&ID=)?"
+               r"(\d+)/?(?:$|[?&#])")
     example = "https://poipiku.com/12345/"
 
     def posts(self):
@@ -207,7 +207,7 @@ class PoipikuUserExtractor(PoipikuExtractor):
 class PoipikuPostExtractor(PoipikuExtractor):
     """Extractor for a poipiku post"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/(\d+)/(\d+)"
+    pattern = BASE_PATTERN + r"/(\d+)/(\d+)"
     example = "https://poipiku.com/12345/12345.html"
 
     def posts(self):
