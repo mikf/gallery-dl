@@ -464,6 +464,18 @@ Description
     Number of seconds to sleep before each download.
 
 
+extractor.*.sleep-skip
+----------------------
+Type
+    |Duration|_
+Default
+    ``0``
+Description
+    Number of seconds to sleep after
+    `skipping <extractor.*.skip_>`__
+    a file download.
+
+
 extractor.*.sleep-extractor
 ---------------------------
 Type

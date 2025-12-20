@@ -529,6 +529,11 @@ def build_parser():
               "(e.g. 2.7 or 2.0-3.5)"),
     )
     downloader.add_argument(
+        "--sleep-skip",
+        dest="sleep-skip", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait after skipping a file download"),
+    )
+    downloader.add_argument(
         "--sleep-request",
         dest="sleep-request", metavar="SECONDS", action=ConfigAction,
         help=("Number of seconds to wait between HTTP requests "
