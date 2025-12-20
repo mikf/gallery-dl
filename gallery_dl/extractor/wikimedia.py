@@ -236,7 +236,7 @@ class WikimediaArticleExtractor(WikimediaExtractor):
     """Extractor for wikimedia articles"""
     subcategory = "article"
     directory_fmt = ("{category}", "{page}")
-    pattern = rf"{BASE_PATTERN}/(?!static/)([^?#]+)"
+    pattern = BASE_PATTERN + r"/(?!static/)([^?#]+)"
     example = "https://en.wikipedia.org/wiki/TITLE"
 
     def __init__(self, match):
@@ -286,7 +286,7 @@ class WikimediaArticleExtractor(WikimediaExtractor):
 class WikimediaWikiExtractor(WikimediaExtractor):
     """Extractor for all files on a MediaWiki instance"""
     subcategory = "wiki"
-    pattern = rf"{BASE_PATTERN}/?$"
+    pattern = BASE_PATTERN + r"/?$"
     example = "https://en.wikipedia.org/"
 
     def params(self):

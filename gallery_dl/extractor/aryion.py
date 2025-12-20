@@ -211,7 +211,7 @@ class AryionGalleryExtractor(AryionExtractor):
     """Extractor for a user's gallery on eka's portal"""
     subcategory = "gallery"
     categorytransfer = True
-    pattern = rf"{BASE_PATTERN}/(?:gallery/|user/|latest.php\?name=)([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?:gallery/|user/|latest.php\?name=)([^/?#]+)"
     example = "https://aryion.com/g4/gallery/USER"
 
     def _init(self):
@@ -238,7 +238,7 @@ class AryionFavoriteExtractor(AryionExtractor):
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user!l}", "favorites", "{folder}")
     archive_fmt = "f_{user}_{id}"
-    pattern = rf"{BASE_PATTERN}/favorites/([^/?#]+)(?:/([^?#]+))?"
+    pattern = BASE_PATTERN + r"/favorites/([^/?#]+)(?:/([^?#]+))?"
     example = "https://aryion.com/g4/favorites/USER"
 
     def _init(self):
@@ -253,7 +253,7 @@ class AryionWatchExtractor(AryionExtractor):
     """Extractor for your watched users and tags"""
     subcategory = "watch"
     directory_fmt = ("{category}", "{user!l}",)
-    pattern = rf"{BASE_PATTERN}/messagepage\.php()"
+    pattern = BASE_PATTERN + r"/messagepage\.php()"
     example = "https://aryion.com/g4/messagepage.php"
 
     def posts(self):
@@ -271,7 +271,7 @@ class AryionTagExtractor(AryionExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "tags", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = rf"{BASE_PATTERN}/tags\.php\?([^#]+)"
+    pattern = BASE_PATTERN + r"/tags\.php\?([^#]+)"
     example = "https://aryion.com/g4/tags.php?tag=TAG"
 
     def _init(self):
@@ -293,7 +293,7 @@ class AryionSearchExtractor(AryionExtractor):
                      "{search[q]|search[tags]|search[user]}")
     archive_fmt = ("s_{search[prefix]}"
                    "{search[q]|search[tags]|search[user]}_{id}")
-    pattern = rf"{BASE_PATTERN}/search\.php\?([^#]+)"
+    pattern = BASE_PATTERN + r"/search\.php\?([^#]+)"
     example = "https://aryion.com/g4/search.php?q=TEXT&tags=TAGS&user=USER"
 
     def metadata(self):
@@ -313,7 +313,7 @@ class AryionSearchExtractor(AryionExtractor):
 class AryionPostExtractor(AryionExtractor):
     """Extractor for individual posts on eka's portal"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/view/(\d+)"
+    pattern = BASE_PATTERN + r"/view/(\d+)"
     example = "https://aryion.com/g4/view/12345"
 
     def posts(self):

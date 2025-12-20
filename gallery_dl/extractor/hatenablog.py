@@ -123,7 +123,7 @@ class HatenablogEntriesExtractor(HatenablogExtractor):
 class HatenablogEntryExtractor(HatenablogExtractor):
     """Extractor for a single entry URL"""
     subcategory = "entry"
-    pattern = rf"{BASE_PATTERN}/entry/([^?#]+){QUERY_RE}"
+    pattern = BASE_PATTERN + r"/entry/([^?#]+)" + QUERY_RE
     example = "https://BLOG.hatenablog.com/entry/PATH"
 
     def __init__(self, match):
@@ -146,21 +146,21 @@ class HatenablogEntryExtractor(HatenablogExtractor):
 class HatenablogHomeExtractor(HatenablogEntriesExtractor):
     """Extractor for a blog's home page"""
     subcategory = "home"
-    pattern = rf"{BASE_PATTERN}(/?){QUERY_RE}"
+    pattern = BASE_PATTERN + r"(/?)" + QUERY_RE
     example = "https://BLOG.hatenablog.com"
 
 
 class HatenablogArchiveExtractor(HatenablogEntriesExtractor):
     """Extractor for a blog's archive page"""
     subcategory = "archive"
-    pattern = (rf"{BASE_PATTERN}(/archive(?:/\d+(?:/\d+(?:/\d+)?)?"
-               rf"|/category/[^?#]+)?){QUERY_RE}")
+    pattern = (BASE_PATTERN + r"(/archive(?:/\d+(?:/\d+(?:/\d+)?)?"
+               r"|/category/[^?#]+)?)" + QUERY_RE)
     example = "https://BLOG.hatenablog.com/archive/2024"
 
 
 class HatenablogSearchExtractor(HatenablogEntriesExtractor):
     """Extractor for a blog's search results"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}(/search){QUERY_RE}"
+    pattern = BASE_PATTERN + r"(/search)" + QUERY_RE
     example = "https://BLOG.hatenablog.com/search?q=QUERY"
     allowed_parameters = ("q",)

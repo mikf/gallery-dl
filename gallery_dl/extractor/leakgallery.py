@@ -81,7 +81,7 @@ class LeakgalleryUserExtractor(LeakgalleryExtractor):
 class LeakgalleryTrendingExtractor(LeakgalleryExtractor):
     """Extractor for trending posts on leakgallery.com"""
     subcategory = "trending"
-    pattern = rf"{BASE_PATTERN}/trending-medias(?:/([\w-]+))?"
+    pattern = BASE_PATTERN + r"/trending-medias(?:/([\w-]+))?"
     example = "https://leakgallery.com/trending-medias/Week"
 
     def items(self):
@@ -93,7 +93,7 @@ class LeakgalleryTrendingExtractor(LeakgalleryExtractor):
 class LeakgalleryMostlikedExtractor(LeakgalleryExtractor):
     """Extractor for most liked posts on leakgallery.com"""
     subcategory = "mostliked"
-    pattern = rf"{BASE_PATTERN}/most-liked"
+    pattern = BASE_PATTERN + r"/most-liked"
     example = "https://leakgallery.com/most-liked"
 
     def items(self):
@@ -104,7 +104,7 @@ class LeakgalleryMostlikedExtractor(LeakgalleryExtractor):
 class LeakgalleryPostExtractor(LeakgalleryExtractor):
     """Extractor for individual posts on leakgallery.com"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/(\d+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/(\d+)"
     example = "https://leakgallery.com/CREATOR/12345"
 
     def items(self):

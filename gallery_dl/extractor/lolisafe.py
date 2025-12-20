@@ -25,7 +25,7 @@ BASE_PATTERN = LolisafeExtractor.update({
 
 class LolisafeAlbumExtractor(LolisafeExtractor):
     subcategory = "album"
-    pattern = rf"{BASE_PATTERN}/a/([^/?#]+)"
+    pattern = BASE_PATTERN + "/a/([^/?#]+)"
     example = "https://xbunkr.com/a/ID"
 
     def __init__(self, match):

@@ -60,7 +60,7 @@ BASE_PATTERN = CheveretoExtractor.update({
 class CheveretoImageExtractor(CheveretoExtractor):
     """Extractor for chevereto images"""
     subcategory = "image"
-    pattern = rf"{BASE_PATTERN}(/im(?:g|age)/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/im(?:g|age)/[^/?#]+)"
     example = "https://jpg7.cr/img/TITLE.ID"
 
     def items(self):
@@ -98,7 +98,7 @@ class CheveretoImageExtractor(CheveretoExtractor):
 class CheveretoVideoExtractor(CheveretoExtractor):
     """Extractor for chevereto videos"""
     subcategory = "video"
-    pattern = rf"{BASE_PATTERN}(/video/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/video/[^/?#]+)"
     example = "https://imagepond.net/video/TITLE.ID"
 
     def items(self):
@@ -145,7 +145,7 @@ class CheveretoVideoExtractor(CheveretoExtractor):
 class CheveretoAlbumExtractor(CheveretoExtractor):
     """Extractor for chevereto albums"""
     subcategory = "album"
-    pattern = rf"{BASE_PATTERN}(/a(?:lbum)?/[^/?#]+(?:/sub)?)"
+    pattern = BASE_PATTERN + r"(/a(?:lbum)?/[^/?#]+(?:/sub)?)"
     example = "https://jpg7.cr/album/TITLE.ID"
 
     def items(self):
@@ -182,7 +182,7 @@ class CheveretoAlbumExtractor(CheveretoExtractor):
 class CheveretoCategoryExtractor(CheveretoExtractor):
     """Extractor for chevereto galleries"""
     subcategory = "category"
-    pattern = rf"{BASE_PATTERN}(/category/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/category/[^/?#]+)"
     example = "https://imglike.com/category/TITLE"
 
     def items(self):
@@ -194,7 +194,7 @@ class CheveretoCategoryExtractor(CheveretoExtractor):
 class CheveretoUserExtractor(CheveretoExtractor):
     """Extractor for chevereto users"""
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}(/[^/?#]+(?:/albums)?)"
+    pattern = BASE_PATTERN + r"(/[^/?#]+(?:/albums)?)"
     example = "https://jpg7.cr/USER"
 
     def items(self):

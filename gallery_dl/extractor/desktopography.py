@@ -22,7 +22,7 @@ class DesktopographyExtractor(Extractor):
 class DesktopographySiteExtractor(DesktopographyExtractor):
     """Extractor for all desktopography exhibitions """
     subcategory = "site"
-    pattern = rf"{BASE_PATTERN}/$"
+    pattern = BASE_PATTERN + r"/$"
     example = "https://desktopography.net/"
 
     def items(self):
@@ -41,7 +41,7 @@ class DesktopographySiteExtractor(DesktopographyExtractor):
 class DesktopographyExhibitionExtractor(DesktopographyExtractor):
     """Extractor for a yearly desktopography exhibition"""
     subcategory = "exhibition"
-    pattern = rf"{BASE_PATTERN}/exhibition-([^/?#]+)/"
+    pattern = BASE_PATTERN + r"/exhibition-([^/?#]+)/"
     example = "https://desktopography.net/exhibition-2020/"
 
     def __init__(self, match):
@@ -70,7 +70,7 @@ class DesktopographyExhibitionExtractor(DesktopographyExtractor):
 class DesktopographyEntryExtractor(DesktopographyExtractor):
     """Extractor for all resolutions of a desktopography wallpaper"""
     subcategory = "entry"
-    pattern = rf"{BASE_PATTERN}/portfolios/([\w-]+)"
+    pattern = BASE_PATTERN + r"/portfolios/([\w-]+)"
     example = "https://desktopography.net/portfolios/NAME/"
 
     def __init__(self, match):
