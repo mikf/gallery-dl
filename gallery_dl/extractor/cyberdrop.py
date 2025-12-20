@@ -18,7 +18,7 @@ class CyberdropAlbumExtractor(lolisafe.LolisafeAlbumExtractor):
     category = "cyberdrop"
     root = "https://cyberdrop.cr"
     root_api = "https://api.cyberdrop.cr"
-    pattern = rf"{BASE_PATTERN}/a/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://cyberdrop.cr/a/ID"
 
     def items(self):
@@ -76,7 +76,7 @@ class CyberdropMediaExtractor(CyberdropAlbumExtractor):
     """Extractor for cyberdrop media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-    pattern = rf"{BASE_PATTERN}/f/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/f/([^/?#]+)"
     example = "https://cyberdrop.cr/f/ID"
 
     def fetch_album(self, album_id):

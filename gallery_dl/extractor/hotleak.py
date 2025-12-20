@@ -61,7 +61,7 @@ def decode_video_url(url):
 class HotleakPostExtractor(HotleakExtractor):
     """Extractor for individual posts on hotleak"""
     subcategory = "post"
-    pattern = (rf"{BASE_PATTERN}/(?!(?:hot|creators|videos|photos)(?:$|/))"
+    pattern = (BASE_PATTERN + r"/(?!(?:hot|creators|videos|photos)(?:$|/))"
                r"([^/]+)/(photo|video)/(\d+)")
     example = "https://hotleak.vip/MODEL/photo/12345"
 
@@ -96,7 +96,7 @@ class HotleakPostExtractor(HotleakExtractor):
 class HotleakCreatorExtractor(HotleakExtractor):
     """Extractor for all posts from a hotleak creator"""
     subcategory = "creator"
-    pattern = (rf"{BASE_PATTERN}/(?!(?:hot|creators|videos|photos)(?:$|/))"
+    pattern = (BASE_PATTERN + r"/(?!(?:hot|creators|videos|photos)(?:$|/))"
                r"([^/?#]+)/?$")
     example = "https://hotleak.vip/MODEL"
 
@@ -150,7 +150,7 @@ class HotleakCreatorExtractor(HotleakExtractor):
 class HotleakCategoryExtractor(HotleakExtractor):
     """Extractor for hotleak categories"""
     subcategory = "category"
-    pattern = rf"{BASE_PATTERN}/(hot|creators|videos|photos)(?:/?\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/(hot|creators|videos|photos)(?:/?\?([^#]+))?"
     example = "https://hotleak.vip/photos"
 
     def __init__(self, match):
@@ -172,7 +172,7 @@ class HotleakCategoryExtractor(HotleakExtractor):
 class HotleakSearchExtractor(HotleakExtractor):
     """Extractor for hotleak search results"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/search(?:/?\?([^#]+))"
+    pattern = BASE_PATTERN + r"/search(?:/?\?([^#]+))"
     example = "https://hotleak.vip/search?search=QUERY"
 
     def __init__(self, match):

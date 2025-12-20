@@ -11,9 +11,9 @@ from .. import text, util, exception
 from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?facebook\.com"
-USER_PATTERN = (rf"{BASE_PATTERN}/"
-                rf"(?!media/|photo/|photo.php|watch/|permalink.php)"
-                rf"(?:profile\.php\?id=|people/[^/?#]+/)?([^/?&#]+)")
+USER_PATTERN = (BASE_PATTERN +
+                r"/(?!media/|photo/|photo.php|watch/|permalink.php)"
+                r"(?:profile\.php\?id=|people/[^/?#]+/)?([^/?&#]+)")
 
 
 class FacebookExtractor(Extractor):
@@ -389,9 +389,9 @@ class FacebookExtractor(Extractor):
 class FacebookPhotoExtractor(FacebookExtractor):
     """Base class for Facebook Photo extractors"""
     subcategory = "photo"
-    pattern = (rf"{BASE_PATTERN}/"
-               rf"(?:[^/?#]+/photos/[^/?#]+/|photo(?:.php)?/?\?"
-               rf"(?:[^&#]+&)*fbid=)([^/?&#]+)[^/?#]*(?<!&setextract)$")
+    pattern = (BASE_PATTERN +
+               r"/(?:[^/?#]+/photos/[^/?#]+/|photo(?:.php)?/?\?"
+               r"(?:[^&#]+&)*fbid=)([^/?&#]+)[^/?#]*(?<!&setextract)$")
     example = "https://www.facebook.com/photo/?fbid=PHOTO_ID"
 
     def items(self):
@@ -427,11 +427,12 @@ class FacebookSetExtractor(FacebookExtractor):
     """Base class for Facebook Set extractors"""
     subcategory = "set"
     pattern = (
-        rf"{BASE_PATTERN}/"
-        rf"(?:(?:media/set|photo)/?\?(?:[^&#]+&)*set=([^&#]+)"
-        rf"[^/?#]*(?<!&setextract)$"
-        rf"|([^/?#]+/posts/[^/?#]+)"
-        rf"|photo/\?(?:[^&#]+&)*fbid=([^/?&#]+)&set=([^/?&#]+)&setextract)")
+        BASE_PATTERN +
+        r"/(?:(?:media/set|photo)/?\?(?:[^&#]+&)*set=([^&#]+)"
+        r"[^/?#]*(?<!&setextract)$"
+        r"|([^/?#]+/posts/[^/?#]+)"
+        r"|photo/\?(?:[^&#]+&)*fbid=([^/?&#]+)&set=([^/?&#]+)&setextract)"
+    )
     example = "https://www.facebook.com/media/set/?set=SET_ID"
 
     def items(self):
@@ -454,7 +455,7 @@ class FacebookVideoExtractor(FacebookExtractor):
     """Base class for Facebook Video extractors"""
     subcategory = "video"
     directory_fmt = ("{category}", "{username}", "{subcategory}")
-    pattern = rf"{BASE_PATTERN}/(?:[^/?#]+/videos/|watch/?\?v=)([^/?&#]+)"
+    pattern = BASE_PATTERN + r"/(?:[^/?#]+/videos/|watch/?\?v=)([^/?&#]+)"
     example = "https://www.facebook.com/watch/?v=VIDEO_ID"
 
     def items(self):
@@ -481,7 +482,7 @@ class FacebookInfoExtractor(FacebookExtractor):
     """Extractor for Facebook Profile data"""
     subcategory = "info"
     directory_fmt = ("{category}", "{username}")
-    pattern = rf"{USER_PATTERN}/info"
+    pattern = USER_PATTERN + r"/info"
     example = "https://www.facebook.com/USERNAME/info"
 
     def items(self):
@@ -492,7 +493,7 @@ class FacebookInfoExtractor(FacebookExtractor):
 class FacebookAlbumsExtractor(FacebookExtractor):
     """Extractor for Facebook Profile albums"""
     subcategory = "albums"
-    pattern = rf"{USER_PATTERN}/photos_albums(?:/([^/?#]+))?"
+    pattern = USER_PATTERN + r"/photos_albums(?:/([^/?#]+))?"
     example = "https://www.facebook.com/USERNAME/photos_albums"
 
     def items(self):
@@ -525,7 +526,7 @@ class FacebookAlbumsExtractor(FacebookExtractor):
 class FacebookPhotosExtractor(FacebookExtractor):
     """Extractor for Facebook Profile Photos"""
     subcategory = "photos"
-    pattern = rf"{USER_PATTERN}/photos(?:_by)?"
+    pattern = USER_PATTERN + r"/photos(?:_by)?"
     example = "https://www.facebook.com/USERNAME/photos"
 
     def items(self):
@@ -542,7 +543,7 @@ class FacebookPhotosExtractor(FacebookExtractor):
 class FacebookAvatarExtractor(FacebookExtractor):
     """Extractor for Facebook Profile Avatars"""
     subcategory = "avatar"
-    pattern = rf"{USER_PATTERN}/avatar"
+    pattern = USER_PATTERN + r"/avatar"
     example = "https://www.facebook.com/USERNAME/avatar"
 
     def items(self):
@@ -564,7 +565,7 @@ class FacebookAvatarExtractor(FacebookExtractor):
 
 class FacebookUserExtractor(Dispatch, FacebookExtractor):
     """Extractor for Facebook Profiles"""
-    pattern = rf"{USER_PATTERN}/?(?:$|\?|#)"
+    pattern = USER_PATTERN + r"/?(?:$|\?|#)"
     example = "https://www.facebook.com/USERNAME"
 
     def items(self):

@@ -95,7 +95,7 @@ class PostmillSubmissionsExtractor(PostmillExtractor):
             groups[-1]).items() if self.acceptable_query(key)}
 
     def items(self):
-        url = self.root + self.base + self.sorting_path
+        url = f"{self.root}{self.base}{self.sorting_path}"
 
         while url:
             response = self.request(url, params=self.query)
@@ -130,14 +130,14 @@ BASE_PATTERN = PostmillExtractor.update({
     }
 })
 QUERY_RE = r"(?:\?([^#]+))?$"
-SORTING_RE = (rf"(/(?:hot|new|active|top|controversial|most_commented))?"
-              rf"{QUERY_RE}")
+SORTING_RE = (r"(/(?:hot|new|active|top|controversial|most_commented))?" +
+              QUERY_RE)
 
 
 class PostmillPostExtractor(PostmillExtractor):
     """Extractor for a single submission URL"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/f/(\w+)/(\d+)"
+    pattern = BASE_PATTERN + r"/f/(\w+)/(\d+)"
     example = "https://raddle.me/f/FORUM/123/TITLE"
 
     def __init__(self, match):
@@ -146,13 +146,13 @@ class PostmillPostExtractor(PostmillExtractor):
         self.post_id = match[4]
 
     def post_urls(self):
-        return (self.root + "/f/" + self.forum + "/" + self.post_id,)
+        return (f"{self.root}/f/{self.forum}/{self.post_id}",)
 
 
 class PostmillShortURLExtractor(PostmillExtractor):
     """Extractor for short submission URLs"""
     subcategory = "shorturl"
-    pattern = rf"{BASE_PATTERN}(/\d+)$"
+    pattern = BASE_PATTERN + r"(/\d+)$"
     example = "https://raddle.me/123"
 
     def items(self):
@@ -193,6 +193,6 @@ class PostmillTagExtractor(PostmillSubmissionsExtractor):
 class PostmillSearchExtractor(PostmillSubmissionsExtractor):
     """Extractor for search results"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}(/search)()\?(q=[^#]+)$"
+    pattern = BASE_PATTERN + r"(/search)()\?(q=[^#]+)$"
     example = "https://raddle.me/search?q=QUERY"
     whitelisted_parameters = ("q",)

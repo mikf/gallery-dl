@@ -67,7 +67,7 @@ class HiperdexBase():
 
 class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
     """Extractor for hiperdex manga chapters"""
-    pattern = rf"{BASE_PATTERN}(/mangas?/([^/?#]+)/([^/?#]+))"
+    pattern = BASE_PATTERN + r"(/mangas?/([^/?#]+)/([^/?#]+))"
     example = "https://hiperdex.com/manga/MANGA/CHAPTER/"
 
     def __init__(self, match):
@@ -89,7 +89,7 @@ class HiperdexChapterExtractor(HiperdexBase, ChapterExtractor):
 class HiperdexMangaExtractor(HiperdexBase, MangaExtractor):
     """Extractor for hiperdex manga"""
     chapterclass = HiperdexChapterExtractor
-    pattern = rf"{BASE_PATTERN}(/mangas?/([^/?#]+))/?$"
+    pattern = BASE_PATTERN + r"(/mangas?/([^/?#]+))/?$"
     example = "https://hiperdex.com/manga/MANGA/"
 
     def __init__(self, match):
@@ -125,7 +125,7 @@ class HiperdexArtistExtractor(HiperdexBase, MangaExtractor):
     categorytransfer = False
     chapterclass = HiperdexMangaExtractor
     reverse = False
-    pattern = rf"{BASE_PATTERN}(/manga-a(?:rtist|uthor)/(?:[^/?#]+))"
+    pattern = BASE_PATTERN + r"(/manga-a(?:rtist|uthor)/(?:[^/?#]+))"
     example = "https://hiperdex.com/manga-artist/NAME/"
 
     def __init__(self, match):

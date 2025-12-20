@@ -24,7 +24,7 @@ class PictoaExtractor(Extractor):
 class PictoaImageExtractor(PictoaExtractor):
     """Extractor for single images from pictoa.com"""
     subcategory = "image"
-    pattern = rf"{BASE_PATTERN}/albums/(?:[\w-]+-)?(\d+)/(\d+)"
+    pattern = BASE_PATTERN + r"/albums/(?:[\w-]+-)?(\d+)/(\d+)"
     example = "https://www.pictoa.com/albums/NAME-12345/12345.html"
 
     def items(self):
@@ -50,7 +50,7 @@ class PictoaImageExtractor(PictoaExtractor):
 class PictoaAlbumExtractor(PictoaExtractor):
     """Extractor for image albums from pictoa.com"""
     subcategory = "album"
-    pattern = rf"{BASE_PATTERN}/albums/(?:[\w-]+-)?(\d+).html"
+    pattern = BASE_PATTERN + r"/albums/(?:[\w-]+-)?(\d+).html"
     example = "https://www.pictoa.com/albums/NAME-12345.html"
 
     def items(self):

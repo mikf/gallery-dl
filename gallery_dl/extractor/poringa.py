@@ -104,7 +104,7 @@ class PoringaExtractor(Extractor):
 class PoringaPostExtractor(PoringaExtractor):
     """Extractor for posts on poringa.net"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/posts/imagenes/(\d+)"
+    pattern = BASE_PATTERN + r"/posts/imagenes/(\d+)"
     example = "http://www.poringa.net/posts/imagenes/12345/TITLE.html"
 
     def posts(self):
@@ -113,7 +113,7 @@ class PoringaPostExtractor(PoringaExtractor):
 
 class PoringaUserExtractor(PoringaExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/(\w+)$"
+    pattern = BASE_PATTERN + r"/(\w+)$"
     example = "http://www.poringa.net/USER"
 
     def posts(self):
@@ -124,7 +124,7 @@ class PoringaUserExtractor(PoringaExtractor):
 
 class PoringaSearchExtractor(PoringaExtractor):
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/buscar/\?&?q=([^&#]+)"
+    pattern = BASE_PATTERN + r"/buscar/\?&?q=([^&#]+)"
     example = "http://www.poringa.net/buscar/?q=QUERY"
 
     def posts(self):

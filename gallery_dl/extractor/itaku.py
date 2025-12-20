@@ -13,7 +13,7 @@ from ..cache import memcache
 from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?itaku\.ee"
-USER_PATTERN = rf"{BASE_PATTERN}/profile/([^/?#]+)"
+USER_PATTERN = BASE_PATTERN + r"/profile/([^/?#]+)"
 
 
 class ItakuExtractor(Extractor):
@@ -86,7 +86,7 @@ class ItakuExtractor(Extractor):
 class ItakuGalleryExtractor(ItakuExtractor):
     """Extractor for an itaku user's gallery"""
     subcategory = "gallery"
-    pattern = rf"{USER_PATTERN}/gallery(?:/(\d+))?"
+    pattern = USER_PATTERN + r"/gallery(?:/(\d+))?"
     example = "https://itaku.ee/profile/USER/gallery"
 
     def images(self):
@@ -104,7 +104,7 @@ class ItakuPostsExtractor(ItakuExtractor):
                      "{id}{title:? //}")
     filename_fmt = "{file[id]}{file[title]:? //}.{extension}"
     archive_fmt = "{id}_{file[id]}"
-    pattern = rf"{USER_PATTERN}/posts(?:/(\d+))?"
+    pattern = USER_PATTERN + r"/posts(?:/(\d+))?"
     example = "https://itaku.ee/profile/USER/posts"
 
     def posts(self):
@@ -118,7 +118,7 @@ class ItakuPostsExtractor(ItakuExtractor):
 class ItakuStarsExtractor(ItakuExtractor):
     """Extractor for an itaku user's starred images"""
     subcategory = "stars"
-    pattern = rf"{USER_PATTERN}/stars(?:/(\d+))?"
+    pattern = USER_PATTERN + r"/stars(?:/(\d+))?"
     example = "https://itaku.ee/profile/USER/stars"
 
     def images(self):
@@ -132,7 +132,7 @@ class ItakuStarsExtractor(ItakuExtractor):
 
 class ItakuFollowingExtractor(ItakuExtractor):
     subcategory = "following"
-    pattern = rf"{USER_PATTERN}/following"
+    pattern = USER_PATTERN + r"/following"
     example = "https://itaku.ee/profile/USER/following"
 
     def users(self):
@@ -143,7 +143,7 @@ class ItakuFollowingExtractor(ItakuExtractor):
 
 class ItakuFollowersExtractor(ItakuExtractor):
     subcategory = "followers"
-    pattern = rf"{USER_PATTERN}/followers"
+    pattern = USER_PATTERN + r"/followers"
     example = "https://itaku.ee/profile/USER/followers"
 
     def users(self):
@@ -155,7 +155,7 @@ class ItakuFollowersExtractor(ItakuExtractor):
 class ItakuBookmarksExtractor(ItakuExtractor):
     """Extractor for an itaku bookmarks folder"""
     subcategory = "bookmarks"
-    pattern = rf"{USER_PATTERN}/bookmarks/(image|user)/(\d+)"
+    pattern = USER_PATTERN + r"/bookmarks/(image|user)/(\d+)"
     example = "https://itaku.ee/profile/USER/bookmarks/image/12345"
 
     def _init(self):
@@ -176,7 +176,7 @@ class ItakuBookmarksExtractor(ItakuExtractor):
 
 class ItakuUserExtractor(Dispatch, ItakuExtractor):
     """Extractor for itaku user profiles"""
-    pattern = rf"{USER_PATTERN}/?(?:$|\?|#)"
+    pattern = USER_PATTERN + r"/?(?:$|\?|#)"
     example = "https://itaku.ee/profile/USER"
 
     def items(self):
@@ -192,7 +192,7 @@ class ItakuUserExtractor(Dispatch, ItakuExtractor):
 
 class ItakuImageExtractor(ItakuExtractor):
     subcategory = "image"
-    pattern = rf"{BASE_PATTERN}/images/(\d+)"
+    pattern = BASE_PATTERN + r"/images/(\d+)"
     example = "https://itaku.ee/images/12345"
 
     def images(self):
@@ -205,7 +205,7 @@ class ItakuPostExtractor(ItakuExtractor):
                      "{id}{title:? //}")
     filename_fmt = "{file[id]}{file[title]:? //}.{extension}"
     archive_fmt = "{id}_{file[id]}"
-    pattern = rf"{BASE_PATTERN}/posts/(\d+)"
+    pattern = BASE_PATTERN + r"/posts/(\d+)"
     example = "https://itaku.ee/posts/12345"
 
     def posts(self):
@@ -214,7 +214,7 @@ class ItakuPostExtractor(ItakuExtractor):
 
 class ItakuSearchExtractor(ItakuExtractor):
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/home/images/?\?([^#]+)"
+    pattern = BASE_PATTERN + r"/home/images/?\?([^#]+)"
     example = "https://itaku.ee/home/images?tags=SEARCH"
 
     def images(self):

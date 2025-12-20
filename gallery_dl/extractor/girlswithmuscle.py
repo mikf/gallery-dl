@@ -60,7 +60,7 @@ class GirlswithmuscleExtractor(Extractor):
 class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
     """Extractor for individual posts on girlswithmuscle.com"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/(\d+)"
+    pattern = BASE_PATTERN + r"/(\d+)"
     example = "https://www.girlswithmuscle.com/12345/"
 
     def items(self):
@@ -143,7 +143,7 @@ class GirlswithmusclePostExtractor(GirlswithmuscleExtractor):
 class GirlswithmuscleSearchExtractor(GirlswithmuscleExtractor):
     """Extractor for search results on girlswithmuscle.com"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/images/(.*)"
+    pattern = BASE_PATTERN + r"/images/(.*)"
     example = "https://www.girlswithmuscle.com/images/?name=MODEL"
 
     def pages(self):

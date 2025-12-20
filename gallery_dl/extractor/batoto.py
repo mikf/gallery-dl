@@ -80,7 +80,7 @@ class BatotoBase():
 class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
     """Extractor for batoto manga chapters"""
     archive_fmt = "{chapter_id}_{page}"
-    pattern = rf"{BASE_PATTERN}/(?:title/[^/?#]+|chapter)/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:title/[^/?#]+|chapter)/(\d+)"
     example = "https://xbato.org/title/12345-MANGA/54321"
 
     def __init__(self, match):
@@ -139,8 +139,8 @@ class BatotoMangaExtractor(BatotoBase, MangaExtractor):
     """Extractor for batoto manga"""
     reverse = False
     chapterclass = BatotoChapterExtractor
-    pattern = (rf"{BASE_PATTERN}"
-               rf"/(?:title/(\d+)[^/?#]*|series/(\d+)(?:/[^/?#]*)?)/?$")
+    pattern = (BASE_PATTERN +
+               r"/(?:title/(\d+)[^/?#]*|series/(\d+)(?:/[^/?#]*)?)/?$")
     example = "https://xbato.org/title/12345-MANGA/"
 
     def __init__(self, match):

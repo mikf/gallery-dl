@@ -36,7 +36,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
     directory_fmt = ("{category}", "{boardSlug}")
     filename_fmt = "{id}_{num}{title:? //[b:230]}.{extension}"
     archive_fmt = "{id}_{num}"
-    pattern = rf"{BASE_PATTERN}/b/(?:\w+)/(\d+)"
+    pattern = BASE_PATTERN + r"/b/(?:\w+)/(\d+)"
     example = "https://arca.live/b/breaking/123456789"
 
     def items(self):
@@ -115,7 +115,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
 class ArcaliveBoardExtractor(ArcaliveExtractor):
     """Extractor for an arca.live board's posts"""
     subcategory = "board"
-    pattern = rf"{BASE_PATTERN}/b/([^/?#]+)/?(?:\?([^#]+))?$"
+    pattern = BASE_PATTERN + r"/b/([^/?#]+)/?(?:\?([^#]+))?$"
     example = "https://arca.live/b/breaking"
 
     def articles(self):
@@ -127,7 +127,7 @@ class ArcaliveBoardExtractor(ArcaliveExtractor):
 class ArcaliveUserExtractor(ArcaliveExtractor):
     """Extractor for an arca.live users's posts"""
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/u/@([^/?#]+)/?(?:\?([^#]+))?$"
+    pattern = BASE_PATTERN + r"/u/@([^/?#]+)/?(?:\?([^#]+))?$"
     example = "https://arca.live/u/@USER"
 
     def articles(self):

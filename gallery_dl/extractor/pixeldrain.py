@@ -29,7 +29,7 @@ class PixeldrainFileExtractor(PixeldrainExtractor):
     """Extractor for pixeldrain files"""
     subcategory = "file"
     filename_fmt = "{filename[:230]} ({id}).{extension}"
-    pattern = rf"{BASE_PATTERN}/(?:u|api/file)/(\w+)"
+    pattern = BASE_PATTERN + r"/(?:u|api/file)/(\w+)"
     example = "https://pixeldrain.com/u/abcdefgh"
 
     def __init__(self, match):
@@ -54,7 +54,7 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
     directory_fmt = ("{category}",
                      "{album[date]:%Y-%m-%d} {album[title]} ({album[id]})")
     filename_fmt = "{num:>03} {filename[:230]} ({id}).{extension}"
-    pattern = rf"{BASE_PATTERN}/(?:l|api/list)/(\w+)(?:#item=(\d+))?"
+    pattern = BASE_PATTERN + r"/(?:l|api/list)/(\w+)(?:#item=(\d+))?"
     example = "https://pixeldrain.com/l/abcdefgh"
 
     def __init__(self, match):
@@ -97,7 +97,7 @@ class PixeldrainFolderExtractor(PixeldrainExtractor):
     subcategory = "folder"
     filename_fmt = "{filename[:230]}.{extension}"
     archive_fmt = "{path}_{num}"
-    pattern = rf"{BASE_PATTERN}/(?:d|api/filesystem)/([^?]+)"
+    pattern = BASE_PATTERN + r"/(?:d|api/filesystem)/([^?]+)"
     example = "https://pixeldrain.com/d/abcdefgh"
 
     def metadata(self, data):

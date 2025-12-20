@@ -193,7 +193,7 @@ class TiktokExtractor(Extractor):
 class TiktokPostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok link"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+)"
     example = "https://www.tiktok.com/@USER/photo/1234567890"
 
     def urls(self):
@@ -226,7 +226,7 @@ class TiktokVmpostExtractor(TiktokExtractor):
 class TiktokUserExtractor(TiktokExtractor):
     """Extract a TikTok user's profile"""
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/@([\w_.-]+)/?(?:$|\?|#)"
+    pattern = BASE_PATTERN + r"/@([\w_.-]+)/?(?:$|\?|#)"
     example = "https://www.tiktok.com/@USER"
 
     def _init(self):

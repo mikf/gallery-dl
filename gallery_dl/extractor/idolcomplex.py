@@ -29,17 +29,17 @@ class IdolcomplexBase():
 
 class IdolcomplexTagExtractor(IdolcomplexBase, sankaku.SankakuTagExtractor):
     """Extractor for idolcomplex tag searches"""
-    pattern = rf"{BASE_PATTERN}(?:/posts)?/?\?([^#]*)"
+    pattern = BASE_PATTERN + r"(?:/posts)?/?\?([^#]*)"
     example = "https://www.idolcomplex.com/en/posts?tags=TAGS"
 
 
 class IdolcomplexPoolExtractor(IdolcomplexBase, sankaku.SankakuPoolExtractor):
     """Extractor for idolcomplex pools"""
-    pattern = rf"{BASE_PATTERN}/pools?/(?:show/)?(\w+)"
+    pattern = BASE_PATTERN + r"/pools?/(?:show/)?(\w+)"
     example = "https://www.idolcomplex.com/en/pools/0123456789abcdef"
 
 
 class IdolcomplexPostExtractor(IdolcomplexBase, sankaku.SankakuPostExtractor):
     """Extractor for individual idolcomplex posts"""
-    pattern = rf"{BASE_PATTERN}/posts?(?:/show)?/(\w+)"
+    pattern = BASE_PATTERN + r"/posts?(?:/show)?/(\w+)"
     example = "https://www.idolcomplex.com/en/posts/0123456789abcdef"

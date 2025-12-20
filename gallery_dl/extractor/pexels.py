@@ -62,7 +62,7 @@ class PexelsCollectionExtractor(PexelsExtractor):
     """Extractor for a pexels.com collection"""
     subcategory = "collection"
     directory_fmt = ("{category}", "Collections", "{collection}")
-    pattern = rf"{BASE_PATTERN}/collections/((?:[^/?#]*-)?(\w+))"
+    pattern = BASE_PATTERN + r"/collections/((?:[^/?#]*-)?(\w+))"
     example = "https://www.pexels.com/collections/SLUG-a1b2c3/"
 
     def metadata(self):
@@ -77,7 +77,7 @@ class PexelsSearchExtractor(PexelsExtractor):
     """Extractor for pexels.com search results"""
     subcategory = "search"
     directory_fmt = ("{category}", "Searches", "{search_tags}")
-    pattern = rf"{BASE_PATTERN}/search/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/search/([^/?#]+)"
     example = "https://www.pexels.com/search/QUERY/"
 
     def metadata(self):
@@ -91,7 +91,7 @@ class PexelsUserExtractor(PexelsExtractor):
     """Extractor for pexels.com user galleries"""
     subcategory = "user"
     directory_fmt = ("{category}", "@{user[slug]}")
-    pattern = rf"{BASE_PATTERN}/(@(?:(?:[^/?#]*-)?(\d+)|[^/?#]+))"
+    pattern = BASE_PATTERN + r"/(@(?:(?:[^/?#]*-)?(\d+)|[^/?#]+))"
     example = "https://www.pexels.com/@USER-12345/"
 
     def posts(self):
@@ -100,7 +100,7 @@ class PexelsUserExtractor(PexelsExtractor):
 
 class PexelsImageExtractor(PexelsExtractor):
     subcategory = "image"
-    pattern = rf"{BASE_PATTERN}/photo/((?:[^/?#]*-)?\d+)"
+    pattern = BASE_PATTERN + r"/photo/((?:[^/?#]*-)?\d+)"
     example = "https://www.pexels.com/photo/SLUG-12345/"
 
     def posts(self):

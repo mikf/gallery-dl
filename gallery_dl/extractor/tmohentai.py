@@ -16,7 +16,7 @@ class TmohentaiGalleryExtractor(GalleryExtractor):
     category = "tmohentai"
     root = "http://tmohentai.com"
     directory_fmt = ("{category}", "{title} ({gallery_id})")
-    pattern = rf"{BASE_PATTERN}/(?:contents|reader)/(\w+)"
+    pattern = BASE_PATTERN + r"/(?:contents|reader)/(\w+)"
     example = "https://tmohentai.com/contents/12345a67b89c0"
 
     def __init__(self, match):

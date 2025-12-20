@@ -68,7 +68,7 @@ class WikiartArtistExtractor(WikiartExtractor):
     """Extractor for an artist's paintings on wikiart.org"""
     subcategory = "artist"
     directory_fmt = ("{category}", "{artist[artistName]}")
-    pattern = rf"{BASE_PATTERN}/(?!\w+-by-)([\w-]+)/?$"
+    pattern = BASE_PATTERN + r"/(?!\w+-by-)([\w-]+)/?$"
     example = "https://www.wikiart.org/en/ARTIST"
 
     def __init__(self, match):
@@ -89,7 +89,7 @@ class WikiartArtistExtractor(WikiartExtractor):
 class WikiartImageExtractor(WikiartArtistExtractor):
     """Extractor for individual paintings on wikiart.org"""
     subcategory = "image"
-    pattern = rf"{BASE_PATTERN}/(?!(?:paintings|artists)-by-)([\w-]+)/([\w-]+)"
+    pattern = BASE_PATTERN + r"/(?!(?:paintings|artists)-by-)([\w-]+)/([\w-]+)"
     example = "https://www.wikiart.org/en/ARTIST/TITLE"
 
     def __init__(self, match):
@@ -109,7 +109,7 @@ class WikiartArtworksExtractor(WikiartExtractor):
     """Extractor for artwork collections on wikiart.org"""
     subcategory = "artworks"
     directory_fmt = ("{category}", "Artworks by {group!c}", "{type}")
-    pattern = rf"{BASE_PATTERN}/paintings-by-([\w-]+)/([\w-]+)"
+    pattern = BASE_PATTERN + r"/paintings-by-([\w-]+)/([\w-]+)"
     example = "https://www.wikiart.org/en/paintings-by-GROUP/TYPE"
 
     def __init__(self, match):
@@ -128,7 +128,7 @@ class WikiartArtworksExtractor(WikiartExtractor):
 class WikiartArtistsExtractor(WikiartExtractor):
     """Extractor for artist collections on wikiart.org"""
     subcategory = "artists"
-    pattern = (rf"{BASE_PATTERN}/artists-by-([\w-]+)/([\w-]+)")
+    pattern = (BASE_PATTERN + r"/artists-by-([\w-]+)/([\w-]+)")
     example = "https://www.wikiart.org/en/artists-by-GROUP/TYPE"
 
     def __init__(self, match):

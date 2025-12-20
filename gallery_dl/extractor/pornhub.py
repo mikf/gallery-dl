@@ -54,7 +54,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
     directory_fmt = ("{category}", "{user}", "{gallery[id]} {gallery[title]}")
     filename_fmt = "{num:>03}_{id}.{extension}"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}/album/(\d+)"
+    pattern = BASE_PATTERN + r"/album/(\d+)"
     example = "https://www.pornhub.com/album/12345"
 
     def __init__(self, match):
@@ -134,7 +134,7 @@ class PornhubGifExtractor(PornhubExtractor):
     directory_fmt = ("{category}", "{user}", "gifs")
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}/gif/(\d+)"
+    pattern = BASE_PATTERN + r"/gif/(\d+)"
     example = "https://www.pornhub.com/gif/12345"
 
     def __init__(self, match):
@@ -163,7 +163,7 @@ class PornhubGifExtractor(PornhubExtractor):
 
 class PornhubUserExtractor(Dispatch, PornhubExtractor):
     """Extractor for a pornhub user"""
-    pattern = rf"{BASE_PATTERN}/((?:users|model|pornstar)/[^/?#]+)/?$"
+    pattern = BASE_PATTERN + r"/((?:users|model|pornstar)/[^/?#]+)/?$"
     example = "https://www.pornhub.com/model/USER"
 
     def items(self):
@@ -177,7 +177,7 @@ class PornhubUserExtractor(Dispatch, PornhubExtractor):
 class PornhubPhotosExtractor(PornhubExtractor):
     """Extractor for all galleries of a pornhub user"""
     subcategory = "photos"
-    pattern = (rf"{BASE_PATTERN}/((?:users|model|pornstar)/[^/?#]+)"
+    pattern = (BASE_PATTERN + r"/((?:users|model|pornstar)/[^/?#]+)"
                "/(photos(?:/[^/?#]+)?)")
     example = "https://www.pornhub.com/model/USER/photos"
 
@@ -198,7 +198,7 @@ class PornhubPhotosExtractor(PornhubExtractor):
 class PornhubGifsExtractor(PornhubExtractor):
     """Extractor for a pornhub user's gifs"""
     subcategory = "gifs"
-    pattern = (rf"{BASE_PATTERN}/((?:users|model|pornstar)/[^/?#]+)"
+    pattern = (BASE_PATTERN + r"/((?:users|model|pornstar)/[^/?#]+)"
                "/(gifs(?:/[^/?#]+)?)")
     example = "https://www.pornhub.com/model/USER/gifs"
 

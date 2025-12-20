@@ -44,7 +44,7 @@ class WeebcentralBase():
 
 class WeebcentralChapterExtractor(WeebcentralBase, ChapterExtractor):
     """Extractor for manga chapters from weebcentral.com"""
-    pattern = rf"{BASE_PATTERN}(/chapters/(\w+))"
+    pattern = BASE_PATTERN + r"(/chapters/(\w+))"
     example = "https://weebcentral.com/chapters/01JHABCDEFGHIJKLMNOPQRSTUV"
 
     def metadata(self, page):
@@ -95,7 +95,7 @@ class WeebcentralChapterExtractor(WeebcentralBase, ChapterExtractor):
 class WeebcentralMangaExtractor(WeebcentralBase, MangaExtractor):
     """Extractor for manga from weebcentral.com"""
     chapterclass = WeebcentralChapterExtractor
-    pattern = rf"{BASE_PATTERN}/series/(\w+)"
+    pattern = BASE_PATTERN + r"/series/(\w+)"
     example = "https://weebcentral.com/series/01J7ABCDEFGHIJKLMNOPQRSTUV/TITLE"
 
     def chapters(self, _):
