@@ -78,6 +78,7 @@ class BasePostprocessorTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.dir = tempfile.TemporaryDirectory()
+        config.clear()
         config.set((), "base-directory", cls.dir.name)
         cls.job = FakeJob()
 
