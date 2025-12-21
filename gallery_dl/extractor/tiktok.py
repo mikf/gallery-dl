@@ -511,6 +511,7 @@ class TiktokUserExtractor(TiktokExtractor):
             "secUid": sec_uid,
             "post_item_list_request_type": post_item_list_request_type,
             "count": "15",
+            "needPinnedItemIds": "false",
         }
         request = TiktokPostItemListRequest(range_predicate)
         request.execute(self, profile_url, query_parameters)
@@ -1123,10 +1124,6 @@ class TiktokPostItemListRequest(TiktokItemListRequest):
 
     def validate_query_parameters(self, query_parameters):
         super().validate_query_parameters(query_parameters)
-        # The count parameter should really be at or above 4 to account for the
-        # potential for 3 pinned posts that could skew our time-based cursors,
-        # causing us to miss posts.
-        assert int(query_parameters["count"]) > 3
         assert "secUid" in query_parameters
         assert "post_item_list_request_type" in query_parameters
         # Pagination type:
@@ -1136,6 +1133,13 @@ class TiktokPostItemListRequest(TiktokItemListRequest):
         assert query_parameters["post_item_list_request_type"] in \
             ["0", "1", "2"]
         self.__request_type = query_parameters["post_item_list_request_type"]
+        assert "needPinnedItemIds" in query_parameters
+        # If this value is set to "true", and "post_item_list_request_type" is
+        # set to "0", pinned posts will always show up first in the resulting
+        # itemList. It keeps our logic simpler if we avoid this behavior by
+        # setting this parameter to "false" (especially if we were to use a
+        # really small "count" value like "1" or "2").
+        assert query_parameters["needPinnedItemIds"] in ["false"]
 
     def cursor_type(self, query_parameters):
         request_type = query_parameters["post_item_list_request_type"]
@@ -1164,8 +1168,7 @@ class TiktokStoryItemListRequest(TiktokItemListRequest):
         super().validate_query_parameters(query_parameters)
         assert "authorId" in query_parameters
         assert "loadBackward" in query_parameters
-        assert query_parameters["loadBackward"] == "false" or \
-            query_parameters["loadBackward"] == "true"
+        assert query_parameters["loadBackward"] in ["true", "false"]
 
     def cursor_type(self, query_parameters):
         return TiktokItemCursor
