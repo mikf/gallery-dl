@@ -20,7 +20,7 @@ class CyberfileExtractor(Extractor):
     root = "https://cyberfile.me"
 
     def request_api(self, endpoint, data):
-        url = f"{self.root}{endpoint}"
+        url = self.root + endpoint
         headers = {
             "X-Requested-With": "XMLHttpRequest",
             "Origin": self.root,
@@ -29,7 +29,7 @@ class CyberfileExtractor(Extractor):
             url, method="POST", headers=headers, data=data)
 
         if "albumPasswordModel" in resp.get("javascript", ""):
-            url_pw = f"{self.root}/ajax/folder_password_process"
+            url_pw = self.root + "/ajax/folder_password_process"
             data_pw = {
                 "folderPassword": self._get_auth_info(password=True)[1],
                 "folderId": text.extr(

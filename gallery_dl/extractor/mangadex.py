@@ -66,7 +66,7 @@ class MangadexExtractor(Extractor):
             "title"   : cattributes["title"],
             "volume"  : text.parse_int(cattributes["volume"]),
             "chapter" : text.parse_int(chnum),
-            "chapter_minor": f"{sep}{minor}",
+            "chapter_minor": sep + minor,
             "chapter_id": chapter["id"],
             "date"    : self.parse_datetime_iso(cattributes["publishAt"]),
             "group"   : [group["attributes"]["name"]
@@ -96,7 +96,7 @@ class MangadexCoversExtractor(MangadexExtractor):
             text.nameext_from_url(name, data)
             data["cover_id"] = data["filename"]
             yield Message.Directory, "", data
-            yield Message.Url, f"{base}{name}", data
+            yield Message.Url, base + name, data
 
     def _transform_cover(self, cover):
         relationships = defaultdict(list)
@@ -148,9 +148,9 @@ class MangadexChapterExtractor(MangadexExtractor):
 
         enum = util.enumerate_reversed if self.config(
             "page-reverse") else enumerate
-        for data["page"], page in enum(chapter[key], 1):
-            text.nameext_from_url(page, data)
-            yield Message.Url, f"{base}{page}", data
+        for data["page"], path in enum(chapter[key], 1):
+            text.nameext_from_url(path, data)
+            yield Message.Url, base + path, data
 
 
 class MangadexMangaExtractor(MangadexExtractor):
@@ -253,22 +253,22 @@ class MangadexAPI():
                      else text.ensure_http_scheme(server).rstrip("/"))
 
     def athome_server(self, uuid):
-        return self._call(f"/at-home/server/{uuid}")
+        return self._call("/at-home/server/" + uuid)
 
     def author(self, uuid, manga=False):
         params = {"includes[]": ("manga",)} if manga else None
-        return self._call(f"/author/{uuid}", params)["data"]
+        return self._call("/author/" + uuid, params)["data"]
 
     def chapter(self, uuid):
         params = {"includes[]": ("scanlation_group",)}
-        return self._call(f"/chapter/{uuid}", params)["data"]
+        return self._call("/chapter/" + uuid, params)["data"]
 
     def covers_manga(self, uuid):
         params = {"manga[]": uuid}
         return self._pagination_covers("/cover", params)
 
     def list(self, uuid):
-        return self._call(f"/list/{uuid}", None, True)["data"]
+        return self._call("/list/" + uuid, None, True)["data"]
 
     def list_feed(self, uuid):
         return self._pagination_chapters(f"/list/{uuid}/feed", None, True)
@@ -276,7 +276,7 @@ class MangadexAPI():
     @memcache(keyarg=1)
     def manga(self, uuid):
         params = {"includes[]": ("artist", "author")}
-        return self._call(f"/manga/{uuid}", params)["data"]
+        return self._call("/manga/" + uuid, params)["data"]
 
     def manga_author(self, uuid_author):
         params = {"authorOrArtist": uuid_author}
@@ -339,17 +339,17 @@ class MangadexAPI():
             _refresh_token_cache.update(
                 (username, "personal"), data["refresh_token"])
 
-        return f"Bearer {access_token}"
+        return "Bearer " + access_token
 
     @cache(maxage=900, keyarg=1)
     def _authenticate_impl_legacy(self, username, password):
         if refresh_token := _refresh_token_cache(username):
             self.extractor.log.info("Refreshing access token")
-            url = f"{self.root}/auth/refresh"
+            url = self.root + "/auth/refresh"
             json = {"token": refresh_token}
         else:
             self.extractor.log.info("Logging in as %s", username)
-            url = f"{self.root}/auth/login"
+            url = self.root + "/auth/login"
             json = {"username": username, "password": password}
 
         self.extractor.log.debug("Using legacy login method")
@@ -360,10 +360,10 @@ class MangadexAPI():
 
         if refresh_token != data["token"]["refresh"]:
             _refresh_token_cache.update(username, data["token"]["refresh"])
-        return f"Bearer {data['token']['session']}"
+        return "Bearer " + data["token"]["session"]
 
     def _call(self, endpoint, params=None, auth=False):
-        url = f"{self.root}{endpoint}"
+        url = self.root + endpoint
         headers = self.headers_auth if auth else self.headers
 
         while True:

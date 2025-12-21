@@ -25,10 +25,10 @@ class EromeExtractor(Extractor):
     _cookies = True
 
     def items(self):
-        base = f"{self.root}/a/"
+        base = self.root + "/a/"
         data = {"_extractor": EromeAlbumExtractor}
         for album_id in self.albums():
-            yield Message.Queue, f"{base}{album_id}", data
+            yield Message.Queue, base + album_id, data
 
     def albums(self):
         return ()
@@ -141,7 +141,7 @@ class EromeSearchExtractor(EromeExtractor):
     example = "https://www.erome.com/search?q=QUERY"
 
     def albums(self):
-        url = f"{self.root}/search"
+        url = self.root + "/search"
         params = text.parse_query(self.groups[0])
         return self._pagination(url, params)
 

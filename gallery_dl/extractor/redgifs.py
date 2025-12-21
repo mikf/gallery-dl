@@ -135,7 +135,7 @@ class RedgifsCollectionsExtractor(RedgifsExtractor):
     def items(self):
         base = f"{self.root}/users/{self.key}/collections/"
         for collection in self.api.collections(self.key):
-            url = f"{base}{collection['folderId']}"
+            url = base + collection["folderId"]
             collection["_extractor"] = RedgifsCollectionExtractor
             yield Message.Queue, url, collection
 

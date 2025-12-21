@@ -636,7 +636,7 @@ class InstagramStoriesTrayExtractor(InstagramExtractor):
     example = "https://www.instagram.com/stories/me/"
 
     def items(self):
-        base = f"{self.root}/stories/id:"
+        base = self.root + "/stories/id:"
         for story in self.api.reels_tray():
             story["date"] = self.parse_timestamp(story["latest_reel_media"])
             story["_extractor"] = InstagramStoriesExtractor

@@ -138,9 +138,9 @@ def _manga_info(self, manga_path):
             current[chap] = {
                 "title"         : name.partition(":")[2].strip(),
                 "chapter"       : text.parse_int(chapter),
-                "chapter_minor" : f"{sep}{minor}",
+                "chapter_minor" : sep + minor,
                 "chapter_string": chap,
-                "chapter_url"   : f"{base}{path}",
+                "chapter_url"   : base + path,
                 "lang"          : lang,
             }
 
@@ -162,7 +162,7 @@ def _manga_info(self, manga_path):
                 "chapter"       : 0,
                 "chapter_minor" : "",
                 "chapter_string": voln,
-                "chapter_url"   : f"{base}{path}",
+                "chapter_url"   : base + path,
                 "lang"          : lang,
             }
 

@@ -424,7 +424,7 @@ class BoostyAPI():
             params["offset"] = offset
 
     def dialog(self, dialog_id):
-        endpoint = f"/v1/dialog/{dialog_id}"
+        endpoint = "/v1/dialog/" + dialog_id
         return self._call(endpoint)
 
     def dialog_messages(self, dialog_id, limit=300, offset=None):

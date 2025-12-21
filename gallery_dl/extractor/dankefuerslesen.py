@@ -34,7 +34,7 @@ class DankefuerslesenChapterExtractor(DankefuerslesenBase, ChapterExtractor):
     def _init(self):
         self.zip = self.config("zip", False)
         if self.zip:
-            self.filename_fmt = f"{self.directory_fmt[-1]}.{{extension}}"
+            self.filename_fmt = self.directory_fmt[-1] + ".{extension}"
             self.directory_fmt = self.directory_fmt[:-1]
 
     def metadata(self, page):

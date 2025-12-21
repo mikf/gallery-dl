@@ -34,7 +34,7 @@ class ItakuExtractor(Extractor):
             for image in images:
                 image["date"] = self.parse_datetime_iso(image["date_added"])
                 for category, tags in image.pop("categorized_tags").items():
-                    image[f"tags_{category.lower()}"] = [
+                    image["tags_" + category.lower()] = [
                         t["name"] for t in tags]
                 image["tags"] = [t["name"] for t in image["tags"]]
 
@@ -73,9 +73,9 @@ class ItakuExtractor(Extractor):
             return
 
         if users := self.users():
-            base = f"{self.root}/profile/"
+            base = self.root + "/profile/"
             for user in users:
-                url = f"{base}{user['owner_username']}"
+                url = base + user["owner_username"]
                 user["_extractor"] = ItakuUserExtractor
                 yield Message.Queue, url, user
             return
@@ -182,11 +182,11 @@ class ItakuUserExtractor(Dispatch, ItakuExtractor):
     def items(self):
         base = f"{self.root}/profile/{self.groups[0]}/"
         return self._dispatch_extractors((
-            (ItakuGalleryExtractor  , f"{base}gallery"),
-            (ItakuPostsExtractor    , f"{base}posts"),
-            (ItakuFollowersExtractor, f"{base}followers"),
-            (ItakuFollowingExtractor, f"{base}following"),
-            (ItakuStarsExtractor    , f"{base}stars"),
+            (ItakuGalleryExtractor  , base + "gallery"),
+            (ItakuPostsExtractor    , base + "posts"),
+            (ItakuFollowersExtractor, base + "followers"),
+            (ItakuFollowingExtractor, base + "following"),
+            (ItakuStarsExtractor    , base + "stars"),
         ), ("gallery",))
 
 
@@ -246,7 +246,7 @@ class ItakuAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.root = f"{extractor.root}/api"
+        self.root = extractor.root + "/api"
         self.headers = {
             "Accept": "application/json, text/plain, */*",
         }
@@ -309,7 +309,7 @@ class ItakuAPI():
 
     def _call(self, endpoint, params=None):
         if not endpoint.startswith("http"):
-            endpoint = f"{self.root}{endpoint}"
+            endpoint = self.root + endpoint
         return self.extractor.request_json(
             endpoint, params=params, headers=self.headers)
 

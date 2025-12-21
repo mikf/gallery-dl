@@ -278,7 +278,7 @@ class FoolfuukaGalleryExtractor(FoolfuukaExtractor):
         base = f"{self.root}/_/api/chan/gallery/?board={self.board}&page="
 
         for pnum in pages:
-            posts = self.request_json(f"{base}{pnum}")
+            posts = self.request_json(base + str(pnum))
             if not posts:
                 return
             yield from posts

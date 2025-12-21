@@ -58,7 +58,7 @@ class SubscribestarExtractor(Extractor):
                     text.nameext_from_url(url, item)
 
                 if url[0] == "/":
-                    url = f"{self.root}{url}"
+                    url = self.root + url
                 yield Message.Url, url, item
 
     def posts(self):
@@ -72,7 +72,7 @@ class SubscribestarExtractor(Extractor):
                     "/verify_subscriber" in response.url or
                     "/age_confirmation_warning" in response.url):
                 raise exception.AbortExtraction(
-                    f"HTTP redirect to {response.url}")
+                    "HTTP redirect to " + response.url)
 
             content = response.content
             if len(content) < 250 and b">redirected<" in content:

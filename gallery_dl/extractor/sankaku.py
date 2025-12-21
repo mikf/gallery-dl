@@ -193,7 +193,7 @@ class SankakuBooksExtractor(SankakuExtractor):
         params = {"tags": self.tags, "pool_type": "0"}
         for pool in self.api.pools_keyset(params):
             pool["_extractor"] = SankakuPoolExtractor
-            url = f"https://sankaku.app/books/{pool['id']}"
+            url = "https://sankaku.app/books/" + pool["id"]
             yield Message.Queue, url, pool
 
 

@@ -25,7 +25,7 @@ class _2chThreadExtractor(Extractor):
 
     def __init__(self, match):
         tld = match[1]
-        self.root = f"https://2ch.{'org' if tld == 'hk' else tld}"
+        self.root = "https://2ch." + ("org" if tld == "hk" else tld)
         Extractor.__init__(self, match)
 
     def items(self):
@@ -71,14 +71,14 @@ class _2chBoardExtractor(Extractor):
 
     def __init__(self, match):
         tld = match[1]
-        self.root = f"https://2ch.{'su' if tld == 'hk' else tld}"
+        self.root = "https://2ch." + ("org" if tld == "hk" else tld)
         Extractor.__init__(self, match)
 
     def items(self):
         base = f"{self.root}/{self.groups[1]}"
 
         # index page
-        url = f"{base}/index.json"
+        url = base + "/index.json"
         index = self.request_json(url)
         index["_extractor"] = _2chThreadExtractor
         for thread in index["threads"]:

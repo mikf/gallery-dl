@@ -18,7 +18,7 @@ class S3ndpicsExtractor(Extractor):
     """Base class for s3ndpics extractors"""
     category = "s3ndpics"
     root = "https://s3nd.pics"
-    root_api = f"{root}/api"
+    root_api = root + "/api"
     directory_fmt = ("{category}", "{user[username]}",
                      "{date} {title:?/ /}({id})")
     filename_fmt = "{num:>02}.{extension}"
@@ -41,7 +41,7 @@ class S3ndpicsExtractor(Extractor):
                 post["type"] = file["type"]
                 path = file["url"]
                 text.nameext_from_url(path, post)
-                yield Message.Url, f"{base}{path}", post
+                yield Message.Url, base + path, post
 
     def _pagination(self, url, params):
         params["page"] = 1
@@ -76,7 +76,7 @@ class S3ndpicsUserExtractor(S3ndpicsExtractor):
         url = f"{self.root_api}/users/username/{self.groups[0]}"
         self.kwdict["user"] = user = self.request_json(url)["user"]
 
-        url = f"{self.root_api}/posts"
+        url = self.root_api + "/posts"
         params = {
             "userId": user["_id"],
             "limit" : "12",
@@ -91,7 +91,7 @@ class S3ndpicsSearchExtractor(S3ndpicsExtractor):
     example = "https://s3nd.pics/search?QUERY"
 
     def posts(self):
-        url = f"{self.root_api}/posts"
+        url = self.root_api + "/posts"
         params = text.parse_query(self.groups[0])
         params.setdefault("limit", "20")
         self.kwdict["search_tags"] = \

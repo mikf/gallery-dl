@@ -322,7 +322,7 @@ class FuraffinityUserExtractor(Dispatch, FuraffinityExtractor):
 
     def items(self):
         base = self.root
-        user = f"{self.user}/"
+        user = self.user + "/"
         return self._dispatch_extractors((
             (FuraffinityGalleryExtractor , f"{base}/gallery/{user}"),
             (FuraffinityScrapsExtractor  , f"{base}/scraps/{user}"),

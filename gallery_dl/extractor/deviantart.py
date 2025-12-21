@@ -66,7 +66,7 @@ class DeviantartExtractor(Extractor):
                 self.quality = "-fullview.png?"
                 self.quality_sub = text.re(r"-fullview\.[a-z0-9]+\?").sub
             else:
-                self.quality = f",q_{self.quality}"
+                self.quality = ",q_" + str(self.quality)
                 self.quality_sub = text.re(r",q_\d+").sub
 
         if self.intermediary:

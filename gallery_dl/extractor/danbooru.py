@@ -155,7 +155,7 @@ class DanbooruExtractor(BaseExtractor):
                 return
 
             if prefix:
-                params["page"] = f"{prefix}{posts[-1]['id']}"
+                params["page"] = prefix + str(posts[-1]["id"])
             elif params["page"]:
                 params["page"] += 1
             else:
@@ -174,9 +174,8 @@ class DanbooruExtractor(BaseExtractor):
         else:
             ext = data["ZIP:ZipFileName"].rpartition(".")[2]
 
-        fmt = ("{:>06}." + ext).format
         delays = data["Ugoira:FrameDelays"]
-        return [{"file": fmt(index), "delay": delay}
+        return [{"file": f"{index:>06}.{ext}", "delay": delay}
                 for index, delay in enumerate(delays)]
 
     def _collection_posts(self, cid, ctype):

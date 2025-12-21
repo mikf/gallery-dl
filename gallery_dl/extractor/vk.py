@@ -101,7 +101,7 @@ class VkExtractor(Extractor):
                 url, method="POST", headers=headers, data=data)
             if response.history and "/challenge.html" in response.url:
                 raise exception.AbortExtraction(
-                    f"HTTP redirect to 'challenge' page:\n{response.url}")
+                    "HTTP redirect to 'challenge' page:\n" + response.url)
 
             payload = response.json()["payload"][1]
             if len(payload) < 4:
@@ -236,7 +236,7 @@ class VkTaggedExtractor(VkExtractor):
         self.user_id = match[1]
 
     def photos(self):
-        return self._pagination(f"tag{self.user_id}")
+        return self._pagination("tag" + self.user_id)
 
     def metadata(self):
         return {"user": {"id": self.user_id}}

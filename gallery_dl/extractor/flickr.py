@@ -456,7 +456,7 @@ class FlickrAPI(oauth.OAuth1API):
         except ValueError:
             data = {"code": -1, "message": response.content}
         if "code" in data:
-            msg = data.get("message")
+            msg = data.get("message", "")
             self.log.debug("Server response: %s", data)
             if data["code"] == 1:
                 raise exception.NotFoundError(self.extractor.subcategory)
@@ -466,7 +466,7 @@ class FlickrAPI(oauth.OAuth1API):
                 raise exception.AuthenticationError(msg)
             elif data["code"] == 99:
                 raise exception.AuthorizationError(msg)
-            raise exception.AbortExtraction(f"API request failed: {msg}")
+            raise exception.AbortExtraction("API request failed: " + msg)
         return data
 
     def _pagination(self, method, params, key="photos"):

@@ -200,7 +200,7 @@ class KemonoExtractor(Extractor):
         username = username[0]
         self.log.info("Logging in as %s", username)
 
-        url = f"{self.root}/api/v1/authentication/login"
+        url = self.root + "/api/v1/authentication/login"
         data = {"username": username, "password": password}
 
         response = self.request(url, method="POST", json=data, fatal=False)
@@ -434,7 +434,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
                 attachment["type"] = "attachment"
                 files.append(attachment)
             for path in find_inline(post["content"] or ""):
-                files.append({"path": f"https://cdn.discordapp.com{path}",
+                files.append({"path": "https://cdn.discordapp.com" + path,
                               "name": path, "type": "inline", "hash": ""})
 
             post.update(data)
@@ -577,7 +577,7 @@ class KemonoAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.root = f"{extractor.root}/api"
+        self.root = extractor.root + "/api"
         self.headers = {"Accept": "text/css"}
 
     def posts(self, offset=0, query=None, tags=None):
@@ -586,7 +586,7 @@ class KemonoAPI():
         return self._pagination(endpoint, params, 50, "posts")
 
     def file(self, file_hash):
-        endpoint = f"/v1/file/{file_hash}"
+        endpoint = "/v1/file/" + file_hash
         return self._call(endpoint)
 
     def creators(self):
@@ -643,18 +643,18 @@ class KemonoAPI():
         return self._call(endpoint)
 
     def discord_channel(self, channel_id, post_count=None):
-        endpoint = f"/v1/discord/channel/{channel_id}"
+        endpoint = "/v1/discord/channel/" + channel_id
         if post_count is None:
             return self._pagination(endpoint, {}, 150)
         else:
             return self._pagination_reverse(endpoint, {}, 150, post_count)
 
     def discord_channel_lookup(self, server_id):
-        endpoint = f"/v1/discord/channel/lookup/{server_id}"
+        endpoint = "/v1/discord/channel/lookup/" + server_id
         return self._call(endpoint)
 
     def discord_server(self, server_id):
-        endpoint = f"/v1/discord/server/{server_id}"
+        endpoint = "/v1/discord/server/" + server_id
         return self._call(endpoint)
 
     def account_favorites(self, type):
@@ -669,7 +669,7 @@ class KemonoAPI():
             headers = {**self.headers, **headers}
 
         return self.extractor.request_json(
-            f"{self.root}{endpoint}", params=params, headers=headers,
+            self.root + endpoint, params=params, headers=headers,
             encoding="utf-8", fatal=fatal)
 
     def _pagination(self, endpoint, params, batch=50, key=None):

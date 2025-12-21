@@ -510,7 +510,7 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
     def _extract_favorites(self, page):
         return [
             self.root + path
-            for path in text.extract_iter(page, f'href="{self.root}', '"')
+            for path in text.extract_iter(page, 'href="' + self.root, '"')
         ]
 
 
@@ -519,7 +519,6 @@ class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
     subcategory = "following"
     pattern = (USER_PATTERN + r"/favorites/(following)"
                r"(?:(?:/page/|/?\?page=)(\d+))?")
-
     example = "https://USER.newgrounds.com/favorites/following"
 
     def items(self):

@@ -657,7 +657,7 @@ class PixivFavoriteExtractor(PixivExtractor):
         for preview in self.api.user_following(self.user_id, restrict):
             user = preview["user"]
             user["_extractor"] = PixivUserExtractor
-            url = f"https://www.pixiv.net/users/{user['id']}"
+            url = "https://www.pixiv.net/users/" + str(user["id"])
             yield Message.Queue, url, user
 
 
@@ -1302,7 +1302,7 @@ class PixivAppAPI():
             msg = (f"'{msg}'" if (msg := error.get("user_message")) else
                    f"'{msg}'" if (msg := error.get("message")) else
                    error)
-            raise exception.AbortExtraction(f"API request failed: {msg}")
+            raise exception.AbortExtraction("API request failed: " + msg)
 
     def _pagination(self, endpoint, params,
                     key_items="illusts", key_data=None, key_user=None):

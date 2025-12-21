@@ -44,7 +44,7 @@ class ComickCoversExtractor(ComickBase, GalleryExtractor):
         covers.reverse()
 
         return [
-            (f"https://meo.comick.pictures/{cover['b2key']}", {
+            ("https://meo.comick.pictures/" + cover["b2key"], {
                 "id"    : cover["id"],
                 "width" : cover["w"],
                 "height": cover["h"],
@@ -128,7 +128,7 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
             return ()
 
         return [
-            (f"https://meo.comick.pictures/{img['b2key']}", {
+            ("https://meo.comick.pictures/" + img["b2key"], {
                 "width"    : img["w"],
                 "height"   : img["h"],
                 "size"     : img["s"],

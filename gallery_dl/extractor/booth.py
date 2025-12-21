@@ -116,7 +116,7 @@ class BoothShopExtractor(BoothExtractor):
         BoothExtractor.__init__(self, match)
 
     def shop_items(self):
-        return self._pagination(f"{self.root}/items")
+        return self._pagination(self.root + "/items")
 
 
 def _fallback(url):

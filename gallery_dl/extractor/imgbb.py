@@ -136,8 +136,8 @@ class ImgbbAlbumExtractor(ImgbbExtractor):
                 'data-text="image-count">', "<")),
         }
 
-        url = f"{self.root}/json"
-        params["pathname"] = f"/album/{album['id']}"
+        url = self.root + "/json"
+        params["pathname"] = "/album/" + album["id"]
         return self._pagination(page, url, params)
 
 
@@ -190,11 +190,11 @@ class ImgbbUserExtractor(ImgbbExtractor):
 
         if response.status_code < 300:
             params["pathname"] = "/"
-            return self._pagination(response.text, f"{url}json", params)
+            return self._pagination(response.text, url + "json", params)
 
         if response.status_code == 301:
             raise exception.NotFoundError("user")
-        redirect = f"HTTP redirect to {response.headers.get('Location')}"
+        redirect = "HTTP redirect to " + response.headers.get("Location", "")
         if response.status_code == 302:
             raise exception.AuthRequired(
                 ("username & password", "authenticated cookies"),

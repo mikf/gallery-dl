@@ -580,10 +580,10 @@ class CivitaiUserCollectionsExtractor(CivitaiExtractor):
         params = self._parse_query(query)
         params["userId"] = self.api.user(text.unquote(user))[0]["id"]
 
-        base = f"{self.root}/collections/"
+        base = self.root + "/collections/"
         for collection in self.api.collections(params):
             collection["_extractor"] = CivitaiCollectionExtractor
-            yield Message.Queue, f"{base}{collection['id']}", collection
+            yield Message.Queue, base + str(collection["id"]), collection
 
 
 class CivitaiGeneratedExtractor(CivitaiExtractor):
@@ -591,7 +591,7 @@ class CivitaiGeneratedExtractor(CivitaiExtractor):
     subcategory = "generated"
     filename_fmt = "{filename}.{extension}"
     directory_fmt = ("{category}", "generated")
-    pattern = f"{BASE_PATTERN}/generate"
+    pattern = BASE_PATTERN + "/generate"
     example = "https://civitai.com/generate"
 
     def items(self):
@@ -647,12 +647,12 @@ class CivitaiRestAPI():
         })
 
     def model(self, model_id):
-        endpoint = f"/v1/models/{model_id}"
+        endpoint = "/v1/models/" + str(model_id)
         return self._call(endpoint)
 
     @memcache(keyarg=1)
     def model_version(self, model_version_id):
-        endpoint = f"/v1/model-versions/{model_version_id}"
+        endpoint = "/v1/model-versions/" + str(model_version_id)
         return self._call(endpoint)
 
     def models(self, params):
@@ -945,7 +945,7 @@ class CivitaiSearchAPI():
 
         if auth := extractor.config("token"):
             if " " not in auth:
-                auth = f"Bearer {auth}"
+                auth = "Bearer " + auth
         else:
             auth = ("Bearer 8c46eb2508e21db1e9828a97968d"
                     "91ab1ca1caa5f70a00e88a2ba1e286603b61")

@@ -730,19 +730,19 @@ class TwitterUserExtractor(Dispatch, TwitterExtractor):
     def items(self):
         user, user_id = self.groups
         if user_id is not None:
-            user = f"id:{user_id}"
+            user = "id:" + user_id
 
         base = f"{self.root}/{user}/"
         return self._dispatch_extractors((
-            (TwitterInfoExtractor      , f"{base}info"),
-            (TwitterAvatarExtractor    , f"{base}photo"),
-            (TwitterBackgroundExtractor, f"{base}header_photo"),
-            (TwitterTimelineExtractor  , f"{base}timeline"),
-            (TwitterTweetsExtractor    , f"{base}tweets"),
-            (TwitterMediaExtractor     , f"{base}media"),
-            (TwitterRepliesExtractor   , f"{base}with_replies"),
-            (TwitterHighlightsExtractor, f"{base}highlights"),
-            (TwitterLikesExtractor     , f"{base}likes"),
+            (TwitterInfoExtractor      , base + "info"),
+            (TwitterAvatarExtractor    , base + "photo"),
+            (TwitterBackgroundExtractor, base + "header_photo"),
+            (TwitterTimelineExtractor  , base + "timeline"),
+            (TwitterTweetsExtractor    , base + "tweets"),
+            (TwitterMediaExtractor     , base + "media"),
+            (TwitterRepliesExtractor   , base + "with_replies"),
+            (TwitterHighlightsExtractor, base + "highlights"),
+            (TwitterLikesExtractor     , base + "likes"),
         ), ("timeline",))
 
 
@@ -1990,10 +1990,10 @@ class TwitterAPI():
                             extr.log.info("Retrying API request as guest")
                             continue
                         raise exception.AuthorizationError(
-                            f"{user['screen_name']} blocked your account")
+                            user["screen_name"] + " blocked your account")
                     elif user.get("protected"):
                         raise exception.AuthorizationError(
-                            f"{user['screen_name']}'s Tweets are protected")
+                            user["screen_name"] + "'s Tweets are protected")
 
                 raise exception.AbortExtraction(
                     "Unable to retrieve Tweets from this timeline")
@@ -2042,7 +2042,7 @@ class TwitterAPI():
                     pinned = None
                 elif pinned := extr._user_obj["legacy"].get(
                         "pinned_tweet_ids_str"):
-                    pinned = f"-tweet-{pinned[0]}"
+                    pinned = "-tweet-" + pinned[0]
                     for idx, entry in enumerate(tweets):
                         if entry["entryId"].endswith(pinned):
                             # mark as pinned / set 'pinned = True'
@@ -2248,7 +2248,7 @@ class TwitterAPI():
     def _update_variables_search(self, variables, cursor, tweet):
         try:
             tweet_id = tweet.get("id_str") or tweet["legacy"]["id_str"]
-            max_id = f"max_id:{int(tweet_id)-1}"
+            max_id = "max_id:" + str(int(tweet_id)-1)
 
             query, n = text.re(r"\bmax_id:\d+").subn(
                 max_id, variables["rawQuery"])

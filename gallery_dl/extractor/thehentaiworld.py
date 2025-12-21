@@ -90,12 +90,12 @@ class ThehentaiworldExtractor(Extractor):
         post["tags"] = tags_list = []
         for key, value in tags.items():
             tags_list.extend(value)
-            post[f"tags_{key}" if key else "tags_general"] = value
+            post["tags_" + key if key else "tags_general"] = value
 
         return post
 
     def _pagination(self, endpoint):
-        base = f"{self.root}{endpoint}"
+        base = self.root + endpoint
         pnum = self.page_start
 
         while True:
