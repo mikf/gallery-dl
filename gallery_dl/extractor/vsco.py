@@ -158,7 +158,7 @@ class VscoGalleryExtractor(VscoExtractor):
         tkn = data["users"]["currentUser"]["tkn"]
         sid = str(data["sites"]["siteByUsername"][self.user]["site"]["id"])
 
-        url = f"{self.root}/api/3.0/medias/profile"
+        url = self.root + "/api/3.0/medias/profile"
         params = {
             "site_id"  : sid,
             "limit"    : "14",

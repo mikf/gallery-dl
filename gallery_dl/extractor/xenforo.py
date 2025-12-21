@@ -118,7 +118,7 @@ class XenforoExtractor(BaseExtractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = f"{self.root}/login/login"
+        url = self.root + "/login/login"
         page = self.request(url).text
         data = {
             "_xfToken": text.extr(page, 'name="_xfToken" value="', '"'),
@@ -140,10 +140,10 @@ class XenforoExtractor(BaseExtractor):
         }
 
     def _pagination(self, base, pnum=None):
-        base = f"{self.root}{base}"
+        base = self.root + base
 
         if pnum is None:
-            url = f"{base}/"
+            url = base + "/"
             pnum = 1
         else:
             url = f"{base}/page-{pnum}"
@@ -160,7 +160,7 @@ class XenforoExtractor(BaseExtractor):
             url = f"{base}/page-{pnum}"
 
     def _pagination_reverse(self, base, pnum=None):
-        base = f"{self.root}{base}"
+        base = self.root + base
 
         url = f"{base}/page-{'9999' if pnum is None else pnum}"
         with self.request_page(url) as response:
@@ -180,7 +180,7 @@ class XenforoExtractor(BaseExtractor):
             if pnum > 1:
                 url = f"{base}/page-{pnum}"
             elif pnum == 1:
-                url = f"{base}/"
+                url = base + "/"
             else:
                 return
 
@@ -345,4 +345,4 @@ class XenforoForumExtractor(XenforoExtractor):
         pnum = self.groups[-1]
         for page in self._pagination(path, pnum):
             for path in extract_threads(page):
-                yield Message.Queue, f"{self.root}{text.unquote(path)}", data
+                yield Message.Queue, self.root + text.unquote(path), data

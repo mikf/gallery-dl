@@ -140,7 +140,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = f"{self.root}/login_int.php"
+        url = self.root + "/login_int.php"
         data = {"email": username, "password": password, "save": "on"}
 
         response = self.request(url, method="POST", data=data)

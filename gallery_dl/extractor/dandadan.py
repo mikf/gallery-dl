@@ -31,7 +31,7 @@ class DandadanChapterExtractor(DandadanBase, ChapterExtractor):
         return {
             "manga"        : "Dandadan",
             "chapter"      : text.parse_int(chapter),
-            "chapter_minor": f"{sep}{minor}",
+            "chapter_minor": sep + minor,
             "lang"         : "en",
         }
 

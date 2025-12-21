@@ -54,7 +54,7 @@ class PoipikuExtractor(Extractor):
 
         for post_url in self.posts():
             if post_url[0] == "/":
-                post_url = f"{self.root}{post_url}"
+                post_url = self.root + post_url
             page = self.request(post_url).text
             extr = text.extract_from(page)
             parts = post_url.rsplit("/", 2)
@@ -148,7 +148,7 @@ class PoipikuExtractor(Extractor):
         return files
 
     def _show_illust_detail(self, post):
-        url = f"{self.root}/f/ShowIllustDetailF.jsp"
+        url = self.root + "/f/ShowIllustDetailF.jsp"
         data = {
             "ID" : post["user_id"],
             "TD" : post["post_id"],
@@ -160,7 +160,7 @@ class PoipikuExtractor(Extractor):
             interval=False)
 
     def _show_append_file(self, post):
-        url = f"{self.root}/f/ShowAppendFileF.jsp"
+        url = self.root + "/f/ShowAppendFileF.jsp"
         data = {
             "UID": post["user_id"],
             "IID": post["post_id"],
@@ -183,7 +183,7 @@ class PoipikuUserExtractor(PoipikuExtractor):
     def posts(self):
         pnum, user_id = self.groups
 
-        url = f"{self.root}/IllustListPcV.jsp"
+        url = self.root + "/IllustListPcV.jsp"
         params = {
             "PG" : text.parse_int(pnum, 0),
             "ID" : user_id,

@@ -269,11 +269,11 @@ class ImgurAPI():
         return self._pagination(endpoint, params)
 
     def gallery_subreddit(self, subreddit):
-        endpoint = f"/3/gallery/r/{subreddit}"
+        endpoint = "/3/gallery/r/" + subreddit
         return self._pagination(endpoint)
 
     def gallery_tag(self, tag):
-        endpoint = f"/3/gallery/t/{tag}"
+        endpoint = "/3/gallery/t/" + tag
         return self._pagination(endpoint, key="items")
 
     def image(self, image_hash):

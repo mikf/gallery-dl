@@ -116,7 +116,7 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
             raise exception.NotFoundError("gallery")
 
     def posts(self):
-        gallery_id = f"gallery_id:{self.groups[-1]}"
+        gallery_id = "gallery_id:" + self.groups[-1]
         params = {"sd": "desc", "sf": gallery_id, "q": gallery_id}
         return self.api.search(params)
 

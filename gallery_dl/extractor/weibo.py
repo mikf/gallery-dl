@@ -114,13 +114,13 @@ class WeiboExtractor(Extractor):
                 if not url:
                     continue
                 if url.startswith("http:"):
-                    url = f"https:{url[5:]}"
+                    url = "https:" + url[5:]
                 if "filename" not in file:
                     text.nameext_from_url(url, file)
                     if file["extension"] == "json":
                         file["extension"] = "mp4"
                 if file["extension"] == "m3u8":
-                    url = f"ytdl:{url}"
+                    url = "ytdl:" + url
                     file["_ytdl_manifest"] = "hls"
                     file["extension"] = "mp4"
                 num += 1
@@ -307,11 +307,11 @@ class WeiboUserExtractor(WeiboExtractor):
     def items(self):
         base = f"{self.root}/u/{self._user_id()}?tabtype="
         return Dispatch._dispatch_extractors(self, (
-            (WeiboHomeExtractor    , f"{base}home"),
-            (WeiboFeedExtractor    , f"{base}feed"),
-            (WeiboVideosExtractor  , f"{base}video"),
-            (WeiboNewvideoExtractor, f"{base}newVideo"),
-            (WeiboAlbumExtractor   , f"{base}album"),
+            (WeiboHomeExtractor    , base + "home"),
+            (WeiboFeedExtractor    , base + "feed"),
+            (WeiboVideosExtractor  , base + "video"),
+            (WeiboNewvideoExtractor, base + "newVideo"),
+            (WeiboAlbumExtractor   , base + "album"),
         ), ("feed",))
 
 

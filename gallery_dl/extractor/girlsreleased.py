@@ -22,14 +22,14 @@ class GirlsreleasedExtractor(Extractor):
 
     def items(self):
         data = {"_extractor": GirlsreleasedSetExtractor}
-        base = f"{self.root}/set/"
+        base = self.root + "/set/"
         for set in self._pagination():
-            yield Message.Queue, f"{base}{set[0]}", data
+            yield Message.Queue, base + set[0], data
 
     def _pagination(self):
         base = f"{self.root}/api/0.2/sets/{self._path}/{self.groups[0]}/page/"
         for pnum in itertools.count():
-            sets = self.request_json(f"{base}{pnum}")["sets"]
+            sets = self.request_json(base + str(pnum))["sets"]
             if not sets:
                 return
 

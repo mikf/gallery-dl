@@ -32,7 +32,7 @@ class TumblrExtractor(Extractor):
 
     def _init(self):
         if name := self.groups[1]:
-            self.blog = f"{name}.tumblr.com"
+            self.blog = name + ".tumblr.com"
         else:
             self.blog = self.groups[0] or self.groups[2]
 

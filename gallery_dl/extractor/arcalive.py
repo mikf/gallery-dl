@@ -84,7 +84,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
                 url = src
 
             fallback = ()
-            query = f"?type=orig&{query}"
+            query = "?type=orig&" + query
             if orig := text.extr(media, 'data-orig="', '"'):
                 path, _, ext = url.rpartition(".")
                 if ext != orig:
@@ -169,8 +169,11 @@ class ArcaliveAPI():
             return data
 
         self.log.debug("Server response: %s", data)
-        msg = f": {msg}" if (msg := data.get("message")) else ""
-        raise exception.AbortExtraction(f"API request failed{msg}")
+        if msg := data.get("message"):
+            msg = "API request failed: " + msg
+        else:
+            msg = "API request failed"
+        raise exception.AbortExtraction(msg)
 
     def _pagination(self, endpoint, params, key):
         while True:

@@ -120,13 +120,13 @@ class Rule34xyzExtractor(BooruExtractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = f"{self.root}/api/v2/auth/signin"
+        url = self.root + "/api/v2/auth/signin"
         data = {"email": username, "password": password}
         response = self.request_json(
             url, method="POST", json=data, fatal=False)
 
         if jwt := response.get("jwt"):
-            return f"Bearer {jwt}"
+            return "Bearer " + jwt
         raise exception.AuthenticationError(
             (msg := response.get("message")) and f'"{msg}"')
 

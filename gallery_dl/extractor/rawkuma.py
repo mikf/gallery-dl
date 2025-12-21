@@ -65,7 +65,7 @@ class RawkumaMangaExtractor(RawkumaBase, MangaExtractor):
         manga = text.unescape(text.extr(page, "<title>", " &#8211; "))
         manga_id = text.parse_int(text.extr(page, "manga_id=", "&"))
 
-        url = f"{self.root}/wp-admin/admin-ajax.php"
+        url = self.root + "/wp-admin/admin-ajax.php"
         params = {
             "manga_id": manga_id,
             "page"    : "1",

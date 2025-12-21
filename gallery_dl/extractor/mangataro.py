@@ -75,7 +75,7 @@ class MangataroMangaExtractor(MangataroBase, MangaExtractor):
             results.append((url, {
                 **manga,
                 "chapter"      : text.parse_int(chapter),
-                "chapter_minor": f".{minor}" if sep else "",
+                "chapter_minor": "." + minor if sep else "",
                 "chapter_id"   : text.parse_int(chapter_id),
             }))
         return results

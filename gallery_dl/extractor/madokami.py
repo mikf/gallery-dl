@@ -85,7 +85,7 @@ class MadokamiMangaExtractor(MadokamiExtractor):
             else:
                 ch["volume"] = ch["chapter"] = ch["chapter_end"] = 0
 
-            url = f"{self.root}{ch['path']}"
+            url = self.root + ch["path"]
             text.nameext_from_url(url, ch)
 
             yield Message.Directory, "", ch

@@ -104,7 +104,7 @@ class MoebooruTagExtractor(MoebooruExtractor):
 
     def posts(self):
         params = {"tags": self.tags}
-        return self._pagination(f"{self.root}/post.json", params)
+        return self._pagination(self.root + "/post.json", params)
 
 
 class MoebooruPoolExtractor(MoebooruExtractor):
@@ -129,7 +129,7 @@ class MoebooruPoolExtractor(MoebooruExtractor):
 
     def posts(self):
         params = {"tags": "pool:" + self.pool_id}
-        return self._pagination(f"{self.root}/post.json", params)
+        return self._pagination(self.root + "/post.json", params)
 
 
 class MoebooruPostExtractor(MoebooruExtractor):
@@ -140,7 +140,7 @@ class MoebooruPostExtractor(MoebooruExtractor):
 
     def posts(self):
         params = {"tags": "id:" + self.groups[-1]}
-        return self.request_json(f"{self.root}/post.json", params=params)
+        return self.request_json(self.root + "/post.json", params=params)
 
 
 class MoebooruPopularExtractor(MoebooruExtractor):

@@ -79,10 +79,10 @@ class IwaraExtractor(Extractor):
                 continue
 
             yield Message.Directory, "", info
-            yield Message.Url, f"https:{download_url}", info
+            yield Message.Url, "https:" + download_url, info
 
     def items_user(self, users, key=None):
-        base = f"{self.root}/profile/"
+        base = self.root + "/profile/"
         for user in users:
             if key is not None:
                 user = user[key]
@@ -90,7 +90,7 @@ class IwaraExtractor(Extractor):
                 continue
             user["type"] = "user"
             user["_extractor"] = IwaraUserExtractor
-            yield Message.Queue, f"{base}{username}", user
+            yield Message.Queue, base + username, user
 
     def items_by_type(self, type, results):
         if type == "image":
@@ -164,9 +164,9 @@ class IwaraUserExtractor(Dispatch, IwaraExtractor):
     def items(self):
         base = f"{self.root}/profile/{self.groups[0]}/"
         return self._dispatch_extractors((
-            (IwaraUserImagesExtractor   , f"{base}images"),
-            (IwaraUserVideosExtractor   , f"{base}videos"),
-            (IwaraUserPlaylistsExtractor, f"{base}playlists"),
+            (IwaraUserImagesExtractor   , base + "images"),
+            (IwaraUserVideosExtractor   , base + "videos"),
+            (IwaraUserPlaylistsExtractor, base + "playlists"),
         ), ("user-images", "user-videos"))
 
 
@@ -196,12 +196,12 @@ class IwaraUserPlaylistsExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/profile/USERNAME/playlists"
 
     def items(self):
-        base = f"{self.root}/playlist/"
+        base = self.root + "/playlist/"
 
         for playlist in self.api.playlists(self._user_params()[1]):
             playlist["type"] = "playlist"
             playlist["_extractor"] = IwaraPlaylistExtractor
-            url = f"{base}{playlist['id']}"
+            url = base + playlist["id"]
             yield Message.Queue, url, playlist
 
 
@@ -298,7 +298,7 @@ class IwaraAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.headers = {
-            "Referer"     : f"{extractor.root}/",
+            "Referer"     : extractor.root + "/",
             "Content-Type": "application/json",
             "Origin"      : extractor.root,
         }
@@ -308,15 +308,15 @@ class IwaraAPI():
             self.authenticate = util.noop
 
     def image(self, image_id):
-        endpoint = f"/image/{image_id}"
+        endpoint = "/image/" + image_id
         return self._call(endpoint)
 
     def video(self, video_id):
-        endpoint = f"/video/{video_id}"
+        endpoint = "/video/" + video_id
         return self._call(endpoint)
 
     def playlist(self, playlist_id):
-        endpoint = f"/playlist/{playlist_id}"
+        endpoint = "/playlist/" + playlist_id
         return self._pagination(endpoint)
 
     def detail(self, media):
@@ -356,7 +356,7 @@ class IwaraAPI():
 
     @memcache(keyarg=1)
     def profile(self, username):
-        endpoint = f"/profile/{username}"
+        endpoint = "/profile/" + username
         return self._call(endpoint)
 
     def user_following(self, user_id):
@@ -387,7 +387,7 @@ class IwaraAPI():
         if refresh_token is None:
             self.extractor.log.info("Logging in as %s", username)
 
-            url = f"{self.root}/user/login"
+            url = self.root + "/user/login"
             json = {
                 "email"   : username,
                 "password": self.password
@@ -403,15 +403,15 @@ class IwaraAPI():
 
         self.extractor.log.info("Refreshing access token for %s", username)
 
-        url = f"{self.root}/user/token"
-        headers = {"Authorization": f"Bearer {refresh_token}", **self.headers}
+        url = self.root + "/user/token"
+        headers = {"Authorization": "Bearer " + refresh_token, **self.headers}
         data = self.extractor.request_json(
             url, method="POST", headers=headers, fatal=False)
 
         if not (access_token := data.get("accessToken")):
             self.extractor.log.debug(data)
             raise exception.AuthenticationError(data.get("message"))
-        return f"Bearer {access_token}"
+        return "Bearer " + access_token
 
     def _call(self, endpoint, params=None, headers=None):
         if headers is None:

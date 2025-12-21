@@ -49,7 +49,7 @@ class RealbooruExtractor(booru.BooruExtractor):
             tags.append(tag)
             tags_categories[tag_type].append(tag)
         for key, value in tags_categories.items():
-            post[f"tags_{key}"] = ", ".join(value)
+            post["tags_" + key] = ", ".join(value)
         tags.sort()
 
         post["tags"] = ", ".join(tags)

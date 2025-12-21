@@ -282,7 +282,7 @@ class SexcomFeedExtractor(SexcomExtractor):
     def pins(self):
         if not self.cookies_check(("sess_sex",)):
             self.log.warning("no 'sess_sex' cookie set")
-        url = f"{self.root}/feed/"
+        url = self.root + "/feed/"
         return self._pagination(url)
 
 
@@ -341,10 +341,10 @@ class SexcomSearchExtractor(SexcomExtractor):
                     pin["type"] = "gif"
                     if gifs and pin["extension"] == "webp":
                         pin["extension"] = "gif"
-                        pin["_fallback"] = (f"{root}{path}",)
-                        path = f"{path[:-4]}gif"
+                        pin["_fallback"] = (root + path,)
+                        path = path[:-4] + "gif"
 
-                pin["url"] = f"{root}{path}"
+                pin["url"] = root + path
                 yield Message.Directory, "", pin
                 yield Message.Url, pin["url"], pin
 

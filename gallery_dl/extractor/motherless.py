@@ -93,8 +93,8 @@ class MotherlessExtractor(Extractor):
             title = self._extract_group_title(page, gid)
 
         return {
-            f"{category}_id": gid,
-            f"{category}_title": title,
+            category + "_id": gid,
+            category + "_title": title,
             "uploader": text.remove_html(extr(
                 f'class="{category}-member-username">', "</")),
             "count": text.parse_int(

@@ -135,7 +135,7 @@ class FanslyExtractor(Extractor):
 
             files.append({
                 "file": file,
-                "url": f"ytdl:{location['location']}",
+                "url": "ytdl:" + location["location"],
                 "_fallback": fallback,
                 "_ytdl_manifest":
                     "dash" if mime == "application/dash+xml" else "hls",
@@ -184,7 +184,7 @@ class FanslyListExtractor(FanslyExtractor):
     example = "https://fansly.com/lists/1234567890"
 
     def items(self):
-        base = f"{self.root}/"
+        base = self.root + "/"
         for account in self.api.lists_itemsnew(self.groups[0]):
             account["_extractor"] = FanslyCreatorPostsExtractor
             url = f"{base}{account['username']}/posts"
@@ -197,7 +197,7 @@ class FanslyListsExtractor(FanslyExtractor):
     example = "https://fansly.com/lists"
 
     def items(self):
-        base = f"{self.root}/lists/"
+        base = self.root + "/lists/"
         for list in self.api.lists_account():
             list["_extractor"] = FanslyListExtractor
             url = f"{base}{list['id']}#{list['label']}"
@@ -308,7 +308,7 @@ class FanslyAPI():
         return self._pagination(endpoint, params)
 
     def timeline_new(self, account_id, wall_id):
-        endpoint = f"/v1/timelinenew/{account_id}"
+        endpoint = "/v1/timelinenew/" + str(account_id)
         params = {
             "before"       : "0",
             "after"        : "0",
