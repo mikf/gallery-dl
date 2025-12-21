@@ -3021,6 +3021,16 @@ Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.facebook.loop
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Continue when detecting a jump to a set's beginning.
+
+
 extractor.facebook.videos
 -------------------------
 Type
