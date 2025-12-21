@@ -1138,22 +1138,21 @@ class TiktokPostItemListRequest(TiktokItemListRequest):
         self.__request_type = query_parameters["post_item_list_request_type"]
 
     def cursor_type(self, query_parameters):
-        match query_parameters["post_item_list_request_type"]:
-            case "0":
-                return TiktokBackwardTimeCursor
-            case "1":
-                return TiktokPopularTimeCursor
-            case "2":
-                return TiktokForwardTimeCursor
+        request_type = query_parameters["post_item_list_request_type"]
+        if request_type == "2":
+            return TiktokForwardTimeCursor
+        elif request_type == "1":
+            return TiktokPopularTimeCursor
+        else:
+            return TiktokBackwardTimeCursor
 
     def order_item_keys(self, item_keys):
-        match self.__request_type:
-            case "0":
-                return super().order_item_keys(item_keys)
-            case "1":
-                return item_keys
-            case "2":
-                return sorted(item_keys)
+        if self.__request_type == "2":
+            return sorted(item_keys)
+        elif self.__request_type == "1":
+            return item_keys
+        else:
+            return super().order_item_keys(item_keys)
 
 
 # MARK: story/item_list
