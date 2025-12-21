@@ -675,7 +675,7 @@ class TiktokPaginationCursor:
 
 
 class TiktokTimeCursor(TiktokPaginationCursor):
-    def __init__(self, *, reverse = True):
+    def __init__(self, *, reverse=True):
         super().__init__()
         self.cursor = 0
         # If we expect the cursor to go up or down as we go to the next page.
