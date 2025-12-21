@@ -97,12 +97,12 @@ __tests__ = (
 },
 
 {
-    "#url"       : "https://www.tiktok.com/@ughuwhguweghw/video/1",
-    "#comment"   : "deleted post",
-    "#category"  : ("", "tiktok", "post"),
-    "#class"     : tiktok.TiktokPostExtractor,
-    "#options"   : {"videos": False, "audio": False},
-    "count"      : 0,
+    "#url"      : "https://www.tiktok.com/@ughuwhguweghw/video/1",
+    "#comment"  : "deleted post",
+    "#category" : ("", "tiktok", "post"),
+    "#class"    : tiktok.TiktokPostExtractor,
+    "#options"  : {"videos": False, "audio": False},
+    "#count"    : 0,
 },
 
 {
@@ -276,6 +276,26 @@ __tests__ = (
     "#count"    : 11,  # 10 posts + 1 avatar
     "#options"  : {"videos": True, "audio": True, "tiktok-range": "1-10"},
 },
+
+# order-posts currently has no effect if logged-in cookies aren't used.
+
+# {
+#     "#url"      : "https://www.tiktok.com/@chillezy",
+#     "#comment"  : "User profile ascending order",
+#     "#category" : ("", "tiktok", "user"),
+#     "#class"    : tiktok.TiktokUserExtractor,
+#     "#results"  : "https://www.tiktok.com/@chillezy/video/7112145009356344622",
+#     "#options"  : {"videos": True, "audio": True, "avatar": False, "tiktok-range": "1", "order-posts": "asc"},
+# },
+
+# {
+#     "#url"      : "https://www.tiktok.com/@chillezy",
+#     "#comment"  : "User profile popular order",
+#     "#category" : ("", "tiktok", "user"),
+#     "#class"    : tiktok.TiktokUserExtractor,
+#     "#results"  : "https://www.tiktok.com/@chillezy/video/7240568259186019630",
+#     "#options"  : {"videos": True, "audio": True, "avatar": False, "tiktok-range": "1", "order-posts": "popular"},
+# },
 
 {
     "#url"      : "https://www.tiktok.com/@chillezy",

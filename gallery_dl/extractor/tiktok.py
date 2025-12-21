@@ -7,6 +7,7 @@
 """Extractors for https://www.tiktok.com/"""
 
 from itertools import count
+from json import JSONDecodeError
 from math import floor
 from random import choices, randint
 from re import fullmatch
@@ -317,8 +318,15 @@ class TiktokUserExtractor(TiktokExtractor):
         self.range = self.config("tiktok-range")
         if self.range is None or not self.range and self.range != 0:
             self.range = ""
+        self.post_order = self.config("order-posts", "desc")
+        if not self.post_order:
+            self.post_order = "desc"
+        self.post_order = self.post_order.lower()
+        if self.post_order not in ["desc", "asc", "reverse", "popular"]:
+            self.post_order = "desc"
         self.rehydration_data_cache = {}
         self.rehydration_data_app_context_cache = {}
+        self.user_provided_cookies = bool(self.cookies)
 
     # MARK: Overrides
     def items(self):
@@ -332,6 +340,8 @@ class TiktokUserExtractor(TiktokExtractor):
             try:
                 avatar_url, avatar = self._extract_avatar(profile_url,
                                                           user_name)
+            except (KeyboardInterrupt, SystemExit):
+                raise
             except Exception as exc:
                 self.log.warning("%s: unable to extract 'avatar' URL (%s: %s)",
                                  profile_url, exc.__class__.__name__, exc)
@@ -462,6 +472,52 @@ class TiktokUserExtractor(TiktokExtractor):
     def _extract_posts(self, profile_url, user_name):
         sec_uid = self._extract_sec_uid(profile_url, user_name)
         range_predicate = util.RangePredicate(self.range)
+        if not self.user_provided_cookies:
+            if self.post_order != "desc":
+                self.log.warning(
+                    "%s: no cookies have been provided so the order-posts "
+                    "option will not take effect. You must provide cookies in "
+                    "order to extract a profile's posts in non-descending "
+                    "order",
+                    profile_url
+                )
+            return self._extract_posts_legacy(profile_url, sec_uid,
+                                              range_predicate)
+        try:
+            return self._extract_posts_with_ordering(profile_url, sec_uid,
+                                                     range_predicate)
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as exc:
+            self.log.error(
+                "%s: failed to extract user posts using post/item_list (make "
+                "sure you provide valid cookies). Attempting with legacy "
+                "creator/item_list endpoint that does not support post "
+                "ordering",
+                profile_url
+            )
+            self.log.traceback(exc)
+            return self._extract_posts_legacy(profile_url, sec_uid,
+                                              range_predicate)
+
+    def _extract_posts_with_ordering(self, profile_url, sec_uid,
+                                     range_predicate):
+        post_item_list_request_type = "0"
+        if self.post_order in ["asc", "reverse"]:
+            post_item_list_request_type = "2"
+        elif self.post_order in ["popular"]:
+            post_item_list_request_type = "1"
+        query_parameters = {
+            "secUid": sec_uid,
+            "post_item_list_request_type": post_item_list_request_type,
+            "count": "15",
+        }
+        request = TiktokPostItemListRequest(range_predicate)
+        request.execute(self, profile_url, query_parameters)
+        return request.generate_urls(profile_url, self.video, self.photo,
+                                     self.audio)
+
+    def _extract_posts_legacy(self, profile_url, sec_uid, range_predicate):
         query_parameters = {
             "secUid": sec_uid,
             "type": "1",
@@ -619,6 +675,61 @@ class TiktokPaginationCursor:
 
 
 class TiktokTimeCursor(TiktokPaginationCursor):
+    def __init__(self, *, reverse = True):
+        super().__init__()
+        self.cursor = 0
+        # If we expect the cursor to go up or down as we go to the next page.
+        # True for down, False for up.
+        self.reverse = reverse
+
+    def current_page(self):
+        return self.cursor
+
+    def next_page(self, data, query_parameters):
+        skip_fallback_logic = self.cursor == 0
+        new_cursor = int(data.get("cursor", 0))
+        no_cursor = not new_cursor
+        if not skip_fallback_logic:
+            # If the new cursor doesn't go in the direction we expect, use the
+            # fallback logic instead.
+            if self.reverse and (new_cursor > self.cursor or no_cursor):
+                new_cursor = self.fallback_cursor(data)
+            elif not self.reverse and (new_cursor < self.cursor or no_cursor):
+                new_cursor = self.fallback_cursor(data)
+        elif no_cursor:
+            raise exception.ExtractionError("Could not extract next cursor")
+        self.cursor = new_cursor
+        return not data.get("hasMore", False)
+
+    def fallback_cursor(self, data):
+        try:
+            return int(int(data["itemList"][-1]["createTime"]) * 1e3)
+        except (IndexError, KeyError, ValueError):
+            return 7 * 86_400_000 * (-1 if self.reverse else 1)
+
+
+class TiktokForwardTimeCursor(TiktokTimeCursor):
+    def __init__(self):
+        super().__init__(reverse=False)
+
+
+class TiktokBackwardTimeCursor(TiktokTimeCursor):
+    def __init__(self):
+        super().__init__(reverse=True)
+
+
+class TiktokPopularTimeCursor(TiktokTimeCursor):
+    def __init__(self):
+        super().__init__(reverse=True)
+
+    def fallback_cursor(self, data):
+        # Don't really know what to do here, all I know is that the cursor
+        # for the popular item feed goes down and it does not appear to be
+        # based on item list timestamps at all.
+        return -50_000
+
+
+class TiktokLegacyTimeCursor(TiktokPaginationCursor):
     def __init__(self):
         super().__init__()
         self.cursor = int(time() * 1e3)
@@ -657,9 +768,8 @@ class TiktokItemCursor(TiktokPaginationCursor):
 
 # MARK: Requests
 class TiktokPaginationRequest:
-    def __init__(self, endpoint, cursor_type):
+    def __init__(self, endpoint):
         self.endpoint = endpoint
-        self.cursor_type = cursor_type
         self._regenerate_device_id()
         self.items = {}
 
@@ -692,7 +802,8 @@ class TiktokPaginationRequest:
 
         self.validate_query_parameters(query_parameters)
         self.items = {}
-        cursor = self.cursor_type() if self.cursor_type else None
+        cursor_type = self.cursor_type(query_parameters)
+        cursor = cursor_type() if cursor_type else None
         for page in count(start=1):
             extractor.log.info("%s: retrieving %s page %d", url, self.endpoint,
                                page)
@@ -720,6 +831,8 @@ class TiktokPaginationRequest:
                     else:
                         # This request has no cursor: return immediately.
                         return True
+                except (KeyboardInterrupt, SystemExit):
+                    raise
                 except Exception as exc:
                     if tries >= extractor._retries:
                         extractor.log.error("%s: failed to retrieve %s page "
@@ -757,6 +870,23 @@ class TiktokPaginationRequest:
         assert type(query_parameters["count"]) is str
         assert query_parameters["count"].isdigit()
         assert query_parameters["count"] != "0"
+
+    def cursor_type(self, query_parameters):
+        """Used to determine which type of cursor to use for this
+        request, if any.
+
+        Parameters
+        ----------
+        query_parameters : dict[str, str]
+            The query parameters given to the execute() call.
+
+        Returns
+        -------
+        Type[TiktokPaginationCursor] | None
+            The type of cursor to use, if any.
+        """
+
+        return None
 
     def extract_items(self, data):
         """Used to extract data from the response of a request.
@@ -819,10 +949,24 @@ class TiktokPaginationRequest:
         self.device_id = str(randint(7250000000000000000, 7325099899999994577))
 
     def _request_data(self, extractor, cursor, query_parameters):
-        url, final_parameters = self._build_api_request_url(cursor,
-                                                            query_parameters)
-        response = extractor.request(url)
-        return (util.json_loads(response.text), final_parameters)
+        # Implement simple 1 retry mechanism without delays that handles the
+        # flaky post/item_list endpoint.
+        retries = 0
+        while True:
+            try:
+                url, final_parameters = self._build_api_request_url(
+                    cursor,
+                    query_parameters
+                )
+                response = extractor.request(url)
+                return (util.json_loads(response.text), final_parameters)
+            except JSONDecodeError:
+                if retries == 1:
+                    raise
+                extractor.log.warning(
+                    "Could not decode response for this page, trying again"
+                )
+                retries += 1
 
     def _build_api_request_url(self, cursor, extra_parameters):
         verify_fp = f"verify_{''.join(choices(hexdigits, k=7))}"
@@ -879,8 +1023,8 @@ class TiktokPaginationRequest:
 
 # MARK: XYZ/item_list
 class TiktokItemListRequest(TiktokPaginationRequest):
-    def __init__(self, endpoint, cursor_type, type_of_items, range_predicate):
-        super().__init__(endpoint, cursor_type)
+    def __init__(self, endpoint, type_of_items, range_predicate):
+        super().__init__(endpoint)
         self.type_of_items = type_of_items
         self.range_predicate = range_predicate
         self.exit_early_due_to_no_items = False
@@ -908,7 +1052,8 @@ class TiktokItemListRequest(TiktokPaginationRequest):
 
     def generate_urls(self, profile_url, video, photo, audio):
         return [f"{profile_url}/video/{id}"
-                for index, id in enumerate(reversed(sorted(self.items.keys())))
+                for index, id in enumerate(self.order_item_keys(
+                    self.items.keys()))
                 if self._matches_filters(self.items.get(id), index + 1, video,
                                          photo, audio)]
 
@@ -934,26 +1079,87 @@ class TiktokItemListRequest(TiktokPaginationRequest):
             return False
         return True
 
+    def order_item_keys(self, item_keys):
+        return reversed(sorted(item_keys))
+
 
 # MARK: creator/item_list
 class TiktokCreatorItemListRequest(TiktokItemListRequest):
+    """A less flaky version of the post/item_list endpoint that doesn't
+    support latest/popular/oldest ordering."""
+
     def __init__(self, range_predicate):
-        super().__init__("creator/item_list", TiktokTimeCursor, "posts",
-                         range_predicate)
+        super().__init__("creator/item_list", "posts", range_predicate)
 
     def validate_query_parameters(self, query_parameters):
         super().validate_query_parameters(query_parameters)
         assert "secUid" in query_parameters
         assert "type" in query_parameters
         # Pagination type: 0 == oldest-to-newest, 1 == newest-to-oldest.
+        # NOTE: ^ this type parameter doesn't seem to do what yt-dlp thinks it
+        #       does. post/item_list is the only way to get an ordered feed
+        #       based on latest/popular/oldest.
         assert query_parameters["type"] == "0" or \
             query_parameters["type"] == "1"
+
+    def cursor_type(self, query_parameters):
+        return TiktokLegacyTimeCursor
+
+
+# MARK: post/item_list
+class TiktokPostItemListRequest(TiktokItemListRequest):
+    """Retrieves posts in latest/popular/oldest ordering.
+
+    Very often, this request will just return an empty response, making
+    it quite flaky, but the next attempt to make the request usually
+    does return a response. For this reason creator/item_list was kept
+    as a backup, though it doesn't seem to support ordering.
+
+    It also doesn't work without cookies.
+    """
+
+    def __init__(self, range_predicate):
+        super().__init__("post/item_list", "posts", range_predicate)
+
+    def validate_query_parameters(self, query_parameters):
+        super().validate_query_parameters(query_parameters)
+        # The count parameter should really be at or above 4 to account for the
+        # potential for 3 pinned posts that could skew our time-based cursors,
+        # causing us to miss posts.
+        assert int(query_parameters["count"]) > 3
+        assert "secUid" in query_parameters
+        assert "post_item_list_request_type" in query_parameters
+        # Pagination type:
+        # 0 == newest-to-oldest.
+        # 1 == popular.
+        # 2 == oldest-to-newest.
+        assert query_parameters["post_item_list_request_type"] in \
+            ["0", "1", "2"]
+        self.__request_type = query_parameters["post_item_list_request_type"]
+
+    def cursor_type(self, query_parameters):
+        match query_parameters["post_item_list_request_type"]:
+            case "0":
+                return TiktokBackwardTimeCursor
+            case "1":
+                return TiktokPopularTimeCursor
+            case "2":
+                return TiktokForwardTimeCursor
+
+    def order_item_keys(self, item_keys):
+        match self.__request_type:
+            case "0":
+                return super().order_item_keys(item_keys)
+            case "1":
+                return item_keys
+            case "2":
+                return sorted(item_keys)
 
 
 # MARK: story/item_list
 class TiktokStoryItemListRequest(TiktokItemListRequest):
     def __init__(self):
-        super().__init__("story/item_list", TiktokItemCursor, "stories", None)
+        super().__init__("story/item_list", "stories", None)
 
     def validate_query_parameters(self, query_parameters):
         super().validate_query_parameters(query_parameters)
@@ -962,11 +1168,14 @@ class TiktokStoryItemListRequest(TiktokItemListRequest):
         assert query_parameters["loadBackward"] == "false" or \
             query_parameters["loadBackward"] == "true"
 
+    def cursor_type(self, query_parameters):
+        return TiktokItemCursor
+
 
 # MARK: story/batch/item_list
 class TiktokStoryBatchItemListRequest(TiktokItemListRequest):
     def __init__(self):
-        super().__init__("story/batch/item_list", None, "stories", None)
+        super().__init__("story/batch/item_list", "stories", None)
 
     def validate_query_parameters(self, query_parameters):
         # This request type does not need a count parameter so don't invoke
@@ -998,7 +1207,7 @@ class TiktokStoryBatchItemListRequest(TiktokItemListRequest):
 # MARK: story/user_list
 class TiktokStoryUserListRequest(TiktokPaginationRequest):
     def __init__(self):
-        super().__init__("story/user_list", TiktokItemCursor)
+        super().__init__("story/user_list")
         self.exit_early_due_to_no_cookies = False
 
     def validate_query_parameters(self, query_parameters):
@@ -1006,6 +1215,9 @@ class TiktokStoryUserListRequest(TiktokPaginationRequest):
         # Not sure what this parameter does.
         assert "storyFeedScene" in query_parameters
         assert query_parameters["storyFeedScene"] == "3"
+
+    def cursor_type(self, query_parameters):
+        return TiktokItemCursor
 
     def extract_items(self, data):
         if "storyUsers" not in data:
