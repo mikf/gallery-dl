@@ -11,7 +11,6 @@
 from .common import Extractor, Message
 from .. import text, exception
 from ..cache import memcache
-from os.path import splitext
 
 
 class ImagehostImageExtractor(Extractor):
@@ -98,9 +97,6 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
         ImagehostImageExtractor.__init__(self, match)
         if "/img-" in self.page_url:
             self.page_url = self.page_url.replace("img.yt", "imx.to")
-            self.url_ext = True
-        else:
-            self.url_ext = False
 
     def get_info(self, page):
         url, pos = text.extract(
@@ -108,9 +104,7 @@ class ImxtoImageExtractor(ImagehostImageExtractor):
         if not url:
             self.not_found()
         filename, pos = text.extract(page, ' title="', '"', pos)
-        if self.url_ext and filename:
-            filename += splitext(url)[1]
-        return url, filename or url
+        return url, filename or None
 
     def metadata(self, page):
         extr = text.extract_from(page, page.index("[ FILESIZE <"))
@@ -172,7 +166,7 @@ class AcidimgImageExtractor(ImagehostImageExtractor):
         if not filename:
             filename, pos = text.extract(page, 'alt="', '"', pos)
 
-        return url, (filename + splitext(url)[1]) if filename else url
+        return url, filename or None
 
 
 class ImagevenueImageExtractor(ImagehostImageExtractor):
