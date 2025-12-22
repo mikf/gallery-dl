@@ -20,7 +20,6 @@ class ImagehostImageExtractor(Extractor):
     subcategory = "image"
     archive_fmt = "{token}"
     parent = True
-    _https = True
     _params = None
     _cookies = None
     _encoding = None
@@ -67,7 +66,7 @@ class ImagehostImageExtractor(Extractor):
         data["post_url"] = self.page_url
         data.update(self.metadata(page))
 
-        if self._https and url.startswith("http:"):
+        if url.startswith("http:"):
             url = "https:" + url[5:]
         if self._validate is not None:
             data["_http_validate"] = self._validate
@@ -404,7 +403,6 @@ class ImgclickImageExtractor(ImagehostImageExtractor):
     category = "imgclick"
     pattern = r"(?:https?://)?((?:www\.)?imgclick\.net/([^/?#]+))"
     example = "http://imgclick.net/abc123/NAME.EXT.html"
-    _https = False
     _params = "complex"
 
     def get_info(self, page):
