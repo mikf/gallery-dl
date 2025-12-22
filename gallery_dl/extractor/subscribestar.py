@@ -236,7 +236,7 @@ class SubscribestarExtractor(Extractor):
 class SubscribestarUserTagExtractor(SubscribestarExtractor):
     """Extractor for a subscribestar user's tagged posts"""
     subcategory = "user-tag"
-    pattern = rf"{BASE_PATTERN}/(?!posts/)([^/?#]+)\?tag=([^#]+)"
+    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)\?tag=([^#]+)"
     example = "https://www.subscribestar.com/USER?tag=TAG"
 
     def posts(self):
