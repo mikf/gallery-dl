@@ -150,11 +150,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.original = self.config("original", True)
 
     def finalize(self):
-        if self.data:
+        if self.data and (token := self.data.get("image_token")):
             self.log.info("Use '%s/s/%s/%s-%s' as input URL "
                           "to continue downloading from the current position",
-                          self.root, self.data["image_token"],
-                          self.gallery_id, self.data["num"])
+                          self.root, token, self.gallery_id, self.data["num"])
 
     def favorite(self, slot="0"):
         url = self.root + "/gallerypopups.php"
