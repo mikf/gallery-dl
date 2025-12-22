@@ -314,6 +314,7 @@ class TiktokUserExtractor(TiktokExtractor):
         self.stories = self.config("stories", True)
         self.likes = self.config("likes", False)
         self.reposts = self.config("reposts", False)
+        self.saved_posts = self.config("saved-posts", False)
         # If set to "ytdl", we shall first go via yt-dlp. If that fails,
         # we shall attempt to extract directly.
         self.ytdl = self.config("tiktok-user-extractor") == "ytdl"
@@ -391,7 +392,14 @@ class TiktokUserExtractor(TiktokExtractor):
                 self.log.warning("Could not extract the reposts of TikTok "
                                  "user %s", user_name)
 
-        entries = posts + stories + likes + reposts
+        saved_posts = []
+        if self.saved_posts:
+            saved_posts = self._extract_saved_posts(profile_url, user_name)
+            if not saved_posts:
+                self.log.warning("Could not extract the saved posts of TikTok "
+                                 "user %s", user_name)
+
+        entries = posts + stories + likes + reposts + saved_posts
         seen = set()
         seen_add = seen.add
         for post_url in entries:
@@ -587,6 +595,19 @@ class TiktokUserExtractor(TiktokExtractor):
             "count": "15",
         }
         request = TiktokRepostItemListRequest(self.range_predicate)
+        request.execute(self, profile_url, query_parameters)
+        return request.generate_urls(profile_url, self.video, self.photo,
+                                     self.audio)
+
+    def _extract_saved_posts(self, profile_url, user_name):
+        sec_uid = self._extract_sec_uid(profile_url, user_name)
+        query_parameters = {
+            "secUid": sec_uid,
+            "post_item_list_request_type": "0",
+            "needPinnedItemIds": "false",
+            "count": "15",
+        }
+        request = TiktokSavedPostItemListRequest(self.range_predicate)
         request.execute(self, profile_url, query_parameters)
         return request.generate_urls(profile_url, self.video, self.photo,
                                      self.audio)
@@ -1238,7 +1259,7 @@ class TiktokFavoriteItemListRequest(TiktokItemListRequest):
         assert query_parameters["needPinnedItemIds"] in ["false"]
 
     def cursor_type(self, query_parameters):
-        return TiktokBackwardTimeCursor
+        return TiktokPopularTimeCursor
 
 
 # MARK: report/item_list
@@ -1262,6 +1283,30 @@ class TiktokRepostItemListRequest(TiktokItemListRequest):
 
     def cursor_type(self, query_parameters):
         return TiktokItemCursor
+
+
+# MARK: user/collect/item_list
+class TiktokSavedPostItemListRequest(TiktokItemListRequest):
+    """Retrieves a user's saved posts.
+
+    Appears to only support descending order, but it can work without
+    cookies.
+    """
+
+    def __init__(self, range_predicate):
+        super().__init__("user/collect/item_list", "saved posts",
+                         range_predicate)
+
+    def validate_query_parameters(self, query_parameters):
+        super().validate_query_parameters(query_parameters)
+        assert "secUid" in query_parameters
+        assert "post_item_list_request_type" in query_parameters
+        assert query_parameters["post_item_list_request_type"] == "0"
+        assert "needPinnedItemIds" in query_parameters
+        assert query_parameters["needPinnedItemIds"] in ["false"]
+
+    def cursor_type(self, query_parameters):
+        return TiktokPopularTimeCursor
 
 
 # MARK: story/item_list
