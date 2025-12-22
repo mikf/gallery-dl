@@ -238,7 +238,7 @@ class DiscordExtractor(Extractor):
 
 class DiscordChannelExtractor(DiscordExtractor):
     subcategory = "channel"
-    pattern = rf"{BASE_PATTERN}/channels/(\d+)/(?:\d+/threads/)?(\d+)/?$"
+    pattern = BASE_PATTERN + r"/channels/(\d+)/(?:\d+/threads/)?(\d+)/?$"
     example = "https://discord.com/channels/1234567890/9876543210"
 
     def items(self):
@@ -251,7 +251,7 @@ class DiscordChannelExtractor(DiscordExtractor):
 
 class DiscordMessageExtractor(DiscordExtractor):
     subcategory = "message"
-    pattern = rf"{BASE_PATTERN}/channels/(\d+)/(\d+)/(\d+)/?$"
+    pattern = BASE_PATTERN + r"/channels/(\d+)/(\d+)/(\d+)/?$"
     example = "https://discord.com/channels/1234567890/9876543210/2468013579"
 
     def items(self):
@@ -268,7 +268,7 @@ class DiscordMessageExtractor(DiscordExtractor):
 
 class DiscordServerExtractor(DiscordExtractor):
     subcategory = "server"
-    pattern = rf"{BASE_PATTERN}/channels/(\d+)/?$"
+    pattern = BASE_PATTERN + r"/channels/(\d+)/?$"
     example = "https://discord.com/channels/1234567890"
 
     def items(self):
@@ -286,7 +286,7 @@ class DiscordDirectMessagesExtractor(DiscordExtractor):
     subcategory = "direct-messages"
     directory_fmt = ("{category}", "Direct Messages",
                      "{channel_id}_{recipients:J,}")
-    pattern = rf"{BASE_PATTERN}/channels/@me/(\d+)/?$"
+    pattern = BASE_PATTERN + r"/channels/@me/(\d+)/?$"
     example = "https://discord.com/channels/@me/1234567890"
 
     def items(self):
@@ -297,7 +297,7 @@ class DiscordDirectMessageExtractor(DiscordExtractor):
     subcategory = "direct-message"
     directory_fmt = ("{category}", "Direct Messages",
                      "{channel_id}_{recipients:J,}")
-    pattern = rf"{BASE_PATTERN}/channels/@me/(\d+)/(\d+)/?$"
+    pattern = BASE_PATTERN + r"/channels/@me/(\d+)/(\d+)/?$"
     example = "https://discord.com/channels/@me/1234567890/9876543210"
 
     def items(self):

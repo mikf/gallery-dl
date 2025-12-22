@@ -38,7 +38,7 @@ class HentaicosplaysGalleryExtractor(
     directory_fmt = ("{site}", "{title}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{title}_{filename}"
-    pattern = rf"{BASE_PATTERN}/(?:image|story)/([\w-]+)"
+    pattern = BASE_PATTERN + r"/(?:image|story)/([\w-]+)"
     example = "https://hentai-cosplay-xxx.com/image/TITLE/"
 
     def __init__(self, match):

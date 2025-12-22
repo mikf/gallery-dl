@@ -766,7 +766,7 @@ class GalleryExtractor(Extractor):
         Extractor.__init__(self, match)
 
         if url is None and (path := self.groups[0]) and path[0] == "/":
-            self.page_url = f"{self.root}{path}"
+            self.page_url = self.root + path
         else:
             self.page_url = url
 
@@ -863,7 +863,7 @@ class MangaExtractor(Extractor):
         Extractor.__init__(self, match)
 
         if url is None and (path := self.groups[0]) and path[0] == "/":
-            self.page_url = f"{self.root}{path}"
+            self.page_url = self.root + path
         else:
             self.page_url = url
 

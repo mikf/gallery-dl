@@ -58,7 +58,7 @@ class SubscribestarExtractor(Extractor):
                     text.nameext_from_url(url, item)
 
                 if url[0] == "/":
-                    url = f"{self.root}{url}"
+                    url = self.root + url
                 yield Message.Url, url, item
 
     def posts(self):
@@ -72,7 +72,7 @@ class SubscribestarExtractor(Extractor):
                     "/verify_subscriber" in response.url or
                     "/age_confirmation_warning" in response.url):
                 raise exception.AbortExtraction(
-                    f"HTTP redirect to {response.url}")
+                    "HTTP redirect to " + response.url)
 
             content = response.content
             if len(content) < 250 and b">redirected<" in content:
@@ -250,7 +250,7 @@ class SubscribestarUserTagExtractor(SubscribestarExtractor):
 class SubscribestarUserExtractor(SubscribestarExtractor):
     """Extractor for media from a subscribestar user"""
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/(?!posts/)([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
     example = "https://www.subscribestar.com/USER"
 
     def posts(self):
@@ -260,7 +260,7 @@ class SubscribestarUserExtractor(SubscribestarExtractor):
 class SubscribestarPostExtractor(SubscribestarExtractor):
     """Extractor for media from a single subscribestar post"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/posts/(\d+)"
+    pattern = BASE_PATTERN + r"/posts/(\d+)"
     example = "https://www.subscribestar.com/posts/12345"
 
     def posts(self):

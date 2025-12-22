@@ -190,7 +190,7 @@ class GelbooruV02TagExtractor(GelbooruV02Extractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = rf"{BASE_PATTERN}/index\.php\?page=post&s=list&tags=([^&#]*)"
+    pattern = BASE_PATTERN + r"/index\.php\?page=post&s=list&tags=([^&#]*)"
     example = "https://safebooru.org/index.php?page=post&s=list&tags=TAG"
 
     def posts(self):
@@ -206,7 +206,7 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = rf"{BASE_PATTERN}/index\.php\?page=pool&s=show&id=(\d+)"
+    pattern = BASE_PATTERN + r"/index\.php\?page=pool&s=show&id=(\d+)"
     example = "https://safebooru.org/index.php?page=pool&s=show&id=12345"
 
     def __init__(self, match):
@@ -257,7 +257,7 @@ class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
     directory_fmt = ("{category}", "favorites", "{favorite_id}")
     archive_fmt = "f_{favorite_id}_{id}"
     per_page = 50
-    pattern = rf"{BASE_PATTERN}/index\.php\?page=favorites&s=view&id=(\d+)"
+    pattern = BASE_PATTERN + r"/index\.php\?page=favorites&s=view&id=(\d+)"
     example = "https://safebooru.org/index.php?page=favorites&s=view&id=12345"
 
     def metadata(self):
@@ -275,7 +275,7 @@ class GelbooruV02FavoriteExtractor(GelbooruV02Extractor):
 class GelbooruV02PostExtractor(GelbooruV02Extractor):
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}/index\.php\?page=post&s=view&id=(\d+)"
+    pattern = BASE_PATTERN + r"/index\.php\?page=post&s=view&id=(\d+)"
     example = "https://safebooru.org/index.php?page=post&s=view&id=12345"
 
     def posts(self):

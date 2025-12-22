@@ -12,7 +12,7 @@ from .common import Extractor, Message, Dispatch
 from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?vsco\.co"
-USER_PATTERN = rf"{BASE_PATTERN}/([^/?#]+)"
+USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)"
 
 
 class VscoExtractor(Extractor):
@@ -133,7 +133,7 @@ class VscoExtractor(Extractor):
 
 class VscoUserExtractor(Dispatch, VscoExtractor):
     """Extractor for a vsco user profile"""
-    pattern = rf"{USER_PATTERN}/?$"
+    pattern = USER_PATTERN + r"/?$"
     example = "https://vsco.co/USER"
 
     def items(self):
@@ -149,7 +149,7 @@ class VscoUserExtractor(Dispatch, VscoExtractor):
 class VscoGalleryExtractor(VscoExtractor):
     """Extractor for a vsco user's gallery"""
     subcategory = "gallery"
-    pattern = rf"{USER_PATTERN}/(?:gallery|images)"
+    pattern = USER_PATTERN + r"/(?:gallery|images)"
     example = "https://vsco.co/USER/gallery"
 
     def images(self):
@@ -158,7 +158,7 @@ class VscoGalleryExtractor(VscoExtractor):
         tkn = data["users"]["currentUser"]["tkn"]
         sid = str(data["sites"]["siteByUsername"][self.user]["site"]["id"])
 
-        url = f"{self.root}/api/3.0/medias/profile"
+        url = self.root + "/api/3.0/medias/profile"
         params = {
             "site_id"  : sid,
             "limit"    : "14",
@@ -173,7 +173,7 @@ class VscoCollectionExtractor(VscoExtractor):
     subcategory = "collection"
     directory_fmt = ("{category}", "{user}", "collection")
     archive_fmt = "c_{user}_{id}"
-    pattern = rf"{USER_PATTERN}/collection"
+    pattern = USER_PATTERN + r"/collection"
     example = "https://vsco.co/USER/collection/1"
 
     def images(self):
@@ -198,7 +198,7 @@ class VscoSpaceExtractor(VscoExtractor):
     subcategory = "space"
     directory_fmt = ("{category}", "space", "{user}")
     archive_fmt = "s_{user}_{id}"
-    pattern = rf"{BASE_PATTERN}/spaces/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/spaces/([^/?#]+)"
     example = "https://vsco.co/spaces/a1b2c3d4e5f"
 
     def images(self):
@@ -245,7 +245,7 @@ class VscoSpaceExtractor(VscoExtractor):
 class VscoSpacesExtractor(VscoExtractor):
     """Extractor for a vsco.co user's spaces"""
     subcategory = "spaces"
-    pattern = rf"{USER_PATTERN}/spaces"
+    pattern = USER_PATTERN + r"/spaces"
     example = "https://vsco.co/USER/spaces"
 
     def items(self):
@@ -275,7 +275,7 @@ class VscoSpacesExtractor(VscoExtractor):
 class VscoAvatarExtractor(VscoExtractor):
     """Extractor for vsco.co user avatars"""
     subcategory = "avatar"
-    pattern = rf"{USER_PATTERN}/avatar"
+    pattern = USER_PATTERN + r"/avatar"
     example = "https://vsco.co/USER/avatar"
 
     def images(self):
@@ -303,7 +303,7 @@ class VscoAvatarExtractor(VscoExtractor):
 class VscoImageExtractor(VscoExtractor):
     """Extractor for individual images on vsco.co"""
     subcategory = "image"
-    pattern = rf"{USER_PATTERN}/media/([0-9a-fA-F]+)"
+    pattern = USER_PATTERN + r"/media/([0-9a-fA-F]+)"
     example = "https://vsco.co/USER/media/0123456789abcdef"
 
     def images(self):
@@ -316,7 +316,7 @@ class VscoImageExtractor(VscoExtractor):
 class VscoVideoExtractor(VscoExtractor):
     """Extractor for vsco.co videos links"""
     subcategory = "video"
-    pattern = rf"{USER_PATTERN}/video/([^/?#]+)"
+    pattern = USER_PATTERN + r"/video/([^/?#]+)"
     example = "https://vsco.co/USER/video/012345678-9abc-def0"
 
     def images(self):

@@ -48,7 +48,7 @@ class TwibooruPostExtractor(TwibooruExtractor):
     """Extractor for single twibooru posts"""
     subcategory = "post"
     request_interval = (0.5, 1.5)
-    pattern = rf"{BASE_PATTERN}/(\d+)"
+    pattern = BASE_PATTERN + r"/(\d+)"
     example = "https://twibooru.org/12345"
 
     def __init__(self, match):
@@ -63,7 +63,7 @@ class TwibooruSearchExtractor(TwibooruExtractor):
     """Extractor for twibooru search results"""
     subcategory = "search"
     directory_fmt = ("{category}", "{search_tags}")
-    pattern = rf"{BASE_PATTERN}/(?:search/?\?([^#]+)|tags/([^/?#]+))"
+    pattern = BASE_PATTERN + r"/(?:search/?\?([^#]+)|tags/([^/?#]+))"
     example = "https://twibooru.org/search?q=TAG"
 
     def __init__(self, match):
@@ -97,7 +97,7 @@ class TwibooruGalleryExtractor(TwibooruExtractor):
     subcategory = "gallery"
     directory_fmt = ("{category}", "galleries",
                      "{gallery[id]} {gallery[title]}")
-    pattern = rf"{BASE_PATTERN}/galleries/(\d+)"
+    pattern = BASE_PATTERN + r"/galleries/(\d+)"
     example = "https://twibooru.org/galleries/12345"
 
     def __init__(self, match):

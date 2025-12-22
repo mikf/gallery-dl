@@ -31,7 +31,7 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
                      "{gallery[id]} {gallery[title]}")
     filename_fmt = "{num:>03}_{id}.{extension}"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}(/photos/gallery/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/photos/gallery/[^/?#]+)"
     example = "https://xhamster.com/photos/gallery/12345"
 
     def items(self):
@@ -102,7 +102,7 @@ class XhamsterGalleryExtractor(XhamsterExtractor):
 class XhamsterUserExtractor(XhamsterExtractor):
     """Extractor for all galleries of an xhamster user"""
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/users/([^/?#]+)(?:/photos)?/?(?:$|[?#])"
+    pattern = BASE_PATTERN + r"/users/([^/?#]+)(?:/photos)?/?(?:$|[?#])"
     example = "https://xhamster.com/users/USER/photos"
 
     def items(self):

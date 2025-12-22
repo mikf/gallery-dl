@@ -30,7 +30,7 @@ class JschanThreadExtractor(JschanExtractor):
                      "{threadId} {subject|nomarkup[:50]}")
     filename_fmt = "{postId}{num:?-//} {filename}.{extension}"
     archive_fmt = "{board}_{postId}_{num}"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/thread/(\d+)\.html"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/thread/(\d+)\.html"
     example = "https://94chan.org/a/thread/12345.html"
 
     def items(self):
@@ -56,7 +56,7 @@ class JschanThreadExtractor(JschanExtractor):
 class JschanBoardExtractor(JschanExtractor):
     """Extractor for jschan boards"""
     subcategory = "board"
-    pattern = (rf"{BASE_PATTERN}/([^/?#]+)"
+    pattern = (BASE_PATTERN + r"/([^/?#]+)"
                r"(?:/index\.html|/catalog\.html|/\d+\.html|/?$)")
     example = "https://94chan.org/a/"
 

@@ -31,8 +31,8 @@ class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
         "{page:>03}.{extension}")
     archive_fmt = (
         "{manga_id}_{chapter_id}_{page}")
-    pattern = (rf"{BASE_PATTERN}/read/([\w-]+-\d+)/([^/?#]+)"
-               rf"/(chapter|volume)-(\d+[^/?#]*)")
+    pattern = (BASE_PATTERN + r"/read/([\w-]+-\d+)/([^/?#]+)"
+               r"/(chapter|volume)-(\d+[^/?#]*)")
     example = "https://mangareader.to/read/MANGA-123/LANG/chapter-123"
 
     def metadata(self, _):
@@ -81,7 +81,7 @@ class MangareaderChapterExtractor(MangareaderBase, ChapterExtractor):
 class MangareaderMangaExtractor(MangareaderBase, MangaExtractor):
     """Extractor for mangareader manga"""
     chapterclass = MangareaderChapterExtractor
-    pattern = rf"{BASE_PATTERN}/([\w-]+-\d+)"
+    pattern = BASE_PATTERN + r"/([\w-]+-\d+)"
     example = "https://mangareader.to/MANGA-123"
 
     def chapters(self, page):
@@ -138,9 +138,9 @@ def _manga_info(self, manga_path):
             current[chap] = {
                 "title"         : name.partition(":")[2].strip(),
                 "chapter"       : text.parse_int(chapter),
-                "chapter_minor" : f"{sep}{minor}",
+                "chapter_minor" : sep + minor,
                 "chapter_string": chap,
-                "chapter_url"   : f"{base}{path}",
+                "chapter_url"   : base + path,
                 "lang"          : lang,
             }
 
@@ -162,7 +162,7 @@ def _manga_info(self, manga_path):
                 "chapter"       : 0,
                 "chapter_minor" : "",
                 "chapter_string": voln,
-                "chapter_url"   : f"{base}{path}",
+                "chapter_url"   : base + path,
                 "lang"          : lang,
             }
 

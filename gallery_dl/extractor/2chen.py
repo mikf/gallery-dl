@@ -34,7 +34,7 @@ class _2chenThreadExtractor(_2chenExtractor):
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{time} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{no}_{time}"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/(\d+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/(\d+)"
     example = "https://sturdychan.help/a/12345/"
 
     def items(self):
@@ -84,7 +84,7 @@ class _2chenThreadExtractor(_2chenExtractor):
 class _2chenBoardExtractor(_2chenExtractor):
     """Extractor for 2chen boards"""
     subcategory = "board"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)(?:/catalog|/?$)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)(?:/catalog|/?$)"
     example = "https://sturdychan.help/a/"
 
     def items(self):

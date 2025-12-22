@@ -16,7 +16,7 @@ import random
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
                 r"(?:(?:[fv]x)?twitter|(?:fix(?:up|v))?x)\.com")
-USER_PATTERN = rf"{BASE_PATTERN}/([^/?#]+)"
+USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)"
 
 
 class TwitterExtractor(Extractor):
@@ -667,8 +667,8 @@ class TwitterExtractor(Extractor):
 class TwitterHomeExtractor(TwitterExtractor):
     """Extractor for Twitter home timelines"""
     subcategory = "home"
-    pattern = (rf"{BASE_PATTERN}/"
-               rf"(?:home(?:/fo(?:llowing|r[-_ ]?you()))?|i/timeline)/?$")
+    pattern = (BASE_PATTERN +
+               r"/(?:home(?:/fo(?:llowing|r[-_ ]?you()))?|i/timeline)/?$")
     example = "https://x.com/home"
 
     def tweets(self):
@@ -680,7 +680,7 @@ class TwitterHomeExtractor(TwitterExtractor):
 class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for Twitter search results"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/search/?\?(?:[^&#]+&)*q=([^&#]+)"
+    pattern = BASE_PATTERN + r"/search/?\?(?:[^&#]+&)*q=([^&#]+)"
     example = "https://x.com/search?q=QUERY"
 
     def metadata(self):
@@ -711,7 +711,7 @@ class TwitterSearchExtractor(TwitterExtractor):
 class TwitterHashtagExtractor(TwitterExtractor):
     """Extractor for Twitter hashtags"""
     subcategory = "hashtag"
-    pattern = rf"{BASE_PATTERN}/hashtag/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/hashtag/([^/?#]+)"
     example = "https://x.com/hashtag/NAME"
 
     def items(self):
@@ -722,7 +722,7 @@ class TwitterHashtagExtractor(TwitterExtractor):
 
 class TwitterUserExtractor(Dispatch, TwitterExtractor):
     """Extractor for a Twitter user"""
-    pattern = (rf"{BASE_PATTERN}/(?:"
+    pattern = (BASE_PATTERN + r"/(?:"
                r"([^/?#]+)/?(?:$|\?|#)"
                r"|i(?:/user/|ntent/user\?user_id=)(\d+))")
     example = "https://x.com/USER"
@@ -730,26 +730,26 @@ class TwitterUserExtractor(Dispatch, TwitterExtractor):
     def items(self):
         user, user_id = self.groups
         if user_id is not None:
-            user = f"id:{user_id}"
+            user = "id:" + user_id
 
         base = f"{self.root}/{user}/"
         return self._dispatch_extractors((
-            (TwitterInfoExtractor      , f"{base}info"),
-            (TwitterAvatarExtractor    , f"{base}photo"),
-            (TwitterBackgroundExtractor, f"{base}header_photo"),
-            (TwitterTimelineExtractor  , f"{base}timeline"),
-            (TwitterTweetsExtractor    , f"{base}tweets"),
-            (TwitterMediaExtractor     , f"{base}media"),
-            (TwitterRepliesExtractor   , f"{base}with_replies"),
-            (TwitterHighlightsExtractor, f"{base}highlights"),
-            (TwitterLikesExtractor     , f"{base}likes"),
+            (TwitterInfoExtractor      , base + "info"),
+            (TwitterAvatarExtractor    , base + "photo"),
+            (TwitterBackgroundExtractor, base + "header_photo"),
+            (TwitterTimelineExtractor  , base + "timeline"),
+            (TwitterTweetsExtractor    , base + "tweets"),
+            (TwitterMediaExtractor     , base + "media"),
+            (TwitterRepliesExtractor   , base + "with_replies"),
+            (TwitterHighlightsExtractor, base + "highlights"),
+            (TwitterLikesExtractor     , base + "likes"),
         ), ("timeline",))
 
 
 class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for a Twitter user timeline"""
     subcategory = "timeline"
-    pattern = rf"{USER_PATTERN}/timeline(?!\w)"
+    pattern = USER_PATTERN + r"/timeline(?!\w)"
     example = "https://x.com/USER/timeline"
 
     def _init_cursor(self):
@@ -846,7 +846,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
 class TwitterTweetsExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's Tweets timeline"""
     subcategory = "tweets"
-    pattern = rf"{USER_PATTERN}/tweets(?!\w)"
+    pattern = USER_PATTERN + r"/tweets(?!\w)"
     example = "https://x.com/USER/tweets"
 
     def tweets(self):
@@ -856,7 +856,7 @@ class TwitterTweetsExtractor(TwitterExtractor):
 class TwitterRepliesExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's timeline including replies"""
     subcategory = "replies"
-    pattern = rf"{USER_PATTERN}/with_replies(?!\w)"
+    pattern = USER_PATTERN + r"/with_replies(?!\w)"
     example = "https://x.com/USER/with_replies"
 
     def tweets(self):
@@ -866,7 +866,7 @@ class TwitterRepliesExtractor(TwitterExtractor):
 class TwitterHighlightsExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's highlights timeline"""
     subcategory = "highlights"
-    pattern = rf"{USER_PATTERN}/highlights(?!\w)"
+    pattern = USER_PATTERN + r"/highlights(?!\w)"
     example = "https://x.com/USER/highlights"
 
     def tweets(self):
@@ -876,7 +876,7 @@ class TwitterHighlightsExtractor(TwitterExtractor):
 class TwitterMediaExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's Media timeline"""
     subcategory = "media"
-    pattern = rf"{USER_PATTERN}/media(?!\w)"
+    pattern = USER_PATTERN + r"/media(?!\w)"
     example = "https://x.com/USER/media"
 
     def tweets(self):
@@ -886,7 +886,7 @@ class TwitterMediaExtractor(TwitterExtractor):
 class TwitterLikesExtractor(TwitterExtractor):
     """Extractor for liked tweets"""
     subcategory = "likes"
-    pattern = rf"{USER_PATTERN}/likes(?!\w)"
+    pattern = USER_PATTERN + r"/likes(?!\w)"
     example = "https://x.com/USER/likes"
 
     def metadata(self):
@@ -899,7 +899,7 @@ class TwitterLikesExtractor(TwitterExtractor):
 class TwitterBookmarkExtractor(TwitterExtractor):
     """Extractor for bookmarked tweets"""
     subcategory = "bookmark"
-    pattern = rf"{BASE_PATTERN}/i/bookmarks()"
+    pattern = BASE_PATTERN + r"/i/bookmarks()"
     example = "https://x.com/i/bookmarks"
 
     def tweets(self):
@@ -915,7 +915,7 @@ class TwitterBookmarkExtractor(TwitterExtractor):
 class TwitterListExtractor(TwitterExtractor):
     """Extractor for Twitter lists"""
     subcategory = "list"
-    pattern = rf"{BASE_PATTERN}/i/lists/(\d+)/?$"
+    pattern = BASE_PATTERN + r"/i/lists/(\d+)/?$"
     example = "https://x.com/i/lists/12345"
 
     def tweets(self):
@@ -925,7 +925,7 @@ class TwitterListExtractor(TwitterExtractor):
 class TwitterListMembersExtractor(TwitterExtractor):
     """Extractor for members of a Twitter list"""
     subcategory = "list-members"
-    pattern = rf"{BASE_PATTERN}/i/lists/(\d+)/members"
+    pattern = BASE_PATTERN + r"/i/lists/(\d+)/members"
     example = "https://x.com/i/lists/12345/members"
 
     def items(self):
@@ -936,7 +936,7 @@ class TwitterListMembersExtractor(TwitterExtractor):
 class TwitterFollowingExtractor(TwitterExtractor):
     """Extractor for followed users"""
     subcategory = "following"
-    pattern = rf"{USER_PATTERN}/following(?!\w)"
+    pattern = USER_PATTERN + r"/following(?!\w)"
     example = "https://x.com/USER/following"
 
     def items(self):
@@ -947,7 +947,7 @@ class TwitterFollowingExtractor(TwitterExtractor):
 class TwitterFollowersExtractor(TwitterExtractor):
     """Extractor for a user's followers"""
     subcategory = "followers"
-    pattern = rf"{USER_PATTERN}/followers(?!\w)"
+    pattern = USER_PATTERN + r"/followers(?!\w)"
     example = "https://x.com/USER/followers"
 
     def items(self):
@@ -961,7 +961,7 @@ class TwitterCommunityExtractor(TwitterExtractor):
     directory_fmt = ("{category}", "Communities",
                      "{community[name]} ({community[id]})")
     archive_fmt = "C_{community[id]}_{tweet_id}_{num}"
-    pattern = rf"{BASE_PATTERN}/i/communities/(\d+)"
+    pattern = BASE_PATTERN + r"/i/communities/(\d+)"
     example = "https://x.com/i/communities/12345"
 
     def tweets(self):
@@ -975,7 +975,7 @@ class TwitterCommunitiesExtractor(TwitterExtractor):
     subcategory = "communities"
     directory_fmt = TwitterCommunityExtractor.directory_fmt
     archive_fmt = TwitterCommunityExtractor.archive_fmt
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/communities/?$"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/communities/?$"
     example = "https://x.com/i/communities"
 
     def tweets(self):
@@ -987,7 +987,7 @@ class TwitterEventExtractor(TwitterExtractor):
     subcategory = "event"
     directory_fmt = ("{category}", "Events",
                      "{event[id]} {event[short_title]}")
-    pattern = rf"{BASE_PATTERN}/i/events/(\d+)"
+    pattern = BASE_PATTERN + r"/i/events/(\d+)"
     example = "https://x.com/i/events/12345"
 
     def metadata(self):
@@ -1000,7 +1000,7 @@ class TwitterEventExtractor(TwitterExtractor):
 class TwitterTweetExtractor(TwitterExtractor):
     """Extractor for individual tweets"""
     subcategory = "tweet"
-    pattern = (rf"{BASE_PATTERN}/([^/?#]+|i/web)/status/(\d+)"
+    pattern = (BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
                r"/?(?:$|\?|#|photo/|video/)")
     example = "https://x.com/USER/status/12345"
 
@@ -1081,7 +1081,7 @@ class TwitterTweetExtractor(TwitterExtractor):
 class TwitterQuotesExtractor(TwitterExtractor):
     """Extractor for quotes of a Tweet"""
     subcategory = "quotes"
-    pattern = rf"{BASE_PATTERN}/(?:[^/?#]+|i/web)/status/(\d+)/quotes"
+    pattern = BASE_PATTERN + r"/(?:[^/?#]+|i/web)/status/(\d+)/quotes"
     example = "https://x.com/USER/status/12345/quotes"
 
     def items(self):
@@ -1093,7 +1093,7 @@ class TwitterQuotesExtractor(TwitterExtractor):
 class TwitterInfoExtractor(TwitterExtractor):
     """Extractor for a user's profile data"""
     subcategory = "info"
-    pattern = rf"{USER_PATTERN}/info"
+    pattern = USER_PATTERN + r"/info"
     example = "https://x.com/USER/info"
 
     def items(self):
@@ -1112,7 +1112,7 @@ class TwitterAvatarExtractor(TwitterExtractor):
     subcategory = "avatar"
     filename_fmt = "avatar {date}.{extension}"
     archive_fmt = "AV_{user[id]}_{date}"
-    pattern = rf"{USER_PATTERN}/photo"
+    pattern = USER_PATTERN + r"/photo"
     example = "https://x.com/USER/photo"
 
     def tweets(self):
@@ -1134,7 +1134,7 @@ class TwitterBackgroundExtractor(TwitterExtractor):
     subcategory = "background"
     filename_fmt = "background {date}.{extension}"
     archive_fmt = "BG_{user[id]}_{date}"
-    pattern = rf"{USER_PATTERN}/header_photo"
+    pattern = USER_PATTERN + r"/header_photo"
     example = "https://x.com/USER/header_photo"
 
     def tweets(self):
@@ -1990,10 +1990,10 @@ class TwitterAPI():
                             extr.log.info("Retrying API request as guest")
                             continue
                         raise exception.AuthorizationError(
-                            f"{user['screen_name']} blocked your account")
+                            user["screen_name"] + " blocked your account")
                     elif user.get("protected"):
                         raise exception.AuthorizationError(
-                            f"{user['screen_name']}'s Tweets are protected")
+                            user["screen_name"] + "'s Tweets are protected")
 
                 raise exception.AbortExtraction(
                     "Unable to retrieve Tweets from this timeline")
@@ -2042,7 +2042,7 @@ class TwitterAPI():
                     pinned = None
                 elif pinned := extr._user_obj["legacy"].get(
                         "pinned_tweet_ids_str"):
-                    pinned = f"-tweet-{pinned[0]}"
+                    pinned = "-tweet-" + pinned[0]
                     for idx, entry in enumerate(tweets):
                         if entry["entryId"].endswith(pinned):
                             # mark as pinned / set 'pinned = True'
@@ -2248,7 +2248,7 @@ class TwitterAPI():
     def _update_variables_search(self, variables, cursor, tweet):
         try:
             tweet_id = tweet.get("id_str") or tweet["legacy"]["id_str"]
-            max_id = f"max_id:{int(tweet_id)-1}"
+            max_id = "max_id:" + str(int(tweet_id)-1)
 
             query, n = text.re(r"\bmax_id:\d+").subn(
                 max_id, variables["rawQuery"])

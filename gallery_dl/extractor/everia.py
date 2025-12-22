@@ -45,7 +45,7 @@ class EveriaPostExtractor(EveriaExtractor):
     subcategory = "post"
     directory_fmt = ("{category}", "{title}")
     archive_fmt = "{post_url}_{num}"
-    pattern = rf"{BASE_PATTERN}(/\d{{4}}/\d{{2}}/\d{{2}}/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/\d{4}/\d{2}/\d{2}/[^/?#]+)"
     example = "https://everia.club/0000/00/00/TITLE"
 
     def items(self):
@@ -72,26 +72,26 @@ class EveriaPostExtractor(EveriaExtractor):
 
 class EveriaTagExtractor(EveriaExtractor):
     subcategory = "tag"
-    pattern = rf"{BASE_PATTERN}(/tag/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/tag/[^/?#]+)"
     example = "https://everia.club/tag/TAG"
 
 
 class EveriaCategoryExtractor(EveriaExtractor):
     subcategory = "category"
-    pattern = rf"{BASE_PATTERN}(/category/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/category/[^/?#]+)"
     example = "https://everia.club/category/CATEGORY"
 
 
 class EveriaDateExtractor(EveriaExtractor):
     subcategory = "date"
-    pattern = (rf"{BASE_PATTERN}"
-               rf"(/\d{{4}}(?:/\d{{2}})?(?:/\d{{2}})?)(?:/page/\d+)?/?$")
+    pattern = (BASE_PATTERN +
+               r"(/\d{4}(?:/\d{2})?(?:/\d{2})?)(?:/page/\d+)?/?$")
     example = "https://everia.club/0000/00/00"
 
 
 class EveriaSearchExtractor(EveriaExtractor):
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/(?:page/\d+/)?\?s=([^&#]+)"
+    pattern = BASE_PATTERN + r"/(?:page/\d+/)?\?s=([^&#]+)"
     example = "https://everia.club/?s=SEARCH"
 
     def posts(self):

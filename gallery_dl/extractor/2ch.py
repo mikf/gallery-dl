@@ -20,12 +20,12 @@ class _2chThreadExtractor(Extractor):
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{tim}{filename:? //}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/res/(\d+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
     example = "https://2ch.org/a/res/12345.html"
 
     def __init__(self, match):
         tld = match[1]
-        self.root = f"https://2ch.{'org' if tld == 'hk' else tld}"
+        self.root = "https://2ch." + ("org" if tld == "hk" else tld)
         Extractor.__init__(self, match)
 
     def items(self):
@@ -66,19 +66,19 @@ class _2chBoardExtractor(Extractor):
     category = "2ch"
     subcategory = "board"
     root = "https://2ch.org"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/?$"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/?$"
     example = "https://2ch.org/a/"
 
     def __init__(self, match):
         tld = match[1]
-        self.root = f"https://2ch.{'su' if tld == 'hk' else tld}"
+        self.root = "https://2ch." + ("org" if tld == "hk" else tld)
         Extractor.__init__(self, match)
 
     def items(self):
         base = f"{self.root}/{self.groups[1]}"
 
         # index page
-        url = f"{base}/index.json"
+        url = base + "/index.json"
         index = self.request_json(url)
         index["_extractor"] = _2chThreadExtractor
         for thread in index["threads"]:

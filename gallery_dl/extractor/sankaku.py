@@ -119,7 +119,7 @@ class SankakuTagExtractor(SankakuExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = rf"{BASE_PATTERN}(?:/posts)?/?\?([^#]*)"
+    pattern = BASE_PATTERN + r"(?:/posts)?/?\?([^#]*)"
     example = "https://sankaku.app/?tags=TAG"
 
     def __init__(self, match):
@@ -149,7 +149,7 @@ class SankakuPoolExtractor(SankakuExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name_en]}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = rf"{BASE_PATTERN}/(?:books|pools?/show)/(\w+)"
+    pattern = BASE_PATTERN + r"/(?:books|pools?/show)/(\w+)"
     example = "https://sankaku.app/books/12345"
 
     def metadata(self):
@@ -171,7 +171,7 @@ class SankakuPostExtractor(SankakuExtractor):
     """Extractor for single posts from sankaku.app"""
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}/posts?(?:/show)?/(\w+)"
+    pattern = BASE_PATTERN + r"/posts?(?:/show)?/(\w+)"
     example = "https://sankaku.app/post/show/12345"
 
     def posts(self):
@@ -181,7 +181,7 @@ class SankakuPostExtractor(SankakuExtractor):
 class SankakuBooksExtractor(SankakuExtractor):
     """Extractor for books by tag search on sankaku.app"""
     subcategory = "books"
-    pattern = rf"{BASE_PATTERN}/books/?\?([^#]*)"
+    pattern = BASE_PATTERN + r"/books/?\?([^#]*)"
     example = "https://sankaku.app/books?tags=TAG"
 
     def __init__(self, match):
@@ -193,7 +193,7 @@ class SankakuBooksExtractor(SankakuExtractor):
         params = {"tags": self.tags, "pool_type": "0"}
         for pool in self.api.pools_keyset(params):
             pool["_extractor"] = SankakuPoolExtractor
-            url = f"https://sankaku.app/books/{pool['id']}"
+            url = "https://sankaku.app/books/" + pool["id"]
             yield Message.Queue, url, pool
 
 

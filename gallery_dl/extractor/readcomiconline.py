@@ -44,7 +44,7 @@ class ReadcomiconlineBase():
 class ReadcomiconlineIssueExtractor(ReadcomiconlineBase, ChapterExtractor):
     """Extractor for comic-issues from readcomiconline.li"""
     subcategory = "issue"
-    pattern = rf"{BASE_PATTERN}(/Comic/[^/?#]+/[^/?#]+\?)([^#]+)"
+    pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/[^/?#]+\?)([^#]+)"
     example = "https://readcomiconline.li/Comic/TITLE/Issue-123?id=12345"
 
     def _init(self):
@@ -98,7 +98,7 @@ class ReadcomiconlineComicExtractor(ReadcomiconlineBase, MangaExtractor):
     """Extractor for comics from readcomiconline.li"""
     chapterclass = ReadcomiconlineIssueExtractor
     subcategory = "comic"
-    pattern = rf"{BASE_PATTERN}(/Comic/[^/?#]+/?)$"
+    pattern = BASE_PATTERN + r"(/Comic/[^/?#]+/?)$"
     example = "https://readcomiconline.li/Comic/TITLE"
 
     def chapters(self, page):

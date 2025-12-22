@@ -15,7 +15,7 @@ BASE_PATTERN = (r"(?:https?://)?(?:tcb(?:-backup\.bihar-mirchi|scans)"
 
 class TcbscansChapterExtractor(ChapterExtractor):
     category = "tcbscans"
-    pattern = rf"{BASE_PATTERN}(/chapters/\d+/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/chapters/\d+/[^/?#]+)"
     example = "https://tcbscans.me/chapters/12345/MANGA-chapter-123"
 
     def __init__(self, match):
@@ -44,7 +44,7 @@ class TcbscansChapterExtractor(ChapterExtractor):
 class TcbscansMangaExtractor(MangaExtractor):
     category = "tcbscans"
     chapterclass = TcbscansChapterExtractor
-    pattern = rf"{BASE_PATTERN}(/mangas/\d+/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/mangas/\d+/[^/?#]+)"
     example = "https://tcbscans.me/mangas/123/MANGA"
 
     def __init__(self, match):

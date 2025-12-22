@@ -25,7 +25,7 @@ class MadokamiMangaExtractor(MadokamiExtractor):
     subcategory = "manga"
     directory_fmt = ("{category}", "{manga}")
     archive_fmt = "{chapter_id}"
-    pattern = rf"{BASE_PATTERN}/Manga/(\w/\w{{2}}/\w{{4}}/.+)"
+    pattern = BASE_PATTERN + r"/Manga/(\w/\w{2}/\w{4}/.+)"
     example = "https://manga.madokami.al/Manga/A/AB/ABCD/ABCDE_TITLE"
 
     def items(self):
@@ -85,7 +85,7 @@ class MadokamiMangaExtractor(MadokamiExtractor):
             else:
                 ch["volume"] = ch["chapter"] = ch["chapter_end"] = 0
 
-            url = f"{self.root}{ch['path']}"
+            url = self.root + ch["path"]
             text.nameext_from_url(url, ch)
 
             yield Message.Directory, "", ch

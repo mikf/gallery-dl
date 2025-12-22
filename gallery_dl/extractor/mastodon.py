@@ -118,7 +118,7 @@ BASE_PATTERN = MastodonExtractor.update({
 class MastodonUserExtractor(MastodonExtractor):
     """Extractor for all images of an account/user"""
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/(?:@|users/)([^/?#]+)(?:/media)?/?$"
+    pattern = BASE_PATTERN + r"/(?:@|users/)([^/?#]+)(?:/media)?/?$"
     example = "https://mastodon.social/@USER"
 
     def statuses(self):
@@ -138,7 +138,7 @@ class MastodonUserExtractor(MastodonExtractor):
 class MastodonBookmarkExtractor(MastodonExtractor):
     """Extractor for mastodon bookmarks"""
     subcategory = "bookmark"
-    pattern = rf"{BASE_PATTERN}/bookmarks"
+    pattern = BASE_PATTERN + r"/bookmarks"
     example = "https://mastodon.social/bookmarks"
 
     def statuses(self):
@@ -148,7 +148,7 @@ class MastodonBookmarkExtractor(MastodonExtractor):
 class MastodonFavoriteExtractor(MastodonExtractor):
     """Extractor for mastodon favorites"""
     subcategory = "favorite"
-    pattern = rf"{BASE_PATTERN}/favourites"
+    pattern = BASE_PATTERN + r"/favourites"
     example = "https://mastodon.social/favourites"
 
     def statuses(self):
@@ -158,7 +158,7 @@ class MastodonFavoriteExtractor(MastodonExtractor):
 class MastodonListExtractor(MastodonExtractor):
     """Extractor for mastodon lists"""
     subcategory = "list"
-    pattern = rf"{BASE_PATTERN}/lists/(\w+)"
+    pattern = BASE_PATTERN + r"/lists/(\w+)"
     example = "https://mastodon.social/lists/12345"
 
     def statuses(self):
@@ -168,7 +168,7 @@ class MastodonListExtractor(MastodonExtractor):
 class MastodonHashtagExtractor(MastodonExtractor):
     """Extractor for mastodon hashtags"""
     subcategory = "hashtag"
-    pattern = rf"{BASE_PATTERN}/tags/(\w+)"
+    pattern = BASE_PATTERN + r"/tags/(\w+)"
     example = "https://mastodon.social/tags/NAME"
 
     def statuses(self):
@@ -178,7 +178,7 @@ class MastodonHashtagExtractor(MastodonExtractor):
 class MastodonFollowingExtractor(MastodonExtractor):
     """Extractor for followed mastodon users"""
     subcategory = "following"
-    pattern = rf"{BASE_PATTERN}/(?:@|users/)([^/?#]+)/following"
+    pattern = BASE_PATTERN + r"/(?:@|users/)([^/?#]+)/following"
     example = "https://mastodon.social/@USER/following"
 
     def items(self):
@@ -193,7 +193,7 @@ class MastodonFollowingExtractor(MastodonExtractor):
 class MastodonStatusExtractor(MastodonExtractor):
     """Extractor for images from a status"""
     subcategory = "status"
-    pattern = (rf"{BASE_PATTERN}/(?:@[^/?#]+|(?:users/[^/?#]+/)?"
+    pattern = (BASE_PATTERN + r"/(?:@[^/?#]+|(?:users/[^/?#]+/)?"
                r"(?:statuses|notice|objects()))/(?!following)([^/?#]+)")
     example = "https://mastodon.social/@USER/12345"
 

@@ -64,7 +64,7 @@ class SchalenetworkExtractor(Extractor):
 
     def _token(self, required=True):
         if token := self.config("token"):
-            return f"Bearer {token.rpartition(' ')[2]}"
+            return "Bearer " + token.rpartition(' ')[2]
         if required:
             raise exception.AuthRequired("'token'", "your favorites")
 
@@ -98,7 +98,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
     directory_fmt = ("{category}", "{id} {title}")
     archive_fmt = "{id}_{num}"
     request_interval = 0.0
-    pattern = rf"{BASE_PATTERN}/(?:g|reader)/(\d+)/(\w+)"
+    pattern = BASE_PATTERN + r"/(?:g|reader)/(\d+)/(\w+)"
     example = "https://niyaniya.moe/g/12345/67890abcde/"
 
     TAG_TYPES = {
@@ -172,7 +172,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
         if self.config("cbz", False):
             headers["Authorization"] = self._token()
             dl = self.request_json(
-                f"{url}&action=dl", method="POST", headers=headers)
+                url + "&action=dl", method="POST", headers=headers)
             # 'crt' parameter here is necessary for 'hdoujin' downloads
             url = f"{dl['base']}?crt={self._crt()}"
             info = text.nameext_from_url(url)
@@ -227,7 +227,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
 class SchalenetworkSearchExtractor(SchalenetworkExtractor):
     """Extractor for schale.network search results"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/(?:tag/([^/?#]+)|browse)?(?:/?\?([^#]*))?$"
+    pattern = BASE_PATTERN + r"/(?:tag/([^/?#]+)|browse)?(?:/?\?([^#]*))?$"
     example = "https://niyaniya.moe/browse?s=QUERY"
 
     def items(self):
@@ -252,14 +252,14 @@ class SchalenetworkSearchExtractor(SchalenetworkExtractor):
 class SchalenetworkFavoriteExtractor(SchalenetworkExtractor):
     """Extractor for schale.network favorites"""
     subcategory = "favorite"
-    pattern = rf"{BASE_PATTERN}/favorites(?:\?([^#]*))?"
+    pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
     example = "https://niyaniya.moe/favorites"
 
     def items(self):
         params = text.parse_query(self.groups[1])
         params["page"] = text.parse_int(params.get("page"), 1)
         self.headers["Authorization"] = self._token()
-        return self._pagination(f"/books/favorites?crt={self._crt()}", params)
+        return self._pagination("/books/favorites?crt=" + self._crt(), params)
 
 
 SchalenetworkExtractor.extr_class = SchalenetworkGalleryExtractor
