@@ -419,7 +419,7 @@ SUBCATEGORY_MAP = {
         "asset": "Individual Assets",
     },
     "tiktok": {
-        "user": "User Profiles and Stories",
+        "user": "User Profiles, Stories, Liked Posts",
         "vmpost": "VM Posts",
         "following": "Followed Users (Stories Only)",
     },

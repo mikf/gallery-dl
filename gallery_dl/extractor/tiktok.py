@@ -309,15 +309,16 @@ class TiktokUserExtractor(TiktokExtractor):
     def _init(self):
         super()._init()
         self.avatar = self.config("avatar", True)
+        self.posts = self.config("posts", True)
         self.stories = self.config("stories", True)
-        if type(self.stories) is str:
-            self.stories = self.stories.lower()
+        self.likes = self.config("likes", False)
         # If set to "ytdl", we shall first go via yt-dlp. If that fails,
         # we shall attempt to extract directly.
         self.ytdl = self.config("tiktok-user-extractor") == "ytdl"
         self.range = self.config("tiktok-range")
         if self.range is None or not self.range and self.range != 0:
             self.range = ""
+        self.range_predicate = util.RangePredicate(self.range)
         self.post_order = self.config("order-posts", "desc")
         if not self.post_order:
             self.post_order = "desc"
@@ -349,33 +350,48 @@ class TiktokUserExtractor(TiktokExtractor):
                 yield Message.Directory, "", avatar
                 yield Message.Url, avatar_url, avatar
 
-        entries = []
-        if self.stories != "only":
+        posts = []
+        if self.posts:
             if self.ytdl:
-                entries = self._extract_posts_via_ytdl(profile_url)
-                if not entries:
+                posts = self._extract_posts_via_ytdl(profile_url)
+                if not posts:
                     self.log.warning("Could not extract TikTok user "
                                      f"{user_name} via yt-dlp or youtube-dl, "
                                      "attempting the extraction directly")
-            if not entries:
-                entries = self._extract_posts(profile_url, user_name)
-                if not entries:
-                    message = "Could not extract any video or photo entries " \
-                              f"from TikTok user {user_name}"
+            if not posts:
+                posts = self._extract_posts(profile_url, user_name)
+                if not posts:
+                    message = "Could not extract any posts from TikTok user " \
+                              f"{user_name}"
                     if not self.ytdl:
-                        message += ", try extracting user information using " \
+                        message += ", try extracting post information using " \
                                    "yt-dlp with the -o " \
                                    "tiktok-user-extractor=ytdl argument"
                     self.log.warning(message)
 
+        stories = []
         if self.stories:
-            entries += self._extract_stories(profile_url, user_name)
-            if self.stories == "only" and not entries:
+            stories = self._extract_stories(profile_url, user_name)
+            if not stories:
                 self.log.warning(f"TikTok user {user_name} has no stories")
 
-        for video in entries:
+        likes = []
+        if self.likes:
+            likes = self._extract_likes(profile_url, user_name)
+            if not likes:
+                self.log.warning("Could not extract the liked posts of TikTok "
+                                 "user %s", user_name)
+
+        entries = posts + stories + likes
+        seen = set()
+        seen_add = seen.add
+        for post_url in entries:
+            if post_url in seen:
+                continue
+            else:
+                seen_add(post_url)
             data = {"_extractor": TiktokPostExtractor}
-            yield Message.Queue, video, data
+            yield Message.Queue, post_url, data
 
     def _extract_rehydration_data(self, profile_url, additional_keys=[]):
         if profile_url in self.rehydration_data_cache:
@@ -471,7 +487,6 @@ class TiktokUserExtractor(TiktokExtractor):
 
     def _extract_posts(self, profile_url, user_name):
         sec_uid = self._extract_sec_uid(profile_url, user_name)
-        range_predicate = util.RangePredicate(self.range)
         if not self.user_provided_cookies:
             if self.post_order != "desc":
                 self.log.warning(
@@ -482,10 +497,10 @@ class TiktokUserExtractor(TiktokExtractor):
                     profile_url
                 )
             return self._extract_posts_legacy(profile_url, sec_uid,
-                                              range_predicate)
+                                              self.range_predicate)
         try:
             return self._extract_posts_with_ordering(profile_url, sec_uid,
-                                                     range_predicate)
+                                                     self.range_predicate)
         except (KeyboardInterrupt, SystemExit):
             raise
         except Exception as exc:
@@ -498,7 +513,7 @@ class TiktokUserExtractor(TiktokExtractor):
             )
             self.log.traceback(exc)
             return self._extract_posts_legacy(profile_url, sec_uid,
-                                              range_predicate)
+                                              self.range_predicate)
 
     def _extract_posts_with_ordering(self, profile_url, sec_uid,
                                      range_predicate):
@@ -537,6 +552,19 @@ class TiktokUserExtractor(TiktokExtractor):
             "count": "5",
         }
         request = TiktokStoryItemListRequest()
+        request.execute(self, profile_url, query_parameters)
+        return request.generate_urls(profile_url, self.video, self.photo,
+                                     self.audio)
+
+    def _extract_likes(self, profile_url, user_name):
+        sec_uid = self._extract_sec_uid(profile_url, user_name)
+        query_parameters = {
+            "secUid": sec_uid,
+            "post_item_list_request_type": "0",
+            "needPinnedItemIds": "false",
+            "count": "15",
+        }
+        request = TiktokFavoriteItemListRequest(self.range_predicate)
         request.execute(self, profile_url, query_parameters)
         return request.generate_urls(profile_url, self.video, self.photo,
                                      self.audio)
@@ -1052,11 +1080,22 @@ class TiktokItemListRequest(TiktokPaginationRequest):
         return len(self.items) > self.range_predicate.upper
 
     def generate_urls(self, profile_url, video, photo, audio):
-        return [f"{profile_url}/video/{id}"
-                for index, id in enumerate(self.order_item_keys(
-                    self.items.keys()))
-                if self._matches_filters(self.items.get(id), index + 1, video,
-                                         photo, audio)]
+        urls = []
+        for index, id in enumerate(self.items.keys()):
+            if not self._matches_filters(self.items.get(id), index + 1, video,
+                                         photo, audio):
+                continue
+            # Try to grab the author's unique ID, but don't cause the
+            # extraction to fail if we can't, it's not imperative that the
+            # URLs include the actual poster's unique ID.
+            try:
+                url = f"https://www.tiktok.com/@" \
+                      f"{self.items[id]['author']['uniqueId']}/video/{id}"
+            except KeyError:
+                # Use the given profile URL as a back up.
+                url = f"{profile_url}/video/{id}"
+            urls.append(url)
+        return urls
 
     def _matches_filters(self, item, index, video, photo, audio):
         # First, check if this index falls within any of our configured ranges.
@@ -1079,9 +1118,6 @@ class TiktokItemListRequest(TiktokPaginationRequest):
         if not video and not is_image_post:
             return False
         return True
-
-    def order_item_keys(self, item_keys):
-        return reversed(sorted(item_keys))
 
 
 # MARK: creator/item_list
@@ -1150,13 +1186,28 @@ class TiktokPostItemListRequest(TiktokItemListRequest):
         else:
             return TiktokBackwardTimeCursor
 
-    def order_item_keys(self, item_keys):
-        if self.__request_type == "2":
-            return sorted(item_keys)
-        elif self.__request_type == "1":
-            return item_keys
-        else:
-            return super().order_item_keys(item_keys)
+
+# MARK: favorite/item_list
+class TiktokFavoriteItemListRequest(TiktokItemListRequest):
+    """Retrieves a user's liked posts.
+
+    Appears to only support descending order, but it can work without
+    cookies.
+    """
+
+    def __init__(self, range_predicate):
+        super().__init__("favorite/item_list", "liked posts", range_predicate)
+
+    def validate_query_parameters(self, query_parameters):
+        super().validate_query_parameters(query_parameters)
+        assert "secUid" in query_parameters
+        assert "post_item_list_request_type" in query_parameters
+        assert query_parameters["post_item_list_request_type"] == "0"
+        assert "needPinnedItemIds" in query_parameters
+        assert query_parameters["needPinnedItemIds"] in ["false"]
+
+    def cursor_type(self, query_parameters):
+        return TiktokBackwardTimeCursor
 
 
 # MARK: story/item_list
