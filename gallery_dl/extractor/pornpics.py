@@ -58,7 +58,7 @@ class PornpicsExtractor(Extractor):
 
 class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
     """Extractor for pornpics galleries"""
-    pattern = rf"{BASE_PATTERN}/galleries/((?:[^/?#]+-)?(\d+))"
+    pattern = BASE_PATTERN + r"/galleries/((?:[^/?#]+-)?(\d+))"
     example = "https://www.pornpics.com/galleries/TITLE-12345/"
 
     def __init__(self, match):
@@ -94,7 +94,7 @@ class PornpicsGalleryExtractor(PornpicsExtractor, GalleryExtractor):
 class PornpicsTagExtractor(PornpicsExtractor):
     """Extractor for galleries from pornpics tag searches"""
     subcategory = "tag"
-    pattern = rf"{BASE_PATTERN}/tags/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/tags/([^/?#]+)"
     example = "https://www.pornpics.com/tags/TAGS/"
 
     def galleries(self):
@@ -105,7 +105,7 @@ class PornpicsTagExtractor(PornpicsExtractor):
 class PornpicsSearchExtractor(PornpicsExtractor):
     """Extractor for galleries from pornpics search results"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/(?:\?q=|pornstars/|channels/)([^/&#]+)"
+    pattern = BASE_PATTERN + r"/(?:\?q=|pornstars/|channels/)([^/&#]+)"
     example = "https://www.pornpics.com/?q=QUERY"
 
     def galleries(self):
@@ -125,8 +125,8 @@ class PornpicsListingExtractor(PornpicsExtractor):
     and use single quotes in HTML, unlike category pages.
     """
     subcategory = "listing"
-    pattern = (rf"{BASE_PATTERN}"
-               rf"/(popular|recent|rating|likes|views|comments)/?$")
+    pattern = (BASE_PATTERN +
+               r"/(popular|recent|rating|likes|views|comments)/?$")
     example = "https://www.pornpics.com/popular/"
 
     def galleries(self):
@@ -142,7 +142,7 @@ class PornpicsListingExtractor(PornpicsExtractor):
 class PornpicsCategoryExtractor(PornpicsExtractor):
     """Extractor for galleries from pornpics categories"""
     subcategory = "category"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/?$"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/?$"
     example = "https://www.pornpics.com/ass/"
 
     def galleries(self):

@@ -18,7 +18,7 @@ class PhotovogueUserExtractor(Extractor):
     directory_fmt = ("{category}", "{photographer[id]} {photographer[name]}")
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}/photographers/(\d+)"
+    pattern = BASE_PATTERN + r"/photographers/(\d+)"
     example = "https://www.vogue.com/photovogue/photographers/12345"
 
     def __init__(self, match):

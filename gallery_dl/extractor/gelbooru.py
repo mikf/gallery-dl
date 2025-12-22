@@ -148,7 +148,7 @@ class GelbooruBase():
 class GelbooruTagExtractor(GelbooruBase,
                            gelbooru_v02.GelbooruV02TagExtractor):
     """Extractor for images from gelbooru.com based on search-tags"""
-    pattern = rf"{BASE_PATTERN}page=post&s=list&tags=([^&#]*)"
+    pattern = BASE_PATTERN + r"page=post&s=list&tags=([^&#]*)"
     example = "https://gelbooru.com/index.php?page=post&s=list&tags=TAG"
 
 
@@ -156,7 +156,7 @@ class GelbooruPoolExtractor(GelbooruBase,
                             gelbooru_v02.GelbooruV02PoolExtractor):
     """Extractor for gelbooru pools"""
     per_page = 45
-    pattern = rf"{BASE_PATTERN}page=pool&s=show&id=(\d+)"
+    pattern = BASE_PATTERN + r"page=pool&s=show&id=(\d+)"
     example = "https://gelbooru.com/index.php?page=pool&s=show&id=12345"
 
     skip = GelbooruBase._skip_offset
@@ -187,7 +187,7 @@ class GelbooruFavoriteExtractor(GelbooruBase,
                                 gelbooru_v02.GelbooruV02FavoriteExtractor):
     """Extractor for gelbooru favorites"""
     per_page = 100
-    pattern = rf"{BASE_PATTERN}page=favorites&s=view&id=(\d+)"
+    pattern = BASE_PATTERN + r"page=favorites&s=view&id=(\d+)"
     example = "https://gelbooru.com/index.php?page=favorites&s=view&id=12345"
 
     skip = GelbooruBase._skip_offset
@@ -284,10 +284,10 @@ class GelbooruFavoriteExtractor(GelbooruBase,
 class GelbooruPostExtractor(GelbooruBase,
                             gelbooru_v02.GelbooruV02PostExtractor):
     """Extractor for single images from gelbooru.com"""
-    pattern = (rf"{BASE_PATTERN}"
-               rf"(?=(?:[^#]+&)?page=post(?:&|#|$))"
-               rf"(?=(?:[^#]+&)?s=view(?:&|#|$))"
-               rf"(?:[^#]+&)?id=(\d+)")
+    pattern = (BASE_PATTERN +
+               r"(?=(?:[^#]+&)?page=post(?:&|#|$))"
+               r"(?=(?:[^#]+&)?s=view(?:&|#|$))"
+               r"(?:[^#]+&)?id=(\d+)")
     example = "https://gelbooru.com/index.php?page=post&s=view&id=12345"
 
 

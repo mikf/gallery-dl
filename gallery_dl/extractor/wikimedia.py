@@ -47,7 +47,7 @@ class WikimediaExtractor(BaseExtractor):
     def _init(self):
         if api_path := self.config_instance("api-path"):
             if api_path[0] == "/":
-                self.api_url = f"{self.root}{api_path}"
+                self.api_url = self.root + api_path
             else:
                 self.api_url = api_path
         else:
@@ -66,7 +66,7 @@ class WikimediaExtractor(BaseExtractor):
     def _search_api_path(self, root):
         self.log.debug("Probing possible API endpoints")
         for path in ("/api.php", "/w/api.php", "/wiki/api.php"):
-            url = f"{root}{path}"
+            url = root + path
             response = self.request(url, method="HEAD", fatal=None)
             if response.status_code < 400:
                 return url
@@ -122,10 +122,10 @@ class WikimediaExtractor(BaseExtractor):
                 yield Message.Url, image["url"], image
 
         if self.subcategories:
-            base = f"{self.root}/wiki/"
+            base = self.root + "/wiki/"
             params["gcmtype"] = "subcat"
             for subcat in self._pagination(params):
-                url = f"{base}{subcat['title'].replace(' ', '_')}"
+                url = base + subcat["title"].replace(" ", "_")
                 subcat["_extractor"] = WikimediaArticleExtractor
                 yield Message.Queue, url, subcat
 
@@ -236,7 +236,7 @@ class WikimediaArticleExtractor(WikimediaExtractor):
     """Extractor for wikimedia articles"""
     subcategory = "article"
     directory_fmt = ("{category}", "{page}")
-    pattern = rf"{BASE_PATTERN}/(?!static/)([^?#]+)"
+    pattern = BASE_PATTERN + r"/(?!static/)([^?#]+)"
     example = "https://en.wikipedia.org/wiki/TITLE"
 
     def __init__(self, match):
@@ -286,7 +286,7 @@ class WikimediaArticleExtractor(WikimediaExtractor):
 class WikimediaWikiExtractor(WikimediaExtractor):
     """Extractor for all files on a MediaWiki instance"""
     subcategory = "wiki"
-    pattern = rf"{BASE_PATTERN}/?$"
+    pattern = BASE_PATTERN + r"/?$"
     example = "https://en.wikipedia.org/"
 
     def params(self):

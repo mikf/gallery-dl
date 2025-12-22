@@ -16,7 +16,7 @@ import json
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|beta\.)?"
                 r"(kemono|coomer)\.(cr|s[tu]|party)")
-USER_PATTERN = rf"{BASE_PATTERN}/([^/?#]+)/user/([^/?#]+)"
+USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
 HASH_PATTERN = r"/[0-9a-f]{2}/[0-9a-f]{2}/([0-9a-f]{64})"
 
 
@@ -200,7 +200,7 @@ class KemonoExtractor(Extractor):
         username = username[0]
         self.log.info("Logging in as %s", username)
 
-        url = f"{self.root}/api/v1/authentication/login"
+        url = self.root + "/api/v1/authentication/login"
         data = {"username": username, "password": password}
 
         response = self.request(url, method="POST", json=data, fatal=False)
@@ -322,7 +322,7 @@ def _validate(response):
 class KemonoUserExtractor(KemonoExtractor):
     """Extractor for all posts from a kemono.cr user listing"""
     subcategory = "user"
-    pattern = rf"{USER_PATTERN}/?(?:\?([^#]+))?(?:$|\?|#)"
+    pattern = USER_PATTERN + r"/?(?:\?([^#]+))?(?:$|\?|#)"
     example = "https://kemono.cr/SERVICE/user/12345"
 
     def __init__(self, match):
@@ -345,7 +345,7 @@ class KemonoUserExtractor(KemonoExtractor):
 class KemonoPostsExtractor(KemonoExtractor):
     """Extractor for kemono.cr post listings"""
     subcategory = "posts"
-    pattern = rf"{BASE_PATTERN}/posts()()(?:/?\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/posts()()(?:/?\?([^#]+))?"
     example = "https://kemono.cr/posts"
 
     def posts(self):
@@ -357,7 +357,7 @@ class KemonoPostsExtractor(KemonoExtractor):
 class KemonoPostExtractor(KemonoExtractor):
     """Extractor for a single kemono.cr post"""
     subcategory = "post"
-    pattern = rf"{USER_PATTERN}/post/([^/?#]+)(/revisions?(?:/(\d*))?)?"
+    pattern = USER_PATTERN + r"/post/([^/?#]+)(/revisions?(?:/(\d*))?)?"
     example = "https://kemono.cr/SERVICE/user/12345/post/12345"
 
     def __init__(self, match):
@@ -390,7 +390,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
                      "{server_id} {server}", "{channel_id} {channel}")
     filename_fmt = "{id}_{num:>02}_{filename}.{extension}"
     archive_fmt = "discord_{server_id}_{id}_{num}"
-    pattern = rf"{BASE_PATTERN}/discord/server/(\d+)[/#](?:channel/)?(\d+)"
+    pattern = BASE_PATTERN + r"/discord/server/(\d+)[/#](?:channel/)?(\d+)"
     example = "https://kemono.cr/discord/server/12345/12345"
 
     def items(self):
@@ -434,7 +434,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
                 attachment["type"] = "attachment"
                 files.append(attachment)
             for path in find_inline(post["content"] or ""):
-                files.append({"path": f"https://cdn.discordapp.com{path}",
+                files.append({"path": "https://cdn.discordapp.com" + path,
                               "name": path, "type": "inline", "hash": ""})
 
             post.update(data)
@@ -460,7 +460,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
 
 class KemonoDiscordServerExtractor(KemonoExtractor):
     subcategory = "discord-server"
-    pattern = rf"{BASE_PATTERN}/discord/server/(\d+)$"
+    pattern = BASE_PATTERN + r"/discord/server/(\d+)$"
     example = "https://kemono.cr/discord/server/12345"
 
     def items(self):
@@ -488,7 +488,7 @@ def discord_server_info(extr, server_id):
 class KemonoFavoriteExtractor(KemonoExtractor):
     """Extractor for kemono.cr favorites"""
     subcategory = "favorite"
-    pattern = rf"{BASE_PATTERN}/(?:account/)?favorites()()(?:/?\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/(?:account/)?favorites()()(?:/?\?([^#]+))?"
     example = "https://kemono.cr/account/favorites/artists"
 
     def items(self):
@@ -536,7 +536,7 @@ class KemonoFavoriteExtractor(KemonoExtractor):
 class KemonoArtistsExtractor(KemonoExtractor):
     """Extractor for kemono artists"""
     subcategory = "artists"
-    pattern = rf"{BASE_PATTERN}/artists(?:\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/artists(?:\?([^#]+))?"
     example = "https://kemono.cr/artists"
 
     def items(self):
@@ -577,7 +577,7 @@ class KemonoAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
-        self.root = f"{extractor.root}/api"
+        self.root = extractor.root + "/api"
         self.headers = {"Accept": "text/css"}
 
     def posts(self, offset=0, query=None, tags=None):
@@ -586,7 +586,7 @@ class KemonoAPI():
         return self._pagination(endpoint, params, 50, "posts")
 
     def file(self, file_hash):
-        endpoint = f"/v1/file/{file_hash}"
+        endpoint = "/v1/file/" + file_hash
         return self._call(endpoint)
 
     def creators(self):
@@ -643,18 +643,18 @@ class KemonoAPI():
         return self._call(endpoint)
 
     def discord_channel(self, channel_id, post_count=None):
-        endpoint = f"/v1/discord/channel/{channel_id}"
+        endpoint = "/v1/discord/channel/" + channel_id
         if post_count is None:
             return self._pagination(endpoint, {}, 150)
         else:
             return self._pagination_reverse(endpoint, {}, 150, post_count)
 
     def discord_channel_lookup(self, server_id):
-        endpoint = f"/v1/discord/channel/lookup/{server_id}"
+        endpoint = "/v1/discord/channel/lookup/" + server_id
         return self._call(endpoint)
 
     def discord_server(self, server_id):
-        endpoint = f"/v1/discord/server/{server_id}"
+        endpoint = "/v1/discord/server/" + server_id
         return self._call(endpoint)
 
     def account_favorites(self, type):
@@ -669,7 +669,7 @@ class KemonoAPI():
             headers = {**self.headers, **headers}
 
         return self.extractor.request_json(
-            f"{self.root}{endpoint}", params=params, headers=headers,
+            self.root + endpoint, params=params, headers=headers,
             encoding="utf-8", fatal=fatal)
 
     def _pagination(self, endpoint, params, batch=50, key=None):

@@ -155,7 +155,7 @@ class DanbooruExtractor(BaseExtractor):
                 return
 
             if prefix:
-                params["page"] = f"{prefix}{posts[-1]['id']}"
+                params["page"] = prefix + str(posts[-1]["id"])
             elif params["page"]:
                 params["page"] += 1
             else:
@@ -174,9 +174,8 @@ class DanbooruExtractor(BaseExtractor):
         else:
             ext = data["ZIP:ZipFileName"].rpartition(".")[2]
 
-        fmt = ("{:>06}." + ext).format
         delays = data["Ugoira:FrameDelays"]
-        return [{"file": fmt(index), "delay": delay}
+        return [{"file": f"{index:>06}.{ext}", "delay": delay}
                 for index, delay in enumerate(delays)]
 
     def _collection_posts(self, cid, ctype):
@@ -251,7 +250,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = rf"{BASE_PATTERN}/posts\?(?:[^&#]*&)*tags=([^&#]*)"
+    pattern = BASE_PATTERN + r"/posts\?(?:[^&#]*&)*tags=([^&#]*)"
     example = "https://danbooru.donmai.us/posts?tags=TAG"
 
     def metadata(self):
@@ -279,7 +278,7 @@ class DanbooruTagExtractor(DanbooruExtractor):
 class DanbooruRandomExtractor(DanbooruTagExtractor):
     """Extractor for a random danbooru post"""
     subcategory = "random"
-    pattern = rf"{BASE_PATTERN}/posts/random(?:\?(?:[^&#]*&)*tags=([^&#]*))?"
+    pattern = BASE_PATTERN + r"/posts/random(?:\?(?:[^&#]*&)*tags=([^&#]*))?"
     example = "https://danbooru.donmai.us/posts/random?tags=TAG"
 
     def metadata(self):
@@ -299,7 +298,7 @@ class DanbooruPoolExtractor(DanbooruExtractor):
     directory_fmt = ("{category}", "pool", "{pool[id]} {pool[name]}")
     filename_fmt = "{num:>04}_{id}_{filename}.{extension}"
     archive_fmt = "p_{pool[id]}_{id}"
-    pattern = rf"{BASE_PATTERN}/pool(?:s|/show)/(\d+)"
+    pattern = BASE_PATTERN + r"/pool(?:s|/show)/(\d+)"
     example = "https://danbooru.donmai.us/pools/12345"
 
     def metadata(self):
@@ -317,7 +316,7 @@ class DanbooruFavgroupExtractor(DanbooruExtractor):
                      "{favgroup[id]} {favgroup[name]}")
     filename_fmt = "{num:>04}_{id}_{filename}.{extension}"
     archive_fmt = "fg_{favgroup[id]}_{id}"
-    pattern = rf"{BASE_PATTERN}/favorite_group(?:s|/show)/(\d+)"
+    pattern = BASE_PATTERN + r"/favorite_group(?:s|/show)/(\d+)"
     example = "https://danbooru.donmai.us/favorite_groups/12345"
 
     def metadata(self):
@@ -332,7 +331,7 @@ class DanbooruPostExtractor(DanbooruExtractor):
     """Extractor for single danbooru posts"""
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}/post(?:s|/show)/(\d+)"
+    pattern = BASE_PATTERN + r"/post(?:s|/show)/(\d+)"
     example = "https://danbooru.donmai.us/posts/12345"
 
     def posts(self):
@@ -349,7 +348,7 @@ class DanbooruMediaassetExtractor(DanbooruExtractor):
     subcategory = "media-asset"
     filename_fmt = "{category}_ma{id}_{filename}.{extension}"
     archive_fmt = "m{id}"
-    pattern = rf"{BASE_PATTERN}/media_assets/(\d+)"
+    pattern = BASE_PATTERN + r"/media_assets/(\d+)"
     example = "https://danbooru.donmai.us/media_assets/12345"
 
     def posts(self):
@@ -375,7 +374,7 @@ class DanbooruPopularExtractor(DanbooruExtractor):
     subcategory = "popular"
     directory_fmt = ("{category}", "popular", "{scale}", "{date}")
     archive_fmt = "P_{scale[0]}_{date}_{id}"
-    pattern = rf"{BASE_PATTERN}/(?:explore/posts/)?popular(?:\?([^#]*))?"
+    pattern = BASE_PATTERN + r"/(?:explore/posts/)?popular(?:\?([^#]*))?"
     example = "https://danbooru.donmai.us/explore/posts/popular"
 
     def metadata(self):
@@ -398,7 +397,7 @@ class DanbooruPopularExtractor(DanbooruExtractor):
 class DanbooruArtistExtractor(DanbooruExtractor):
     """Extractor for danbooru artists"""
     subcategory = "artist"
-    pattern = rf"{BASE_PATTERN}/artists/(\d+)"
+    pattern = BASE_PATTERN + r"/artists/(\d+)"
     example = "https://danbooru.donmai.us/artists/12345"
 
     items = DanbooruExtractor.items_artists
@@ -411,7 +410,7 @@ class DanbooruArtistExtractor(DanbooruExtractor):
 class DanbooruArtistSearchExtractor(DanbooruExtractor):
     """Extractor for danbooru artist searches"""
     subcategory = "artist-search"
-    pattern = rf"{BASE_PATTERN}/artists/?\?([^#]+)"
+    pattern = BASE_PATTERN + r"/artists/?\?([^#]+)"
     example = "https://danbooru.donmai.us/artists?QUERY"
 
     items = DanbooruExtractor.items_artists

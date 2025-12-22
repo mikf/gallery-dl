@@ -160,7 +160,7 @@ class ZerochanExtractor(BooruExtractor):
 class ZerochanTagExtractor(ZerochanExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
-    pattern = rf"{BASE_PATTERN}/(?!\d+$)([^/?#]+)/?(?:\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/(?!\d+$)([^/?#]+)/?(?:\?([^#]+))?"
     example = "https://www.zerochan.net/TAG"
 
     def __init__(self, match):
@@ -286,7 +286,7 @@ class ZerochanTagExtractor(ZerochanExtractor):
 
 class ZerochanImageExtractor(ZerochanExtractor):
     subcategory = "image"
-    pattern = rf"{BASE_PATTERN}/(\d+)"
+    pattern = BASE_PATTERN + r"/(\d+)"
     example = "https://www.zerochan.net/12345"
 
     def posts(self):

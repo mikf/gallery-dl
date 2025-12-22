@@ -28,10 +28,7 @@ class ImagehostImageExtractor(Extractor):
 
     def __init__(self, match):
         Extractor.__init__(self, match)
-        if self.root:
-            self.page_url = f"{self.root}{match[1]}"
-        else:
-            self.page_url = f"http{'s' if self._https else ''}://{match[1]}"
+        self.page_url = (self.root or "https://") + match[1]
         self.token = match[2]
 
         if self._params == "simple":
@@ -461,8 +458,8 @@ class ImgdriveImageExtractor(ImagehostImageExtractor):
 
     def __init__(self, match):
         path, category, self.token = match.groups()
-        self.page_url = f"https://{path}"
-        self.category = f"img{category}"
+        self.page_url = "https://" + path
+        self.category = "img" + category
         Extractor.__init__(self, match)
 
     def get_info(self, page):

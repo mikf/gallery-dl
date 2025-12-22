@@ -98,7 +98,7 @@ class SizebooruExtractor(BooruExtractor):
 class SizebooruPostExtractor(SizebooruExtractor):
     """Extractor for sizebooru posts"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/Details/(\d+)"
+    pattern = BASE_PATTERN + r"/Details/(\d+)"
     example = "https://sizebooru.com/Details/12345"
 
     def posts(self):
@@ -109,7 +109,7 @@ class SizebooruTagExtractor(SizebooruExtractor):
     """Extractor for sizebooru tag searches"""
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
-    pattern = rf"{BASE_PATTERN}/Search/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/Search/([^/?#]+)"
     example = "https://sizebooru.com/Search/TAG"
 
     def posts(self):
@@ -122,7 +122,7 @@ class SizebooruGalleryExtractor(SizebooruExtractor):
     """Extractor for sizebooru galleries"""
     subcategory = "gallery"
     directory_fmt = ("{category}", "{gallery_name} ({gallery_id})")
-    pattern = rf"{BASE_PATTERN}/Galleries/List/(\d+)"
+    pattern = BASE_PATTERN + r"/Galleries/List/(\d+)"
     example = "https://sizebooru.com/Galleries/List/123"
 
     def posts(self):
@@ -140,7 +140,7 @@ class SizebooruUserExtractor(SizebooruExtractor):
     """Extractor for a sizebooru user's uploads"""
     subcategory = "user"
     directory_fmt = ("{category}", "Uploads {user}")
-    pattern = rf"{BASE_PATTERN}/Profile/Uploads/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/Profile/Uploads/([^/?#]+)"
     example = "https://sizebooru.com/Profile/Uploads/USER"
 
     def posts(self):
@@ -153,7 +153,7 @@ class SizebooruFavoriteExtractor(SizebooruExtractor):
     """Extractor for a sizebooru user's favorites"""
     subcategory = "favorite"
     directory_fmt = ("{category}", "Favorites {user}")
-    pattern = rf"{BASE_PATTERN}/Profile/Favorites/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/Profile/Favorites/([^/?#]+)"
     example = "https://sizebooru.com/Profile/Favorites/USER"
 
     def posts(self):

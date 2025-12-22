@@ -10,7 +10,7 @@ from .common import Extractor, Message, Dispatch
 from .. import text
 
 BASE_PATTERN = r"(?:https?://)?skeb\.jp"
-USER_PATTERN = rf"{BASE_PATTERN}/@([^/?#]+)"
+USER_PATTERN = BASE_PATTERN + r"/@([^/?#]+)"
 
 
 class SkebExtractor(Extractor):
@@ -194,7 +194,7 @@ class SkebExtractor(Extractor):
 class SkebPostExtractor(SkebExtractor):
     """Extractor for a single skeb post"""
     subcategory = "post"
-    pattern = rf"{USER_PATTERN}/works/(\d+)"
+    pattern = USER_PATTERN + r"/works/(\d+)"
     example = "https://skeb.jp/@USER/works/123"
 
     def posts(self):
@@ -204,7 +204,7 @@ class SkebPostExtractor(SkebExtractor):
 class SkebWorksExtractor(SkebExtractor):
     """Extractor for a skeb user's works"""
     subcategory = "works"
-    pattern = rf"{USER_PATTERN}/works"
+    pattern = USER_PATTERN + r"/works"
     example = "https://skeb.jp/@USER/works"
 
     def posts(self):
@@ -216,7 +216,7 @@ class SkebWorksExtractor(SkebExtractor):
 class SkebSentrequestsExtractor(SkebExtractor):
     """Extractor for a skeb user's sent requests"""
     subcategory = "sentrequests"
-    pattern = rf"{USER_PATTERN}/sent[ _-]?requests"
+    pattern = USER_PATTERN + r"/sent[ _-]?requests"
     example = "https://skeb.jp/@USER/sentrequests"
 
     def posts(self):
@@ -227,7 +227,7 @@ class SkebSentrequestsExtractor(SkebExtractor):
 
 class SkebUserExtractor(Dispatch, SkebExtractor):
     """Extractor for a skeb user profile"""
-    pattern = rf"{USER_PATTERN}/?$"
+    pattern = USER_PATTERN + r"/?$"
     example = "https://skeb.jp/@USER"
 
     def items(self):
@@ -246,7 +246,7 @@ class SkebUserExtractor(Dispatch, SkebExtractor):
 class SkebSearchExtractor(SkebExtractor):
     """Extractor for skeb search results"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/search\?q=([^&#]+)"
+    pattern = BASE_PATTERN + r"/search\?q=([^&#]+)"
     example = "https://skeb.jp/search?q=QUERY"
 
     def metadata(self):
@@ -298,7 +298,7 @@ class SkebSearchExtractor(SkebExtractor):
 class SkebFollowingExtractor(SkebExtractor):
     """Extractor for all creators followed by a skeb user"""
     subcategory = "following"
-    pattern = rf"{USER_PATTERN}/following_creators"
+    pattern = USER_PATTERN + r"/following_creators"
     example = "https://skeb.jp/@USER/following_creators"
 
     items = SkebExtractor.items_users
@@ -312,7 +312,7 @@ class SkebFollowingExtractor(SkebExtractor):
 class SkebFollowingUsersExtractor(SkebExtractor):
     """Extractor for your followed users"""
     subcategory = "following-users"
-    pattern = rf"{BASE_PATTERN}/following_users"
+    pattern = BASE_PATTERN + r"/following_users"
     example = "https://skeb.jp/following_users"
 
     items = SkebExtractor.items_users

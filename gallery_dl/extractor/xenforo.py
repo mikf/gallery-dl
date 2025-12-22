@@ -118,7 +118,7 @@ class XenforoExtractor(BaseExtractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = f"{self.root}/login/login"
+        url = self.root + "/login/login"
         page = self.request(url).text
         data = {
             "_xfToken": text.extr(page, 'name="_xfToken" value="', '"'),
@@ -140,10 +140,10 @@ class XenforoExtractor(BaseExtractor):
         }
 
     def _pagination(self, base, pnum=None):
-        base = f"{self.root}{base}"
+        base = self.root + base
 
         if pnum is None:
-            url = f"{base}/"
+            url = base + "/"
             pnum = 1
         else:
             url = f"{base}/page-{pnum}"
@@ -160,7 +160,7 @@ class XenforoExtractor(BaseExtractor):
             url = f"{base}/page-{pnum}"
 
     def _pagination_reverse(self, base, pnum=None):
-        base = f"{self.root}{base}"
+        base = self.root + base
 
         url = f"{base}/page-{'9999' if pnum is None else pnum}"
         with self.request_page(url) as response:
@@ -180,7 +180,7 @@ class XenforoExtractor(BaseExtractor):
             if pnum > 1:
                 url = f"{base}/page-{pnum}"
             elif pnum == 1:
-                url = f"{base}/"
+                url = base + "/"
             else:
                 return
 
@@ -282,8 +282,8 @@ BASE_PATTERN = XenforoExtractor.update({
 
 class XenforoPostExtractor(XenforoExtractor):
     subcategory = "post"
-    pattern = (rf"{BASE_PATTERN}(/(?:index\.php\?)?threads"
-               rf"/[^/?#]+/post-|/posts/)(\d+)")
+    pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?threads"
+               r"/[^/?#]+/post-|/posts/)(\d+)")
     example = "https://simpcity.cr/threads/TITLE.12345/post-54321"
 
     def posts(self):
@@ -303,8 +303,8 @@ class XenforoPostExtractor(XenforoExtractor):
 
 class XenforoThreadExtractor(XenforoExtractor):
     subcategory = "thread"
-    pattern = (rf"{BASE_PATTERN}(/(?:index\.php\?)?threads"
-               rf"/(?:[^/?#]+\.)?\d+)(?:/page-(\d+))?")
+    pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?threads"
+               r"/(?:[^/?#]+\.)?\d+)(?:/page-(\d+))?")
     example = "https://simpcity.cr/threads/TITLE.12345/"
 
     def posts(self):
@@ -332,8 +332,8 @@ class XenforoThreadExtractor(XenforoExtractor):
 
 class XenforoForumExtractor(XenforoExtractor):
     subcategory = "forum"
-    pattern = (rf"{BASE_PATTERN}(/(?:index\.php\?)?forums"
-               rf"/(?:[^/?#]+\.)?[^/?#]+)(?:/page-(\d+))?")
+    pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?forums"
+               r"/(?:[^/?#]+\.)?[^/?#]+)(?:/page-(\d+))?")
     example = "https://simpcity.cr/forums/TITLE.123/"
 
     def items(self):
@@ -345,4 +345,4 @@ class XenforoForumExtractor(XenforoExtractor):
         pnum = self.groups[-1]
         for page in self._pagination(path, pnum):
             for path in extract_threads(page):
-                yield Message.Queue, f"{self.root}{text.unquote(path)}", data
+                yield Message.Queue, self.root + text.unquote(path), data

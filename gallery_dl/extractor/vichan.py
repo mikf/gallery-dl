@@ -39,7 +39,7 @@ class VichanThreadExtractor(VichanExtractor):
     directory_fmt = ("{category}", "{board}", "{thread} {title}")
     filename_fmt = "{time}{num:?-//} {filename}.{extension}"
     archive_fmt = "{board}_{thread}_{tim}"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/res/(\d+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
     example = "https://8kun.top/a/res/12345.html"
 
     def items(self):
@@ -93,7 +93,7 @@ class VichanThreadExtractor(VichanExtractor):
 class VichanBoardExtractor(VichanExtractor):
     """Extractor for vichan boards"""
     subcategory = "board"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)(?:/index|/catalog|/\d+|/?$)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)(?:/index|/catalog|/\d+|/?$)"
     example = "https://8kun.top/a/"
 
     def items(self):

@@ -18,8 +18,8 @@ class MangafoxChapterExtractor(ChapterExtractor):
     """Extractor for manga chapters from fanfox.net"""
     category = "mangafox"
     root = "https://m.fanfox.net"
-    pattern = (rf"{BASE_PATTERN}"
-               rf"(/manga/[^/?#]+/((?:v([^/?#]+)/)?c(\d+)([^/?#]*)))")
+    pattern = BASE_PATTERN + \
+        r"(/manga/[^/?#]+/((?:v([^/?#]+)/)?c(\d+)([^/?#]*)))"
     example = "https://fanfox.net/manga/TITLE/v01/c001/1.html"
 
     def __init__(self, match):
@@ -62,7 +62,7 @@ class MangafoxMangaExtractor(MangaExtractor):
     category = "mangafox"
     root = "https://m.fanfox.net"
     chapterclass = MangafoxChapterExtractor
-    pattern = rf"{BASE_PATTERN}(/manga/[^/?#]+)/?$"
+    pattern = BASE_PATTERN + r"(/manga/[^/?#]+)/?$"
     example = "https://fanfox.net/manga/TITLE"
 
     def chapters(self, page):

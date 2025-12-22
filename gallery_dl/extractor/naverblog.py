@@ -142,7 +142,7 @@ class NaverBlogBlogExtractor(NaverBlogBase, Extractor):
         )
 
         # setup params for API calls
-        url = f"{self.root}/PostViewBottomTitleListAsync.nhn"
+        url = self.root + "/PostViewBottomTitleListAsync.nhn"
         params = {
             "blogId"             : self.blog_id,
             "logNo"              : post_num or "0",

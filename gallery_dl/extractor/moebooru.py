@@ -92,7 +92,7 @@ class MoebooruTagExtractor(MoebooruExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = rf"{BASE_PATTERN}/post\?(?:[^&#]*&)*tags=([^&#]*)"
+    pattern = BASE_PATTERN + r"/post\?(?:[^&#]*&)*tags=([^&#]*)"
     example = "https://yande.re/post?tags=TAG"
 
     def __init__(self, match):
@@ -104,14 +104,14 @@ class MoebooruTagExtractor(MoebooruExtractor):
 
     def posts(self):
         params = {"tags": self.tags}
-        return self._pagination(f"{self.root}/post.json", params)
+        return self._pagination(self.root + "/post.json", params)
 
 
 class MoebooruPoolExtractor(MoebooruExtractor):
     subcategory = "pool"
     directory_fmt = ("{category}", "pool", "{pool}")
     archive_fmt = "p_{pool}_{id}"
-    pattern = rf"{BASE_PATTERN}/pool/show/(\d+)"
+    pattern = BASE_PATTERN + r"/pool/show/(\d+)"
     example = "https://yande.re/pool/show/12345"
 
     def __init__(self, match):
@@ -129,26 +129,26 @@ class MoebooruPoolExtractor(MoebooruExtractor):
 
     def posts(self):
         params = {"tags": "pool:" + self.pool_id}
-        return self._pagination(f"{self.root}/post.json", params)
+        return self._pagination(self.root + "/post.json", params)
 
 
 class MoebooruPostExtractor(MoebooruExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}/post/show/(\d+)"
+    pattern = BASE_PATTERN + r"/post/show/(\d+)"
     example = "https://yande.re/post/show/12345"
 
     def posts(self):
         params = {"tags": "id:" + self.groups[-1]}
-        return self.request_json(f"{self.root}/post.json", params=params)
+        return self.request_json(self.root + "/post.json", params=params)
 
 
 class MoebooruPopularExtractor(MoebooruExtractor):
     subcategory = "popular"
     directory_fmt = ("{category}", "popular", "{scale}", "{date}")
     archive_fmt = "P_{scale[0]}_{date}_{id}"
-    pattern = (rf"{BASE_PATTERN}"
-               rf"/post/popular_(by_(?:day|week|month)|recent)(?:\?([^#]*))?")
+    pattern = BASE_PATTERN + \
+        r"/post/popular_(by_(?:day|week|month)|recent)(?:\?([^#]*))?"
     example = "https://yande.re/post/popular_by_month?year=YYYY&month=MM"
 
     def __init__(self, match):

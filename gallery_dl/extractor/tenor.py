@@ -111,7 +111,7 @@ class TenorExtractor(Extractor):
 
 class TenorImageExtractor(TenorExtractor):
     subcategory = "image"
-    pattern = rf"{BASE_PATTERN}view/(?:[^/?#]*-)?(\d+)"
+    pattern = BASE_PATTERN + r"view/(?:[^/?#]*-)?(\d+)"
     example = "https://tenor.com/view/SLUG-1234567890"
 
     def gifs(self):
@@ -125,7 +125,7 @@ class TenorImageExtractor(TenorExtractor):
 class TenorSearchExtractor(TenorExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "{search_tags}")
-    pattern = rf"{BASE_PATTERN}search/([^/?#]+)"
+    pattern = BASE_PATTERN + r"search/([^/?#]+)"
     example = "https://tenor.com/search/QUERY"
 
     def gifs(self):
@@ -141,7 +141,7 @@ class TenorSearchExtractor(TenorExtractor):
 class TenorUserExtractor(TenorExtractor):
     subcategory = "user"
     directory_fmt = ("{category}", "@{user[username]}")
-    pattern = rf"{BASE_PATTERN}(?:users|official)/([^/?#]+)"
+    pattern = BASE_PATTERN + r"(?:users|official)/([^/?#]+)"
     example = "https://tenor.com/users/USER"
 
     def gifs(self):

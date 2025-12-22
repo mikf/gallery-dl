@@ -67,7 +67,7 @@ class FikfapExtractor(Extractor):
 
 class FikfapPostExtractor(FikfapExtractor):
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/user/(\w+)/post/(\d+)"
+    pattern = BASE_PATTERN + r"/user/(\w+)/post/(\d+)"
     example = "https://fikfap.com/user/USER/post/12345"
 
     def posts(self):
@@ -86,7 +86,7 @@ class FikfapPostExtractor(FikfapExtractor):
 
 class FikfapUserExtractor(FikfapExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/user/(\w+)"
+    pattern = BASE_PATTERN + r"/user/(\w+)"
     example = "https://fikfap.com/user/USER"
 
     def posts(self):

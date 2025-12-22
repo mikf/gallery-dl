@@ -97,7 +97,7 @@ class PahealTagExtractor(PahealExtractor):
 
         while True:
             try:
-                page = self.request(f"{base}{pnum}").text
+                page = self.request(base + str(pnum)).text
             except exception.HttpError as exc:
                 if exc.status == 404:
                     return

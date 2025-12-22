@@ -39,7 +39,7 @@ BASE_PATTERN = ManganeloExtractor.update({
 
 class ManganeloChapterExtractor(ManganeloExtractor, ChapterExtractor):
     """Extractor for manganelo manga chapters"""
-    pattern = rf"{BASE_PATTERN}(/manga/[^/?#]+/chapter-[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/manga/[^/?#]+/chapter-[^/?#]+)"
     example = "https://www.mangakakalot.gg/manga/MANGA_NAME/chapter-123"
 
     def __init__(self, match):
@@ -86,7 +86,7 @@ class ManganeloChapterExtractor(ManganeloExtractor, ChapterExtractor):
 class ManganeloMangaExtractor(ManganeloExtractor, MangaExtractor):
     """Extractor for manganelo manga"""
     chapterclass = ManganeloChapterExtractor
-    pattern = rf"{BASE_PATTERN}(/manga/[^/?#]+)$"
+    pattern = BASE_PATTERN + r"(/manga/[^/?#]+)$"
     example = "https://www.mangakakalot.gg/manga/MANGA_NAME"
 
     def __init__(self, match):

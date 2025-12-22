@@ -32,7 +32,7 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
                      "{album[id]} {album[title]}")
     filename_fmt = "{num:>03}_{id}{title:?_//}.{extension}"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}/albums/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/albums/([^/?#]+)"
     example = "https://USER.slickpic.com/albums/TITLE/"
 
     def __init__(self, match):
@@ -110,7 +110,7 @@ class SlickpicAlbumExtractor(SlickpicExtractor):
 
 class SlickpicUserExtractor(SlickpicExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}(?:/gallery)?/?(?:$|[?#])"
+    pattern = BASE_PATTERN + r"(?:/gallery)?/?(?:$|[?#])"
     example = "https://USER.slickpic.com/"
 
     def items(self):

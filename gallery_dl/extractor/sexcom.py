@@ -194,8 +194,8 @@ class SexcomPinExtractor(SexcomExtractor):
     """Extractor for a pinned image or video on www.sex.com"""
     subcategory = "pin"
     directory_fmt = ("{category}",)
-    pattern = (rf"{BASE_PATTERN}"
-               rf"(/(?:\w\w/(?:pic|gif|video)s|pin)/\d+/?)(?!.*#related$)")
+    pattern = (BASE_PATTERN +
+               r"(/(?:\w\w/(?:pic|gif|video)s|pin)/\d+/?)(?!.*#related$)")
     example = "https://www.sex.com/pin/12345-TITLE/"
 
     def pins(self):
@@ -206,7 +206,7 @@ class SexcomRelatedPinExtractor(SexcomPinExtractor):
     """Extractor for related pins on www.sex.com"""
     subcategory = "related-pin"
     directory_fmt = ("{category}", "related {original_pin[pin_id]}")
-    pattern = rf"{BASE_PATTERN}(/pin/(\d+)/?).*#related$"
+    pattern = BASE_PATTERN + r"(/pin/(\d+)/?).*#related$"
     example = "https://www.sex.com/pin/12345#related"
 
     def metadata(self):
@@ -223,7 +223,7 @@ class SexcomPinsExtractor(SexcomExtractor):
     """Extractor for a user's pins on www.sex.com"""
     subcategory = "pins"
     directory_fmt = ("{category}", "{user}")
-    pattern = rf"{BASE_PATTERN}/user/([^/?#]+)/pins/"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)/pins/"
     example = "https://www.sex.com/user/USER/pins/"
 
     def metadata(self):
@@ -238,7 +238,7 @@ class SexcomLikesExtractor(SexcomExtractor):
     """Extractor for a user's liked pins on www.sex.com"""
     subcategory = "likes"
     directory_fmt = ("{category}", "{user}", "Likes")
-    pattern = rf"{BASE_PATTERN}/user/([^/?#]+)/likes/"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)/likes/"
     example = "https://www.sex.com/user/USER/likes/"
 
     def metadata(self):
@@ -253,8 +253,8 @@ class SexcomBoardExtractor(SexcomExtractor):
     """Extractor for pins from a board on www.sex.com"""
     subcategory = "board"
     directory_fmt = ("{category}", "{user}", "{board}")
-    pattern = (rf"{BASE_PATTERN}/user"
-               rf"/([^/?#]+)/(?!(?:following|pins|repins|likes)/)([^/?#]+)")
+    pattern = (BASE_PATTERN + r"/user"
+               r"/([^/?#]+)/(?!(?:following|pins|repins|likes)/)([^/?#]+)")
     example = "https://www.sex.com/user/USER/BOARD/"
 
     def metadata(self):
@@ -273,7 +273,7 @@ class SexcomFeedExtractor(SexcomExtractor):
     """Extractor for pins from your account's main feed on www.sex.com"""
     subcategory = "feed"
     directory_fmt = ("{category}", "feed")
-    pattern = rf"{BASE_PATTERN}/feed"
+    pattern = BASE_PATTERN + r"/feed"
     example = "https://www.sex.com/feed/"
 
     def metadata(self):
@@ -282,7 +282,7 @@ class SexcomFeedExtractor(SexcomExtractor):
     def pins(self):
         if not self.cookies_check(("sess_sex",)):
             self.log.warning("no 'sess_sex' cookie set")
-        url = f"{self.root}/feed/"
+        url = self.root + "/feed/"
         return self._pagination(url)
 
 
@@ -290,10 +290,10 @@ class SexcomSearchExtractor(SexcomExtractor):
     """Extractor for search results on www.sex.com"""
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search[search]}")
-    pattern = (rf"{BASE_PATTERN}/(?:"
-               rf"(pic|gif|video)s(?:\?(search=[^#]+)$|/([^/?#]*))"
-               rf"|search/(pic|gif|video)s"
-               rf")/?(?:\?([^#]+))?")
+    pattern = (BASE_PATTERN + r"/(?:"
+               r"(pic|gif|video)s(?:\?(search=[^#]+)$|/([^/?#]*))"
+               r"|search/(pic|gif|video)s"
+               r")/?(?:\?([^#]+))?")
     example = "https://www.sex.com/search/pics?query=QUERY"
 
     def _init(self):
@@ -341,10 +341,10 @@ class SexcomSearchExtractor(SexcomExtractor):
                     pin["type"] = "gif"
                     if gifs and pin["extension"] == "webp":
                         pin["extension"] = "gif"
-                        pin["_fallback"] = (f"{root}{path}",)
-                        path = f"{path[:-4]}gif"
+                        pin["_fallback"] = (root + path,)
+                        path = path[:-4] + "gif"
 
-                pin["url"] = f"{root}{path}"
+                pin["url"] = root + path
                 yield Message.Directory, "", pin
                 yield Message.Url, pin["url"], pin
 

@@ -67,7 +67,7 @@ class ImgurImageExtractor(ImgurExtractor):
     subcategory = "image"
     filename_fmt = "{category}_{id}{title:?_//}.{extension}"
     archive_fmt = "{id}"
-    pattern = (rf"{BASE_PATTERN}/(?!gallery|search)"
+    pattern = (BASE_PATTERN + r"/(?!gallery|search)"
                r"(?:r/\w+/)?(?:[^/?#]+-)?(\w{7}|\w{5})[sbtmlh]?")
     example = "https://imgur.com/abcdefg"
 
@@ -93,7 +93,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
     directory_fmt = ("{category}", "{album[id]}{album[title]:? - //}")
     filename_fmt = "{category}_{album[id]}_{num:>03}_{id}.{extension}"
     archive_fmt = "{album[id]}_{id}"
-    pattern = rf"{BASE_PATTERN}/a/(?:[^/?#]+-)?(\w{{7}}|\w{{5}})"
+    pattern = BASE_PATTERN + r"/a/(?:[^/?#]+-)?(\w{7}|\w{5})"
     example = "https://imgur.com/a/abcde"
 
     def items(self):
@@ -126,8 +126,7 @@ class ImgurAlbumExtractor(ImgurExtractor):
 class ImgurGalleryExtractor(ImgurExtractor):
     """Extractor for imgur galleries"""
     subcategory = "gallery"
-    pattern = (rf"{BASE_PATTERN}/"
-               rf"(?:gallery|t/\w+)/(?:[^/?#]+-)?(\w{{7}}|\w{{5}})")
+    pattern = BASE_PATTERN + r"/(?:gallery|t/\w+)/(?:[^/?#]+-)?(\w{7}|\w{5})"
     example = "https://imgur.com/gallery/abcde"
 
     def items(self):
@@ -143,7 +142,7 @@ class ImgurGalleryExtractor(ImgurExtractor):
 class ImgurUserExtractor(ImgurExtractor):
     """Extractor for all images posted by a user"""
     subcategory = "user"
-    pattern = (rf"{BASE_PATTERN}/user/(?!me(?:/|$|\?|#))"
+    pattern = (BASE_PATTERN + r"/user/(?!me(?:/|$|\?|#))"
                r"([^/?#]+)(?:/posts|/submitted)?/?$")
     example = "https://imgur.com/user/USER"
 
@@ -154,7 +153,7 @@ class ImgurUserExtractor(ImgurExtractor):
 class ImgurFavoriteExtractor(ImgurExtractor):
     """Extractor for a user's favorites"""
     subcategory = "favorite"
-    pattern = rf"{BASE_PATTERN}/user/([^/?#]+)/favorites/?$"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)/favorites/?$"
     example = "https://imgur.com/user/USER/favorites"
 
     def items(self):
@@ -164,7 +163,7 @@ class ImgurFavoriteExtractor(ImgurExtractor):
 class ImgurFavoriteFolderExtractor(ImgurExtractor):
     """Extractor for a user's favorites folder"""
     subcategory = "favorite-folder"
-    pattern = rf"{BASE_PATTERN}/user/([^/?#]+)/favorites/folder/(\d+)"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)/favorites/folder/(\d+)"
     example = "https://imgur.com/user/USER/favorites/folder/12345/TITLE"
 
     def __init__(self, match):
@@ -179,7 +178,7 @@ class ImgurFavoriteFolderExtractor(ImgurExtractor):
 class ImgurMeExtractor(ImgurExtractor):
     """Extractor for your personal uploads"""
     subcategory = "me"
-    pattern = rf"{BASE_PATTERN}/user/me(?:/posts)?(/hidden)?"
+    pattern = BASE_PATTERN + r"/user/me(?:/posts)?(/hidden)?"
     example = "https://imgur.com/user/me"
 
     def items(self):
@@ -196,7 +195,7 @@ class ImgurMeExtractor(ImgurExtractor):
 class ImgurSubredditExtractor(ImgurExtractor):
     """Extractor for a subreddits's imgur links"""
     subcategory = "subreddit"
-    pattern = rf"{BASE_PATTERN}/r/([^/?#]+)/?$"
+    pattern = BASE_PATTERN + r"/r/([^/?#]+)/?$"
     example = "https://imgur.com/r/SUBREDDIT"
 
     def items(self):
@@ -206,7 +205,7 @@ class ImgurSubredditExtractor(ImgurExtractor):
 class ImgurTagExtractor(ImgurExtractor):
     """Extractor for imgur tag searches"""
     subcategory = "tag"
-    pattern = rf"{BASE_PATTERN}/t/([^/?#]+)$"
+    pattern = BASE_PATTERN + r"/t/([^/?#]+)$"
     example = "https://imgur.com/t/TAG"
 
     def items(self):
@@ -216,7 +215,7 @@ class ImgurTagExtractor(ImgurExtractor):
 class ImgurSearchExtractor(ImgurExtractor):
     """Extractor for imgur search results"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/search(?:/[^?#]+)?/?\?q=([^&#]+)"
+    pattern = BASE_PATTERN + r"/search(?:/[^?#]+)?/?\?q=([^&#]+)"
     example = "https://imgur.com/search?q=UERY"
 
     def items(self):
@@ -270,11 +269,11 @@ class ImgurAPI():
         return self._pagination(endpoint, params)
 
     def gallery_subreddit(self, subreddit):
-        endpoint = f"/3/gallery/r/{subreddit}"
+        endpoint = "/3/gallery/r/" + subreddit
         return self._pagination(endpoint)
 
     def gallery_tag(self, tag):
-        endpoint = f"/3/gallery/t/{tag}"
+        endpoint = "/3/gallery/t/" + tag
         return self._pagination(endpoint, key="items")
 
     def image(self, image_hash):

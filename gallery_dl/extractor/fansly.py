@@ -135,7 +135,7 @@ class FanslyExtractor(Extractor):
 
             files.append({
                 "file": file,
-                "url": f"ytdl:{location['location']}",
+                "url": "ytdl:" + location["location"],
                 "_fallback": fallback,
                 "_ytdl_manifest":
                     "dash" if mime == "application/dash+xml" else "hls",
@@ -155,7 +155,7 @@ class FanslyExtractor(Extractor):
 
 class FanslyPostExtractor(FanslyExtractor):
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/post/(\d+)"
+    pattern = BASE_PATTERN + r"/post/(\d+)"
     example = "https://fansly.com/post/1234567890"
 
     def posts(self):
@@ -164,7 +164,7 @@ class FanslyPostExtractor(FanslyExtractor):
 
 class FanslyHomeExtractor(FanslyExtractor):
     subcategory = "home"
-    pattern = rf"{BASE_PATTERN}/home(?:/(?:subscribed()|list/(\d+)))?"
+    pattern = BASE_PATTERN + r"/home(?:/(?:subscribed()|list/(\d+)))?"
     example = "https://fansly.com/home"
 
     def posts(self):
@@ -180,11 +180,11 @@ class FanslyHomeExtractor(FanslyExtractor):
 
 class FanslyListExtractor(FanslyExtractor):
     subcategory = "list"
-    pattern = rf"{BASE_PATTERN}/lists/(\d+)"
+    pattern = BASE_PATTERN + r"/lists/(\d+)"
     example = "https://fansly.com/lists/1234567890"
 
     def items(self):
-        base = f"{self.root}/"
+        base = self.root + "/"
         for account in self.api.lists_itemsnew(self.groups[0]):
             account["_extractor"] = FanslyCreatorPostsExtractor
             url = f"{base}{account['username']}/posts"
@@ -193,11 +193,11 @@ class FanslyListExtractor(FanslyExtractor):
 
 class FanslyListsExtractor(FanslyExtractor):
     subcategory = "lists"
-    pattern = rf"{BASE_PATTERN}/lists"
+    pattern = BASE_PATTERN + r"/lists"
     example = "https://fansly.com/lists"
 
     def items(self):
-        base = f"{self.root}/lists/"
+        base = self.root + "/lists/"
         for list in self.api.lists_account():
             list["_extractor"] = FanslyListExtractor
             url = f"{base}{list['id']}#{list['label']}"
@@ -206,7 +206,7 @@ class FanslyListsExtractor(FanslyExtractor):
 
 class FanslyCreatorPostsExtractor(FanslyExtractor):
     subcategory = "creator-posts"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/posts(?:/wall/(\d+))?"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/posts(?:/wall/(\d+))?"
     example = "https://fansly.com/CREATOR/posts"
 
     def posts_wall(self, account, wall):
@@ -215,7 +215,7 @@ class FanslyCreatorPostsExtractor(FanslyExtractor):
 
 class FanslyCreatorMediaExtractor(FanslyExtractor):
     subcategory = "creator-media"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/media(?:/wall/(\d+))?"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/media(?:/wall/(\d+))?"
     example = "https://fansly.com/CREATOR/media"
 
     def posts_wall(self, account, wall):
@@ -308,7 +308,7 @@ class FanslyAPI():
         return self._pagination(endpoint, params)
 
     def timeline_new(self, account_id, wall_id):
-        endpoint = f"/v1/timelinenew/{account_id}"
+        endpoint = "/v1/timelinenew/" + str(account_id)
         params = {
             "before"       : "0",
             "after"        : "0",

@@ -48,7 +48,7 @@ class WebtoonsBase():
 class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
     """Extractor for an episode on webtoons.com"""
     subcategory = "episode"
-    pattern = (rf"{LANG_PATTERN}/([^/?#]+)/([^/?#]+)/[^/?#]+)"
+    pattern = (LANG_PATTERN + r"/([^/?#]+)/([^/?#]+)/[^/?#]+)"
                r"/viewer\?([^#'\"]+)")
     example = ("https://www.webtoons.com/en/GENRE/TITLE/NAME/viewer"
                "?title_no=123&episode_no=12345")
@@ -142,7 +142,7 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
     categorytransfer = True
     filename_fmt = "{type}.{extension}"
     archive_fmt = "{title_no}_{type}"
-    pattern = rf"{LANG_PATTERN}/([^/?#]+)/([^/?#]+))/list\?([^#]+)"
+    pattern = LANG_PATTERN + r"/([^/?#]+)/([^/?#]+))/list\?([^#]+)"
     example = "https://www.webtoons.com/en/GENRE/TITLE/list?title_no=123"
 
     def items(self):
@@ -197,7 +197,7 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
 class WebtoonsArtistExtractor(WebtoonsBase, Extractor):
     """Extractor for webtoons.com artists"""
     subcategory = "artist"
-    pattern = rf"{BASE_PATTERN}/p/community/([^/?#]+)/u/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/p/community/([^/?#]+)/u/([^/?#]+)"
     example = "https://www.webtoons.com/p/community/LANG/u/ARTIST"
 
     def items(self):

@@ -15,7 +15,7 @@ import itertools
 import hashlib
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|touch\.)?ph?ixiv\.net"
-USER_PATTERN = rf"{BASE_PATTERN}/(?:en/)?users/(\d+)"
+USER_PATTERN = BASE_PATTERN + r"/(?:en/)?users/(\d+)"
 
 
 class PixivExtractor(Extractor):
@@ -393,7 +393,7 @@ class PixivExtractor(Extractor):
 
 class PixivUserExtractor(Dispatch, PixivExtractor):
     """Extractor for a pixiv user profile"""
-    pattern = (rf"{BASE_PATTERN}/(?:"
+    pattern = (BASE_PATTERN + r"/(?:"
                r"(?:en/)?u(?:sers)?/|member\.php\?id=|(?:mypage\.php)?#id="
                r")(\d+)(?:$|[?#])")
     example = "https://www.pixiv.net/en/users/12345"
@@ -416,7 +416,7 @@ class PixivUserExtractor(Dispatch, PixivExtractor):
 class PixivArtworksExtractor(PixivExtractor):
     """Extractor for artworks of a pixiv user"""
     subcategory = "artworks"
-    pattern = (rf"{BASE_PATTERN}/(?:"
+    pattern = (BASE_PATTERN + r"/(?:"
                r"(?:en/)?users/(\d+)/(?:artworks|illustrations|manga)"
                r"(?:/([^/?#]+))?/?(?:$|[?#])"
                r"|member_illust\.php\?id=(\d+)(?:&([^#]+))?)")
@@ -505,7 +505,7 @@ class PixivAvatarExtractor(PixivExtractor):
     subcategory = "avatar"
     filename_fmt = "avatar{date:?_//%Y-%m-%d}.{extension}"
     archive_fmt = "avatar_{user[id]}_{date}"
-    pattern = rf"{USER_PATTERN}/avatar"
+    pattern = USER_PATTERN + r"/avatar"
     example = "https://www.pixiv.net/en/users/12345/avatar"
 
     def _init(self):
@@ -523,7 +523,7 @@ class PixivBackgroundExtractor(PixivExtractor):
     subcategory = "background"
     filename_fmt = "background{date:?_//%Y-%m-%d}.{extension}"
     archive_fmt = "background_{user[id]}_{date}"
-    pattern = rf"{USER_PATTERN}/background"
+    pattern = USER_PATTERN + "/background"
     example = "https://www.pixiv.net/en/users/12345/background"
 
     def _init(self):
@@ -585,7 +585,7 @@ class PixivWorkExtractor(PixivExtractor):
 class PixivUnlistedExtractor(PixivExtractor):
     """Extractor for a unlisted pixiv illustrations"""
     subcategory = "unlisted"
-    pattern = rf"{BASE_PATTERN}/(?:en/)?artworks/unlisted/(\w+)"
+    pattern = BASE_PATTERN + r"/(?:en/)?artworks/unlisted/(\w+)"
     example = "https://www.pixiv.net/en/artworks/unlisted/a1b2c3d4e5f6g7h8i9j0"
 
     def _extract_files(self, work):
@@ -604,7 +604,7 @@ class PixivFavoriteExtractor(PixivExtractor):
     directory_fmt = ("{category}", "bookmarks",
                      "{user_bookmark[id]} {user_bookmark[account]}")
     archive_fmt = "f_{user_bookmark[id]}_{id}{num}.{extension}"
-    pattern = (rf"{BASE_PATTERN}/(?:(?:en/)?"
+    pattern = (BASE_PATTERN + r"/(?:(?:en/)?"
                r"users/(\d+)/(bookmarks/artworks|following)(?:/([^/?#]+))?"
                r"|bookmark\.php)(?:\?([^#]*))?")
     example = "https://www.pixiv.net/en/users/12345/bookmarks/artworks"
@@ -657,7 +657,7 @@ class PixivFavoriteExtractor(PixivExtractor):
         for preview in self.api.user_following(self.user_id, restrict):
             user = preview["user"]
             user["_extractor"] = PixivUserExtractor
-            url = f"https://www.pixiv.net/users/{user['id']}"
+            url = "https://www.pixiv.net/users/" + str(user["id"])
             yield Message.Queue, url, user
 
 
@@ -667,7 +667,7 @@ class PixivRankingExtractor(PixivExtractor):
     archive_fmt = "r_{ranking[mode]}_{ranking[date]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "rankings",
                      "{ranking[mode]}", "{ranking[date]}")
-    pattern = rf"{BASE_PATTERN}/ranking\.php(?:\?([^#]*))?"
+    pattern = BASE_PATTERN + r"/ranking\.php(?:\?([^#]*))?"
     example = "https://www.pixiv.net/ranking.php"
 
     def __init__(self, match):
@@ -736,7 +736,7 @@ class PixivSearchExtractor(PixivExtractor):
     subcategory = "search"
     archive_fmt = "s_{search[word]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "search", "{search[word]}")
-    pattern = (rf"{BASE_PATTERN}/(?:(?:en/)?tags/([^/?#]+)(?:/[^/?#]+)?/?"
+    pattern = (BASE_PATTERN + r"/(?:(?:en/)?tags/([^/?#]+)(?:/[^/?#]+)?/?"
                r"|search\.php)(?:\?([^#]+))?")
     example = "https://www.pixiv.net/en/tags/TAG"
 
@@ -802,7 +802,7 @@ class PixivFollowExtractor(PixivExtractor):
     subcategory = "follow"
     archive_fmt = "F_{user_follow[id]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "following")
-    pattern = rf"{BASE_PATTERN}/bookmark_new_illust\.php"
+    pattern = BASE_PATTERN + r"/bookmark_new_illust\.php"
     example = "https://www.pixiv.net/bookmark_new_illust.php"
 
     def works(self):
@@ -851,7 +851,7 @@ class PixivSeriesExtractor(PixivExtractor):
     directory_fmt = ("{category}", "{user[id]} {user[account]}",
                      "{series[id]} {series[title]}")
     filename_fmt = "{num_series:>03}_{id}_p{num}.{extension}"
-    pattern = rf"{BASE_PATTERN}/user/(\d+)/series/(\d+)"
+    pattern = BASE_PATTERN + r"/user/(\d+)/series/(\d+)"
     example = "https://www.pixiv.net/user/12345/series/12345"
 
     def __init__(self, match):
@@ -1042,7 +1042,7 @@ class PixivNovelExtractor(PixivExtractor):
 class PixivNovelNovelExtractor(PixivNovelExtractor):
     """Extractor for pixiv novels"""
     subcategory = "novel"
-    pattern = rf"{BASE_PATTERN}/n(?:ovel/show\.php\?id=|/)(\d+)"
+    pattern = BASE_PATTERN + r"/n(?:ovel/show\.php\?id=|/)(\d+)"
     example = "https://www.pixiv.net/novel/show.php?id=12345"
 
     def novels(self):
@@ -1056,7 +1056,7 @@ class PixivNovelNovelExtractor(PixivNovelExtractor):
 class PixivNovelUserExtractor(PixivNovelExtractor):
     """Extractor for pixiv users' novels"""
     subcategory = "user"
-    pattern = rf"{USER_PATTERN}/novels"
+    pattern = USER_PATTERN + r"/novels"
     example = "https://www.pixiv.net/en/users/12345/novels"
 
     def novels(self):
@@ -1066,7 +1066,7 @@ class PixivNovelUserExtractor(PixivNovelExtractor):
 class PixivNovelSeriesExtractor(PixivNovelExtractor):
     """Extractor for pixiv novel series"""
     subcategory = "series"
-    pattern = rf"{BASE_PATTERN}/novel/series/(\d+)"
+    pattern = BASE_PATTERN + r"/novel/series/(\d+)"
     example = "https://www.pixiv.net/novel/series/12345"
 
     def novels(self):
@@ -1076,7 +1076,7 @@ class PixivNovelSeriesExtractor(PixivNovelExtractor):
 class PixivNovelBookmarkExtractor(PixivNovelExtractor):
     """Extractor for bookmarked pixiv novels"""
     subcategory = "bookmark"
-    pattern = (rf"{USER_PATTERN}/bookmarks/novels"
+    pattern = (USER_PATTERN + r"/bookmarks/novels"
                r"(?:/([^/?#]+))?(?:/?\?([^#]+))?")
     example = "https://www.pixiv.net/en/users/12345/bookmarks/novels"
 
@@ -1302,7 +1302,7 @@ class PixivAppAPI():
             msg = (f"'{msg}'" if (msg := error.get("user_message")) else
                    f"'{msg}'" if (msg := error.get("message")) else
                    error)
-            raise exception.AbortExtraction(f"API request failed: {msg}")
+            raise exception.AbortExtraction("API request failed: " + msg)
 
     def _pagination(self, endpoint, params,
                     key_items="illusts", key_data=None, key_user=None):

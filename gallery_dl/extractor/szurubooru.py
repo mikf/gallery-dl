@@ -93,7 +93,7 @@ class SzurubooruTagExtractor(SzurubooruExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}_{version}"
-    pattern = rf"{BASE_PATTERN}/posts(?:/query=([^/?#]*))?"
+    pattern = BASE_PATTERN + r"/posts(?:/query=([^/?#]*))?"
     example = "https://booru.bcbnsfw.space/posts/query=TAG"
 
     def __init__(self, match):
@@ -116,7 +116,7 @@ class SzurubooruTagExtractor(SzurubooruExtractor):
 class SzurubooruPostExtractor(SzurubooruExtractor):
     subcategory = "post"
     archive_fmt = "{id}_{version}"
-    pattern = rf"{BASE_PATTERN}/post/(\d+)"
+    pattern = BASE_PATTERN + r"/post/(\d+)"
     example = "https://booru.bcbnsfw.space/post/12345"
 
     def posts(self):

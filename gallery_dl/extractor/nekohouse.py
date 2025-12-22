@@ -12,7 +12,7 @@ from .common import Extractor, Message
 from .. import text
 
 BASE_PATTERN = r"(?:https?://)?nekohouse\.su"
-USER_PATTERN = rf"{BASE_PATTERN}/([^/?#]+)/user/([^/?#]+)"
+USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)/user/([^/?#]+)"
 
 
 class NekohouseExtractor(Extractor):
@@ -27,7 +27,7 @@ class NekohousePostExtractor(NekohouseExtractor):
                      "{post_id} {date} {title[b:230]}")
     filename_fmt = "{num:>02} {id|filename}.{extension}"
     archive_fmt = "{service}_{user_id}_{post_id}_{hash}"
-    pattern = rf"{USER_PATTERN}/post/([^/?#]+)"
+    pattern = USER_PATTERN + r"/post/([^/?#]+)"
     example = "https://nekohouse.su/SERVICE/user/12345/post/12345"
 
     def items(self):
@@ -98,7 +98,7 @@ class NekohousePostExtractor(NekohouseExtractor):
 
 class NekohouseUserExtractor(NekohouseExtractor):
     subcategory = "user"
-    pattern = rf"{USER_PATTERN}/?(?:\?([^#]+))?(?:$|\?|#)"
+    pattern = USER_PATTERN + r"/?(?:\?([^#]+))?(?:$|\?|#)"
     example = "https://nekohouse.su/SERVICE/user/12345"
 
     def items(self):

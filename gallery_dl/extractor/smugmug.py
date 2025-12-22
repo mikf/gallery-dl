@@ -93,7 +93,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
     """Extractor for individual smugmug images"""
     subcategory = "image"
     archive_fmt = "{Image[ImageKey]}"
-    pattern = rf"{BASE_PATTERN}(?:/[^/?#]+)+/i-([^/?#-]+)"
+    pattern = BASE_PATTERN + r"(?:/[^/?#]+)+/i-([^/?#-]+)"
     example = "https://USER.smugmug.com/PATH/i-ID"
 
     def __init__(self, match):
@@ -114,7 +114,7 @@ class SmugmugImageExtractor(SmugmugExtractor):
 class SmugmugPathExtractor(SmugmugExtractor):
     """Extractor for smugmug albums from URL paths and users"""
     subcategory = "path"
-    pattern = rf"{BASE_PATTERN}((?:/[^/?#a-fh-mo-z][^/?#]*)*)/?$"
+    pattern = BASE_PATTERN + r"((?:/[^/?#a-fh-mo-z][^/?#]*)*)/?$"
     example = "https://USER.smugmug.com/PATH"
 
     def __init__(self, match):

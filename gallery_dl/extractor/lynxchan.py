@@ -39,7 +39,7 @@ class LynxchanThreadExtractor(LynxchanExtractor):
                      "{threadId} {subject|message[:50]}")
     filename_fmt = "{postId}{num:?-//} {filename}.{extension}"
     archive_fmt = "{boardUri}_{postId}_{num}"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/res/(\d+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/res/(\d+)"
     example = "https://endchan.org/a/res/12345.html"
 
     def items(self):
@@ -63,7 +63,7 @@ class LynxchanThreadExtractor(LynxchanExtractor):
 class LynxchanBoardExtractor(LynxchanExtractor):
     """Extractor for LynxChan boards"""
     subcategory = "board"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)(?:/index|/catalog|/\d+|/?$)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)(?:/index|/catalog|/\d+|/?$)"
     example = "https://endchan.org/a/"
 
     def items(self):

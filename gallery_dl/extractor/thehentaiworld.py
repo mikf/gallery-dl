@@ -90,12 +90,12 @@ class ThehentaiworldExtractor(Extractor):
         post["tags"] = tags_list = []
         for key, value in tags.items():
             tags_list.extend(value)
-            post[f"tags_{key}" if key else "tags_general"] = value
+            post["tags_" + key if key else "tags_general"] = value
 
         return post
 
     def _pagination(self, endpoint):
-        base = f"{self.root}{endpoint}"
+        base = self.root + endpoint
         pnum = self.page_start
 
         while True:
@@ -116,7 +116,7 @@ class ThehentaiworldTagExtractor(ThehentaiworldExtractor):
     page_start = 1
     post_start = 0
     directory_fmt = ("{category}", "{search_tags}")
-    pattern = rf"{BASE_PATTERN}/tag/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/tag/([^/?#]+)"
     example = "https://thehentaiworld.com/tag/TAG/"
 
     def posts(self):
@@ -132,8 +132,8 @@ class ThehentaiworldTagExtractor(ThehentaiworldExtractor):
 
 class ThehentaiworldPostExtractor(ThehentaiworldExtractor):
     subcategory = "post"
-    pattern = (rf"{BASE_PATTERN}("
-               rf"/(?:video|(?:[\w-]+-)?hentai-image)s/([^/?#]+))")
+    pattern = (BASE_PATTERN +
+               r"(/(?:video|(?:[\w-]+-)?hentai-image)s/([^/?#]+))")
     example = "https://thehentaiworld.com/hentai-images/SLUG/"
 
     def posts(self):

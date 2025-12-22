@@ -20,7 +20,7 @@ class MyhentaigalleryBase():
 class MyhentaigalleryGalleryExtractor(MyhentaigalleryBase, GalleryExtractor):
     """Extractor for image galleries from myhentaigallery.com"""
     directory_fmt = ("{category}", "{gallery_id} {artist:?[/] /J, }{title}")
-    pattern = rf"{BASE_PATTERN}/g(?:allery/(?:thumbnails|show))?/(\d+)"
+    pattern = BASE_PATTERN + r"/g(?:allery/(?:thumbnails|show))?/(\d+)"
     example = "https://myhentaigallery.com/g/12345"
 
     def __init__(self, match):
@@ -62,7 +62,7 @@ class MyhentaigalleryGalleryExtractor(MyhentaigalleryBase, GalleryExtractor):
 class MyhentaigalleryTagExtractor(MyhentaigalleryBase, Extractor):
     """Extractor for myhentaigallery tag searches"""
     subcategory = "tag"
-    pattern = rf"{BASE_PATTERN}(/g/(artist|category|group|parody)/(\d+).*)"
+    pattern = BASE_PATTERN + r"(/g/(artist|category|group|parody)/(\d+).*)"
     example = "https://myhentaigallery.com/g/category/123"
 
     def items(self):

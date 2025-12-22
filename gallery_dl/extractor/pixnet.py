@@ -65,7 +65,7 @@ class PixnetImageExtractor(PixnetExtractor):
     subcategory = "image"
     filename_fmt = "{id}.{extension}"
     directory_fmt = ("{category}", "{blog}")
-    pattern = rf"{BASE_PATTERN}/album/photo/(\d+)"
+    pattern = BASE_PATTERN + r"/album/photo/(\d+)"
     example = "https://USER.pixnet.net/album/photo/12345"
 
     def items(self):
@@ -92,7 +92,7 @@ class PixnetSetExtractor(PixnetExtractor):
     subcategory = "set"
     directory_fmt = ("{category}", "{blog}",
                      "{folder_id} {folder_title}", "{set_id} {set_title}")
-    pattern = rf"{BASE_PATTERN}/album/set/(\d+)"
+    pattern = BASE_PATTERN + r"/album/set/(\d+)"
     example = "https://USER.pixnet.net/album/set/12345"
 
     def items(self):
@@ -137,7 +137,7 @@ class PixnetFolderExtractor(PixnetExtractor):
     """Extractor for all sets in a pixnet folder"""
     subcategory = "folder"
     url_fmt = "{}/album/folder/{}"
-    pattern = rf"{BASE_PATTERN}/album/folder/(\d+)"
+    pattern = BASE_PATTERN + r"/album/folder/(\d+)"
     example = "https://USER.pixnet.net/album/folder/12345"
 
 
@@ -145,5 +145,5 @@ class PixnetUserExtractor(PixnetExtractor):
     """Extractor for all sets and folders of a pixnet user"""
     subcategory = "user"
     url_fmt = "{}{}/album/list"
-    pattern = rf"{BASE_PATTERN}()(?:/blog|/album(?:/list)?)?/?(?:$|[?#])"
+    pattern = BASE_PATTERN + r"()(?:/blog|/album(?:/list)?)?/?(?:$|[?#])"
     example = "https://USER.pixnet.net/"
