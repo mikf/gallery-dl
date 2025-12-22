@@ -6,6 +6,7 @@
 
 """Extractors for https://www.tiktok.com/"""
 
+from functools import partial
 from itertools import count
 from json import JSONDecodeError
 from math import floor
@@ -312,6 +313,7 @@ class TiktokUserExtractor(TiktokExtractor):
         self.posts = self.config("posts", True)
         self.stories = self.config("stories", True)
         self.likes = self.config("likes", False)
+        self.reposts = self.config("reposts", False)
         # If set to "ytdl", we shall first go via yt-dlp. If that fails,
         # we shall attempt to extract directly.
         self.ytdl = self.config("tiktok-user-extractor") == "ytdl"
@@ -382,7 +384,14 @@ class TiktokUserExtractor(TiktokExtractor):
                 self.log.warning("Could not extract the liked posts of TikTok "
                                  "user %s", user_name)
 
-        entries = posts + stories + likes
+        reposts = []
+        if self.reposts:
+            reposts = self._extract_reposts(profile_url, user_name)
+            if not reposts:
+                self.log.warning("Could not extract the reposts of TikTok "
+                                 "user %s", user_name)
+
+        entries = posts + stories + likes + reposts
         seen = set()
         seen_add = seen.add
         for post_url in entries:
@@ -569,6 +578,19 @@ class TiktokUserExtractor(TiktokExtractor):
         return request.generate_urls(profile_url, self.video, self.photo,
                                      self.audio)
 
+    def _extract_reposts(self, profile_url, user_name):
+        sec_uid = self._extract_sec_uid(profile_url, user_name)
+        query_parameters = {
+            "secUid": sec_uid,
+            "post_item_list_request_type": "0",
+            "needPinnedItemIds": "false",
+            "count": "15",
+        }
+        request = TiktokRepostItemListRequest(self.range_predicate)
+        request.execute(self, profile_url, query_parameters)
+        return request.generate_urls(profile_url, self.video, self.photo,
+                                     self.audio)
+
     def _extract_sec_uid(self, profile_url, user_name):
         sec_uid = self._extract_id(profile_url, user_name, SEC_UID_PATTERN,
                                    "secUid")
@@ -611,10 +633,13 @@ class TiktokFollowingExtractor(TiktokUserExtractor):
             "count": "15",
         }
         request = TiktokStoryUserListRequest()
-        request.execute(self, self.url, query_parameters)
+        if not request.execute(self, self.url, query_parameters):
+            self.log.error("%s: could not extract follower list, make sure "
+                           "you are using logged-in cookies", self.url)
         users = request.generate_urls()
         if len(users) == 0:
-            self.log.warning("No followers with stories could be extracted")
+            self.log.warning("%s: No followers with stories could be "
+                             "extracted", self.url)
 
         entries = []
         # Batch all of the users up into groups of at most ten and use the
@@ -783,15 +808,22 @@ class TiktokLegacyTimeCursor(TiktokPaginationCursor):
 
 
 class TiktokItemCursor(TiktokPaginationCursor):
-    def __init__(self):
+    def __init__(self, list_key: str = "itemList"):
         super().__init__()
         self.cursor = 0
+        self.list_key = list_key
 
     def current_page(self):
         return self.cursor
 
     def next_page(self, data, query_parameters):
-        self.cursor += int(data.get("TotalCount", query_parameters["count"]))
+        # We should offset the cursor by the number of items in the response.
+        # Sometimes less items are returned than what was requested in the
+        # count parameter! We could fall back onto the count query parameter
+        # but we could miss out on some posts, and truth is if the expected
+        # item list isn't in the response, the extraction was going to fail
+        # anyway.
+        self.cursor += len(data[self.list_key])
         return not data.get("hasMore", False)
 
 
@@ -1168,7 +1200,6 @@ class TiktokPostItemListRequest(TiktokItemListRequest):
         # 2 == oldest-to-newest.
         assert query_parameters["post_item_list_request_type"] in \
             ["0", "1", "2"]
-        self.__request_type = query_parameters["post_item_list_request_type"]
         assert "needPinnedItemIds" in query_parameters
         # If this value is set to "true", and "post_item_list_request_type" is
         # set to "0", pinned posts will always show up first in the resulting
@@ -1208,6 +1239,29 @@ class TiktokFavoriteItemListRequest(TiktokItemListRequest):
 
     def cursor_type(self, query_parameters):
         return TiktokBackwardTimeCursor
+
+
+# MARK: report/item_list
+class TiktokRepostItemListRequest(TiktokItemListRequest):
+    """Retrieves a user's reposts.
+
+    Appears to only support descending order, but it can work without
+    cookies.
+    """
+
+    def __init__(self, range_predicate):
+        super().__init__("repost/item_list", "reposts", range_predicate)
+
+    def validate_query_parameters(self, query_parameters):
+        super().validate_query_parameters(query_parameters)
+        assert "secUid" in query_parameters
+        assert "post_item_list_request_type" in query_parameters
+        assert query_parameters["post_item_list_request_type"] == "0"
+        assert "needPinnedItemIds" in query_parameters
+        assert query_parameters["needPinnedItemIds"] in ["false"]
+
+    def cursor_type(self, query_parameters):
+        return TiktokItemCursor
 
 
 # MARK: story/item_list
@@ -1270,7 +1324,7 @@ class TiktokStoryUserListRequest(TiktokPaginationRequest):
         assert query_parameters["storyFeedScene"] == "3"
 
     def cursor_type(self, query_parameters):
-        return TiktokItemCursor
+        return partial(TiktokItemCursor, "storyUsers")
 
     def extract_items(self, data):
         if "storyUsers" not in data:
