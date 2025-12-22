@@ -9,7 +9,7 @@
 """Extractors for https://www.linkedin.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, exception
 import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?linkedin\.com"
@@ -34,8 +34,9 @@ class LinkedinExtractor(Extractor):
         url_clean = url.split("?")[0]
 
         # Extract post ID from URL - support multiple LinkedIn URL formats
-        post_id_match = re.search(r"-(\d+)-[A-Za-z0-9]+$", url_clean) or re.search(
-            r"/feed/update/urn:li:activity:(\d+)", url_clean
+        post_id_match = (
+            re.search(r"-(\d+)-[A-Za-z0-9]+$", url_clean) or
+            re.search(r"/feed/update/urn:li:activity:(\d+)", url_clean)
         )
 
         if not post_id_match:
@@ -109,7 +110,8 @@ class LinkedinExtractor(Extractor):
                     {
                         **file_metadata,
                         "filename": filename,
-                        "extension": self._get_extension(media_url, media_type),
+                        "extension": self._get_extension(media_url,
+                                                         media_type),
                     },
                 )
 
@@ -128,7 +130,8 @@ class LinkedinExtractor(Extractor):
         # Extract description
         desc_patterns = [
             r'"description":\s*"([^"]+)"',
-            r'<meta[^>]+name=["\']description["\'][^>]+content=["\']([^"\']+)["\']',
+            r'<meta[^>]+name=["\']description["\'][^>]+'
+            r'content=["\']([^"\']+)["\']',
             r'"text":\s*"([^"]{50,})"',  # Longer text fields
         ]
 
@@ -136,7 +139,8 @@ class LinkedinExtractor(Extractor):
             match = re.search(pattern, page)
             if match:
                 description = text.unescape(match.group(1))
-                if len(description) > 20:  # Filter out short/irrelevant descriptions
+                # Filter out short/irrelevant descriptions
+                if len(description) > 20:
                     metadata["description"] = description
                     break
 
@@ -153,7 +157,8 @@ class LinkedinExtractor(Extractor):
                 author = text.unescape(match.group(1))
                 if not author.startswith("http"):  # Filter out URLs
                     metadata["author"] = author
-                    metadata["username"] = author.lower().replace(" ", "_")
+                    metadata["username"] = author.lower().replace(" ",
+                                                                  "_")
                     break
 
         # Extract publication date
@@ -184,7 +189,8 @@ class LinkedinExtractor(Extractor):
                     metadata["post_text"] = post_text
                     break
 
-        return metadata if any(k != "post_id" for k in metadata.keys()) else None
+        return metadata if any(k != "post_id" for k in metadata.keys()) \
+            else None
 
     def _extract_media_data(self, page):
         """Extract video and image data from the page"""
@@ -210,16 +216,16 @@ class LinkedinExtractor(Extractor):
                     any(
                         indicator in url_lower
                         for indicator in ["mp4", "mov", "avi", "webm", "video"]
-                    )
-                    or "dms.licdn.com/playlist/vid/" in url_lower
-                    or "/vid/" in url_lower
+                    ) or
+                    "dms.licdn.com/playlist/vid/" in url_lower or
+                    "/vid/" in url_lower
                 )
                 is_image = (
                     any(
                         indicator in url_lower
                         for indicator in ["jpg", "jpeg", "png", "gif", "webp"]
-                    )
-                    or "media.licdn.com/dms/image/" in url_lower
+                    ) or
+                    "media.licdn.com/dms/image/" in url_lower
                 )
 
                 if is_video:
@@ -308,7 +314,8 @@ class LinkedinExtractor(Extractor):
 
         # Skip very small images (likely icons/thumbnails)
         if any(
-            size in url_lower for size in ["24x24", "32x32", "48x48", "64x64", "16x16"]
+            size in url_lower for size in ["24x24", "32x32", "48x48", "64x64",
+                                           "16x16"]
         ):
             self.log.debug(f"Filtering out small image: {image_url}")
             return False
@@ -319,7 +326,7 @@ class LinkedinExtractor(Extractor):
             return False
 
         # Check if image appears in post content area
-        # This is a heuristic - look for the image URL near post content indicators
+        # Look for the image URL near post content indicators
         post_context_patterns = [
             r'"commentary"[^}]*' + re.escape(image_url),
             r'"text"[^}]*' + re.escape(image_url),
@@ -457,4 +464,5 @@ class LinkedinFeedExtractor(LinkedinExtractor):
 
     subcategory = "feed"
     pattern = BASE_PATTERN + r"/feed/update/urn:li:activity:(\d+)"
-    example = "https://www.linkedin.com/feed/update/urn:li:activity:7381400030911500288"
+    example = ("https://www.linkedin.com/feed/update/urn:li:activity:"
+               "7381400030911500288")
