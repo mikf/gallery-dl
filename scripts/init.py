@@ -111,8 +111,8 @@ class {ccat}Extractor(Extractor):
 
 class {ccat}{subcat.capitalize()}Extractor({ccat}Extractor):
     subcategory = "{subcat}"
-    pattern = rf"{{BASE_PATTERN}}/PATH"
-    example = "{args.root}/..."
+    pattern = BASE_PATTERN + r"/PATH"
+    example = "{args.root}/PATH"
 
     def items(self):
         pass
@@ -128,6 +128,7 @@ def generate_extractors_manga(args):
     return f'''\
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
+from ..cache import memcache
 
 {build_base_pattern(args)}
 
@@ -139,8 +140,8 @@ class {ccat}Base():
 
 class {ccat}ChapterExtractor({ccat}Base, ChapterExtractor):
     """Extractor for {cat} manga chapters"""
-    pattern = rf"{{BASE_PATTERN}}/PATH"
-    example = "{args.root}/..."
+    pattern = BASE_PATTERN + r"/PATH"
+    example = "{args.root}/PATH"
 
     def __init__(self, match):
         url = f"{{self.root}}/PATH"
@@ -150,6 +151,7 @@ class {ccat}ChapterExtractor({ccat}Base, ChapterExtractor):
         chapter, sep, minor = chapter.partition(".")
 
         return {{
+            **_manga_info(self, manga_id),
             "manga"   : text.unescape(manga),
             "manga_id": text.parse_int(manga_id),
             "title"   : "",
@@ -171,8 +173,8 @@ class {ccat}ChapterExtractor({ccat}Base, ChapterExtractor):
 class {ccat}MangaExtractor({ccat}Base, MangaExtractor):
     """Extractor for {cat} manga"""
     chapterclass = {ccat}ChapterExtractor
-    pattern = rf"{{BASE_PATTERN}}/PATH"
-    example = "{args.root}/..."
+    pattern = BASE_PATTERN + r"/PATH"
+    example = "{args.root}/PATH"
 
     def __init__(self, match):
         url = f"{{self.root}}/PATH"
@@ -185,6 +187,11 @@ class {ccat}MangaExtractor({ccat}Base, MangaExtractor):
             results.append((url, None))
 
         return results
+
+
+@memcache(keyarg=1)
+def _manga_info(self, slug):
+    return {{}}
 '''
 
 
@@ -197,7 +204,7 @@ from .common import Extractor, Message, Dispatch
 from .. import text
 
 {build_base_pattern(args)}
-USER_PATTERN = rf"{{BASE_PATTERN}}/([^/?#]+)"
+USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)"
 
 class {ccat}Extractor(Extractor):
     """Base class for {cat} extractors"""
@@ -207,13 +214,13 @@ class {ccat}Extractor(Extractor):
 
 class {ccat}UserExtractor(Dispatch, {ccat}Extractor)
     """Extractor for {cat} user profiles"""
-    pattern = rf"{{USER_PATTERN}}/?(?:$|\\?|#)"
+    pattern = USER_PATTERN + r"/?(?:$|\\?|#)"
     example = "{args.root}/USER/"
 
     def items(self):
-        base = f"{{self.root}}/"
+        base = self.root + "/"
         return self._dispatch_extractors((
-            ({ccat}InfoExtractor, f"{{base}}info"),
+            ({ccat}InfoExtractor, base + "info"),
         ), ("posts",))
 '''
 
