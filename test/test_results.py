@@ -56,14 +56,14 @@ AUTH_REQUIRED = {
     "poipiku",
 }
 
-AUTH_KEYS = (
+AUTH_KEYS = {
     "username",
     "cookies",
     "api-key",
     "client-id",
     "access-token",
     "refresh-token",
-)
+}
 
 
 class TestExtractorResults(unittest.TestCase):
@@ -145,7 +145,7 @@ class TestExtractorResults(unittest.TestCase):
             for key in AUTH_KEYS:
                 config.set((), key, None)
 
-        if auth and not any(extr.config(key) for key in AUTH_KEYS):
+        if auth and not self._has_auth(extr, auth):
             self._skipped.append((result["#url"], "no auth"))
             self.skipTest("no auth")
 
@@ -270,6 +270,19 @@ class TestExtractorResults(unittest.TestCase):
                 kwdicts = tjob.kwdict_list
             for kwdict in kwdicts:
                 self._test_kwdict(kwdict, metadata)
+
+    def _has_auth(self, extr, auth):
+        if auth is True:
+            auth = AUTH_KEYS
+
+        if isinstance(auth, str):
+            return extr.config(auth)
+        if isinstance(auth, set):
+            return any(self._has_auth(extr, a) for a in auth)
+        if isinstance(auth, (tuple, list)):
+            return all(self._has_auth(extr, k) for k in auth)
+
+        self.fail(f"Invalid '#auth' value: {auth!r}")
 
     def _test_kwdict(self, kwdict, tests, parent=None):
         for key, test in tests.items():
