@@ -130,10 +130,53 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         return results
 
     def assets(self, page):
+        assets = []
+
         if self.config("thumbnails", False):
             active = text.extr(page, 'class="on', '</a>')
             url = _url(text.extr(active, 'data-url="', '"'))
-            return ({"url": url, "type": "thumbnail"},)
+            assets.append({"url": url, "type": "thumbnail"})
+
+        if self.config("bgm", True):
+            if bgm := text.extr(page, "episodeBgmList:", ",\n"):
+                self._asset_bgm(assets, util.json_loads(bgm))
+
+        return assets
+
+    def _asset_bgm(self, assets, bgm_list):
+        import binascii
+        params = {
+            #  "quality"     : "MIDDLE",
+            "quality"     : "HIGH",  # no difference to 'MIDDLE'
+            "acceptCodecs": "AAC,MP3",
+        }
+        headers = {
+            "Accept"        : "application/json",
+            "Content-Type"  : "application/json",
+            "Origin"        : self.root,
+            "Referer"       : self.root + "/",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "cross-site",
+        }
+
+        for bgm in bgm_list:
+            url = (f"https://apis.naver.com/audiocweb/audiocplayogwweb/play"
+                   f"/audio/{bgm['audioId']}/hls/token")
+            data = self.request_json(
+                url, params=params, headers=headers, interval=False)
+            token = data["result"]["playToken"]
+            data = util.json_loads(binascii.a2b_base64(token).decode())
+            audio = data["audioInfo"]
+
+            assets.append({
+                **bgm,
+                **audio,
+                "type": "bgm",
+                "url" : "ytdl:" + audio["url"],
+                "_ytdl_manifest": audio["type"].lower(),
+                "extension": "mp3",
+            })
 
 
 class WebtoonsComicExtractor(WebtoonsBase, Extractor):
