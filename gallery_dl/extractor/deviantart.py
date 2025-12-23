@@ -1074,6 +1074,8 @@ class DeviantartStashExtractor(DeviantartExtractor):
                 return
 
         if stash_data := text.extr(page, ',\\"stash\\":', ',\\"@@'):
+            if stash_data.endswith(":{}"):
+                stash_data = stash_data[:stash_data.rfind("}", None, -2)+1]
             stash_data = util.json_loads(self._unescape_json(stash_data))
 
         for sid in text.extract_iter(
