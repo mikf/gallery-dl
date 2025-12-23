@@ -6745,13 +6745,24 @@ Note
     This requires 1 additional HTTP request per submission.
 
 
+extractor.webtoons.bgm
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download an episode's `background music` if available.
+Note
+    Requires |ytdl|
+
+
 extractor.webtoons.quality
 --------------------------
 Type
     * ``integer``
     * ``string``
     * ``object`` (`ext` → `type`)
-
 Default
     ``"original"``
 Example
