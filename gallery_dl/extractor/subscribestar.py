@@ -233,28 +233,24 @@ class SubscribestarExtractor(Extractor):
         self._warn_preview = util.noop
 
 
-class SubscribestarUserTagExtractor(SubscribestarExtractor):
-    """Extractor for a subscribestar user's tagged posts"""
-    subcategory = "user-tag"
-    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)\?tag=([^#]+)"
-    example = "https://www.subscribestar.com/USER?tag=TAG"
-
-    def posts(self):
-        _, user, tag = self.groups
-        self.kwdict["search_tags"] = tag = text.unquote(tag)
-        url = f"{self.root}/{user}"
-        params = {"tag": tag}
-        return self._pagination(url, params)
-
-
 class SubscribestarUserExtractor(SubscribestarExtractor):
     """Extractor for media from a subscribestar user"""
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?!posts/)([^/?#]+)(?:\?([^#]+))?"
     example = "https://www.subscribestar.com/USER"
 
     def posts(self):
-        return self._pagination(f"{self.root}/{self.item}")
+        _, user, qs = self.groups
+        url = f"{self.root}/{user}"
+
+        if qs is None:
+            params = None
+        else:
+            params = text.parse_query(qs)
+            if "tag" in params:
+                self.kwdict["search_tags"] = params["tag"]
+
+        return self._pagination(url, params)
 
 
 class SubscribestarPostExtractor(SubscribestarExtractor):

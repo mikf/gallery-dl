@@ -1042,7 +1042,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="subscribestar" title="subscribestar">
     <td>SubscribeStar</td>
     <td>https://www.subscribestar.com/</td>
-    <td>Posts, User Profiles, User Tags</td>
+    <td>Posts, User Profiles</td>
     <td>Supported</td>
 </tr>
 <tr id="sxypix" title="sxypix">
