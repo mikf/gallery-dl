@@ -127,7 +127,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
                 elif type:
                     url = f"{path}?type={type}"
 
-            self.images_urls.append(f"{path.rpartition(".net")[2]}")
+            self.images_urls.append(path.rpartition(".net")[2])
             results.append((_url(url), None))
         return results
 
