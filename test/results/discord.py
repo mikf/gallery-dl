@@ -83,7 +83,7 @@ __tests__ = (
     "filename" : str,
     "extension": "png",
     "id"       : str,
-    "label"    : {"general", "emojis", "stickers"},
+    "label"    : {"", "emojis", "stickers"},
     "owner_id" : "699203962691256400",
     "server"   : "MangaDex",
     "server_id": "403905762268545024",
