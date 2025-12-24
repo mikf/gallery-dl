@@ -182,8 +182,10 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             play_image = images_keys.get(play_image_url) or ""
             stop_image = images_keys.get(stop_image_url) or ""
 
-            play_image_filename = play_image_url.rpartition("/")[2].rpartition(".")[0] or ""
-            stop_image_filename = stop_image_url.rpartition("/")[2].rpartition(".")[0] or ""
+            play_image_file = play_image_url.rpartition("/")[2] or ""
+            play_image_filename = play_image_file.rpartition(".")[0] or ""
+            stop_image_file = stop_image_url.rpartition("/")[2] or ""
+            stop_image_filename = stop_image_file.rpartition(".")[0] or ""
 
             assets.append({
                 **bgm,
