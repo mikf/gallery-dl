@@ -52,6 +52,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
                r"/viewer\?([^#'\"]+)")
     example = ("https://www.webtoons.com/en/GENRE/TITLE/NAME/viewer"
                "?title_no=123&episode_no=12345")
+    images_urls = []
 
     def _init(self):
         self.setup_agegate_cookies()
@@ -126,6 +127,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
                 elif type:
                     url = f"{path}?type={type}"
 
+            self.images_urls.append(f"{path.rpartition(".net")[2]}")
             results.append((_url(url), None))
         return results
 
@@ -160,6 +162,11 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             "Sec-Fetch-Site": "cross-site",
         }
 
+        images_keys = {}
+
+        for i, url in enumerate(self.images_urls):
+            images_keys[url] = i + 1
+
         for bgm in bgm_list:
             url = (f"https://apis.naver.com/audiocweb/audiocplayogwweb/play"
                    f"/audio/{bgm['audioId']}/hls/token")
@@ -169,9 +176,22 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             data = util.json_loads(binascii.a2b_base64(token).decode())
             audio = data["audioInfo"]
 
+            play_image_url = bgm.get("playImageUrl", "")
+            stop_image_url = bgm.get("stopImageUrl", "")
+
+            play_image = images_keys.get(play_image_url) or ""
+            stop_image = images_keys.get(stop_image_url) or ""
+
+            play_image_filename = play_image_url.rpartition("/")[2].rpartition(".")[0] or ""
+            stop_image_filename = stop_image_url.rpartition("/")[2].rpartition(".")[0] or ""
+
             assets.append({
                 **bgm,
                 **audio,
+                "play_image": play_image,
+                "play_image_filename": play_image_filename,
+                "stop_image": stop_image,
+                "stop_image_filename": stop_image_filename,
                 "type": "bgm",
                 "url" : "ytdl:" + audio["url"],
                 "_ytdl_manifest": audio["type"].lower(),
