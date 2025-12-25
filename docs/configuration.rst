@@ -3130,6 +3130,8 @@ extractor.fansly.formats
 Type
     ``list`` of ``integers``
 Default
+    ``null``
+Example
     ``[1, 2, 3, 4, 302, 303]``
 Description
     List of file formats to consider during format selection.

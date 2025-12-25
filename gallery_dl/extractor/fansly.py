@@ -29,7 +29,7 @@ class FanslyExtractor(Extractor):
         if fmts := self.config("formats"):
             self.formats = set(fmts)
         else:
-            self.formats = {1, 2, 3, 4, 302, 303}
+            self.formats = None
 
     def items(self):
         for post in self.posts():
@@ -95,11 +95,13 @@ class FanslyExtractor(Extractor):
         if media.get("locations"):
             variants.append(media)
 
+        fmts = self.formats
         formats = [
             (variant["width"], (type-500 if type > 256 else type), variant)
             for variant in variants
             if variant.get("locations") and
-            (type := variant["type"]) in self.formats
+            (type := variant["type"]) and
+            (fmts is None or type in fmts)
         ]
 
         try:
