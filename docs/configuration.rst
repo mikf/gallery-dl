@@ -3137,6 +3137,16 @@ Description
     List of file formats to consider during format selection.
 
 
+extractor.fansly.previews
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download `previews` if no other format is available.
+
+
 extractor.fansly.token
 ----------------------
 Type
