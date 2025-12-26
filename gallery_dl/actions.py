@@ -257,15 +257,21 @@ def action_raise(opts):
 
 
 def action_abort(opts):
-    return None, util.raises(exception.StopExtraction)
+    def _abort(_):
+        raise exception.StopExtraction(opts or None)
+    return None, _abort
 
 
 def action_terminate(opts):
-    return None, util.raises(exception.TerminateExtraction)
+    def _terminate(_):
+        raise exception.TerminateExtraction(opts)
+    return None, _terminate
 
 
 def action_restart(opts):
-    return None, util.raises(exception.RestartExtraction)
+    def _restart(_):
+        raise exception.RestartExtraction(opts)
+    return None, _restart
 
 
 def action_exit(opts):
@@ -274,7 +280,7 @@ def action_exit(opts):
     except ValueError:
         pass
 
-    def _exit(args):
+    def _exit(_):
         raise SystemExit(opts)
     return None, _exit
 
