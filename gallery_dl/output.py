@@ -36,14 +36,29 @@ except Exception:
 COLORS_DEFAULT = {}
 COLORS = not os.environ.get("NO_COLOR")
 if COLORS:
+    theme = util.choose_term_color_theme({
+        # base
+        "success": "1;32",
+        "skip": "2",
+        "warning": "1;33",
+        "error": "1;31",
+    }, {
+        # dark
+        "debug": "0;37",
+        "info": "1;37",
+    }, {
+        # light
+        "debug": "0;30",
+        "info": "1;30",
+    })
     if TTY_STDOUT:
-        COLORS_DEFAULT["success"] = "1;32"
-        COLORS_DEFAULT["skip"] = "2"
+        COLORS_DEFAULT["success"] = theme["success"]
+        COLORS_DEFAULT["skip"] = theme["skip"]
     if TTY_STDERR:
-        COLORS_DEFAULT["debug"] = "0;37"
-        COLORS_DEFAULT["info"] = "1;37"
-        COLORS_DEFAULT["warning"] = "1;33"
-        COLORS_DEFAULT["error"] = "1;31"
+        COLORS_DEFAULT["debug"] = theme["debug"]
+        COLORS_DEFAULT["info"] = theme["info"]
+        COLORS_DEFAULT["warning"] = theme["warning"]
+        COLORS_DEFAULT["error"] = theme["error"]
 
 
 if util.WINDOWS:
