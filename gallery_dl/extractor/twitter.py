@@ -521,10 +521,13 @@ class TwitterExtractor(Extractor):
         except KeyError:
             pass
 
-        core = user.get("core") or user
-        legacy = user.get("legacy") or user
-        lget = legacy.get
+        if "core" in user:
+            core = user["core"]
+            legacy = user["legacy"]
+        else:
+            core = legacy = user
 
+        lget = legacy.get
         if lget("withheld_scope"):
             self.log.warning("'%s'", lget("description"))
 
@@ -533,14 +536,9 @@ class TwitterExtractor(Extractor):
             "id"              : text.parse_int(uid),
             "name"            : core.get("screen_name"),
             "nick"            : core.get("name"),
-            "location"        : user["location"].get("location"),
             "date"            : self.parse_datetime(
                 core["created_at"], "%a %b %d %H:%M:%S %z %Y"),
-            "verified"        : user["verification"]["verified"],
-            "protected"       : user["privacy"]["protected"],
             "profile_banner"  : lget("profile_banner_url", ""),
-            "profile_image"   : user["avatar"].get("image_url", "").replace(
-                "_normal.", "."),
             "favourites_count": lget("favourites_count"),
             "followers_count" : lget("followers_count"),
             "friends_count"   : lget("friends_count"),
@@ -548,6 +546,19 @@ class TwitterExtractor(Extractor):
             "media_count"     : lget("media_count"),
             "statuses_count"  : lget("statuses_count"),
         }
+
+        if "core" in user:
+            udata["location"] = user["location"].get("location")
+            udata["verified"] = user["verification"]["verified"]
+            udata["protected"] = user["privacy"]["protected"]
+            udata["profile_image"] = user["avatar"].get(
+                "image_url", "").replace("_normal.", ".")
+        else:
+            udata["location"] = user["location"]
+            udata["verified"] = user["verified"]
+            udata["protected"] = user["protected"]
+            udata["profile_image"] = user["profile_image_url_https"].replace(
+                "_normal.", ".")
 
         descr = legacy["description"]
         if urls := entities["description"].get("urls"):
@@ -667,14 +678,23 @@ class TwitterExtractor(Extractor):
 class TwitterHomeExtractor(TwitterExtractor):
     """Extractor for Twitter home timelines"""
     subcategory = "home"
-    pattern = (BASE_PATTERN +
-               r"/(?:home(?:/fo(?:llowing|r[-_ ]?you()))?|i/timeline)/?$")
+    pattern = BASE_PATTERN + r"/home(?:/fo(?:llowing|r[-_ ]?you()))?/?$"
     example = "https://x.com/home"
 
     def tweets(self):
         if self.groups[0] is None:
             return self.api.home_latest_timeline()
         return self.api.home_timeline()
+
+
+class TwitterNotificationsExtractor(TwitterExtractor):
+    """Extractor for Twitter notifications timelines"""
+    subcategory = "notifications"
+    pattern = BASE_PATTERN + r"/(?:notifications|i/timeline())"
+    example = "https://x.com/notifications"
+
+    def tweets(self):
+        return self.api.notifications_devicefollow()
 
 
 class TwitterSearchExtractor(TwitterExtractor):
@@ -1226,18 +1246,17 @@ class TwitterAPI():
             "include_mute_edge": "1",
             "include_can_dm": "1",
             "include_can_media_tag": "1",
-            "include_ext_has_nft_avatar": "1",
             "include_ext_is_blue_verified": "1",
             "include_ext_verified_type": "1",
+            "include_ext_profile_image_shape": "1",
             "skip_status": "1",
             "cards_platform": "Web-12",
             "include_cards": "1",
             "include_ext_alt_text": "true",
-            "include_ext_limited_action_results": "false",
+            "include_ext_limited_action_results": "true",
             "include_quote_count": "true",
             "include_reply_count": "1",
             "tweet_mode": "extended",
-            "include_ext_collab_control": "true",
             "include_ext_views": "true",
             "include_entities": "true",
             "include_user_entities": "true",
@@ -1247,16 +1266,11 @@ class TwitterAPI():
             "include_ext_trusted_friends_metadata": "true",
             "send_error_codes": "true",
             "simple_quoted_tweet": "true",
-            "q": None,
-            "count": "100",
-            "query_source": None,
             "cursor": None,
-            "pc": None,
-            "spelling_corrections": None,
-            "include_ext_edit_control": "true",
-            "ext": "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo,"
-                   "enrichments,superFollowMetadata,unmentionInfo,editControl,"
-                   "collab_control,vibe",
+            "count": "20",
+            "ext": "mediaStats,highlightedLabel,parodyCommentaryFanLabel,"
+                   "voiceInfo,birdwatchPivot,superFollowMetadata,"
+                   "unmentionInfo,editControl,article",
         }
         self.features = {
             "hidden_profile_subscriptions_enabled": True,
@@ -1576,7 +1590,7 @@ class TwitterAPI():
         params["timeline_id"] = "recap"
         params["urt"] = "true"
         params["get_annotations"] = "true"
-        return self._pagination_legacy(endpoint, params)
+        return self._pagination_rest(endpoint, params)
 
     def live_event(self, event_id):
         endpoint = f"/1.1/live_event/1/{event_id}/timeline.json"
@@ -1603,6 +1617,12 @@ class TwitterAPI():
         }
         return self._pagination_users(
             endpoint, variables, ("list", "members_timeline", "timeline"))
+
+    def notifications_devicefollow(self):
+        endpoint = "/2/notifications/device_follow.json"
+        params = self.params.copy()
+        params["count"] = self.extractor.config("limit", 50)
+        return self._pagination_rest(endpoint, params)
 
     def user_followers(self, screen_name):
         endpoint = "/graphql/i6PPdIMm1MO7CpAqjau7sw/Followers"
@@ -1797,7 +1817,7 @@ class TwitterAPI():
             raise exception.AbortExtraction(
                 f"{response.status_code} {response.reason} ({errors})")
 
-    def _pagination_legacy(self, endpoint, params):
+    def _pagination_rest(self, endpoint, params):
         extr = self.extractor
         if cursor := extr._init_cursor():
             params["cursor"] = cursor
