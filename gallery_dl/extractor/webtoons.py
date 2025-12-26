@@ -173,6 +173,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "cross-site",
         }
+        paths = self.paths
 
         for bgm in bgm_list:
             url = (f"https://apis.naver.com/audiocweb/audiocplayogwweb/play"
@@ -182,25 +183,16 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             token = data["result"]["playToken"]
             data = util.json_loads(binascii.a2b_base64(token).decode())
             audio = data["audioInfo"]
-
-            play_image_url = bgm.get("playImageUrl", "")
-            stop_image_url = bgm.get("stopImageUrl", "")
-
-            play_image = self.paths.get(play_image_url) or ""
-            stop_image = self.paths.get(stop_image_url) or ""
-
-            play_image_file = play_image_url.rpartition("/")[2] or ""
-            play_image_filename = play_image_file.rpartition(".")[0] or ""
-            stop_image_file = stop_image_url.rpartition("/")[2] or ""
-            stop_image_filename = stop_image_file.rpartition(".")[0] or ""
+            play = bgm.get("playImageUrl", "")
+            stop = bgm.get("stopImageUrl", "")
 
             assets.append({
                 **bgm,
                 **audio,
-                "play_image": play_image,
-                "play_image_filename": play_image_filename,
-                "stop_image": stop_image,
-                "stop_image_filename": stop_image_filename,
+                "play_image": paths.get(play) or 0,
+                "play_image_filename": play[play.rfind("/")+1:play.rfind(".")],
+                "stop_image": paths.get(stop) or 0,
+                "stop_image_filename": stop[stop.rfind("/")+1:stop.rfind(".")],
                 "type": "bgm",
                 "url" : "ytdl:" + audio["url"],
                 "_ytdl_manifest": audio["type"].lower(),
