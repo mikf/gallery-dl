@@ -90,13 +90,11 @@ class InstagramExtractor(Extractor):
             post["count"] = len(files)
             yield Message.Directory, "", post
 
-            if "date" in post:
-                del post["date"]
             if reverse:
                 files.reverse()
 
             for file in files:
-                file.update(post)
+                file = {**post, **file}
 
                 if url := file.get("video_url"):
                     if videos:
@@ -301,7 +299,7 @@ class InstagramExtractor(Extractor):
             if "reshared_story_media_author" in item:
                 media["author"] = item["reshared_story_media_author"]
             if "expiring_at" in item:
-                media["expires"] = self.parse_timestamp(post["expiring_at"])
+                media["expires"] = self.parse_timestamp(item["expiring_at"])
             if "subscription_media_visibility" in item:
                 media["subscription"] = item["subscription_media_visibility"]
 
