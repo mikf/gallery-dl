@@ -62,6 +62,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         self.title_no = params.get("title_no")
         self.episode_no = params.get("episode_no")
         self.page_url = f"{self.root}/{base}/viewer?{query}"
+        self.bgm = self.config("bgm", True)
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -115,19 +116,30 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         elif not isinstance(quality, dict):
             quality = None
 
+        if self.bgm:
+            num = 0
+            self.paths = paths = {}
+        else:
+            num = None
+
+        split = (num is not None) or (quality is not None)
+
         results = []
         for url in text.extract_iter(
                 page, 'class="_images" data-url="', '"'):
 
-            if quality is not None:
+            if split:
                 path, _, query = url.rpartition("?")
+            if num is not None:
+                num += 1
+                paths[path[path.find("/", 8):]] = num
+            if quality is not None:
                 type = quality.get(path.rpartition(".")[2].lower())
                 if type is False:
                     url = path
                 elif type:
                     url = f"{path}?type={type}"
 
-            self.images_urls.append(path.rpartition(".net")[2])
             results.append((_url(url), None))
         return results
 
@@ -139,7 +151,7 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             url = _url(text.extr(active, 'data-url="', '"'))
             assets.append({"url": url, "type": "thumbnail"})
 
-        if self.config("bgm", True):
+        if self.bgm:
             if bgm := text.extr(page, "episodeBgmList:", ",\n"):
                 self._asset_bgm(assets, util.json_loads(bgm))
 
@@ -162,11 +174,6 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             "Sec-Fetch-Site": "cross-site",
         }
 
-        images_keys = {}
-
-        for i, url in enumerate(self.images_urls):
-            images_keys[url] = i + 1
-
         for bgm in bgm_list:
             url = (f"https://apis.naver.com/audiocweb/audiocplayogwweb/play"
                    f"/audio/{bgm['audioId']}/hls/token")
@@ -179,8 +186,8 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
             play_image_url = bgm.get("playImageUrl", "")
             stop_image_url = bgm.get("stopImageUrl", "")
 
-            play_image = images_keys.get(play_image_url) or ""
-            stop_image = images_keys.get(stop_image_url) or ""
+            play_image = self.paths.get(play_image_url) or ""
+            stop_image = self.paths.get(stop_image_url) or ""
 
             play_image_file = play_image_url.rpartition("/")[2] or ""
             play_image_filename = play_image_file.rpartition(".")[0] or ""
