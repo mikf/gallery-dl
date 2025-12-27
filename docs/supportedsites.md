@@ -616,7 +616,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="linkedin" title="linkedin">
     <td>Linkedin</td>
     <td>https://www.linkedin.com/</td>
-    <td>Photos, Posts, Videos</td>
+    <td>Feeds, Posts</td>
     <td></td>
 </tr>
 <tr id="livedoor" title="livedoor">
