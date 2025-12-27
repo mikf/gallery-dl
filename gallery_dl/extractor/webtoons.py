@@ -122,14 +122,11 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         else:
             num = None
 
-        split = (num is not None) or (quality is not None)
-
         results = []
         for url in text.extract_iter(
                 page, 'class="_images" data-url="', '"'):
 
-            if split:
-                path, _, query = url.rpartition("?")
+            path, _, query = url.rpartition("?")
             if num is not None:
                 num += 1
                 paths[path[path.find("/", 8):]] = num
