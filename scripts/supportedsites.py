@@ -231,6 +231,7 @@ SUBCATEGORY_MAP = {
     "media"  : "Media Files",
     "popular": "Popular Images",
     "recent" : "Recent Images",
+    "saved"  : "Saved Posts",
     "search" : "Search Results",
     "status" : "Images from Statuses",
     "tag"    : "Tag Searches",
@@ -330,7 +331,6 @@ SUBCATEGORY_MAP = {
     },
     "instagram": {
         "posts": "",
-        "saved": "Saved Posts",
         "tagged": "Tagged Posts",
         "stories-tray": "Stories Home Tray",
     },
@@ -419,7 +419,7 @@ SUBCATEGORY_MAP = {
         "asset": "Individual Assets",
     },
     "tiktok": {
-        "user": "User Profiles, Stories, Liked Posts, Reposts, Saved Posts",
+        "posts": "User Posts",
         "vmpost": "VM Posts",
         "following": "Followed Users (Stories Only)",
     },

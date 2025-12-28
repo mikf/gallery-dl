@@ -6,7 +6,7 @@
 
 """Extractors for https://www.tiktok.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, Dispatch
 from .. import text, util, ytdl, exception
 import functools
 import itertools
@@ -14,6 +14,7 @@ import random
 import time
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktokv?\.com"
+USER_PATTERN = BASE_PATTERN + r"/@([\w_.-]+)"
 SEC_UID_PATTERN = r"MS4wLjABAAAA[\w-]{64}"
 AUTHOR_ID_PATTERN = r"[0-9]+"
 
@@ -27,6 +28,8 @@ class TiktokExtractor(Extractor):
     archive_fmt = "{id}_{num}_{img_id}"
     root = "https://www.tiktok.com"
     cookies_domain = ".tiktok.com"
+    rehydration_data_cache = {}
+    rehydration_data_app_context_cache = {}
 
     def _init(self):
         self.photo = self.config("photos", True)
@@ -34,8 +37,11 @@ class TiktokExtractor(Extractor):
         self.video = self.config("videos", True)
         self.cover = self.config("covers", False)
 
+        self.range = self.config("tiktok-range") or ""
+        self.range_predicate = util.RangePredicate(self.range)
+
     def items(self):
-        for tiktok_url in self.urls():
+        for tiktok_url in self.posts():
             tiktok_url = self._sanitize_url(tiktok_url)
             data = self._extract_rehydration_data(tiktok_url)
             if "webapp.video-detail" not in data:
@@ -144,6 +150,63 @@ class TiktokExtractor(Extractor):
                                  "(%s/%s)", url.rpartition("/")[2], tries,
                                  self._retries)
                 self.sleep(self._timeout, "retry")
+
+    def _extract_rehydration_data_user(self, profile_url, additional_keys=()):
+        if profile_url in self.rehydration_data_cache:
+            data = self.rehydration_data_cache[profile_url]
+        else:
+            data = self._extract_rehydration_data(
+                profile_url,
+                has_keys=["webapp.user-detail", "webapp.app-context"]
+            )
+            self.rehydration_data_cache[profile_url] = \
+                data["webapp.user-detail"]
+            self.rehydration_data_app_context_cache = \
+                data["webapp.app-context"]
+            data = data["webapp.user-detail"]
+        if not self._check_status_code(data, profile_url, "profile"):
+            raise exception.ExtractionError(
+                "%s: could not extract rehydration data", profile_url)
+        try:
+            for key in additional_keys:
+                data = data[key]
+        except KeyError as exc:
+            self.log.traceback(exc)
+            raise exception.ExtractionError(
+                "%s: could not extract rehydration data (%s)",
+                profile_url, ", ".join(additional_keys))
+        return data
+
+    def _ensure_rehydration_data_app_context_cache_is_populated(self):
+        if not self.rehydration_data_app_context_cache:
+            self.rehydration_data_app_context_cache = \
+                self._extract_rehydration_data_user(
+                    "https://www.tiktok.com/", ["webapp.app-context"])
+
+    def _extract_sec_uid(self, profile_url, user_name):
+        sec_uid = self._extract_id(profile_url, user_name, SEC_UID_PATTERN,
+                                   "secUid")
+        if not text.re(SEC_UID_PATTERN).fullmatch(sec_uid):
+            raise exception.ExtractionError("%s: unable to extract secondary "
+                                            "user ID", user_name)
+        return sec_uid
+
+    def _extract_author_id(self, profile_url, user_name):
+        author_id = self._extract_id(profile_url, user_name, AUTHOR_ID_PATTERN,
+                                     "id")
+        if not text.re(AUTHOR_ID_PATTERN).fullmatch(author_id):
+            raise exception.ExtractionError("%s: unable to extract user ID",
+                                            user_name)
+        return author_id
+
+    def _extract_id(self, profile_url, user_name, regex, id_key):
+        if text.re(regex).fullmatch(user_name):
+            # If it was provided in the URL, then we can skip extracting it
+            # from the rehydration data.
+            return user_name
+        else:
+            return self._extract_rehydration_data_user(
+                profile_url, ["userInfo", "user", id_key])
 
     def _extract_video(self, post):
         video = post["video"]
@@ -265,7 +328,7 @@ class TiktokPostExtractor(TiktokExtractor):
     pattern = rf"{BASE_PATTERN}/(?:@([\w_.-]*)|share)/(?:phot|vide)o/(\d+)"
     example = "https://www.tiktok.com/@USER/photo/1234567890"
 
-    def urls(self):
+    def posts(self):
         user, post_id = self.groups
         url = f"{self.root}/@{user or ''}/video/{post_id}"
         return (url,)
@@ -292,150 +355,34 @@ class TiktokVmpostExtractor(TiktokExtractor):
         yield Message.Queue, url.partition("?")[0], data
 
 
-class TiktokUserExtractor(TiktokExtractor):
-    """Extract a TikTok user's profile"""
-    subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/@([\w_.-]+)/?(?:$|\?|#)"
+class TiktokUserExtractor(Dispatch, TiktokExtractor):
+    """Extractor for a TikTok user profile"""
+    pattern = USER_PATTERN + r"/?(?:$|\?|#)"
     example = "https://www.tiktok.com/@USER"
 
-    def _init(self):
-        super()._init()
-        self.avatar = self.config("avatar", True)
-        self.posts = self.config("posts", True)
-        self.stories = self.config("stories", True)
-        self.likes = self.config("likes", False)
-        self.reposts = self.config("reposts", False)
-        self.saved_posts = self.config("saved-posts", False)
-        # If set to "ytdl", we shall first go via yt-dlp. If that fails,
-        # we shall attempt to extract directly.
-        self.ytdl = self.config("tiktok-user-extractor") == "ytdl"
-        self.range = self.config("tiktok-range")
-        if self.range is None or not self.range and self.range != 0:
-            self.range = ""
-        self.range_predicate = util.RangePredicate(self.range)
-        self.post_order = self.config("order-posts", "desc")
-        if not self.post_order:
-            self.post_order = "desc"
-        self.post_order = self.post_order.lower()
-        if self.post_order not in ["desc", "asc", "reverse", "popular"]:
-            self.post_order = "desc"
-        self.rehydration_data_cache = {}
-        self.rehydration_data_app_context_cache = {}
-        self.user_provided_cookies = bool(self.cookies)
+    def items(self):
+        base = f"{self.root}/@{self.groups[0]}/"
+        return self._dispatch_extractors((
+            (TiktokAvatarExtractor , base + "avatar"),
+            (TiktokPostsExtractor  , base + "posts"),
+            (TiktokRepostsExtractor, base + "reposts"),
+            (TiktokStoriesExtractor, base + "stories"),
+            (TiktokLikesExtractor  , base + "likes"),
+            (TiktokSavedExtractor  , base + "saved"),
+        ), ("avatar", "posts", "stories"))
+
+
+class TiktokAvatarExtractor(TiktokExtractor):
+    subcategory = "avatar"
+    pattern = USER_PATTERN + r"/avatar"
+    example = "https://www.tiktok.com/@USER/avatar"
 
     def items(self):
-        """Attempt to [use yt-dlp/youtube-dl to] extract links from a
-        user's page"""
-
         user_name = self.groups[0]
         profile_url = f"{self.root}/@{user_name}"
 
-        if self.avatar:
-            try:
-                avatar_url, avatar = self._extract_avatar(profile_url,
-                                                          user_name)
-            except Exception as exc:
-                self.log.warning("%s: unable to extract 'avatar' URL (%s: %s)",
-                                 profile_url, exc.__class__.__name__, exc)
-            else:
-                yield Message.Directory, "", avatar
-                yield Message.Url, avatar_url, avatar
-
-        posts = []
-        if self.posts:
-            if self.ytdl:
-                posts = self._extract_posts_via_ytdl(profile_url)
-                if not posts:
-                    self.log.warning("Could not extract TikTok user "
-                                     f"{user_name} via yt-dlp or youtube-dl, "
-                                     "attempting the extraction directly")
-            if not posts:
-                posts = self._extract_posts(profile_url, user_name)
-                if not posts:
-                    message = "Could not extract any posts from TikTok user " \
-                              f"{user_name}"
-                    if not self.ytdl:
-                        message += ", try extracting post information using " \
-                                   "yt-dlp with the -o " \
-                                   "tiktok-user-extractor=ytdl argument"
-                    self.log.warning(message)
-
-        stories = []
-        if self.stories:
-            stories = self._extract_stories(profile_url, user_name)
-            if not stories:
-                self.log.warning(f"TikTok user {user_name} has no stories")
-
-        likes = []
-        if self.likes:
-            likes = self._extract_likes(profile_url, user_name)
-            if not likes:
-                self.log.warning("Could not extract the liked posts of TikTok "
-                                 "user %s", user_name)
-
-        reposts = []
-        if self.reposts:
-            reposts = self._extract_reposts(profile_url, user_name)
-            if not reposts:
-                self.log.warning("Could not extract the reposts of TikTok "
-                                 "user %s", user_name)
-
-        saved_posts = []
-        if self.saved_posts:
-            saved_posts = self._extract_saved_posts(profile_url, user_name)
-            if not saved_posts:
-                self.log.warning("Could not extract the saved posts of TikTok "
-                                 "user %s", user_name)
-
-        entries = posts + stories + likes + reposts + saved_posts
-        seen = set()
-        seen_add = seen.add
-        for post_url in entries:
-            if post_url in seen:
-                continue
-            else:
-                seen_add(post_url)
-            data = {"_extractor": TiktokPostExtractor}
-            yield Message.Queue, post_url, data
-
-    def _extract_rehydration_data(self, profile_url, additional_keys=[]):
-        if profile_url in self.rehydration_data_cache:
-            data = self.rehydration_data_cache[profile_url]
-        else:
-            data = super()._extract_rehydration_data(
-                profile_url,
-                has_keys=["webapp.user-detail", "webapp.app-context"]
-            )
-            self.rehydration_data_cache[profile_url] = \
-                data["webapp.user-detail"]
-            self.rehydration_data_app_context_cache = \
-                data["webapp.app-context"]
-            data = data["webapp.user-detail"]
-        if not self._check_status_code(data, profile_url, "profile"):
-            raise exception.ExtractionError("%s: could not extract "
-                                            "rehydration data", profile_url)
-        try:
-            for key in additional_keys:
-                data = data[key]
-        except KeyError as exc:
-            self.log.traceback(exc)
-            raise exception.ExtractionError("%s: could not extract "
-                                            "rehydration data (%s)",
-                                            profile_url,
-                                            ", ".join(additional_keys))
-        return data
-
-    def _ensure_rehydration_data_app_context_cache_is_populated(self):
-        if not self.rehydration_data_app_context_cache:
-            self.rehydration_data_app_context_cache = \
-                super()._extract_rehydration_data(
-                    "https://www.tiktok.com/", ["webapp.app-context"]
-                )
-
-    def _extract_avatar(self, profile_url, user_name):
-        data = self._extract_rehydration_data(
-            profile_url, ["userInfo", "user"]
-        ).copy()
+        data = self._extract_rehydration_data_user(
+            profile_url, ("userInfo", "user"))
         data["user"] = data.get("uniqueId", user_name)
         avatar_url = data.get("avatarLarger") or data.get("avatarMedium") \
             or data["avatarThumb"]
@@ -447,9 +394,46 @@ class TiktokUserExtractor(TiktokExtractor):
             "img_id" : avatar["filename"].partition("~")[0],
             "num"    : 0,
         })
-        return (avatar_url, avatar)
 
-    def _extract_posts_via_ytdl(self, profile_url):
+        yield Message.Directory, "", avatar
+        yield Message.Url, avatar_url, avatar
+
+
+class TiktokPostsExtractor(TiktokExtractor):
+    subcategory = "posts"
+    pattern = USER_PATTERN + r"/posts"
+    example = "https://www.tiktok.com/@USER/posts"
+
+    def posts(self):
+        user_name = self.groups[0]
+        profile_url = f"{self.root}/@{user_name}"
+        self.user_provided_cookies = bool(self.cookies)
+
+        # If set to "ytdl", we shall first go via yt-dlp. If that fails,
+        # we shall attempt to extract directly.
+        if self.config("tiktok-user-extractor") == "ytdl":
+            if posts := self._extract_posts_ytdl(profile_url):
+                return posts
+            ytdl = True
+            self.log.warning("Could not extract TikTok user "
+                             f"{user_name} via yt-dlp or youtube-dl, "
+                             "attempting the extraction directly")
+        else:
+            ytdl = False
+
+        if posts := self._extract_posts_api(profile_url, user_name):
+            return posts
+
+        message = "Could not extract any posts from TikTok user " \
+                  f"{user_name}"
+        if not ytdl:
+            message += ", try extracting post information using " \
+                       "yt-dlp with the -o " \
+                       "tiktok-user-extractor=ytdl argument"
+        self.log.warning(message)
+        return ()
+
+    def _extract_posts_ytdl(self, profile_url):
         try:
             module = ytdl.import_module(self.config("module"))
         except (ImportError, SyntaxError) as exc:
@@ -489,7 +473,11 @@ class TiktokUserExtractor(TiktokExtractor):
             return [video["url"].partition("?")[0]
                     for video in info_dict["entries"]]
 
-    def _extract_posts(self, profile_url, user_name):
+    def _extract_posts_api(self, profile_url, user_name):
+        self.post_order = self.config("order-posts") or "desc"
+        if self.post_order not in ["desc", "asc", "reverse", "popular"]:
+            self.post_order = "desc"
+
         sec_uid = self._extract_sec_uid(profile_url, user_name)
         if not self.user_provided_cookies:
             if self.post_order != "desc":
@@ -500,11 +488,11 @@ class TiktokUserExtractor(TiktokExtractor):
                     "order",
                     profile_url
                 )
-            return self._extract_posts_legacy(profile_url, sec_uid,
-                                              self.range_predicate)
+            return self._extract_posts_api_legacy(
+                profile_url, sec_uid, self.range_predicate)
         try:
-            return self._extract_posts_with_ordering(profile_url, sec_uid,
-                                                     self.range_predicate)
+            return self._extract_posts_api_order(
+                profile_url, sec_uid, self.range_predicate)
         except Exception as exc:
             self.log.error(
                 "%s: failed to extract user posts using post/item_list (make "
@@ -514,11 +502,10 @@ class TiktokUserExtractor(TiktokExtractor):
                 profile_url
             )
             self.log.traceback(exc)
-            return self._extract_posts_legacy(profile_url, sec_uid,
-                                              self.range_predicate)
+            return self._extract_posts_api_legacy(
+                profile_url, sec_uid, self.range_predicate)
 
-    def _extract_posts_with_ordering(self, profile_url, sec_uid,
-                                     range_predicate):
+    def _extract_posts_api_order(self, profile_url, sec_uid, range_predicate):
         post_item_list_request_type = "0"
         if self.post_order in ["asc", "reverse"]:
             post_item_list_request_type = "2"
@@ -535,7 +522,7 @@ class TiktokUserExtractor(TiktokExtractor):
         return request.generate_urls(profile_url, self.video, self.photo,
                                      self.audio)
 
-    def _extract_posts_legacy(self, profile_url, sec_uid, range_predicate):
+    def _extract_posts_api_legacy(self, profile_url, sec_uid, range_predicate):
         query_parameters = {
             "secUid": sec_uid,
             "type": "1",
@@ -546,32 +533,16 @@ class TiktokUserExtractor(TiktokExtractor):
         return request.generate_urls(profile_url, self.video, self.photo,
                                      self.audio)
 
-    def _extract_stories(self, profile_url, user_name):
-        author_id = self._extract_author_id(profile_url, user_name)
-        query_parameters = {
-            "authorId": author_id,
-            "loadBackward": "false",
-            "count": "5",
-        }
-        request = TiktokStoryItemListRequest()
-        request.execute(self, profile_url, query_parameters)
-        return request.generate_urls(profile_url, self.video, self.photo,
-                                     self.audio)
 
-    def _extract_likes(self, profile_url, user_name):
-        sec_uid = self._extract_sec_uid(profile_url, user_name)
-        query_parameters = {
-            "secUid": sec_uid,
-            "post_item_list_request_type": "0",
-            "needPinnedItemIds": "false",
-            "count": "15",
-        }
-        request = TiktokFavoriteItemListRequest(self.range_predicate)
-        request.execute(self, profile_url, query_parameters)
-        return request.generate_urls(profile_url, self.video, self.photo,
-                                     self.audio)
+class TiktokRepostsExtractor(TiktokExtractor):
+    subcategory = "reposts"
+    pattern = USER_PATTERN + r"/reposts"
+    example = "https://www.tiktok.com/@USER/reposts"
 
-    def _extract_reposts(self, profile_url, user_name):
+    def posts(self):
+        user_name = self.groups[0]
+        profile_url = f"{self.root}/@{user_name}"
+
         sec_uid = self._extract_sec_uid(profile_url, user_name)
         query_parameters = {
             "secUid": sec_uid,
@@ -584,7 +555,59 @@ class TiktokUserExtractor(TiktokExtractor):
         return request.generate_urls(profile_url, self.video, self.photo,
                                      self.audio)
 
-    def _extract_saved_posts(self, profile_url, user_name):
+
+class TiktokStoriesExtractor(TiktokExtractor):
+    subcategory = "stories"
+    pattern = USER_PATTERN + r"/stories"
+    example = "https://www.tiktok.com/@USER/stories"
+
+    def posts(self):
+        user_name = self.groups[0]
+        profile_url = f"{self.root}/@{user_name}"
+
+        author_id = self._extract_author_id(profile_url, user_name)
+        query_parameters = {
+            "authorId": author_id,
+            "loadBackward": "false",
+            "count": "5",
+        }
+        request = TiktokStoryItemListRequest()
+        request.execute(self, profile_url, query_parameters)
+        return request.generate_urls(profile_url, self.video, self.photo,
+                                     self.audio)
+
+
+class TiktokLikesExtractor(TiktokExtractor):
+    subcategory = "likes"
+    pattern = USER_PATTERN + r"/like[sd]"
+    example = "https://www.tiktok.com/@USER/liked"
+
+    def posts(self):
+        user_name = self.groups[0]
+        profile_url = f"{self.root}/@{user_name}"
+
+        sec_uid = self._extract_sec_uid(profile_url, user_name)
+        query_parameters = {
+            "secUid": sec_uid,
+            "post_item_list_request_type": "0",
+            "needPinnedItemIds": "false",
+            "count": "15",
+        }
+        request = TiktokFavoriteItemListRequest(self.range_predicate)
+        request.execute(self, profile_url, query_parameters)
+        return request.generate_urls(profile_url, self.video, self.photo,
+                                     self.audio)
+
+
+class TiktokSavedExtractor(TiktokExtractor):
+    subcategory = "saved"
+    pattern = USER_PATTERN + r"/saved"
+    example = "https://www.tiktok.com/@USER/saved"
+
+    def posts(self):
+        user_name = self.groups[0]
+        profile_url = f"{self.root}/@{user_name}"
+
         sec_uid = self._extract_sec_uid(profile_url, user_name)
         query_parameters = {
             "secUid": sec_uid,
@@ -596,31 +619,6 @@ class TiktokUserExtractor(TiktokExtractor):
         request.execute(self, profile_url, query_parameters)
         return request.generate_urls(profile_url, self.video, self.photo,
                                      self.audio)
-
-    def _extract_sec_uid(self, profile_url, user_name):
-        sec_uid = self._extract_id(profile_url, user_name, SEC_UID_PATTERN,
-                                   "secUid")
-        if not text.re(SEC_UID_PATTERN).fullmatch(sec_uid):
-            raise exception.ExtractionError("%s: unable to extract secondary "
-                                            "user ID", user_name)
-        return sec_uid
-
-    def _extract_author_id(self, profile_url, user_name):
-        author_id = self._extract_id(profile_url, user_name, AUTHOR_ID_PATTERN,
-                                     "id")
-        if not text.re(AUTHOR_ID_PATTERN).fullmatch(author_id):
-            raise exception.ExtractionError("%s: unable to extract user ID",
-                                            user_name)
-        return author_id
-
-    def _extract_id(self, profile_url, user_name, regex, id_key):
-        if text.re(regex).fullmatch(user_name):
-            # If it was provided in the URL, then we can skip extracting it
-            # from the rehydration data.
-            return user_name
-        else:
-            return self._extract_rehydration_data(profile_url,
-                                                  ["userInfo", "user", id_key])
 
 
 class TiktokFollowingExtractor(TiktokUserExtractor):
