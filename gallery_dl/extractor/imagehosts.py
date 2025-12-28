@@ -485,3 +485,28 @@ class SilverpicImageExtractor(ImagehostImageExtractor):
             "width" : text.parse_int(width),
             "height": text.parse_int(height),
         }
+
+
+class ImgpvImageExtractor(ImagehostImageExtractor):
+    """Extractor for imgpv.com images"""
+    category = "imgpv"
+    root = "https://imgpv.com"
+    pattern = (r"(?:https?://)?(?:www\.)?imgpv\.com"
+               r"(/([a-z0-9]{10,})/[\S]+\.html)")
+    example = "https://www.imgpv.com/a1b2c3d4f5g6/NAME.EXT.html"
+
+    def get_info(self, page):
+        url, pos = text.extract(page, 'id="img-preview" src="', '"')
+        alt, pos = text.extract(page, 'alt="', '"', pos)
+        return url, text.unescape(alt)
+
+    def metadata(self, page):
+        pos = page.find('class="upinfo">')
+        date, pos = text.extract(page, '<b>', 'by', pos)
+        user, pos = text.extract(page, '>', '<', pos)
+
+        date = date.split()
+        return {
+            "date": self.parse_datetime_iso(f"{date[0][:10]} {date[1]}"),
+            "user": text.unescape(user),
+        }
