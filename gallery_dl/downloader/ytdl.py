@@ -41,6 +41,7 @@ class YoutubeDLDownloader(DownloaderBase):
         kwdict = pathfmt.kwdict
         tries = 0
 
+        kwdict["_mtime_http"] = None
         if ytdl_instance := kwdict.pop("_ytdl_instance", None):
             # 'ytdl' extractor
             self._prepare(ytdl_instance)
