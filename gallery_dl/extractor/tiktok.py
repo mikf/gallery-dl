@@ -18,7 +18,6 @@ SEC_UID_PATTERN = r"MS4wLjABAAAA[\w-]{64}"
 AUTHOR_ID_PATTERN = r"[0-9]+"
 
 
-# MARK: TiktokExtractor
 class TiktokExtractor(Extractor):
     """Base class for TikTok extractors"""
     category = "tiktok"
@@ -260,7 +259,6 @@ class TiktokExtractor(Extractor):
             return None
 
 
-# MARK: TiktokPostExtractor
 class TiktokPostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok link"""
     subcategory = "post"
@@ -273,7 +271,6 @@ class TiktokPostExtractor(TiktokExtractor):
         return (url,)
 
 
-# MARK: TiktokVmpostExtractor
 class TiktokVmpostExtractor(TiktokExtractor):
     """Extract a single video or photo TikTok VM link"""
     subcategory = "vmpost"
@@ -295,7 +292,6 @@ class TiktokVmpostExtractor(TiktokExtractor):
         yield Message.Queue, url.partition("?")[0], data
 
 
-# MARK: TiktokUserExtractor
 class TiktokUserExtractor(TiktokExtractor):
     """Extract a TikTok user's profile"""
     subcategory = "user"
@@ -327,7 +323,6 @@ class TiktokUserExtractor(TiktokExtractor):
         self.rehydration_data_app_context_cache = {}
         self.user_provided_cookies = bool(self.cookies)
 
-    # MARK: Overrides
     def items(self):
         """Attempt to [use yt-dlp/youtube-dl to] extract links from a
         user's page"""
@@ -432,7 +427,6 @@ class TiktokUserExtractor(TiktokExtractor):
                                             ", ".join(additional_keys))
         return data
 
-    # MARK: Helpers
     def _ensure_rehydration_data_app_context_cache_is_populated(self):
         if not self.rehydration_data_app_context_cache:
             self.rehydration_data_app_context_cache = \
@@ -633,7 +627,6 @@ class TiktokUserExtractor(TiktokExtractor):
                                                   ["userInfo", "user", id_key])
 
 
-# MARK: TiktokFollowingExtractor
 class TiktokFollowingExtractor(TiktokUserExtractor):
     """Extract all of the stories of all of the users you follow"""
     subcategory = "following"
@@ -710,7 +703,6 @@ class TiktokFollowingExtractor(TiktokUserExtractor):
             user_id
 
 
-# MARK: Cursors
 class TiktokPaginationCursor:
     def current_page(self):
         """Must return the page the cursor is currently pointing to.
@@ -843,7 +835,6 @@ class TiktokItemCursor(TiktokPaginationCursor):
         return not data.get("hasMore", False)
 
 
-# MARK: Requests
 class TiktokPaginationRequest:
     def __init__(self, endpoint):
         self.endpoint = endpoint
@@ -920,8 +911,6 @@ class TiktokPaginationRequest:
                     extractor.log.warning("%s: failed to retrieve %s page %d",
                                           url, self.endpoint, page)
                     extractor.sleep(extractor._timeout, "retry")
-
-    # MARK: Interface
 
     def validate_query_parameters(self, query_parameters):
         """Used to validate the given parameters for this type of
@@ -1020,8 +1009,6 @@ class TiktokPaginationRequest:
 
         return []
 
-    # MARK: Helpers
-
     def _regenerate_device_id(self):
         self.device_id = str(random.randint(
             7_250_000_000_000_000_000, 7_325_099_899_999_994_577))
@@ -1098,7 +1085,6 @@ class TiktokPaginationRequest:
                 "TikTok API keeps sending the same page")
 
 
-# MARK: XYZ/item_list
 class TiktokItemListRequest(TiktokPaginationRequest):
     def __init__(self, endpoint, type_of_items, range_predicate):
         super().__init__(endpoint)
@@ -1168,7 +1154,6 @@ class TiktokItemListRequest(TiktokPaginationRequest):
         return True
 
 
-# MARK: creator/item_list
 class TiktokCreatorItemListRequest(TiktokItemListRequest):
     """A less flaky version of the post/item_list endpoint that doesn't
     support latest/popular/oldest ordering."""
@@ -1191,7 +1176,6 @@ class TiktokCreatorItemListRequest(TiktokItemListRequest):
         return TiktokLegacyTimeCursor
 
 
-# MARK: post/item_list
 class TiktokPostItemListRequest(TiktokItemListRequest):
     """Retrieves posts in latest/popular/oldest ordering.
 
@@ -1234,7 +1218,6 @@ class TiktokPostItemListRequest(TiktokItemListRequest):
             return TiktokBackwardTimeCursor
 
 
-# MARK: favorite/item_list
 class TiktokFavoriteItemListRequest(TiktokItemListRequest):
     """Retrieves a user's liked posts.
 
@@ -1257,7 +1240,6 @@ class TiktokFavoriteItemListRequest(TiktokItemListRequest):
         return TiktokPopularTimeCursor
 
 
-# MARK: report/item_list
 class TiktokRepostItemListRequest(TiktokItemListRequest):
     """Retrieves a user's reposts.
 
@@ -1280,7 +1262,6 @@ class TiktokRepostItemListRequest(TiktokItemListRequest):
         return TiktokItemCursor
 
 
-# MARK: user/collect/item_list
 class TiktokSavedPostItemListRequest(TiktokItemListRequest):
     """Retrieves a user's saved posts.
 
@@ -1304,7 +1285,6 @@ class TiktokSavedPostItemListRequest(TiktokItemListRequest):
         return TiktokPopularTimeCursor
 
 
-# MARK: story/item_list
 class TiktokStoryItemListRequest(TiktokItemListRequest):
     def __init__(self):
         super().__init__("story/item_list", "stories", None)
@@ -1319,7 +1299,6 @@ class TiktokStoryItemListRequest(TiktokItemListRequest):
         return TiktokItemCursor
 
 
-# MARK: story/batch/item_list
 class TiktokStoryBatchItemListRequest(TiktokItemListRequest):
     def __init__(self):
         super().__init__("story/batch/item_list", "stories", None)
@@ -1351,7 +1330,6 @@ class TiktokStoryBatchItemListRequest(TiktokItemListRequest):
         return items
 
 
-# MARK: story/user_list
 class TiktokStoryUserListRequest(TiktokPaginationRequest):
     def __init__(self):
         super().__init__("story/user_list")
