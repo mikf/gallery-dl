@@ -2129,6 +2129,12 @@ Consider all listed sites to potentially be NSFW.
     <td>individual Images</td>
     <td></td>
 </tr>
+<tr id="imgpv" title="imgpv">
+    <td>IMGPV</td>
+    <td>https://imgpv.com/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
 <tr id="imgspice" title="imgspice">
     <td>Imgspice</td>
     <td>https://imgspice.com/</td>

@@ -100,6 +100,7 @@ CATEGORY_MAP = {
     "imgkiwi"        : "IMG.Kiwi",
     "imglike"        : "Nude Celeb",
     "imgpile"        : "imgpile",
+    "imgpv"          : "IMGPV",
     "imgtaxi"        : "ImgTaxi.com",
     "imgth"          : "imgth",
     "imgur"          : "imgur",
