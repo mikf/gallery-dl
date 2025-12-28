@@ -334,8 +334,6 @@ class TiktokUserExtractor(TiktokExtractor):
             try:
                 avatar_url, avatar = self._extract_avatar(profile_url,
                                                           user_name)
-            except (KeyboardInterrupt, SystemExit):
-                raise
             except Exception as exc:
                 self.log.warning("%s: unable to extract 'avatar' URL (%s: %s)",
                                  profile_url, exc.__class__.__name__, exc)
@@ -507,8 +505,6 @@ class TiktokUserExtractor(TiktokExtractor):
         try:
             return self._extract_posts_with_ordering(profile_url, sec_uid,
                                                      self.range_predicate)
-        except (KeyboardInterrupt, SystemExit):
-            raise
         except Exception as exc:
             self.log.error(
                 "%s: failed to extract user posts using post/item_list (make "
@@ -765,8 +761,8 @@ class TiktokTimeCursor(TiktokPaginationCursor):
 
     def fallback_cursor(self, data):
         try:
-            return int(int(data["itemList"][-1]["createTime"]) * 1e3)
-        except (IndexError, KeyError, ValueError):
+            return int(data["itemList"][-1]["createTime"]) * 1000
+        except Exception:
             return 7 * 86_400_000 * (-1 if self.reverse else 1)
 
 
@@ -802,8 +798,8 @@ class TiktokLegacyTimeCursor(TiktokPaginationCursor):
     def next_page(self, data, query_parameters):
         old_cursor = self.cursor
         try:
-            self.cursor = int(int(data["itemList"][-1]["createTime"]) * 1e3)
-        except (IndexError, KeyError, ValueError):
+            self.cursor = int(data["itemList"][-1]["createTime"]) * 1000
+        except Exception:
             self.cursor = 0
         if not self.cursor or old_cursor == self.cursor:
             # User may not have posted within this ~1 week look back,
@@ -899,8 +895,6 @@ class TiktokPaginationRequest:
                     else:
                         # This request has no cursor: return immediately.
                         return True
-                except (KeyboardInterrupt, SystemExit):
-                    raise
                 except Exception as exc:
                     if tries >= extractor._retries:
                         extractor.log.error("%s: failed to retrieve %s page "
