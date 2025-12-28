@@ -6,17 +6,12 @@
 
 """Extractors for https://www.tiktok.com/"""
 
-from functools import partial
-from itertools import count
-from json import JSONDecodeError
-from math import floor
-from random import choices, randint
-from re import fullmatch
-from string import hexdigits
-from time import time
-from urllib.parse import quote
 from .common import Extractor, Message
 from .. import text, util, ytdl, exception
+import functools
+import itertools
+import random
+import time
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktokv?\.com"
 SEC_UID_PATTERN = r"MS4wLjABAAAA[\w-]{64}"
@@ -615,7 +610,7 @@ class TiktokUserExtractor(TiktokExtractor):
     def _extract_sec_uid(self, profile_url, user_name):
         sec_uid = self._extract_id(profile_url, user_name, SEC_UID_PATTERN,
                                    "secUid")
-        if not fullmatch(SEC_UID_PATTERN, sec_uid):
+        if not text.re(SEC_UID_PATTERN).fullmatch(sec_uid):
             raise exception.ExtractionError("%s: unable to extract secondary "
                                             "user ID", user_name)
         return sec_uid
@@ -623,13 +618,13 @@ class TiktokUserExtractor(TiktokExtractor):
     def _extract_author_id(self, profile_url, user_name):
         author_id = self._extract_id(profile_url, user_name, AUTHOR_ID_PATTERN,
                                      "id")
-        if not fullmatch(AUTHOR_ID_PATTERN, author_id):
+        if not text.re(AUTHOR_ID_PATTERN).fullmatch(author_id):
             raise exception.ExtractionError("%s: unable to extract user ID",
                                             user_name)
         return author_id
 
     def _extract_id(self, profile_url, user_name, regex, id_key):
-        if fullmatch(regex, user_name):
+        if text.re(regex).fullmatch(user_name):
             # If it was provided in the URL, then we can skip extracting it
             # from the rehydration data.
             return user_name
@@ -807,7 +802,7 @@ class TiktokPopularTimeCursor(TiktokTimeCursor):
 class TiktokLegacyTimeCursor(TiktokPaginationCursor):
     def __init__(self):
         super().__init__()
-        self.cursor = int(time() * 1e3)
+        self.cursor = int(time.time()) * 1000
 
     def current_page(self):
         return self.cursor
@@ -886,7 +881,7 @@ class TiktokPaginationRequest:
         self.items = {}
         cursor_type = self.cursor_type(query_parameters)
         cursor = cursor_type() if cursor_type else None
-        for page in count(start=1):
+        for page in itertools.count(start=1):
             extractor.log.info("%s: retrieving %s page %d", url, self.endpoint,
                                page)
             tries = 0
@@ -1028,7 +1023,8 @@ class TiktokPaginationRequest:
     # MARK: Helpers
 
     def _regenerate_device_id(self):
-        self.device_id = str(randint(7250000000000000000, 7325099899999994577))
+        self.device_id = str(random.randint(
+            7_250_000_000_000_000_000, 7_325_099_899_999_994_577))
 
     def _request_data(self, extractor, cursor, query_parameters):
         # Implement simple 1 retry mechanism without delays that handles the
@@ -1042,7 +1038,7 @@ class TiktokPaginationRequest:
                 )
                 response = extractor.request(url)
                 return (util.json_loads(response.text), final_parameters)
-            except JSONDecodeError:
+            except ValueError:
                 if retries == 1:
                     raise
                 extractor.log.warning(
@@ -1051,7 +1047,6 @@ class TiktokPaginationRequest:
                 retries += 1
 
     def _build_api_request_url(self, cursor, extra_parameters):
-        verify_fp = f"verify_{''.join(choices(hexdigits, k=7))}"
         query_parameters = {
             "aid": "1988",
             "app_language": "en",
@@ -1078,16 +1073,16 @@ class TiktokPaginationRequest:
             "screen_height": "1080",
             "screen_width": "1920",
             "tz_name": "UTC",
-            "verifyFp": verify_fp,
+            "verifyFp": "verify_" + "".join(random.choices(
+                "0123456789abcdef", k=7)),
             "webcast_language": "en",
         }
         if cursor:
             # We must not write this as a floating-point number:
-            query_parameters["cursor"] = f"{floor(cursor.current_page())}"
+            query_parameters["cursor"] = str(int(cursor.current_page()))
         for key, value in extra_parameters.items():
             query_parameters[key] = f"{value}"
-        query_str = "&".join([f"{name}={quote(value, safe='')}"
-                              for name, value in query_parameters.items()])
+        query_str = text.build_query(query_parameters)
         return (f"https://www.tiktok.com/api/{self.endpoint}/?{query_str}",
                 query_parameters)
 
@@ -1369,7 +1364,7 @@ class TiktokStoryUserListRequest(TiktokPaginationRequest):
         assert query_parameters["storyFeedScene"] == "3"
 
     def cursor_type(self, query_parameters):
-        return partial(TiktokItemCursor, "storyUsers")
+        return functools.partial(TiktokItemCursor, "storyUsers")
 
     def extract_items(self, data):
         if "storyUsers" not in data:
