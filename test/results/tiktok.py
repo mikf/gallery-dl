@@ -327,4 +327,34 @@ __tests__ = (
     "#count"    : 1,  # 1 avatar
 },
 
+{
+    "#url"     : "https://www.tiktok.com/@chillezy/avatar",
+    "#class"   : tiktok.TiktokAvatarExtractor,
+},
+
+{
+    "#url"     : "https://www.tiktok.com/@chillezy/posts",
+    "#class"   : tiktok.TiktokPostsExtractor,
+},
+
+{
+    "#url"     : "https://www.tiktok.com/@chillezy/reposts",
+    "#class"   : tiktok.TiktokRepostsExtractor,
+},
+
+{
+    "#url"     : "https://www.tiktok.com/@chillezy/stories",
+    "#class"   : tiktok.TiktokStoriesExtractor,
+},
+
+{
+    "#url"     : "https://www.tiktok.com/@chillezy/likes",
+    "#class"   : tiktok.TiktokLikesExtractor,
+},
+
+{
+    "#url"     : "https://www.tiktok.com/@chillezy/saved",
+    "#class"   : tiktok.TiktokSavedExtractor,
+},
+
 )
