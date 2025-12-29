@@ -484,6 +484,8 @@ MIME_TYPES = {
     "audio/webm" : "webm",
     "audio/ogg"  : "ogg",
     "audio/mpeg" : "mp3",
+    "audio/aac"  : "aac",
+    "audio/x-aac": "aac",
 
     "application/vnd.apple.mpegurl": "m3u8",
     "application/x-mpegurl"        : "m3u8",
@@ -540,6 +542,7 @@ SIGNATURE_CHECKS = {
                        s[8:12] == b"WAVE"),
     "mp3" : lambda s: (s[0:3] == b"ID3" or
                        s[0:2] in (b"\xFF\xFB", b"\xFF\xF3", b"\xFF\xF2")),
+    "aac" : lambda s: s[0:2] in (b"\xFF\xF9", b"\xFF\xF1"),
     "m3u8": lambda s: s[0:7] == b"#EXTM3U",
     "mpd" : lambda s: b"<MPD" in s,
     "zip" : lambda s: s[0:4] in (b"PK\x03\x04", b"PK\x05\x06", b"PK\x07\x08"),
