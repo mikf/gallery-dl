@@ -1088,7 +1088,7 @@ class TiktokItemListRequest(TiktokPaginationRequest):
         if "itemList" not in data:
             self.exit_early_due_to_no_items = True
             return {}
-        return dict((item["id"], item) for item in data["itemList"])
+        return {item["id"]: item for item in data["itemList"]}
 
     def exit_early(self, extractor, url):
         if self.exit_early_due_to_no_items:
@@ -1340,8 +1340,8 @@ class TiktokStoryUserListRequest(TiktokPaginationRequest):
         if "storyUsers" not in data:
             self.exit_early_due_to_no_cookies = True
             return {}
-        return dict((item["user"]["id"], item["user"]["uniqueId"])
-                    for item in data["storyUsers"])
+        return {item["user"]["id"]: item["user"]["uniqueId"]
+                for item in data["storyUsers"]}
 
     def exit_early(self, extractor, url):
         if self.exit_early_due_to_no_cookies:
