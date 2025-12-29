@@ -137,6 +137,8 @@ class InstagramExtractor(Extractor):
                 page = "login"
             elif "/challenge/" in url:
                 page = "challenge"
+            elif 24 < len(url) < 28 and url[-1] == "/":
+                page = "home"
             else:
                 page = None
 
