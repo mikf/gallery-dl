@@ -85,6 +85,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr id="ahottie" title="ahottie">
+    <td>AHottie</td>
+    <td>https://ahottie.top/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
 <tr id="arcalive" title="arcalive">
     <td>Arcalive</td>
     <td>https://arca.live/</td>
