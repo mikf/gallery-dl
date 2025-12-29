@@ -15,8 +15,6 @@ import time
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?tiktokv?\.com"
 USER_PATTERN = BASE_PATTERN + r"/@([\w_.-]+)"
-SEC_UID_PATTERN = r"MS4wLjABAAAA[\w-]{64}"
-AUTHOR_ID_PATTERN = r"[0-9]+"
 
 
 class TiktokExtractor(Extractor):
@@ -184,6 +182,7 @@ class TiktokExtractor(Extractor):
                     "https://www.tiktok.com/", ["webapp.app-context"])
 
     def _extract_sec_uid(self, profile_url, user_name):
+        SEC_UID_PATTERN = r"MS4wLjABAAAA[\w-]{64}"
         sec_uid = self._extract_id(profile_url, user_name, SEC_UID_PATTERN,
                                    "secUid")
         if not text.re(SEC_UID_PATTERN).fullmatch(sec_uid):
@@ -192,6 +191,7 @@ class TiktokExtractor(Extractor):
         return sec_uid
 
     def _extract_author_id(self, profile_url, user_name):
+        AUTHOR_ID_PATTERN = r"[0-9]+"
         author_id = self._extract_id(profile_url, user_name, AUTHOR_ID_PATTERN,
                                      "id")
         if not text.re(AUTHOR_ID_PATTERN).fullmatch(author_id):
