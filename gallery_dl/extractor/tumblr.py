@@ -531,12 +531,16 @@ class TumblrAPI(oauth.OAuth1API):
         if self.api_key:
             params["api_key"] = self.api_key
 
-        strategy = self.extractor.config("pagination")
-        if not strategy:
-            if params.get("before"):
-                strategy = "before"
-            elif "offset" not in params:
+        if strategy := self.extractor.config("pagination"):
+            if strategy not in {"api", "before"} and "offset" not in params:
+                self.log.warning('Unable to use "pagination": "%s". '
+                                 'Falling back to "api".', strategy)
                 strategy = "api"
+        elif params.get("before"):
+            strategy = "before"
+        elif "offset" not in params:
+            strategy = "api"
+        self.log.debug("Pagination strategy '%s'", strategy or "offset")
 
         while True:
             data = self._call(endpoint, params)
