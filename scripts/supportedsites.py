@@ -25,6 +25,7 @@ CATEGORY_MAP = {
     "35photo"        : "35PHOTO",
     "adultempire"    : "Adult Empire",
     "agnph"          : "AGNPH",
+    "ahottie"        : "AHottie",
     "aibooru"        : "AIBooru",
     "allgirlbooru"   : "All girl",
     "ao3"            : "Archive of Our Own",
