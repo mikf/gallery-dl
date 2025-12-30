@@ -157,7 +157,7 @@ class SteamgriddbAssetsExtractor(SteamgriddbExtractor):
 class SteamgriddbAssetExtractor(SteamgriddbExtractor):
     """Extractor for a single asset"""
     subcategory = "asset"
-    pattern = rf"{BASE_PATTERN}/(grid|hero|logo|icon)/(\d+)"
+    pattern = BASE_PATTERN + r"/(grid|hero|logo|icon)/(\d+)"
     example = "https://www.steamgriddb.com/grid/1234"
 
     def __init__(self, match):
@@ -177,7 +177,7 @@ class SteamgriddbAssetExtractor(SteamgriddbExtractor):
 class SteamgriddbGridsExtractor(SteamgriddbAssetsExtractor):
     subcategory = "grids"
     asset_type = "grid"
-    pattern = rf"{BASE_PATTERN}/(game|collection)/(\d+)/grids(?:/(\d+))?"
+    pattern = BASE_PATTERN + r"/(game|collection)/(\d+)/grids(?:/(\d+))?"
     example = "https://www.steamgriddb.com/game/1234/grids"
     valid_dimensions = ("460x215", "920x430", "600x900", "342x482", "660x930",
                         "512x512", "1024x1024")
@@ -189,7 +189,7 @@ class SteamgriddbGridsExtractor(SteamgriddbAssetsExtractor):
 class SteamgriddbHeroesExtractor(SteamgriddbAssetsExtractor):
     subcategory = "heroes"
     asset_type = "hero"
-    pattern = rf"{BASE_PATTERN}/(game|collection)/(\d+)/heroes(?:/(\d+))?"
+    pattern = BASE_PATTERN + r"/(game|collection)/(\d+)/heroes(?:/(\d+))?"
     example = "https://www.steamgriddb.com/game/1234/heroes"
     valid_dimensions = ("1920x620", "3840x1240", "1600x650")
     valid_styles = ("alternate", "blurred", "material")
@@ -199,7 +199,7 @@ class SteamgriddbHeroesExtractor(SteamgriddbAssetsExtractor):
 class SteamgriddbLogosExtractor(SteamgriddbAssetsExtractor):
     subcategory = "logos"
     asset_type = "logo"
-    pattern = rf"{BASE_PATTERN}/(game|collection)/(\d+)/logos(?:/(\d+))?"
+    pattern = BASE_PATTERN + r"/(game|collection)/(\d+)/logos(?:/(\d+))?"
     example = "https://www.steamgriddb.com/game/1234/logos"
     valid_dimensions = None
     valid_styles = ("official", "white", "black", "custom")
@@ -209,7 +209,7 @@ class SteamgriddbLogosExtractor(SteamgriddbAssetsExtractor):
 class SteamgriddbIconsExtractor(SteamgriddbAssetsExtractor):
     subcategory = "icons"
     asset_type = "icon"
-    pattern = rf"{BASE_PATTERN}/(game|collection)/(\d+)/icons(?:/(\d+))?"
+    pattern = BASE_PATTERN + r"/(game|collection)/(\d+)/icons(?:/(\d+))?"
     example = "https://www.steamgriddb.com/game/1234/icons"
     valid_dimensions = [f"{i}x{i}" for i in (8, 10, 14, 16, 20, 24,
                         28, 32, 35, 40, 48, 54, 56, 57, 60, 64, 72, 76, 80, 90,

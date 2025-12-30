@@ -464,6 +464,18 @@ Description
     Number of seconds to sleep before each download.
 
 
+extractor.*.sleep-skip
+----------------------
+Type
+    |Duration|_
+Default
+    ``0``
+Description
+    Number of seconds to sleep after
+    `skipping <extractor.*.skip_>`__
+    a file download.
+
+
 extractor.*.sleep-extractor
 ---------------------------
 Type
@@ -3009,6 +3021,16 @@ Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.facebook.loop
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Continue when detecting a jump to a set's beginning.
+
+
 extractor.facebook.videos
 -------------------------
 Type
@@ -3108,9 +3130,21 @@ extractor.fansly.formats
 Type
     ``list`` of ``integers``
 Default
+    ``null``
+Example
     ``[1, 2, 3, 4, 302, 303]``
 Description
     List of file formats to consider during format selection.
+
+
+extractor.fansly.previews
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download `previews` if no other format is available.
 
 
 extractor.fansly.token
@@ -5218,7 +5252,7 @@ Type
     * ``bool``
     * ``string``
 Default
-    ``true``
+    ``"dash"``
 Description
     Control video download behavior.
 
@@ -6770,13 +6804,24 @@ Note
     This requires 1 additional HTTP request per submission.
 
 
+extractor.webtoons.bgm
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download an episode's `background music` if available.
+Note
+    Requires |ytdl|
+
+
 extractor.webtoons.quality
 --------------------------
 Type
     * ``integer``
     * ``string``
     * ``object`` (`ext` → `type`)
-
 Default
     ``"original"``
 Example

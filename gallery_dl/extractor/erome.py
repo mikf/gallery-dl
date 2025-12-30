@@ -25,10 +25,10 @@ class EromeExtractor(Extractor):
     _cookies = True
 
     def items(self):
-        base = f"{self.root}/a/"
+        base = self.root + "/a/"
         data = {"_extractor": EromeAlbumExtractor}
         for album_id in self.albums():
-            yield Message.Queue, f"{base}{album_id}", data
+            yield Message.Queue, base + album_id, data
 
     def albums(self):
         return ()
@@ -64,7 +64,7 @@ class EromeExtractor(Extractor):
 class EromeAlbumExtractor(EromeExtractor):
     """Extractor for albums on erome.com"""
     subcategory = "album"
-    pattern = rf"{BASE_PATTERN}/a/(\w+)"
+    pattern = BASE_PATTERN + r"/a/(\w+)"
     example = "https://www.erome.com/a/ID"
 
     def items(self):
@@ -121,7 +121,7 @@ class EromeAlbumExtractor(EromeExtractor):
 
 class EromeUserExtractor(EromeExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/(?!a/|search\?)([^/?#]+)(?:/?\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/(?!a/|search\?)([^/?#]+)(?:/?\?([^#]+))?"
     example = "https://www.erome.com/USER"
 
     def albums(self):
@@ -137,11 +137,11 @@ class EromeUserExtractor(EromeExtractor):
 
 class EromeSearchExtractor(EromeExtractor):
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/search/?\?(q=[^#]+)"
+    pattern = BASE_PATTERN + r"/search/?\?(q=[^#]+)"
     example = "https://www.erome.com/search?q=QUERY"
 
     def albums(self):
-        url = f"{self.root}/search"
+        url = self.root + "/search"
         params = text.parse_query(self.groups[0])
         return self._pagination(url, params)
 

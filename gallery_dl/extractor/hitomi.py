@@ -32,14 +32,14 @@ class HitomiExtractor(Extractor):
             language = tag
             tag = "index"
         else:
-            ns = f"{ns}/"
+            ns += "/"
 
         url = (f"https://ltn.{self.domain}/n/{ns}"
                f"/{tag.replace('_', ' ')}-{language}.nozomi")
         if headers is None:
             headers = {}
         headers["Origin"] = self.root
-        headers["Referer"] = f"{self.root}/"
+        headers["Referer"] = self.root + "/"
         return decode_nozomi(self.request(url, headers=headers).content)
 
 

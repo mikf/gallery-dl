@@ -97,7 +97,7 @@ class Furry34Extractor(BooruExtractor):
 class Furry34PostExtractor(Furry34Extractor):
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}/post/(\d+)"
+    pattern = BASE_PATTERN + r"/post/(\d+)"
     example = "https://furry34.com/post/12345"
 
     def posts(self):
@@ -108,7 +108,7 @@ class Furry34PlaylistExtractor(Furry34Extractor):
     subcategory = "playlist"
     directory_fmt = ("{category}", "{playlist_id}")
     archive_fmt = "p_{playlist_id}_{id}"
-    pattern = rf"{BASE_PATTERN}/playlists/view/(\d+)"
+    pattern = BASE_PATTERN + r"/playlists/view/(\d+)"
     example = "https://furry34.com/playlists/view/12345"
 
     def metadata(self):
@@ -123,7 +123,7 @@ class Furry34TagExtractor(Furry34Extractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = rf"{BASE_PATTERN}/(?:([^/?#]+))?(?:/?\?([^#]+))?(?:$|#)"
+    pattern = BASE_PATTERN + r"/(?:([^/?#]+))?(?:/?\?([^#]+))?(?:$|#)"
     example = "https://furry34.com/TAG"
 
     def _init(self):

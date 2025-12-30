@@ -42,6 +42,39 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://aryion.com/g4/favorites/CultOfTheShyCorpus",
+    "#class"   : aryion.AryionFavoriteExtractor,
+    "#range"   : "1-3",
+    "#results" : (
+        "https://aryion.com/g4/data.php?id=373076",
+        "https://aryion.com/g4/data.php?id=373075",
+        "https://aryion.com/g4/data.php?id=373074",
+    ),
+
+    "user"  : "CultOfTheShyCorpus",
+    "folder": "Camilla Swallows Corrin",
+    "path"  : [
+        "Older Art!",
+        "Older Fanart!",
+    ],
+},
+
+{
+    "#url"     : "https://aryion.com/g4/favorites/CultOfTheShyCorpus/Elf%27s%20Revenge",
+    "#comment" : "'category' URL (#8705)",
+    "#class"   : aryion.AryionFavoriteExtractor,
+    "#range"   : "1-3",
+    "#results" : (
+        "https://aryion.com/g4/data.php?id=531328",
+        "https://aryion.com/g4/data.php?id=403354",
+        "https://aryion.com/g4/data.php?id=361515",
+    ),
+
+    "folder"     : "Elf's Revenge",
+    "path"       : [],
+},
+
+{
     "#url"     : "https://aryion.com/g4/tags.php?tag=star+wars&p=28",
     "#category": ("", "aryion", "tag"),
     "#class"   : aryion.AryionTagExtractor,
@@ -132,6 +165,11 @@ __tests__ = (
         "type_search": "",
         "user"       : "",
     },
+},
+
+{
+    "#url"     : "https://aryion.com/g4/messagepage.php",
+    "#class"   : aryion.AryionWatchExtractor,
 },
 
 )

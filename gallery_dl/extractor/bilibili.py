@@ -146,7 +146,7 @@ class BilibiliAPI():
             except Exception:
                 if "window._riskdata_" not in page:
                     raise exception.AbortExtraction(
-                        f"{article_id}: Unable to extract INITIAL_STATE data")
+                        article_id + ": Unable to extract INITIAL_STATE data")
             self.extractor.wait(seconds=300)
 
     def user_favlist(self):

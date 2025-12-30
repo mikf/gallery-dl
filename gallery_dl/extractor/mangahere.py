@@ -28,7 +28,7 @@ class MangahereChapterExtractor(MangahereBase, ChapterExtractor):
     def __init__(self, match):
         self.part, self.volume, self.chapter = match.groups()
         self.base = f"{self.root_mobile}/manga/{self.part}/"
-        ChapterExtractor.__init__(self, match, f"{self.base}1.html")
+        ChapterExtractor.__init__(self, match, self.base + "1.html")
 
     def _init(self):
         self.session.headers["Referer"] = self.root_mobile + "/"

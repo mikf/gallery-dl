@@ -18,7 +18,7 @@ class S3ndpicsExtractor(Extractor):
     """Base class for s3ndpics extractors"""
     category = "s3ndpics"
     root = "https://s3nd.pics"
-    root_api = f"{root}/api"
+    root_api = root + "/api"
     directory_fmt = ("{category}", "{user[username]}",
                      "{date} {title:?/ /}({id})")
     filename_fmt = "{num:>02}.{extension}"
@@ -41,7 +41,7 @@ class S3ndpicsExtractor(Extractor):
                 post["type"] = file["type"]
                 path = file["url"]
                 text.nameext_from_url(path, post)
-                yield Message.Url, f"{base}{path}", post
+                yield Message.Url, base + path, post
 
     def _pagination(self, url, params):
         params["page"] = 1
@@ -59,7 +59,7 @@ class S3ndpicsExtractor(Extractor):
 
 class S3ndpicsPostExtractor(S3ndpicsExtractor):
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/post/([0-9a-f]+)"
+    pattern = BASE_PATTERN + r"/post/([0-9a-f]+)"
     example = "https://s3nd.pics/post/0123456789abcdef01234567"
 
     def posts(self):
@@ -69,14 +69,14 @@ class S3ndpicsPostExtractor(S3ndpicsExtractor):
 
 class S3ndpicsUserExtractor(S3ndpicsExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/user/(\w+)"
+    pattern = BASE_PATTERN + r"/user/(\w+)"
     example = "https://s3nd.pics/user/USER"
 
     def posts(self):
         url = f"{self.root_api}/users/username/{self.groups[0]}"
         self.kwdict["user"] = user = self.request_json(url)["user"]
 
-        url = f"{self.root_api}/posts"
+        url = self.root_api + "/posts"
         params = {
             "userId": user["_id"],
             "limit" : "12",
@@ -87,11 +87,11 @@ class S3ndpicsUserExtractor(S3ndpicsExtractor):
 
 class S3ndpicsSearchExtractor(S3ndpicsExtractor):
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/search/?\?([^#]+)"
+    pattern = BASE_PATTERN + r"/search/?\?([^#]+)"
     example = "https://s3nd.pics/search?QUERY"
 
     def posts(self):
-        url = f"{self.root_api}/posts"
+        url = self.root_api + "/posts"
         params = text.parse_query(self.groups[0])
         params.setdefault("limit", "20")
         self.kwdict["search_tags"] = \

@@ -85,6 +85,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr id="ahottie" title="ahottie">
+    <td>AHottie</td>
+    <td>https://ahottie.top/</td>
+    <td>Galleries, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
 <tr id="arcalive" title="arcalive">
     <td>Arcalive</td>
     <td>https://arca.live/</td>
@@ -268,7 +274,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="discord" title="discord">
     <td>Discord</td>
     <td>https://discord.com/</td>
-    <td>Channels, DMs, Messages, Servers</td>
+    <td>Channels, DMs, Messages, Servers, Server Assets</td>
     <td></td>
 </tr>
 <tr id="dynastyscans" title="dynastyscans">
@@ -286,7 +292,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="aryion" title="aryion">
     <td>Eka's Portal</td>
     <td>https://aryion.com/</td>
-    <td>Favorites, Galleries, Posts, Search Results, Tag Searches</td>
+    <td>Favorites, Galleries, Posts, Search Results, Tag Searches, Watches</td>
     <td>Supported</td>
 </tr>
 <tr id="eporner" title="eporner">
@@ -787,6 +793,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries</td>
     <td></td>
 </tr>
+<tr id="picazor" title="picazor">
+    <td>Picazor</td>
+    <td>https://picazor.com/</td>
+    <td>User Profiles</td>
+    <td></td>
+</tr>
 <tr id="pictoa" title="pictoa">
     <td>Pictoa</td>
     <td>https://pictoa.com/</td>
@@ -1126,7 +1138,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="twitter" title="twitter">
     <td>Twitter</td>
     <td>https://x.com/</td>
-    <td>Avatars, Backgrounds, Bookmarks, Communities, Events, Followers, Followed Users, Hashtags, Highlights, Home Feed, individual Images, User Profile Information, Likes, Lists, List Members, Media Timelines, Quotes, Search Results, Timelines, Tweets, User Profiles</td>
+    <td>Avatars, Backgrounds, Bookmarks, Communities, Events, Followers, Followed Users, Hashtags, Highlights, Home Feed, individual Images, User Profile Information, Likes, Lists, List Members, Media Timelines, Notifications, Quotes, Search Results, Timelines, Tweets, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr id="unsplash" title="unsplash">
@@ -1204,6 +1216,12 @@ Consider all listed sites to potentially be NSFW.
 <tr id="weebcentral" title="weebcentral">
     <td>Weeb Central</td>
     <td>https://weebcentral.com/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
+<tr id="weebdex" title="weebdex">
+    <td>WeebDex</td>
+    <td>https://weebdex.org/</td>
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
@@ -2114,6 +2132,12 @@ Consider all listed sites to potentially be NSFW.
 <tr id="imgdrive" title="imgdrive">
     <td>ImgDrive.net</td>
     <td>https://imgdrive.net/</td>
+    <td>individual Images</td>
+    <td></td>
+</tr>
+<tr id="imgpv" title="imgpv">
+    <td>IMGPV</td>
+    <td>https://imgpv.com/</td>
     <td>individual Images</td>
     <td></td>
 </tr>

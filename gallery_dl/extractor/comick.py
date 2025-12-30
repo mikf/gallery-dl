@@ -27,7 +27,7 @@ class ComickCoversExtractor(ComickBase, GalleryExtractor):
     directory_fmt = ("{category}", "{manga}", "Covers")
     filename_fmt = "{volume:>02}_{lang}.{extension}"
     archive_fmt = "c_{id}"
-    pattern = rf"{BASE_PATTERN}/comic/([\w-]+)/cover"
+    pattern = BASE_PATTERN + r"/comic/([\w-]+)/cover"
     example = "https://comick.io/comic/MANGA/cover"
 
     def metadata(self, page):
@@ -44,7 +44,7 @@ class ComickCoversExtractor(ComickBase, GalleryExtractor):
         covers.reverse()
 
         return [
-            (f"https://meo.comick.pictures/{cover['b2key']}", {
+            ("https://meo.comick.pictures/" + cover["b2key"], {
                 "id"    : cover["id"],
                 "width" : cover["w"],
                 "height": cover["h"],
@@ -60,7 +60,7 @@ class ComickCoversExtractor(ComickBase, GalleryExtractor):
 class ComickChapterExtractor(ComickBase, ChapterExtractor):
     """Extractor for comick.io manga chapters"""
     archive_fmt = "{chapter_hid}_{page}"
-    pattern = (rf"{BASE_PATTERN}/comic/([\w-]+)"
+    pattern = (BASE_PATTERN + r"/comic/([\w-]+)"
                r"/(\w+(?:-(?:chapter|volume)-[^/?#]+)?)")
     example = "https://comick.io/comic/MANGA/ID-chapter-123-en"
 
@@ -128,7 +128,7 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
             return ()
 
         return [
-            (f"https://meo.comick.pictures/{img['b2key']}", {
+            ("https://meo.comick.pictures/" + img["b2key"], {
                 "width"    : img["w"],
                 "height"   : img["h"],
                 "size"     : img["s"],
@@ -140,7 +140,7 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
 
 class ComickMangaExtractor(ComickBase, MangaExtractor):
     """Extractor for comick.io manga"""
-    pattern = rf"{BASE_PATTERN}/comic/([\w-]+)/?(?:\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/comic/([\w-]+)/?(?:\?([^#]+))?"
     example = "https://comick.io/comic/MANGA"
 
     def items(self):

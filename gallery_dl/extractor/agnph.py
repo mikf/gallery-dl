@@ -81,7 +81,7 @@ class AgnphTagExtractor(AgnphExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = rf"{BASE_PATTERN}/gallery/post/(?:\?([^#]+))?$"
+    pattern = BASE_PATTERN + r"/gallery/post/(?:\?([^#]+))?$"
     example = "https://agn.ph/gallery/post/?search=TAG"
 
     def __init__(self, match):
@@ -99,7 +99,7 @@ class AgnphTagExtractor(AgnphExtractor):
 class AgnphPostExtractor(AgnphExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}/gallery/post/show/(\d+)"
+    pattern = BASE_PATTERN + r"/gallery/post/show/(\d+)"
     example = "https://agn.ph/gallery/post/show/12345/"
 
     def posts(self):

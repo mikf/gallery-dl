@@ -104,7 +104,7 @@ class ToyhouseExtractor(Extractor):
 class ToyhouseArtExtractor(ToyhouseExtractor):
     """Extractor for artworks of a toyhouse user"""
     subcategory = "art"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/art"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/art"
     example = "https://www.toyhou.se/USER/art"
 
     def posts(self):

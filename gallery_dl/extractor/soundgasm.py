@@ -50,7 +50,7 @@ class SoundgasmExtractor(Extractor):
 class SoundgasmAudioExtractor(SoundgasmExtractor):
     """Extractor for audio clips from soundgasm.net"""
     subcategory = "audio"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/([^/?#]+)"
     example = "https://soundgasm.net/u/USER/TITLE"
 
     def __init__(self, match):
@@ -64,7 +64,7 @@ class SoundgasmAudioExtractor(SoundgasmExtractor):
 class SoundgasmUserExtractor(SoundgasmExtractor):
     """Extractor for all sounds from a soundgasm user"""
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/?$"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/?$"
     example = "https://soundgasm.net/u/USER"
 
     def __init__(self, match):

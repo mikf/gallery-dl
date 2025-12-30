@@ -23,19 +23,19 @@ class HdoujinBase():
 
 class HdoujinGalleryExtractor(
         HdoujinBase, schalenetwork.SchalenetworkGalleryExtractor):
-    pattern = rf"{BASE_PATTERN}/(?:g|reader)/(\d+)/(\w+)"
+    pattern = BASE_PATTERN + r"/(?:g|reader)/(\d+)/(\w+)"
     example = "https://hdoujin.org/g/12345/67890abcdef/"
 
 
 class HdoujinSearchExtractor(
         HdoujinBase, schalenetwork.SchalenetworkSearchExtractor):
-    pattern = rf"{BASE_PATTERN}/(?:tag/([^/?#]+)|browse)?(?:/?\?([^#]*))?$"
+    pattern = BASE_PATTERN + r"/(?:tag/([^/?#]+)|browse)?(?:/?\?([^#]*))?$"
     example = "https://hdoujin.org/browse?s=QUERY"
 
 
 class HdoujinFavoriteExtractor(
         HdoujinBase, schalenetwork.SchalenetworkFavoriteExtractor):
-    pattern = rf"{BASE_PATTERN}/favorites(?:\?([^#]*))?"
+    pattern = BASE_PATTERN + r"/favorites(?:\?([^#]*))?"
     example = "https://hdoujin.org/favorites"
 
 

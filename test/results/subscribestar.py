@@ -13,7 +13,7 @@ __tests__ = (
     "#category": ("", "subscribestar", "user"),
     "#class"   : subscribestar.SubscribestarUserExtractor,
     "#pattern" : r"https://(www\.subscribestar\.com/uploads\?payload=.+|(ss-uploads-prod\.b-cdn|\w+\.cloudfront)\.net/uploads(_v2)?/users/11/)",
-    "#count"   : range(15, 25),
+    "#count"   : range(20, 50),
 
     "author_id"  : 11,
     "author_name": "subscribestar",
@@ -38,6 +38,27 @@ __tests__ = (
     "#range"   : "1",
 
     "date": "type:datetime",
+},
+
+{
+    "#url"     : "https://www.subscribestar.com/subscribestar?tag=Security",
+    "#comment" : "'tag' query parameter (#8737)",
+    "#class"   : subscribestar.SubscribestarUserExtractor,
+    "#count"   : 0,
+    "#metadata": "post",
+
+    "author_id"  : 11,
+    "author_name": "subscribestar",
+    "author_nick": "SubscribeStar",
+    "content"    : "\n<h1>Enhance Your Account Security with OTP</h1>\n<div>In addition to our existing email-based Two-Factor Authentication (2FA), we encourage everyone to use a more secure and convenient method: One-Time Password (OTP) 2FA using authentication apps like 1Password, Google Authenticator etc. To get started:</div>\n<ol>\n<li>Navigate to <strong>Menu → Account Settings</strong>, scroll down to the Authenticator Apps (OTP 2FA) section.</li>\n<li>Click the \"<strong>Set up OTP</strong>\" button and follow the instructions.<br><br>\n</li>\n</ol>\n<div>The entire process should take less than 5 minutes. You can opt out of using email 2FA then.</div>\n<div><br></div>\n<div><strong>Why Choose OTP 2FA Over Email 2FA?</strong></div>\n<div>\n<strong>Stronger Security</strong>: While email 2FA adds an extra layer of protection, OTP 2FA generates codes directly on your mobile device, reducing the risk associated with email interception or unauthorized access.</div>\n<div>\n<strong>Instant Access</strong>: Authentication apps provide time-sensitive codes without the need for an internet connection or waiting for an email to arrive.</div>\n<div>\n<strong>Enhanced Protection Against Phishing</strong>: OTP codes from authentication apps are less susceptible to phishing attacks compared to email-based codes.</div>\n\n",
+    "date"       : "dt:2024-09-30 20:46:00",
+    "post_id"    : 1320999,
+    "search_tags": "Security",
+    "title"      : "Enhance Your Account Security with OTP",
+    "tags"       : [
+        "Security",
+        "PlatformUpdates",
+    ],
 },
 
 {

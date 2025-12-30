@@ -19,7 +19,7 @@ BASE_PATTERN = r"(?:https?://)?(?:www\.)?aryion\.com/g4"
 class AryionExtractor(Extractor):
     """Base class for aryion extractors"""
     category = "aryion"
-    directory_fmt = ("{category}", "{user!l}", "{path:J - }")
+    directory_fmt = ("{category}", "{user!l}", "{path:I}")
     filename_fmt = "{id} {title}.{extension}"
     archive_fmt = "{id}"
     cookies_domain = ".aryion.com"
@@ -77,20 +77,20 @@ class AryionExtractor(Extractor):
     def metadata(self):
         """Return general metadata"""
 
-    def _pagination_params(self, url, params=None, needle=None):
+    def _pagination_params(self, url, params=None, needle=None, quote="'"):
         if params is None:
             params = {"p": 1}
         else:
             params["p"] = text.parse_int(params.get("p"), 1)
 
         if needle is None:
-            needle = "class='gallery-item' id='"
+            needle = "class='gallery-item' id=" + quote
 
         while True:
             page = self.request(url, params=params).text
 
             cnt = 0
-            for post_id in text.extract_iter(page, needle, "'"):
+            for post_id in text.extract_iter(page, needle, quote):
                 cnt += 1
                 yield post_id
 
@@ -107,6 +107,42 @@ class AryionExtractor(Extractor):
             if pos < 0:
                 return
             url = self.root + text.rextr(page, "href='", "'", pos)
+
+    def _pagination_folders(self, url, folder=None, seen=None):
+        if folder is None:
+            self.kwdict["folder"] = ""
+        else:
+            url = f"{url}/{folder}"
+            self.kwdict["folder"] = folder = text.unquote(folder)
+            self.log.debug("Descending into folder '%s'", folder)
+
+        params = {"p": 1}
+        while True:
+            page = self.request(url, params=params).text
+
+            cnt = 0
+            for item in text.extract_iter(
+                    page, "<li class='gallery-item", "</li>"):
+                cnt += 1
+                if text.extr(item, 'data-item-type="', '"') == "Folders":
+                    folder = text.extr(item, "href='", "'").rpartition("/")[2]
+                    if seen is None:
+                        seen = set()
+                    if folder not in seen:
+                        seen.add(folder)
+                        if self.recursive:
+                            yield from self._pagination_folders(
+                                url, folder, seen)
+                        else:
+                            self.log.debug("Skipping folder '%s'", folder)
+                else:
+                    yield text.extr(item, "data-item-id='", "'")
+
+            if cnt < 40 and ">Next &gt;&gt;<" not in page:
+                break
+            params["p"] += 1
+
+        self.kwdict["folder"] = ""
 
     def _parse_post(self, post_id):
         url = f"{self.root}/g4/data.php?id={post_id}"
@@ -153,6 +189,8 @@ class AryionExtractor(Extractor):
             "user"  : self.user or artist,
             "title" : title,
             "artist": artist,
+            "description": text.unescape(extr(
+                'property="og:description" content="', '"')),
             "path"  : text.split_html(extr(
                 "cookiecrumb'>", '</span'))[4:-1:2],
             "date"  : dt.datetime(*parsedate_tz(lmod)[:6]),
@@ -163,8 +201,6 @@ class AryionExtractor(Extractor):
             "comments" : text.parse_int(extr("Comments</b>:", "<")),
             "favorites": text.parse_int(extr("Favorites</b>:", "<")),
             "tags"     : text.split_html(extr("class='taglist'>", "</span>")),
-            "description": text.unescape(text.remove_html(extr(
-                "<p>", "</p>"), "", "")),
             "filename" : fname,
             "extension": ext,
             "_http_lastmodified": lmod,
@@ -175,14 +211,11 @@ class AryionGalleryExtractor(AryionExtractor):
     """Extractor for a user's gallery on eka's portal"""
     subcategory = "gallery"
     categorytransfer = True
-    pattern = rf"{BASE_PATTERN}/(?:gallery/|user/|latest.php\?name=)([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?:gallery/|user/|latest.php\?name=)([^/?#]+)"
     example = "https://aryion.com/g4/gallery/USER"
 
-    def __init__(self, match):
-        AryionExtractor.__init__(self, match)
-        self.offset = 0
-
     def _init(self):
+        self.offset = 0
         self.recursive = self.config("recursive", True)
 
     def skip(self, num):
@@ -203,15 +236,34 @@ class AryionGalleryExtractor(AryionExtractor):
 class AryionFavoriteExtractor(AryionExtractor):
     """Extractor for a user's favorites gallery"""
     subcategory = "favorite"
-    directory_fmt = ("{category}", "{user!l}", "favorites")
+    directory_fmt = ("{category}", "{user!l}", "favorites", "{folder}")
     archive_fmt = "f_{user}_{id}"
-    categorytransfer = True
-    pattern = rf"{BASE_PATTERN}/favorites/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/favorites/([^/?#]+)(?:/([^?#]+))?"
     example = "https://aryion.com/g4/favorites/USER"
+
+    def _init(self):
+        self.recursive = self.config("recursive", True)
 
     def posts(self):
         url = f"{self.root}/g4/favorites/{self.user}"
-        return self._pagination_params(url, None, "data-item-id='")
+        return self._pagination_folders(url, self.groups[1])
+
+
+class AryionWatchExtractor(AryionExtractor):
+    """Extractor for your watched users and tags"""
+    subcategory = "watch"
+    directory_fmt = ("{category}", "{user!l}",)
+    pattern = BASE_PATTERN + r"/messagepage\.php()"
+    example = "https://aryion.com/g4/messagepage.php"
+
+    def posts(self):
+        if not self.cookies_check(self.cookies_names):
+            raise exception.AuthRequired(
+                ("username & password", "authenticated cookies"),
+                "watched Submissions")
+        self.cookies.set("g4p_msgpage_style", "plain", domain="aryion.com")
+        url = self.root + "/g4/messagepage.php"
+        return self._pagination_params(url, None, 'data-item-id="', '"')
 
 
 class AryionTagExtractor(AryionExtractor):
@@ -219,7 +271,7 @@ class AryionTagExtractor(AryionExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "tags", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = rf"{BASE_PATTERN}/tags\.php\?([^#]+)"
+    pattern = BASE_PATTERN + r"/tags\.php\?([^#]+)"
     example = "https://aryion.com/g4/tags.php?tag=TAG"
 
     def _init(self):
@@ -241,7 +293,7 @@ class AryionSearchExtractor(AryionExtractor):
                      "{search[q]|search[tags]|search[user]}")
     archive_fmt = ("s_{search[prefix]}"
                    "{search[q]|search[tags]|search[user]}_{id}")
-    pattern = rf"{BASE_PATTERN}/search\.php\?([^#]+)"
+    pattern = BASE_PATTERN + r"/search\.php\?([^#]+)"
     example = "https://aryion.com/g4/search.php?q=TEXT&tags=TAGS&user=USER"
 
     def metadata(self):
@@ -261,7 +313,7 @@ class AryionSearchExtractor(AryionExtractor):
 class AryionPostExtractor(AryionExtractor):
     """Extractor for individual posts on eka's portal"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/view/(\d+)"
+    pattern = BASE_PATTERN + r"/view/(\d+)"
     example = "https://aryion.com/g4/view/12345"
 
     def posts(self):

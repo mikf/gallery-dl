@@ -36,7 +36,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
     directory_fmt = ("{category}", "{boardSlug}")
     filename_fmt = "{id}_{num}{title:? //[b:230]}.{extension}"
     archive_fmt = "{id}_{num}"
-    pattern = rf"{BASE_PATTERN}/b/(?:\w+)/(\d+)"
+    pattern = BASE_PATTERN + r"/b/(?:\w+)/(\d+)"
     example = "https://arca.live/b/breaking/123456789"
 
     def items(self):
@@ -84,7 +84,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
                 url = src
 
             fallback = ()
-            query = f"?type=orig&{query}"
+            query = "?type=orig&" + query
             if orig := text.extr(media, 'data-orig="', '"'):
                 path, _, ext = url.rpartition(".")
                 if ext != orig:
@@ -115,7 +115,7 @@ class ArcalivePostExtractor(ArcaliveExtractor):
 class ArcaliveBoardExtractor(ArcaliveExtractor):
     """Extractor for an arca.live board's posts"""
     subcategory = "board"
-    pattern = rf"{BASE_PATTERN}/b/([^/?#]+)/?(?:\?([^#]+))?$"
+    pattern = BASE_PATTERN + r"/b/([^/?#]+)/?(?:\?([^#]+))?$"
     example = "https://arca.live/b/breaking"
 
     def articles(self):
@@ -127,7 +127,7 @@ class ArcaliveBoardExtractor(ArcaliveExtractor):
 class ArcaliveUserExtractor(ArcaliveExtractor):
     """Extractor for an arca.live users's posts"""
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/u/@([^/?#]+)/?(?:\?([^#]+))?$"
+    pattern = BASE_PATTERN + r"/u/@([^/?#]+)/?(?:\?([^#]+))?$"
     example = "https://arca.live/u/@USER"
 
     def articles(self):
@@ -169,8 +169,11 @@ class ArcaliveAPI():
             return data
 
         self.log.debug("Server response: %s", data)
-        msg = f": {msg}" if (msg := data.get("message")) else ""
-        raise exception.AbortExtraction(f"API request failed{msg}")
+        if msg := data.get("message"):
+            msg = "API request failed: " + msg
+        else:
+            msg = "API request failed"
+        raise exception.AbortExtraction(msg)
 
     def _pagination(self, endpoint, params, key):
         while True:

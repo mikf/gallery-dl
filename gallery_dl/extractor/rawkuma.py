@@ -21,7 +21,7 @@ class RawkumaBase():
 class RawkumaChapterExtractor(RawkumaBase, ChapterExtractor):
     """Extractor for manga chapters from rawkuma.net"""
     archive_fmt = "{chapter_id}_{page}"
-    pattern = rf"{BASE_PATTERN}(/manga/[^/?#]+/chapter-\d+(?:.\d+)?\.(\d+))"
+    pattern = BASE_PATTERN + r"(/manga/[^/?#]+/chapter-\d+(?:.\d+)?\.(\d+))"
     example = "https://rawkuma.net/manga/7TITLE/chapter-123.321"
 
     def __init__(self, match):
@@ -54,7 +54,7 @@ class RawkumaChapterExtractor(RawkumaBase, ChapterExtractor):
 class RawkumaMangaExtractor(RawkumaBase, MangaExtractor):
     """Extractor for manga from rawkuma.net"""
     chapterclass = RawkumaChapterExtractor
-    pattern = rf"{BASE_PATTERN}/manga/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/manga/([^/?#]+)"
     example = "https://rawkuma.net/manga/TITLE/"
 
     def __init__(self, match):
@@ -65,7 +65,7 @@ class RawkumaMangaExtractor(RawkumaBase, MangaExtractor):
         manga = text.unescape(text.extr(page, "<title>", " &#8211; "))
         manga_id = text.parse_int(text.extr(page, "manga_id=", "&"))
 
-        url = f"{self.root}/wp-admin/admin-ajax.php"
+        url = self.root + "/wp-admin/admin-ajax.php"
         params = {
             "manga_id": manga_id,
             "page"    : "1",

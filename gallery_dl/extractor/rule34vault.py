@@ -79,7 +79,7 @@ class Rule34vaultExtractor(BooruExtractor):
 class Rule34vaultPostExtractor(Rule34vaultExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}/post/(\d+)"
+    pattern = BASE_PATTERN + r"/post/(\d+)"
     example = "https://rule34vault.com/post/12345"
 
     def posts(self):
@@ -90,7 +90,7 @@ class Rule34vaultPlaylistExtractor(Rule34vaultExtractor):
     subcategory = "playlist"
     directory_fmt = ("{category}", "{playlist_id}")
     archive_fmt = "p_{playlist_id}_{id}"
-    pattern = rf"{BASE_PATTERN}/playlists/view/(\d+)"
+    pattern = BASE_PATTERN + r"/playlists/view/(\d+)"
     example = "https://rule34vault.com/playlists/view/12345"
 
     def metadata(self):
@@ -105,7 +105,7 @@ class Rule34vaultTagExtractor(Rule34vaultExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = rf"{BASE_PATTERN}/(?!p(?:ost|laylists)/)([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?!p(?:ost|laylists)/)([^/?#]+)"
     example = "https://rule34vault.com/TAG"
 
     def metadata(self):

@@ -40,13 +40,14 @@ class TenorExtractor(Extractor):
                 continue
 
             url = fmt["url"]
+            title = gif.pop("h1_title", "")
+            gif["title"] = title[:-4] if title.endswith(" GIF") else title
+            gif["width"], gif["height"] = fmt.pop("dims") or (0, 0)
+            gif["description"] = gif.pop("content_description", "")
             gif["id_format"] = url.rsplit("/", 2)[1]
             gif["format"] = fmt["name"]
-            gif["width"], gif["height"] = fmt["dims"]
             gif["duration"] = fmt["duration"]
             gif["size"] = fmt["size"]
-            gif["title"] = gif["h1_title"][:-4]
-            gif["description"] = gif.pop("content_description", "")
             gif["date"] = self.parse_timestamp(gif["created"])
 
             yield Message.Directory, "", gif
@@ -110,7 +111,7 @@ class TenorExtractor(Extractor):
 
 class TenorImageExtractor(TenorExtractor):
     subcategory = "image"
-    pattern = rf"{BASE_PATTERN}view/(?:[^/?#]*-)?(\d+)"
+    pattern = BASE_PATTERN + r"view/(?:[^/?#]*-)?(\d+)"
     example = "https://tenor.com/view/SLUG-1234567890"
 
     def gifs(self):
@@ -124,7 +125,7 @@ class TenorImageExtractor(TenorExtractor):
 class TenorSearchExtractor(TenorExtractor):
     subcategory = "search"
     directory_fmt = ("{category}", "{search_tags}")
-    pattern = rf"{BASE_PATTERN}search/([^/?#]+)"
+    pattern = BASE_PATTERN + r"search/([^/?#]+)"
     example = "https://tenor.com/search/QUERY"
 
     def gifs(self):
@@ -140,7 +141,7 @@ class TenorSearchExtractor(TenorExtractor):
 class TenorUserExtractor(TenorExtractor):
     subcategory = "user"
     directory_fmt = ("{category}", "@{user[username]}")
-    pattern = rf"{BASE_PATTERN}(?:users|official)/([^/?#]+)"
+    pattern = BASE_PATTERN + r"(?:users|official)/([^/?#]+)"
     example = "https://tenor.com/users/USER"
 
     def gifs(self):

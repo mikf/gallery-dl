@@ -41,6 +41,7 @@ class YoutubeDLDownloader(DownloaderBase):
         kwdict = pathfmt.kwdict
         tries = 0
 
+        kwdict["_mtime_http"] = None
         if ytdl_instance := kwdict.pop("_ytdl_instance", None):
             # 'ytdl' extractor
             self._prepare(ytdl_instance)
@@ -68,7 +69,7 @@ class YoutubeDLDownloader(DownloaderBase):
                 self.log.debug("Using %s version %s", module, ytdl_version)
 
                 self.ytdl_instance = ytdl_instance = ytdl.construct_YoutubeDL(
-                    module, self, self.ytdl_opts)
+                    module, self, self.ytdl_opts, kwdict.get("_ytdl_params"))
                 if self.outtmpl == "default":
                     self.outtmpl = module.DEFAULT_OUTTMPL
                 self._prepare(ytdl_instance)

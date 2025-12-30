@@ -23,7 +23,7 @@ class MangataroBase():
 
 class MangataroChapterExtractor(MangataroBase, ChapterExtractor):
     """Extractor for mangataro manga chapters"""
-    pattern = rf"{BASE_PATTERN}(/read/([^/?#]+)/(?:[^/?#]*-)?(\d+))"
+    pattern = BASE_PATTERN + r"(/read/([^/?#]+)/(?:[^/?#]*-)?(\d+))"
     example = "https://mangataro.org/read/MANGA/ch123-12345"
 
     def metadata(self, page):
@@ -59,7 +59,7 @@ class MangataroChapterExtractor(MangataroBase, ChapterExtractor):
 class MangataroMangaExtractor(MangataroBase, MangaExtractor):
     """Extractor for mangataro manga"""
     chapterclass = MangataroChapterExtractor
-    pattern = rf"{BASE_PATTERN}(/manga/([^/?#]+))"
+    pattern = BASE_PATTERN + r"(/manga/([^/?#]+))"
     example = "https://mangataro.org/manga/MANGA"
 
     def chapters(self, page):
@@ -75,7 +75,7 @@ class MangataroMangaExtractor(MangataroBase, MangaExtractor):
             results.append((url, {
                 **manga,
                 "chapter"      : text.parse_int(chapter),
-                "chapter_minor": f".{minor}" if sep else "",
+                "chapter_minor": "." + minor if sep else "",
                 "chapter_id"   : text.parse_int(chapter_id),
             }))
         return results

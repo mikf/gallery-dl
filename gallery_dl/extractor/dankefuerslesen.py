@@ -28,13 +28,13 @@ class DankefuerslesenBase():
 
 class DankefuerslesenChapterExtractor(DankefuerslesenBase, ChapterExtractor):
     """Extractor for Danke fürs Lesen manga chapters"""
-    pattern = rf"{BASE_PATTERN}/read/manga/([\w-]+)/([\w-]+)"
+    pattern = BASE_PATTERN + r"/read/manga/([\w-]+)/([\w-]+)"
     example = "https://danke.moe/read/manga/TITLE/123/1/"
 
     def _init(self):
         self.zip = self.config("zip", False)
         if self.zip:
-            self.filename_fmt = f"{self.directory_fmt[-1]}.{{extension}}"
+            self.filename_fmt = self.directory_fmt[-1] + ".{extension}"
             self.directory_fmt = self.directory_fmt[:-1]
 
     def metadata(self, page):
@@ -95,7 +95,7 @@ class DankefuerslesenMangaExtractor(DankefuerslesenBase, MangaExtractor):
     """Extractor for Danke fürs Lesen manga"""
     chapterclass = DankefuerslesenChapterExtractor
     reverse = False
-    pattern = rf"{BASE_PATTERN}/read/manga/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/read/manga/([^/?#]+)"
     example = "https://danke.moe/read/manga/TITLE/"
 
     def chapters(self, page):

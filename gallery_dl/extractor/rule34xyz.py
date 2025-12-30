@@ -120,13 +120,13 @@ class Rule34xyzExtractor(BooruExtractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = f"{self.root}/api/v2/auth/signin"
+        url = self.root + "/api/v2/auth/signin"
         data = {"email": username, "password": password}
         response = self.request_json(
             url, method="POST", json=data, fatal=False)
 
         if jwt := response.get("jwt"):
-            return f"Bearer {jwt}"
+            return "Bearer " + jwt
         raise exception.AuthenticationError(
             (msg := response.get("message")) and f'"{msg}"')
 
@@ -134,7 +134,7 @@ class Rule34xyzExtractor(BooruExtractor):
 class Rule34xyzPostExtractor(Rule34xyzExtractor):
     subcategory = "post"
     archive_fmt = "{id}"
-    pattern = rf"{BASE_PATTERN}/post/(\d+)"
+    pattern = BASE_PATTERN + r"/post/(\d+)"
     example = "https://rule34.xyz/post/12345"
 
     def posts(self):
@@ -145,7 +145,7 @@ class Rule34xyzPlaylistExtractor(Rule34xyzExtractor):
     subcategory = "playlist"
     directory_fmt = ("{category}", "{playlist_id}")
     archive_fmt = "p_{playlist_id}_{id}"
-    pattern = rf"{BASE_PATTERN}/playlists/view/(\d+)"
+    pattern = BASE_PATTERN + r"/playlists/view/(\d+)"
     example = "https://rule34.xyz/playlists/view/12345"
 
     def metadata(self):
@@ -160,7 +160,7 @@ class Rule34xyzTagExtractor(Rule34xyzExtractor):
     subcategory = "tag"
     directory_fmt = ("{category}", "{search_tags}")
     archive_fmt = "t_{search_tags}_{id}"
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)$"
+    pattern = BASE_PATTERN + r"/([^/?#]+)$"
     example = "https://rule34.xyz/TAG"
 
     def metadata(self):

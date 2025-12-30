@@ -32,7 +32,7 @@ BASE_PATTERN = UrlshortenerExtractor.update({
 class UrlshortenerLinkExtractor(UrlshortenerExtractor):
     """Extractor for general-purpose URL shorteners"""
     subcategory = "link"
-    pattern = rf"{BASE_PATTERN}(/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/[^/?#]+)"
     example = "https://bit.ly/abcde"
 
     def items(self):
