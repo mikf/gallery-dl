@@ -218,6 +218,7 @@ CATEGORY_MAP = {
     "xvideos"        : "XVideos",
     "yandere"        : "yande.re",
     "yiffverse"      : "Yiff verse",
+    "yourlesbians"   : "YourLesbians",
 }
 
 SUBCATEGORY_MAP = {
