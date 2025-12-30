@@ -91,15 +91,6 @@ def unique_sequence(iterable):
             yield element
 
 
-def chunk(list, n):
-    """Yield successive n-sized chunks from list.
-
-    Copied from: https://stackoverflow.com/a/312464.
-    """
-    for i in range(0, len(list), n):
-        yield list[i:i + n]
-
-
 def contains(values, elements, separator=" "):
     """Returns True if at least one of 'elements' is contained in 'values'"""
     if isinstance(values, str) and (separator or separator is None):

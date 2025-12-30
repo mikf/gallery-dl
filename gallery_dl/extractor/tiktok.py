@@ -649,8 +649,10 @@ class TiktokFollowingExtractor(TiktokUserExtractor):
         # batch endpoint to improve performance. The response to the story user
         # list request may also include the user themselves, so skip them if
         # they ever turn up.
-        for batch_number, user_batch in enumerate(util.chunk(users, 10),
-                                                  start=1):
+        for b in range((len(users) - 1) // 10 + 1):
+            batch_number = b + 1
+            user_batch = users[b*10:batch_number*10]
+
             # Handle edge case where final batch is composed of a single user
             # and that user is the one we need to skip. If we don't handle this
             # here (or when we generate the author ID list later), we will
