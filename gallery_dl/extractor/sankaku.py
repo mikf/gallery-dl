@@ -356,6 +356,7 @@ def _authenticate_impl(extr, username, password):
     extr.log.info("Logging in as %s", username)
 
     api = extr.api
+    api.headers["Authorization"] = None
     url = api.ROOT + "/auth/token"
     data = {"login": username, "password": password}
 
