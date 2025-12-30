@@ -369,7 +369,7 @@ class TiktokUserExtractor(Dispatch, TiktokExtractor):
             (TiktokStoriesExtractor, base + "stories"),
             (TiktokLikesExtractor  , base + "likes"),
             (TiktokSavedExtractor  , base + "saved"),
-        ), ("avatar", "posts", "stories"))
+        ), ("avatar", "posts"))
 
 
 class TiktokAvatarExtractor(TiktokExtractor):
@@ -411,7 +411,7 @@ class TiktokPostsExtractor(TiktokExtractor):
 
         # If set to "ytdl", we shall first go via yt-dlp. If that fails,
         # we shall attempt to extract directly.
-        if self.config("tiktok-user-extractor") == "ytdl":
+        if self.config("ytdl", False):
             if posts := self._extract_posts_ytdl(profile_url):
                 return posts
             ytdl = True
