@@ -5845,6 +5845,16 @@ Description
     Download video covers.
 
 
+extractor.tiktok.photos
+-----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download photos.
+
+
 extractor.tiktok.videos
 -----------------------
 Type
@@ -5855,18 +5865,52 @@ Description
     Download videos using |ytdl|.
 
 
-extractor.tiktok.user.avatar
-----------------------------
+extractor.tiktok.tiktok-range
+-----------------------------
+Type
+    ``string``
+Default
+    ``""``
+Example
+    ``"1-20"``
+Description
+    Range or playlist indices of ``tiktok`` posts to extract.
+
+    When using `ytdl`, see
+    `ytdl/playlist_items <https://github.com/yt-dlp/yt-dlp/blob/3042afb5fe342d3a00de76704cd7de611acc350e/yt_dlp/YoutubeDL.py#L289>`__
+    for details.
+
+
+extractor.tiktok.posts.order-posts
+----------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    posts are processed.
+
+    ``"asc"`` | ``"reverse"``
+        Ascending order (oldest first)
+    ``"desc"``
+        Descending order (newest first)
+    ``"popular"``
+        *Popular* order
+
+
+extractor.tiktok.posts.ytdl
+---------------------------
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
-    Download user avatars.
+    Extract user posts with |ytdl|
 
 
-extractor.tiktok.user.module
-----------------------------
+extractor.tiktok.posts.module
+-----------------------------
 Type
     |Module|_
 Default
@@ -5878,20 +5922,25 @@ Description
     See `extractor.ytdl.module`_.
 
 
-extractor.tiktok.user.tiktok-range
-----------------------------------
+extractor.tiktok.user.include
+-----------------------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Default
-    ``""``
-Example
-    ``"1-20"``
+    ``["avatar", "posts"]``
 Description
-    Range or playlist indices of ``tiktok`` user posts to extract.
-
-    See
-    `ytdl/playlist_items <https://github.com/yt-dlp/yt-dlp/blob/3042afb5fe342d3a00de76704cd7de611acc350e/yt_dlp/YoutubeDL.py#L289>`__
-    for details.
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+Supported Values
+    * ``avatar``
+    * ``posts``
+    * ``reposts``
+    * ``stories``
+    * ``likes``
+    * ``saved``
+Note
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.tumblr.avatar
