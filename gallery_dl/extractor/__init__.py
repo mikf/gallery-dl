@@ -243,6 +243,7 @@ modules = [
     "xhamster",
     "xvideos",
     "yiffverse",
+    "yourlesbians",
     "zerochan",
     "booru",
     "moebooru",

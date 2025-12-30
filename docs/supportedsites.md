@@ -1279,6 +1279,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Playlists, Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr id="yourlesbians" title="yourlesbians">
+    <td>YourLesbians</td>
+    <td>https://yourlesbians.com/</td>
+    <td>Albums</td>
+    <td></td>
+</tr>
 <tr id="zerochan" title="zerochan">
     <td>Zerochan</td>
     <td>https://www.zerochan.net/</td>
