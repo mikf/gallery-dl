@@ -5895,6 +5895,8 @@ Description
         Ascending order (oldest first)
     ``"desc"``
         Descending order (newest first)
+    ``"popular"``
+        *Popular* order
 
 
 extractor.tiktok.posts.ytdl
