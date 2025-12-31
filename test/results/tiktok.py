@@ -6,7 +6,7 @@
 
 from gallery_dl.extractor import tiktok
 
-PATTERN = r"https://p1[69]-[^/?#.]+\.tiktokcdn[^/?#.]*\.com/[^/?#]+/\w+~.*\.jpe?g"
+PATTERN = r"https://p1[69]-[^/?#.]+\.tiktokcdn[^/?#.]*\.com/[^/?#]+/\w+~.*\.(jpe?g|image)"
 PATTERN_WITH_AUDIO = r"(?:" + PATTERN + r"|https://v\d+m?\.tiktokcdn[^/?#.]*\.com/[^?#]+\?[^/?#]+)"
 VIDEO_PATTERN = r"https://v1[69]-webapp-prime.tiktok.com/video/tos/[^?#]+\?[^/?#]+"
 OLD_VIDEO_PATTERN = r"https://www.tiktok.com/aweme/v1/play/\?[^/?#]+"
