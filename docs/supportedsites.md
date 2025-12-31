@@ -1570,25 +1570,25 @@ Consider all listed sites to potentially be NSFW.
 <tr id="nelomanga" title="nelomanga">
     <td>MangaNelo</td>
     <td>https://www.nelomanga.net/</td>
-    <td>Chapters, Manga</td>
+    <td>Bookmarks, Chapters, Manga</td>
     <td></td>
 </tr>
 <tr id="natomanga" title="natomanga">
     <td>MangaNato</td>
     <td>https://www.natomanga.com/</td>
-    <td>Chapters, Manga</td>
+    <td>Bookmarks, Chapters, Manga</td>
     <td></td>
 </tr>
 <tr id="manganato" title="manganato">
     <td>MangaNato</td>
     <td>https://www.manganato.gg/</td>
-    <td>Chapters, Manga</td>
+    <td>Bookmarks, Chapters, Manga</td>
     <td></td>
 </tr>
 <tr id="mangakakalot" title="mangakakalot">
     <td>MangaKakalot</td>
     <td>https://www.mangakakalot.gg/</td>
-    <td>Chapters, Manga</td>
+    <td>Bookmarks, Chapters, Manga</td>
     <td></td>
 </tr>
 
