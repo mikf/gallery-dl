@@ -23,7 +23,11 @@ class TiktokExtractor(Extractor):
     directory_fmt = ("{category}", "{user}")
     filename_fmt = (
         "{id}{num:?_//>02} {title[b:150]}{img_id|audio_id:? [/]/}.{extension}")
-    archive_fmt = "{id}_{num}_{img_id}"
+    archive_fmt = "{id}_{num}_{img_id}"\
+                  "{cover_id:?_//}"\
+                  "{subtitle_lang_id:?_//}"\
+                  "{subtitle_version:?_//}"\
+                  "{subtitle_source:?_//}"
     root = "https://www.tiktok.com"
     cookies_domain = ".tiktok.com"
     rehydration_data_cache = {}
