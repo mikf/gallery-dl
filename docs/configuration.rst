@@ -2247,7 +2247,7 @@ Type
     * ``string``
     * ``list`` of ``strings``
 Default
-    ``"quality=100"``
+    ``"original=true,quality=100"``
 Example
     * ``"+transcode=true,quality=100"``
     * ``["+", "transcode=true", "quality=100"]``

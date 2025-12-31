@@ -54,7 +54,7 @@ class CivitaiExtractor(Extractor):
         elif quality_video is not None and quality:
             self._video_quality = self._image_quality
         else:
-            self._video_quality = "quality=100"
+            self._video_quality = "original=true,quality=100"
         self._video_ext = "webm"
 
         if metadata := self.config("metadata"):
