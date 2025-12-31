@@ -70,13 +70,15 @@ class TiktokExtractor(Extractor):
                         url = img["imageURL"]["urlList"][0]
                         text.nameext_from_url(url, post)
                         post.update({
-                            "type"  : "image",
-                            "image" : img,
-                            "title" : title,
-                            "num"   : i,
-                            "img_id": post["filename"].partition("~")[0],
-                            "width" : img["imageWidth"],
-                            "height": img["imageHeight"],
+                            "type"      : "image",
+                            "image"     : img,
+                            "title"     : title,
+                            "num"       : i,
+                            "img_id"    : post["filename"].partition("~")[0],
+                            "audio_id"  : "",
+                            "cover_id"  : "",
+                            "width"     : img["imageWidth"],
+                            "height"    : img["imageHeight"],
                         })
                         yield Message.Url, url, post
 
@@ -108,6 +110,8 @@ class TiktokExtractor(Extractor):
                     "title"     : title,
                     "num"       : 0,
                     "img_id"    : "",
+                    "audio_id"  : "",
+                    "cover_id"  : "",
                     "width"     : 0,
                     "height"    : 0,
                 })
@@ -224,6 +228,7 @@ class TiktokExtractor(Extractor):
             "num"      : 0,
             "img_id"   : "",
             "audio_id" : "",
+            "cover_id" : "",
             "width"    : video.get("width"),
             "height"   : video.get("height"),
         })
@@ -243,6 +248,7 @@ class TiktokExtractor(Extractor):
             "num"      : 0,
             "img_id"   : "",
             "audio_id" : audio.get("id"),
+            "cover_id" : "",
             "width"    : 0,
             "height"   : 0,
         })
@@ -268,6 +274,7 @@ class TiktokExtractor(Extractor):
             "duration" : media.get("duration"),
             "num"      : 0,
             "img_id"   : "",
+            "audio_id" : "",
             "cover_id" : cover_id,
             "width"    : 0,
             "height"   : 0,
@@ -388,11 +395,13 @@ class TiktokAvatarExtractor(TiktokExtractor):
             or data["avatarThumb"]
         avatar = text.nameext_from_url(avatar_url, data.copy())
         avatar.update({
-            "type"   : "avatar",
-            "title"  : "@" + data["user"],
-            "id"     : data["id"],
-            "img_id" : avatar["filename"].partition("~")[0],
-            "num"    : 0,
+            "type"      : "avatar",
+            "title"     : "@" + data["user"],
+            "id"        : data["id"],
+            "img_id"    : avatar["filename"].partition("~")[0],
+            "audio_id"  : "",
+            "cover_id"  : "",
+            "num"       : 0,
         })
 
         yield Message.Directory, "", avatar
