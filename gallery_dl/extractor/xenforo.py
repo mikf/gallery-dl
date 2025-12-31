@@ -41,6 +41,7 @@ class XenforoExtractor(BaseExtractor):
             r')'
         ).findall
 
+        root_media = self.config_instance("root-media") or self.root
         for post in self.posts():
             urls = extract_urls(post["content"])
             if post["attachments"]:
@@ -74,6 +75,8 @@ class XenforoExtractor(BaseExtractor):
                     text.nameext_from_url(url, data)
                     data["id"] = text.parse_int(
                         data["filename"].partition("-")[0])
+                    if url[0] == "/":
+                        url = root_media + url
                     yield Message.Url, url, data
 
                 elif (inline := inl1 or inl2):
@@ -274,6 +277,7 @@ BASE_PATTERN = XenforoExtractor.update({
     },
     "atfforum": {
         "root": "https://allthefallen.moe/forum",
+        "root-media": "https://allthefallen.moe",
         "pattern": r"(?:www\.)?allthefallen\.moe/forum",
         "cookies": ("xf_user",),
     },

@@ -59,6 +59,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.allthefallen.moe/forum/index.php?threads/shoujo-ramune-episode-1-decensored-by-deepcreampy.17050/#post-19803487",
+    "#comment" : "incomplete video URL (#8786)",
+    "#category": ("xenforo", "atfforum", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+    "#auth"    : True,
+    "#results" : "https://allthefallen.moe/forum/data/video/1094/1094367-e46ad8636dee0d4488db56d3770919cc.mp4",
+},
+
+{
     "#url"     : "https://www.allthefallen.moe/forum/index.php?threads/final-fantasy-xiv.57090/",
     "#category": ("xenforo", "atfforum", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
