@@ -115,14 +115,16 @@ class TiktokExtractor(Extractor):
                     for url in self._extract_subtitles(post, "video"):
                         yield Message.Url, url, post
                 elif isinstance(self.subtitles, str) and self.subtitles != "":
-                    filters = self.subtitles.split(",")
+                    # split the filter into sources and languages
+                    known_sources = ("ASR", "MT", "LC")
+                    filters = set(self.subtitles.split(","))
                     sources = []
-                    if "ASR" in filters:
-                        sources.append("ASR")
-                        filters.remove("ASR")
-                    if "MT" in filters:
-                        sources.append("MT")
-                        filters.remove("MT")
+                    for f in filters:
+                        if f in known_sources:
+                            sources.append(f)
+
+                    for s in sources:
+                        filters.remove(s)
 
                     for url in self._extract_subtitles(
                             post,
@@ -335,8 +337,17 @@ class TiktokExtractor(Extractor):
                     continue
 
             if url := subtitle.get("Url"):
+                # subtitle urls may not specify a filename,
+                # so the metadata can be used to build one.
                 if (text.nameext_from_url(url, post))["filename"] == "":
                     post["extension"] = sub_format.lower()
+
+                    # replace extensions for known formats
+                    if post["extension"] == "webvtt":
+                        post["extension"] = "vtt"
+                    elif post["extension"] == "creator_caption":
+                        post["extension"] = "json"
+
                     post["filename"] = \
                         f"{post['id']}_" \
                         f"{sub_lang_codename}_" \
@@ -345,7 +356,6 @@ class TiktokExtractor(Extractor):
 
                 post.update({
                     "type"                  : "subtitle",
-                    "extension"             : "vtt",
                     "image"                 : None,
                     "title"                 :
                     post["desc"] or "TikTok {type} cover #{post['id']}",
