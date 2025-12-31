@@ -5838,11 +5838,23 @@ Description
 extractor.tiktok.covers
 -----------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``false``
 Description
     Download video covers.
+
+    ``true``
+        Download the first cover found in the following order:
+
+        * ``thumbnail``
+        * ``cover``
+        * ``originCover``
+        * ``dynamicCover``
+
+    ``"all"``
+        Download all available covers.
 
 
 extractor.tiktok.photos

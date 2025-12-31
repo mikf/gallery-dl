@@ -127,8 +127,20 @@ __tests__ = (
     "#url"      : "https://www.tiktok.com/@memezar/video/7449708266168274208",
     "#comment"  : "video post cover image",
     "#class"    : tiktok.TiktokPostExtractor,
-    "#pattern"  : r"https://p19-common-sign-useastred.tiktokcdn-eu.com/tos-useast2a-p-0037-euttp/o4rVzhI1bABhooAaEqtCAYGi6nijIsDib8NGfC~tplv-tiktokx-origin.image\?dr=10395&x-expires=\d+&x-signature=.+",
+    "#pattern"  : PATTERN,
+    "#count"    : 1,
     "#options"  : {"videos": False, "covers": True},
+
+
+},
+
+{
+    "#url"      : "https://www.tiktok.com/@memezar/video/7449708266168274208",
+    "#comment"  : "all video post cover images",
+    "#class"    : tiktok.TiktokPostExtractor,
+    "#pattern"  : PATTERN,
+    "#count"    : 3,
+    "#options"  : {"videos": False, "covers": "all"},
 
 
 },

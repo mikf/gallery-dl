@@ -93,8 +93,15 @@ class TiktokExtractor(Extractor):
                     ytdl_media = "video"
                 elif self.video and (url := self._extract_video(post)):
                     yield Message.Url, url, post
-                if self.cover and (url := self._extract_cover(post, "video")):
-                    yield Message.Url, url, post
+
+                if self.cover:
+                    if self.cover == "all":
+                        for url in self._extract_covers(post, "video"):
+                            yield Message.Url, url, post
+                    else:
+                        for url in self._extract_covers(post, "video"):
+                            yield Message.Url, url, post
+                            break
 
             else:
                 self.log.info("%s: Skipping post", tiktok_url)
@@ -256,30 +263,26 @@ class TiktokExtractor(Extractor):
             post["extension"] = "mp3"
         return url
 
-    def _extract_cover(self, post, type):
+    def _extract_covers(self, post, type):
         media = post[type]
 
         for cover_id in ("thumbnail", "cover", "originCover", "dynamicCover"):
             if url := media.get(cover_id):
-                break
-        else:
-            return
-
-        text.nameext_from_url(url, post)
-        post.update({
-            "type"     : "cover",
-            "extension": "jpg",
-            "image"    : url,
-            "title"    : post["desc"] or f"TikTok {type} cover #{post['id']}",
-            "duration" : media.get("duration"),
-            "num"      : 0,
-            "img_id"   : "",
-            "audio_id" : "",
-            "cover_id" : cover_id,
-            "width"    : 0,
-            "height"   : 0,
-        })
-        return url
+                text.nameext_from_url(url, post)
+                post.update({
+                    "type"      : "cover",
+                    "extension" : "jpg",
+                    "image"     : url,
+                    "title"     :
+                    post["desc"] or f"TikTok {type} cover #{post['id']}",
+                    "duration"  : media.get("duration"),
+                    "num"       : 0,
+                    "img_id"    : "",
+                    "cover_id"  : cover_id,
+                    "width"     : 0,
+                    "height"    : 0,
+                })
+                yield url
 
     def _check_status_code(self, detail, url, type_of_url):
         status = detail.get("statusCode")
