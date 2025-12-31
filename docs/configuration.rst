@@ -5857,6 +5857,40 @@ Description
         Download all available covers.
 
 
+extractor.tiktok.subtitles
+-----------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``false``
+Example
+    * ``"all"``
+    * ``"ASR,MT"``
+    * ``"ASR,eng-US"``
+Description
+    Download video subtitles.
+    The subtitles can be filtered by source or language.
+    The following source types can be filtered:
+
+    * ``ASR`` - Automatic Speech Recognition
+    * ``MT`` - Machine Translation
+    If both source types and language codes are provided,
+    only subtitles matching both are downloaded.
+
+    ``true``
+        Download all subtitles tagged ``ASR``.
+
+    ``"all"``
+        Download all available subtitles.
+
+    ``"ASR,MT,eng-US,cmn-Hans-CN"``
+        Download english and simplified chinese subtitles
+        that are either automatically recognized or machine translated.
+
+        The source types and languages can be listed in any order.
+
+
 extractor.tiktok.photos
 -----------------------
 Type

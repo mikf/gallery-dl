@@ -34,6 +34,7 @@ class TiktokExtractor(Extractor):
         self.audio = self.config("audio", True)
         self.video = self.config("videos", True)
         self.cover = self.config("covers", False)
+        self.subtitles = self.config("subtitles", False)
 
         self.range = self.config("tiktok-range") or ""
         self.range_predicate = util.RangePredicate(self.range)
@@ -102,6 +103,36 @@ class TiktokExtractor(Extractor):
                         for url in self._extract_covers(post, "video"):
                             yield Message.Url, url, post
                             break
+
+                if self.subtitles is True:
+                    self.subtitles = "ASR"
+
+                if self.subtitles == "all":
+                    for url in self._extract_subtitles(post, "video"):
+                        yield Message.Url, url, post
+                elif isinstance(self.subtitles, str) and self.subtitles != "":
+                    filters = self.subtitles.split(",")
+                    sources = []
+                    if "ASR" in filters:
+                        sources.append("ASR")
+                        filters.remove("ASR")
+                    if "MT" in filters:
+                        sources.append("MT")
+                        filters.remove("MT")
+
+                    for url in self._extract_subtitles(
+                            post,
+                            "video",
+                            sources=sources,
+                            langs=filters):
+                        yield Message.Url, url, post
+
+                    # remove the subtitle related fields for the next item
+                    post.pop('subtitle_lang_id', None)
+                    post.pop('subtitle_lang_codename', None)
+                    post.pop('subtitle_format', None)
+                    post.pop('subtitle_version', None)
+                    post.pop('subtitle_source', None)
 
             else:
                 self.log.info("%s: Skipping post", tiktok_url)
@@ -281,6 +312,51 @@ class TiktokExtractor(Extractor):
                     "cover_id"  : cover_id,
                     "width"     : 0,
                     "height"    : 0,
+                })
+                yield url
+
+    def _extract_subtitles(self, post, type, sources=None, langs=None):
+        media = post[type]
+
+        for subtitle in media.get("subtitleInfos", []):
+            sub_lang_id = subtitle.get("LanguageID")
+            sub_lang_codename = subtitle.get("LanguageCodeName")
+            sub_format = subtitle.get("Format")
+            sub_version = subtitle.get("Version")
+            sub_source = subtitle.get("Source")
+
+            if sources is not None or langs is not None:
+                if sub_source not in sources and \
+                        sub_lang_codename not in langs:
+                    continue
+
+            if url := subtitle.get("Url"):
+                if (text.nameext_from_url(url, post))["filename"] == "":
+                    post["extension"] = sub_format.lower()
+                    post["filename"] = \
+                        f"{post['id']}_" \
+                        f"{sub_lang_codename}_" \
+                        f"{sub_version}_" \
+                        f"{sub_source}"
+
+                post.update({
+                    "type"                  : "subtitle",
+                    "extension"             : "vtt",
+                    "image"                 : None,
+                    "title"                 :
+                    post["desc"] or "TikTok {type} cover #{post['id']}",
+                    "duration"              : media.get("duration"),
+                    "num"                   : 0,
+                    "img_id"                : "",
+                    "audio_id"              : "",
+                    "cover_id"              : "",
+                    "subtitle_lang_id"      : sub_lang_id,
+                    "subtitle_lang_codename": sub_lang_codename,
+                    "subtitle_format"       : sub_format,
+                    "subtitle_version"      : sub_version,
+                    "subtitle_source"       : sub_source,
+                    "width"                 : 0,
+                    "height"                : 0,
                 })
                 yield url
 
