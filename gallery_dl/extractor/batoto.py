@@ -127,11 +127,13 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
         }
 
     def images(self, page):
-        images_container = text.extr(page, 'pageOpts', ':[0,0]}"')
-        images_container = text.unescape(images_container)
+        container = text.unescape(text.extr(page, 'pageOpts', ':[0,0]}"'))
+
         return [
-            (url, None)
-            for url in text.extract_iter(images_container, r"\"", r"\"")
+            ((url.replace("://k", "://n", 1)
+              if url.startswith("https://k") and ".mb" in url else
+              url), None)
+            for url in text.extract_iter(container, r"\"", r"\"")
         ]
 
 
