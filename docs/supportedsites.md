@@ -1231,6 +1231,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, Articles, Feeds, Images from Statuses, User Profiles, Videos</td>
     <td></td>
 </tr>
+<tr id="whyp" title="whyp">
+    <td>Whyp</td>
+    <td>https://whyp.it/</td>
+    <td>Audio, Collections, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="wikiart" title="wikiart">
     <td>WikiArt.org</td>
     <td>https://www.wikiart.org/</td>

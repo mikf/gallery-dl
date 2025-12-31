@@ -234,6 +234,7 @@ modules = [
     "weebcentral",
     "weebdex",
     "weibo",
+    "whyp",
     "wikiart",
     "wikifeet",
     "wikimedia",
