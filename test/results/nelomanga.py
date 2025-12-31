@@ -5,6 +5,7 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import manganelo
+from gallery_dl import exception
 
 
 __tests__ = (
@@ -68,6 +69,23 @@ __tests__ = (
     "#url"     : "https://nelomanga.net/manga/aria",
     "#category": ("manganelo", "nelomanga", "manga"),
     "#class"   : manganelo.ManganeloMangaExtractor,
+},
+
+{
+    "#url"     : "https://www.nelomanga.net/bookmark",
+    "#category": ("manganelo", "nelomanga", "bookmark"),
+    "#class"   : manganelo.ManganeloBookmarkExtractor,
+    "#pattern" : manganelo.ManganeloMangaExtractor.pattern,
+    "#auth"    : "cookies",
+    "#count"   : 23,
+},
+
+{
+    "#url"     : "https://nelomanga.net/bookmark",
+    "#category": ("manganelo", "nelomanga", "bookmark"),
+    "#class"   : manganelo.ManganeloBookmarkExtractor,
+    "#auth"     : False,
+    "#exception": exception.AuthRequired,
 },
 
 )
