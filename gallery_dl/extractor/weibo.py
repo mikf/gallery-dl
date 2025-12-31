@@ -311,6 +311,7 @@ class WeiboUserExtractor(WeiboExtractor):
             (WeiboFeedExtractor    , base + "feed"),
             (WeiboVideosExtractor  , base + "video"),
             (WeiboNewvideoExtractor, base + "newVideo"),
+            (WeiboArticleExtractor , base + "article"),
             (WeiboAlbumExtractor   , base + "album"),
         ), ("feed",))
 
