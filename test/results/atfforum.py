@@ -53,6 +53,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.allthefallen.moe/forum/index.php?threads/final-fantasy-xiv.57090/#post-21765744",
+    "#category": ("xenforo", "atfforum", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+},
+
+{
     "#url"     : "https://www.allthefallen.moe/forum/index.php?threads/final-fantasy-xiv.57090/",
     "#category": ("xenforo", "atfforum", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
