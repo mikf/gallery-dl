@@ -283,7 +283,7 @@ BASE_PATTERN = XenforoExtractor.update({
 class XenforoPostExtractor(XenforoExtractor):
     subcategory = "post"
     pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?threads"
-               r"/[^/?#]+/post-|/posts/)(\d+)")
+               r"/[^/?#]+/#?post-|/posts/)(\d+)")
     example = "https://simpcity.cr/threads/TITLE.12345/post-54321"
 
     def posts(self):
