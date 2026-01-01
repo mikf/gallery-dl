@@ -182,31 +182,32 @@ class TiktokExtractor(Extractor):
                     "https://www.tiktok.com/", ["webapp.app-context"])
 
     def _extract_sec_uid(self, profile_url, user_name):
-        SEC_UID_PATTERN = r"MS4wLjABAAAA[\w-]{64}"
-        sec_uid = self._extract_id(profile_url, user_name, SEC_UID_PATTERN,
-                                   "secUid")
-        if not text.re(SEC_UID_PATTERN).fullmatch(sec_uid):
-            raise exception.ExtractionError("%s: unable to extract secondary "
-                                            "user ID", user_name)
+        sec_uid = self._extract_id(
+            profile_url, user_name, r"MS4wLjABAAAA[\w-]{64}", "secUid")
+        if sec_uid is None:
+            raise exception.AbortExtraction(
+                f"{user_name}: unable to extract secondary user ID")
         return sec_uid
 
     def _extract_author_id(self, profile_url, user_name):
-        AUTHOR_ID_PATTERN = r"[0-9]+"
-        author_id = self._extract_id(profile_url, user_name, AUTHOR_ID_PATTERN,
-                                     "id")
-        if not text.re(AUTHOR_ID_PATTERN).fullmatch(author_id):
-            raise exception.ExtractionError("%s: unable to extract user ID",
-                                            user_name)
+        author_id = self._extract_id(
+            profile_url, user_name, r"[0-9]+", "id")
+        if author_id is None:
+            raise exception.AbortExtraction(
+                f"{user_name}: unable to extract user ID")
         return author_id
 
     def _extract_id(self, profile_url, user_name, regex, id_key):
-        if text.re(regex).fullmatch(user_name):
+        match = text.re(regex).fullmatch
+
+        if match(user_name) is not None:
             # If it was provided in the URL, then we can skip extracting it
             # from the rehydration data.
             return user_name
-        else:
-            return self._extract_rehydration_data_user(
-                profile_url, ["userInfo", "user", id_key])
+
+        id = self._extract_rehydration_data_user(
+            profile_url, ("userInfo", "user", id_key))
+        return None if match(id) is None else id
 
     def _extract_video(self, post):
         video = post["video"]
@@ -540,9 +541,8 @@ class TiktokRepostsExtractor(TiktokExtractor):
         user_name = self.groups[0]
         profile_url = f"{self.root}/@{user_name}"
 
-        sec_uid = self._extract_sec_uid(profile_url, user_name)
         query_parameters = {
-            "secUid": sec_uid,
+            "secUid": self._extract_sec_uid(profile_url, user_name),
             "post_item_list_request_type": "0",
             "needPinnedItemIds": "false",
             "count": "15",
@@ -562,9 +562,8 @@ class TiktokStoriesExtractor(TiktokExtractor):
         user_name = self.groups[0]
         profile_url = f"{self.root}/@{user_name}"
 
-        author_id = self._extract_author_id(profile_url, user_name)
         query_parameters = {
-            "authorId": author_id,
+            "authorId": self._extract_author_id(profile_url, user_name),
             "loadBackward": "false",
             "count": "5",
         }
@@ -583,9 +582,8 @@ class TiktokLikesExtractor(TiktokExtractor):
         user_name = self.groups[0]
         profile_url = f"{self.root}/@{user_name}"
 
-        sec_uid = self._extract_sec_uid(profile_url, user_name)
         query_parameters = {
-            "secUid": sec_uid,
+            "secUid": self._extract_sec_uid(profile_url, user_name),
             "post_item_list_request_type": "0",
             "needPinnedItemIds": "false",
             "count": "15",
@@ -605,9 +603,8 @@ class TiktokSavedExtractor(TiktokExtractor):
         user_name = self.groups[0]
         profile_url = f"{self.root}/@{user_name}"
 
-        sec_uid = self._extract_sec_uid(profile_url, user_name)
         query_parameters = {
-            "secUid": sec_uid,
+            "secUid": self._extract_sec_uid(profile_url, user_name),
             "post_item_list_request_type": "0",
             "needPinnedItemIds": "false",
             "count": "15",
