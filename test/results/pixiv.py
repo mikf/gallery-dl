@@ -15,6 +15,23 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/users/173530",
+    "#class"   : pixiv.PixivUserExtractor,
+    "#options" : {"include": "all"},
+    "#results" : (
+        "https://www.pixiv.net/users/173530/avatar",
+        "https://www.pixiv.net/users/173530/background",
+        "https://www.pixiv.net/users/173530/artworks",
+        "https://www.pixiv.net/users/173530/bookmarks/artworks",
+        "https://www.pixiv.net/users/173530/bookmarks/novels",
+        "https://www.pixiv.net/users/173530/novels",
+        "https://sketch.pixiv.net/@del_shannon",
+        "https://www.pixiv.net/users/173530/bookmarks/novels",
+        "https://www.pixiv.net/users/173530/novels",
+    ),
+},
+
+{
     "#url"     : "https://www.pixiv.net/u/173530",
     "#class"   : pixiv.PixivUserExtractor,
 },

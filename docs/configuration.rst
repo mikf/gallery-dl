@@ -4787,6 +4787,7 @@ Supported Values
     * ``favorite``
     * ``novel-user``
     * ``novel-bookmark``
+    * ``sketch``
 Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
