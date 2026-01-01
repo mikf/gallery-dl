@@ -22,8 +22,8 @@ class TiktokExtractor(Extractor):
     category = "tiktok"
     directory_fmt = ("{category}", "{user}")
     filename_fmt = (
-        "{id}{num:?_//>02} {title[b:150]}{img_id|audio_id:? [/]/}.{extension}")
-    archive_fmt = "{id}_{num}_{img_id}"
+        "{id}{num:?_//>02} {title[b:150]}{file_id:? [/]/}.{extension}")
+    archive_fmt = "{id}_{num}_{file_id}"
     root = "https://www.tiktok.com"
     cookies_domain = ".tiktok.com"
     rehydration_data_cache = {}
@@ -74,7 +74,7 @@ class TiktokExtractor(Extractor):
                             "image" : img,
                             "title" : title,
                             "num"   : i,
-                            "img_id": post["filename"].partition("~")[0],
+                            "file_id": post["filename"].partition("~")[0],
                             "width" : img["imageWidth"],
                             "height": img["imageHeight"],
                         })
@@ -107,7 +107,7 @@ class TiktokExtractor(Extractor):
                     "extension" : "mp3" if ytdl_media == "audio" else "mp4",
                     "title"     : title,
                     "num"       : 0,
-                    "img_id"    : "",
+                    "file_id"   : "",
                     "width"     : 0,
                     "height"    : 0,
                 })
@@ -222,8 +222,7 @@ class TiktokExtractor(Extractor):
             "title"    : post["desc"] or f"TikTok video #{post['id']}",
             "duration" : video.get("duration"),
             "num"      : 0,
-            "img_id"   : "",
-            "audio_id" : "",
+            "file_id"  : video.get("id"),
             "width"    : video.get("width"),
             "height"   : video.get("height"),
         })
@@ -241,8 +240,7 @@ class TiktokExtractor(Extractor):
             "title"    : post["desc"] or f"TikTok audio #{post['id']}",
             "duration" : audio.get("duration"),
             "num"      : 0,
-            "img_id"   : "",
-            "audio_id" : audio.get("id"),
+            "file_id"  : audio.get("id"),
             "width"    : 0,
             "height"   : 0,
         })
@@ -267,8 +265,7 @@ class TiktokExtractor(Extractor):
             "title"    : post["desc"] or f"TikTok {type} cover #{post['id']}",
             "duration" : media.get("duration"),
             "num"      : 0,
-            "img_id"   : "",
-            "cover_id" : cover_id,
+            "file_id"  : cover_id,
             "width"    : 0,
             "height"   : 0,
         })
@@ -391,7 +388,7 @@ class TiktokAvatarExtractor(TiktokExtractor):
             "type"   : "avatar",
             "title"  : "@" + data["user"],
             "id"     : data["id"],
-            "img_id" : avatar["filename"].partition("~")[0],
+            "file_id": avatar["filename"].partition("~")[0],
             "num"    : 0,
         })
 
