@@ -17,6 +17,8 @@ class KoofrSharedExtractor(Extractor):
     category = "koofr"
     subcategory = "shared"
     root = "https://app.koofr.net"
+    directory_fmt = ("{category}", "{date:%Y-%m-%d} {title}")
+    archive_fmt = "{post[id]}_{hash|id}"
     pattern = (r"(?:https?://)?(?:"
                r"(?:app\.)?koofr\.(?:net|eu)/links/([\w-]+)|"
                r"k00\.fr/(\w+))")
@@ -41,15 +43,45 @@ class KoofrSharedExtractor(Extractor):
             "Sec-Fetch-Site" : "same-origin",
         }
         data = self.request_json(url, params=params, headers=headers)
-
-        name = data["name"]
-        file = text.nameext_from_name(name, data["file"])
-        file["_http_headers"] = {"Referer": referer}
-
         root = data.get("publicUrlBase") or self.root
-        url = f"{root}/content/links/{uuid}/files/get/{name}?path=/&force="
-        if password:
-            url = f"{url}&password={password}"
+        base = f"{root}/content/links/{uuid}/files/get/"
+        headers = {"Referer": referer}
+        file = data["file"]
 
-        yield Message.Directory, "", file
-        yield Message.Url, url, file
+        if file["type"] == "dir" and not self.config("zip", False):
+            path = True
+            url = url + "/bundle"
+            params["path"] = "/"
+            files = self.request_json(
+                url, params=params, headers=headers)["files"]
+        else:
+            path = False
+            files = (file,)
+
+        if password:
+            password = text.escape(password)
+
+        post = {
+            "id"   : data["id"],
+            "title": data["name"],
+            "count": len(files),
+            "date" : self.parse_timestamp(file["modified"] / 1000),
+        }
+
+        yield Message.Directory, "", post
+        for num, file in enumerate(files, 1):
+            file["count"] = len(files)
+            file["num"] = num
+            file["post"] = post
+            file["date"] = self.parse_timestamp(file["modified"] / 1000)
+            file["_http_headers"] = headers
+
+            name = file["name"]
+            text.nameext_from_name(name, file)
+
+            name = text.escape(name)
+            url = (f"{base}{name}?path=%2F{name if path else '&force'}")
+            if password:
+                url = f"{url}&password={password}"
+
+            yield Message.Url, url, file
