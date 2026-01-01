@@ -5866,7 +5866,7 @@ Default
     ``false``
 Example
     * ``"all"``
-    * ``"ASR,MT"``
+    * ``"ASR,MT,LC"``
     * ``"ASR,eng-US"``
 Description
     Download video subtitles.
@@ -5875,6 +5875,7 @@ Description
 
     * ``ASR`` - Automatic Speech Recognition
     * ``MT`` - Machine Translation
+    * ``LC`` - Local Captions / Creator Captions
     If both source types and language codes are provided,
     only subtitles matching both are downloaded.
 
@@ -5889,6 +5890,11 @@ Description
         that are either automatically recognized or machine translated.
 
         The source types and languages can be listed in any order.
+Note
+    It is not possible to filter all subtitles of a specific source type,
+    while also filtering for additional languages of another source type.
+    (e.g. any ASR subtitle + fra-FR of any source type)
+    For this, refer to `extractor.*.image-filter`_.
 
 
 extractor.tiktok.photos
