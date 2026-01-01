@@ -92,10 +92,11 @@ class PixivExtractor(Extractor):
                     work["caption"] = self._sanitize_ajax_caption(
                         body["illustComment"])
 
-            if transform_tags:
+            if transform_tags is not None:
                 transform_tags(work)
             work["num"] = 0
             work["date"] = dt.parse_iso(work["create_date"])
+            work["count"] = len(files)
             work["rating"] = ratings.get(work["x_restrict"])
             work["suffix"] = ""
             work.update(metadata)
