@@ -202,7 +202,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         }
 
     def _validate(self, response):
-        if response.history and response.url.endswith("/maintenance-vid.mp4"):
+        if response.history and response.url.endswith(
+                ("/maint.mp4", "/maintenance-vid.mp4")):
             self.log.warning("File server in maintenance mode")
             return False
         return True
