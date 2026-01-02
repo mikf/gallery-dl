@@ -1,5 +1,53 @@
 # Changelog
 
+## 1.31.2 - 2026-01-02
+### Extractors
+#### Additions
+- [ahottie] add aupport ([#8710](https://github.com/mikf/gallery-dl/issues/8710))
+- [discord] add `server-assets` extractor ([#8589](https://github.com/mikf/gallery-dl/issues/8589))
+- [imgpv] add `image` extractor ([#8773](https://github.com/mikf/gallery-dl/issues/8773))
+- [manganelo] add `bookmark` extractor ([#8776](https://github.com/mikf/gallery-dl/issues/8776))
+- [tiktok] add support for stories, liked posts, saved posts, reposts ([#8035](https://github.com/mikf/gallery-dl/issues/8035) [#8466](https://github.com/mikf/gallery-dl/issues/8466) [#8715](https://github.com/mikf/gallery-dl/issues/8715))
+- [twitter] add `notifications` extractor ([#7974](https://github.com/mikf/gallery-dl/issues/7974))
+- [whyp] add support ([#8725](https://github.com/mikf/gallery-dl/issues/8725))
+- [yourlesbians] add `album` extractor ([#8713](https://github.com/mikf/gallery-dl/issues/8713))
+#### Fixes
+- [batoto] replace k-subdomain image URLs with n-subdomain ([#8791](https://github.com/mikf/gallery-dl/issues/8791))
+- [civitai] update `quality-videos` default ([#8787](https://github.com/mikf/gallery-dl/issues/8787))
+- [deviantart:stash] fix `JSONDecodeEerror` for folders ([#8750](https://github.com/mikf/gallery-dl/issues/8750))
+- [exhentai] fix possible exception in `finalize()` ([#8741](https://github.com/mikf/gallery-dl/issues/8741))
+- [instagram:stories] extract correct `expires` dates ([#8764](https://github.com/mikf/gallery-dl/issues/8764))
+- [sankaku] fix re-authentication ([#8779](https://github.com/mikf/gallery-dl/issues/8779))
+- [tapas] unescape HTML entities in image URLs ([#8790](https://github.com/mikf/gallery-dl/issues/8790))
+- [tumblr:search] prevent `KeyError` when using `offset` pagination ([#8720](https://github.com/mikf/gallery-dl/issues/8720))
+- [xenforo] fix incomplete video URLs ([#8786](https://github.com/mikf/gallery-dl/issues/8786))
+#### Improvements
+- [bunkr] detect new maintenance video file ([#8802](https://github.com/mikf/gallery-dl/issues/8802))
+- [fansly] disable `formats` check by default ([#8757](https://github.com/mikf/gallery-dl/issues/8757))
+- [instagram] detect homepage redirects ([#8714](https://github.com/mikf/gallery-dl/issues/8714))
+- [instagram] don't warn on minor image size differences ([#8300](https://github.com/mikf/gallery-dl/issues/8300))
+- [pixiv] support `sketch` include ([#8789](https://github.com/mikf/gallery-dl/issues/8789))
+- [subscribestar] support filterting `user` posts by `tag` ([#8737](https://github.com/mikf/gallery-dl/issues/8737))
+- [tiktok] remove yt-dlp dependency ([#7246](https://github.com/mikf/gallery-dl/issues/7246) [#8466](https://github.com/mikf/gallery-dl/issues/8466) [#8730](https://github.com/mikf/gallery-dl/issues/8730) [#8715](https://github.com/mikf/gallery-dl/issues/8715))
+- [webtoons] download episode background music ([#8733](https://github.com/mikf/gallery-dl/issues/8733))
+- [xenforo] support `/#post-ID` URLs
+#### Metadata
+- [pixiv] provide `count` metadata ([#8794](https://github.com/mikf/gallery-dl/issues/8794))
+- [tiktok] combine `…_id` fields into a single `file_id` one ([#8804](https://github.com/mikf/gallery-dl/issues/8804))
+- [webtoons] extract `num_play` & `num_stop` for background music ([#8733](https://github.com/mikf/gallery-dl/issues/8733) [#8755](https://github.com/mikf/gallery-dl/issues/8755))
+#### Options
+- [facebook] add `loop` option ([#8696](https://github.com/mikf/gallery-dl/issues/8696))
+- [fansly] add `previews` option ([#8686](https://github.com/mikf/gallery-dl/issues/8686))
+- [koofr] implement `zip` option ([#6582](https://github.com/mikf/gallery-dl/issues/6582) [#8700](https://github.com/mikf/gallery-dl/issues/8700))
+- [tiktok] add `order-posts` option ([#8730](https://github.com/mikf/gallery-dl/issues/8730) [#8715](https://github.com/mikf/gallery-dl/issues/8715))
+### Downloaders
+- [http] add MIME type and signature for `.aac` files
+- [ytdl] fix overwriting `mtime` of downloaded files ([#8767](https://github.com/mikf/gallery-dl/issues/8767))
+- [ytdl] expect all exception types when extracting `info_dict` ([#8343](https://github.com/mikf/gallery-dl/issues/8343))
+### Miscellaneous
+- [actions] fix `abort` ([#8753](https://github.com/mikf/gallery-dl/issues/8753))
+- [options] add `--sleep-skip` ([#6582](https://github.com/mikf/gallery-dl/issues/6582))
+
 ## 1.31.1 - 2025-12-20
 ### Extractors
 #### Additions
