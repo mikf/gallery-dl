@@ -13,6 +13,7 @@ from .. import text, util
 from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?danke\.moe"
+MANGA_PATTERN = BASE_PATTERN + r"/read(?:er)?/(?:manga|series)/([\w-]+)"
 
 
 class DankefuerslesenBase():
@@ -28,7 +29,7 @@ class DankefuerslesenBase():
 
 class DankefuerslesenChapterExtractor(DankefuerslesenBase, ChapterExtractor):
     """Extractor for Danke fürs Lesen manga chapters"""
-    pattern = BASE_PATTERN + r"/read/manga/([\w-]+)/([\w-]+)"
+    pattern = MANGA_PATTERN + r"/([\w-]+)"
     example = "https://danke.moe/read/manga/TITLE/123/1/"
 
     def _init(self):
@@ -95,7 +96,7 @@ class DankefuerslesenMangaExtractor(DankefuerslesenBase, MangaExtractor):
     """Extractor for Danke fürs Lesen manga"""
     chapterclass = DankefuerslesenChapterExtractor
     reverse = False
-    pattern = BASE_PATTERN + r"/read/manga/([^/?#]+)"
+    pattern = MANGA_PATTERN
     example = "https://danke.moe/read/manga/TITLE/"
 
     def chapters(self, page):
