@@ -817,15 +817,24 @@ Default
 Example
     * ``"curl/8.14.1"``
     * ``"browser"``
-    * ``"@chrome"``
+    * ``"+chrome"``
+    * ``"@/opt/ChromeBrowser/bin/chrome"``
 Description
     User-Agent header value used for HTTP requests.
 
     Setting this value to ``"browser"`` will try to automatically detect
     and use the ``User-Agent`` header of the system's default browser.
 
-    Setting this value to ``"@BROWSER"``, e.g. ``"@chrome"``, will try to automatically detect
-    and use the ``User-Agent`` header of this installed browser.
+    | Starting this value with a ``+``
+      will use the latest ``User-Agent`` header of this preset target,
+      e.g. ``"+ff"``.
+    | (Supported values:
+      ``firefox`` | ``ff`` | ``chrome`` | ``cr`` | ``gallery-dl`` | ``gdl``)
+
+    | Starting this value with an ``@``
+     will try to automatically detect and use the ``User-Agent`` header
+     of this installed browser,
+    | e.g. ``"@C:/Program Files/Zen Browser/zen-browser.exe"``.
 
 
 extractor.*.browser
