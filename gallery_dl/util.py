@@ -716,7 +716,7 @@ EXTS_IMAGE = {"jpg", "jpeg", "png", "gif", "bmp", "svg", "psd", "ico",
 EXTS_VIDEO = {"mp4", "m4v", "mov", "webm", "mkv", "ogv", "flv", "avi", "wmv"}
 EXTS_ARCHIVE = {"zip", "rar", "7z", "tar", "gz", "bz2", "lzma", "xz"}
 
-USERAGENT = "gallery-dl/" + version.__version__
+USERAGENT_GALLERYDL = "gallery-dl/" + version.__version__
 USERAGENT_FIREFOX = (f"Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
                      f"rv:{_ff_ver}.0) Gecko/20100101 Firefox/{_ff_ver}.0")
 USERAGENT_CHROME = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
