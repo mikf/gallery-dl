@@ -475,6 +475,17 @@ class Extractor():
             headers["User-Agent"] = _browser_useragent(None)
         elif custom_ua[0] == "@":
             headers["User-Agent"] = _browser_useragent(custom_ua[1:])
+        elif custom_ua[0] == "+":
+            custom_ua = custom_ua[1:].lower()
+            if custom_ua in {"firefox", "ff"}:
+                headers["User-Agent"] = util.USERAGENT_FIREFOX
+            elif custom_ua in {"chrome", "cr"}:
+                headers["User-Agent"] = util.USERAGENT_CHROME
+            elif custom_ua in {"gallery-dl", "gallerydl", "gdl"}:
+                headers["User-Agent"] = util.USERAGENT_GALLERYDL
+            else:
+                self.log.warning(
+                    "Unsupported User-Agent preset '%s'", custom_ua)
         elif self.useragent is Extractor.useragent and not self.browser or \
                 custom_ua is not config.get(("extractor",), "user-agent"):
             headers["User-Agent"] = custom_ua
