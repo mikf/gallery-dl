@@ -190,7 +190,7 @@ def _manga_info(self, manga_id, page=None):
         "manga_id"   : text.parse_int(manga_id),
         "manga_slug" : data["slug"][1],
         "manga_date" : self.parse_timestamp(
-            data["dateCreate"][1] // 1000),
+            data["dateCreate"][1] / 1000),
         "manga_date_updated": self.parse_timestamp(
             data["dateUpdate"][1] / 1000),
         "author"     : json_list(data["authors"]),

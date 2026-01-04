@@ -29,7 +29,7 @@ class LofterExtractor(Extractor):
                 post = post["post"]
 
             post["blog_name"] = post["blogInfo"]["blogName"]
-            post["date"] = self.parse_timestamp(post["publishTime"] // 1000)
+            post["date"] = self.parse_timestamp(post["publishTime"] / 1000)
             post_type = post["type"]
 
             # Article

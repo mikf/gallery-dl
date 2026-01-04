@@ -126,7 +126,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
         data = self.request_json(url, headers=headers)
 
         try:
-            data["date"] = self.parse_timestamp(data["created_at"] // 1000)
+            data["date"] = self.parse_timestamp(data["created_at"] / 1000)
             data["count"] = len(data["thumbnails"]["entries"])
             del data["thumbnails"]
         except Exception:
