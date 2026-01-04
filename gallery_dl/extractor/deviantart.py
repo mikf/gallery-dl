@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://www.deviantart.com/"""
+"""Extractors for https://www.deviantart.com/n8navarro/art/John-Corben-Metallo-New-Earth-1212585450"""
 
 from .common import Extractor, Message, Dispatch
 from .. import text, util, dt, exception
