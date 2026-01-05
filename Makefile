@@ -32,7 +32,15 @@ supportedsites: docs/supportedsites.md
 
 options: docs/options.md
 
-.PHONY: all clean install release test executable completion man supportedsites options
+hooks:
+	@test -d .git || { echo "No .git directory found"; exit 1; }
+	mkdir -p .git/hooks
+	ln -sf ../../scripts/pre-commit .git/hooks/pre-commit
+	chmod +x scripts/pre-commit .git/hooks/pre-commit
+
+install-hooks: hooks
+
+.PHONY: all clean install release test executable completion man supportedsites options hooks install-hooks
 
 docs/supportedsites.md: gallery_dl/*/*.py scripts/supportedsites.py
 	$(PYTHON) scripts/supportedsites.py
