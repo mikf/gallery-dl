@@ -11,7 +11,7 @@ with many `configuration options <https://gdl-org.github.io/docs/configuration.h
 and powerful `filenaming capabilities <https://gdl-org.github.io/docs/formatting.html>`__.
 
 
-|pypi| |build|
+|pypi| |build| |discord|
 
 .. contents::
 
@@ -490,7 +490,7 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _Chocolatey: https://chocolatey.org/install
 .. _Scoop:      https://scoop.sh/
 
-.. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
+.. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl?logo=pypi&label=PyPI
     :target: https://pypi.org/project/gallery-dl/
 
 .. |build| image:: https://github.com/mikf/gallery-dl/workflows/tests/badge.svg
@@ -498,3 +498,6 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 
 .. |gitter| image:: https://badges.gitter.im/gallery-dl/main.svg
     :target: https://gitter.im/gallery-dl/main
+
+.. |discord| image:: https://img.shields.io/discord/1067148002722062416?logo=discord&label=Discord&color=blue
+    :target: https://discord.gg/euZgE6Xp
