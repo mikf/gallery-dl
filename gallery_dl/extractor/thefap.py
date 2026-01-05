@@ -4,19 +4,19 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://thefap.com/"""
+"""Extractors for https://thefap.net/"""
 
 from .common import Extractor, Message
 from .. import text, exception
 
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?thefap\.(?:com|net)"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?thefap\.net"
 
 
 class ThefapExtractor(Extractor):
     """Base class for thefap extractors"""
     category = "thefap"
-    root = "https://thefap.com"
+    root = "https://thefap.net"
     directory_fmt = ("{category}", "{model}")
     filename_fmt = "{model}_{num}.{extension}"
 
@@ -56,10 +56,10 @@ class ThefapExtractor(Extractor):
 
 
 class ThefapModelExtractor(ThefapExtractor):
-    """Extractor for model pages on thefap.com"""
+    """Extractor for model pages on thefap.net"""
     subcategory = "model"
     pattern = BASE_PATTERN + r"/([^/?#]+)-(\d+)(?:/)?$"
-    example = "https://thefap.com/zoey.curly-374261/"
+    example = "https://thefap.net/zoey.curly-374261/"
 
     def __init__(self, match):
         ThefapExtractor.__init__(self, match)
@@ -115,11 +115,11 @@ class ThefapModelExtractor(ThefapExtractor):
 
 
 class ThefapItemExtractor(ThefapExtractor):
-    """Extractor for individual items on thefap.com"""
+    """Extractor for individual items on thefap.net"""
     subcategory = "item"
     pattern = (BASE_PATTERN +
                r"/([^/?#]+)-(\d+)/([^/?#]+)/i(\d+)")
-    example = "https://thefap.com/zoey.curly-374261/xpics/i1"
+    example = "https://thefap.net/zoey.curly-374261/xpics/i1"
 
     def __init__(self, match):
         ThefapExtractor.__init__(self, match)

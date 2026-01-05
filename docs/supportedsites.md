@@ -1083,7 +1083,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr id="thefap" title="thefap">
     <td>TheFap</td>
-    <td>https://thefap.com/</td>
+    <td>https://thefap.net/</td>
     <td>Items, Models</td>
     <td></td>
 </tr>
