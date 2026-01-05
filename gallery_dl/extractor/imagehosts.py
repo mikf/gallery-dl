@@ -176,6 +176,11 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
                r"/([A-Z0-9]{8,10}|view/.*|img\.php\?.*))")
     example = "https://www.imagevenue.com/ME123456789"
 
+    @property
+    @memcache(maxage=3*3600)
+    def _cookies(self):
+        return self.request(self.page_url).cookies
+
     def get_info(self, page):
         try:
             pos = page.index('class="card-body')
