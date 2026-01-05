@@ -193,6 +193,7 @@ CATEGORY_MAP = {
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
     "thecollectionS" : "The /co/llection",
+    "thefap"         : "TheFap",
     "thehentaiworld" : "The Hentai World",
     "tiktok"         : "TikTok",
     "tmohentai"      : "TMOHentai",
