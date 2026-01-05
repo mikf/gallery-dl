@@ -991,6 +991,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Boards, Feed, Likes, Pins, User Pins, related Pins, Search Results</td>
     <td></td>
 </tr>
+<tr id="sexygirlspics" title="sexygirlspics">
+    <td>SexyGirlsPics.com</td>
+    <td>https://sexygirlspics.com/</td>
+    <td>Galleries, Tag Searches</td>
+    <td></td>
+</tr>
 <tr id="simplyhentai" title="simplyhentai">
     <td>Simply Hentai</td>
     <td>https://www.simply-hentai.com/</td>

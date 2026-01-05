@@ -189,6 +189,7 @@ modules = [
     "seiga",
     "senmanga",
     "sexcom",
+    "sexygirlspics",
     "shimmie2",
     "simplyhentai",
     "sizebooru",
