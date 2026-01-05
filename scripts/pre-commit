@@ -1,6 +1,10 @@
 #!/bin/bash
 
-TEMP="$(mktemp --directory)"
+if mktemp --directory >/dev/null 2>&1; then
+    TEMP="$(mktemp --directory)"
+else
+    TEMP="$(mktemp -d)"
+fi
 trap 'rm -rf -- "$TEMP"' EXIT
 
 while IFS="" read -r FILE
@@ -13,7 +17,15 @@ REPO=$PWD
 cd "$TEMP"
 
 # -----------------------------------------------------------------------------
-py 10 -s -m flake8 --config "$REPO/setup.cfg" .
+if [[ -x "$REPO/.venv/bin/python" ]]; then
+    "$REPO/.venv/bin/python" -m flake8 --config "$REPO/setup.cfg" .
+elif command -v py >/dev/null 2>&1; then
+    py 10 -s -m flake8 --config "$REPO/setup.cfg" .
+elif command -v python3 >/dev/null 2>&1; then
+    python3 -m flake8 --config "$REPO/setup.cfg" .
+else
+    python -m flake8 --config "$REPO/setup.cfg" .
+fi
 A=$?
 
 # -----------------------------------------------------------------------------
