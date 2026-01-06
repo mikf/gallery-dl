@@ -4073,14 +4073,18 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
-extractor.koofr.zip
--------------------
+extractor.koofr.recursive
+-------------------------
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
-    Download shared `/links/` with multiple files as a single `.zip` file.
+    ``true``
+        Recursively descent into subfolders
+        while downloading individual files.
+    ``false``
+        Download shared `/links/` with multiple files as a single `.zip` file.
 
 
 extractor.lolisafe.domain
