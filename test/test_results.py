@@ -534,6 +534,9 @@ class TestFormatter(formatter.StringFormatter):
                     return fmt(obj[key])
                 except KeyError:
                     return ""
+        elif "<function identity at " in repr(fmt):
+            def wrap(obj):
+                return "".join(obj[key])
         else:
             def wrap(obj):
                 return fmt(obj[key])
@@ -546,6 +549,9 @@ class TestFormatter(formatter.StringFormatter):
                 for func in funcs:
                     obj = func(obj)
                 return fmt(obj)
+        elif "<function identity at " in repr(fmt):
+            def wrap(obj):
+                return "".join(obj[key])
         else:
             def wrap(obj):
                 obj = obj[key]
