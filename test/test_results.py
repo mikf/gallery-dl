@@ -323,6 +323,8 @@ class TestExtractorResults(unittest.TestCase):
         elif isinstance(test, range):
             self.assertRange(value, test, msg=path)
         elif isinstance(test, set):
+            if isinstance(value, list):
+                value = tuple(value)
             for item in test:
                 if isinstance(item, type) and isinstance(value, item) or \
                         value == item:
