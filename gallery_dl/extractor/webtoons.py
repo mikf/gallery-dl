@@ -172,6 +172,12 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
         }
         paths = self.paths
 
+        if isinstance(self.bgm, str):
+            remux = ext = self.bgm.lower()
+        else:
+            ext = "mp4"
+            remux = False
+
         for bgm in bgm_list:
             url = (f"https://apis.naver.com/audiocweb/audiocplayogwweb/play"
                    f"/audio/{bgm['audioId']}/hls/token")
@@ -190,10 +196,11 @@ class WebtoonsEpisodeExtractor(WebtoonsBase, GalleryExtractor):
                 "num_stop": paths.get(stop) or 0,
                 "filename_play": play[play.rfind("/")+1:play.rfind(".")],
                 "filename_stop": stop[stop.rfind("/")+1:stop.rfind(".")],
+                "extension": ext,
                 "type": "bgm",
                 "url" : "ytdl:" + audio["url"],
                 "_ytdl_manifest": audio["type"].lower(),
-                "extension": "mp3",
+                "_ytdl_manifest_remux": remux,
             })
 
 

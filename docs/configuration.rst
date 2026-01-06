@@ -6833,13 +6833,20 @@ Note
 extractor.webtoons.bgm
 ----------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
+Example
+    ``"aac"``
 Description
     Download an episode's `background music` if available.
+
+    If this is a ``string``, remux the downloaded `background music` file
+    into the given format.
 Note
-    Requires |ytdl|
+    Requires |ytdl| for downloads
+    and |ffmpeg| for remuxing
 
 
 extractor.webtoons.quality
