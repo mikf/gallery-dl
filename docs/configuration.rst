@@ -6986,6 +6986,16 @@ Description
     Download video files.
 
 
+extractor.weibo.album.subalbums
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract subalbum media.
+
+
 extractor.wikimedia.format
 --------------------------
 Type
