@@ -196,7 +196,7 @@ class BellazonExtractor(Extractor):
 
 class BellazonPostExtractor(BellazonExtractor):
     subcategory = "post"
-    pattern = (BASE_PATTERN + r"(/topic/\d+-[\w-]+(?:/page/\d+)?)"
+    pattern = (BASE_PATTERN + r"(/topic/\d+-[^/?#]+(?:/page/\d+)?)"
                r"/?#(?:findC|c)omment-(\d+)")
     example = "https://www.bellazon.com/main/topic/123-SLUG/#findComment-12345"
 
@@ -215,7 +215,7 @@ class BellazonPostExtractor(BellazonExtractor):
 
 class BellazonThreadExtractor(BellazonExtractor):
     subcategory = "thread"
-    pattern = BASE_PATTERN + r"(/topic/\d+-[\w-]+)(?:/page/(\d+))?"
+    pattern = BASE_PATTERN + r"(/topic/\d+-[^/?#]+)(?:/page/(\d+))?"
     example = "https://www.bellazon.com/main/topic/123-SLUG/"
 
     def posts(self):
@@ -240,7 +240,7 @@ class BellazonThreadExtractor(BellazonExtractor):
 
 class BellazonForumExtractor(BellazonExtractor):
     subcategory = "forum"
-    pattern = BASE_PATTERN + r"(/forum/\d+-[\w-]+)(?:/page/(\d+))?"
+    pattern = BASE_PATTERN + r"(/forum/\d+-[^/?#]+)(?:/page/(\d+))?"
     example = "https://www.bellazon.com/main/forum/123-SLUG/"
 
     def items(self):
