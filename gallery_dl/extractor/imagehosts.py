@@ -231,12 +231,21 @@ class ImagetwistGalleryExtractor(ImagehostImageExtractor):
     example = "https://imagetwist.com/p/USER/12345/NAME"
 
     def items(self):
+        url = self.page_url
+        root = url[:url.find("/", 8)]
         data = {"_extractor": ImagetwistImageExtractor}
-        root = self.page_url[:self.page_url.find("/", 8)]
-        page = self.request(self.page_url).text
-        gallery = text.extr(page, 'class="gallerys', "</div")
-        for path in text.extract_iter(gallery, ' href="', '"'):
-            yield Message.Queue, root + path, data
+
+        while True:
+            page = self.request(url).text
+            gallery = text.extr(page, 'class="gallerys', "</div")
+            for path in text.extract_iter(gallery, ' href="', '"'):
+                yield Message.Queue, root + path, data
+
+            pos = page.find("&#187;</a>")
+            if pos < 0:
+                break
+            qs = text.unescape(text.rextr(page, "href='", "'", pos))
+            url = f"{root}/{qs}"
 
 
 class ImgadultImageExtractor(ImagehostImageExtractor):
