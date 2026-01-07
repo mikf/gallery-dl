@@ -157,6 +157,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Avatars, Backgrounds, Bookmarks, Feeds, Followed Users, Hashtags, User Profile Information, Likes, Lists, Media Files, Posts, Replies, Search Results, User Profiles, Videos</td>
     <td>Supported</td>
 </tr>
+<tr id="bodytorium" title="bodytorium">
+    <td>Bodytorium</td>
+    <td>https://bodytorium.com/</td>
+    <td>Albums, Model pages, Models, Videos</td>
+    <td></td>
+</tr>
 <tr id="boosty" title="boosty">
     <td>Boosty</td>
     <td>https://www.boosty.to/</td>
