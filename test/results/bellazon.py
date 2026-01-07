@@ -271,6 +271,44 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/123434-%D0%BD%D0%B0-%D1%84%D0%BE%D1%82%D0%BE-%D0%B2%D0%B8%D0%BA%D1%82%D0%BE%D1%80%D0%B8%D1%8F-%D0%BA%D0%BE%D0%BB%D0%B5%D1%81%D0%BD%D0%B8%D0%BA%D0%BE%D0%B2%D0%B0/#comment-6112956",
+    "#comment" : "URL-escaped 'slug'",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#results" : "https://www.bellazon.com/main/uploads/monthly_2026_01/IMG_3177.png.b057c59b2168b2ff52d45cf6b1eba86e.png",
+
+    "extension"   : "png",
+    "filename"    : "IMG_3177",
+    "id"          : "15808003",
+    "post"        : {
+        "author_id"  : "328354",
+        "author_slug": "ghhhv",
+        "author_url" : "https://www.bellazon.com/main/profile/328354-ghhhv/",
+        "content"    : """<a href="https://www.bellazon.com/main/uploads/monthly_2026_01/IMG_3177.png.b057c59b2168b2ff52d45cf6b1eba86e.png" class="ipsAttachLink ipsAttachLink_image" ><img data-fileid="15808003" src="https://www.bellazon.com/main/uploads/monthly_2026_01/IMG_3177.thumb.png.a48d590d47aa78f5da7e7dddeb6c284d.png" height="300" width="172" class="ipsImage ipsImage_thumbnailed" alt="IMG_3177.png" loading='lazy'></a>""",
+        "count"      : 1,
+        "date"       : "dt:2026-01-04 22:14:17",
+        "id"         : "6112956",
+    },
+    "thread"      : {
+        "author"      : "Ghhhv",
+        "author_id"   : "328354",
+        "author_slug" : "ghhhv",
+        "author_url"  : "https://www.bellazon.com/main/profile/328354-ghhhv/",
+        "date"        : "dt:2026-01-04 22:14:17",
+        "date_updated": "dt:2026-01-04 22:14:17",
+        "id"          : "123434",
+        "section"     : "Actresses",
+        "slug"        : "на-фото-виктория-колесникова",
+        "title"       : "на фото Виктория Колесникова",
+        "url"         : "https://www.bellazon.com/main/topic/123434-%D0%BD%D0%B0-%D1%84%D0%BE%D1%82%D0%BE-%D0%B2%D0%B8%D0%BA%D1%82%D0%BE%D1%80%D0%B8%D1%8F-%D0%BA%D0%BE%D0%BB%D0%B5%D1%81%D0%BD%D0%B8%D0%BA%D0%BE%D0%B2%D0%B0/",
+        "path"        : [
+            "Females",
+            "Actresses",
+            "на фото Виктория Колесникова",
+        ],
+    },
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
