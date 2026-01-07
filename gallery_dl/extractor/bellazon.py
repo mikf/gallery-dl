@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -49,7 +49,11 @@ class BellazonExtractor(Extractor):
             yield Message.Directory, "", data
             data["num"] = data["num_internal"] = data["num_external"] = 0
             for info, url, url_img in urls:
-                url = text.unescape(url or url_img)
+                if url_img:
+                    url = text.unescape(
+                        text.extr(info, 'data-full-image="', '"') or url_img)
+                else:
+                    url = text.unescape(url)
 
                 if url.startswith(native):
                     if (

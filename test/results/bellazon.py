@@ -249,6 +249,28 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/79152-sydney-sweeney/page/42/#comment-6113627",
+    "#comment" : "'data-full-image' URLs (#8833)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#results" : (
+        "https://www.wmagazine.com/culture/sydney-sweeney-cover-interview-the-housemaid-christy",
+        "https://www.bellazon.com/main/uploads/monthly_2026_01/1222250126covershrinstagram2.jpg.9bca664c750694127c5c77c0e99db770.jpg",
+        "https://www.bellazon.com/main/uploads/monthly_2026_01/1222250126covershrcms2.jpg.a4d33f2e157aec446f9e268cce576ddc.jpg",
+        "https://www.bellazon.com/main/uploads/monthly_2026_01/1-0126broadsheetcmslo13-14.jpg.21f087b58d0d3cc5c7d03ea2bb62a979.jpg",
+    ),
+
+    "post"        : {
+        "author_id"  : "145049",
+        "author_slug": "matt",
+        "author_url" : "https://www.bellazon.com/main/profile/145049-matt/",
+        "content"    : """<p style="text-align:center;">W Magazine's 2026 Best Performances issue</p><p style="text-align:center;">Sydney Sweeney Talks The Housemaid, Christy, and Bonding With Amanda Seyfried</p><p style="text-align:center;">Ph. Tyrone Lebon</p><p style="text-align:center;"><a rel="external nofollow" href="https://www.wmagazine.com/culture/sydney-sweeney-cover-interview-the-housemaid-christy">https://www.wmagazine.com/culture/sydney-sweeney-cover-interview-the-housemaid-christy</a></p><p style="text-align:center;"></p><p style="text-align:center;"><img class="ipsImage ipsImage_thumbnailed ipsRichText__align--block" data-fileid="15813191" src="https://www.bellazon.com/main/uploads/monthly_2026_01/1222250126covershrinstagram2.thumb.jpg.7bfbdc57ebcbfd61e4ba72c2b55dfbf3.jpg" alt="1222250126covershrinstagram2.jpg" title="" width="230" height="300" data-full-image="https://www.bellazon.com/main/uploads/monthly_2026_01/1222250126covershrinstagram2.jpg.9bca664c750694127c5c77c0e99db770.jpg" loading="lazy"><img class="ipsImage ipsImage_thumbnailed ipsRichText__align--block" data-fileid="15813196" src="https://www.bellazon.com/main/uploads/monthly_2026_01/1222250126covershrcms2.thumb.jpg.4ae359d3f0927aca1f7ab6a4d44b47cf.jpg" alt="1222250126covershrcms2.jpg" title="" width="231" height="300" data-full-image="https://www.bellazon.com/main/uploads/monthly_2026_01/1222250126covershrcms2.jpg.a4d33f2e157aec446f9e268cce576ddc.jpg" loading="lazy"><img class="ipsImage ipsImage_thumbnailed ipsRichText__align--block" data-fileid="15813194" src="https://www.bellazon.com/main/uploads/monthly_2026_01/1-0126broadsheetcmslo13-14.thumb.jpg.904162a4ebd4a340d5a595df82e7c982.jpg" alt="1-0126broadsheetcmslo13-14.jpg" title="" width="300" height="194" data-full-image="https://www.bellazon.com/main/uploads/monthly_2026_01/1-0126broadsheetcmslo13-14.jpg.21f087b58d0d3cc5c7d03ea2bb62a979.jpg" loading="lazy"></p>""",
+        "count"      : 4,
+        "date"       : "dt:2026-01-06 16:34:53",
+        "id"         : "6113627",
+    },
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
