@@ -413,6 +413,7 @@ class ResultJob(job.DownloadJob):
         self.queue = False
         self.content = content
 
+        self.format = format
         self.url_list = []
         self.url_hash = hashlib.sha1()
         self.kwdict_list = []
@@ -427,18 +428,6 @@ class ResultJob(job.DownloadJob):
         else:
             self._update_content = lambda url, kwdict: None
 
-        if format:
-            self.format_directory = TestFormatter(
-                "".join(self.extractor.directory_fmt)).format_map
-            self.format_filename = TestFormatter(
-                self.extractor.filename_fmt).format_map
-            self.format_archive = TestFormatter(
-                self.extractor.archive_fmt).format_map
-        else:
-            self.format_directory = \
-                self.format_filename = \
-                self.format_archive = lambda kwdict: ""
-
     def run(self):
         self._init()
         self.dispatch(self.extractor)
@@ -451,6 +440,20 @@ class ResultJob(job.DownloadJob):
         self.format_filename(kwdict)
 
     def handle_directory(self, kwdict):
+        if self.format is not None:
+            if self.format:
+                self.format_directory = TestFormatter(
+                    "".join(self.extractor.directory_fmt)).format_map
+                self.format_filename = TestFormatter(
+                    self.extractor.filename_fmt).format_map
+                self.format_archive = TestFormatter(
+                    self.extractor.archive_fmt).format_map
+            else:
+                self.format_directory = \
+                    self.format_filename = \
+                    self.format_archive = lambda kwdict: ""
+            self.format = None
+
         self._update_kwdict(kwdict, False)
         self.format_directory(kwdict)
 
