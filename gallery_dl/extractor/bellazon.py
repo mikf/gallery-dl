@@ -161,8 +161,9 @@ class BellazonExtractor(Extractor):
             "author_url"  : url_a,
         }
 
-        thread["id"], _, thread["slug"] = \
+        thread["id"], _, slug = \
             url_t.rsplit("/", 2)[1].partition("-")
+        thread["slug"] = text.unquote(slug)
 
         if url_a:
             thread["author_id"], _, thread["author_slug"] = \
