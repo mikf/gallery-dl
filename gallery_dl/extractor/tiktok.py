@@ -89,7 +89,8 @@ class TiktokExtractor(Extractor):
             elif "video" in post:
                 if self.video == "ytdl":
                     ytdl_media = "video"
-                elif self.video and (url := self._extract_video(post)):
+                elif self.video and (url := self._extract_video(post,
+                                                                tiktok_url)):
                     yield Message.Url, url, post
                 if self.cover and (url := self._extract_cover(post, "video")):
                     yield Message.Url, url, post
@@ -209,13 +210,9 @@ class TiktokExtractor(Extractor):
             profile_url, ("userInfo", "user", id_key))
         return None if match(id) is None else id
 
-    def _extract_video(self, post):
+    def _extract_video(self, post, given_url):
         video = post["video"]
-        try:
-            url = video["playAddr"]
-        except KeyError:
-            raise exception.ExtractionError("Failed to extract video URL, you "
-                                            "may need cookies to continue")
+        url = self._extract_video_url(video, given_url)
         text.nameext_from_url(url, post)
         post.update({
             "type"     : "video",
@@ -223,6 +220,9 @@ class TiktokExtractor(Extractor):
             "title"    : post["desc"] or f"TikTok video #{post['id']}",
             "duration" : video.get("duration"),
             "num"      : 0,
+            "img_id"   : "",
+            "audio_id" : "",
+            "cover_id" : "",
             "file_id"  : video.get("id"),
             "width"    : video.get("width"),
             "height"   : video.get("height"),
@@ -230,6 +230,33 @@ class TiktokExtractor(Extractor):
         if not post["extension"]:
             post["extension"] = video.get("format", "mp4")
         return url
+
+    def _extract_video_url(self, video, given_url):
+        # First, look for bitrateInfo. This will include URLs pointing to the
+        # best quality videos.
+        if "bitrateInfo" in video:
+            bitrate_info = video["bitrateInfo"]
+            if type(bitrate_info) is not list:
+                bitrate_info = [bitrate_info]
+            largest_size = 0
+            urls = []
+            for video_info in bitrate_info:
+                play_addr = video_info["PlayAddr"]
+                width = int(play_addr.get("Width"))
+                height = int(play_addr.get("Height"))
+                size = width * height
+                if size > largest_size:
+                    largest_size = size
+                    urls = play_addr.get("UrlList")
+            if len(urls) > 0:
+                return urls[0]
+        # As a fallback, try to look for the root playAddr, which won't
+        # necessarily point to the best quality.
+        if "playAddr" in video:
+            return video["playAddr"]
+        raise exception.ExtractionError(f"{given_url}: Failed to extract "
+                                        "video URL, you may need cookies to "
+                                        "continue")
 
     def _extract_audio(self, post):
         audio = post["music"]
