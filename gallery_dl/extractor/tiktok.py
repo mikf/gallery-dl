@@ -475,33 +475,41 @@ class TiktokPostsExtractor(TiktokExtractor):
         self.post_order = self.config("order-posts") or "desc"
         if self.post_order not in ["desc", "asc", "reverse", "popular"]:
             self.post_order = "desc"
-
         sec_uid = self._extract_sec_uid(profile_url, user_name)
-        if not self.user_provided_cookies:
-            if self.post_order != "desc":
-                self.log.warning(
-                    "%s: no cookies have been provided so the order-posts "
-                    "option will not take effect. You must provide cookies in "
-                    "order to extract a profile's posts in non-descending "
-                    "order",
-                    profile_url
-                )
+
+        # If descending order is requested, opt for the more reliable legacy
+        # endpoint instead of trying with the "newer", flakier endpoint.
+        if self.post_order == "desc":
             return self._extract_posts_api_legacy(
                 profile_url, sec_uid, self.range_predicate)
-        try:
-            return self._extract_posts_api_order(
-                profile_url, sec_uid, self.range_predicate)
-        except Exception as exc:
-            self.log.error(
-                "%s: failed to extract user posts using post/item_list (make "
-                "sure you provide valid cookies). Attempting with legacy "
-                "creator/item_list endpoint that does not support post "
-                "ordering",
+
+        if not self.user_provided_cookies:
+            self.log.warning(
+                "%s: no cookies have been provided so the order-posts "
+                "option will not take effect. You must provide cookies in "
+                "order to extract a profile's posts in non-descending "
+                "order",
                 profile_url
             )
-            self.log.traceback(exc)
             return self._extract_posts_api_legacy(
                 profile_url, sec_uid, self.range_predicate)
+
+        try:
+            urls = self._extract_posts_api_order(
+                profile_url, sec_uid, self.range_predicate)
+            if urls:
+                return urls
+        except Exception as exc:
+            self.log.traceback(exc)
+
+        self.log.error(
+            "%s: failed to extract user posts using post/item_list (make sure "
+            "you provide valid cookies). Attempting with legacy "
+            "creator/item_list endpoint that does not support post ordering",
+            profile_url
+        )
+        return self._extract_posts_api_legacy(
+            profile_url, sec_uid, self.range_predicate)
 
     def _extract_posts_api_order(self, profile_url, sec_uid, range_predicate):
         post_item_list_request_type = "0"
@@ -516,7 +524,8 @@ class TiktokPostsExtractor(TiktokExtractor):
             "needPinnedItemIds": "false",
         }
         request = TiktokPostItemListRequest(range_predicate)
-        request.execute(self, profile_url, query_parameters)
+        if not request.execute(self, profile_url, query_parameters):
+            return []
         return request.generate_urls(profile_url, self.video, self.photo,
                                      self.audio)
 
