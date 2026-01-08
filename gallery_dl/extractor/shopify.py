@@ -83,7 +83,7 @@ BASE_PATTERN = ShopifyExtractor.update({
         "root": "https://www.windsorstore.com",
         "pattern": r"(?:www\.)?windsorstore\.com",
     },
-})
+}) + "(?:/[a-z]{2}(?:-[^/?#]+)?)?"
 
 
 class ShopifyCollectionExtractor(ShopifyExtractor):
