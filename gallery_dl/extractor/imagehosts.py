@@ -226,9 +226,10 @@ class ImagetwistGalleryExtractor(ImagehostImageExtractor):
     """Extractor for galleries from imagetwist.com"""
     category = "imagetwist"
     subcategory = "gallery"
-    pattern = (r"(?:https?://)?((?:www\.|phun\.)?"
-               r"image(?:twist|haha)\.com/(p/[^/?#]+/\d+))")
-    example = "https://imagetwist.com/p/USER/12345/NAME"
+    pattern = (r"(?:https?://)?((?:www\.|phun\.)?image(?:twist|haha)\.com/("
+               r"p/[^/?#]+/\d+|"
+               r"\?[^#]*\bfld_id=\d+[^#]*&page=\d+))")
+    example = "https://imagetwist.com/p/USER/12345/TITLE"
 
     def items(self):
         url = self.page_url
@@ -237,6 +238,7 @@ class ImagetwistGalleryExtractor(ImagehostImageExtractor):
 
         while True:
             page = self.request(url).text
+
             gallery = text.extr(page, 'class="gallerys', "</div")
             for path in text.extract_iter(gallery, ' href="', '"'):
                 yield Message.Queue, root + path, data
