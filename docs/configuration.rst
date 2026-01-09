@@ -7049,6 +7049,18 @@ Description
     For ``Category:`` pages, recursively descent into subcategories.
 
 
+extractor.[xenforo].metadata
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract detailed metadata for `media` files.
+Note
+    This requires 1 additional HTTP request per file.
+
+
 extractor.[xenforo].order-posts
 -------------------------------
 Type

@@ -117,4 +117,35 @@ __tests__ = (
     "#count"   : range(100, 200),
 },
 
+{
+    "#url"     : "https://allthefallen.moe/forum/index.php?media/1737485564664-png.224260/",
+    "#category": ("xenforo", "atfforum", "media-item"),
+    "#class"   : xenforo.XenforoMediaItemExtractor,
+    "#options" : {"metadata": False},
+    "#results" : "https://allthefallen.moe/forum/index.php?media/1737485564664-png.224260/full",
+
+    "extension": "png",
+    "filename" : "1737485564664",
+    "id"       : "224260",
+},
+
+{
+    "#url"     : "https://allthefallen.moe/forum/index.php?media/users/peters.150992/",
+    "#category": ("xenforo", "atfforum", "media-user"),
+    "#class"   : xenforo.XenforoMediaUserExtractor,
+    "#options" : {"metadata": False},
+    "#auth"    : True,
+    "#results" : (
+        "https://allthefallen.moe/forum/index.php?media/eden-invitation-jpg.254624/full",
+        "https://allthefallen.moe/forum/index.php?media/1737485564664-png.224260/full",
+        "https://allthefallen.moe/forum/index.php?media/laughing-cat-emoji-png.243825/full",
+    ),
+},
+
+{
+    "#url"     : "https://allthefallen.moe/forum/index.php?members/peters.150992/#xfmgMedia",
+    "#category": ("xenforo", "atfforum", "media-user"),
+    "#class"   : xenforo.XenforoMediaUserExtractor,
+},
+
 )

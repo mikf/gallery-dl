@@ -465,6 +465,10 @@ SUBCATEGORY_MAP = {
     "wikimedia": {
         "article": ["Articles", "Categories", "Files"],
     },
+    "xenforo": {
+        "media-user": "User Media",
+        "media-item": "Media Files",
+    },
 }
 
 BASE_MAP = {
