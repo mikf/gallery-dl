@@ -64,6 +64,9 @@ __tests__ = (
         "https://imagetwist.com/n3td3a6vzzed",
         "https://imagetwist.com/8uz6lmg31nmc",
     ),
+
+    "gallery_id"   : "747223",
+    "gallery_title": "digits",
 },
 
 {
@@ -73,6 +76,9 @@ __tests__ = (
     "#class"   : imagehosts.ImagetwistGalleryExtractor,
     "#pattern" : imagehosts.ImagetwistImageExtractor.pattern,
     "#count"   : 100,
+
+    "gallery_id"   : "806105",
+    "gallery_title": "multi",
 },
 
 {
@@ -82,6 +88,9 @@ __tests__ = (
     "#class"   : imagehosts.ImagetwistGalleryExtractor,
     "#pattern" : imagehosts.ImagetwistImageExtractor.pattern,
     "#count"   : 60,
+
+    "gallery_id"   : "806105",
+    "gallery_title": "multi",
 },
 
 )
