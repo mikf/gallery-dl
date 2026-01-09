@@ -40,79 +40,88 @@ class TiktokExtractor(Extractor):
 
     def items(self):
         for tiktok_url in self.posts():
-            tiktok_url = self._sanitize_url(tiktok_url)
+            try:
+                tiktok_url = self._sanitize_url(tiktok_url)
 
-            data = self._extract_rehydration_data(tiktok_url)
-            if "webapp.video-detail" not in data:
-                # Only /video/ links result in the video-detail dict we need.
-                # Try again using that form of link.
-                tiktok_url = self._sanitize_url(
-                    data["seo.abtest"]["canonical"])
                 data = self._extract_rehydration_data(tiktok_url)
-            video_detail = data["webapp.video-detail"]
-            if not self._check_status_code(video_detail, tiktok_url, "post"):
-                continue
-            post = video_detail["itemInfo"]["itemStruct"]
+                if "webapp.video-detail" not in data:
+                    # Only /video/ links result in the video-detail dict we
+                    # need. Try again using that form of link.
+                    tiktok_url = self._sanitize_url(
+                        data["seo.abtest"]["canonical"])
+                    data = self._extract_rehydration_data(tiktok_url)
+                video_detail = data["webapp.video-detail"]
+                if not self._check_status_code(video_detail, tiktok_url,
+                                               "post"):
+                    continue
+                post = video_detail["itemInfo"]["itemStruct"]
 
-            post["user"] = (a := post.get("author")) and a["uniqueId"] or ""
-            post["date"] = self.parse_timestamp(post["createTime"])
-            original_title = title = post["desc"]
+                post["user"] = (a := post.get("author")) and a["uniqueId"] \
+                    or ""
+                post["date"] = self.parse_timestamp(post["createTime"])
+                original_title = title = post["desc"]
 
-            yield Message.Directory, "", post
-            ytdl_media = False
+                yield Message.Directory, "", post
+                ytdl_media = False
 
-            if "imagePost" in post:
-                if self.photo:
+                if "imagePost" in post:
+                    if self.photo:
+                        if not original_title:
+                            title = f"TikTok photo #{post['id']}"
+                        img_list = post["imagePost"]["images"]
+                        for i, img in enumerate(img_list, 1):
+                            url = img["imageURL"]["urlList"][0]
+                            text.nameext_from_url(url, post)
+                            post.update({
+                                "type"  : "image",
+                                "image" : img,
+                                "title" : title,
+                                "num"   : i,
+                                "file_id": post["filename"].partition("~")[0],
+                                "width" : img["imageWidth"],
+                                "height": img["imageHeight"],
+                            })
+                            yield Message.Url, url, post
+
+                    if self.audio and "music" in post:
+                        if self.audio == "ytdl":
+                            ytdl_media = "audio"
+                        elif url := self._extract_audio(post):
+                            yield Message.Url, url, post
+
+                elif "video" in post:
+                    if self.video == "ytdl":
+                        ytdl_media = "video"
+                    elif self.video and (url := self._extract_video(post,
+                                                                    tiktok_url
+                                                                    )):
+                        yield Message.Url, url, post
+                    if self.cover and (url := self._extract_cover(post,
+                                                                  "video")):
+                        yield Message.Url, url, post
+
+                else:
+                    self.log.info("%s: Skipping post", tiktok_url)
+
+                if ytdl_media:
                     if not original_title:
-                        title = f"TikTok photo #{post['id']}"
-                    img_list = post["imagePost"]["images"]
-                    for i, img in enumerate(img_list, 1):
-                        url = img["imageURL"]["urlList"][0]
-                        text.nameext_from_url(url, post)
-                        post.update({
-                            "type"  : "image",
-                            "image" : img,
-                            "title" : title,
-                            "num"   : i,
-                            "file_id": post["filename"].partition("~")[0],
-                            "width" : img["imageWidth"],
-                            "height": img["imageHeight"],
-                        })
-                        yield Message.Url, url, post
-
-                if self.audio and "music" in post:
-                    if self.audio == "ytdl":
-                        ytdl_media = "audio"
-                    elif url := self._extract_audio(post):
-                        yield Message.Url, url, post
-
-            elif "video" in post:
-                if self.video == "ytdl":
-                    ytdl_media = "video"
-                elif self.video and (url := self._extract_video(post,
-                                                                tiktok_url)):
-                    yield Message.Url, url, post
-                if self.cover and (url := self._extract_cover(post, "video")):
-                    yield Message.Url, url, post
-
-            else:
-                self.log.info("%s: Skipping post", tiktok_url)
-
-            if ytdl_media:
-                if not original_title:
-                    title = f"TikTok {ytdl_media} #{post['id']}"
-                post.update({
-                    "type"      : ytdl_media,
-                    "image"     : None,
-                    "filename"  : "",
-                    "extension" : "mp3" if ytdl_media == "audio" else "mp4",
-                    "title"     : title,
-                    "num"       : 0,
-                    "file_id"   : "",
-                    "width"     : 0,
-                    "height"    : 0,
-                })
-                yield Message.Url, "ytdl:" + tiktok_url, post
+                        title = f"TikTok {ytdl_media} #{post['id']}"
+                    post.update({
+                        "type"      : ytdl_media,
+                        "image"     : None,
+                        "filename"  : "",
+                        "extension" :
+                        "mp3" if ytdl_media == "audio" else "mp4",
+                        "title"     : title,
+                        "num"       : 0,
+                        "file_id"   : "",
+                        "width"     : 0,
+                        "height"    : 0,
+                    })
+                    yield Message.Url, "ytdl:" + tiktok_url, post
+            except Exception as exc:
+                self.log.error("%s: failed to extract: %s", tiktok_url, exc)
+                self.log.traceback(exc)
 
     def _sanitize_url(self, url):
         return text.ensure_http_scheme(url.replace("/photo/", "/video/", 1))
