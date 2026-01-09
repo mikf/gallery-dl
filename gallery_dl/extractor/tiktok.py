@@ -260,7 +260,7 @@ class TiktokExtractor(Extractor):
             # Sort the URLs by descending quality.
             urls = [bitrate_urls[size] for size in
                     reversed(sorted(bitrate_urls.keys()))]
-            urls = [l for ls in urls for l in ls]
+            urls = [url for url_list in urls for url in url_list]
         # As a fallback, try to look for the root playAddr, which won't
         # necessarily point to the best quality.
         if "playAddr" in video:
