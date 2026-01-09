@@ -75,4 +75,13 @@ __tests__ = (
     "#count"   : 100,
 },
 
+{
+    "#url"     : "https://imagetwist.com/?op=user_public&per_page=40&fld_id=806105&usr_login=gdldev&page=2",
+    "#comment" : "'page=' URL (#8826)",
+    "#category": ("imagehost", "imagetwist", "gallery"),
+    "#class"   : imagehosts.ImagetwistGalleryExtractor,
+    "#pattern" : imagehosts.ImagetwistImageExtractor.pattern,
+    "#count"   : 60,
+},
+
 )
