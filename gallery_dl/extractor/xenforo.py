@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -253,6 +253,47 @@ class XenforoExtractor(BaseExtractor):
 
         return post
 
+    def _extract_media(self, path, file):
+        media = {}
+        name, _, media["id"] = file.rpartition(".")
+        media["filename"], _, media["extension"] = name.rpartition("-")
+        return f"{self.root_media}{path}/full", media
+
+    def _extract_media_ex(self, path, file):
+        page = self.request(f"{self.root}{path}/").text
+
+        schema = self._extract_jsonld(page)
+        main = schema["mainEntity"]
+        author = main["author"]
+        url_a = author.get("url") or ""
+        stats = main["interactionStatistic"]
+
+        media = text.nameext_from_name(main["name"], {
+            "schema": schema,
+            "id"    : file.rpartition("."),
+            "size"  : main.get("contentSize"),
+            "description": main.get("description"),
+            "date"  : self.parse_datetime_iso(main.get("dateCreated")),
+            "width" : (w := main.get("width")) and text.parse_int(
+                w["name"].partition(" ")[0]) or 0,
+            "height": (h := main.get("height")) and text.parse_int(
+                h["name"].partition(" ")[0]) or 0,
+            "author"    : author.get("name") or "",
+            "author_id" : (url_a[url_a.rfind(".")+1:-1] if url_a else
+                           (author.get("name") or "")[15:]),
+            "author_url": url_a,
+        })
+
+        if ext := main.get("encodingFormat"):
+            media["extension"] = ext
+
+        if isinstance(stats, list):
+            media["likes"] = stats[1]["userInteractionCount"]
+            media["views"] = stats[0]["userInteractionCount"]
+            media["comments"] = stats[0]["userInteractionCount"]
+
+        return main["contentUrl"], media
+
     def _require_auth(self, response=None):
         raise exception.AuthRequired(
             ("username & password", "authenticated cookies"), None,
@@ -350,3 +391,82 @@ class XenforoForumExtractor(XenforoExtractor):
         for page in self._pagination(path, pnum):
             for path in extract_threads(page):
                 yield Message.Queue, self.root + text.unquote(path), data
+
+
+class XenforoMediaUserExtractor(XenforoExtractor):
+    subcategory = "media-user"
+    directory_fmt = ("{category}", "Media", "{author}")
+    filename_fmt = "{filename}.{extension}"
+    archive_fmt = "{id}"
+    pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?)me(?:"
+               r"dia/users/([^/?#]+)(?:/page-(\d+))?|"
+               r"mbers/([^/?#]+)/#xfmgMedia)")
+    example = "https://simpcity.cr/media/users/USER.123/"
+
+    def items(self):
+        self.root_media = self.config_instance("root-media") or self.root
+        groups = self.groups
+
+        user = groups[-3]
+        if user is None:
+            user = groups[-1]
+            pnum = None
+        else:
+            pnum = groups[-2]
+
+        path = f"{groups[-4]}media/users/{user}"
+        if (order := self.config("order-posts")) and \
+                order[0] in ("d", "r"):
+            pages = self._pagination_reverse(path, pnum)
+            reverse = True
+        else:
+            pages = self._pagination(path, pnum)
+            reverse = False
+
+        if meta := self.config("metadata"):
+            extr_media = self._extract_media_ex
+            meta = True
+        else:
+            extr_media = self._extract_media
+            meta = False
+            self.kwdict["author"], _, self.kwdict["author_id"] = \
+                user.rpartition(".")
+
+        for page in pages:
+            posts = page.split(
+                '<div class="itemList-item js-inlineModContainer')
+            del posts[0]
+
+            if reverse:
+                posts.reverse()
+
+            for html in posts:
+                href, pos = text.extract(html, 'href="', '"')
+                name, pos = text.extract(html, "alt='", "'", pos)
+
+                href = href[:-1]
+                url, media = extr_media(href, href.rpartition("/")[2])
+                if not meta and name:
+                    text.nameext_from_name(text.unescape(name), media)
+
+                yield Message.Directory, "", media
+                yield Message.Url, url, media
+
+
+class XenforoMediaItemExtractor(XenforoExtractor):
+    subcategory = "media-item"
+    directory_fmt = ("{category}", "Media", "{author|''}")
+    filename_fmt = "{filename}.{extension}"
+    archive_fmt = "{id}"
+    pattern = BASE_PATTERN + r"(/(?:index\.php\?)?media/((?:[^/?#]+\.)\d+))"
+    example = "https://simpcity.cr/media/NAME.123/"
+
+    def items(self):
+        self.root_media = self.root
+
+        path = self.groups[-2]
+        file = self.groups[-1]
+        url, media = (self._extract_media_ex if self.config("metadata") else
+                      self._extract_media)(path, file)
+        yield Message.Directory, "", media
+        yield Message.Url, url, media

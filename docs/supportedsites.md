@@ -1888,19 +1888,19 @@ Consider all listed sites to potentially be NSFW.
 <tr id="simpcity" title="simpcity">
     <td>SimpCity Forums</td>
     <td>https://simpcity.cr/</td>
-    <td>Forums, Posts, Threads</td>
+    <td>Forums, Media Files, User Media, Posts, Threads</td>
     <td>Supported</td>
 </tr>
 <tr id="nudostarforum" title="nudostarforum">
     <td>NudoStar Forums</td>
     <td>https://nudostar.com/forum/</td>
-    <td>Forums, Posts, Threads</td>
+    <td>Forums, Media Files, User Media, Posts, Threads</td>
     <td>Supported</td>
 </tr>
 <tr id="atfforum" title="atfforum">
     <td>All The Fallen</td>
     <td>https://allthefallen.moe/forum/</td>
-    <td>Forums, Posts, Threads</td>
+    <td>Forums, Media Files, User Media, Posts, Threads</td>
     <td></td>
 </tr>
 
