@@ -329,7 +329,7 @@ class TiktokPostExtractor(TiktokExtractor):
     def posts(self):
         user, post_id = self.groups
         url = f"{self.root}/@{user or ''}/video/{post_id}"
-        return { url: None }
+        return {url: None}
 
 
 class TiktokVmpostExtractor(TiktokExtractor):
