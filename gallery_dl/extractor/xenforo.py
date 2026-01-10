@@ -260,7 +260,7 @@ class XenforoExtractor(BaseExtractor):
         return f"{self.root_media}{path}/full", media
 
     def _extract_media_ex(self, path, file):
-        page = self.request(f"{self.root}{path}/").text
+        page = self.request(f"{self.root_media}{path}/").text
 
         schema = self._extract_jsonld(page)
         main = schema["mainEntity"]
