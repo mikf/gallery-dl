@@ -75,17 +75,23 @@ class BilibiliArticleExtractor(BilibiliExtractor):
 
         article["count"] = len(pics)
         yield Message.Directory, "", article
+        
         for article["num"], pic in enumerate(pics, 1):
             url = pic["url"]
             article.update(pic)
             yield Message.Url, url, text.nameext_from_url(url, article)
+            
+            # Add support for live photo videos
+            live_url = pic.get("live_url")
+            if live_url:
+                yield Message.Url, live_url, text.nameext_from_url(live_url, article)
 
 
 class BilibiliUserArticlesExtractor(BilibiliExtractor):
     """Extractor for a bilibili user's articles"""
     subcategory = "user-articles"
     pattern = (r"(?:https?://)?space\.bilibili\.com/(\d+)"
-               r"/(?:article|upload/opus)")
+               r"/(?:article|upload/opus|dynamic)")
     example = "https://space.bilibili.com/12345/article"
 
     def articles(self):
