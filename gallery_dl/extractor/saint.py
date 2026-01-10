@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024-2025 Mike Fährmann
+# Copyright 2024-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://saint2.su/"""
+"""Extractors for https://saint2.su/ and https://turbovid.cr/"""
 
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?saint\d*\.(?:su|pk|cr|to)"
+BASE_PATTERN = r"(?:https?://)?(?:turbovid\.cr|saint\d*\.(?:su|pk|cr|to))"
 
 
 class SaintAlbumExtractor(LolisafeAlbumExtractor):
@@ -26,18 +26,27 @@ class SaintAlbumExtractor(LolisafeAlbumExtractor):
         response = self.request(self.root + "/a/" + album_id)
         extr = text.extract_from(response.text)
 
-        title = extr("<title>", "<")
-        descr = extr('name="description" content="', '"')
+        title = extr("<title>", "</title")
+        descr = extr('name="description" content="', '"/>')
         files = []
 
         while True:
-            id2 = extr("/thumbs/", "-")
+            id2 = extr("/thumbs/", '"')
             if not id2:
                 break
+
+            id2, sep, ts = id2.rpartition(".")[0].rpartition("-")
+            if sep:
+                date = self.parse_timestamp(ts)
+            else:
+                date = None
+                id2 = ts
+
             files.append({
-                "id2"  : id2,
-                "date" : self.parse_timestamp(extr("", ".")),
                 "id"   : extr("/embed/", '"'),
+                "id2"  : id2,
+                "date" : date,
+                #  "extension": extr("<td>", "</"),
                 "size" : text.parse_int(extr('data="', '"')),
                 "file" : text.unescape(extr(
                     "onclick=\"play(", ")").strip("\"'")),
@@ -70,10 +79,18 @@ class SaintMediaExtractor(SaintAlbumExtractor):
             extr = text.extract_from(response.text)
 
             if embed:
+                id2, sep, ts = extr(
+                    "/thumbs/", '"').rpartition(".")[0].rpartition("-")
+                if sep:
+                    date = self.parse_timestamp(ts)
+                else:
+                    date = None
+                    id2 = ts
+
                 file = {
                     "id"   : album_id,
-                    "id2"  : extr("/thumbs/", "-"),
-                    "date" : self.parse_timestamp(extr("", ".")),
+                    "id2"  : id2,
+                    "date" : date,
                     "file" : text.unescape(extr('<source src="', '"')),
                     "id_dl": extr("/d/", "'"),
                 }
