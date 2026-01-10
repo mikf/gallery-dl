@@ -75,12 +75,12 @@ class BilibiliArticleExtractor(BilibiliExtractor):
 
         article["count"] = len(pics)
         yield Message.Directory, "", article
-        
+
         for article["num"], pic in enumerate(pics, 1):
             url = pic["url"]
             article.update(pic)
             yield Message.Url, url, text.nameext_from_url(url, article)
-            
+    
             # Add support for live photo videos
             live_url = pic.get("live_url")
             if live_url:
