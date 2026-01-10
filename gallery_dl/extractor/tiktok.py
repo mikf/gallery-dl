@@ -43,6 +43,24 @@ class TiktokExtractor(Extractor):
         self.range = self.config("tiktok-range") or ""
         self.range_predicate = util.RangePredicate(self.range)
 
+        # If one of these fields is None, the filter for it is disabled.
+        # Therefore, if both fields are none, all subtitles are extracted.
+        self.subtitle_sources = None
+        self.subtitle_langs = None
+
+        if self.subtitles and self.subtitles != "all":
+            if self.subtitles is True or not isinstance(self.subtitles, str):
+                self.subtitles = "ASR"
+
+            known_sources = {"ASR", "MT", "LC"}
+            filters = set(self.subtitles.split(","))
+            self.subtitle_sources = known_sources.intersection(filters)
+            self.subtitle_langs = filters.difference(known_sources)
+            if not self.subtitle_sources:
+                self.subtitle_sources = None
+            if not self.subtitle_langs:
+                self.subtitle_langs = None
+
     def items(self):
         for tiktok_url in self.posts():
             tiktok_url = self._sanitize_url(tiktok_url)
@@ -105,29 +123,8 @@ class TiktokExtractor(Extractor):
                         if self.cover == "all":
                             break
 
-                if self.subtitles is True:
-                    self.subtitles = "ASR"
-
-                if self.subtitles == "all":
+                if self.subtitles:
                     for url in self._extract_subtitles(post, "video"):
-                        yield Message.Url, url, post
-                elif isinstance(self.subtitles, str) and self.subtitles != "":
-                    # split the filter into sources and languages
-                    known_sources = ("ASR", "MT", "LC")
-                    filters = set(self.subtitles.split(","))
-                    sources = []
-                    for f in filters:
-                        if f in known_sources:
-                            sources.append(f)
-
-                    for s in sources:
-                        filters.remove(s)
-
-                    for url in self._extract_subtitles(
-                            post,
-                            "video",
-                            sources=sources,
-                            langs=filters):
                         yield Message.Url, url, post
 
                     # remove the subtitle related fields for the next item
@@ -318,7 +315,7 @@ class TiktokExtractor(Extractor):
                 })
                 yield url
 
-    def _extract_subtitles(self, post, type, sources=None, langs=None):
+    def _extract_subtitles(self, post, type):
         media = post[type]
 
         for subtitle in media.get("subtitleInfos", []):
@@ -328,10 +325,24 @@ class TiktokExtractor(Extractor):
             sub_version = subtitle.get("Version")
             sub_source = subtitle.get("Source")
 
-            if sources is not None or langs is not None:
-                if sub_source not in sources and \
-                        sub_lang_codename not in langs:
-                    continue
+            sources_filtered = self.subtitle_sources is not None
+            langs_filtered = self.subtitle_langs is not None
+            # guard the iterable access
+            sources_match = sources_filtered and \
+                sub_source in self.subtitle_sources
+            langs_match = langs_filtered and \
+                sub_lang_codename in self.subtitle_langs
+
+            # Subtitles will be extracted when either filter matches.
+            if sources_filtered and \
+                    not sources_match and \
+                    not (langs_filtered and langs_match):
+                continue
+
+            if langs_filtered and \
+                    not langs_match and \
+                    not sources_filtered:
+                continue
 
             if url := subtitle.get("Url"):
                 # subtitle urls may not specify a filename,
