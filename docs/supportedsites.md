@@ -1129,6 +1129,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Models, Posts, User Profiles</td>
     <td></td>
 </tr>
+<tr id="turbovid" title="turbovid">
+    <td>turbovid.cr</td>
+    <td>https://turbovid.cr/</td>
+    <td>Albums, Media Files</td>
+    <td></td>
+</tr>
 <tr id="twibooru" title="twibooru">
     <td>Twibooru</td>
     <td>https://twibooru.org/</td>

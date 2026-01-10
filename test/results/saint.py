@@ -38,6 +38,34 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://turbovid.cr/a/FiphGijfJoR",
+    "#comment" : "'turbovid' album (#8851)",
+    "#category": ("lolisafe", "saint", "album"),
+    "#class"   : saint.SaintAlbumExtractor,
+    "#results" : (
+        "https://data.saint2.cr/data/jZqe1xxqw9bX7.mp4",
+        "https://data.saint2.cr/data/eJ9fLurGdaHqS.mp4",
+        "https://data.saint2.cr/data/WkD7hRaHdBpBI.mp4",
+    ),
+
+    "album_id"   : "FiphGijfJoR",
+    "album_name" : """test-???-"&> album""",
+    "album_size" : 37165256,
+    "count"      : 3,
+    "num"        : range(1, 3),
+    "date"       : None,
+    "description": """test-???-"&> description""",
+    "extension"  : "mp4",
+    "file"       : r"re:https://data.saint2.cr/data/\w+.mp4",
+    "filename"   : str,
+    "id"         : str,
+    "id2"        : str,
+    "id_dl"      : str,
+    "name"       : str,
+    "size"       : int,
+},
+
+{
     "#url"  : "https://saint2.su/embed/6lC7mKrJst8",
     "#class": saint.SaintMediaExtractor,
     "#results"     : "https://data.saint2.cr/data/3b1ccebf3576f8d5aac3ee0e5a12da95.mp4",
@@ -83,6 +111,23 @@ __tests__ = (
 {
     "#url"  : "https://saint.to/embed/6lC7mKrJst8",
     "#class": saint.SaintMediaExtractor,
+},
+
+{
+    "#url"     : "https://turbovid.cr/embed/WkD7hRaHdBpBI",
+    "#comment" : "'turbovid' URL/video",
+    "#category": ("lolisafe", "saint", "media"),
+    "#class"   : saint.SaintMediaExtractor,
+    "#results" : "https://data.saint2.cr/data/WkD7hRaHdBpBI.mp4",
+
+    "date"       : None,
+    "extension"  : "mp4",
+    "file"       : "https://data.saint2.cr/data/WkD7hRaHdBpBI.mp4",
+    "filename"   : "WkD7hRaHdBpBI",
+    "id"         : "WkD7hRaHdBpBI",
+    "id2"        : "WkD7hRaHdBpBI",
+    "id_dl"      : "V2tEN2hSYUhkQnBCSS5tcDQ=",
+    "name"       : "WkD7hRaHdBpBI",
 },
 
 )
