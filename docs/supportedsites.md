@@ -799,6 +799,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Collections, individual Images, Search Results, User Profiles</td>
     <td></td>
 </tr>
+<tr id="pholder" title="pholder">
+    <td>pholder</td>
+    <td>https://pholder.com/</td>
+    <td>Search Results, Subreddits, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="photovogue" title="photovogue">
     <td>PhotoVogue</td>
     <td>https://www.vogue.com/photovogue/</td>
