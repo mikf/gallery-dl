@@ -1813,6 +1813,16 @@ Description
     Extract files from quoted content.
 
 
+extractor.bilibili.livephoto
+----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download ``livephoto`` files.
+
+
 extractor.[blogger].api-key
 ---------------------------
 Type
