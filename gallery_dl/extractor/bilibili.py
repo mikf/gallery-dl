@@ -80,12 +80,13 @@ class BilibiliArticleExtractor(BilibiliExtractor):
             url = pic["url"]
             article.update(pic)
             yield Message.Url, url, text.nameext_from_url(url, article)
-    
+
             # Add support for live photo videos
             live_url = pic.get("live_url")
             if live_url:
                 yield (Message.Url, live_url,
                        text.nameext_from_url(live_url, article))
+
 
 class BilibiliUserArticlesExtractor(BilibiliExtractor):
     """Extractor for a bilibili user's articles"""
