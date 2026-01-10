@@ -100,12 +100,9 @@ class TiktokExtractor(Extractor):
                     yield Message.Url, url, post
 
                 if self.cover:
-                    if self.cover == "all":
-                        for url in self._extract_covers(post, "video"):
-                            yield Message.Url, url, post
-                    else:
-                        for url in self._extract_covers(post, "video"):
-                            yield Message.Url, url, post
+                    for url in self._extract_covers(post, "video"):
+                        yield Message.Url, url, post
+                        if self.cover == "all":
                             break
 
                 if self.subtitles is True:
@@ -355,10 +352,10 @@ class TiktokExtractor(Extractor):
                         f"{sub_source}"
 
                 post.update({
-                    "type"                  : "subtitle",
+                    "type"                  : "subtitles",
                     "image"                 : None,
                     "title"                 :
-                    post["desc"] or "TikTok {type} cover #{post['id']}",
+                    post["desc"] or "TikTok {type} #{post['id']}",
                     "duration"              : media.get("duration"),
                     "num"                   : 0,
                     "img_id"                : "",
