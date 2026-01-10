@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2022 Ailothaen
-# Copyright 2024-2025 Mike Fährmann
+# Copyright 2024-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,7 @@
 """Extractors for Wikimedia sites"""
 
 from .common import BaseExtractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
 
 
@@ -19,6 +19,7 @@ class WikimediaExtractor(BaseExtractor):
     basecategory = "wikimedia"
     filename_fmt = "{filename} ({sha1[:8]}).{extension}"
     archive_fmt = "{sha1}"
+    useragent = util.USERAGENT_GALLERYDL
     request_interval = (1.0, 2.0)
 
     def __init__(self, match):
