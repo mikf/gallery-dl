@@ -357,7 +357,11 @@ class TiktokExtractor(Extractor):
                     post["desc"] or "TikTok {type} #{post['id']}",
                     "duration"              : media.get("duration"),
                     "num"                   : 0,
-                    "file_id"               : "",
+                    "file_id"               : f"{sub_lang_id}_"
+                        f"{sub_lang_codename}_"
+                        f"{sub_source}_"
+                        f"{sub_version}_"
+                        f"{sub_format}",
                     "subtitle_lang_id"      : sub_lang_id,
                     "subtitle_lang_codename": sub_lang_codename,
                     "subtitle_format"       : sub_format,
