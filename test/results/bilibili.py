@@ -66,6 +66,28 @@ __tests__ = (
 },
 
 {
+    "#url"    : "https://www.bilibili.com/opus/1154738799821979656",
+    "#comment": "livephoto (#8860)",
+    "#class"  : bilibili.BilibiliArticleExtractor,
+    "#results": (
+        "http://i0.hdslb.com/bfs/new_dyn/live_958a5cffe9177b196ada011867abd0a031968078.jpg",
+        "https://i0.hdslb.com/bfs/dyn_video/_000003lud8wlka5eq2kxctgfx3fwo3b-1-152111110022.mp4",
+    ),
+},
+
+{
+    "#url"     : "https://www.bilibili.com/opus/1047501858770255875",
+    "#comment" : "blocked/paid article (#7880)",
+    "#class"   : bilibili.BilibiliArticleExtractor,
+    "#count"   : 0,
+    "#log"     : """\
+1047501858770255875: Blocked Article
+乌龙茶专属动态
+加入当前UP主的6元档包月充电即可解锁观看\
+""",
+},
+
+{
     "#url"    : "https://space.bilibili.com/405279279/article",
     "#class"  : bilibili.BilibiliUserArticlesExtractor,
     "#pattern": bilibili.BilibiliArticleExtractor.pattern,
@@ -74,6 +96,11 @@ __tests__ = (
 
 {
     "#url"    : "https://space.bilibili.com/405279279/upload/opus",
+    "#class"  : bilibili.BilibiliUserArticlesExtractor,
+},
+
+{
+    "#url"    : "https://space.bilibili.com/405279279/dynamic",
     "#class"  : bilibili.BilibiliUserArticlesExtractor,
 },
 

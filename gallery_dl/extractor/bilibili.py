@@ -83,6 +83,7 @@ class BilibiliArticleExtractor(BilibiliExtractor):
             yield Message.Url, url, text.nameext_from_url(url, article)
 
             if livephoto and (url := pic.get("live_url")):
+                article["id"] += "_l"
                 yield Message.Url, url, text.nameext_from_url(url, article)
 
 
