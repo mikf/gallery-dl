@@ -101,6 +101,44 @@ class XenforoExtractor(BaseExtractor):
                     data["type"] = "inline"
                     yield Message.Url, self.root + path, data
 
+    def items_media(self, path, pnum):
+        self.root_media = self.config_instance("root-media") or self.root
+
+        if (order := self.config("order-posts")) and \
+                order[0] in ("d", "r"):
+            pages = self._pagination_reverse(path, pnum)
+            reverse = True
+        else:
+            pages = self._pagination(path, pnum)
+            reverse = False
+
+        if meta := self.config("metadata"):
+            extr_media = self._extract_media_ex
+            meta = True
+        else:
+            extr_media = self._extract_media
+            meta = False
+
+        for page in pages:
+            posts = page.split(
+                '<div class="itemList-item js-inlineModContainer')
+            del posts[0]
+
+            if reverse:
+                posts.reverse()
+
+            for html in posts:
+                href, pos = text.extract(html, 'href="', '"')
+                name, pos = text.extract(html, "alt='", "'", pos)
+
+                href = href[:-1]
+                url, media = extr_media(href, href.rpartition("/")[2])
+                if not meta and name:
+                    text.nameext_from_name(text.unescape(name), media)
+
+                yield Message.Directory, "", media
+                yield Message.Url, url, media
+
     def request_page(self, url):
         try:
             return self.request(url)
@@ -270,7 +308,7 @@ class XenforoExtractor(BaseExtractor):
 
         media = text.nameext_from_name(main["name"], {
             "schema": schema,
-            "id"    : file.rpartition("."),
+            "id"    : file.rpartition(".")[2],
             "size"  : main.get("contentSize"),
             "description": main.get("description"),
             "date"  : self.parse_datetime_iso(main.get("dateCreated")),
@@ -404,7 +442,6 @@ class XenforoMediaUserExtractor(XenforoExtractor):
     example = "https://simpcity.cr/media/users/USER.123/"
 
     def items(self):
-        self.root_media = self.config_instance("root-media") or self.root
         groups = self.groups
 
         user = groups[-3]
@@ -414,43 +451,26 @@ class XenforoMediaUserExtractor(XenforoExtractor):
         else:
             pnum = groups[-2]
 
-        path = f"{groups[-4]}media/users/{user}"
-        if (order := self.config("order-posts")) and \
-                order[0] in ("d", "r"):
-            pages = self._pagination_reverse(path, pnum)
-            reverse = True
-        else:
-            pages = self._pagination(path, pnum)
-            reverse = False
-
-        if meta := self.config("metadata"):
-            extr_media = self._extract_media_ex
-            meta = True
-        else:
-            extr_media = self._extract_media
-            meta = False
+        if not self.config("metadata"):
             self.kwdict["author"], _, self.kwdict["author_id"] = \
                 user.rpartition(".")
 
-        for page in pages:
-            posts = page.split(
-                '<div class="itemList-item js-inlineModContainer')
-            del posts[0]
+        return self.items_media(f"{groups[-4]}media/users/{user}", pnum)
 
-            if reverse:
-                posts.reverse()
 
-            for html in posts:
-                href, pos = text.extract(html, 'href="', '"')
-                name, pos = text.extract(html, "alt='", "'", pos)
+class XenforoMediaCategoryExtractor(XenforoExtractor):
+    subcategory = "media-category"
+    directory_fmt = ("{category}", "Media", "Category", "{mcategory}")
+    filename_fmt = "{filename}.{extension}"
+    archive_fmt = "{id}"
+    pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?"
+               r"media/categories/([^/?#]+))(?:/page-(\d+))?")
+    example = "https://simpcity.cr/media/categories/CATEGORY.123/"
 
-                href = href[:-1]
-                url, media = extr_media(href, href.rpartition("/")[2])
-                if not meta and name:
-                    text.nameext_from_name(text.unescape(name), media)
-
-                yield Message.Directory, "", media
-                yield Message.Url, url, media
+    def items(self):
+        self.kwdict["mcategory"], _, self.kwdict["mcategory_id"] = \
+            self.groups[-2].rpartition(".")
+        return self.items_media(self.groups[-3], self.groups[-1])
 
 
 class XenforoMediaItemExtractor(XenforoExtractor):
@@ -463,10 +483,7 @@ class XenforoMediaItemExtractor(XenforoExtractor):
 
     def items(self):
         self.root_media = self.root
-
-        path = self.groups[-2]
-        file = self.groups[-1]
         url, media = (self._extract_media_ex if self.config("metadata") else
-                      self._extract_media)(path, file)
+                      self._extract_media)(self.groups[-2], self.groups[-1])
         yield Message.Directory, "", media
         yield Message.Url, url, media
