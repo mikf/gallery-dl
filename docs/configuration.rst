@@ -803,6 +803,7 @@ Default
         * ``[Danbooru]``
         * ``mangadex``
         * ``weasyl``
+        * ``[wikimedia]``
         * ``zerochan``
     ``"gallery-dl/VERSION (by mikf)"``
         * ``[E621]``
