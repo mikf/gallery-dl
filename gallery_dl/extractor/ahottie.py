@@ -62,15 +62,22 @@ class AhottieGalleryExtractor(GalleryExtractor, AhottieExtractor):
         }
 
     def images(self, page):
-        pos = page.find("<time ") + 1
         data = {
             "_http_headers" : {"Referer": None},
             "_http_validate": self._validate,
         }
-        return [
-            (url, data)
-            for url in text.extract_iter(page, '" src="', '"', pos)
-        ]
+
+        results = []
+        while True:
+            pos = page.find("<time ") + 1
+            for url in text.extract_iter(page, '" src="', '"', pos):
+                results.append((url, data))
+
+            pos = page.find('rel="next"', pos)
+            if pos < 0:
+                break
+            page = self.request(text.rextr(page, 'href="', '"', pos)).text
+        return results
 
     def _validate(self, response):
         hget = response.headers.get

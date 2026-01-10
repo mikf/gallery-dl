@@ -10,12 +10,13 @@ from gallery_dl.extractor import ahottie
 __tests__ = (
 {
     "#url"     : "https://ahottie.top/albums/5d54b221c19ff9c9126ffd62859c6603",
+    "#comment" : "multiple pages (#8862)",
     "#class"   : ahottie.AhottieGalleryExtractor,
     "#pattern" : r"https://images2\.imgbox\.com/../../\w+_o\.jpg",
-    "#count"   : 10,
+    "#count"   : 14,
 
-    "count"     : 10,
-    "num"       : range(1, 10),
+    "count"     : 14,
+    "num"       : range(1, 14),
     "date"      : "dt:2024-12-30 00:00:00",
     "extension" : "jpg",
     "filename"  : str,
