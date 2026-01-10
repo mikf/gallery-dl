@@ -468,6 +468,7 @@ SUBCATEGORY_MAP = {
     "xenforo": {
         "media-user": "User Media",
         "media-item": "Media Files",
+        "media-category": "Media Categories",
     },
 }
 

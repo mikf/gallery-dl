@@ -148,4 +148,10 @@ __tests__ = (
     "#class"   : xenforo.XenforoMediaUserExtractor,
 },
 
+{
+    "#url"     : "https://www.allthefallen.moe/forum/index.php?media/categories/translations.2/",
+    "#category": ("xenforo", "atfforum", "media-category"),
+    "#class"   : xenforo.XenforoMediaCategoryExtractor,
+},
+
 )
