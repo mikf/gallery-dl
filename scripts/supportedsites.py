@@ -198,6 +198,7 @@ CATEGORY_MAP = {
     "tmohentai"      : "TMOHentai",
     "tumblrgallery"  : "TumblrGallery",
     "turboimagehost" : "TurboImageHost.com",
+    "turbovid"       : "turbovid.cr",
     "vanillarock"    : "もえぴりあ",
     "vidyart2"       : "/v/idyart2",
     "vidyapics"      : "Vidya Booru",
@@ -218,6 +219,7 @@ CATEGORY_MAP = {
     "xvideos"        : "XVideos",
     "yandere"        : "yande.re",
     "yiffverse"      : "Yiff verse",
+    "yourlesbians"   : "YourLesbians",
 }
 
 SUBCATEGORY_MAP = {
@@ -464,6 +466,11 @@ SUBCATEGORY_MAP = {
     "wikimedia": {
         "article": ["Articles", "Categories", "Files"],
     },
+    "xenforo": {
+        "media-user": "User Media",
+        "media-item": "Media Files",
+        "media-category": "Media Categories",
+    },
 }
 
 BASE_MAP = {
@@ -696,6 +703,11 @@ def build_extractor_list():
     # add wikifeetx.com
     default["wikifeetx"] = default["wikifeet"]
     domains["wikifeetx"] = "https://www.wikifeetx.com/"
+
+    # turbovid
+    default["turbovid"] = default["saint"]
+    domains["turbovid"] = "https://turbovid.cr/"
+    domains["saint"] = "https://saint2.su/"
 
     # imgdrive / imgtaxi / imgwallet
     base = categories["imagehost"]

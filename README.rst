@@ -11,7 +11,7 @@ with many `configuration options <https://gdl-org.github.io/docs/configuration.h
 and powerful `filenaming capabilities <https://gdl-org.github.io/docs/formatting.html>`__.
 
 
-|pypi| |build|
+|pypi| |build| |discord|
 
 .. contents::
 
@@ -79,9 +79,9 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.31.1/gallery-dl.exe>`__
+- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.31.2/gallery-dl.exe>`__
   (Requires `Microsoft Visual C++ Redistributable Package (x86) <https://aka.ms/vs/17/release/vc_redist.x86.exe>`__)
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.31.1/gallery-dl.bin>`__
+- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.31.2/gallery-dl.bin>`__
 
 
 Nightly Builds
@@ -490,7 +490,7 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _Chocolatey: https://chocolatey.org/install
 .. _Scoop:      https://scoop.sh/
 
-.. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl.svg
+.. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl?logo=pypi&label=PyPI
     :target: https://pypi.org/project/gallery-dl/
 
 .. |build| image:: https://github.com/mikf/gallery-dl/workflows/tests/badge.svg
@@ -498,3 +498,6 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 
 .. |gitter| image:: https://badges.gitter.im/gallery-dl/main.svg
     :target: https://gitter.im/gallery-dl/main
+
+.. |discord| image:: https://img.shields.io/discord/1067148002722062416?logo=discord&label=Discord&color=blue
+    :target: https://discord.gg/euZgE6Xp

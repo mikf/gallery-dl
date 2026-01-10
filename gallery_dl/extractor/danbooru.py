@@ -19,7 +19,7 @@ class DanbooruExtractor(BaseExtractor):
     page_limit = 1000
     page_start = None
     per_page = 200
-    useragent = util.USERAGENT
+    useragent = util.USERAGENT_GALLERYDL
     request_interval = (0.5, 1.5)
 
     def _init(self):

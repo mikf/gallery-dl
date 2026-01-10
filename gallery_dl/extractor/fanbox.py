@@ -151,9 +151,9 @@ class FanboxExtractor(Extractor):
                 post["plan"] = plans[fee] = plan
         if self._meta_comments:
             if post.get("commentCount"):
-                post["comments"] = list(self._get_comment_data(post["id"]))
+                post["comments"] = self._get_comment_data(post["id"])
             else:
-                post["commentd"] = ()
+                post["comments"] = ()
 
         return content_body, post
 
@@ -208,12 +208,15 @@ class FanboxExtractor(Extractor):
                "?limit=10&postId=" + post_id)
 
         comments = []
-        while url:
-            url = text.ensure_http_scheme(url)
-            body = self.request_json(url, headers=self.headers)["body"]
-            data = body["commentList"]
-            comments.extend(data["items"])
-            url = data["nextUrl"]
+        try:
+            while url:
+                comlist = self.request_json(
+                    text.ensure_http_scheme(url), headers=self.headers,
+                )["body"]["commentList"]
+                comments.extend(comlist["items"])
+                url = comlist["nextUrl"]
+        except Exception as exc:
+            self.log.debug("comments: %s: %s", exc.__class__.__name__, exc)
         return comments
 
     def _get_urls_from_post(self, content_body, post):

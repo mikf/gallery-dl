@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2025 Mike Fährmann
+# Copyright 2017-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -697,8 +697,9 @@ class Flags():
 #  _ff_ver = (_ord_today - 735506) // 28
 #  _ch_ver = (_ord_today - 735562) // 28
 
-_ff_ver = (dt.date.today().toordinal() - 735506) // 28
-#  _ch_ver = _ff_ver - 2
+_ord_today = dt.date.today().toordinal()
+_ff_ver = (_ord_today - 735_513) // 28  # 147 on 2026-01-13
+_ch_ver = (_ord_today - 735_599) // 28  # 143 on 2025-12-18
 
 re = text.re
 re_compile = text.re_compile
@@ -715,12 +716,12 @@ EXTS_IMAGE = {"jpg", "jpeg", "png", "gif", "bmp", "svg", "psd", "ico",
 EXTS_VIDEO = {"mp4", "m4v", "mov", "webm", "mkv", "ogv", "flv", "avi", "wmv"}
 EXTS_ARCHIVE = {"zip", "rar", "7z", "tar", "gz", "bz2", "lzma", "xz"}
 
-USERAGENT = "gallery-dl/" + version.__version__
+USERAGENT_GALLERYDL = "gallery-dl/" + version.__version__
 USERAGENT_FIREFOX = (f"Mozilla/5.0 (Windows NT 10.0; Win64; x64; "
                      f"rv:{_ff_ver}.0) Gecko/20100101 Firefox/{_ff_ver}.0")
 USERAGENT_CHROME = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                     "AppleWebKit/537.36 (KHTML, like Gecko) "
-                    f"Chrome/{_ff_ver - 2}.0.0.0 Safari/537.36")
+                    f"Chrome/{_ch_ver}.0.0.0 Safari/537.36")
 
 GLOBALS = {
     "contains" : contains,

@@ -269,8 +269,8 @@ class InstagramExtractor(Extractor):
                 width = image["width"]
                 height = image["height"]
 
-                if self._warn_image < ((width < width_orig) +
-                                       (height < height_orig)):
+                if self._warn_image < ((width * 1.1 < width_orig) +
+                                       (height * 1.1 < height_orig)):
                     self.log.warning(
                         "%s: Available image resolutions lower than the "
                         "original (%sx%s < %sx%s). "

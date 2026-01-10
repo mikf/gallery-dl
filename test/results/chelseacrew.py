@@ -20,4 +20,10 @@ __tests__ = (
     "#class"   : shopify.ShopifyProductExtractor,
 },
 
+{
+    "#url"     : "https://chelseacrew.com/en-de/collections/bridalcrew/products/gloria",
+    "#category": ("shopify", "chelseacrew", "product"),
+    "#class"   : shopify.ShopifyProductExtractor,
+},
+
 )

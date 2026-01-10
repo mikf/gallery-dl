@@ -803,6 +803,7 @@ Default
         * ``[Danbooru]``
         * ``mangadex``
         * ``weasyl``
+        * ``[wikimedia]``
         * ``zerochan``
     ``"gallery-dl/VERSION (by mikf)"``
         * ``[E621]``
@@ -817,15 +818,24 @@ Default
 Example
     * ``"curl/8.14.1"``
     * ``"browser"``
-    * ``"@chrome"``
+    * ``"+chrome"``
+    * ``"@/opt/ChromeBrowser/bin/chrome"``
 Description
     User-Agent header value used for HTTP requests.
 
     Setting this value to ``"browser"`` will try to automatically detect
     and use the ``User-Agent`` header of the system's default browser.
 
-    Setting this value to ``"@BROWSER"``, e.g. ``"@chrome"``, will try to automatically detect
-    and use the ``User-Agent`` header of this installed browser.
+    | Starting this value with a ``+``
+      will use the latest ``User-Agent`` header of this preset target,
+      e.g. ``"+ff"``.
+    | (Supported values:
+      ``firefox`` | ``ff`` | ``chrome`` | ``cr`` | ``gallery-dl`` | ``gdl``)
+
+    | Starting this value with an ``@``
+     will try to automatically detect and use the ``User-Agent`` header
+     of this installed browser,
+    | e.g. ``"@C:/Program Files/Zen Browser/zen-browser.exe"``.
 
 
 extractor.*.browser
@@ -1803,6 +1813,16 @@ Description
     Extract files from quoted content.
 
 
+extractor.bilibili.livephoto
+----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download ``livephoto`` files.
+
+
 extractor.[blogger].api-key
 ---------------------------
 Type
@@ -2247,7 +2267,7 @@ Type
     * ``string``
     * ``list`` of ``strings``
 Default
-    ``"quality=100"``
+    ``"original=true,quality=100"``
 Example
     * ``"+transcode=true,quality=100"``
     * ``["+", "transcode=true", "quality=100"]``
@@ -4064,6 +4084,20 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
+extractor.koofr.recursive
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    ``true``
+        Recursively descent into subfolders
+        while downloading individual files.
+    ``false``
+        Download shared `/links/` with multiple files as a single `.zip` file.
+
+
 extractor.lolisafe.domain
 -------------------------
 Type
@@ -4787,6 +4821,7 @@ Supported Values
     * ``favorite``
     * ``novel-user``
     * ``novel-bookmark``
+    * ``sketch``
 Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -6861,13 +6896,20 @@ Note
 extractor.webtoons.bgm
 ----------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
 Default
     ``true``
+Example
+    ``"aac"``
 Description
     Download an episode's `background music` if available.
+
+    If this is a ``string``, remux the downloaded `background music` file
+    into the given format.
 Note
-    Requires |ytdl|
+    Requires |ytdl| for downloads
+    and |ffmpeg| for remuxing
 
 
 extractor.webtoons.quality
@@ -7007,6 +7049,16 @@ Description
     Download video files.
 
 
+extractor.weibo.album.subalbums
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract subalbum media.
+
+
 extractor.wikimedia.format
 --------------------------
 Type
@@ -7058,6 +7110,18 @@ Default
     ``true``
 Description
     For ``Category:`` pages, recursively descent into subcategories.
+
+
+extractor.[xenforo].metadata
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract detailed metadata for `media` files.
+Note
+    This requires 1 additional HTTP request per file.
 
 
 extractor.[xenforo].order-posts

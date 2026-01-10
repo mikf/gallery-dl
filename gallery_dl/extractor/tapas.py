@@ -102,6 +102,7 @@ class TapasEpisodeExtractor(TapasExtractor):
         else:  # comic
             for episode["num"], url in enumerate(text.extract_iter(
                     html, 'data-src="', '"'), 1):
+                url = text.unescape(url)
                 yield Message.Url, url, text.nameext_from_url(url, episode)
 
     def _extract_series(self, html):

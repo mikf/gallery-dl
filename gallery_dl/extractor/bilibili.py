@@ -75,17 +75,23 @@ class BilibiliArticleExtractor(BilibiliExtractor):
 
         article["count"] = len(pics)
         yield Message.Directory, "", article
+
+        livephoto = self.config("livephoto", True)
         for article["num"], pic in enumerate(pics, 1):
             url = pic["url"]
             article.update(pic)
             yield Message.Url, url, text.nameext_from_url(url, article)
+
+            if livephoto and (url := pic.get("live_url")):
+                article["id"] += "_l"
+                yield Message.Url, url, text.nameext_from_url(url, article)
 
 
 class BilibiliUserArticlesExtractor(BilibiliExtractor):
     """Extractor for a bilibili user's articles"""
     subcategory = "user-articles"
     pattern = (r"(?:https?://)?space\.bilibili\.com/(\d+)"
-               r"/(?:article|upload/opus)")
+               r"/(?:article|upload/opus|dynamic)")
     example = "https://space.bilibili.com/12345/article"
 
     def articles(self):

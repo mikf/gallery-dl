@@ -8,9 +8,9 @@ from gallery_dl.extractor import batoto
 
 __tests__ = (
 {
-    "#url"     : "https://bato.to/title/86408-i-shall-master-this-family-official/1681030-ch_8",
+    "#url"     : "https://battwo.com/title/86408-i-shall-master-this-family-official/1681030-ch_8",
     "#class"   : batoto.BatotoChapterExtractor,
-    "#pattern" : r"https://\w+\.mb\w\w\w\.org/media/7006/.+\.webp",
+    "#pattern" : r"https://n\d+\.mb\w{3}\.org/media/7006/.+\.webp",
     "#count"   : 66,
 
     "artist"        : ["Mon"],
@@ -22,7 +22,7 @@ __tests__ = (
     "chapter_url"   : "8",
     "count"         : 66,
     "page"          : range(1, 66),
-    "cover"         : "https://n28.mbxma.org/thumb/ampi/c69/c69c33b47d05536b565df0ae2138ccd4c083bad2_400_600_52848.jpeg",
+    "cover"         : "https://n24.mbhiz.org/media/mbim/476/4765b5482c87970ae18e3e335bc8a3f2f7a47f8b_400_600_43900.webp",
     "date"          : "dt:2021-05-15 18:51:37",
     "description"   : "The great Lombardi family was once at the top of the empire. After the death of its patriarch, the fate of the family and that of Firentia, born from a Lombardi and a peasant, fall to ruin at the hands of her useless and cruel cousins. But when she’s reincarnated as her seven-year-old self, she’ll work to protect the family’s honor, gain her grandpa Lulac’s favor, and prevent her own father’s death. In this lifetime, there’s only one way for her to win: become the head of their mighty household.",
     "extension"     : "webp",
@@ -31,7 +31,7 @@ __tests__ = (
     "lang_orig"     : "ko",
     "manga"         : "I Shall Master this Family! [Official]",
     "manga_date"    : "dt:2021-05-10 20:18:58",
-    "manga_date_updated": "dt:2024-11-10 18:38:02",
+    "manga_date_updated": "dt:2025-12-28 18:41:24",
     "manga_id"      : 86408,
     "manga_slug"    : "i-shall-master-this-family-official",
     "published"     : "2021",
@@ -55,7 +55,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://bato.to/title/104929-86-eighty-six-official/1943513-vol_1-ch_5",
+    "#url"     : "https://battwo.com/title/104929-86-eighty-six-official/1943513-vol_1-ch_5",
     "#comment" : "volume (vol) in url",
     "#class"   : batoto.BatotoChapterExtractor,
     "#count"   : 7,
@@ -84,7 +84,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://bato.to/title/90710-new-suitor-for-the-abandoned-wife/2089747-ch_76",
+    "#url"     : "https://battwo.com/title/90710-new-suitor-for-the-abandoned-wife/2089747-ch_76",
     "#comment" : "duplicate info in chapter_minor / title (#5988)",
     "#class"   : batoto.BatotoChapterExtractor,
 
@@ -96,7 +96,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://bato.to/title/115494-today-with-you/2631897-ch_38",
+    "#url"     : "https://battwo.com/title/115494-today-with-you/2631897-ch_38",
     "#class"   : batoto.BatotoChapterExtractor,
 
     "chapter"       : 37,
@@ -113,18 +113,18 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://bato.to/title/86408/1681030",
+    "#url"     : "https://battwo.com/title/86408/1681030",
     "#class"   : batoto.BatotoChapterExtractor,
 },
 
 {
-    "#url"     : "https://bato.to/chapter/1681030",
+    "#url"     : "https://battwo.com/chapter/1681030",
     "#comment" : "v2 URL",
     "#class"   : batoto.BatotoChapterExtractor,
 },
 
 {
-    "#url"     : "https://bato.to/title/113742-futsutsuka-na-akujo-de-wa-gozaimasu-ga-suuguu-chouso-torikae-den-official",
+    "#url"     : "https://battwo.com/title/113742-futsutsuka-na-akujo-de-wa-gozaimasu-ga-suuguu-chouso-torikae-den-official",
     "#class"   : batoto.BatotoMangaExtractor,
     "#pattern" : batoto.BatotoChapterExtractor.pattern,
     "#count"   : range(50, 80),
@@ -134,7 +134,7 @@ __tests__ = (
     "artist"       : ["Ei Ohitsuji", "Kana Yuki"],
     "chapter"      : int,
     "chapter_minor": {"", ".5", ".6", ".7", ".8", ".9"},
-    "cover"        : "https://n26.mbfpu.org/media/mbim/865/8652703e451b4ddefbd2eb2d270cbf6102430a40_600_843_155280.webp",
+    "cover"        : "https://k02.mbimg.org/media/mbim/aa0/aa011e00e8354783114e1eb26beee624b98ab7f7_600_843_172402.webp",
     "date"         : "type:datetime",
     "description"  : "As the crown prince’s favored maiden at court, Kou Reirin’s future as the next empress is all but assured. That is, until her rival Shu Keigetsu, the court’s “sewer rat,” pushes her over a balcony! Reirin survives, but wakes up in Keigetsu’s body! Turns out, Keigetsu has used magic to swap bodies with Reirin in order to steal her position at court. After being sickly her whole life, Reirin is determined to use this new body to turn things around. She won’t let anything stop her, not even her impending execution!",
     "lang"         : "en",
@@ -162,7 +162,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://bato.to/title/104929-86-eighty-six-official",
+    "#url"     : "https://battwo.com/title/104929-86-eighty-six-official",
     "#comment" : "Manga with number in name",
     "#class"   : batoto.BatotoMangaExtractor,
     "#count"   : ">= 18",
@@ -171,7 +171,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://bato.to/title/140046-the-grand-duke-s-fox-princess-mgchan",
+    "#url"     : "https://battwo.com/title/140046-the-grand-duke-s-fox-princess-mgchan",
     "#comment" : "Non-English translation (Indonesian)",
     "#class"   : batoto.BatotoMangaExtractor,
     "#count"   : ">= 29",
@@ -180,7 +180,7 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://bato.to/title/134270-removed",
+    "#url"     : "https://battwo.com/title/134270-removed",
     "#comment" : "Deleted/removed manga",
     "#class"   : batoto.BatotoMangaExtractor,
     "#log"     : "'This comic has been marked as deleted and the chapter list is not available.'",
@@ -201,12 +201,12 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://bato.to/title/86408-i-shall-master-this-family-official",
+    "#url"     : "https://battwo.com/title/86408-i-shall-master-this-family-official",
     "#class"   : batoto.BatotoMangaExtractor,
 },
 
 {
-    "#url"     : "https://bato.to/series/86408/i-shall-master-this-family-official",
+    "#url"     : "https://battwo.com/series/86408/i-shall-master-this-family-official",
     "#comment" : "v2 URL",
     "#class"   : batoto.BatotoMangaExtractor,
 },

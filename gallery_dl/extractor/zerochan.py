@@ -26,7 +26,7 @@ class ZerochanExtractor(BooruExtractor):
     per_page = 200
     cookies_domain = ".zerochan.net"
     cookies_names = ("z_id", "z_hash")
-    useragent = util.USERAGENT
+    useragent = util.USERAGENT_GALLERYDL
     request_interval = (0.5, 1.5)
 
     def login(self):
@@ -173,7 +173,6 @@ class ZerochanTagExtractor(ZerochanExtractor):
             self.per_page = 24
         else:
             self.posts = self.posts_api
-            self.session.headers["User-Agent"] = util.USERAGENT
 
         if exts := self.config("extensions"):
             if isinstance(exts, str):

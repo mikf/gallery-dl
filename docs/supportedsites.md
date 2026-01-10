@@ -1129,6 +1129,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Models, Posts, User Profiles</td>
     <td></td>
 </tr>
+<tr id="turbovid" title="turbovid">
+    <td>turbovid.cr</td>
+    <td>https://turbovid.cr/</td>
+    <td>Albums, Media Files</td>
+    <td></td>
+</tr>
 <tr id="twibooru" title="twibooru">
     <td>Twibooru</td>
     <td>https://twibooru.org/</td>
@@ -1231,6 +1237,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, Articles, Feeds, Images from Statuses, User Profiles, Videos</td>
     <td></td>
 </tr>
+<tr id="whyp" title="whyp">
+    <td>Whyp</td>
+    <td>https://whyp.it/</td>
+    <td>Audio, Collections, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="wikiart" title="wikiart">
     <td>WikiArt.org</td>
     <td>https://www.wikiart.org/</td>
@@ -1277,6 +1289,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Yiff verse</td>
     <td>https://yiffverse.com/</td>
     <td>Playlists, Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr id="yourlesbians" title="yourlesbians">
+    <td>YourLesbians</td>
+    <td>https://yourlesbians.com/</td>
+    <td>Albums</td>
     <td></td>
 </tr>
 <tr id="zerochan" title="zerochan">
@@ -1564,25 +1582,25 @@ Consider all listed sites to potentially be NSFW.
 <tr id="nelomanga" title="nelomanga">
     <td>MangaNelo</td>
     <td>https://www.nelomanga.net/</td>
-    <td>Chapters, Manga</td>
+    <td>Bookmarks, Chapters, Manga</td>
     <td></td>
 </tr>
 <tr id="natomanga" title="natomanga">
     <td>MangaNato</td>
     <td>https://www.natomanga.com/</td>
-    <td>Chapters, Manga</td>
+    <td>Bookmarks, Chapters, Manga</td>
     <td></td>
 </tr>
 <tr id="manganato" title="manganato">
     <td>MangaNato</td>
     <td>https://www.manganato.gg/</td>
-    <td>Chapters, Manga</td>
+    <td>Bookmarks, Chapters, Manga</td>
     <td></td>
 </tr>
 <tr id="mangakakalot" title="mangakakalot">
     <td>MangaKakalot</td>
     <td>https://www.mangakakalot.gg/</td>
-    <td>Chapters, Manga</td>
+    <td>Bookmarks, Chapters, Manga</td>
     <td></td>
 </tr>
 
@@ -1876,19 +1894,19 @@ Consider all listed sites to potentially be NSFW.
 <tr id="simpcity" title="simpcity">
     <td>SimpCity Forums</td>
     <td>https://simpcity.cr/</td>
-    <td>Forums, Posts, Threads</td>
+    <td>Forums, Media Categories, Media Files, User Media, Posts, Threads</td>
     <td>Supported</td>
 </tr>
 <tr id="nudostarforum" title="nudostarforum">
     <td>NudoStar Forums</td>
     <td>https://nudostar.com/forum/</td>
-    <td>Forums, Posts, Threads</td>
+    <td>Forums, Media Categories, Media Files, User Media, Posts, Threads</td>
     <td>Supported</td>
 </tr>
 <tr id="atfforum" title="atfforum">
     <td>All The Fallen</td>
     <td>https://allthefallen.moe/forum/</td>
-    <td>Forums, Posts, Threads</td>
+    <td>Forums, Media Categories, Media Files, User Media, Posts, Threads</td>
     <td></td>
 </tr>
 

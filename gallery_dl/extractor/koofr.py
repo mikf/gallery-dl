@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -17,6 +17,8 @@ class KoofrSharedExtractor(Extractor):
     category = "koofr"
     subcategory = "shared"
     root = "https://app.koofr.net"
+    directory_fmt = ("{category}", "{post[title]} ({post[id]})", "{path:I}")
+    archive_fmt = "{post[id]}_{path:J/}_{hash|id}"
     pattern = (r"(?:https?://)?(?:"
                r"(?:app\.)?koofr\.(?:net|eu)/links/([\w-]+)|"
                r"k00\.fr/(\w+))")
@@ -42,14 +44,62 @@ class KoofrSharedExtractor(Extractor):
         }
         data = self.request_json(url, params=params, headers=headers)
 
-        name = data["name"]
-        file = text.nameext_from_name(name, data["file"])
-        file["_http_headers"] = {"Referer": referer}
+        file = data["file"]
+        file["path"] = []
+        if file["type"] == "dir" and self.config("recursive", True):
+            files = self._extract_files(file, url + "/bundle", params, headers)
+            recursive = True
+        else:
+            files = (file,)
+            recursive = False
 
-        root = data.get("publicUrlBase") or self.root
-        url = f"{root}/content/links/{uuid}/files/get/{name}?path=/&force="
-        if password:
-            url = f"{url}&password={password}"
+        post = {
+            "id"   : data["id"],
+            "title": data["name"],
+            "date" : self.parse_timestamp(file["modified"] / 1000),
+        }
 
-        yield Message.Directory, "", file
-        yield Message.Url, url, file
+        base = (f"{data.get('publicUrlBase') or self.root}"
+                f"/content/links/{uuid}/files/get/")
+        headers = {"Referer": referer}
+        password = "&password=" + text.escape(password) if password else ""
+
+        for file in files:
+            file["post"] = post
+            file["date"] = self.parse_timestamp(file["modified"] / 1000)
+            file["_http_headers"] = headers
+
+            name = file["name"]
+            text.nameext_from_name(name, file)
+
+            if recursive:
+                if path := file["path"]:
+                    path = f"{'/'.join(path)}/{name}"
+                else:
+                    path = name
+            else:
+                path = ""
+                password += "&force"
+
+            url = (f"{base}{text.escape(name)}"
+                   f"?path=/{text.escape(path)}{password}")
+
+            yield Message.Directory, "", file
+            yield Message.Url, url, file
+
+    def _extract_files(self, dir, url, params, headers):
+        path = dir["path"]
+        params["path"] = "/" + "/".join(path)
+
+        files = self.request_json(
+            url, params=params, headers=headers)["files"]
+
+        for file in files:
+            if file["type"] == "dir":
+                file["path"] = path.copy()
+                file["path"].append(file["name"])
+                yield from self._extract_files(
+                    file, url, params.copy(), headers)
+            else:
+                file["path"] = path
+                yield file

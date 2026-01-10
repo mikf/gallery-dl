@@ -92,10 +92,11 @@ class PixivExtractor(Extractor):
                     work["caption"] = self._sanitize_ajax_caption(
                         body["illustComment"])
 
-            if transform_tags:
+            if transform_tags is not None:
                 transform_tags(work)
             work["num"] = 0
             work["date"] = dt.parse_iso(work["create_date"])
+            work["count"] = len(files)
             work["rating"] = ratings.get(work["x_restrict"])
             work["suffix"] = ""
             work.update(metadata)
@@ -399,6 +400,14 @@ class PixivUserExtractor(Dispatch, PixivExtractor):
     example = "https://www.pixiv.net/en/users/12345"
 
     def items(self):
+        if (inc := self.config("include")) and (
+                "sketch" in inc or inc == "all"):
+            Extractor.initialize(self)
+            user = PixivAppAPI(self).user_detail(self.groups[0])
+            sketch = "https://sketch.pixiv.net/@" + user["user"]["account"]
+        else:
+            sketch = ""
+
         base = f"{self.root}/users/{self.groups[0]}/"
         return self._dispatch_extractors((
             (PixivAvatarExtractor       , base + "avatar"),
@@ -407,6 +416,7 @@ class PixivUserExtractor(Dispatch, PixivExtractor):
             (PixivFavoriteExtractor     , base + "bookmarks/artworks"),
             (PixivNovelBookmarkExtractor, base + "bookmarks/novels"),
             (PixivNovelUserExtractor    , base + "novels"),
+            (PixivSketchExtractor       , sketch),
         ), ("artworks",), (
             ("bookmark", "novel-bookmark"),
             ("user"    , "novel-user"),

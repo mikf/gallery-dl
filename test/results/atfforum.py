@@ -53,6 +53,21 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.allthefallen.moe/forum/index.php?threads/final-fantasy-xiv.57090/#post-21765744",
+    "#category": ("xenforo", "atfforum", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+},
+
+{
+    "#url"     : "https://www.allthefallen.moe/forum/index.php?threads/shoujo-ramune-episode-1-decensored-by-deepcreampy.17050/#post-19803487",
+    "#comment" : "incomplete video URL (#8786)",
+    "#category": ("xenforo", "atfforum", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+    "#auth"    : True,
+    "#results" : "https://allthefallen.moe/forum/data/video/1094/1094367-e46ad8636dee0d4488db56d3770919cc.mp4",
+},
+
+{
     "#url"     : "https://www.allthefallen.moe/forum/index.php?threads/final-fantasy-xiv.57090/",
     "#category": ("xenforo", "atfforum", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
@@ -100,6 +115,43 @@ __tests__ = (
     "#pattern" : xenforo.XenforoThreadExtractor.pattern,
     "#auth"    : True,
     "#count"   : range(100, 200),
+},
+
+{
+    "#url"     : "https://allthefallen.moe/forum/index.php?media/1737485564664-png.224260/",
+    "#category": ("xenforo", "atfforum", "media-item"),
+    "#class"   : xenforo.XenforoMediaItemExtractor,
+    "#options" : {"metadata": False},
+    "#results" : "https://allthefallen.moe/forum/index.php?media/1737485564664-png.224260/full",
+
+    "extension": "png",
+    "filename" : "1737485564664",
+    "id"       : "224260",
+},
+
+{
+    "#url"     : "https://allthefallen.moe/forum/index.php?media/users/peters.150992/",
+    "#category": ("xenforo", "atfforum", "media-user"),
+    "#class"   : xenforo.XenforoMediaUserExtractor,
+    "#options" : {"metadata": False},
+    "#auth"    : True,
+    "#results" : (
+        "https://allthefallen.moe/forum/index.php?media/eden-invitation-jpg.254624/full",
+        "https://allthefallen.moe/forum/index.php?media/1737485564664-png.224260/full",
+        "https://allthefallen.moe/forum/index.php?media/laughing-cat-emoji-png.243825/full",
+    ),
+},
+
+{
+    "#url"     : "https://allthefallen.moe/forum/index.php?members/peters.150992/#xfmgMedia",
+    "#category": ("xenforo", "atfforum", "media-user"),
+    "#class"   : xenforo.XenforoMediaUserExtractor,
+},
+
+{
+    "#url"     : "https://www.allthefallen.moe/forum/index.php?media/categories/translations.2/",
+    "#category": ("xenforo", "atfforum", "media-category"),
+    "#class"   : xenforo.XenforoMediaCategoryExtractor,
 },
 
 )

@@ -26,6 +26,7 @@ __tests__ = (
         "https://weibo.com/u/1758989602?tabtype=feed",
         "https://weibo.com/u/1758989602?tabtype=video",
         "https://weibo.com/u/1758989602?tabtype=newVideo",
+        "https://weibo.com/u/1758989602?tabtype=article",
         "https://weibo.com/u/1758989602?tabtype=album",
     ),
 },
@@ -158,6 +159,34 @@ __tests__ = (
     "#pattern" : r"https://(wx\d+\.sinaimg\.cn/large/\w{32}\.(jpg|png|gif)|g\.us\.sinaimg\.cn/../\w+\.mp4)",
     "#range"   : "1-3",
     "#count"   : 3,
+},
+
+{
+    "#url"     : "https://weibo.com/u/2142058927?tabtype=album-头像",
+    "#comment" : "subalbum",
+    "#class"   : weibo.WeiboAlbumExtractor,
+    "#range"   : "1-3",
+    "#results" : (
+        "https://weibo.com/ajax/common/download?pid=002kXRnxly8i5b4anvvxbj60u00u078w02",
+        "https://weibo.com/ajax/common/download?pid=002kXRnxly8i2b7u68bfhj60u00u0dl002",
+        "https://weibo.com/ajax/common/download?pid=002kXRnxly8i2b6rmr1trj60rs0rstdn02",
+    ),
+
+    "extension": "jpg",
+    "pid"      : str,
+    "type"     : "pic",
+    "subalbum" : {
+        "containerid": "2318262142058927_-_pc_profile_album_-_photo_-_avatar_-_35046512_-_%E5%A4%B4%E5%83%8F",
+        "pic"        : "https://wx1.sinaimg.cn/webp720/002kXRnxly8i5b4anvvxbj60u00u078w02.jpg",
+        "pic_title"  : "头像",
+    },
+    "user"     : {
+        "id"         : 2142058927,
+        "idstr"      : "2142058927",
+        "location"   : "上海 黄浦区",
+        "profile_url": "/u/2142058927",
+        "screen_name": "吴磊LEO",
+    },
 },
 
 {

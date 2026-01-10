@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -49,7 +49,11 @@ class BellazonExtractor(Extractor):
             yield Message.Directory, "", data
             data["num"] = data["num_internal"] = data["num_external"] = 0
             for info, url, url_img in urls:
-                url = text.unescape(url or url_img)
+                if url_img:
+                    url = text.unescape(
+                        text.extr(info, 'data-full-image="', '"') or url_img)
+                else:
+                    url = text.unescape(url)
 
                 if url.startswith(native):
                     if (
@@ -157,8 +161,9 @@ class BellazonExtractor(Extractor):
             "author_url"  : url_a,
         }
 
-        thread["id"], _, thread["slug"] = \
+        thread["id"], _, slug = \
             url_t.rsplit("/", 2)[1].partition("-")
+        thread["slug"] = text.unquote(slug)
 
         if url_a:
             thread["author_id"], _, thread["author_slug"] = \
@@ -192,7 +197,7 @@ class BellazonExtractor(Extractor):
 
 class BellazonPostExtractor(BellazonExtractor):
     subcategory = "post"
-    pattern = (BASE_PATTERN + r"(/topic/\d+-[\w-]+(?:/page/\d+)?)"
+    pattern = (BASE_PATTERN + r"(/topic/\d+-[^/?#]+(?:/page/\d+)?)"
                r"/?#(?:findC|c)omment-(\d+)")
     example = "https://www.bellazon.com/main/topic/123-SLUG/#findComment-12345"
 
@@ -211,7 +216,7 @@ class BellazonPostExtractor(BellazonExtractor):
 
 class BellazonThreadExtractor(BellazonExtractor):
     subcategory = "thread"
-    pattern = BASE_PATTERN + r"(/topic/\d+-[\w-]+)(?:/page/(\d+))?"
+    pattern = BASE_PATTERN + r"(/topic/\d+-[^/?#]+)(?:/page/(\d+))?"
     example = "https://www.bellazon.com/main/topic/123-SLUG/"
 
     def posts(self):
@@ -236,7 +241,7 @@ class BellazonThreadExtractor(BellazonExtractor):
 
 class BellazonForumExtractor(BellazonExtractor):
     subcategory = "forum"
-    pattern = BASE_PATTERN + r"(/forum/\d+-[\w-]+)(?:/page/(\d+))?"
+    pattern = BASE_PATTERN + r"(/forum/\d+-[^/?#]+)(?:/page/(\d+))?"
     example = "https://www.bellazon.com/main/forum/123-SLUG/"
 
     def items(self):

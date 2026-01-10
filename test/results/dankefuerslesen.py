@@ -74,6 +74,21 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://danke.moe/read/series/awana-chan-wa-kyou-mo-shiawase/2/1/",
+    "#class"   : dankefuerslesen.DankefuerslesenChapterExtractor,
+},
+
+{
+    "#url"     : "https://danke.moe/reader/manga/awana-chan-wa-kyou-mo-shiawase/2/1/",
+    "#class"   : dankefuerslesen.DankefuerslesenChapterExtractor,
+},
+
+{
+    "#url"     : "https://danke.moe/reader/series/awana-chan-wa-kyou-mo-shiawase/2/1/",
+    "#class"   : dankefuerslesen.DankefuerslesenChapterExtractor,
+},
+
+{
     "#url"     : "https://danke.moe/read/manga/awana-chan-wa-kyou-mo-shiawase/",
     "#class"   : dankefuerslesen.DankefuerslesenMangaExtractor,
     "#pattern" : dankefuerslesen.DankefuerslesenChapterExtractor.pattern,
@@ -88,6 +103,21 @@ __tests__ = (
     "chapter_minor": "",
     "lang"    : None,
     "language": None,
+},
+
+{
+    "#url"     : "https://danke.moe/read/series/awana-chan-wa-kyou-mo-shiawase",
+    "#class"   : dankefuerslesen.DankefuerslesenMangaExtractor,
+},
+
+{
+    "#url"     : "https://danke.moe/reader/manga/awana-chan-wa-kyou-mo-shiawase",
+    "#class"   : dankefuerslesen.DankefuerslesenMangaExtractor,
+},
+
+{
+    "#url"     : "https://danke.moe/reader/series/awana-chan-wa-kyou-mo-shiawase",
+    "#class"   : dankefuerslesen.DankefuerslesenMangaExtractor,
 },
 
 )

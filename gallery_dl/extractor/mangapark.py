@@ -101,7 +101,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
             "language"  : util.code_to_language(lang),
             "source"    : chapter["srcTitle"],
             "source_id" : chapter["sourceId"],
-            "date"      : self.parse_timestamp(chapter["dateCreate"] // 1000),
+            "date"      : self.parse_timestamp(chapter["dateCreate"] / 1000),
         }
 
     def images(self, _):
@@ -139,7 +139,7 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
                 "source"    : chapter["srcTitle"],
                 "source_id" : chapter["sourceId"],
                 "date"      : self.parse_timestamp(
-                    chapter["dateCreate"] // 1000),
+                    chapter["dateCreate"] / 1000),
                 "_extractor": MangaparkChapterExtractor,
             }
             yield Message.Queue, url, data

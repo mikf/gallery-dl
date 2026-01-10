@@ -127,11 +127,13 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
         }
 
     def images(self, page):
-        images_container = text.extr(page, 'pageOpts', ':[0,0]}"')
-        images_container = text.unescape(images_container)
+        container = text.unescape(text.extr(page, 'pageOpts', ':[0,0]}"'))
+
         return [
-            (url, None)
-            for url in text.extract_iter(images_container, r"\"", r"\"")
+            ((url.replace("://k", "://n", 1)
+              if url.startswith("https://k") and ".mb" in url else
+              url), None)
+            for url in text.extract_iter(container, r"\"", r"\"")
         ]
 
 
@@ -188,7 +190,7 @@ def _manga_info(self, manga_id, page=None):
         "manga_id"   : text.parse_int(manga_id),
         "manga_slug" : data["slug"][1],
         "manga_date" : self.parse_timestamp(
-            data["dateCreate"][1] // 1000),
+            data["dateCreate"][1] / 1000),
         "manga_date_updated": self.parse_timestamp(
             data["dateUpdate"][1] / 1000),
         "author"     : json_list(data["authors"]),

@@ -18,7 +18,7 @@ class WeasylExtractor(Extractor):
     filename_fmt = "{submitid} {title}.{extension}"
     archive_fmt = "{submitid}"
     root = "https://www.weasyl.com"
-    useragent = util.USERAGENT
+    useragent = util.USERAGENT_GALLERYDL
 
     def populate_submission(self, data):
         # Some submissions don't have content and can be skipped

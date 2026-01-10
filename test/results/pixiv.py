@@ -15,6 +15,23 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/users/173530",
+    "#class"   : pixiv.PixivUserExtractor,
+    "#options" : {"include": "all"},
+    "#results" : (
+        "https://www.pixiv.net/users/173530/avatar",
+        "https://www.pixiv.net/users/173530/background",
+        "https://www.pixiv.net/users/173530/artworks",
+        "https://www.pixiv.net/users/173530/bookmarks/artworks",
+        "https://www.pixiv.net/users/173530/bookmarks/novels",
+        "https://www.pixiv.net/users/173530/novels",
+        "https://sketch.pixiv.net/@del_shannon",
+        "https://www.pixiv.net/users/173530/bookmarks/novels",
+        "https://www.pixiv.net/users/173530/novels",
+    ),
+},
+
+{
     "#url"     : "https://www.pixiv.net/u/173530",
     "#class"   : pixiv.PixivUserExtractor,
 },
@@ -217,11 +234,12 @@ __tests__ = (
 
 {
     "#url"     : "https://www.pixiv.net/artworks/966412",
-    "#comment" : "related works (#1237)",
     "#class"   : pixiv.PixivWorkExtractor,
     "#sha1_url"    : "90c1715b07b0d1aad300bce256a0bc71f42540ba",
     "#sha1_content": "69a8edfb717400d1c2e146ab2b30d2c235440c5a",
 
+    "count"   : 1,
+    "num"     : 0,
     "date"    : "dt:2008-06-12 15:29:13",
     "date_url": "dt:2008-06-12 15:29:13",
 },
@@ -239,6 +257,7 @@ __tests__ = (
     "#results" : "https://i.pximg.net/img-zip-ugoira/img/2018/01/15/13/24/48/66806629_ugoira1920x1080.zip",
 
     "frames"  : list,
+    "count"   : 1,
     "date"    : "dt:2018-01-14 15:06:08",
     "date_url": "dt:2018-01-15 04:24:48",
 },
@@ -258,6 +277,7 @@ __tests__ = (
     ),
 
     "frames": list,
+    "count" : 6,
 },
 
 {
@@ -287,6 +307,7 @@ __tests__ = (
     "caption"       : "Meet a deer .",
     "comment_access_control": 0,
     "comments"      : (),
+    "count"         : 1,
     "create_date"   : "2022-11-19T15:00:00+00:00",
     "date"          : "dt:2022-11-19 15:00:00",
     "date_url"      : "dt:2022-11-19 15:00:49",
@@ -368,10 +389,7 @@ __tests__ = (
     "#comment" : "deleted limit_sanity_level_360.png work (#6339)",
     "#class"   : pixiv.PixivWorkExtractor,
     "#count"   : 0,
-    "#log"     : (
-        ("warning", "104582860: 'limit_sanity_level' warning"),
-        ("error"  , "'General Error'"),
-    ),
+    "#exception": exception.NotFoundError,
 },
 
 {

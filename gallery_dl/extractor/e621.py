@@ -20,7 +20,7 @@ class E621Extractor(danbooru.DanbooruExtractor):
     page_limit = 750
     page_start = None
     per_page = 320
-    useragent = util.USERAGENT + " (by mikf)"
+    useragent = util.USERAGENT_GALLERYDL + " (by mikf)"
     request_interval_min = 1.0
 
     def items(self):
