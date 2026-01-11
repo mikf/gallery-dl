@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2025 Mike Fährmann
+# Copyright 2021-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -298,7 +298,7 @@ def parse_field_name(field_name):
 
     for is_attr, key in rest:
         if is_attr:
-            func = operator.attrgetter
+            func = _attrgetter
         else:
             func = operator.itemgetter
             try:
@@ -328,6 +328,22 @@ def _slice(indices):
         int(stop) if stop else None,
         int(step) if step else None,
     )
+
+
+def _attrgetter(key):
+
+    if key.isdecimal() or key[0] == "-":
+        try:
+            return operator.itemgetter(int(key))
+        except ValueError:
+            pass
+
+    def apply_key(obj):
+        try:
+            return obj[key]
+        except (TypeError, KeyError):
+            return getattr(obj, key)
+    return apply_key
 
 
 def _bytesgetter(slice):
