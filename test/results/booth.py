@@ -200,6 +200,12 @@ https://www.melonbooks.co.jp/detail/detail.php?product_id=1872452""",
 },
 
 {
+    "#url"     : "https://booth.pm/zh-cn/items/1895090",
+    "#comment" : "URL with language code",
+    "#class"   : booth.BoothItemExtractor,
+},
+
+{
     "#url"     : "https://wanoazayaka.booth.pm/",
     "#class"   : booth.BoothShopExtractor,
     "#results" : (
