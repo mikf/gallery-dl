@@ -33,11 +33,11 @@ class RedditExtractor(Extractor):
         previews = self.config("previews", True)
         embeds = self.config("embeds", True)
 
-        if videos := self.config("videos", True):
-            if videos == "ytdl":
-                self._extract_video = self._extract_video_ytdl
-            elif videos == "dash":
+        if videos := self.config("videos", "dash"):
+            if videos == "dash":
                 self._extract_video = self._extract_video_dash
+            elif videos == "ytdl":
+                self._extract_video = self._extract_video_ytdl
             videos = True
 
         selftext = self.config("selftext")
@@ -223,10 +223,10 @@ class RedditExtractor(Extractor):
                     self.log.debug(src)
             elif url := data.get("dashUrl"):
                 submission["_ytdl_manifest"] = "dash"
-                yield f"ytdl:{url}"
+                yield "ytdl:" + url
             elif url := data.get("hlsUrl"):
                 submission["_ytdl_manifest"] = "hls"
-                yield f"ytdl:{url}"
+                yield "ytdl:" + url
 
     def _extract_video_ytdl(self, submission):
         return "https://www.reddit.com" + submission["permalink"]
@@ -506,7 +506,7 @@ class RedditAPI():
         return "Bearer " + data["access_token"]
 
     def _call(self, endpoint, params):
-        url = f"{self.root}{endpoint}"
+        url = self.root + endpoint
         params["raw_json"] = "1"
 
         while True:

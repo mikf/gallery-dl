@@ -19,7 +19,7 @@ class ImagechestGalleryExtractor(GalleryExtractor):
     """Extractor for image galleries from imgchest.com"""
     category = "imagechest"
     root = "https://imgchest.com"
-    pattern = rf"{BASE_PATTERN}/p/([A-Za-z0-9]{{11}})"
+    pattern = BASE_PATTERN + r"/p/([A-Za-z0-9]{11})"
     example = "https://imgchest.com/p/abcdefghijk"
 
     def __init__(self, match):
@@ -78,7 +78,7 @@ class ImagechestUserExtractor(Extractor):
     category = "imagechest"
     subcategory = "user"
     root = "https://imgchest.com"
-    pattern = rf"{BASE_PATTERN}/u/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/u/([^/?#]+)"
     example = "https://imgchest.com/u/USER"
 
     def items(self):

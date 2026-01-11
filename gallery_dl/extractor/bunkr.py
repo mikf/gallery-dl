@@ -64,7 +64,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
     root_dl = "https://get.bunkrr.su"
     root_api = "https://apidl.bunkr.ru"
     archive_fmt = "{album_id}_{id|id_url|slug}"
-    pattern = rf"{BASE_PATTERN}/a/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://bunkr.si/a/ID"
 
     def __init__(self, match):
@@ -189,7 +189,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                                  json={"id": data_id})
 
         if data.get("encrypted"):
-            key = f"SECRET_KEY_{data['timestamp'] // 3600}"
+            key = "SECRET_KEY_" + str(data["timestamp"] // 3600)
             file_url = util.decrypt_xor(data["url"], key.encode())
         else:
             file_url = data["url"]
@@ -202,7 +202,8 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         }
 
     def _validate(self, response):
-        if response.history and response.url.endswith("/maintenance-vid.mp4"):
+        if response.history and response.url.endswith(
+                ("/maint.mp4", "/maintenance-vid.mp4")):
             self.log.warning("File server in maintenance mode")
             return False
         return True
@@ -216,12 +217,12 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
     """Extractor for bunkr.si media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-    pattern = rf"{BASE_PATTERN}(/[fvid]/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/[fvid]/[^/?#]+)"
     example = "https://bunkr.si/f/FILENAME"
 
     def fetch_album(self, album_id):
         try:
-            page = self.request(f"{self.root}{album_id}").text
+            page = self.request(self.root + album_id).text
             data_id = text.extr(page, 'data-file-id="', '"')
             file = self._extract_file(data_id)
             file["name"] = text.unquote(text.unescape(text.extr(

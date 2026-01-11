@@ -79,7 +79,7 @@ BASE_PATTERN = ImhentaiExtractor.update({
 
 class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
     """Extractor for imhentai galleries"""
-    pattern = rf"{BASE_PATTERN}/(?:gallery|view)/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:gallery|view)/(\d+)"
     example = "https://imhentai.xxx/gallery/12345/"
 
     def __init__(self, match):
@@ -141,7 +141,7 @@ class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
 class ImhentaiTagExtractor(ImhentaiExtractor):
     """Extractor for imhentai tag searches"""
     subcategory = "tag"
-    pattern = (rf"{BASE_PATTERN}(/(?:"
+    pattern = (BASE_PATTERN + r"(/(?:"
                r"artist|category|character|group|language|parody|tag"
                r")/([^/?#]+))")
     example = "https://imhentai.xxx/tag/TAG/"
@@ -154,7 +154,7 @@ class ImhentaiTagExtractor(ImhentaiExtractor):
 class ImhentaiSearchExtractor(ImhentaiExtractor):
     """Extractor for imhentai search results"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}(/(?:advanced-)?search/?\?[^#]+|/[^/?#]+/?)"
+    pattern = BASE_PATTERN + r"(/(?:advanced-)?search/?\?[^#]+|/[^/?#]+/?)"
     example = "https://imhentai.xxx/search/?key=QUERY"
 
     def items(self):

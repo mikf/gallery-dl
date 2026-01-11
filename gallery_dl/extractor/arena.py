@@ -24,8 +24,8 @@ class ArenaChannelExtractor(GalleryExtractor):
     example = "https://are.na/evan-collins-1522646491/cassette-futurism"
 
     def metadata(self, page):
-        channel = self.request_json(
-            f"https://api.are.na/v2/channels/{self.groups[0]}")
+        url = "https://api.are.na/v2/channels/" + self.groups[0]
+        channel = self.request_json(url)
 
         channel["date"] = self.parse_datetime_iso(
             channel["created_at"])

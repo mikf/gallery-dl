@@ -464,6 +464,18 @@ Description
     Number of seconds to sleep before each download.
 
 
+extractor.*.sleep-skip
+----------------------
+Type
+    |Duration|_
+Default
+    ``0``
+Description
+    Number of seconds to sleep after
+    `skipping <extractor.*.skip_>`__
+    a file download.
+
+
 extractor.*.sleep-extractor
 ---------------------------
 Type
@@ -2235,7 +2247,7 @@ Type
     * ``string``
     * ``list`` of ``strings``
 Default
-    ``"quality=100"``
+    ``"original=true,quality=100"``
 Example
     * ``"+transcode=true,quality=100"``
     * ``["+", "transcode=true", "quality=100"]``
@@ -3009,6 +3021,16 @@ Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.facebook.loop
+-----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Continue when detecting a jump to a set's beginning.
+
+
 extractor.facebook.videos
 -------------------------
 Type
@@ -3108,9 +3130,21 @@ extractor.fansly.formats
 Type
     ``list`` of ``integers``
 Default
+    ``null``
+Example
     ``[1, 2, 3, 4, 302, 303]``
 Description
     List of file formats to consider during format selection.
+
+
+extractor.fansly.previews
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download `previews` if no other format is available.
 
 
 extractor.fansly.token
@@ -4030,6 +4064,16 @@ Description
     the first in the list gets chosen (usually `mp3`).
 
 
+extractor.koofr.zip
+-------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download shared `/links/` with multiple files as a single `.zip` file.
+
+
 extractor.lolisafe.domain
 -------------------------
 Type
@@ -4250,6 +4294,21 @@ Supported Values
     * ``notes``
 Note
     It is possible to use ``"all"`` instead of listing all values separately.
+
+
+extractor.[misskey].order-posts
+-------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which posts are processed.
+
+    ``"asc"`` | ``"reverse"``
+        Ascending order (oldest first)
+    ``"desc"``
+        Descending order (newest first)
 
 
 extractor.[misskey].renotes
@@ -4738,6 +4797,7 @@ Supported Values
     * ``favorite``
     * ``novel-user``
     * ``novel-bookmark``
+    * ``sketch``
 Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
@@ -5203,7 +5263,7 @@ Type
     * ``bool``
     * ``string``
 Default
-    ``true``
+    ``"dash"``
 Description
     Control video download behavior.
 
@@ -5796,6 +5856,16 @@ Description
     Download video covers.
 
 
+extractor.tiktok.photos
+-----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download photos.
+
+
 extractor.tiktok.videos
 -----------------------
 Type
@@ -5806,18 +5876,52 @@ Description
     Download videos using |ytdl|.
 
 
-extractor.tiktok.user.avatar
-----------------------------
+extractor.tiktok.tiktok-range
+-----------------------------
+Type
+    ``string``
+Default
+    ``""``
+Example
+    ``"1-20"``
+Description
+    Range or playlist indices of ``tiktok`` posts to extract.
+
+    When using `ytdl`, see
+    `ytdl/playlist_items <https://github.com/yt-dlp/yt-dlp/blob/3042afb5fe342d3a00de76704cd7de611acc350e/yt_dlp/YoutubeDL.py#L289>`__
+    for details.
+
+
+extractor.tiktok.posts.order-posts
+----------------------------------
+Type
+    ``string``
+Default
+    ``"desc"``
+Description
+    Controls the order in which
+    posts are processed.
+
+    ``"asc"`` | ``"reverse"``
+        Ascending order (oldest first)
+    ``"desc"``
+        Descending order (newest first)
+    ``"popular"``
+        *Popular* order
+
+
+extractor.tiktok.posts.ytdl
+---------------------------
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
-    Download user avatars.
+    Extract user posts with |ytdl|
 
 
-extractor.tiktok.user.module
-----------------------------
+extractor.tiktok.posts.module
+-----------------------------
 Type
     |Module|_
 Default
@@ -5829,20 +5933,25 @@ Description
     See `extractor.ytdl.module`_.
 
 
-extractor.tiktok.user.tiktok-range
-----------------------------------
+extractor.tiktok.user.include
+-----------------------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``strings``
 Default
-    ``""``
-Example
-    ``"1-20"``
+    ``["avatar", "posts"]``
 Description
-    Range or playlist indices of ``tiktok`` user posts to extract.
-
-    See
-    `ytdl/playlist_items <https://github.com/yt-dlp/yt-dlp/blob/3042afb5fe342d3a00de76704cd7de611acc350e/yt_dlp/YoutubeDL.py#L289>`__
-    for details.
+    A (comma-separated) list of subcategories to include
+    when processing a user profile.
+Supported Values
+    * ``avatar``
+    * ``posts``
+    * ``reposts``
+    * ``stories``
+    * ``likes``
+    * ``saved``
+Note
+    It is possible to use ``"all"`` instead of listing all values separately.
 
 
 extractor.tumblr.avatar
@@ -6492,18 +6601,6 @@ Description
     Ignore previously seen Tweets.
 
 
-extractor.twitter.username-alt
-------------------------------
-Type
-    ``string``
-Description
-    Alternate Identifier (username, email, phone number)
-    when `logging in <extractor.*.username & .password_>`__.
-
-    When not specified and asked for by Twitter,
-    this identifier will need to be entered in an interactive prompt.
-
-
 extractor.twitter.users
 -----------------------
 Type
@@ -6720,13 +6817,24 @@ Note
     This requires 1 additional HTTP request per submission.
 
 
+extractor.webtoons.bgm
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download an episode's `background music` if available.
+Note
+    Requires |ytdl|
+
+
 extractor.webtoons.quality
 --------------------------
 Type
     * ``integer``
     * ``string``
     * ``object`` (`ext` → `type`)
-
 Default
     ``"original"``
 Example

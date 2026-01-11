@@ -32,7 +32,7 @@ class TumblrExtractor(Extractor):
 
     def _init(self):
         if name := self.groups[1]:
-            self.blog = f"{name}.tumblr.com"
+            self.blog = name + ".tumblr.com"
         else:
             self.blog = self.groups[0] or self.groups[2]
 
@@ -270,7 +270,7 @@ class TumblrExtractor(Extractor):
 class TumblrUserExtractor(TumblrExtractor):
     """Extractor for a Tumblr user's posts"""
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}(?:/page/\d+|/archive)?/?$"
+    pattern = BASE_PATTERN + r"(?:/page/\d+|/archive)?/?$"
     example = "https://www.tumblr.com/BLOG"
 
     def posts(self):
@@ -280,7 +280,7 @@ class TumblrUserExtractor(TumblrExtractor):
 class TumblrPostExtractor(TumblrExtractor):
     """Extractor for a single Tumblr post"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/(?:post/|image/)?(\d+)"
+    pattern = BASE_PATTERN + r"/(?:post/|image/)?(\d+)"
     example = "https://www.tumblr.com/BLOG/12345"
 
     def posts(self):
@@ -295,7 +295,7 @@ class TumblrPostExtractor(TumblrExtractor):
 class TumblrTagExtractor(TumblrExtractor):
     """Extractor for Tumblr user's posts by tag"""
     subcategory = "tag"
-    pattern = rf"{BASE_PATTERN}(?:/archive)?/tagged/([^/?#]+)"
+    pattern = BASE_PATTERN + r"(?:/archive)?/tagged/([^/?#]+)"
     example = "https://www.tumblr.com/BLOG/tagged/TAG"
 
     def posts(self):
@@ -307,7 +307,7 @@ class TumblrTagExtractor(TumblrExtractor):
 class TumblrDayExtractor(TumblrExtractor):
     """Extractor for Tumblr user's posts by day"""
     subcategory = "day"
-    pattern = rf"{BASE_PATTERN}/day/(\d\d\d\d/\d\d/\d\d)"
+    pattern = BASE_PATTERN + r"/day/(\d\d\d\d/\d\d/\d\d)"
     example = "https://www.tumblr.com/BLOG/day/1970/01/01"
 
     def posts(self):
@@ -325,7 +325,7 @@ class TumblrLikesExtractor(TumblrExtractor):
     subcategory = "likes"
     directory_fmt = ("{category}", "{blog_name}", "likes")
     archive_fmt = "f_{blog[name]}_{id}_{num}"
-    pattern = rf"{BASE_PATTERN}/likes"
+    pattern = BASE_PATTERN + r"/likes"
     example = "https://www.tumblr.com/BLOG/likes"
 
     def posts(self):
@@ -335,7 +335,7 @@ class TumblrLikesExtractor(TumblrExtractor):
 class TumblrFollowingExtractor(TumblrExtractor):
     """Extractor for a Tumblr user's followed blogs"""
     subcategory = "following"
-    pattern = rf"{BASE_PATTERN}/following"
+    pattern = BASE_PATTERN + r"/following"
     example = "https://www.tumblr.com/BLOG/following"
 
     items = TumblrExtractor.items_blogs
@@ -347,7 +347,7 @@ class TumblrFollowingExtractor(TumblrExtractor):
 class TumblrFollowersExtractor(TumblrExtractor):
     """Extractor for a Tumblr user's followers"""
     subcategory = "followers"
-    pattern = rf"{BASE_PATTERN}/followers"
+    pattern = BASE_PATTERN + r"/followers"
     example = "https://www.tumblr.com/BLOG/followers"
 
     items = TumblrExtractor.items_blogs
@@ -531,12 +531,16 @@ class TumblrAPI(oauth.OAuth1API):
         if self.api_key:
             params["api_key"] = self.api_key
 
-        strategy = self.extractor.config("pagination")
-        if not strategy:
-            if params.get("before"):
-                strategy = "before"
-            elif "offset" not in params:
+        if strategy := self.extractor.config("pagination"):
+            if strategy not in {"api", "before"} and "offset" not in params:
+                self.log.warning('Unable to use "pagination": "%s". '
+                                 'Falling back to "api".', strategy)
                 strategy = "api"
+        elif params.get("before"):
+            strategy = "before"
+        elif "offset" not in params:
+            strategy = "api"
+        self.log.debug("Pagination strategy '%s'", strategy or "offset")
 
         while True:
             data = self._call(endpoint, params)

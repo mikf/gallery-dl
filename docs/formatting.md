@@ -375,6 +375,12 @@ Format specifiers can be used for advanced formatting by using the options provi
     <td><code>{date:Olocal/}</code></td>
     <td><code>2010-01-01 01:00:00</code></td>
 </tr>
+<tr>
+    <td><code>I</code></td>
+    <td>Return the current value as is.<br>Do not convert it to <code>str</code></td>
+    <td><code>{num:I}</code></td>
+    <td><code>1</code></td>
+</tr>
 </tbody>
 </table>
 

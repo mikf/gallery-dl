@@ -20,7 +20,7 @@ class CyberfileExtractor(Extractor):
     root = "https://cyberfile.me"
 
     def request_api(self, endpoint, data):
-        url = f"{self.root}{endpoint}"
+        url = self.root + endpoint
         headers = {
             "X-Requested-With": "XMLHttpRequest",
             "Origin": self.root,
@@ -29,7 +29,7 @@ class CyberfileExtractor(Extractor):
             url, method="POST", headers=headers, data=data)
 
         if "albumPasswordModel" in resp.get("javascript", ""):
-            url_pw = f"{self.root}/ajax/folder_password_process"
+            url_pw = self.root + "/ajax/folder_password_process"
             data_pw = {
                 "folderPassword": self._get_auth_info(password=True)[1],
                 "folderId": text.extr(
@@ -48,7 +48,7 @@ class CyberfileExtractor(Extractor):
 
 class CyberfileFolderExtractor(CyberfileExtractor):
     subcategory = "folder"
-    pattern = rf"{BASE_PATTERN}/folder/([0-9a-f]+)"
+    pattern = BASE_PATTERN + r"/folder/([0-9a-f]+)"
     example = "https://cyberfile.me/folder/0123456789abcdef/NAME"
 
     def items(self):
@@ -97,7 +97,7 @@ class CyberfileFolderExtractor(CyberfileExtractor):
 
 class CyberfileSharedExtractor(CyberfileExtractor):
     subcategory = "shared"
-    pattern = rf"{BASE_PATTERN}/shared/([a-zA-Z0-9]+)"
+    pattern = BASE_PATTERN + r"/shared/([a-zA-Z0-9]+)"
     example = "https://cyberfile.me/shared/AbCdEfGhIjK"
 
     def items(self):
@@ -129,7 +129,7 @@ class CyberfileSharedExtractor(CyberfileExtractor):
 class CyberfileFileExtractor(CyberfileExtractor):
     subcategory = "file"
     directory_fmt = ("{category}", "{uploader}", "{folder}")
-    pattern = rf"{BASE_PATTERN}/([a-zA-Z0-9]+)"
+    pattern = BASE_PATTERN + r"/([a-zA-Z0-9]+)"
     example = "https://cyberfile.me/AbCdE"
 
     def items(self):

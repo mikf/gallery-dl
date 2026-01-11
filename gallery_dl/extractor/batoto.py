@@ -80,7 +80,7 @@ class BatotoBase():
 class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
     """Extractor for batoto manga chapters"""
     archive_fmt = "{chapter_id}_{page}"
-    pattern = rf"{BASE_PATTERN}/(?:title/[^/?#]+|chapter)/(\d+)"
+    pattern = BASE_PATTERN + r"/(?:title/[^/?#]+|chapter)/(\d+)"
     example = "https://xbato.org/title/12345-MANGA/54321"
 
     def __init__(self, match):
@@ -127,11 +127,13 @@ class BatotoChapterExtractor(BatotoBase, ChapterExtractor):
         }
 
     def images(self, page):
-        images_container = text.extr(page, 'pageOpts', ':[0,0]}"')
-        images_container = text.unescape(images_container)
+        container = text.unescape(text.extr(page, 'pageOpts', ':[0,0]}"'))
+
         return [
-            (url, None)
-            for url in text.extract_iter(images_container, r"\"", r"\"")
+            ((url.replace("://k", "://n", 1)
+              if url.startswith("https://k") and ".mb" in url else
+              url), None)
+            for url in text.extract_iter(container, r"\"", r"\"")
         ]
 
 
@@ -139,8 +141,8 @@ class BatotoMangaExtractor(BatotoBase, MangaExtractor):
     """Extractor for batoto manga"""
     reverse = False
     chapterclass = BatotoChapterExtractor
-    pattern = (rf"{BASE_PATTERN}"
-               rf"/(?:title/(\d+)[^/?#]*|series/(\d+)(?:/[^/?#]*)?)/?$")
+    pattern = (BASE_PATTERN +
+               r"/(?:title/(\d+)[^/?#]*|series/(\d+)(?:/[^/?#]*)?)/?$")
     example = "https://xbato.org/title/12345-MANGA/"
 
     def __init__(self, match):

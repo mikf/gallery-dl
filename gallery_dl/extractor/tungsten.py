@@ -52,7 +52,7 @@ class TungstenExtractor(Extractor):
 
 class TungstenPostExtractor(TungstenExtractor):
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/post/(\w+)"
+    pattern = BASE_PATTERN + r"/post/(\w+)"
     example = "https://tungsten.run/post/AbCdEfGhIjKlMnOp"
 
     def posts(self):
@@ -64,7 +64,7 @@ class TungstenPostExtractor(TungstenExtractor):
 
 class TungstenModelExtractor(TungstenExtractor):
     subcategory = "model"
-    pattern = rf"{BASE_PATTERN}/model/(\w+)(?:/?\?model_version=(\w+))?"
+    pattern = BASE_PATTERN + r"/model/(\w+)(?:/?\?model_version=(\w+))?"
     example = "https://tungsten.run/model/AbCdEfGhIjKlM"
 
     def posts(self):
@@ -87,7 +87,7 @@ class TungstenModelExtractor(TungstenExtractor):
 
 class TungstenUserExtractor(TungstenExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/user/([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/user/([^/?#]+)(?:/posts)?/?(?:\?([^#]+))?"
     example = "https://tungsten.run/user/USER"
 
     def posts(self):

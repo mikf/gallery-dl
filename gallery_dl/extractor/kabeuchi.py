@@ -52,7 +52,7 @@ class KabeuchiUserExtractor(Extractor):
         return self._pagination(target_id)
 
     def _pagination(self, target_id):
-        url = f"{self.root}/get_posts.php"
+        url = self.root + "/get_posts.php"
         data = {
             "user_id"    : "0",
             "target_id"  : target_id,

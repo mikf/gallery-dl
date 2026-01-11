@@ -27,7 +27,7 @@ class NaverWebtoonEpisodeExtractor(NaverWebtoonBase, GalleryExtractor):
     directory_fmt = ("{category}", "{comic}")
     filename_fmt = "{episode:>03}-{num:>02}.{extension}"
     archive_fmt = "{title_id}_{episode}_{num}"
-    pattern = rf"{BASE_PATTERN}/detail(?:\.nhn)?\?([^#]+)"
+    pattern = BASE_PATTERN + r"/detail(?:\.nhn)?\?([^#]+)"
     example = "https://comic.naver.com/webtoon/detail?titleId=12345&no=1"
 
     def __init__(self, match):
@@ -66,7 +66,7 @@ class NaverWebtoonEpisodeExtractor(NaverWebtoonBase, GalleryExtractor):
 class NaverWebtoonComicExtractor(NaverWebtoonBase, Extractor):
     subcategory = "comic"
     categorytransfer = True
-    pattern = rf"{BASE_PATTERN}/list(?:\.nhn)?\?([^#]+)"
+    pattern = BASE_PATTERN + r"/list(?:\.nhn)?\?([^#]+)"
     example = "https://comic.naver.com/webtoon/list?titleId=12345"
 
     def __init__(self, match):

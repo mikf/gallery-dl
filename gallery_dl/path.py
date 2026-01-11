@@ -31,6 +31,8 @@ class PathFormat():
         if kwdefault is None:
             kwdefault = util.NONE
 
+        self.filename_conditions = self.directory_conditions = None
+
         filename_fmt = config("filename")
         try:
             if filename_fmt is None:
@@ -41,7 +43,6 @@ class PathFormat():
                      formatter.parse(fmt, kwdefault).format_map)
                     for expr, fmt in filename_fmt.items() if expr
                 ]
-                self.build_filename = self.build_filename_conditional
                 filename_fmt = filename_fmt.get("", extractor.filename_fmt)
 
             self.filename_formatter = formatter.parse(
@@ -50,7 +51,6 @@ class PathFormat():
             raise exception.FilenameFormatError(exc)
 
         directory_fmt = config("directory")
-        self.directory_conditions = ()
         try:
             if directory_fmt is None:
                 directory_fmt = extractor.directory_fmt
@@ -62,7 +62,6 @@ class PathFormat():
                     ])
                     for expr, fmts in directory_fmt.items() if expr
                 ]
-                self.build_directory = self.build_directory_conditional
                 directory_fmt = directory_fmt.get("", extractor.directory_fmt)
 
             self.directory_formatters = [
@@ -256,55 +255,47 @@ class PathFormat():
     def build_filename(self, kwdict):
         """Apply 'kwdict' to filename format string"""
         try:
-            return self.clean_path(self.clean_segment(
-                self.filename_formatter(kwdict)))
-        except Exception as exc:
-            raise exception.FilenameFormatError(exc)
-
-    def build_filename_conditional(self, kwdict):
-        try:
-            for condition, fmt in self.filename_conditions:
-                if condition(kwdict):
-                    break
-            else:
+            if self.filename_conditions is None:
                 fmt = self.filename_formatter
+            else:
+                for condition, fmt in self.filename_conditions:
+                    if condition(kwdict):
+                        break
+                else:
+                    fmt = self.filename_formatter
             return self.clean_path(self.clean_segment(fmt(kwdict)))
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
 
     def build_directory(self, kwdict):
         """Apply 'kwdict' to directory format strings"""
-        segments = []
-        strip = self.strip
-
         try:
-            for fmt in self.directory_formatters:
-                segment = fmt(kwdict).strip()
-                if strip and segment not in {".", ".."}:
-                    # remove trailing dots and spaces (#647)
-                    segment = segment.rstrip(strip)
-                if segment:
-                    segments.append(self.clean_segment(segment))
-            return segments
-        except Exception as exc:
-            raise exception.DirectoryFormatError(exc)
-
-    def build_directory_conditional(self, kwdict):
-        segments = []
-        strip = self.strip
-
-        try:
-            for condition, formatters in self.directory_conditions:
-                if condition(kwdict):
-                    break
-            else:
+            if self.directory_conditions is None:
                 formatters = self.directory_formatters
+            else:
+                for condition, formatters in self.directory_conditions:
+                    if condition(kwdict):
+                        break
+                else:
+                    formatters = self.directory_formatters
+
+            segments = []
+            strip = self.strip
             for fmt in formatters:
-                segment = fmt(kwdict).strip()
-                if strip and segment != "..":
-                    segment = segment.rstrip(strip)
-                if segment:
-                    segments.append(self.clean_segment(segment))
+                segment = fmt(kwdict)
+                if segment.__class__ is str:
+                    segment = segment.strip()
+                    if strip and segment not in {".", ".."}:
+                        segment = segment.rstrip(strip)
+                    if segment:
+                        segments.append(self.clean_segment(segment))
+                else:  # assume list
+                    for segment in segment:
+                        segment = segment.strip()
+                        if strip and segment not in {".", ".."}:
+                            segment = segment.rstrip(strip)
+                        if segment:
+                            segments.append(self.clean_segment(segment))
             return segments
         except Exception as exc:
             raise exception.DirectoryFormatError(exc)

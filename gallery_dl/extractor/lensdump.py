@@ -31,7 +31,7 @@ class LensdumpBase():
 
 class LensdumpAlbumExtractor(LensdumpBase, GalleryExtractor):
     subcategory = "album"
-    pattern = rf"{BASE_PATTERN}/a/(\w+)(?:/?\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/a/(\w+)(?:/?\?([^#]+))?"
     example = "https://lensdump.com/a/ID"
 
     def __init__(self, match):
@@ -76,7 +76,7 @@ class LensdumpAlbumExtractor(LensdumpBase, GalleryExtractor):
 class LensdumpAlbumsExtractor(LensdumpBase, Extractor):
     """Extractor for album list from lensdump.com"""
     subcategory = "albums"
-    pattern = rf"{BASE_PATTERN}/(?![ai]/)([^/?#]+)(?:/?\?([^#]+))?"
+    pattern = BASE_PATTERN + r"/(?![ai]/)([^/?#]+)(?:/?\?([^#]+))?"
     example = "https://lensdump.com/USER"
 
     def items(self):

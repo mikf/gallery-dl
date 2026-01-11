@@ -38,6 +38,10 @@ __tests__ = (
     "extension": "",
     "filename" : "75f86086-fc67-4ed2-9365-2958d3d1a8f7",
 
+    "_http_headers": {
+        "!Accept": str,
+        "Origin" : "https://www.boosty.to",
+    },
     "file": {
         "height"   : 2048,
         "id"       : "75f86086-fc67-4ed2-9365-2958d3d1a8f7",

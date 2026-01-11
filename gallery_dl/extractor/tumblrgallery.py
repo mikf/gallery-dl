@@ -36,7 +36,7 @@ class TumblrgalleryExtractor(GalleryExtractor):
 class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
     """Extractor for Tumblrblog on tumblrgallery.xyz"""
     subcategory = "tumblrblog"
-    pattern = rf"{BASE_PATTERN}(/tumblrblog/gallery/(\d+)\.html)"
+    pattern = BASE_PATTERN + r"(/tumblrblog/gallery/(\d+)\.html)"
     example = "https://tumblrgallery.xyz/tumblrblog/gallery/12345.html"
 
     def __init__(self, match):
@@ -68,7 +68,7 @@ class TumblrgalleryTumblrblogExtractor(TumblrgalleryExtractor):
 class TumblrgalleryPostExtractor(TumblrgalleryExtractor):
     """Extractor for Posts on tumblrgallery.xyz"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}(/post/(\d+)\.html)"
+    pattern = BASE_PATTERN + r"(/post/(\d+)\.html)"
     example = "https://tumblrgallery.xyz/post/12345.html"
 
     def __init__(self, match):
@@ -93,7 +93,7 @@ class TumblrgallerySearchExtractor(TumblrgalleryExtractor):
     subcategory = "search"
     filename_fmt = "{category}_{num:>03}_{gallery_id}_{id}_{title}.{extension}"
     directory_fmt = ("{category}", "{search_term}")
-    pattern = rf"{BASE_PATTERN}(/s\.php\?q=([^&#]+))"
+    pattern = BASE_PATTERN + r"(/s\.php\?q=([^&#]+))"
     example = "https://tumblrgallery.xyz/s.php?q=QUERY"
 
     def __init__(self, match):

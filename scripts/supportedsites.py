@@ -25,6 +25,7 @@ CATEGORY_MAP = {
     "35photo"        : "35PHOTO",
     "adultempire"    : "Adult Empire",
     "agnph"          : "AGNPH",
+    "ahottie"        : "AHottie",
     "aibooru"        : "AIBooru",
     "allgirlbooru"   : "All girl",
     "ao3"            : "Archive of Our Own",
@@ -34,6 +35,7 @@ CATEGORY_MAP = {
     "artstation"     : "ArtStation",
     "aryion"         : "Eka's Portal",
     "atfbooru"       : "ATFBooru",
+    "atfforum"       : "All The Fallen",
     "azurlanewiki"   : "Azur Lane Wiki",
     "b4k"            : "arch.b4k.dev",
     "baraag"         : "baraag",
@@ -43,6 +45,7 @@ CATEGORY_MAP = {
     "cfake"          : "Celebrity Fakes",
     "cien"           : "Ci-en",
     "cohost"         : "cohost!",
+    "comedywildlifephoto": "Comedy Wildlife Photography Awards",
     "comicvine"      : "Comic Vine",
     "cyberfile"      : "CyberFile",
     "dankefuerslesen": "Danke fürs Lesen",
@@ -98,6 +101,7 @@ CATEGORY_MAP = {
     "imgkiwi"        : "IMG.Kiwi",
     "imglike"        : "Nude Celeb",
     "imgpile"        : "imgpile",
+    "imgpv"          : "IMGPV",
     "imgtaxi"        : "ImgTaxi.com",
     "imgth"          : "imgth",
     "imgur"          : "imgur",
@@ -205,6 +209,7 @@ CATEGORY_MAP = {
     "webmshare"      : "webmshare",
     "webtoons"       : "WEBTOON",
     "weebcentral"    : "Weeb Central",
+    "weebdex"        : "WeebDex",
     "wikiart"        : "WikiArt.org",
     "wikigg"         : "wiki.gg",
     "wikimediacommons": "Wikimedia Commons",
@@ -213,6 +218,7 @@ CATEGORY_MAP = {
     "xvideos"        : "XVideos",
     "yandere"        : "yande.re",
     "yiffverse"      : "Yiff verse",
+    "yourlesbians"   : "YourLesbians",
 }
 
 SUBCATEGORY_MAP = {
@@ -229,6 +235,7 @@ SUBCATEGORY_MAP = {
     "media"  : "Media Files",
     "popular": "Popular Images",
     "recent" : "Recent Images",
+    "saved"  : "Saved Posts",
     "search" : "Search Results",
     "status" : "Images from Statuses",
     "tag"    : "Tag Searches",
@@ -328,7 +335,6 @@ SUBCATEGORY_MAP = {
     },
     "instagram": {
         "posts": "",
-        "saved": "Saved Posts",
         "tagged": "Tagged Posts",
         "stories-tray": "Stories Home Tray",
     },
@@ -339,6 +345,9 @@ SUBCATEGORY_MAP = {
         "discord"       : "Discord Servers",
         "discord-server": "",
         "posts"         : "",
+    },
+    "koofr": {
+        "shared": "Shared Links",
     },
     "leakgallery": {
         "trending" : "Trending Medias",
@@ -414,7 +423,9 @@ SUBCATEGORY_MAP = {
         "asset": "Individual Assets",
     },
     "tiktok": {
+        "posts": "User Posts",
         "vmpost": "VM Posts",
+        "following": "Followed Users (Stories Only)",
     },
     "tumblr": {
         "day": "Days",

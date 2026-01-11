@@ -412,7 +412,7 @@ class NewgroundsImageExtractor(NewgroundsExtractor):
 class NewgroundsMediaExtractor(NewgroundsExtractor):
     """Extractor for a media file from newgrounds.com"""
     subcategory = "media"
-    pattern = rf"{BASE_PATTERN}(/(?:portal/view|audio/listen)/\d+)"
+    pattern = BASE_PATTERN + r"(/(?:portal/view|audio/listen)/\d+)"
     example = "https://www.newgrounds.com/portal/view/12345"
 
     def __init__(self, match):
@@ -427,34 +427,34 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
 class NewgroundsArtExtractor(NewgroundsExtractor):
     """Extractor for all images of a newgrounds user"""
     subcategory = _path = "art"
-    pattern = rf"{USER_PATTERN}/art(?:(?:/page/|/?\?page=)(\d+))?/?$"
+    pattern = USER_PATTERN + r"/art(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/art"
 
 
 class NewgroundsAudioExtractor(NewgroundsExtractor):
     """Extractor for all audio submissions of a newgrounds user"""
     subcategory = _path = "audio"
-    pattern = rf"{USER_PATTERN}/audio(?:(?:/page/|/?\?page=)(\d+))?/?$"
+    pattern = USER_PATTERN + r"/audio(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/audio"
 
 
 class NewgroundsMoviesExtractor(NewgroundsExtractor):
     """Extractor for all movies of a newgrounds user"""
     subcategory = _path = "movies"
-    pattern = rf"{USER_PATTERN}/movies(?:(?:/page/|/?\?page=)(\d+))?/?$"
+    pattern = USER_PATTERN + r"/movies(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/movies"
 
 
 class NewgroundsGamesExtractor(NewgroundsExtractor):
     """Extractor for a newgrounds user's games"""
     subcategory = _path = "games"
-    pattern = rf"{USER_PATTERN}/games(?:(?:/page/|/?\?page=)(\d+))?/?$"
+    pattern = USER_PATTERN + r"/games(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/games"
 
 
 class NewgroundsUserExtractor(Dispatch, NewgroundsExtractor):
     """Extractor for a newgrounds user profile"""
-    pattern = rf"{USER_PATTERN}/?$"
+    pattern = USER_PATTERN + r"/?$"
     example = "https://USER.newgrounds.com"
 
     def items(self):
@@ -471,7 +471,7 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
     """Extractor for posts favorited by a newgrounds user"""
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user}", "Favorites")
-    pattern = (rf"{USER_PATTERN}/favorites(?!/following)(?:/(art|audio|movies)"
+    pattern = (USER_PATTERN + r"/favorites(?!/following)(?:/(art|audio|movies)"
                r"(?:(?:/page/|/?\?page=)(\d+))?)?")
     example = "https://USER.newgrounds.com/favorites"
 
@@ -510,16 +510,15 @@ class NewgroundsFavoriteExtractor(NewgroundsExtractor):
     def _extract_favorites(self, page):
         return [
             self.root + path
-            for path in text.extract_iter(page, f'href="{self.root}', '"')
+            for path in text.extract_iter(page, 'href="' + self.root, '"')
         ]
 
 
 class NewgroundsFollowingExtractor(NewgroundsFavoriteExtractor):
     """Extractor for a newgrounds user's favorited users"""
     subcategory = "following"
-    pattern = (rf"{USER_PATTERN}/favorites/(following)"
+    pattern = (USER_PATTERN + r"/favorites/(following)"
                r"(?:(?:/page/|/?\?page=)(\d+))?")
-
     example = "https://USER.newgrounds.com/favorites/following"
 
     def items(self):
@@ -539,7 +538,7 @@ class NewgroundsSearchExtractor(NewgroundsExtractor):
     """Extractor for newgrounds.com search reesults"""
     subcategory = "search"
     directory_fmt = ("{category}", "search", "{search_tags}")
-    pattern = rf"{BASE_PATTERN}/search/conduct/([^/?#]+)/?\?([^#]+)"
+    pattern = BASE_PATTERN + r"/search/conduct/([^/?#]+)/?\?([^#]+)"
     example = "https://www.newgrounds.com/search/conduct/art?terms=QUERY"
 
     def __init__(self, match):

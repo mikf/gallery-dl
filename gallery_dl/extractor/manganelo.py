@@ -9,8 +9,8 @@
 
 """Extractors for https://www.mangakakalot.gg/ and mirror sites"""
 
-from .common import BaseExtractor, ChapterExtractor, MangaExtractor
-from .. import text, util
+from .common import BaseExtractor, ChapterExtractor, MangaExtractor, Message
+from .. import text, util, exception
 
 
 class ManganeloExtractor(BaseExtractor):
@@ -39,7 +39,7 @@ BASE_PATTERN = ManganeloExtractor.update({
 
 class ManganeloChapterExtractor(ManganeloExtractor, ChapterExtractor):
     """Extractor for manganelo manga chapters"""
-    pattern = rf"{BASE_PATTERN}(/manga/[^/?#]+/chapter-[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/manga/[^/?#]+/chapter-[^/?#]+)"
     example = "https://www.mangakakalot.gg/manga/MANGA_NAME/chapter-123"
 
     def __init__(self, match):
@@ -86,7 +86,7 @@ class ManganeloChapterExtractor(ManganeloExtractor, ChapterExtractor):
 class ManganeloMangaExtractor(ManganeloExtractor, MangaExtractor):
     """Extractor for manganelo manga"""
     chapterclass = ManganeloChapterExtractor
-    pattern = rf"{BASE_PATTERN}(/manga/[^/?#]+)$"
+    pattern = BASE_PATTERN + r"(/manga/[^/?#]+)$"
     example = "https://www.mangakakalot.gg/manga/MANGA_NAME"
 
     def __init__(self, match):
@@ -126,3 +126,33 @@ class ManganeloMangaExtractor(ManganeloExtractor, MangaExtractor):
                 "language": "English",
             }))
         return results
+
+
+class ManganeloBookmarkExtractor(ManganeloExtractor):
+    """Extractor for manganelo bookmarks"""
+    subcategory = "bookmark"
+    pattern = BASE_PATTERN + r"/bookmark"
+    example = "https://www.mangakakalot.gg/bookmark"
+
+    def items(self):
+        data = {"_extractor": ManganeloMangaExtractor}
+
+        url = self.root + "/bookmark"
+        params = {"page": 1}
+
+        response = self.request(url, params=params)
+        if response.history:
+            raise exception.AuthRequired(
+                "authenticated cookies", "your bookmarks")
+        page = response.text
+        last = text.parse_int(text.extr(page, ">Last(", ")"))
+
+        while True:
+            for bookmark in text.extract_iter(
+                    page, 'class="user-bookmark-item ', '</a>'):
+                yield Message.Queue, text.extr(bookmark, ' href="', '"'), data
+
+            if params["page"] >= last:
+                break
+            params["page"] += 1
+            page = self.request(url, params=params).text

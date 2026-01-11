@@ -16,8 +16,6 @@ from ..cache import cache
 class XenforoExtractor(BaseExtractor):
     """Base class for xenforo extractors"""
     basecategory = "xenforo"
-    #  cookies_domain = "simpcity.cr"
-    cookies_names = ("ogaddgmetaprof_user",)
     directory_fmt = ("{category}", "{thread[section]}",
                      "{thread[title]} ({thread[id]})")
     filename_fmt = "{post[id]}_{num:>02}_{id}_{filename}.{extension}"
@@ -35,14 +33,15 @@ class XenforoExtractor(BaseExtractor):
             r'(?s)(?:'
             r'<video (.*?\ssrc="[^"]+".*?)</video>'
             r'|<a [^>]*?href="[^"]*?'
-            r'(/attachments/[^"]+".*?)</a>'
+            r'(/(?:index\.php\?)?attachments/[^"]+".*?)</a>'
             r'|<div [^>]*?data-src="[^"]*?'
-            r'(/attachments/[^"]+".*?)/>'
+            r'(/(?:index\.php\?)attachments/[^"]+".*?)/>'
             r'|(?:<a [^>]*?href="|<iframe [^>]*?src="|'
             r'''onclick="loadMedia\(this, ')([^"']+)'''
             r')'
         ).findall
 
+        root_media = self.config_instance("root-media") or self.root
         for post in self.posts():
             urls = extract_urls(post["content"])
             if post["attachments"]:
@@ -61,8 +60,11 @@ class XenforoExtractor(BaseExtractor):
                     data["num"] += 1
                     data["num_external"] += 1
                     data["type"] = "external"
-                    if ext.startswith("//"):
-                        ext = "https:" + ext
+                    if ext[0] == "/":
+                        if ext[1] == "/":
+                            ext = "https:" + ext
+                        else:
+                            continue
                     yield Message.Queue, ext, data
 
                 elif video:
@@ -73,6 +75,8 @@ class XenforoExtractor(BaseExtractor):
                     text.nameext_from_url(url, data)
                     data["id"] = text.parse_int(
                         data["filename"].partition("-")[0])
+                    if url[0] == "/":
+                        url = root_media + url
                     yield Message.Url, url, data
 
                 elif (inline := inl1 or inl2):
@@ -117,7 +121,7 @@ class XenforoExtractor(BaseExtractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = f"{self.root}/login/login"
+        url = self.root + "/login/login"
         page = self.request(url).text
         data = {
             "_xfToken": text.extr(page, 'name="_xfToken" value="', '"'),
@@ -139,10 +143,10 @@ class XenforoExtractor(BaseExtractor):
         }
 
     def _pagination(self, base, pnum=None):
-        base = f"{self.root}{base}"
+        base = self.root + base
 
         if pnum is None:
-            url = f"{base}/"
+            url = base + "/"
             pnum = 1
         else:
             url = f"{base}/page-{pnum}"
@@ -159,10 +163,12 @@ class XenforoExtractor(BaseExtractor):
             url = f"{base}/page-{pnum}"
 
     def _pagination_reverse(self, base, pnum=None):
-        base = f"{self.root}{base}"
+        base = self.root + base
 
         url = f"{base}/page-{'9999' if pnum is None else pnum}"
         with self.request_page(url) as response:
+            if pnum is None and not response.history:
+                self._require_auth()
             url = response.url
             if url[-1] == "/":
                 pnum = 1
@@ -177,7 +183,7 @@ class XenforoExtractor(BaseExtractor):
             if pnum > 1:
                 url = f"{base}/page-{pnum}"
             elif pnum == 1:
-                url = f"{base}/"
+                url = base + "/"
             else:
                 return
 
@@ -247,10 +253,10 @@ class XenforoExtractor(BaseExtractor):
 
         return post
 
-    def _require_auth(self, response):
+    def _require_auth(self, response=None):
         raise exception.AuthRequired(
             ("username & password", "authenticated cookies"), None,
-            self._extract_error(response.text))
+            None if response is None else self._extract_error(response.text))
 
     def _validate(self, response):
         if response.status_code == 403 and b">Log in<" in response.content:
@@ -269,17 +275,25 @@ BASE_PATTERN = XenforoExtractor.update({
         "pattern": r"(?:www\.)?nudostar\.com/forum",
         "cookies": ("xf_user",),
     },
+    "atfforum": {
+        "root": "https://allthefallen.moe/forum",
+        "root-media": "https://allthefallen.moe",
+        "pattern": r"(?:www\.)?allthefallen\.moe/forum",
+        "cookies": ("xf_user",),
+    },
 })
 
 
 class XenforoPostExtractor(XenforoExtractor):
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/(?:threads/[^/?#]+/post-|posts/)(\d+)"
+    pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?threads"
+               r"/[^/?#]+/#?post-|/posts/)(\d+)")
     example = "https://simpcity.cr/threads/TITLE.12345/post-54321"
 
     def posts(self):
+        path = self.groups[-2]
         post_id = self.groups[-1]
-        url = f"{self.root}/posts/{post_id}/"
+        url = f"{self.root}{path}{post_id}/"
         page = self.request_page(url).text
 
         pos = page.find(f'data-content="post-{post_id}"')
@@ -293,7 +307,8 @@ class XenforoPostExtractor(XenforoExtractor):
 
 class XenforoThreadExtractor(XenforoExtractor):
     subcategory = "thread"
-    pattern = rf"{BASE_PATTERN}(/threads/(?:[^/?#]+\.)?\d+)(?:/page-(\d+))?"
+    pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?threads"
+               r"/(?:[^/?#]+\.)?\d+)(?:/page-(\d+))?")
     example = "https://simpcity.cr/threads/TITLE.12345/"
 
     def posts(self):
@@ -321,16 +336,17 @@ class XenforoThreadExtractor(XenforoExtractor):
 
 class XenforoForumExtractor(XenforoExtractor):
     subcategory = "forum"
-    pattern = rf"{BASE_PATTERN}(/forums/(?:[^/?#]+\.)?[^/?#]+)(?:/page-(\d+))?"
+    pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?forums"
+               r"/(?:[^/?#]+\.)?[^/?#]+)(?:/page-(\d+))?")
     example = "https://simpcity.cr/forums/TITLE.123/"
 
     def items(self):
         extract_threads = text.re(
-            r'(/threads/[^"]+)"[^>]+data-xf-init=').findall
+            r'(/(?:index\.php\?)?threads/[^"]+)"[^>]+data-xf-init=').findall
 
         data = {"_extractor": XenforoThreadExtractor}
         path = self.groups[-2]
         pnum = self.groups[-1]
         for page in self._pagination(path, pnum):
             for path in extract_threads(page):
-                yield Message.Queue, f"{self.root}{text.unquote(path)}", data
+                yield Message.Queue, self.root + text.unquote(path), data

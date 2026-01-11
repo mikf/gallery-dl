@@ -39,7 +39,7 @@ class ImagefapExtractor(Extractor):
 class ImagefapGalleryExtractor(ImagefapExtractor):
     """Extractor for image galleries from imagefap.com"""
     subcategory = "gallery"
-    pattern = rf"{BASE_PATTERN}/(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)"
+    pattern = BASE_PATTERN + r"/(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)"
     example = "https://www.imagefap.com/gallery/12345"
 
     def __init__(self, match):
@@ -110,7 +110,7 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
 class ImagefapImageExtractor(ImagefapExtractor):
     """Extractor for single images from imagefap.com"""
     subcategory = "image"
-    pattern = rf"{BASE_PATTERN}/photo/(\d+)"
+    pattern = BASE_PATTERN + r"/photo/(\d+)"
     example = "https://www.imagefap.com/photo/12345"
 
     def __init__(self, match):
@@ -148,9 +148,9 @@ class ImagefapImageExtractor(ImagefapExtractor):
 class ImagefapFolderExtractor(ImagefapExtractor):
     """Extractor for imagefap user folders"""
     subcategory = "folder"
-    pattern = (rf"{BASE_PATTERN}/(?:organizer/|"
-               rf"(?:usergallery\.php\?user(id)?=([^&#]+)&"
-               rf"|profile/([^/?#]+)/galleries\?)folderid=)(\d+|-1)")
+    pattern = (BASE_PATTERN + r"/(?:organizer/|"
+               r"(?:usergallery\.php\?user(id)?=([^&#]+)&"
+               r"|profile/([^/?#]+)/galleries\?)folderid=)(\d+|-1)")
     example = "https://www.imagefap.com/organizer/12345"
 
     def __init__(self, match):
@@ -206,9 +206,9 @@ class ImagefapFolderExtractor(ImagefapExtractor):
 class ImagefapUserExtractor(ImagefapExtractor):
     """Extractor for an imagefap user profile"""
     subcategory = "user"
-    pattern = (rf"{BASE_PATTERN}/(?:"
-               rf"profile(?:\.php\?user=|/)([^/?#]+)(?:/galleries)?|"
-               rf"usergallery\.php\?userid=(\d+))(?:$|#)")
+    pattern = (BASE_PATTERN +
+               r"/(?:profile(?:\.php\?user=|/)([^/?#]+)(?:/galleries)?"
+               r"|usergallery\.php\?userid=(\d+))(?:$|#)")
     example = "https://www.imagefap.com/profile/USER"
 
     def __init__(self, match):

@@ -45,7 +45,7 @@ class XfolioExtractor(Extractor):
 
 class XfolioWorkExtractor(XfolioExtractor):
     subcategory = "work"
-    pattern = rf"{BASE_PATTERN}/portfolio/([^/?#]+)/works/(\d+)"
+    pattern = BASE_PATTERN + r"/portfolio/([^/?#]+)/works/(\d+)"
     example = "https://xfolio.jp/portfolio/USER/works/12345"
 
     def items(self):
@@ -107,7 +107,7 @@ class XfolioWorkExtractor(XfolioExtractor):
 
 class XfolioUserExtractor(XfolioExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/portfolio/([^/?#]+)(?:/works)?/?(?:$|\?|#)"
+    pattern = BASE_PATTERN + r"/portfolio/([^/?#]+)(?:/works)?/?(?:$|\?|#)"
     example = "https://xfolio.jp/portfolio/USER"
 
     def works(self):
@@ -129,7 +129,7 @@ class XfolioUserExtractor(XfolioExtractor):
 
 class XfolioSeriesExtractor(XfolioExtractor):
     subcategory = "series"
-    pattern = rf"{BASE_PATTERN}/portfolio/([^/?#]+)/series/(\d+)"
+    pattern = BASE_PATTERN + r"/portfolio/([^/?#]+)/series/(\d+)"
     example = "https://xfolio.jp/portfolio/USER/series/12345"
 
     def works(self):

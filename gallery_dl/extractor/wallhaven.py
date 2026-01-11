@@ -113,7 +113,7 @@ class WallhavenCollectionsExtractor(WallhavenExtractor):
         base = f"{self.root}/user/{self.username}/favorites/"
         for collection in self.api.collections(self.username):
             collection["_extractor"] = WallhavenCollectionExtractor
-            url = f"{base}{collection['id']}"
+            url = base + str(collection["id"])
             yield Message.Queue, url, collection
 
 

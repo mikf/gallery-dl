@@ -61,7 +61,7 @@ BASE_PATTERN = PhilomenaExtractor.update({
 class PhilomenaPostExtractor(PhilomenaExtractor):
     """Extractor for single posts on a Philomena booru"""
     subcategory = "post"
-    pattern = rf"{BASE_PATTERN}/(?:images/)?(\d+)"
+    pattern = BASE_PATTERN + r"/(?:images/)?(\d+)"
     example = "https://derpibooru.org/images/12345"
 
     def posts(self):
@@ -72,7 +72,7 @@ class PhilomenaSearchExtractor(PhilomenaExtractor):
     """Extractor for Philomena search results"""
     subcategory = "search"
     directory_fmt = ("{category}", "{search_tags}")
-    pattern = rf"{BASE_PATTERN}/(?:search/?\?([^#]+)|tags/([^/?#]+))"
+    pattern = BASE_PATTERN + r"/(?:search/?\?([^#]+)|tags/([^/?#]+))"
     example = "https://derpibooru.org/search?q=QUERY"
 
     def __init__(self, match):
@@ -106,7 +106,7 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
     subcategory = "gallery"
     directory_fmt = ("{category}", "galleries",
                      "{gallery[id]} {gallery[title]}")
-    pattern = rf"{BASE_PATTERN}/galleries/(\d+)"
+    pattern = BASE_PATTERN + r"/galleries/(\d+)"
     example = "https://derpibooru.org/galleries/12345"
 
     def metadata(self):
@@ -116,7 +116,7 @@ class PhilomenaGalleryExtractor(PhilomenaExtractor):
             raise exception.NotFoundError("gallery")
 
     def posts(self):
-        gallery_id = f"gallery_id:{self.groups[-1]}"
+        gallery_id = "gallery_id:" + self.groups[-1]
         params = {"sd": "desc", "sf": gallery_id, "q": gallery_id}
         return self.api.search(params)
 

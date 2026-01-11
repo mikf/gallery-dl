@@ -115,9 +115,9 @@ class ExhentaiExtractor(Extractor):
 class ExhentaiGalleryExtractor(ExhentaiExtractor):
     """Extractor for image galleries from exhentai.org"""
     subcategory = "gallery"
-    pattern = (rf"{BASE_PATTERN}/(?:"
-               rf"g/(\d+)/([\da-f]{{10}})|"
-               rf"s/([\da-f]{{10}})/(\d+)-(\d+))")
+    pattern = (BASE_PATTERN +
+               r"(?:/g/(\d+)/([\da-f]{10})"
+               r"|/s/([\da-f]{10})/(\d+)-(\d+))")
     example = "https://e-hentai.org/g/12345/67890abcde/"
 
     def __init__(self, match):
@@ -150,11 +150,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.original = self.config("original", True)
 
     def finalize(self):
-        if self.data:
+        if self.data and (token := self.data.get("image_token")):
             self.log.info("Use '%s/s/%s/%s-%s' as input URL "
                           "to continue downloading from the current position",
-                          self.root, self.data["image_token"],
-                          self.gallery_id, self.data["num"])
+                          self.root, token, self.gallery_id, self.data["num"])
 
     def favorite(self, slot="0"):
         url = self.root + "/gallerypopups.php"
@@ -563,7 +562,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 class ExhentaiSearchExtractor(ExhentaiExtractor):
     """Extractor for exhentai search results"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/(?:\?([^#]*)|tag/([^/?#]+))"
+    pattern = BASE_PATTERN + r"/(?:\?([^#]*)|tag/([^/?#]+))"
     example = "https://e-hentai.org/?f_search=QUERY"
 
     def __init__(self, match):
@@ -620,7 +619,7 @@ class ExhentaiSearchExtractor(ExhentaiExtractor):
 class ExhentaiFavoriteExtractor(ExhentaiSearchExtractor):
     """Extractor for favorited exhentai galleries"""
     subcategory = "favorite"
-    pattern = rf"{BASE_PATTERN}/favorites\.php(?:\?([^#]*)())?"
+    pattern = BASE_PATTERN + r"/favorites\.php(?:\?([^#]*)())?"
     example = "https://e-hentai.org/favorites.php"
 
     def _init(self):

@@ -803,8 +803,13 @@ The Washington Post writes, "Three weeks after the toxic train derailment in Ohi
 },
 
 {
+    "#url"     : "https://x.com/notifications",
+    "#class"   : twitter.TwitterNotificationsExtractor,
+},
+
+{
     "#url"     : "https://x.com/i/timeline",
-    "#class"   : twitter.TwitterHomeExtractor,
+    "#class"   : twitter.TwitterNotificationsExtractor,
 },
 
 )

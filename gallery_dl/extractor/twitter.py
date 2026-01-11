@@ -16,7 +16,7 @@ import random
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.|mobile\.)?"
                 r"(?:(?:[fv]x)?twitter|(?:fix(?:up|v))?x)\.com")
-USER_PATTERN = rf"{BASE_PATTERN}/([^/?#]+)"
+USER_PATTERN = BASE_PATTERN + r"/([^/?#]+)"
 
 
 class TwitterExtractor(Extractor):
@@ -521,10 +521,13 @@ class TwitterExtractor(Extractor):
         except KeyError:
             pass
 
-        core = user.get("core") or user
-        legacy = user.get("legacy") or user
-        lget = legacy.get
+        if "core" in user:
+            core = user["core"]
+            legacy = user["legacy"]
+        else:
+            core = legacy = user
 
+        lget = legacy.get
         if lget("withheld_scope"):
             self.log.warning("'%s'", lget("description"))
 
@@ -533,14 +536,9 @@ class TwitterExtractor(Extractor):
             "id"              : text.parse_int(uid),
             "name"            : core.get("screen_name"),
             "nick"            : core.get("name"),
-            "location"        : user["location"].get("location"),
             "date"            : self.parse_datetime(
                 core["created_at"], "%a %b %d %H:%M:%S %z %Y"),
-            "verified"        : user["verification"]["verified"],
-            "protected"       : user["privacy"]["protected"],
             "profile_banner"  : lget("profile_banner_url", ""),
-            "profile_image"   : user["avatar"].get("image_url", "").replace(
-                "_normal.", "."),
             "favourites_count": lget("favourites_count"),
             "followers_count" : lget("followers_count"),
             "friends_count"   : lget("friends_count"),
@@ -548,6 +546,19 @@ class TwitterExtractor(Extractor):
             "media_count"     : lget("media_count"),
             "statuses_count"  : lget("statuses_count"),
         }
+
+        if "core" in user:
+            udata["location"] = user["location"].get("location")
+            udata["verified"] = user["verification"]["verified"]
+            udata["protected"] = user["privacy"]["protected"]
+            udata["profile_image"] = user["avatar"].get(
+                "image_url", "").replace("_normal.", ".")
+        else:
+            udata["location"] = user["location"]
+            udata["verified"] = user["verified"]
+            udata["protected"] = user["protected"]
+            udata["profile_image"] = user["profile_image_url_https"].replace(
+                "_normal.", ".")
 
         descr = legacy["description"]
         if urls := entities["description"].get("urls"):
@@ -596,9 +607,12 @@ class TwitterExtractor(Extractor):
             obj = tweet["legacy"] if "legacy" in tweet else tweet
             cid = obj.get("conversation_id_str")
             if not cid:
-                tid = obj["id_str"]
-                self.log.warning(
-                    "Unable to expand %s (no 'conversation_id')", tid)
+                if cid is False:
+                    yield tweet
+                else:
+                    tid = obj["id_str"]
+                    self.log.warning(
+                        "Unable to expand %s (no 'conversation_id')", tid)
                 continue
             if cid in seen:
                 self.log.debug(
@@ -613,6 +627,7 @@ class TwitterExtractor(Extractor):
     def _make_tweet(self, user, url, id_str):
         return {
             "id_str": id_str,
+            "conversation_id_str": False,
             "lang": None,
             "user": user,
             "source": "><",
@@ -663,8 +678,7 @@ class TwitterExtractor(Extractor):
 class TwitterHomeExtractor(TwitterExtractor):
     """Extractor for Twitter home timelines"""
     subcategory = "home"
-    pattern = (rf"{BASE_PATTERN}/"
-               rf"(?:home(?:/fo(?:llowing|r[-_ ]?you()))?|i/timeline)/?$")
+    pattern = BASE_PATTERN + r"/home(?:/fo(?:llowing|r[-_ ]?you()))?/?$"
     example = "https://x.com/home"
 
     def tweets(self):
@@ -673,10 +687,20 @@ class TwitterHomeExtractor(TwitterExtractor):
         return self.api.home_timeline()
 
 
+class TwitterNotificationsExtractor(TwitterExtractor):
+    """Extractor for Twitter notifications timelines"""
+    subcategory = "notifications"
+    pattern = BASE_PATTERN + r"/(?:notifications|i/timeline())"
+    example = "https://x.com/notifications"
+
+    def tweets(self):
+        return self.api.notifications_devicefollow()
+
+
 class TwitterSearchExtractor(TwitterExtractor):
     """Extractor for Twitter search results"""
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/search/?\?(?:[^&#]+&)*q=([^&#]+)"
+    pattern = BASE_PATTERN + r"/search/?\?(?:[^&#]+&)*q=([^&#]+)"
     example = "https://x.com/search?q=QUERY"
 
     def metadata(self):
@@ -707,7 +731,7 @@ class TwitterSearchExtractor(TwitterExtractor):
 class TwitterHashtagExtractor(TwitterExtractor):
     """Extractor for Twitter hashtags"""
     subcategory = "hashtag"
-    pattern = rf"{BASE_PATTERN}/hashtag/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/hashtag/([^/?#]+)"
     example = "https://x.com/hashtag/NAME"
 
     def items(self):
@@ -718,7 +742,7 @@ class TwitterHashtagExtractor(TwitterExtractor):
 
 class TwitterUserExtractor(Dispatch, TwitterExtractor):
     """Extractor for a Twitter user"""
-    pattern = (rf"{BASE_PATTERN}/(?:"
+    pattern = (BASE_PATTERN + r"/(?:"
                r"([^/?#]+)/?(?:$|\?|#)"
                r"|i(?:/user/|ntent/user\?user_id=)(\d+))")
     example = "https://x.com/USER"
@@ -726,26 +750,26 @@ class TwitterUserExtractor(Dispatch, TwitterExtractor):
     def items(self):
         user, user_id = self.groups
         if user_id is not None:
-            user = f"id:{user_id}"
+            user = "id:" + user_id
 
         base = f"{self.root}/{user}/"
         return self._dispatch_extractors((
-            (TwitterInfoExtractor      , f"{base}info"),
-            (TwitterAvatarExtractor    , f"{base}photo"),
-            (TwitterBackgroundExtractor, f"{base}header_photo"),
-            (TwitterTimelineExtractor  , f"{base}timeline"),
-            (TwitterTweetsExtractor    , f"{base}tweets"),
-            (TwitterMediaExtractor     , f"{base}media"),
-            (TwitterRepliesExtractor   , f"{base}with_replies"),
-            (TwitterHighlightsExtractor, f"{base}highlights"),
-            (TwitterLikesExtractor     , f"{base}likes"),
+            (TwitterInfoExtractor      , base + "info"),
+            (TwitterAvatarExtractor    , base + "photo"),
+            (TwitterBackgroundExtractor, base + "header_photo"),
+            (TwitterTimelineExtractor  , base + "timeline"),
+            (TwitterTweetsExtractor    , base + "tweets"),
+            (TwitterMediaExtractor     , base + "media"),
+            (TwitterRepliesExtractor   , base + "with_replies"),
+            (TwitterHighlightsExtractor, base + "highlights"),
+            (TwitterLikesExtractor     , base + "likes"),
         ), ("timeline",))
 
 
 class TwitterTimelineExtractor(TwitterExtractor):
     """Extractor for a Twitter user timeline"""
     subcategory = "timeline"
-    pattern = rf"{USER_PATTERN}/timeline(?!\w)"
+    pattern = USER_PATTERN + r"/timeline(?!\w)"
     example = "https://x.com/USER/timeline"
 
     def _init_cursor(self):
@@ -842,7 +866,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
 class TwitterTweetsExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's Tweets timeline"""
     subcategory = "tweets"
-    pattern = rf"{USER_PATTERN}/tweets(?!\w)"
+    pattern = USER_PATTERN + r"/tweets(?!\w)"
     example = "https://x.com/USER/tweets"
 
     def tweets(self):
@@ -852,7 +876,7 @@ class TwitterTweetsExtractor(TwitterExtractor):
 class TwitterRepliesExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's timeline including replies"""
     subcategory = "replies"
-    pattern = rf"{USER_PATTERN}/with_replies(?!\w)"
+    pattern = USER_PATTERN + r"/with_replies(?!\w)"
     example = "https://x.com/USER/with_replies"
 
     def tweets(self):
@@ -862,7 +886,7 @@ class TwitterRepliesExtractor(TwitterExtractor):
 class TwitterHighlightsExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's highlights timeline"""
     subcategory = "highlights"
-    pattern = rf"{USER_PATTERN}/highlights(?!\w)"
+    pattern = USER_PATTERN + r"/highlights(?!\w)"
     example = "https://x.com/USER/highlights"
 
     def tweets(self):
@@ -872,7 +896,7 @@ class TwitterHighlightsExtractor(TwitterExtractor):
 class TwitterMediaExtractor(TwitterExtractor):
     """Extractor for Tweets from a user's Media timeline"""
     subcategory = "media"
-    pattern = rf"{USER_PATTERN}/media(?!\w)"
+    pattern = USER_PATTERN + r"/media(?!\w)"
     example = "https://x.com/USER/media"
 
     def tweets(self):
@@ -882,7 +906,7 @@ class TwitterMediaExtractor(TwitterExtractor):
 class TwitterLikesExtractor(TwitterExtractor):
     """Extractor for liked tweets"""
     subcategory = "likes"
-    pattern = rf"{USER_PATTERN}/likes(?!\w)"
+    pattern = USER_PATTERN + r"/likes(?!\w)"
     example = "https://x.com/USER/likes"
 
     def metadata(self):
@@ -895,7 +919,7 @@ class TwitterLikesExtractor(TwitterExtractor):
 class TwitterBookmarkExtractor(TwitterExtractor):
     """Extractor for bookmarked tweets"""
     subcategory = "bookmark"
-    pattern = rf"{BASE_PATTERN}/i/bookmarks()"
+    pattern = BASE_PATTERN + r"/i/bookmarks()"
     example = "https://x.com/i/bookmarks"
 
     def tweets(self):
@@ -911,7 +935,7 @@ class TwitterBookmarkExtractor(TwitterExtractor):
 class TwitterListExtractor(TwitterExtractor):
     """Extractor for Twitter lists"""
     subcategory = "list"
-    pattern = rf"{BASE_PATTERN}/i/lists/(\d+)/?$"
+    pattern = BASE_PATTERN + r"/i/lists/(\d+)/?$"
     example = "https://x.com/i/lists/12345"
 
     def tweets(self):
@@ -921,7 +945,7 @@ class TwitterListExtractor(TwitterExtractor):
 class TwitterListMembersExtractor(TwitterExtractor):
     """Extractor for members of a Twitter list"""
     subcategory = "list-members"
-    pattern = rf"{BASE_PATTERN}/i/lists/(\d+)/members"
+    pattern = BASE_PATTERN + r"/i/lists/(\d+)/members"
     example = "https://x.com/i/lists/12345/members"
 
     def items(self):
@@ -932,7 +956,7 @@ class TwitterListMembersExtractor(TwitterExtractor):
 class TwitterFollowingExtractor(TwitterExtractor):
     """Extractor for followed users"""
     subcategory = "following"
-    pattern = rf"{USER_PATTERN}/following(?!\w)"
+    pattern = USER_PATTERN + r"/following(?!\w)"
     example = "https://x.com/USER/following"
 
     def items(self):
@@ -943,7 +967,7 @@ class TwitterFollowingExtractor(TwitterExtractor):
 class TwitterFollowersExtractor(TwitterExtractor):
     """Extractor for a user's followers"""
     subcategory = "followers"
-    pattern = rf"{USER_PATTERN}/followers(?!\w)"
+    pattern = USER_PATTERN + r"/followers(?!\w)"
     example = "https://x.com/USER/followers"
 
     def items(self):
@@ -957,7 +981,7 @@ class TwitterCommunityExtractor(TwitterExtractor):
     directory_fmt = ("{category}", "Communities",
                      "{community[name]} ({community[id]})")
     archive_fmt = "C_{community[id]}_{tweet_id}_{num}"
-    pattern = rf"{BASE_PATTERN}/i/communities/(\d+)"
+    pattern = BASE_PATTERN + r"/i/communities/(\d+)"
     example = "https://x.com/i/communities/12345"
 
     def tweets(self):
@@ -971,7 +995,7 @@ class TwitterCommunitiesExtractor(TwitterExtractor):
     subcategory = "communities"
     directory_fmt = TwitterCommunityExtractor.directory_fmt
     archive_fmt = TwitterCommunityExtractor.archive_fmt
-    pattern = rf"{BASE_PATTERN}/([^/?#]+)/communities/?$"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/communities/?$"
     example = "https://x.com/i/communities"
 
     def tweets(self):
@@ -983,7 +1007,7 @@ class TwitterEventExtractor(TwitterExtractor):
     subcategory = "event"
     directory_fmt = ("{category}", "Events",
                      "{event[id]} {event[short_title]}")
-    pattern = rf"{BASE_PATTERN}/i/events/(\d+)"
+    pattern = BASE_PATTERN + r"/i/events/(\d+)"
     example = "https://x.com/i/events/12345"
 
     def metadata(self):
@@ -996,7 +1020,7 @@ class TwitterEventExtractor(TwitterExtractor):
 class TwitterTweetExtractor(TwitterExtractor):
     """Extractor for individual tweets"""
     subcategory = "tweet"
-    pattern = (rf"{BASE_PATTERN}/([^/?#]+|i/web)/status/(\d+)"
+    pattern = (BASE_PATTERN + r"/([^/?#]+|i/web)/status/(\d+)"
                r"/?(?:$|\?|#|photo/|video/)")
     example = "https://x.com/USER/status/12345"
 
@@ -1077,7 +1101,7 @@ class TwitterTweetExtractor(TwitterExtractor):
 class TwitterQuotesExtractor(TwitterExtractor):
     """Extractor for quotes of a Tweet"""
     subcategory = "quotes"
-    pattern = rf"{BASE_PATTERN}/(?:[^/?#]+|i/web)/status/(\d+)/quotes"
+    pattern = BASE_PATTERN + r"/(?:[^/?#]+|i/web)/status/(\d+)/quotes"
     example = "https://x.com/USER/status/12345/quotes"
 
     def items(self):
@@ -1089,7 +1113,7 @@ class TwitterQuotesExtractor(TwitterExtractor):
 class TwitterInfoExtractor(TwitterExtractor):
     """Extractor for a user's profile data"""
     subcategory = "info"
-    pattern = rf"{USER_PATTERN}/info"
+    pattern = USER_PATTERN + r"/info"
     example = "https://x.com/USER/info"
 
     def items(self):
@@ -1108,7 +1132,7 @@ class TwitterAvatarExtractor(TwitterExtractor):
     subcategory = "avatar"
     filename_fmt = "avatar {date}.{extension}"
     archive_fmt = "AV_{user[id]}_{date}"
-    pattern = rf"{USER_PATTERN}/photo"
+    pattern = USER_PATTERN + r"/photo"
     example = "https://x.com/USER/photo"
 
     def tweets(self):
@@ -1130,7 +1154,7 @@ class TwitterBackgroundExtractor(TwitterExtractor):
     subcategory = "background"
     filename_fmt = "background {date}.{extension}"
     archive_fmt = "BG_{user[id]}_{date}"
-    pattern = rf"{USER_PATTERN}/header_photo"
+    pattern = USER_PATTERN + r"/header_photo"
     example = "https://x.com/USER/header_photo"
 
     def tweets(self):
@@ -1222,18 +1246,17 @@ class TwitterAPI():
             "include_mute_edge": "1",
             "include_can_dm": "1",
             "include_can_media_tag": "1",
-            "include_ext_has_nft_avatar": "1",
             "include_ext_is_blue_verified": "1",
             "include_ext_verified_type": "1",
+            "include_ext_profile_image_shape": "1",
             "skip_status": "1",
             "cards_platform": "Web-12",
             "include_cards": "1",
             "include_ext_alt_text": "true",
-            "include_ext_limited_action_results": "false",
+            "include_ext_limited_action_results": "true",
             "include_quote_count": "true",
             "include_reply_count": "1",
             "tweet_mode": "extended",
-            "include_ext_collab_control": "true",
             "include_ext_views": "true",
             "include_entities": "true",
             "include_user_entities": "true",
@@ -1243,16 +1266,11 @@ class TwitterAPI():
             "include_ext_trusted_friends_metadata": "true",
             "send_error_codes": "true",
             "simple_quoted_tweet": "true",
-            "q": None,
-            "count": "100",
-            "query_source": None,
             "cursor": None,
-            "pc": None,
-            "spelling_corrections": None,
-            "include_ext_edit_control": "true",
-            "ext": "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo,"
-                   "enrichments,superFollowMetadata,unmentionInfo,editControl,"
-                   "collab_control,vibe",
+            "count": "20",
+            "ext": "mediaStats,highlightedLabel,parodyCommentaryFanLabel,"
+                   "voiceInfo,birdwatchPivot,superFollowMetadata,"
+                   "unmentionInfo,editControl,article",
         }
         self.features = {
             "hidden_profile_subscriptions_enabled": True,
@@ -1572,7 +1590,7 @@ class TwitterAPI():
         params["timeline_id"] = "recap"
         params["urt"] = "true"
         params["get_annotations"] = "true"
-        return self._pagination_legacy(endpoint, params)
+        return self._pagination_rest(endpoint, params)
 
     def live_event(self, event_id):
         endpoint = f"/1.1/live_event/1/{event_id}/timeline.json"
@@ -1599,6 +1617,12 @@ class TwitterAPI():
         }
         return self._pagination_users(
             endpoint, variables, ("list", "members_timeline", "timeline"))
+
+    def notifications_devicefollow(self):
+        endpoint = "/2/notifications/device_follow.json"
+        params = self.params.copy()
+        params["count"] = self.extractor.config("limit", 50)
+        return self._pagination_rest(endpoint, params)
 
     def user_followers(self, screen_name):
         endpoint = "/graphql/i6PPdIMm1MO7CpAqjau7sw/Followers"
@@ -1793,7 +1817,7 @@ class TwitterAPI():
             raise exception.AbortExtraction(
                 f"{response.status_code} {response.reason} ({errors})")
 
-    def _pagination_legacy(self, endpoint, params):
+    def _pagination_rest(self, endpoint, params):
         extr = self.extractor
         if cursor := extr._init_cursor():
             params["cursor"] = cursor
@@ -1986,10 +2010,10 @@ class TwitterAPI():
                             extr.log.info("Retrying API request as guest")
                             continue
                         raise exception.AuthorizationError(
-                            f"{user['screen_name']} blocked your account")
+                            user["screen_name"] + " blocked your account")
                     elif user.get("protected"):
                         raise exception.AuthorizationError(
-                            f"{user['screen_name']}'s Tweets are protected")
+                            user["screen_name"] + "'s Tweets are protected")
 
                 raise exception.AbortExtraction(
                     "Unable to retrieve Tweets from this timeline")
@@ -2038,7 +2062,7 @@ class TwitterAPI():
                     pinned = None
                 elif pinned := extr._user_obj["legacy"].get(
                         "pinned_tweet_ids_str"):
-                    pinned = f"-tweet-{pinned[0]}"
+                    pinned = "-tweet-" + pinned[0]
                     for idx, entry in enumerate(tweets):
                         if entry["entryId"].endswith(pinned):
                             # mark as pinned / set 'pinned = True'
@@ -2244,7 +2268,7 @@ class TwitterAPI():
     def _update_variables_search(self, variables, cursor, tweet):
         try:
             tweet_id = tweet.get("id_str") or tweet["legacy"]["id_str"]
-            max_id = f"max_id:{int(tweet_id)-1}"
+            max_id = "max_id:" + str(int(tweet_id)-1)
 
             query, n = text.re(r"\bmax_id:\d+").subn(
                 max_id, variables["rawQuery"])

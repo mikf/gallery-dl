@@ -127,15 +127,19 @@ class FanboxExtractor(Extractor):
                         if file.get("extension", "").lower() in exts
                     ]
 
-        post["date"] = self.parse_datetime_iso(post["publishedDatetime"])
+        try:
+            post["date"] = self.parse_datetime_iso(post["publishedDatetime"])
+        except Exception:
+            post["date"] = None
         post["text"] = content_body.get("text") if content_body else None
         post["isCoverImage"] = False
 
-        if self._meta_user:
-            post["user"] = self._get_user_data(post["creatorId"])
-        if self._meta_plan:
+        cid = post.get("creatorId")
+        if self._meta_user and cid is not None:
+            post["user"] = self._get_user_data(cid)
+        if self._meta_plan and cid is not None:
             plans = self._get_plan_data(post["creatorId"])
-            fee = post["feeRequired"]
+            fee = post.get("feeRequired") or 0
             try:
                 post["plan"] = plans[fee]
             except KeyError:
@@ -146,7 +150,7 @@ class FanboxExtractor(Extractor):
                     plan["fee"] = fee
                 post["plan"] = plans[fee] = plan
         if self._meta_comments:
-            if post["commentCount"]:
+            if post.get("commentCount"):
                 post["comments"] = list(self._get_comment_data(post["id"]))
             else:
                 post["commentd"] = ()
@@ -336,7 +340,7 @@ class FanboxExtractor(Extractor):
             url = (f"https://docs.google.com/forms/d/e/"
                    f"{content_id}/viewform?usp=sf_link")
         else:
-            self.log.warning(f"service not recognized: {provider}")
+            self.log.warning("service not recognized: %s", provider)
 
         if url:
             final_post["embed"] = embed
@@ -351,7 +355,7 @@ class FanboxExtractor(Extractor):
 class FanboxCreatorExtractor(FanboxExtractor):
     """Extractor for a Fanbox creator's works"""
     subcategory = "creator"
-    pattern = rf"{USER_PATTERN}(?:/posts)?/?$"
+    pattern = USER_PATTERN + r"(?:/posts)?/?$"
     example = "https://USER.fanbox.cc/"
 
     def posts(self):
@@ -380,7 +384,7 @@ class FanboxCreatorExtractor(FanboxExtractor):
 class FanboxPostExtractor(FanboxExtractor):
     """Extractor for media from a single Fanbox post"""
     subcategory = "post"
-    pattern = rf"{USER_PATTERN}/posts/(\d+)"
+    pattern = USER_PATTERN + r"/posts/(\d+)"
     example = "https://USER.fanbox.cc/posts/12345"
 
     def posts(self):
@@ -390,7 +394,7 @@ class FanboxPostExtractor(FanboxExtractor):
 class FanboxHomeExtractor(FanboxExtractor):
     """Extractor for your Fanbox home feed"""
     subcategory = "home"
-    pattern = rf"{BASE_PATTERN}/?$"
+    pattern = BASE_PATTERN + r"/?$"
     example = "https://fanbox.cc/"
 
     def posts(self):
@@ -401,7 +405,7 @@ class FanboxHomeExtractor(FanboxExtractor):
 class FanboxSupportingExtractor(FanboxExtractor):
     """Extractor for your supported Fanbox users feed"""
     subcategory = "supporting"
-    pattern = rf"{BASE_PATTERN}/home/supporting"
+    pattern = BASE_PATTERN + r"/home/supporting"
     example = "https://fanbox.cc/home/supporting"
 
     def posts(self):

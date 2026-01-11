@@ -72,7 +72,7 @@ class TapasExtractor(Extractor):
 
 class TapasEpisodeExtractor(TapasExtractor):
     subcategory = "episode"
-    pattern = rf"{BASE_PATTERN}/episode/(\d+)"
+    pattern = BASE_PATTERN + r"/episode/(\d+)"
     example = "https://tapas.io/episode/12345"
 
     def items(self):
@@ -102,6 +102,7 @@ class TapasEpisodeExtractor(TapasExtractor):
         else:  # comic
             for episode["num"], url in enumerate(text.extract_iter(
                     html, 'data-src="', '"'), 1):
+                url = text.unescape(url)
                 yield Message.Url, url, text.nameext_from_url(url, episode)
 
     def _extract_series(self, html):
@@ -116,7 +117,7 @@ class TapasEpisodeExtractor(TapasExtractor):
 
 class TapasSeriesExtractor(TapasExtractor):
     subcategory = "series"
-    pattern = rf"{BASE_PATTERN}/series/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/series/([^/?#]+)"
     example = "https://tapas.io/series/TITLE"
 
     def items(self):
@@ -150,7 +151,7 @@ class TapasSeriesExtractor(TapasExtractor):
 
 class TapasCreatorExtractor(TapasExtractor):
     subcategory = "creator"
-    pattern = rf"{BASE_PATTERN}/(?!series|episode)([^/?#]+)"
+    pattern = BASE_PATTERN + r"/(?!series|episode)([^/?#]+)"
     example = "https://tapas.io/CREATOR"
 
     def items(self):

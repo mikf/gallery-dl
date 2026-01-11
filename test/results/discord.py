@@ -73,4 +73,38 @@ __tests__ = (
     "#class"   : discord.DiscordDirectMessagesExtractor,
 },
 
+{
+    "#url"     : "https://discord.com/channels/403905762268545024/assets",
+    "#class"   : discord.DiscordServerAssetsExtractor,
+    "#auth"    : "token",
+    "#count"   : range(380, 450),
+
+    "name"     : str,
+    "filename" : str,
+    "extension": "png",
+    "id"       : str,
+    "label"    : {"", "emojis", "stickers"},
+    "owner_id" : "699203962691256400",
+    "server"   : "MangaDex",
+    "server_id": "403905762268545024",
+    "url"      : str,
+},
+
+{
+    "#url"     : "https://discord.com/channels/403905762268545024/assets/general",
+    "#class"   : discord.DiscordServerAssetsExtractor,
+    "#auth"    : "token",
+    "#count"   : 3,
+
+    "name"     : {"icon", "banner", "splash"},
+    "filename" : {"icon", "banner", "splash"},
+    "extension": "png",
+    "id"       : str,
+    "label"    : "general",
+    "owner_id" : "699203962691256400",
+    "server"   : "MangaDex",
+    "server_id": "403905762268545024",
+    "url"      : str,
+},
+
 )

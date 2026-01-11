@@ -14,12 +14,16 @@ __tests__ = (
     "#comment" : "new-style URL",
     "#category": ("imagehost", "imxto", "image"),
     "#class"   : imagehosts.ImxtoImageExtractor,
-    "#sha1_url"    : "ab2173088a6cdef631d7a47dec4a5da1c6a00130",
+    "#results"     : "https://image.imx.to/u/i/2018/04/09/1qdeva.png",
     "#sha1_content": "0c8768055e4e20e7c7259608b67799171b691140",
 
+    "filename" : "test-ãƒ†ã‚¹ãƒˆ",
+    "extension": "png",
+    "post_url" : "https://imx.to/i/1qdeva",
     "size"  : 18,
     "width" : 64,
     "height": 32,
+    "token" : "1qdeva",
     "hash"  : "94d56c599223c59f3feb71ea603484d1",
 },
 
@@ -28,12 +32,16 @@ __tests__ = (
     "#comment" : "old-style URL",
     "#category": ("imagehost", "imxto", "image"),
     "#class"   : imagehosts.ImxtoImageExtractor,
-    "#sha1_url"    : "a83fe6ef1909a318c4d49fcf2caf62f36c3f9204",
+    "#results"     : "https://image.imx.to/u/i/2016/08/03/57a2050547b60.jpg",
     "#sha1_content": "54592f2635674c25677c6872db3709d343cdf92f",
 
+    "filename" : "test",
+    "extension": "jpg",
+    "post_url" : "https://imx.to/img-57a2050547b97.html",
     "size"  : 5284,
     "width" : 320,
     "height": 160,
+    "token" : "57a2050547b97",
     "hash"  : "40da6aaa7b8c42b18ef74309bbc713fc",
 },
 
@@ -42,7 +50,16 @@ __tests__ = (
     "#comment" : "img.yt domain",
     "#category": ("imagehost", "imxto", "image"),
     "#class"   : imagehosts.ImxtoImageExtractor,
-    "#sha1_url": "a83fe6ef1909a318c4d49fcf2caf62f36c3f9204",
+    "#results" : "https://image.imx.to/u/i/2016/08/03/57a2050547b60.jpg",
+
+    "filename" : "test",
+    "extension": "jpg",
+    "post_url" : "https://imx.to/img-57a2050547b97.html",
+    "size"  : 5284,
+    "width" : 320,
+    "height": 160,
+    "token" : "57a2050547b97",
+    "hash"  : "40da6aaa7b8c42b18ef74309bbc713fc",
 },
 
 {
@@ -69,7 +86,6 @@ __tests__ = (
     "#class"   : imagehosts.ImxtoGalleryExtractor,
     "#pattern" : imagehosts.ImxtoImageExtractor.pattern,
     "#count"   : 1037,
-    "#auth"    : True,
 
     "title": "freckledspirit",
 },

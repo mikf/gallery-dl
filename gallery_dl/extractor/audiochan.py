@@ -88,22 +88,22 @@ class AudiochanExtractor(Extractor):
                 break
             params["page"] += 1
 
-    def _extract_description(self, description, asd=None):
-        if asd is None:
-            asd = []
+    def _extract_description(self, description, texts=None):
+        if texts is None:
+            texts = []
 
         if "text" in description:
-            asd.append(description["text"])
+            texts.append(description["text"])
         elif "content" in description:
             for desc in description["content"]:
-                self._extract_description(desc, asd)
+                self._extract_description(desc, texts)
 
-        return asd
+        return texts
 
 
 class AudiochanAudioExtractor(AudiochanExtractor):
     subcategory = "audio"
-    pattern = rf"{BASE_PATTERN}/a/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://audiochan.com/a/SLUG"
 
     def posts(self):
@@ -114,7 +114,7 @@ class AudiochanAudioExtractor(AudiochanExtractor):
 
 class AudiochanUserExtractor(AudiochanExtractor):
     subcategory = "user"
-    pattern = rf"{BASE_PATTERN}/u/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/u/([^/?#]+)"
     example = "https://audiochan.com/u/USER"
 
     def posts(self):
@@ -130,7 +130,7 @@ class AudiochanUserExtractor(AudiochanExtractor):
 
 class AudiochanCollectionExtractor(AudiochanExtractor):
     subcategory = "collection"
-    pattern = rf"{BASE_PATTERN}/c/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/c/([^/?#]+)"
     example = "https://audiochan.com/c/SLUG"
 
     def posts(self):
@@ -146,7 +146,7 @@ class AudiochanCollectionExtractor(AudiochanExtractor):
 
 class AudiochanSearchExtractor(AudiochanExtractor):
     subcategory = "search"
-    pattern = rf"{BASE_PATTERN}/search/?\?([^#]+)"
+    pattern = BASE_PATTERN + r"/search/?\?([^#]+)"
     example = "https://audiochan.com/search?q=QUERY"
 
     def posts(self):
