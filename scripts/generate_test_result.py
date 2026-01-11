@@ -138,6 +138,8 @@ def generate_opts(args, urls, meta=(), exc=None, log=None):
         else:
             import re
             opts["#pattern"] = re.escape(urls[0])
+        if "#range" in opts:
+            opts["#range"] = opts.pop("#range")
         opts["#count"] = len(urls)
 
     if log is not None:
