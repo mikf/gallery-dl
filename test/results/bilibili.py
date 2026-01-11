@@ -66,13 +66,24 @@ __tests__ = (
 },
 
 {
-    "#url"    : "https://www.bilibili.com/opus/1154738799821979656",
-    "#comment": "livephoto (#8860)",
-    "#class"  : bilibili.BilibiliArticleExtractor,
-    "#results": (
+    "#url"     : "https://www.bilibili.com/opus/1154738799821979656",
+    "#comment" : "livephoto (#8860)",
+    "#class"   : bilibili.BilibiliArticleExtractor,
+    "#results" : (
         "http://i0.hdslb.com/bfs/new_dyn/live_958a5cffe9177b196ada011867abd0a031968078.jpg",
         "https://i0.hdslb.com/bfs/dyn_video/_000003lud8wlka5eq2kxctgfx3fwo3b-1-152111110022.mp4",
     ),
+
+    "extension"   : {"jpg", "mp4"},
+    "width"       : 4096,
+    "height"      : 3072,
+    "id"          : {"1154738799821979656", "1154738799821979656_l"},
+    "isPreview"   : False,
+    "live_url"    : "https://i0.hdslb.com/bfs/dyn_video/_000003lud8wlka5eq2kxctgfx3fwo3b-1-152111110022.mp4",
+    "modern"      : True,
+    "theme"       : "light",
+    "themeMode"   : "light",
+    "username"    : "粽子淞",
 },
 
 {
