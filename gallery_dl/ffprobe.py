@@ -57,7 +57,20 @@ def get_video_length(obj, url):
             )
             data = json.loads(result.stdout)
         except subprocess.CalledProcessError as e:
-            msg = "ffprobe failed: " + str(e)
+            stderr = e.stderr.strip() if e.stderr else ""
+            stdout = e.output.strip() if e.output else ""
+            obj.log.debug(
+                "ffprobe command failed on attempt %s: %s",
+                tries,
+                " ".join(command),
+            )
+            if stderr:
+                obj.log.debug("ffprobe stderr: %s", stderr)
+            if stdout:
+                obj.log.debug("ffprobe stdout: %s", stdout)
+            msg = "ffprobe failed with exit code {}".format(e.returncode)
+            if stderr:
+                msg += f": {stderr}"
             continue
         except json.JSONDecodeError:
             msg = "Failed to decode ffprobe output as JSON"
