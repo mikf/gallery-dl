@@ -44,8 +44,9 @@ class BoothExtractor(Extractor):
 
 class BoothItemExtractor(BoothExtractor):
     subcategory = "item"
-    pattern = r"(?:https?://)?(?:[\w-]+\.)?booth\.pm/(?:\w\w/)?items/(\d+)"
-    example = "https://booth.pm/items/12345"
+    pattern = (r"(?:https?://)?(?:[\w-]+\.)?booth\.pm/"
+               r"(?:[a-z]{2}(?:-[^/?#]+)?/)?items/(\d+)")
+    example = "https://booth.pm/ja/items/12345"
 
     def items(self):
         url = f"{self.root}/ja/items/{self.groups[0]}"
@@ -108,7 +109,7 @@ class BoothItemExtractor(BoothExtractor):
 
 class BoothShopExtractor(BoothExtractor):
     subcategory = "shop"
-    pattern = r"(?:https?://)?([\w-]+\.)booth\.pm/(?:\w\w/)?(?:items)?"
+    pattern = r"(?:https?://)?([\w-]+\.)booth\.pm/"
     example = "https://SHOP.booth.pm/"
 
     def __init__(self, match):
