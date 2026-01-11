@@ -172,7 +172,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="booth" title="booth">
     <td>BOOTH</td>
     <td>https://booth.pm/</td>
-    <td>Items, Shops</td>
+    <td>Item Categories, Items, Shops</td>
     <td></td>
 </tr>
 <tr id="bunkr" title="bunkr">
