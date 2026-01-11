@@ -50,13 +50,6 @@ class LoggingCapture(logging.Handler):
         self.output.append(self.format(record))
 
 
-def module_name(opts):
-    category = opts["category"]
-    if category[0].isdecimal():
-        return f"_{category}"
-    return category
-
-
 def generate_test_result(args):
     head = generate_head(args)
 
@@ -85,7 +78,8 @@ def generate_test_result(args):
         with LoggingCapture(args) as log_info:
             djob.run()
 
-        opts = generate_opts(args, djob.data_urls, djob.exception, log_info)
+        opts = generate_opts(
+            args, djob.data_urls, djob.data_meta, djob.exception, log_info)
         ool = (len(opts) > 1 or "#options" in opts)
 
         if args.metadata:
@@ -115,7 +109,7 @@ def generate_head(args):
     return head
 
 
-def generate_opts(args, urls, exc=None, log=None):
+def generate_opts(args, urls, meta=(), exc=None, log=None):
     opts = {}
 
     if args.auth is not None:
@@ -136,8 +130,14 @@ def generate_opts(args, urls, exc=None, log=None):
     elif len(urls) < args.limit_urls:
         opts["#results"] = tuple(urls)
     else:
-        import re
-        opts["#pattern"] = re.escape(urls[0])
+        if meta and (extr := meta[0].get("_extractor")):
+            name = extr.__module__.rpartition(".")[2]
+            if name[0].isdecimal():
+                name = f"_{name}"
+            opts["#pattern"] = f"lit:{name}.{extr.__name__}.pattern"
+        else:
+            import re
+            opts["#pattern"] = re.escape(urls[0])
         opts["#count"] = len(urls)
 
     if log is not None:
