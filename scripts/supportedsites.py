@@ -267,6 +267,9 @@ SUBCATEGORY_MAP = {
     "boosty": {
         "feed": "Subscriptions Feed",
     },
+    "booth": {
+        "category": "Item Categories",
+    },
     "cfake": {
         "created": "Created",
     },
