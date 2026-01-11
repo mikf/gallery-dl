@@ -181,6 +181,8 @@ def sort_key(key, value):
 
 
 def small(obj):
+    if not obj:
+        return True
     if isinstance(obj, list):
         return False if len(obj) > 1 else small(obj[0])
     if isinstance(obj, dict):
