@@ -215,6 +215,31 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://simpcity.cr/threads/snowball7766.1490941/post-38256229",
+    "#comment" : "bbImageWrapper blocks (#8868)",
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+    "#auth"    : True,
+    "#results" : (
+        "https://www.instagram.com/snowball7766/",
+        "https://www.threads.com/@snowball7766",
+        "https://www.facebook.com/ball.snow.7773#",
+        "https://simp6.selti-delivery.ru/images3/82489639_3012191048813651_5086244093198073856_o94d88f27678869a9.jpg",
+        "https://simp6.selti-delivery.ru/images3/81822451_3012190595480363_7751669220496113664_od8fd937464a00f73.jpg",
+        "https://simp6.selti-delivery.ru/images3/81459259_3012190838813672_781773786918682624_o880c1a4f0aa402c2.jpg",
+        "https://simp6.selti-delivery.ru/images3/81936276_3012190545480368_1653404646221283328_oab69119416354f10.jpg",
+        "https://simp6.selti-delivery.ru/images3/82375666_3012191015480321_6208103187434438656_of41cd9f33c2f5d2b.jpg",
+        "https://simp6.selti-delivery.ru/images3/82453137_3012190802147009_1828394700625674240_o9f4ee63fffbfc3de.jpg",
+        "https://simp6.selti-delivery.ru/images3/82710873_3012190752147014_2275240512531202048_o31a8e0ff56b05fa6.jpg",
+        "https://simp6.selti-delivery.ru/images3/82919150_3012190608813695_447262977784020992_o8105006061c5fd32.jpg",
+        "https://simp6.selti-delivery.ru/images3/49013049333_eed56c4a94_ob0809a5e8b720026.jpg",
+        "https://simp6.selti-delivery.ru/images3/49013783762_6143932191_o76c074c41effc49f.jpg",
+        "https://simp6.selti-delivery.ru/images3/49013792187_8a9f1066e6_o9359dcb86e42dba6.jpg",
+        "https://simp6.selti-delivery.ru/images3/52044873_2357680964251830_3177806178725920768_n3f60e7febf7ed056.jpg",
+    ),
+},
+
+{
     "#url"     : "https://simpcity.cr/threads/alua-tatakai.89490/",
     "#category": ("xenforo", "simpcity", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
