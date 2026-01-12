@@ -43,6 +43,7 @@ class HttpDownloader(DownloaderBase):
         self.mtime = self.config("mtime", True)
         self.rate = self.config("rate")
         interval_429 = self.config("sleep-429")
+        self._ffprobe_cache = {}
 
         if not self.config("consume-content", False):
             # this resets the underlying TCP connection, and therefore
@@ -278,8 +279,15 @@ class HttpDownloader(DownloaderBase):
                 build_path = True
 
             # check video length using ffprobe request
-            if (self.minlength or self.maxlength):
-                length = ffprobe.get_video_length(self, url)
+            if self.minlength or self.maxlength:
+                sentinel = object()
+                length = self._ffprobe_cache.get(url, sentinel)
+                if length is sentinel:
+                    length = ffprobe.get_video_length(self, url)
+                    if length is not False:
+                        # cache successful ffprobe results per URL to avoid
+                        # re-running the probe when retries occur later
+                        self._ffprobe_cache[url] = length
 
                 if length and self.minlength and length < self.minlength:
                     self.release_conn(response)
