@@ -120,7 +120,7 @@ def nameext_from_url(url, data=None):
 
 
 def nameext_from_name(filename, data=None):
-    """Extract the last part of an URL and fill 'data' accordingly"""
+    """Extract the last part of a file name and fill 'data' accordingly"""
     if data is None:
         data = {}
 
