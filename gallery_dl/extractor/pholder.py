@@ -26,8 +26,8 @@ class PholderExtractor(Extractor):
     category = "pholder"
     root = "https://pholder.com"
     directory_fmt = ("{category}", "{subredditTitle}")
-    filename_fmt = "{id}{title:? //[:230]}.{extension}"
-    archive_fmt = "{id}_{filename}"
+    filename_fmt = "{id}{gallery_id:? / /}{title:? //[:225]}.{extension}"
+    archive_fmt = "{id}_{filename}_{gallery_id:? / /}"
     request_interval = (2.0, 4.0)
 
     def __init__(self, match):
@@ -68,11 +68,19 @@ class PholderExtractor(Extractor):
 
             for item in window_data["media"]:
                 data = {
-                    "id": item["_id"].replace(":", "_"),
+                    "id": item["_id"],
+                    "gallery_id": "",
                     "subredditTitle": item["_source"]["sub"],
-                    "filename": text.unquote(item["_source"]["title"]),
                     "title": text.unquote(item["_source"]["title"]),
+                    "tags": item["_source"]["tags"],
                 }
+
+                if ":" in data["id"]:
+                    # this is a gallery
+                    # (can also see from item["is_gallery"])
+                    # pholder does not preserver gallery order, but assigns
+                    # each image a sub-id.
+                    data["id"], data["gallery_id"] = data["id"].partition(":")
 
                 yield Message.Directory, "", data
 
