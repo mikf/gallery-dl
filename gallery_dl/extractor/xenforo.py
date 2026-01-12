@@ -18,7 +18,7 @@ class XenforoExtractor(BaseExtractor):
     basecategory = "xenforo"
     directory_fmt = ("{category}", "{thread[section]}",
                      "{thread[title]} ({thread[id]})")
-    filename_fmt = "{post[id]}_{num:>02}_{id}_{filename}.{extension}"
+    filename_fmt = "{post[id]}_{num:>02}{id:?_//}_{filename}.{extension}"
     archive_fmt = "{post[id]}/{type[0]}{id}_{filename}"
 
     def __init__(self, match):
@@ -34,8 +34,8 @@ class XenforoExtractor(BaseExtractor):
             r'<video (.*?\ssrc="[^"]+".*?)</video>'
             r'|<a [^>]*?href="[^"]*?'
             r'(/(?:index\.php\?)?attachments/[^"]+".*?)</a>'
-            r'|<div [^>]*?data-src="[^"]*?'
-            r'(/(?:index\.php\?)attachments/[^"]+".*?)/>'
+            r'|<div class="bb(?:Image|Media)Wrapper[^>]*?'
+            r'data-src="([^"]+".*?) />'
             r'|(?:<a [^>]*?href="|<iframe [^>]*?src="|'
             r'''onclick="loadMedia\(this, ')([^"']+)'''
             r')'
@@ -55,7 +55,7 @@ class XenforoExtractor(BaseExtractor):
             data["_http_expected_status"] = (403,)
             data["_http_validate"] = self._validate
             data["num"] = data["num_internal"] = data["num_external"] = 0
-            for video, inl1, inl2, ext in urls:
+            for video, inl, bb, ext in urls:
                 if ext:
                     data["num"] += 1
                     data["num_external"] += 1
@@ -79,16 +79,17 @@ class XenforoExtractor(BaseExtractor):
                         url = root_media + url
                     yield Message.Url, url, data
 
-                elif (inline := inl1 or inl2):
+                elif (inline := bb or inl):
                     path = inline[:inline.find('"')]
                     name, _, id = path[path.rfind("/", 0, -1):].strip(
                         "/").rpartition(".")
-                    if id == id_last:
-                        id_last = None
-                        continue
-                    else:
-                        id_last = id
-                    data["id"] = text.parse_int(id)
+                    data["id"] = id = text.parse_int(id)
+                    if id:
+                        if id == id_last:
+                            id_last = None
+                            continue
+                        else:
+                            id_last = id
                     if alt := text.extr(inline, 'alt="', '"'):
                         text.nameext_from_name(alt, data)
                         if not data["extension"]:
@@ -99,7 +100,9 @@ class XenforoExtractor(BaseExtractor):
                     data["num"] += 1
                     data["num_internal"] += 1
                     data["type"] = "inline"
-                    yield Message.Url, self.root + path, data
+
+                    url = self.root + path if path[0] == "/" else path
+                    yield Message.Url, url, data
 
     def items_media(self, path, pnum):
         self.root_media = self.config_instance("root-media") or self.root
