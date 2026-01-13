@@ -30,6 +30,8 @@ class Rule34xyzExtractor(BooruExtractor):
         2   : "copyright",
         4   : "character",
         8   : "artist",
+        16  : "system",
+        32  : "meta",
     }
     FORMATS = {
         "10" : "pic.jpg",
