@@ -11,7 +11,7 @@ with many `configuration options <https://gdl-org.github.io/docs/configuration.h
 and powerful `filenaming capabilities <https://gdl-org.github.io/docs/formatting.html>`__.
 
 
-|pypi| |build| |discord|
+|pypi| |discord| |build|
 
 .. contents::
 
@@ -500,4 +500,4 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
     :target: https://gitter.im/gallery-dl/main
 
 .. |discord| image:: https://img.shields.io/discord/1067148002722062416?logo=discord&label=Discord&color=blue
-    :target: https://discord.gg/euZgE6Xp
+    :target: https://discord.gg/rSzQwRvGnE
