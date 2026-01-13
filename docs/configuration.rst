@@ -9376,6 +9376,22 @@ Description
         by using a `defaultdict <https://docs.python.org/3/library/collections.html#collections.defaultdict>`__
 
 
+format-operator-dot
+-------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    In standard `Format Strings`_, allow the `dot` operator ``.``
+    to function as a general access operator
+    in addition to regular attribute access.
+
+    * ``obj.attribute``
+    * ``dict.fieldname``
+    * ``list.123``
+
+
 format-separator
 ----------------
 Type
