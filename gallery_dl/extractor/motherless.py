@@ -190,12 +190,13 @@ class MotherlessGalleryExtractor(MotherlessExtractor):
             file = self._parse_thumb_data(thumb)
             thumbnail = file["thumbnail"]
 
-            if file["type"] == "video":
-                file = self._extract_media(file["id"])
+            file = self._extract_media(file["id"])
 
+            uploader = file.get("uploader")
             file.update(data)
             file["num"] = num
             file["thumbnail"] = thumbnail
+            file["uploader"] = uploader
             url = file["url"]
             yield Message.Directory, "", file
             yield Message.Url, url, text.nameext_from_url(url, file)
