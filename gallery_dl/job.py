@@ -209,9 +209,9 @@ class Job():
         for msg, url, kwdict in messages:
 
             if msg == Message.Directory:
+                self.update_kwdict(kwdict)
                 if self.pred_post(url, kwdict):
                     process = True
-                    self.update_kwdict(kwdict)
                     self.handle_directory(kwdict)
                 else:
                     process = None
@@ -224,19 +224,17 @@ class Job():
             elif msg == Message.Url:
                 if self.metadata_url:
                     kwdict[self.metadata_url] = url
+                self.update_kwdict(kwdict)
                 if self.pred_url(url, kwdict):
-                    self.update_kwdict(kwdict)
                     self.handle_url(url, kwdict)
                 if FLAGS.FILE is not None:
                     FLAGS.process("FILE")
 
             elif msg == Message.Queue:
-                if process is None:
-                    continue
+                self.update_kwdict(kwdict)
                 if self.metadata_url:
                     kwdict[self.metadata_url] = url
                 if self.pred_queue(url, kwdict):
-                    self.update_kwdict(kwdict)
                     self.handle_queue(url, kwdict)
                 if FLAGS.CHILD is not None:
                     FLAGS.process("CHILD")
