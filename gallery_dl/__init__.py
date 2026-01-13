@@ -120,7 +120,10 @@ def main():
             elif filterenv.startswith("default"):
                 util.compile_expression = util.compile_expression_defaultdict
 
-        # format string separator
+        # format string options
+        if not config.get((), "format-operator-dot", True):
+            from . import formatter
+            formatter._attrgetter = formatter.operator.attrgetter
         if separator := config.get((), "format-separator"):
             from . import formatter
             formatter._SEPARATOR = separator
