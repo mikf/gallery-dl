@@ -91,8 +91,8 @@ class MotherlessExtractor(Extractor):
             title = self._extract_gallery_title(page, gid)
         else:
             title = self._extract_group_title(page, gid)
-
-        creator = text.remove_html(extr(f'class="{category}-member-username">', "</"))
+        creator = text.remove_html(extr(
+            f'class="{category}-member-username">', "</"))
 
         return {
             category + "_id": gid,
