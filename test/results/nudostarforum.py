@@ -26,6 +26,7 @@ __tests__ = (
         "author"     : "djokica",
         "author_id"  : "3471965",
         "author_url" : "/forum/members/djokica.3471965/",
+        "author_slug": "djokica",
         "content"    : """<div class="bbWrapper"><a href="https://imagetwist.com/bvolb8129fnm/v1.jpg" target="_blank" class="link link--external" rel="nofollow noopener"><img src="https://s10.imagetwist.com/th/73048/bvolb8129fnm.jpg" data-url="https://s10.imagetwist.com/th/73048/bvolb8129fnm.jpg" class="bbImage " style="" alt="" title="" /></a> <a href="https://imagetwist.com/9pddder15iow/v2.jpg" target="_blank" class="link link--external" rel="nofollow noopener"><img src="https://s10.imagetwist.com/th/73048/9pddder15iow.jpg" data-url="https://s10.imagetwist.com/th/73048/9pddder15iow.jpg" class="bbImage " style="" alt="" title="" /></a> <a href="https://imagetwist.com/zzonmk0gqqdv/v3.jpg" target="_blank" class="link link--external" rel="nofollow noopener"><img src="https://s10.imagetwist.com/th/73048/zzonmk0gqqdv.jpg" data-url="https://s10.imagetwist.com/th/73048/zzonmk0gqqdv.jpg" class="bbImage " style="" alt="" title="" /></a></div>""",
         "count"      : 3,
         "date"       : "dt:2025-10-31 21:26:42",
