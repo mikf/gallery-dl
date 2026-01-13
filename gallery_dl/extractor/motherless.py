@@ -91,12 +91,14 @@ class MotherlessExtractor(Extractor):
             title = self._extract_gallery_title(page, gid)
         else:
             title = self._extract_group_title(page, gid)
+        creator = text.remove_html(extr(
+            f'class="{category}-member-username">', "</"))
 
         return {
             category + "_id": gid,
             category + "_title": title,
-            "uploader": text.remove_html(extr(
-                f'class="{category}-member-username">', "</")),
+            category + "_creator": creator,
+            "uploader": creator,
             "count": text.parse_int(
                 extr('<span class="active">', ")")
                 .rpartition("(")[2].replace(",", "")),
@@ -190,12 +192,13 @@ class MotherlessGalleryExtractor(MotherlessExtractor):
             file = self._parse_thumb_data(thumb)
             thumbnail = file["thumbnail"]
 
-            if file["type"] == "video":
-                file = self._extract_media(file["id"])
+            file = self._extract_media(file["id"])
 
+            uploader = file.get("uploader")
             file.update(data)
             file["num"] = num
             file["thumbnail"] = thumbnail
+            file["uploader"] = uploader
             url = file["url"]
             yield Message.Directory, "", file
             yield Message.Url, url, text.nameext_from_url(url, file)
