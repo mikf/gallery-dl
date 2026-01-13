@@ -92,11 +92,13 @@ class MotherlessExtractor(Extractor):
         else:
             title = self._extract_group_title(page, gid)
 
+        creator = text.remove_html(extr(f'class="{category}-member-username">', "</"))
+
         return {
             category + "_id": gid,
             category + "_title": title,
-            "uploader": text.remove_html(extr(
-                f'class="{category}-member-username">', "</")),
+            category + "_creator": creator,
+            "uploader": creator,
             "count": text.parse_int(
                 extr('<span class="active">', ")")
                 .rpartition("(")[2].replace(",", "")),
