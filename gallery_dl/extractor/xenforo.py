@@ -245,7 +245,6 @@ class XenforoExtractor(BaseExtractor):
         author = schema["author"]
         stats = schema["interactionStatistic"]
         url_t = schema.get("url") or schema.get("@id") or ""
-        url_a = author.get("url") or ""
 
         thread = {
             "id"   : url_t[url_t.rfind(".")+1:-1],
@@ -254,12 +253,18 @@ class XenforoExtractor(BaseExtractor):
             "date" : self.parse_datetime_iso(schema["datePublished"]),
             "tags" : (schema["keywords"].split(", ")
                       if "keywords" in schema else ()),
-            "section"   : schema["articleSection"],
-            "author"    : author.get("name") or "",
-            "author_id" : (url_a[url_a.rfind(".")+1:-1] if url_a else
-                           (author.get("name") or "")[15:]),
-            "author_url": url_a,
+            "section": schema["articleSection"],
+            "author" : author.get("name") or "",
         }
+
+        if url_a := author.get("url"):
+            thread["author_url"] = url_a
+            thread["author_slug"], _, thread["author_id"] = \
+                url_a[url_a.rfind("/", 0, -1)+1:-1].rpartition(".")
+        else:
+            thread["author_url"] = ""
+            thread["author_slug"] = text.slugify(thread["author"][:15])
+            thread["author_id"] = thread["author"][15:]
 
         if isinstance(stats, list):
             thread["views"] = stats[0]["userInteractionCount"]
@@ -286,7 +291,8 @@ class XenforoExtractor(BaseExtractor):
         }
 
         url_a = post["author_url"]
-        post["author_id"] = url_a[url_a.rfind(".")+1:-1]
+        post["author_slug"], _, post["author_id"] = \
+            url_a[url_a.rfind("/", 0, -1)+1:-1].rpartition(".")
 
         con = post["content"]
         if (pos := con.find('<div class="bbWrapper')) >= 0:
@@ -307,7 +313,6 @@ class XenforoExtractor(BaseExtractor):
         schema = self._extract_jsonld(page)
         main = schema["mainEntity"]
         author = main["author"]
-        url_a = author.get("url") or ""
         stats = main["interactionStatistic"]
 
         media = text.nameext_from_name(main["name"], {
@@ -320,19 +325,25 @@ class XenforoExtractor(BaseExtractor):
                 w["name"].partition(" ")[0]) or 0,
             "height": (h := main.get("height")) and text.parse_int(
                 h["name"].partition(" ")[0]) or 0,
-            "author"    : author.get("name") or "",
-            "author_id" : (url_a[url_a.rfind(".")+1:-1] if url_a else
-                           (author.get("name") or "")[15:]),
-            "author_url": url_a,
+            "author": author.get("name") or "",
         })
+
+        if url_a := author.get("url"):
+            media["author_url"] = url_a
+            media["author_slug"], _, media["author_id"] = \
+                url_a[url_a.rfind("/", 0, -1)+1:-1].rpartition(".")
+        else:
+            media["author_url"] = ""
+            media["author_slug"] = text.slugify(media["author"][15:])
+            media["author_id"] = media["author"][15:]
 
         if ext := main.get("encodingFormat"):
             media["extension"] = ext
 
         if isinstance(stats, list):
-            media["likes"] = stats[1]["userInteractionCount"]
             media["views"] = stats[0]["userInteractionCount"]
-            media["comments"] = stats[0]["userInteractionCount"]
+            media["likes"] = stats[1]["userInteractionCount"]
+            media["comments"] = stats[2]["userInteractionCount"]
 
         return main["contentUrl"], media
 
