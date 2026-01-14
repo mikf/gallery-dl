@@ -1081,16 +1081,16 @@ Consider all listed sites to potentially be NSFW.
     <td>individual Images, Search Results, User Profiles</td>
     <td></td>
 </tr>
-<tr id="thefap" title="thefap">
-    <td>TheFap</td>
-    <td>https://thefap.net/</td>
-    <td>Items, Models</td>
-    <td></td>
-</tr>
 <tr id="thehentaiworld" title="thehentaiworld">
     <td>The Hentai World</td>
     <td>https://thehentaiworld.com/</td>
     <td>Posts, Tag Searches</td>
+    <td></td>
+</tr>
+<tr id="thefap" title="thefap">
+    <td>TheFap</td>
+    <td>https://thefap.net/</td>
+    <td>Models, Posts</td>
     <td></td>
 </tr>
 <tr id="tiktok" title="tiktok">
