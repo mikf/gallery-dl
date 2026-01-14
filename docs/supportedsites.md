@@ -1087,6 +1087,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr id="thefap" title="thefap">
+    <td>TheFap</td>
+    <td>https://thefap.net/</td>
+    <td>Models, Posts</td>
+    <td></td>
+</tr>
 <tr id="tiktok" title="tiktok">
     <td>TikTok</td>
     <td>https://www.tiktok.com/</td>
