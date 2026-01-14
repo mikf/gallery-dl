@@ -43,7 +43,7 @@ class PixeldrainFileExtractor(PixeldrainExtractor):
         file["url"] = url + "?download"
         file["date"] = self.parse_datetime_iso(file["date_upload"])
 
-        text.nameext_from_url(file["name"], file)
+        text.nameext_from_name(file["name"], file)
         yield Message.Directory, "", file
         yield Message.Url, file["url"], file
 
@@ -107,7 +107,7 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
             file["num"] = num
             file["url"] = url = f"{self.root}/api/file/{file['id']}?download"
             file["date"] = self.parse_datetime_iso(file["date_upload"])
-            text.nameext_from_url(file["name"], file)
+            text.nameext_from_name(file["name"], file)
             yield Message.Url, url, file
 
 
