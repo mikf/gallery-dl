@@ -65,11 +65,33 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
     def items(self):
         url = f"{self.root}/api/list/{self.album_id}"
         album = self.request_json(url)
-
-        files = album["files"]
-        album["count"] = album["file_count"]
         album["date"] = self.parse_datetime_iso(album["date_created"])
 
+        if self.config("zip", False):
+            self.directory_fmt = ("{category}",)
+            self.filename_fmt = "{filename[:230]} ({id}).{extension}"
+            del album["files"]
+            album["count"] = 1
+            url += "/zip"
+
+            file = {
+                "id"   : album["id"],
+                "url"  : url,
+                "num"  : 0,
+                "count": 1,
+                "name" : album["title"] + ".zip",
+                "date" : album["date"],
+                "album": album,
+                "filename" : album["title"],
+                "extension": "zip",
+            }
+
+            yield Message.Directory, "", file
+            yield Message.Url, url, file
+            return
+
+        files = album.pop("files")
+        album["count"] = album.pop("file_count")
         if self.file_index:
             idx = text.parse_int(self.file_index)
             try:
@@ -78,9 +100,6 @@ class PixeldrainAlbumExtractor(PixeldrainExtractor):
                 files = ()
         else:
             idx = 0
-
-        del album["files"]
-        del album["file_count"]
 
         yield Message.Directory, "", {"album": album}
         for num, file in enumerate(files, idx+1):
