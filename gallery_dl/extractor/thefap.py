@@ -9,7 +9,6 @@
 from .common import Extractor, Message
 from .. import text, exception
 
-
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?thefap\.net"
 
 
@@ -17,101 +16,20 @@ class ThefapExtractor(Extractor):
     """Base class for thefap extractors"""
     category = "thefap"
     root = "https://thefap.net"
-    directory_fmt = ("{category}", "{model}")
-    filename_fmt = "{model}_{num}.{extension}"
-
-    def _extract_images(self, page, seen):
-        section = text.extr(page, '<div id="content"', '<div id="showmore"')
-        if not section:
-            section = page
-
-        for url in text.extract_iter(section, 'data-src="', '"'):
-            url = self._normalize_url(url)
-            if self._valid_image_url(url, seen):
-                seen.add(url)
-                yield url
-
-        for url in text.extract_iter(section, 'src="', '"'):
-            url = self._normalize_url(url)
-            if self._valid_image_url(url, seen):
-                seen.add(url)
-                yield url
-
-    def _valid_image_url(self, url, seen):
-        if not url or url in seen:
-            return False
-        if "/assets/" in url or "blank.gif" in url:
-            return False
-        return True
+    directory_fmt = ("{category}", "{model_name} ({model_id})")
+    filename_fmt = "{model}_{num:>03}.{extension}"
 
     def _normalize_url(self, url):
         if not url:
             return ""
         url = url.strip()
+        if "?w=" in url:
+            url = url[:url.rfind("?")]
         if url.startswith("//"):
             return "https:" + url
         if url.startswith("/"):
             return self.root + url
         return url
-
-
-class ThefapModelExtractor(ThefapExtractor):
-    """Extractor for model pages on thefap.net"""
-    subcategory = "model"
-    pattern = BASE_PATTERN + r"/([^/?#]+)-(\d+)(?:/)?$"
-    example = "https://thefap.net/zoey.curly-374261/"
-
-    def __init__(self, match):
-        ThefapExtractor.__init__(self, match)
-        self.root = text.root_from_url(match[0])
-        self.model, self.model_id = match.groups()
-
-    def items(self):
-        base = f"{self.root}/{self.model}-{self.model_id}/"
-        page = self.request(base).text
-        if 'id="content"' not in page:
-            raise exception.NotFoundError("model")
-
-        model_name = text.remove_html(text.extr(page, "<h2", "</h2>"))
-        if not model_name:
-            model_name = text.unquote(self.model).replace(".", " ")
-
-        data = {
-            "model": self.model,
-            "model_id": text.parse_int(self.model_id),
-            "model_name": model_name,
-        }
-        yield Message.Directory, "", data
-
-        seen = set()
-        num = 0
-
-        for url in self._extract_images(page, seen):
-            num += 1
-            data["num"] = num
-            yield Message.Url, url, text.nameext_from_url(url, data)
-
-        pnum = 2
-        while True:
-            page_data = self._request_ajax(pnum)
-            if not page_data:
-                return
-
-            added = 0
-            for url in self._extract_images(page_data, seen):
-                num += 1
-                added += 1
-                data["num"] = num
-                yield Message.Url, url, text.nameext_from_url(url, data)
-
-            if added == 0:
-                return
-            pnum += 1
-
-    def _request_ajax(self, pnum):
-        url = f"{self.root}/ajax/model/{self.model_id}/page-{pnum}"
-        headers = {"X-Requested-With": "XMLHttpRequest"}
-        return self.request(url, headers=headers).text
 
 
 class ThefapItemExtractor(ThefapExtractor):
@@ -147,3 +65,57 @@ class ThefapItemExtractor(ThefapExtractor):
             data["num"] = num
             yield Message.Url, media_url, text.nameext_from_url(
                 media_url, data)
+
+
+class ThefapModelExtractor(ThefapExtractor):
+    """Extractor for model pages on thefap.net"""
+    subcategory = "model"
+    pattern = BASE_PATTERN + r"/([^/?#]+)-(\d+)"
+    example = "https://thefap.net/MODEL-12345/"
+
+    def items(self):
+        model, model_id = self.groups
+
+        url = f"{self.root}/{model}-{model_id}/"
+        page = self.request(url).text
+
+        if 'id="content"' not in page:
+            raise exception.NotFoundError("model")
+
+        if model_name := text.extr(page, "<h2", "</h2>"):
+            model_name = text.unescape(model_name[model_name.find(">")+1:])
+        else:
+            model_name = text.unquote(model).replace(".", " ")
+
+        data = {
+            "model"     : model,
+            "model_id"  : text.parse_int(model_id),
+            "model_name": model_name,
+            "_http_headers": {"Referer": None},
+        }
+        yield Message.Directory, "", data
+
+        base = f"{self.root}/ajax/model/{model_id}/page-"
+        headers = {
+            "X-Requested-With": "XMLHttpRequest",
+            "Sec-Fetch-Dest"  : "empty",
+            "Sec-Fetch-Mode"  : "cors",
+            "Sec-Fetch-Site"  : "same-origin",
+        }
+
+        page = text.extr(page, '<div id="content"', '<div id="showmore"')
+        imgs = text.extract_iter(page, 'data-src="', '"')
+        pnum = 1
+        data["num"] = 0
+
+        while True:
+            for url in imgs:
+                data["num"] += 1
+                if url := self._normalize_url(url):
+                    yield Message.Url, url, text.nameext_from_url(url, data)
+
+            pnum += 1
+            page = self.request(base + str(pnum), headers=headers).text
+            if not page:
+                break
+            imgs = text.extract_iter(page, '<img src="', '"')
