@@ -56,6 +56,7 @@ class TiktokExtractor(Extractor):
             post = video_detail["itemInfo"]["itemStruct"]
             post["user"] = (a := post.get("author")) and a["uniqueId"] or ""
             post["date"] = self.parse_timestamp(post["createTime"])
+            post["post_type"] = "image" if "imagePost" in post else "video"
             original_title = title = post["desc"]
 
             yield Message.Directory, "", post
