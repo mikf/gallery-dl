@@ -4801,6 +4801,16 @@ Description
     Recursively download files from subfolders.
 
 
+extractor.pixeldrain.zip
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download albums as a single `.zip` file.
+
+
 extractor.pixiv.include
 -----------------------
 Type
