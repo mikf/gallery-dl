@@ -18,6 +18,7 @@ class ThefapExtractor(Extractor):
     root = "https://thefap.net"
     directory_fmt = ("{category}", "{model_name} ({model_id})")
     filename_fmt = "{model}_{num:>03}.{extension}"
+    archive_fmt = "{model_id}_{filename}"
 
     def _normalize_url(self, url):
         if not url:
@@ -25,50 +26,55 @@ class ThefapExtractor(Extractor):
         url = url.strip()
         if "?w=" in url:
             url = url[:url.rfind("?")]
+        elif url.endswith(":small"):
+            url = url[:-6] + ":orig"
         if url.startswith("//"):
-            return "https:" + url
-        if url.startswith("/"):
-            return self.root + url
+            url = "https:" + url
+        elif url.startswith("/"):
+            url = self.root + url
         return url
 
 
-class ThefapItemExtractor(ThefapExtractor):
-    """Extractor for individual items on thefap.net"""
-    subcategory = "item"
+class ThefapPostExtractor(ThefapExtractor):
+    """Extractor for individual thefap.net posts"""
+    subcategory = "post"
     pattern = (BASE_PATTERN +
-               r"/([^/?#]+)-(\d+)/([^/?#]+)/i(\d+)")
-    example = "https://thefap.net/zoey.curly-374261/xpics/i1"
-
-    def __init__(self, match):
-        ThefapExtractor.__init__(self, match)
-        self.root = text.root_from_url(match[0])
-        self.model, self.model_id, self.kind, self.item_id = match.groups()
+               r"(/([^/?#]+)-(\d+)/([^/?#]+)/i(\d+))")
+    example = "https://thefap.net/MODEL-12345/KIND/i12345"
 
     def items(self):
-        url = text.ensure_http_scheme(self.url)
-        page = self.request(url).text
+        path, model, model_id, kind, post_id = self.groups
+
+        page = self.request(self.root + path).text
         if "Not Found" in page:
-            raise exception.NotFoundError("item")
+            raise exception.NotFoundError("post")
+
+        if model_name := text.extr(page, "<title>", " / "):
+            model_name = text.unescape(model_name)
+        else:
+            model_name = text.unquote(model).replace(".", " ")
 
         data = {
-            "model": self.model,
-            "model_id": text.parse_int(self.model_id),
-            "kind": self.kind,
-            "item_id": text.parse_int(self.item_id),
+            "model"     : model,
+            "model_id"  : text.parse_int(model_id),
+            "model_name": model_name,
+            "kind"      : kind,
+            "post_id"   : text.parse_int(post_id),
+            "_http_headers": {"Referer": None},
         }
         yield Message.Directory, "", data
 
-        seen = set()
-        num = 0
-        for media_url in self._extract_images(page, seen):
-            num += 1
-            data["num"] = num
-            yield Message.Url, media_url, text.nameext_from_url(
-                media_url, data)
+        data["num"] = 0
+        page = text.extract(
+            page, "\n</div>", "\n<!---->", page.index("</header>"))[0]
+        for url in text.extract_iter(page, '<img src="', '"'):
+            if url := self._normalize_url(url):
+                data["num"] += 1
+                yield Message.Url, url, text.nameext_from_url(url, data)
 
 
 class ThefapModelExtractor(ThefapExtractor):
-    """Extractor for model pages on thefap.net"""
+    """Extractor for thefap.net model pages"""
     subcategory = "model"
     pattern = BASE_PATTERN + r"/([^/?#]+)-(\d+)"
     example = "https://thefap.net/MODEL-12345/"
@@ -110,8 +116,8 @@ class ThefapModelExtractor(ThefapExtractor):
 
         while True:
             for url in imgs:
-                data["num"] += 1
                 if url := self._normalize_url(url):
+                    data["num"] += 1
                     yield Message.Url, url, text.nameext_from_url(url, data)
 
             pnum += 1
