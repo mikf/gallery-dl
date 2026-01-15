@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023-2025 Mike Fährmann
+# Copyright 2023-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -24,6 +24,10 @@ class CheveretoExtractor(BaseExtractor):
 
     def _pagination(self, url, callback=None):
         page = self.request(url).text
+
+        if form := text.extr(page, "<form ", "</form"):
+            page = self._password_submit(url, form) or page
+
         if callback is not None:
             callback(page)
 
@@ -40,6 +44,41 @@ class CheveretoExtractor(BaseExtractor):
             if url[0] == "/":
                 url = self.root + url
             page = self.request(url).text
+
+    def _password_submit(self, url, form):
+        sources = getattr(self, "_password_sources", None)
+        if sources is None:
+            sources = self._password_sources = []
+            if pw := getattr(self, "_password_last", None):
+                sources.append(pw)
+            if pw := self.config("password"):
+                if isinstance(pw, str):
+                    pw = pw.split(",")
+                sources.extend(pw)
+            sources.reverse()
+        sources = sources.copy()
+
+        page = None
+        tried = set()
+        while True:
+            pw = sources.pop() if sources else self.input("Password: ")
+            if not pw:
+                break
+            if pw in tried:
+                continue
+            self.log.debug("Submitting password '%s'", pw)
+            data = {
+                "auth_token": text.unescape(text.extr(
+                    form, 'name="auth_token" value="', '"')),
+                "content-password": pw,
+            }
+            page = self.request(url, method="POST", data=data).text
+            form = text.extr(page, "<form ", "</form")
+            if not form:
+                CheveretoExtractor._password_last = pw
+                break
+            tried.add(pw)
+        return page
 
 
 BASE_PATTERN = CheveretoExtractor.update({

@@ -2071,6 +2071,20 @@ Description
         Match only URLs with known TLDs
 
 
+extractor.[chevereto].password
+------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``null``
+Example
+    * ``pw1,pw2,foobar``
+    * ``["pw1", "pw2", "foobar"]``
+Description
+    Password value(s) used to access protected albums.
+
+
 extractor.cien.files
 --------------------
 Type
