@@ -36,6 +36,7 @@ class CheveretoExtractor(BaseExtractor):
             url = text.extr(page, 'data-pagination="next" href="', '"')
             if not url:
                 return
+            url = text.unescape(url).replace("+", " ")
             if url[0] == "/":
                 url = self.root + url
             page = self.request(url).text
