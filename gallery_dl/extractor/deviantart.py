@@ -29,7 +29,7 @@ class DeviantartExtractor(Extractor):
     category = "deviantart"
     root = "https://www.deviantart.com"
     directory_fmt = ("{category}", "{username}")
-    filename_fmt = "[{date:%Y-%m-%d}] {title} by {username} - {num:>02} {index}.{extension}"
+    filename_fmt = "[{date:%Y-%m-%d}] {title} by {username} - {num} {index}.{extension}"
     cookies_domain = ".deviantart.com"
     cookies_names = ("auth", "auth_secure", "userinfo")
     _last_request = 0
@@ -1153,7 +1153,7 @@ class DeviantartStatusExtractor(DeviantartExtractor):
     """Extractor for an artist's status updates"""
     subcategory = "status"
     directory_fmt = ("{category}", "{username}", "Status")
-    filename_fmt = "[{date:%Y-%m-%d}] {title} by {username} - {num:>02} {index}.{extension}"
+    filename_fmt = "[{date:%Y-%m-%d}] {title} by {username} - {num} {index}.{extension}"
     archive_fmt = "S_{_username}_{index}.{extension}"
     pattern = BASE_PATTERN + r"/posts/statuses"
     example = "https://www.deviantart.com/USER/posts/statuses/"
@@ -1301,7 +1301,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
             return
 
         self.filename_fmt = ("[{date:%Y-%m-%d}] {title} by {username} - "
-                             "{num:>02} {index}.{extension}")
+                             "{num} {index}.{extension}")
         self.archive_fmt = ("g_{_username}_{index}{index_file:?_//}."
                             "{extension}")
 
