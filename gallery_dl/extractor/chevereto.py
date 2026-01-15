@@ -198,15 +198,11 @@ class CheveretoUserExtractor(CheveretoExtractor):
     example = "https://jpg7.cr/USER"
 
     def items(self):
-        url = self.root + self.path
-
-        if self.path.endswith("/albums"):
-            data = {"_extractor": CheveretoAlbumExtractor}
-            for url in self._pagination(url):
-                yield Message.Queue, url, data
-        else:
-            data_image = {"_extractor": CheveretoImageExtractor}
-            data_video = {"_extractor": CheveretoVideoExtractor}
-            for url in self._pagination(url):
-                data = data_video if "/video/" in url else data_image
-                yield Message.Queue, url, data
+        data_image = {"_extractor": CheveretoImageExtractor}
+        data_video = {"_extractor": CheveretoVideoExtractor}
+        data_album = {"_extractor": CheveretoAlbumExtractor}
+        for url in self._pagination(self.root + self.path):
+            data = (data_album if "/album/" in url else
+                    data_video if "/video/" in url else
+                    data_image)
+            yield Message.Queue, url, data
