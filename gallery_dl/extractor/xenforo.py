@@ -466,7 +466,7 @@ class XenforoMediaUserExtractor(XenforoExtractor):
             pnum = groups[-2]
 
         if not self.config("metadata"):
-            self.kwdict["author"], _, self.kwdict["author_id"] = \
+            self.kwdict["author_slug"], _, self.kwdict["author_id"] = \
                 user.rpartition(".")
 
         return self.items_media(f"{groups[-4]}media/users/{user}", pnum)
