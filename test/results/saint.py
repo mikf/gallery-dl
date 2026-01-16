@@ -66,6 +66,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://turbo.cr/a/FiphGijfJoR",
+    "#comment" : "'turbo' album (#8888)",
+    "#class"   : saint.SaintAlbumExtractor,
+},
+
+{
     "#url"  : "https://saint2.su/embed/6lC7mKrJst8",
     "#class": saint.SaintMediaExtractor,
     "#results"     : "https://data.saint2.cr/data/3b1ccebf3576f8d5aac3ee0e5a12da95.mp4",
@@ -128,6 +134,12 @@ __tests__ = (
     "id2"        : "WkD7hRaHdBpBI",
     "id_dl"      : "V2tEN2hSYUhkQnBCSS5tcDQ=",
     "name"       : "WkD7hRaHdBpBI",
+},
+
+{
+    "#url"     : "https://turbo.cr/embed/WkD7hRaHdBpBI",
+    "#comment" : "'turbo' URL/video",
+    "#class"   : saint.SaintMediaExtractor,
 },
 
 )
