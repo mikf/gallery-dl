@@ -447,7 +447,7 @@ class XenforoForumExtractor(XenforoExtractor):
 
 class XenforoMediaUserExtractor(XenforoExtractor):
     subcategory = "media-user"
-    directory_fmt = ("{category}", "Media", "{author}")
+    directory_fmt = ("{category}", "Media", "{author_slug}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{id}"
     pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?)me(?:"
@@ -489,7 +489,7 @@ class XenforoMediaCategoryExtractor(XenforoExtractor):
 
 class XenforoMediaItemExtractor(XenforoExtractor):
     subcategory = "media-item"
-    directory_fmt = ("{category}", "Media", "{author|''}")
+    directory_fmt = ("{category}", "Media", "{author_slug|''}")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{id}"
     pattern = BASE_PATTERN + r"(/(?:index\.php\?)?media/((?:[^/?#]+\.)\d+))"
