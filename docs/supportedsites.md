@@ -619,6 +619,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries</td>
     <td></td>
 </tr>
+<tr id="linkedin" title="linkedin">
+    <td>Linkedin</td>
+    <td>https://www.linkedin.com/</td>
+    <td>Feeds, Posts</td>
+    <td></td>
+</tr>
 <tr id="livedoor" title="livedoor">
     <td>livedoor Blog</td>
     <td>http://blog.livedoor.jp/</td>
