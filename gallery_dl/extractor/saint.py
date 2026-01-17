@@ -11,7 +11,6 @@
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text
 
-# BASE_PATTERN = r"(?:https?://)?(?:turbo(?:vid)?\.cr|saint\d*\.(?:su|pk|cr|to))"
 BASE_PATTERN = r"(?:https?://)?(?:saint\d*\.(?:su|pk|cr|to))"
 
 
