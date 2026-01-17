@@ -142,7 +142,7 @@ class TurboMediaExtractor(Extractor):
     example = "https://turbo.cr/embed/ID"
 
     def items(self):
-        path, _, video_id = self.groups
+        path, _, _, video_id = self.groups
         api_url = "https://turbo.cr/api/sign?v={}".format(video_id)
 
         # Obtain file metadata
