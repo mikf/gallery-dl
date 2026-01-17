@@ -28,7 +28,7 @@ __tests__ = (
 {
     "#url"     : "https://turbovid.cr/a/FiphGijfJoR",
     "#comment" : "'turbovid' album (#8851)",
-    "#category": ("turbo", "album"),
+    "#category": ("extractor", "turbo", "media"),
     "#class"   : turbo.TurboAlbumExtractor,
     # "#results" : (
     #     "https://data.saint2.cr/data/jZqe1xxqw9bX7.mp4",
@@ -58,7 +58,7 @@ __tests__ = (
 {
     "#url"     : "https://turbovid.cr/embed/WkD7hRaHdBpBI",
     "#comment" : "'turbovid' URL/video",
-    "#category": ("turbo", "media"),
+    "#category": ("extractor", "turbo", "media"),
     "#class"   : turbo.TurboMediaExtractor,
     # "#results" : "https://data.saint2.cr/data/WkD7hRaHdBpBI.mp4",
     # "date"       : None,
