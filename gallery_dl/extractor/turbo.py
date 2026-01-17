@@ -83,7 +83,7 @@ class TurboAlbumExtractor(Extractor):
             size, _ = text.extract(
                 response.text,
                 '<span id="fileSizeBytes">',
-               '</span>'
+                '</span>'
             )
 
             # Fix cientific notation
@@ -132,7 +132,6 @@ class TurboAlbumExtractor(Extractor):
             yield Message.Url, data["url"], full_data
 
 
-
 class TurboMediaExtractor(Extractor):
     """Extractor for turbo.cr single files"""
     category = "turbo"
@@ -158,7 +157,7 @@ class TurboMediaExtractor(Extractor):
         size, _ = text.extract(
             response.text,
             '<span id="fileSizeBytes">',
-           '</span>'
+            '</span>'
         )
 
         # Fix cientific notation
@@ -186,7 +185,7 @@ class TurboMediaExtractor(Extractor):
                 "size": int(size),
                 "category" : self.category,
                 "_http_headers": {"Referer": "https://turbo.cr/" + path}
-                }
+            }
 
             yield Message.Directory, "", data
             yield Message.Url, video_url, data
