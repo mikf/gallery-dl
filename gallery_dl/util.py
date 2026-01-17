@@ -762,10 +762,9 @@ if EXECUTABLE and hasattr(sys, "_MEIPASS"):
 
     del orig
 
-    class Popen(subprocess.Popen):
-        def __init__(self, args, **kwargs):
-            kwargs["env"] = _popen_env
-            subprocess.Popen.__init__(self, args, **kwargs)
+    def Popen(args, **kwargs):
+        kwargs["env"] = _popen_env
+        return subprocess.Popen(args, **kwargs)
 else:
     Popen = subprocess.Popen
 
