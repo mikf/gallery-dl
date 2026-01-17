@@ -28,7 +28,7 @@ __tests__ = (
 {
     "#url"     : "https://turbovid.cr/a/FiphGijfJoR",
     "#comment" : "'turbovid' album (#8851)",
-    "#category": ("extractor", "turbo", "media"),
+    "#category": ("extractor", "turbo", "album"),
     "#class"   : turbo.TurboAlbumExtractor,
     # "#results" : (
     #     "https://data.saint2.cr/data/jZqe1xxqw9bX7.mp4",
