@@ -150,15 +150,29 @@ changelog() {
     > "${CHANGELOG}"
 }
 
-supportedsites() {
+prepare() {
     cd "${ROOTDIR}"
-    echo Checking if "${SUPPORTEDSITES}" is up to date
 
+    echo Checking if "${SUPPORTEDSITES}" is up to date
     ./scripts/supportedsites.py
-    if ! git diff --quiet "${SUPPORTEDSITES}"; then
+    if ! git diff --quiet -- "${SUPPORTEDSITES}"; then
         echo "updated ${SUPPORTEDSITES} contains changes"
         exit 4
     fi
+
+    echo Checking changed files
+    DIFF="$(git diff --name-only)"
+    if [[ "$DIFF" != "${CHANGELOG}" ]]; then
+        if [[ "$DIFF" != *"${CHANGELOG}"* ]]; then
+            echo "Missing ${NEWVERSION} '${CHANGELOG}' entries"
+        else
+            printf "Uncommited changes to files other than '${CHANGELOG}':\n%s\n" "$DIFF"
+        fi
+        exit 4
+    fi
+
+    echo Syncing local branch with origin/master
+    git pull --autostash
 }
 
 upload-git() {
@@ -202,7 +216,7 @@ fi
 
 
 prompt
-supportedsites
+prepare
 cleanup
 update
 changelog
