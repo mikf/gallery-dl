@@ -16,25 +16,30 @@ from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:turbo(?:vid)?\.cr)"
 
-class TurboAlbumMediaExtractor(Extractor):
+
+class TurboAlbumExtractor(Extractor):
     """Extractor for turbo.cr album files"""
     category = "turbo"
-    subcategory = "media"
+    subcategory = "album"
     directory_fmt = ("{category}",)
 
     pattern = r"https?://(?:www\.)?turbo(?:vid)?\.cr(/a/([^/?#]+))"
     example = "https://turbo.cr/a/ID"
 
     def items(self):
-        path, _ = self.groups
+        path, album_id = self.groups
 
         try:
-            # FIXME: self.root is empty by default
             response = self.request(
                 self.url,
             )
 
-            tbody, _ = text.extract(response.text, '<tbody id="fileTbody"', '</tbody>')
+            tbody, _ = text.extract(
+                response.text,
+                '<tbody id="fileTbody"',
+                '</tbody>'
+            )
+
             if not tbody:
                 raise Exception("Could not extract files from site")
 
@@ -42,6 +47,21 @@ class TurboAlbumMediaExtractor(Extractor):
 
             if not ids:
                 raise Exception("Could not extract files from site")
+
+            main, _ = text.extract(
+                response.text,
+                '<main',
+                '</main>'
+            )
+
+            h1, _ = text.extract(main, '<h1 class=', '/h1>')
+            album_title, _ = text.extract(h1, '>', "<")
+
+            description, _ = text.extract(
+                main,
+                '<p class="mt-1 text-sm text-white/60">',
+                '</p>'
+            )
 
         except Exception as ex:
             self.log.error("%s: %s", ex.__class__.__name__, ex)
@@ -51,6 +71,25 @@ class TurboAlbumMediaExtractor(Extractor):
         api_url = "https://turbo.cr/api/sign?v={}"
 
         for v_id in ids:
+            # Obtain file metadata
+            try:
+                response = self.request(
+                    f"https://turbo.cr/d/{v_id}"
+                )
+            except HttpError as ex:
+                self.log.error("%s: %s", ex.__class__.__name__, ex)
+                return (), {}
+
+            size, _ = text.extract(
+                response.text,
+                '<span id="fileSizeBytes">',
+               '</span>'
+            )
+
+            # Fix cientific notation
+            size = int(float(size.replace("&#43;", "+")))
+
+            # Obtain signed direct url
             try:
                 response = self.request(
                     api_url.format(v_id),
@@ -61,25 +100,37 @@ class TurboAlbumMediaExtractor(Extractor):
 
             video_url = response.get("url")
 
-            filename = response.get("filename")
             filename = response.get("filename").split(".")[0]
+            extension = response.get("filename").split(".")[1]
 
             files.append(
                 {
                     "id"       : v_id,
+                    "album_id"       : album_id,
                     "url"       : video_url,
                     "filename" : filename,
-                    "extension": "mp4",
+                    "extension": extension,
+                    "size": int(size),
                     "category" : self.category,
-                    "_http_headers": {
-                        "Referer": self.root + path
-                    }
                 }
             )
 
+        album_data = {
+            "album_id": album_id,
+            "album_name": album_title,
+            "album_size": sum(file["size"] for file in files),
+            "description"  : text.unescape(description),
+            "count"        : len(files),
+            "_http_headers": {"Referer": "https://turbo.cr/" + path}
+        }
+
+        yield Message.Directory, "", album_data
+
         for data in files:
-            yield Message.Directory, "", data
-            yield Message.Url, data["url"], data
+            full_data = album_data.copy()
+            full_data.update(data)
+            yield Message.Url, data["url"], full_data
+
 
 
 class TurboMediaExtractor(Extractor):
@@ -95,6 +146,24 @@ class TurboMediaExtractor(Extractor):
         path, _, video_id = self.groups
         api_url = "https://turbo.cr/api/sign?v={}".format(video_id)
 
+        # Obtain file metadata
+        try:
+            response = self.request(
+                f"https://turbo.cr/d/{video_id}"
+            )
+        except HttpError as ex:
+            self.log.error("%s: %s", ex.__class__.__name__, ex)
+            return (), {}
+
+        size, _ = text.extract(
+            response.text,
+            '<span id="fileSizeBytes">',
+           '</span>'
+        )
+
+        # Fix cientific notation
+        size = int(float(size.replace("&#43;", "+")))
+
         try:
             response = self.request(
                 api_url,
@@ -105,20 +174,19 @@ class TurboMediaExtractor(Extractor):
 
         video_url = response.get("url")
 
-        filename = response.get("filename")
         filename = response.get("filename").split(".")[0]
+        extension = response.get("filename").split(".")[1]
 
         if video_url:
             data = {
                 "id"       : video_id,
+                "url"       : video_url,
                 "filename" : filename,
-                "extension": "mp4",
+                "extension": extension,
+                "size": int(size),
                 "category" : self.category,
-                "_http_headers": {
-                    "Referer": self.root + path
+                "_http_headers": {"Referer": "https://turbo.cr/" + path}
                 }
-            }
 
             yield Message.Directory, "", data
-
             yield Message.Url, video_url, data
