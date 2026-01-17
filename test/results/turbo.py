@@ -72,7 +72,7 @@ __tests__ = (
 {
     "#url"     : "https://turbo.cr/embed/WkD7hRaHdBpBI",
     "#comment" : "'turbo' URL/video",
-    "#class"   : turbo.TurboFileExtractor,
+    "#class"   : turbo.TurboMediaExtractor,
 },
 
 )
