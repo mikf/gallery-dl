@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2025 Mike Fährmann
+# Copyright 2015-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -162,7 +162,10 @@ class TestExtractorResults(unittest.TestCase):
                          format=(result.get("#metadata") != "post"))
 
         if "#exception" in result:
-            with self.assertRaises(result["#exception"], msg="#exception"), \
+            exc = result["#exception"]
+            if isinstance(exc, str):
+                exc = getattr(exception, exc, None)
+            with self.assertRaises(exc, msg="#exception"), \
                     self.assertLogs() as log_info:
                 tjob.run()
             if "#log" in result:
