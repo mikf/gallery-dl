@@ -1429,6 +1429,44 @@ class DeviantartFollowingExtractor(DeviantartExtractor):
 ###############################################################################
 # API Interfaces ##############################################################
 
+class LearningDelay():
+    '''
+    Deviantart API is throttled dynamically over time
+    you can learn the ideal ammount to wait
+    '''
+
+    def __init__(self, initial=1, error_margin=0.01):
+        '''
+        Inital is the inital time to wait in seconds,
+        error_margin is added on top of the esitmate but not used in
+        the update. It accounts for fuzzyness in the choice of value
+
+        TODO: You can store an load this calue across gallery-dl execution.
+        '''
+        self._min = 0
+        self._current = initial
+        self._prev = initial + error_margin
+        self._error = error_margin
+        self._convegered = False
+
+    def reject(self):
+        '''The current estimate was too low, increase it'''
+        self._min = self._current
+        self._current = self._prev+self._error
+
+    def update(self):
+        '''Try a smaller estimate'''
+        if self._convegered:
+            return
+        self._current = 0.5*(self._current+self._min)
+        self._convegered = abs(self._current - self._prev) < self._error
+
+    @property
+    def value(self):
+        '''Current guess pluss an engineering margin for rounding errors'''
+        return self._current + self._error
+
+
 class DeviantartOAuthAPI():
     """Interface for the DeviantArt OAuth API
 
@@ -1445,6 +1483,9 @@ class DeviantartOAuthAPI():
 
         self.delay = extractor.config("wait-min", 0)
         self.delay_min = max(2, self.delay)
+        self.exp_backoff_mul = 2
+        self.learned_delay = LearningDelay(initial=self.delay)
+        self.is_throttled = False
 
         self.mature = extractor.config("mature", "true")
         if not isinstance(self.mature, str):
@@ -1746,7 +1787,10 @@ class DeviantartOAuthAPI():
 
         while True:
             if self.delay:
-                self.extractor.sleep(self.delay, "api")
+                if self.is_throttled:
+                    self.extractor.sleep(self.delay, "api")
+                else:
+                    self.extractor.sleep(self.learned_delay.value, "api")
 
             self.authenticate(None if public else self.refresh_token_key)
             kwargs["headers"] = self.headers
@@ -1760,6 +1804,14 @@ class DeviantartOAuthAPI():
 
             status = response.status_code
             if 200 <= status < 400:
+                self.learned_delay.update()
+                self.is_throttled = False
+
+                # Exp backoff shouldn't be but could be significant
+                # so nap back to a sane value for linear cooldown
+                if self.delay > 10:
+                    self.delay = 10
+
                 if self.delay > self.delay_min:
                     self.delay -= 1
                 return data
@@ -1775,8 +1827,15 @@ class DeviantartOAuthAPI():
             self.log.debug(response.text)
             msg = f"API responded with {status} {response.reason}"
             if status == 429:
-                if self.delay < 30:
-                    self.delay += 1
+
+                # When throttled we use exp backoff
+                self.is_throttled = True
+
+                # Exp backoff is a multiplier so enure sane initial delay
+                if self.delay < 1:
+                    self.delay = 1
+                else:
+                    self.delay *= self.exp_backoff_mul
                 self.log.warning("%s. Using %ds delay.", msg, self.delay)
 
                 if self._warn_429 and self.delay >= 3:
