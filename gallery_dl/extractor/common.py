@@ -216,7 +216,9 @@ class Extractor():
                     if encoding:
                         response.encoding = encoding
                     return response
-                if notfound and code == 404:
+                if notfound is not None and code == 404:
+                    if notfound is True:
+                        notfound = self.__class__.subcategory
                     self.status |= exception.NotFoundError.code
                     raise exception.NotFoundError(notfound)
 

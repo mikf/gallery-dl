@@ -198,7 +198,7 @@ class SeigaImageExtractor(SeigaExtractor):
             "skip_fetish_warning", "1", domain="seiga.nicovideo.jp")
 
         url = f"{self.root}/seiga/im{self.image_id}"
-        page = self.request(url, notfound="image").text
+        page = self.request(url, notfound=True).text
 
         data = text.extract_all(page, (
             ("date"        , '<li class="date"><span class="created">', '<'),
