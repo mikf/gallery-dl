@@ -41,7 +41,7 @@ class _2chenThreadExtractor(_2chenExtractor):
         board = self.groups[-2]
         thread = self.kwdict["thread"] = self.groups[-1]
         url = f"{self.root}/{board}/{thread}"
-        page = self.request(url, encoding="utf-8", notfound="thread").text
+        page = self.request(url, encoding="utf-8", notfound=True).text
 
         self.kwdict["board"], pos = text.extract(
             page, 'class="board">/', '/<')
@@ -89,7 +89,7 @@ class _2chenBoardExtractor(_2chenExtractor):
 
     def items(self):
         url = f"{self.root}/{self.groups[-1]}/catalog"
-        page = self.request(url, notfound="board").text
+        page = self.request(url, notfound=True).text
         data = {"_extractor": _2chenThreadExtractor}
         for thread in text.extract_iter(
                 page, '<figure><a href="', '"'):

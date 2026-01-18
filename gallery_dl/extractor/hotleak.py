@@ -115,7 +115,7 @@ class HotleakCreatorExtractor(HotleakExtractor):
         while True:
             try:
                 response = self.request(
-                    url, headers=headers, params=params, notfound="creator")
+                    url, headers=headers, params=params, notfound=True)
             except exception.HttpError as exc:
                 if exc.response.status_code == 429:
                     self.wait(

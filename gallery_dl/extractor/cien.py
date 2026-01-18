@@ -54,7 +54,7 @@ class CienArticleExtractor(CienExtractor):
     def items(self):
         author_id, post_id = self.groups
         url = f"{self.root}/creator/{author_id}/article/{post_id}"
-        page = self.request(url, notfound="article").text
+        page = self.request(url, notfound=True).text
 
         files = self._extract_files(page)
         post = self._extract_jsonld(page)[0]
