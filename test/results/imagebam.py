@@ -87,4 +87,11 @@ __tests__ = (
     "url"      : "https://images3.imagebam.com/d2/7a/d9/b728aa119132443.jpg",
 },
 
+{
+    "#url"      : "https://www.imagebam.com/image/40a481151474621",
+    "#comment"  : "deleted image (#8890)",
+    "#class"    : imagebam.ImagebamImageExtractor,
+    "#exception": exception.NotFoundError,
+},
+
 )
