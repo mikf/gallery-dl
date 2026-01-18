@@ -36,7 +36,7 @@ class TiktokExtractor(Extractor):
         self.cover = self.config("covers", False)
 
         self.range = self.config("tiktok-range") or ""
-        self.range_predicate = util.RangePredicate(self.range)
+        self.range_predicate = util.predicate_range(self.range)
 
     def items(self):
         for tiktok_url in self.posts():
