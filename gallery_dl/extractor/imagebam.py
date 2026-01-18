@@ -49,7 +49,7 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
     example = "https://www.imagebam.com/view/GID"
 
     def items(self):
-        page = self.request(self.root + self.path).text
+        page = self.request(self.root + self.path, notfound="gallery").text
 
         images = self.images(page)
         images.reverse()
