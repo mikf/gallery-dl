@@ -521,16 +521,15 @@ CODES = {
 }
 
 
-class HTTPBasicAuth():
-    __slots__ = ("authorization",)
+def HTTPBasicAuth(username, password):
+    authorization = b"Basic " + binascii.b2a_base64(
+        f"{username}:{password}".encode("latin1"), newline=False)
+    del username, password
 
-    def __init__(self, username, password):
-        self.authorization = b"Basic " + binascii.b2a_base64(
-            f"{username}:{password}".encode("latin1"), newline=False)
-
-    def __call__(self, request):
-        request.headers["Authorization"] = self.authorization
+    def _apply(request):
+        request.headers["Authorization"] = authorization
         return request
+    return _apply
 
 
 class ModuleProxy():
