@@ -949,12 +949,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Search Results, User Profiles</td>
     <td></td>
 </tr>
-<tr id="saint" title="saint">
-    <td>Saint</td>
-    <td>https://saint2.su/</td>
-    <td>Albums, Media Files</td>
-    <td></td>
-</tr>
 <tr id="sankaku" title="sankaku">
     <td>Sankaku Channel</td>
     <td>https://sankaku.app/</td>
@@ -1135,9 +1129,9 @@ Consider all listed sites to potentially be NSFW.
     <td>Models, Posts, User Profiles</td>
     <td></td>
 </tr>
-<tr id="turbovid" title="turbovid">
-    <td>turbovid.cr</td>
-    <td>https://turbovid.cr/</td>
+<tr id="turbo" title="turbo">
+    <td>turbo.cr</td>
+    <td>https://turbo.cr/</td>
     <td>Albums, Media Files</td>
     <td></td>
 </tr>

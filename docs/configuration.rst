@@ -9260,6 +9260,7 @@ Special Values
             {
                 "coomer"       : "coomerparty",
                 "kemono"       : "kemonoparty",
+                "turbo"        : "saint",
                 "schalenetwork": "koharu",
                 "naver-chzzk"  : "chzzk",
                 "naver-blog"   : "naver",
@@ -9287,7 +9288,8 @@ Default
             "chzzk"        : "naver-chzzk",
             "naver"        : "naver-blog",
             "naverwebtoon" : "naver-webtoon",
-            "pixiv"        : "pixiv-novel"
+            "pixiv"        : "pixiv-novel",
+            "saint"        : "turbo"
         }
 Description
     Duplicate the configuration settings of extractor `categories`
