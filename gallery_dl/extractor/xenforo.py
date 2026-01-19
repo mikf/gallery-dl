@@ -24,7 +24,7 @@ class XenforoExtractor(BaseExtractor):
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
         self.cookies_domain = "." + self.root.split("/")[2]
-        self.cookies_names = self.config_instance("cookies")
+        self.cookies_names = self.config_instance("cookies") or ("xf_user",)
 
     def items(self):
         self.login()
@@ -152,7 +152,7 @@ class XenforoExtractor(BaseExtractor):
             raise
 
     def login(self):
-        if self.cookies_check(self.cookies_names):
+        if self.cookies_names and self.cookies_check(self.cookies_names):
             return
 
         username, password = self._get_auth_info()
@@ -367,12 +367,10 @@ BASE_PATTERN = XenforoExtractor.update({
     "nudostarforum": {
         "root": "https://nudostar.com/forum",
         "pattern": r"(?:www\.)?nudostar\.com/forum",
-        "cookies": ("xf_user",),
     },
     "atfforum": {
         "root": "https://allthefallen.moe/forum",
         "pattern": r"(?:www\.)?allthefallen\.moe/forum",
-        "cookies": ("xf_user",),
     },
 })
 
