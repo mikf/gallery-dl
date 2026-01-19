@@ -58,14 +58,16 @@ class XenforoExtractor(BaseExtractor):
             data["num"] = data["num_internal"] = data["num_external"] = 0
             for video, inl, bb, ext in urls:
                 if ext:
-                    data["num"] += 1
-                    data["num_external"] += 1
-                    data["type"] = "external"
+                    if ext[0] == "#":
+                        continue
                     if ext[0] == "/":
                         if ext[1] == "/":
                             ext = "https:" + ext
                         else:
                             continue
+                    data["num"] += 1
+                    data["num_external"] += 1
+                    data["type"] = "external"
                     yield Message.Queue, ext, data
 
                 elif video:
