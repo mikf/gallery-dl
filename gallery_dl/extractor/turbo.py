@@ -133,54 +133,35 @@ class TurboMediaExtractor(TurboAlbumExtractor):
     """Extractor for turbo.cr media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"(/(embe)?[dv]/([^/?#]+))"
+    pattern = BASE_PATTERN + r"/(?:embe)?[dv]/([^/?#]+)"
     example = "https://turbo.cr/embed/ID"
 
-    def items(self):
-        path, _, _, video_id = self.groups
-        api_url = "https://turbo.cr/api/sign?v={}".format(video_id)
-
-        # Obtain file metadata
+    def fetch_album(self, album_id):
         try:
-            response = self.request(
-                f"https://turbo.cr/d/{video_id}"
-            )
-        except HttpError as ex:
-            self.log.error("%s: %s", ex.__class__.__name__, ex)
+            url = f"{self.root}/d/{album_id}"
+            headers = {"Referer": url}
+            page = self.request(url).text
+            size = text.extr(page, 'id="fileSizeBytes">', '<')
+            date = text.extract(page, "<span>", "<", page.find("File ID:"))[0]
+
+            url = f"{self.root}/api/sign?v={album_id}"
+            data = self.request_json(url, headers=headers)
+            name = data.get("original_filename") or data.get("filename")
+            file = text.nameext_from_name(name, {
+                "id"  : album_id,
+                "file": data.get("url"),
+                "size": int(float(size.replace("&#43;", "+"))),
+                "date": self.parse_datetime_iso(date),
+                "_http_headers": headers,
+            })
+        except Exception as exc:
+            self.log.error("%s: %s", exc.__class__.__name__, exc)
             return (), {}
 
-        size, _ = text.extract(
-            response.text,
-            '<span id="fileSizeBytes">',
-            '</span>'
-        )
-
-        # Fix cientific notation
-        size = int(float(size.replace("&#43;", "+")))
-
-        try:
-            response = self.request(
-                api_url,
-            ).json()
-        except HttpError as ex:
-            self.log.error("%s: %s", ex.__class__.__name__, ex)
-            return (), {}
-
-        video_url = response.get("url")
-
-        filename = response.get("filename").split(".")[0]
-        extension = response.get("filename").split(".")[1]
-
-        if video_url:
-            data = {
-                "id"       : video_id,
-                "url"       : video_url,
-                "filename" : filename,
-                "extension": extension,
-                "size": int(size),
-                "category" : self.category,
-                "_http_headers": {"Referer": "https://turbo.cr/" + path}
-            }
-
-            yield Message.Directory, "", data
-            yield Message.Url, video_url, data
+        return (file,), {
+            "album_id"   : "",
+            "album_name" : "",
+            "album_size" : -1,
+            "description": "",
+            "count"      : 1,
+        }
