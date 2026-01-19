@@ -23,110 +23,36 @@ class TurboAlbumExtractor(LolisafeAlbumExtractor):
     pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://turbo.cr/a/ID"
 
-    def items(self):
-        path, album_id = self.groups
+    def fetch_album(self, album_id):
+        url = f"{self.root}/a/{album_id}"
+        extr = text.extract_from(self.request(url).text)
+        title = extr("<h1 ", "<")
+        descr = extr("<p ", "<")
+        tbody = extr('id="fileTbody"', '</tbody>')
+        headers = {"Referer": url}
 
-        try:
-            response = self.request(
-                self.url,
-            )
-
-            tbody, _ = text.extract(
-                response.text,
-                '<tbody id="fileTbody"',
-                '</tbody>'
-            )
-
-            if not tbody:
-                raise Exception("Could not extract files from site")
-
-            ids = list(text.extract_iter(tbody, 'data-id="', '"'))
-
-            if not ids:
-                raise Exception("Could not extract files from site")
-
-            main, _ = text.extract(
-                response.text,
-                '<main',
-                '</main>'
-            )
-
-            h1, _ = text.extract(main, '<h1 class=', '/h1>')
-            album_title, _ = text.extract(h1, '>', "<")
-
-            description, _ = text.extract(
-                main,
-                '<p class="mt-1 text-sm text-white/60">',
-                '</p>'
-            )
-
-        except Exception as ex:
-            self.log.error("%s: %s", ex.__class__.__name__, ex)
-            return (), {}
-
-        files = []
-        api_url = "https://turbo.cr/api/sign?v={}"
-
-        for v_id in ids:
-            # Obtain file metadata
-            try:
-                response = self.request(
-                    f"https://turbo.cr/d/{v_id}"
-                )
-            except HttpError as ex:
-                self.log.error("%s: %s", ex.__class__.__name__, ex)
-                return (), {}
-
-            size, _ = text.extract(
-                response.text,
-                '<span id="fileSizeBytes">',
-                '</span>'
-            )
-
-            # Fix cientific notation
-            size = int(float(size.replace("&#43;", "+")))
-
-            # Obtain signed direct url
-            try:
-                response = self.request(
-                    api_url.format(v_id),
-                ).json()
-            except HttpError as ex:
-                self.log.error("%s: %s", ex.__class__.__name__, ex)
-                return (), {}
-
-            video_url = response.get("url")
-
-            filename = response.get("filename").split(".")[0]
-            extension = response.get("filename").split(".")[1]
-
-            files.append(
-                {
-                    "id"       : v_id,
-                    "album_id"       : album_id,
-                    "url"       : video_url,
-                    "filename" : filename,
-                    "extension": extension,
-                    "size": int(size),
-                    "category" : self.category,
-                }
-            )
-
-        album_data = {
-            "album_id": album_id,
-            "album_name": album_title,
-            "album_size": sum(file["size"] for file in files),
-            "description"  : text.unescape(description),
-            "count"        : len(files),
-            "_http_headers": {"Referer": "https://turbo.cr/" + path}
+        return self._extract_files(tbody, headers), {
+            "album_id"     : album_id,
+            "album_name"   : text.unescape(title[title.find(">")+1:]),
+            "description"  : text.unescape(descr[descr.find(">")+1:]),
+            "album_size"   : sum(map(text.parse_int, text.extract_iter(
+                tbody, 'data-size="', '"'))),
+            "count"        : tbody.count("data-id="),
+            "_http_headers": headers,
         }
 
-        yield Message.Directory, "", album_data
-
-        for data in files:
-            full_data = album_data.copy()
-            full_data.update(data)
-            yield Message.Url, data["url"], full_data
+    def _extract_files(self, body, headers):
+        for file in text.extract_iter(body, "<tr", "</tr>"):
+            data_id = text.extr(file, 'data-id="', '"')
+            url = f"{self.root}/api/sign?v={data_id}"
+            data = self.request_json(url, headers=headers)
+            name = data.get("original_filename") or data.get("filename")
+            yield text.nameext_from_name(name, {
+                "id"  : data_id,
+                "file": data.get("url"),
+                "size": text.parse_int(text.extr(file, 'data-size="', '"')),
+                "_http_headers": headers,
+            })
 
 
 class TurboMediaExtractor(TurboAlbumExtractor):
@@ -138,30 +64,31 @@ class TurboMediaExtractor(TurboAlbumExtractor):
 
     def fetch_album(self, album_id):
         try:
-            url = f"{self.root}/d/{album_id}"
-            headers = {"Referer": url}
-            page = self.request(url).text
-            size = text.extr(page, 'id="fileSizeBytes">', '<')
-            date = text.extract(page, "<span>", "<", page.find("File ID:"))[0]
-
-            url = f"{self.root}/api/sign?v={album_id}"
-            data = self.request_json(url, headers=headers)
-            name = data.get("original_filename") or data.get("filename")
-            file = text.nameext_from_name(name, {
-                "id"  : album_id,
-                "file": data.get("url"),
-                "size": int(float(size.replace("&#43;", "+"))),
-                "date": self.parse_datetime_iso(date),
-                "_http_headers": headers,
-            })
+            return (self._extract_file(album_id),), {
+                "album_id"   : "",
+                "album_name" : "",
+                "album_size" : -1,
+                "description": "",
+                "count"      : 1,
+            }
         except Exception as exc:
             self.log.error("%s: %s", exc.__class__.__name__, exc)
             return (), {}
 
-        return (file,), {
-            "album_id"   : "",
-            "album_name" : "",
-            "album_size" : -1,
-            "description": "",
-            "count"      : 1,
-        }
+    def _extract_file(self, data_id):
+        url = f"{self.root}/d/{data_id}"
+        headers = {"Referer": url}
+        page = self.request(url).text
+        size = text.extr(page, 'id="fileSizeBytes">', '<')
+        date = text.extract(page, "<span>", "<", page.find("File ID:"))[0]
+
+        url = f"{self.root}/api/sign?v={data_id}"
+        data = self.request_json(url, headers=headers)
+        name = data.get("original_filename") or data.get("filename")
+        return text.nameext_from_name(name, {
+            "id"  : data_id,
+            "file": data.get("url"),
+            "size": int(text.parse_float(size.replace("&#43;", "+"))),
+            "date": self.parse_datetime_iso(date),
+            "_http_headers": headers,
+        })
