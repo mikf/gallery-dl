@@ -321,6 +321,7 @@ def main():
                     catmap = {
                         "coomer"       : "coomerparty",
                         "kemono"       : "kemonoparty",
+                        "turbo"        : "saint",
                         "schalenetwork": "koharu",
                         "naver-blog"   : "naver",
                         "naver-chzzk"  : "chzzk",
