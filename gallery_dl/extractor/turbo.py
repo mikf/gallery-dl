@@ -6,24 +6,21 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors forhttps://turbovid.cr/"""
+"""Extractors for https://turbo.cr/"""
 
-from gallery_dl.exception import HttpError
-from gallery_dl.extractor.message import Message
-from .common import Extractor
-
+from .lolisafe import LolisafeAlbumExtractor
 from .. import text
 
-BASE_PATTERN = r"(?:https?://)?(?:turbo(?:vid)?\.cr)"
+BASE_PATTERN = (r"(?:https?://)?(?:"
+                r"(?:www\.)?turbo(?:vid)?\.cr|"
+                r"saint\d*\.(?:su|pk|cr|to))")
 
 
-class TurboAlbumExtractor(Extractor):
-    """Extractor for turbo.cr album files"""
+class TurboAlbumExtractor(LolisafeAlbumExtractor):
+    """Extractor for turbo.cr albums"""
     category = "turbo"
-    subcategory = "album"
-    directory_fmt = ("{category}",)
-
-    pattern = r"https?://(?:www\.)?turbo(?:vid)?\.cr(/a/([^/?#]+))"
+    root = "https://turbo.cr"
+    pattern = BASE_PATTERN + r"/a/([^/?#]+)"
     example = "https://turbo.cr/a/ID"
 
     def items(self):
@@ -132,13 +129,11 @@ class TurboAlbumExtractor(Extractor):
             yield Message.Url, data["url"], full_data
 
 
-class TurboMediaExtractor(Extractor):
-    """Extractor for turbo.cr single files"""
-    category = "turbo"
+class TurboMediaExtractor(TurboAlbumExtractor):
+    """Extractor for turbo.cr media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-
-    pattern = r"https?://(?:www\.)?turbo(?:vid)?\.cr(/(embe)?(v)?d/([^/?#]+))"
+    pattern = BASE_PATTERN + r"(/(embe)?[dv]/([^/?#]+))"
     example = "https://turbo.cr/embed/ID"
 
     def items(self):
