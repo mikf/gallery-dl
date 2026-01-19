@@ -1915,6 +1915,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Forums, Media Categories, Media Files, User Media, Posts, Threads</td>
     <td></td>
 </tr>
+<tr id="celebforum" title="celebforum">
+    <td>celebforum</td>
+    <td>https://celebforum.to/</td>
+    <td>Forums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td></td>
+</tr>
 
 <tr id="moebooru" title="moebooru">
     <td colspan="4"><strong>Moebooru and MyImouto</strong></td>

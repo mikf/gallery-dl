@@ -374,6 +374,10 @@ BASE_PATTERN = XenforoExtractor.update({
         "root": "https://allthefallen.moe/forum",
         "pattern": r"(?:www\.)?allthefallen\.moe/forum",
     },
+    "celebforum": {
+        "root": "https://celebforum.to",
+        "pattern": r"(?:www\.)?celebforum\.to",
+    },
 })
 
 

@@ -42,6 +42,7 @@ CATEGORY_MAP = {
     "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
     "booth"          : "BOOTH",
+    "celebforum"     : "celebforum",
     "cfake"          : "Celebrity Fakes",
     "cien"           : "Ci-en",
     "cohost"         : "cohost!",
