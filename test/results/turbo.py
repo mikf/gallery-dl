@@ -103,7 +103,7 @@ __tests__ = (
 
 {
     "#url"     : "https://turbovid.cr/embed/WkD7hRaHdBpBI",
-    "#comment" : "'turbovid' URL/video",
+    "#comment" : "'turbovid' URL",
     "#category": ("lolisafe", "turbo", "media"),
     "#class"   : turbo.TurboMediaExtractor,
     "#pattern" : r"https://dl\d+.turbocdn.st/data/\w+.mp4",
@@ -117,7 +117,15 @@ __tests__ = (
 
 {
     "#url"     : "https://saint2.su/embed/WkD7hRaHdBpBI",
-    "#comment" : "'saint' URL/video",
+    "#comment" : "'saint' URL",
+    "#category": ("lolisafe", "turbo", "media"),
+    "#class"   : turbo.TurboMediaExtractor,
+},
+
+{
+    "#url"     : "https://turbo.cr/v/6lC7mKrJst8",
+    "#comment" : "'/v/' URL",
+    "#category": ("lolisafe", "turbo", "media"),
     "#class"   : turbo.TurboMediaExtractor,
 },
 
