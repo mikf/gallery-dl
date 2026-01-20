@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -14,7 +14,7 @@ import argparse
 import json
 import util
 from pyprint import pyprint
-from gallery_dl import extractor, job, config
+from gallery_dl import extractor, job, config, exception
 
 LOG = logging.getLogger("gen-test")
 
@@ -122,7 +122,10 @@ def generate_opts(args, urls, meta=(), exc=None, log=None):
         opts["#range"] = args.range
 
     if exc:
-        opts["#exception"] = exc.__class__
+        if isinstance(exc, exception.GalleryDLException):
+            opts["#exception"] = exc.__class__.__name__
+        else:
+            opts["#exception"] = exc.__class__
     elif not urls:
         opts["#count"] = 0
     elif len(urls) == 1:
