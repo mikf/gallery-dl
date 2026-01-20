@@ -460,7 +460,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
 
 class KemonoDiscordServerExtractor(KemonoExtractor):
     subcategory = "discord-server"
-    pattern = BASE_PATTERN + r"/discord/server/(\d+)$"
+    pattern = BASE_PATTERN + r"/discord/server/(\d+)"
     example = "https://kemono.cr/discord/server/12345"
 
     def items(self):

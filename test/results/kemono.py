@@ -683,6 +683,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.cr/discord/server/488668827274444803/",
+    "#class"   : kemono.KemonoDiscordServerExtractor,
+},
+
+{
     "#url"     : "https://kemono.cr/posts?q=foobar",
     "#category": ("", "kemono", "posts"),
     "#class"   : kemono.KemonoPostsExtractor,
