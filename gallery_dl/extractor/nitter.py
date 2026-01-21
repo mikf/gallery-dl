@@ -229,6 +229,26 @@ class NitterExtractor(BaseExtractor):
 
 
 BASE_PATTERN = NitterExtractor.update({
+    "nitter.net": {
+        "root": "https://nitter.net",
+        "pattern": r"(?:www\.)?nitter\.net",
+    },
+    "nitter.space": {
+        "root": "https://nitter.space",
+        "pattern": r"(?:www\.)?nitter\.space",
+    },
+    "nitter.tiekoetter": {
+        "root": "https://nitter.tiekoetter",
+        "pattern": r"(?:www\.)?nitter\.tiekoetter\.com",
+    },
+    "xcancel": {
+        "root": "https://xcancel.com",
+        "pattern": r"(?:www\.)?xcancel\.com",
+    },
+    "lightbrd": {
+        "root": "https://lightbrd.com",
+        "pattern": r"(?:www\.)?lightbrd\.com",
+    },
 })
 
 USER_PATTERN = BASE_PATTERN + r"/(i(?:/user/|d:)(\d+)|[^/?#]+)"
