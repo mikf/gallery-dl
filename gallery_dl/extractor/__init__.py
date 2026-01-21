@@ -31,7 +31,6 @@ modules = [
     "artstation",
     "aryion",
     "audiochan",
-    "batoto",
     "bbc",
     "behance",
     "bellazon",

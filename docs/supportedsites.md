@@ -127,12 +127,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Audios, Collections, Search Results, User Profiles</td>
     <td></td>
 </tr>
-<tr id="batoto" title="batoto">
-    <td>BATO.TO</td>
-    <td>https://bato.to/</td>
-    <td>Chapters, Manga</td>
-    <td></td>
-</tr>
 <tr id="bbc" title="bbc">
     <td>BBC</td>
     <td>https://bbc.co.uk/</td>
