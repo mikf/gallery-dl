@@ -451,11 +451,16 @@ class KemonoDiscordExtractor(KemonoExtractor):
                 post["type"] = file["type"]
                 url = file["path"]
 
-                text.nameext_from_url(file.get("name", url), post)
-                if not post["extension"]:
-                    post["extension"] = text.ext_from_url(url)
+                if name := file.get("name"):
+                    text.nameext_from_name(name, post)
+                    ext = text.ext_from_url(url)
+                    if not post["extension"]:
+                        post["extension"] = ext
+                else:
+                    text.nameext_from_url(url, post)
+                    ext = post["extension"]
 
-                if post["extension"] in exts_archive:
+                if ext in exts_archive:
                     if not post_archives:
                         post["archives"] = post_archives = []
                     post["type"] = "archive"
