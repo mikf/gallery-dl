@@ -485,6 +485,8 @@ class Extractor():
                 headers["User-Agent"] = util.USERAGENT_CHROME
             elif custom_ua in {"gallery-dl", "gallerydl", "gdl"}:
                 headers["User-Agent"] = util.USERAGENT_GALLERYDL
+            elif custom_ua in {"google-bot", "googlebot", "bot"}:
+                headers["User-Agent"] = "Googlebot-Image/1.0"
             else:
                 self.log.warning(
                     "Unsupported User-Agent preset '%s'", custom_ua)
