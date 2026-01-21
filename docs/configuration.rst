@@ -514,6 +514,7 @@ Default
         ``hdoujin``         |
         ``itaku``           |
         ``newgrounds``      |
+        ``[nitter]``        |
         ``[philomena]``     |
         ``pixiv-novel``     |
         ``plurk``           |
@@ -802,6 +803,7 @@ Default
     ``"gallery-dl/VERSION"``
         * ``[Danbooru]``
         * ``mangadex``
+        * ``[nitter]``
         * ``weasyl``
         * ``[wikimedia]``
         * ``zerochan``
@@ -4487,8 +4489,8 @@ Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
-extractor.nitter.quoted
------------------------
+extractor.[nitter].quoted
+-------------------------
 Type
     ``bool``
 Default
@@ -4497,8 +4499,8 @@ Description
     Fetch media from quoted Tweets.
 
 
-extractor.nitter.retweets
--------------------------
+extractor.[nitter].retweets
+---------------------------
 Type
     ``bool``
 Default
@@ -4507,8 +4509,8 @@ Description
     Fetch media from Retweets.
 
 
-extractor.nitter.videos
------------------------
+extractor.[nitter].videos
+-------------------------
 Type
     * ``bool``
     * ``string``

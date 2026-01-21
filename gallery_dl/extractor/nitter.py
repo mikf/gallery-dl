@@ -9,16 +9,18 @@
 """Extractors for Nitter instances"""
 
 from .common import BaseExtractor, Message
-from .. import text
+from .. import text, util
 import binascii
 
 
 class NitterExtractor(BaseExtractor):
     """Base class for nitter extractors"""
     basecategory = "nitter"
-    directory_fmt = ("{category}", "{user[name]}")
+    directory_fmt = ("nitter", "{user[name]}")
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{num}"
+    useragent = util.USERAGENT_GALLERYDL
+    request_interval = (0.5, 1.5)
 
     def __init__(self, match):
         self.cookies_domain = self.root.partition("://")[2]
@@ -271,7 +273,7 @@ class NitterSearchExtractor(NitterExtractor):
 class NitterTweetExtractor(NitterExtractor):
     """Extractor for nitter tweets"""
     subcategory = "tweet"
-    directory_fmt = ("{category}", "{user[name]}")
+    directory_fmt = ("nitter", "{user[name]}")
     filename_fmt = "{tweet_id}_{num}.{extension}"
     archive_fmt = "{tweet_id}_{num}"
     pattern = BASE_PATTERN + r"/(i/web|[^/?#]+)/status/(\d+())"
