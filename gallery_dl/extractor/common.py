@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2025 Mike Fährmann
+# Copyright 2014-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -39,8 +39,10 @@ class Extractor():
     archive_fmt = ""
     status = 0
     root = ""
-    cookies_domain = ""
+    cookies_file = ""
     cookies_index = 0
+    cookies_domain = ""
+    session = None
     referer = True
     ciphers = None
     tls12 = True
@@ -85,8 +87,15 @@ class Extractor():
 
     def initialize(self):
         self._init_options()
-        self._init_session()
-        self._init_cookies()
+
+        if self.session is None:
+            self._init_session()
+            self.cookies = self.session.cookies
+            if self.cookies_domain is not None:
+                self._init_cookies()
+        else:
+            self.cookies = self.session.cookies
+
         self._init()
         self.initialize = util.noop
 
@@ -541,11 +550,6 @@ class Extractor():
 
     def _init_cookies(self):
         """Populate the session's cookiejar"""
-        self.cookies = self.session.cookies
-        self.cookies_file = None
-        if self.cookies_domain is None:
-            return
-
         if cookies := self.config("cookies"):
             if select := self.config("cookies-select"):
                 if select == "rotate":
