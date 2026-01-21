@@ -830,7 +830,11 @@ Description
       will use the latest ``User-Agent`` header of this preset target,
       e.g. ``"+ff"``.
     | (Supported values:
-      ``firefox`` | ``ff`` | ``chrome`` | ``cr`` | ``gallery-dl`` | ``gdl``)
+      ``firefox`` | ``ff`` |
+      ``chrome`` | ``cr`` |
+      ``gallery-dl`` | ``gdl`` |
+      ``google-bot`` | ``bot``
+      )
 
     | Starting this value with an ``@``
      will try to automatically detect and use the ``User-Agent`` header
