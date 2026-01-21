@@ -1657,9 +1657,33 @@ Consider all listed sites to potentially be NSFW.
 <tr id="nitter" title="nitter">
     <td colspan="4"><strong>Nitter Instances</strong></td>
 </tr>
-<tr id="" title="">
+<tr id="nitter.net" title="nitter.net">
+    <td>Nitter.net</td>
+    <td>https://nitter.net/</td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
+</tr>
+<tr id="nitter.space" title="nitter.space">
+    <td>Nitter.space</td>
+    <td>https://nitter.space/</td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
+</tr>
+<tr id="nitter.tiekoetter" title="nitter.tiekoetter">
+    <td>Nitter.tiekoetter</td>
+    <td>https://nitter.tiekoetter/</td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
+    <td></td>
+</tr>
+<tr id="xcancel" title="xcancel">
+    <td>Xcancel</td>
+    <td>https://xcancel.com/</td>
+    <td>Media Files, Replies, Search Results, Tweets</td>
+    <td></td>
+</tr>
+<tr id="lightbrd" title="lightbrd">
+    <td>Lightbrd</td>
+    <td>https://lightbrd.com/</td>
     <td>Media Files, Replies, Search Results, Tweets</td>
     <td></td>
 </tr>
