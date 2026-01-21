@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2025 Mike Fährmann
+# Copyright 2015-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -458,6 +458,9 @@ class DownloadJob(Job):
                         job.kwdict.update(self.kwdict)
                     if kwdict:
                         job.kwdict.update(kwdict)
+
+            if pextr.config("parent-session", pextr.parent):
+                extr.session = pextr.session
 
             while True:
                 try:

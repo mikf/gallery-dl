@@ -251,6 +251,25 @@ Description
         }
 
 
+extractor.*.parent-session
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+        ``[chevereto]`` |
+        ``[imagehost]``
+    ``false``
+        otherwise
+Description
+    Share a parent's
+    `session <https://requests.readthedocs.io/en/latest/user/advanced/#session-objects>`__
+    with its child extractors, including
+    `cookies <extractor.*.cookies_>`__,
+    `headers <extractor.*.headers_>`__,
+    and other networking settings.
+
+
 extractor.*.parent-skip
 -----------------------
 Type
