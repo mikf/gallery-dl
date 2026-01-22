@@ -107,13 +107,13 @@ class XenforoExtractor(BaseExtractor):
                         url = base + url
                     yield Message.Url, url, data
 
-    def items_media(self, path, pnum):
+    def items_media(self, path, pnum, callback=None):
         if (order := self.config("order-posts")) and \
                 order[0] in ("d", "r"):
-            pages = self._pagination_reverse(path, pnum)
+            pages = self._pagination_reverse(path, pnum, callback)
             reverse = True
         else:
-            pages = self._pagination(path, pnum)
+            pages = self._pagination(path, pnum, callback)
             reverse = False
 
         if self.config("metadata"):
@@ -186,7 +186,7 @@ class XenforoExtractor(BaseExtractor):
             if cookie.domain.endswith(self.cookies_domain)
         }
 
-    def _pagination(self, base, pnum=None):
+    def _pagination(self, base, pnum=None, callback=None):
         base = self.root + base
 
         if pnum is None:
@@ -196,17 +196,18 @@ class XenforoExtractor(BaseExtractor):
             url = f"{base}/page-{pnum}"
             pnum = None
 
+        page = self.request_page(url).text
+        if callback is not None:
+            callback(page)
         while True:
-            page = self.request_page(url).text
-
             yield page
 
             if pnum is None or "pageNav-jump--next" not in page:
                 return
             pnum += 1
-            url = f"{base}/page-{pnum}"
+            page = self.request_page(f"{base}/page-{pnum}").text
 
-    def _pagination_reverse(self, base, pnum=None):
+    def _pagination_reverse(self, base, pnum=None, callback=None):
         base = self.root + base
 
         url = f"{base}/page-{'9999' if pnum is None else pnum}"
@@ -220,6 +221,8 @@ class XenforoExtractor(BaseExtractor):
                 pnum = text.parse_int(url[url.rfind("-")+1:], 1)
             page = response.text
 
+        if callback is not None:
+            callback(page)
         while True:
             yield page
 
@@ -236,46 +239,6 @@ class XenforoExtractor(BaseExtractor):
     def _extract_error(self, html):
         return text.unescape(text.extr(
             html, "blockMessage--error", "</").rpartition(">")[2].strip())
-
-    def _parse_thread(self, page):
-        try:
-            data = self._extract_jsonld(page)
-        except ValueError:
-            return {}
-
-        schema = data.get("mainEntity", data)
-        author = schema["author"]
-        stats = schema["interactionStatistic"]
-        url_t = schema.get("url") or schema.get("@id") or ""
-
-        thread = {
-            "id"   : url_t[url_t.rfind(".")+1:-1],
-            "url"  : url_t,
-            "title": schema["headline"],
-            "date" : self.parse_datetime_iso(schema["datePublished"]),
-            "tags" : (schema["keywords"].split(", ")
-                      if "keywords" in schema else ()),
-            "section": schema["articleSection"],
-            "author" : author.get("name") or "",
-        }
-
-        if url_a := author.get("url"):
-            thread["author_url"] = url_a
-            thread["author_slug"], _, thread["author_id"] = \
-                url_a[url_a.rfind("/", 0, -1)+1:-1].rpartition(".")
-        else:
-            thread["author_url"] = ""
-            thread["author_slug"] = text.slugify(thread["author"][:15])
-            thread["author_id"] = thread["author"][15:]
-
-        if isinstance(stats, list):
-            thread["views"] = stats[0]["userInteractionCount"]
-            thread["posts"] = stats[1]["userInteractionCount"]
-        else:
-            thread["views"] = -1
-            thread["posts"] = stats["userInteractionCount"]
-
-        return thread
 
     def _parse_post(self, html):
         extr = text.extract_from(html)
@@ -303,6 +266,70 @@ class XenforoExtractor(BaseExtractor):
 
         return post
 
+    def _parse_thread(self, page):
+        try:
+            data = self._extract_jsonld(page)
+        except ValueError:
+            return {}
+
+        main = data.get("mainEntity", data)
+        url = main.get("url") or main.get("@id") or ""
+
+        self.kwdict["thread"] = thread = self._parse_author(main["author"], {
+            "id"   : url[url.rfind(".")+1:-1],
+            "url"  : url,
+            "title": main["headline"],
+            "date" : self.parse_datetime_iso(main["datePublished"]),
+            "tags" : (main["keywords"].split(", ")
+                      if "keywords" in main else ()),
+            "section": main["articleSection"],
+        })
+
+        stats = main["interactionStatistic"]
+        if isinstance(stats, list):
+            thread["views"] = stats[0]["userInteractionCount"]
+            thread["posts"] = stats[1]["userInteractionCount"]
+        else:
+            thread["views"] = -1
+            thread["posts"] = stats["userInteractionCount"]
+
+        return thread
+
+    def _parse_album(self, page):
+        main = self._extract_jsonld(page)["mainEntity"]
+        url = main.get("url") or main.get("@id") or ""
+        slug, _, id = url[url.rfind("/", 0, -1)+1:-1].rpartition(".")
+
+        self.kwdict["album"] = album = self._parse_author(main["author"], {
+            "id"   : id,
+            "url"  : url,
+            "slug" : text.unquote(slug),
+            "title": main["headline"],
+            "description": main.get("description"),
+            "date": self.parse_datetime_iso(main["dateCreated"]),
+        })
+
+        stats = main["interactionStatistic"]
+        if isinstance(stats, list):
+            album["count"] = stats[0]["userInteractionCount"]
+            album["likes"] = stats[1]["userInteractionCount"]
+            album["views"] = stats[2]["userInteractionCount"]
+            album["comments"] = stats[3]["userInteractionCount"]
+
+        return album
+
+    def _parse_author(self, author, data):
+        data["author"] = author.get("name") or ""
+        if url := author.get("url"):
+            data["author_url"] = url
+            data["author_slug"], _, data["author_id"] = \
+                url[url.rfind("/", 0, -1)+1:-1].rpartition(".")
+        else:
+            data["author_url"] = ""
+            data["author_slug"] = text.slugify(data["author"][:15])
+            data["author_id"] = data["author"][15:]
+        return data
+
     def _extract_media(self, url, file):
         media = {}
         name, _, media["id"] = file.rpartition(".")
@@ -314,7 +341,6 @@ class XenforoExtractor(BaseExtractor):
 
         schema = self._extract_jsonld(page)
         main = schema["mainEntity"]
-        author = main["author"]
         stats = main["interactionStatistic"]
 
         media = text.nameext_from_name(main["name"], {
@@ -327,18 +353,9 @@ class XenforoExtractor(BaseExtractor):
                 w["name"].partition(" ")[0]) or 0,
             "height": (h := main.get("height")) and text.parse_int(
                 h["name"].partition(" ")[0]) or 0,
-            "author": author.get("name") or "",
         })
 
-        if url_a := author.get("url"):
-            media["author_url"] = url_a
-            media["author_slug"], _, media["author_id"] = \
-                url_a[url_a.rfind("/", 0, -1)+1:-1].rpartition(".")
-        else:
-            media["author_url"] = ""
-            media["author_slug"] = text.slugify(media["author"][15:])
-            media["author_id"] = media["author"][15:]
-
+        self._parse_author(main["author"], media)
         if ext := main.get("encodingFormat"):
             media["extension"] = ext
 
@@ -398,7 +415,7 @@ class XenforoPostExtractor(XenforoExtractor):
             raise exception.NotFoundError("post")
         html = text.extract(page, "<article ", "<footer", pos-200)[0]
 
-        self.kwdict["thread"] = self._parse_thread(page)
+        self._parse_thread(page)
         return (self._parse_post(html),)
 
 
@@ -422,7 +439,7 @@ class XenforoThreadExtractor(XenforoExtractor):
 
         for page in pages:
             if "thread" not in self.kwdict:
-                self.kwdict["thread"] = self._parse_thread(page)
+                self._parse_thread(page)
             posts = text.extract_iter(page, "<article ", "<footer")
             if reverse:
                 posts = list(posts)
@@ -479,7 +496,7 @@ class XenforoMediaUserExtractor(XenforoExtractor):
 class XenforoMediaAlbumExtractor(XenforoExtractor):
     subcategory = "media-album"
     directory_fmt = ("{category}", "Media", "Albums",
-                     "{album_slug} ({album_id})")
+                     "{album[slug]} ({album[id]})")
     filename_fmt = "{filename}.{extension}"
     archive_fmt = "{id}"
     pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?"
@@ -487,9 +504,8 @@ class XenforoMediaAlbumExtractor(XenforoExtractor):
     example = "https://simpcity.cr/media/albums/ALBUM.123/"
 
     def items(self):
-        slug, _, self.kwdict["album_id"] = self.groups[-2].rpartition(".")
-        self.kwdict["album_slug"] = text.unquote(slug)
-        return self.items_media(self.groups[-3], self.groups[-1])
+        return self.items_media(
+            self.groups[-3], self.groups[-1], self._parse_album)
 
 
 class XenforoMediaCategoryExtractor(XenforoExtractor):
