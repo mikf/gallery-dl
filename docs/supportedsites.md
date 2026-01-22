@@ -1912,25 +1912,25 @@ Consider all listed sites to potentially be NSFW.
 <tr id="simpcity" title="simpcity">
     <td>SimpCity Forums</td>
     <td>https://simpcity.cr/</td>
-    <td>Forums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
     <td>Supported</td>
 </tr>
 <tr id="nudostarforum" title="nudostarforum">
     <td>NudoStar Forums</td>
     <td>https://nudostar.com/forum/</td>
-    <td>Forums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
     <td>Supported</td>
 </tr>
 <tr id="atfforum" title="atfforum">
     <td>All The Fallen</td>
     <td>https://allthefallen.moe/forum/</td>
-    <td>Forums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
     <td></td>
 </tr>
 <tr id="celebforum" title="celebforum">
     <td>celebforum</td>
     <td>https://celebforum.to/</td>
-    <td>Forums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
     <td></td>
 </tr>
 

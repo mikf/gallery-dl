@@ -154,4 +154,10 @@ __tests__ = (
     "#class"   : xenforo.XenforoMediaCategoryExtractor,
 },
 
+{
+    "#url"     : "https://allthefallen.moe/forum/index.php?media/albums/2-%E9%AD%94%E6%B3%95%E5%B0%91%E5%A5%B3%E3%81%AB%E3%81%82%E3%81%93%E3%81%8C%E3%82%8C%E3%81%A6-mahou-shoujo-ni-akogarete.7385/",
+    "#category": ("xenforo", "atfforum", "media-album"),
+    "#class"   : xenforo.XenforoMediaAlbumExtractor,
+},
+
 )

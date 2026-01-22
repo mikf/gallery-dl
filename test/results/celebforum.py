@@ -99,4 +99,10 @@ __tests__ = (
     "#count"   : 50,
 },
 
+{
+    "#url"     : "https://celebforum.to/media/albums/5404/",
+    "#category": ("xenforo", "celebforum", "media-album"),
+    "#class"   : xenforo.XenforoMediaAlbumExtractor,
+},
+
 )
