@@ -476,6 +476,22 @@ class XenforoMediaUserExtractor(XenforoExtractor):
         return self.items_media(f"{groups[-4]}media/users/{user}", pnum)
 
 
+class XenforoMediaAlbumExtractor(XenforoExtractor):
+    subcategory = "media-album"
+    directory_fmt = ("{category}", "Media", "Albums",
+                     "{album_slug} ({album_id})")
+    filename_fmt = "{filename}.{extension}"
+    archive_fmt = "{id}"
+    pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?"
+               r"media/albums/([^/?#]+))(?:/page-(\d+))?")
+    example = "https://simpcity.cr/media/albums/ALBUM.123/"
+
+    def items(self):
+        slug, _, self.kwdict["album_id"] = self.groups[-2].rpartition(".")
+        self.kwdict["album_slug"] = text.unquote(slug)
+        return self.items_media(self.groups[-3], self.groups[-1])
+
+
 class XenforoMediaCategoryExtractor(XenforoExtractor):
     subcategory = "media-category"
     directory_fmt = ("{category}", "Media", "Category", "{mcategory}")
