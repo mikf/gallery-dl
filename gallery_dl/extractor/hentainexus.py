@@ -99,23 +99,23 @@ class HentainexusGalleryExtractor(GalleryExtractor):
         k = primes[C & 0x7]
 
         x = 0
+        L = len(key)
         S = list(range(256))
         for i in range(256):
-            x = (x + S[i] + key[i % len(key)]) % 256
+            x = (x + S[i] + key[i % L]) & 255
             S[i], S[x] = S[x], S[i]
 
-        result = ""
+        result = []
         a = c = m = x = 0
         for n in range(64, len(blob)):
-            a = (a + k) % 256
-            x = (c + S[(x + S[a]) % 256]) % 256
-            c = (c + a + S[a]) % 256
+            a = (a + k) & 255
+            x = (c + S[(x + S[a]) & 255]) & 255
+            c = (c + a + S[a]) & 255
 
             S[a], S[x] = S[x], S[a]
-            m = S[(x + S[(a + S[(m + c) % 256]) % 256]) % 256]
-            result += chr(blob[n] ^ m)
-
-        return result
+            m = S[(x + S[(a + S[(m + c) & 255]) & 255]) & 255]
+            result.append(chr(blob[n] ^ m))
+        return "".join(result)
 
     def _join_title(self, data):
         event = data['event']
