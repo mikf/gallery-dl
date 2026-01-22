@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"     : "https://mangafire.to/read/moto-saikyou-yuusha-no-saishuushoku.qzq9j/en/chapter-4",
     "#class"   : mangafire.MangafireChapterExtractor,
-    "#pattern" : r"https://s3\.mfcdn2\.xyz/\w+/h/p\.jpg",
+    "#pattern" : r"https://20l\.mfcdn2\.xyz/mf/\w+/h/p\.jpg",
     "#count"   : 37,
 
     "chapter"       : 4,
@@ -30,7 +30,7 @@ __tests__ = (
     "manga_slug"    : "moto-saikyou-yuusha-no-saishuushoku",
     "published"     : "Mar 31, 2022 to ?",
     "publisher"     : ["Wild Hero's"],
-    "score"         : 9.0,
+    "score"         : float,
     "status"        : "Releasing",
     "title"         : "The Former Strongest Hero Makes a Choice",
     "type"          : "Manga",
@@ -54,7 +54,7 @@ __tests__ = (
 {
     "#url"     : "https://mangafire.to/read/munou-wa-fuyou-to-iware-tokei-tsukai-no-boku-wa-shokuin-guild-kara-oidasareru-mo-dungeon-no-shinbu-de-shin-no-chikara-ni-kakusei-suru-the-comic.6wmv9/en/chapter-14.1",
     "#class"   : mangafire.MangafireChapterExtractor,
-    "#pattern" : r"https://s\d\.mfcdn\d\.xyz/\w+/h/p\.jpg",
+    "#pattern" : r"https://\w+\.mfcdn\d\.xyz/mf/\w+/h/p\.jpg",
     "#count"   : 13,
 
     "chapter"       : 14,
@@ -73,7 +73,7 @@ __tests__ = (
     "manga_slug"    : "munou-wa-fuyou-to-iware-tokei-tsukai-no-boku-wa-shokuin-guild-kara-oidasareru-mo-dungeon-no-shinbu-de-shin-no-chikara-ni-kakusei-suru-the-comic",
     "published"     : "Feb 27, 2023 to ?",
     "publisher"     : ["Comic Ride"],
-    "score"         : 9.0,
+    "score"         : range(5, 10),
     "status"        : "Releasing",
     "title"         : "Part 1 - Karim's Purpose",
     "type"          : "Manga",
@@ -96,7 +96,7 @@ __tests__ = (
     "#url"     : "https://mangafire.to/read/munou-wa-fuyou-to-iware-tokei-tsukai-no-boku-wa-shokuin-guild-kara-oidasareru-mo-dungeon-no-shinbu-de-shin-no-chikara-ni-kakusei-suru-the-comic.6wmv9/en/volume-2",
     "#comment" : "volume",
     "#class"   : mangafire.MangafireChapterExtractor,
-    "#pattern" : r"https://s\d\.mfcdn\d\.xyz/\w+/h/p\.jpg",
+    "#pattern" : r"https://\w+\.mfcdn\d\.xyz/mf/\w+/h/p\.jpg",
     "#count"   : 154,
 
     "volume"        : 2,
@@ -111,7 +111,7 @@ __tests__ = (
     "#url"     : "https://mangafire.to/manga/my-noble-family-is-headed-for-ruin-so-i-may-as-well-study-magic-in-my-free-timee.xjj0w",
     "#class"   : mangafire.MangafireMangaExtractor,
     "#pattern" : mangafire.MangafireChapterExtractor.pattern,
-    "#count"   : 31,
+    "#count"   : range(40, 60),
 
     "chapter"       : range(1, 30),
     "chapter_id"    : int,
@@ -156,7 +156,7 @@ __tests__ = (
     "#url"     : "https://mangafire.to/manga/regressing-as-the-reincarnated-bastard-of-the-sword-clann.90vp0",
     "#class"   : mangafire.MangafireMangaExtractor,
     "#pattern" : mangafire.MangafireChapterExtractor.pattern,
-    "#count"   : 62,
+    "#count"   : range(70, 120),
 
     "author"        : (),
     "chapter"       : int,
@@ -171,7 +171,7 @@ __tests__ = (
     "manga_slug"    : "regressing-as-the-reincarnated-bastard-of-the-sword-clann",
     "published"     : "2024 to ?",
     "publisher"     : (),
-    "score"         : 9.0,
+    "score"         : range(8, 10),
     "status"        : "Releasing",
     "title"         : "",
     "type"          : "Manhwa",
