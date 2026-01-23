@@ -70,14 +70,13 @@ class TiktokExtractor(Extractor):
                         url = img["imageURL"]["urlList"][0]
                         text.nameext_from_url(url, post)
                         post.update({
-                            "_fallback" : [],
-                            "type"      : "image",
-                            "image"     : img,
-                            "title"     : title,
-                            "num"       : i,
-                            "file_id"   : post["filename"].partition("~")[0],
-                            "width"     : img["imageWidth"],
-                            "height"    : img["imageHeight"],
+                            "type"  : "image",
+                            "image" : img,
+                            "title" : title,
+                            "num"   : i,
+                            "file_id": post["filename"].partition("~")[0],
+                            "width" : img["imageWidth"],
+                            "height": img["imageHeight"],
                         })
                         yield Message.Url, url, post
 
@@ -103,7 +102,6 @@ class TiktokExtractor(Extractor):
                 if not original_title:
                     title = f"TikTok {ytdl_media} #{post['id']}"
                 post.update({
-                    "_fallback" : [],
                     "type"      : ytdl_media,
                     "image"     : None,
                     "filename"  : "",
@@ -222,18 +220,15 @@ class TiktokExtractor(Extractor):
         url = urls[0]
         text.nameext_from_url(url, post)
         post.update({
-            "_fallback" : urls[1:],
-            "type"      : "video",
-            "image"     : None,
-            "title"     : post["desc"] or f"TikTok video #{post['id']}",
-            "duration"  : video.get("duration"),
-            "num"       : 0,
-            "img_id"    : "",
-            "audio_id"  : "",
-            "cover_id"  : "",
-            "file_id"   : video.get("id"),
-            "width"     : video.get("width"),
-            "height"    : video.get("height"),
+            "_fallback": urls[1:],
+            "type"     : "video",
+            "image"    : None,
+            "title"    : post["desc"] or f"TikTok video #{post['id']}",
+            "duration" : video.get("duration"),
+            "num"      : 0,
+            "file_id"  : video.get("id"),
+            "width"    : video.get("width"),
+            "height"   : video.get("height"),
         })
         if not post["extension"]:
             post["extension"] = video.get("format", "mp4")
@@ -272,15 +267,14 @@ class TiktokExtractor(Extractor):
         url = audio["playUrl"]
         text.nameext_from_url(url, post)
         post.update({
-            "_fallback" : [],
-            "type"      : "audio",
-            "image"     : None,
-            "title"     : post["desc"] or f"TikTok audio #{post['id']}",
-            "duration"  : audio.get("duration"),
-            "num"       : 0,
-            "file_id"   : audio.get("id"),
-            "width"     : 0,
-            "height"    : 0,
+            "type"     : "audio",
+            "image"    : None,
+            "title"    : post["desc"] or f"TikTok audio #{post['id']}",
+            "duration" : audio.get("duration"),
+            "num"      : 0,
+            "file_id"  : audio.get("id"),
+            "width"    : 0,
+            "height"   : 0,
         })
         if not post["extension"]:
             post["extension"] = "mp3"
@@ -297,16 +291,15 @@ class TiktokExtractor(Extractor):
 
         text.nameext_from_url(url, post)
         post.update({
-            "_fallback" : [],
-            "type"      : "cover",
-            "extension" : "jpg",
-            "image"     : url,
-            "title"     : post["desc"] or f"TikTok {type} cover #{post['id']}",
-            "duration"  : media.get("duration"),
-            "num"       : 0,
-            "file_id"   : cover_id,
-            "width"     : 0,
-            "height"    : 0,
+            "type"     : "cover",
+            "extension": "jpg",
+            "image"    : url,
+            "title"    : post["desc"] or f"TikTok {type} cover #{post['id']}",
+            "duration" : media.get("duration"),
+            "num"      : 0,
+            "file_id"  : cover_id,
+            "width"    : 0,
+            "height"   : 0,
         })
         return url
 
@@ -424,12 +417,11 @@ class TiktokAvatarExtractor(TiktokExtractor):
             or data["avatarThumb"]
         avatar = text.nameext_from_url(avatar_url, data.copy())
         avatar.update({
-            "_fallback" : [],
-            "type"      : "avatar",
-            "title"     : "@" + data["user"],
-            "id"        : data["id"],
-            "file_id"   : avatar["filename"].partition("~")[0],
-            "num"       : 0,
+            "type"   : "avatar",
+            "title"  : "@" + data["user"],
+            "id"     : data["id"],
+            "file_id": avatar["filename"].partition("~")[0],
+            "num"    : 0,
         })
 
         yield Message.Directory, "", avatar
