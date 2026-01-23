@@ -113,6 +113,7 @@ CATEGORY_MAP = {
     "itchio"         : "itch.io",
     "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
+    "kaliscan"       : "KaliScan",
     "mangafire"      : "MangaFire",
     "mangareader"    : "MangaReader",
     "mangataro"      : "MangaTaro",
