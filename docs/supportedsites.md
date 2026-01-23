@@ -661,6 +661,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
+<tr id="mangalib" title="mangalib">
+    <td>MangaLib</td>
+    <td>https://mangalib.me/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
 <tr id="mangapark" title="mangapark">
     <td>MangaPark</td>
     <td>https://mangapark.net/</td>
