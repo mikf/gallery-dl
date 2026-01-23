@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
-#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
@@ -22,17 +20,17 @@ class KaliscanBase():
 
     @memcache(keyarg=1)
     def manga_data(self, manga_slug, page=None):
-        if not page:
-            url = "{}/manga/{}".format(self.root, manga_slug)
+        if page is None:
+            url = f"{self.root}/manga/{manga_slug}"
             page = self.request(url).text
         extr = text.extract_from(page)
 
+        manga_id = text.parse_int(extr("bookId =", ";"))
         title = text.unescape(extr("<h1>", "<"))
-        alt_titles = extr("<h2>", "<")
-        alt_titles = (
-            [t.strip() for t in alt_titles.split(",")]
-            if alt_titles else []
-        )
+        if alt_titles := extr("<h2>", "<"):
+            alt_titles = [t.strip() for t in alt_titles.split(",")]
+        else:
+            alt_titles = ()
 
         author = text.remove_html(extr(
             "Authors :</strong>", "</p>"))
@@ -41,13 +39,10 @@ class KaliscanBase():
         genres = [g.strip(" ,") for g in text.split_html(extr(
             "Genres :</strong>", "</p>"))]
 
-        desc_html = extr('class="content"', '<div class="readmore"')
-        description = (
-            text.remove_html(desc_html.partition(">")[2]).strip()
-            if desc_html else ""
-        )
-
-        manga_id = text.parse_int(text.extr(page, "bookId =", ";"))
+        if descr := extr('class="content"', '<div class="readmore"'):
+            descr = text.remove_html(descr[descr.find(">")+1:]).strip()
+        else:
+            descr = ""
 
         return {
             "manga"       : title,
@@ -57,7 +52,7 @@ class KaliscanBase():
             "author"      : author,
             "status"      : status,
             "genres"      : genres,
-            "description" : description,
+            "description" : descr,
             "lang"        : "en",
             "language"    : "English",
         }
@@ -67,10 +62,6 @@ class KaliscanChapterExtractor(KaliscanBase, ChapterExtractor):
     """Extractor for kaliscan manga chapters"""
     pattern = BASE_PATTERN + r"(/manga/([\w-]+)/chapter-([\d.]+))"
     example = "https://kaliscan.me/manga/ID-MANGA/chapter-1"
-
-    def __init__(self, match):
-        ChapterExtractor.__init__(self, match)
-        self.manga_slug = self.groups[1]
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -87,16 +78,16 @@ class KaliscanChapterExtractor(KaliscanBase, ChapterExtractor):
             "chapter"      : text.parse_int(chapter),
             "chapter_minor": sep + minor,
             "chapter_id"   : chapter_id,
+            **self.manga_data(self.groups[1]),
         }
-        data.update(self.manga_data(self.manga_slug))
-        if manga_id:
+        if manga_id and not data["manga_id"]:
             data["manga_id"] = manga_id
         return data
 
     def images(self, page):
         images_str = text.extr(page, 'var chapImages = "', '"')
         if not images_str:
-            return []
+            return ()
         return [
             (url, None)
             for url in (u.strip() for u in images_str.split(","))
@@ -110,16 +101,12 @@ class KaliscanMangaExtractor(KaliscanBase, MangaExtractor):
     pattern = BASE_PATTERN + r"(/manga/([\w-]+))/?$"
     example = "https://kaliscan.me/manga/ID-MANGA"
 
-    def __init__(self, match):
-        MangaExtractor.__init__(self, match)
-        self.manga_slug = self.groups[1]
-
     def chapters(self, page):
-        data = self.manga_data(self.manga_slug, page)
+        data = self.manga_data(self.groups[1], page)
 
         chapter_list = text.extr(page, 'id="chapter-list">', '</ul>')
         if not chapter_list:
-            return []
+            return ()
 
         results = []
         for li in text.extract_iter(chapter_list, "<li", "</li>"):
