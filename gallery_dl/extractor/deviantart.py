@@ -1277,7 +1277,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         else:
             url = f"{self.root}/view/{self.deviation_id}/"
 
-        page = self._limited_request(url, notfound="deviation").text
+        page = self._limited_request(url, notfound=True).text
         uuid = text.extr(page, '"deviationUuid\\":\\"', '\\')
         if not uuid:
             raise exception.NotFoundError("deviation")

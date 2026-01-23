@@ -282,7 +282,7 @@ class ArtstationCollectionExtractor(ArtstationExtractor):
         url = f"{self.root}/collections/{self.collection_id}.json"
         params = {"username": self.user}
         collection = self.request_json(
-            url, params=params, notfound="collection")
+            url, params=params, notfound=True)
         return {"collection": collection, "user": self.user}
 
     def projects(self):
@@ -303,7 +303,7 @@ class ArtstationCollectionsExtractor(ArtstationExtractor):
         params = {"username": self.user}
 
         for collection in self.request_json(
-                url, params=params, notfound="collections"):
+                url, params=params, notfound=True):
             url = f"{self.root}/{self.user}/collections/{collection['id']}"
             collection["_extractor"] = ArtstationCollectionExtractor
             yield Message.Queue, url, collection

@@ -42,6 +42,7 @@ CATEGORY_MAP = {
     "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
     "booth"          : "BOOTH",
+    "celebforum"     : "celebforum",
     "cfake"          : "Celebrity Fakes",
     "cien"           : "Ci-en",
     "cohost"         : "cohost!",
@@ -193,12 +194,13 @@ CATEGORY_MAP = {
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
     "thecollectionS" : "The /co/llection",
+    "thefap"         : "TheFap",
     "thehentaiworld" : "The Hentai World",
     "tiktok"         : "TikTok",
     "tmohentai"      : "TMOHentai",
     "tumblrgallery"  : "TumblrGallery",
     "turboimagehost" : "TurboImageHost.com",
-    "turbovid"       : "turbovid.cr",
+    "turbo"          : "turbo.cr",
     "vanillarock"    : "もえぴりあ",
     "vidyart2"       : "/v/idyart2",
     "vidyapics"      : "Vidya Booru",
@@ -266,6 +268,9 @@ SUBCATEGORY_MAP = {
     },
     "boosty": {
         "feed": "Subscriptions Feed",
+    },
+    "booth": {
+        "category": "Item Categories",
     },
     "cfake": {
         "created": "Created",
@@ -470,6 +475,7 @@ SUBCATEGORY_MAP = {
         "media-user": "User Media",
         "media-item": "Media Files",
         "media-category": "Media Categories",
+        "media-album"   : "Albums",
     },
 }
 
@@ -703,11 +709,6 @@ def build_extractor_list():
     # add wikifeetx.com
     default["wikifeetx"] = default["wikifeet"]
     domains["wikifeetx"] = "https://www.wikifeetx.com/"
-
-    # turbovid
-    default["turbovid"] = default["saint"]
-    domains["turbovid"] = "https://turbovid.cr/"
-    domains["saint"] = "https://saint2.su/"
 
     # imgdrive / imgtaxi / imgwallet
     base = categories["imagehost"]

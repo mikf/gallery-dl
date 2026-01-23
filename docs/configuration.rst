@@ -251,6 +251,25 @@ Description
         }
 
 
+extractor.*.parent-session
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+        ``[chevereto]`` |
+        ``[imagehost]``
+    ``false``
+        otherwise
+Description
+    Share a parent's
+    `session <https://requests.readthedocs.io/en/latest/user/advanced/#session-objects>`__
+    with its child extractors, including
+    `cookies <extractor.*.cookies_>`__,
+    `headers <extractor.*.headers_>`__,
+    and other networking settings.
+
+
 extractor.*.parent-skip
 -----------------------
 Type
@@ -514,6 +533,7 @@ Default
         ``hdoujin``         |
         ``itaku``           |
         ``newgrounds``      |
+        ``[nitter]``        |
         ``[philomena]``     |
         ``pixiv-novel``     |
         ``plurk``           |
@@ -802,6 +822,7 @@ Default
     ``"gallery-dl/VERSION"``
         * ``[Danbooru]``
         * ``mangadex``
+        * ``[nitter]``
         * ``weasyl``
         * ``[wikimedia]``
         * ``zerochan``
@@ -830,7 +851,11 @@ Description
       will use the latest ``User-Agent`` header of this preset target,
       e.g. ``"+ff"``.
     | (Supported values:
-      ``firefox`` | ``ff`` | ``chrome`` | ``cr`` | ``gallery-dl`` | ``gdl``)
+      ``firefox`` | ``ff`` |
+      ``chrome`` | ``cr`` |
+      ``gallery-dl`` | ``gdl`` |
+      ``google-bot`` | ``bot``
+      )
 
     | Starting this value with an ``@``
      will try to automatically detect and use the ``User-Agent`` header
@@ -1735,28 +1760,6 @@ Description
         Get posts from "Latest Updates" pages
 
 
-extractor.batoto.domain
------------------------
-Type
-    ``string``
-Default
-    ``"auto"``
-Example
-    ``"mangatoto.org"``
-Description
-    Specifies the domain used by ``batoto`` extractors.
-
-    ``"auto"`` | ``"url"``
-        Use the input URL's domain
-    ``"nolegacy"``
-        Use the input URL's domain
-        - replace legacy domains with ``"xbato.org"``
-    ``"nowarn"``
-        Use the input URL's domain
-        - do not warn about legacy domains
-    any ``string``
-        Use this domain
-
 
 extractor.bbc.width
 -------------------
@@ -2069,6 +2072,20 @@ Description
         Match URLs with *all* possible TLDs (e.g. ``bunkr.xyz`` or ``bunkrrr.duck``)
     ``false``
         Match only URLs with known TLDs
+
+
+extractor.[chevereto].password
+------------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``null``
+Example
+    * ``pw1,pw2,foobar``
+    * ``["pw1", "pw2", "foobar"]``
+Description
+    Password value(s) used to access protected albums.
 
 
 extractor.cien.files
@@ -4469,8 +4486,8 @@ Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
-extractor.nitter.quoted
------------------------
+extractor.[nitter].quoted
+-------------------------
 Type
     ``bool``
 Default
@@ -4479,8 +4496,8 @@ Description
     Fetch media from quoted Tweets.
 
 
-extractor.nitter.retweets
--------------------------
+extractor.[nitter].retweets
+---------------------------
 Type
     ``bool``
 Default
@@ -4489,8 +4506,8 @@ Description
     Fetch media from Retweets.
 
 
-extractor.nitter.videos
------------------------
+extractor.[nitter].videos
+-------------------------
 Type
     * ``bool``
     * ``string``
@@ -4799,6 +4816,16 @@ Default
     ``false``
 Description
     Recursively download files from subfolders.
+
+
+extractor.pixeldrain.zip
+------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download albums as a single `.zip` file.
 
 
 extractor.pixiv.include
@@ -6959,6 +6986,16 @@ Description
     Download the active episode's ``thumbnail``.
 
     Useful for creating CBZ archives with actual source thumbnails.
+
+
+extractor.weebdex.data-saver
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Enable `Data Saver` mode and download lower quality versions of chapters.
 
 
 extractor.weibo.gifs
@@ -9288,6 +9325,7 @@ Special Values
             {
                 "coomer"       : "coomerparty",
                 "kemono"       : "kemonoparty",
+                "turbo"        : "saint",
                 "schalenetwork": "koharu",
                 "naver-chzzk"  : "chzzk",
                 "naver-blog"   : "naver",
@@ -9315,7 +9353,8 @@ Default
             "chzzk"        : "naver-chzzk",
             "naver"        : "naver-blog",
             "naverwebtoon" : "naver-webtoon",
-            "pixiv"        : "pixiv-novel"
+            "pixiv"        : "pixiv-novel",
+            "saint"        : "turbo"
         }
 Description
     Duplicate the configuration settings of extractor `categories`
@@ -9426,6 +9465,22 @@ Description
     ``"defaultdict"``
         Prevent exceptions when accessing undefined variables
         by using a `defaultdict <https://docs.python.org/3/library/collections.html#collections.defaultdict>`__
+
+
+format-operator-dot
+-------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    In standard `Format Strings`_, allow the `dot` operator ``.``
+    to function as a general access operator
+    in addition to regular attribute access.
+
+    * ``obj.attribute``
+    * ``dict.fieldname``
+    * ``list.123``
 
 
 format-separator

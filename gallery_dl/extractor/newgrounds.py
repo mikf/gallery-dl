@@ -94,7 +94,7 @@ class NewgroundsExtractor(Extractor):
 
     def posts(self):
         """Return URLs of all relevant post pages"""
-        return self._pagination(self._path, self.groups[1])
+        return self._pagination(self.__class__.subcategory, self.groups[1])
 
     def metadata(self):
         """Return general metadata"""
@@ -426,28 +426,28 @@ class NewgroundsMediaExtractor(NewgroundsExtractor):
 
 class NewgroundsArtExtractor(NewgroundsExtractor):
     """Extractor for all images of a newgrounds user"""
-    subcategory = _path = "art"
+    subcategory = "art"
     pattern = USER_PATTERN + r"/art(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/art"
 
 
 class NewgroundsAudioExtractor(NewgroundsExtractor):
     """Extractor for all audio submissions of a newgrounds user"""
-    subcategory = _path = "audio"
+    subcategory = "audio"
     pattern = USER_PATTERN + r"/audio(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/audio"
 
 
 class NewgroundsMoviesExtractor(NewgroundsExtractor):
     """Extractor for all movies of a newgrounds user"""
-    subcategory = _path = "movies"
+    subcategory = "movies"
     pattern = USER_PATTERN + r"/movies(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/movies"
 
 
 class NewgroundsGamesExtractor(NewgroundsExtractor):
     """Extractor for a newgrounds user's games"""
-    subcategory = _path = "games"
+    subcategory = "games"
     pattern = USER_PATTERN + r"/games(?:(?:/page/|/?\?page=)(\d+))?/?$"
     example = "https://USER.newgrounds.com/games"
 

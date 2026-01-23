@@ -24,28 +24,29 @@ class BoothExtractor(Extractor):
     def _init(self):
         self.cookies.set("adult", "t", domain=".booth.pm")
 
-    def items(self):
-        for item in self.shop_items():
-            item["_extractor"] = BoothItemExtractor
-            yield Message.Queue, item["shop_item_url"], item
-
-    def _pagination(self, url):
+    def _pagination(self, url, json=False):
         while True:
             page = self.request(url).text
 
-            for item in text.extract_iter(page, ' data-item="', '"'):
-                yield util.json_loads(text.unescape(item))
+            if json:
+                for item in text.extract_iter(page, ' data-item="', '"'):
+                    yield util.json_loads(text.unescape(item))
+            else:
+                for item in text.extract_iter(
+                        page, "item-card__title", "</div>"):
+                    yield text.unescape(text.extr(item, 'href="', '"'))
 
             next = text.extr(page, 'rel="next" class="nav-item" href="', '"')
             if not next:
                 break
-            url = self.root + next
+            url = self.root + text.unescape(next)
 
 
 class BoothItemExtractor(BoothExtractor):
     subcategory = "item"
-    pattern = r"(?:https?://)?(?:[\w-]+\.)?booth\.pm/(?:\w\w/)?items/(\d+)"
-    example = "https://booth.pm/items/12345"
+    pattern = (r"(?:https?://)?(?:[\w-]+\.)?booth\.pm/"
+               r"(?:[a-z]{2}(?:-[^/?#]+)?/)?items/(\d+)")
+    example = "https://booth.pm/ja/items/12345"
 
     def items(self):
         url = f"{self.root}/ja/items/{self.groups[0]}"
@@ -108,15 +109,28 @@ class BoothItemExtractor(BoothExtractor):
 
 class BoothShopExtractor(BoothExtractor):
     subcategory = "shop"
-    pattern = r"(?:https?://)?([\w-]+\.)booth\.pm/(?:\w\w/)?(?:items)?"
+    pattern = r"(?:https?://)?([\w-]+\.)booth\.pm/"
     example = "https://SHOP.booth.pm/"
 
     def __init__(self, match):
         self.root = text.root_from_url(match[0])
         BoothExtractor.__init__(self, match)
 
-    def shop_items(self):
-        return self._pagination(self.root + "/items")
+    def items(self):
+        for item in self._pagination(self.root + "/items", json=True):
+            item["_extractor"] = BoothItemExtractor
+            yield Message.Queue, item["shop_item_url"], item
+
+
+class BoothCategoryExtractor(BoothExtractor):
+    subcategory = "category"
+    pattern = r"(?:https?://)?booth\.pm(/[a-z]{2}(?:-[^/?#]+)?/browse/.+)"
+    example = "https://booth.pm/ja/browse/CATEGORY"
+
+    def items(self):
+        data = {"_extractor": BoothItemExtractor}
+        for url in self._pagination(self.root + self.groups[0]):
+            yield Message.Queue, url, data
 
 
 def _fallback(url):

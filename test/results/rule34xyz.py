@@ -19,6 +19,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.rule34.xyz/sfw",
+    "#comment" : "URL with 'www' subdomain (#8875)",
+    "#class"   : rule34xyz.Rule34xyzTagExtractor,
+},
+
+{
     "#url"  : "https://rule34.xyz/playlists/view/119",
     "#class": rule34xyz.Rule34xyzPlaylistExtractor,
     "#pattern": r"https://rule34(\.xyz|xyz\.b-cdn\.net)/posts/\d+/\d+/\d+\.(pic|mov\d*)\.(jpg|mp4)",

@@ -417,6 +417,8 @@ class KemonoDiscordExtractor(KemonoExtractor):
             r"https?://(?:cdn\.discordapp.com|media\.discordapp\.net)"
             r"(/[A-Za-z0-9-._~:/?#\[\]@!$&'()*+,;%=]+)").findall
         find_hash = text.re(HASH_PATTERN).match
+        archives = True if self.config("archives") else False
+        exts_archive = util.EXTS_ARCHIVE
 
         if (order := self.config("order-posts")) and order[0] in ("r", "d"):
             posts = self.api.discord_channel(channel_id, channel["post_count"])
@@ -440,6 +442,8 @@ class KemonoDiscordExtractor(KemonoExtractor):
             post.update(data)
             post["date"] = self._parse_datetime(post["published"])
             post["count"] = len(files)
+            post["archives"] = post_archives = ()
+
             yield Message.Directory, "", post
 
             for post["num"], file in enumerate(files, 1):
@@ -447,9 +451,31 @@ class KemonoDiscordExtractor(KemonoExtractor):
                 post["type"] = file["type"]
                 url = file["path"]
 
-                text.nameext_from_url(file.get("name", url), post)
-                if not post["extension"]:
-                    post["extension"] = text.ext_from_url(url)
+                if name := file.get("name"):
+                    text.nameext_from_name(name, post)
+                    ext = text.ext_from_url(url)
+                    if not post["extension"]:
+                        post["extension"] = ext
+                else:
+                    text.nameext_from_url(url, post)
+                    ext = post["extension"]
+
+                if ext in exts_archive:
+                    if not post_archives:
+                        post["archives"] = post_archives = []
+                    post["type"] = "archive"
+                    if archives:
+                        try:
+                            post_archives.append({
+                                **self.api.file(file["hash"]), **file})
+                        except Exception as exc:
+                            self.log.warning(
+                                "%s: Failed to retrieve archive metadata of "
+                                "'%s' (%s: %s)", post["id"], file.get("name"),
+                                exc.__class__.__name__, exc)
+                            post_archives.append(file.copy())
+                    else:
+                        post_archives.append(file.copy())
 
                 if url[0] == "/":
                     url = f"{self.root}/data{url}"
@@ -460,7 +486,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
 
 class KemonoDiscordServerExtractor(KemonoExtractor):
     subcategory = "discord-server"
-    pattern = BASE_PATTERN + r"/discord/server/(\d+)$"
+    pattern = BASE_PATTERN + r"/discord/server/(\d+)"
     example = "https://kemono.cr/discord/server/12345"
 
     def items(self):

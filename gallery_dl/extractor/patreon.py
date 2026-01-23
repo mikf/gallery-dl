@@ -422,7 +422,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
             url = f"{self.root}/user?u={user_id}"
         else:
             url = f"{self.root}/{creator}"
-        page = self.request(url, notfound="creator").text
+        page = self.request(url, notfound=True).text
 
         try:
             data = None
@@ -478,7 +478,7 @@ class PatreonPostExtractor(PatreonExtractor):
 
     def posts(self):
         url = f"{self.root}/posts/{self.groups[0]}"
-        page = self.request(url, notfound="post").text
+        page = self.request(url, notfound=True).text
         bootstrap = self._extract_bootstrap(page)
 
         try:
