@@ -559,6 +559,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Favorites, Followers, Followed Users, individual Images, Playlists, Search Results, Tag Searches, User Profiles, User Images, User Playlists, User Videos, Videos</td>
     <td>Supported</td>
 </tr>
+<tr id="kaliscan" title="kaliscan">
+    <td>KaliScan</td>
+    <td>https://kaliscan.me/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
 <tr id="keenspot" title="keenspot">
     <td>Keenspot</td>
     <td>http://www.keenspot.com/</td>
