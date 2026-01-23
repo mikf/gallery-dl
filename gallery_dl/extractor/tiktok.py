@@ -236,31 +236,34 @@ class TiktokExtractor(Extractor):
         return url
 
     def _extract_video_urls(self, video):
-        urls = []
-        # First, look for bitrateInfo. This will include URLs pointing to the
-        # best quality videos.
+        # First, look for bitrateInfo.
+        # This will include URLs pointing to the best quality videos.
         if "bitrateInfo" in video:
             bitrate_info = video["bitrateInfo"]
-            if type(bitrate_info) is not list:
+            if not isinstance(bitrate_info, list):
                 bitrate_info = [bitrate_info]
             bitrate_urls = {}
             for video_info in bitrate_info:
                 play_addr = video_info["PlayAddr"]
-                width = int(play_addr.get("Width"))
-                height = int(play_addr.get("Height"))
+                width = text.parse_int(play_addr.get("Width"))
+                height = text.parse_int(play_addr.get("Height"))
                 size = width * height
                 if size in bitrate_urls:
                     bitrate_urls[size] += play_addr.get("UrlList")
                 else:
                     bitrate_urls[size] = play_addr.get("UrlList").copy()
             # Sort the URLs by descending quality.
-            urls = [bitrate_urls[size] for size in
-                    reversed(sorted(bitrate_urls.keys()))]
-            urls = [url for url_list in urls for url in url_list]
-        # As a fallback, try to look for the root playAddr, which won't
-        # necessarily point to the best quality.
+            sizes = list(bitrate_urls)
+            sizes.sort(reverse=True)
+            urls = [url for size in sizes for url in bitrate_urls[size]]
+        else:
+            urls = []
+
+        # As a fallback, try to look for the root playAddr,
+        # which won't necessarily point to the best quality.
         if "playAddr" in video:
             urls.append(video["playAddr"])
+
         return urls
 
     def _extract_audio(self, post):
