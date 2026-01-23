@@ -92,6 +92,7 @@ class TiktokExtractor(Extractor):
                     ytdl_media = "video"
                 elif self.video and (url := self._extract_video(post)):
                     yield Message.Url, url, post
+                    del post["_fallback"]
                 if self.cover and (url := self._extract_cover(post, "video")):
                     yield Message.Url, url, post
 
@@ -212,13 +213,16 @@ class TiktokExtractor(Extractor):
 
     def _extract_video(self, post):
         video = post["video"]
-        try:
-            url = video["playAddr"]
-        except KeyError:
-            raise exception.ExtractionError("Failed to extract video URL, you "
-                                            "may need cookies to continue")
+        urls = self._extract_video_urls(video)
+        if not urls:
+            raise exception.ExtractionError(
+                f"{post['id']}: Failed to extract video URLs. "
+                f"You may need cookies to continue.")
+
+        url = urls[0]
         text.nameext_from_url(url, post)
         post.update({
+            "_fallback": urls[1:],
             "type"     : "video",
             "image"    : None,
             "title"    : post["desc"] or f"TikTok video #{post['id']}",
@@ -231,6 +235,37 @@ class TiktokExtractor(Extractor):
         if not post["extension"]:
             post["extension"] = video.get("format", "mp4")
         return url
+
+    def _extract_video_urls(self, video):
+        # First, look for bitrateInfo.
+        # This will include URLs pointing to the best quality videos.
+        if "bitrateInfo" in video:
+            bitrate_info = video["bitrateInfo"]
+            if not isinstance(bitrate_info, list):
+                bitrate_info = [bitrate_info]
+            bitrate_urls = {}
+            for video_info in bitrate_info:
+                play_addr = video_info["PlayAddr"]
+                width = text.parse_int(play_addr.get("Width"))
+                height = text.parse_int(play_addr.get("Height"))
+                size = width * height
+                if size in bitrate_urls:
+                    bitrate_urls[size] += play_addr.get("UrlList")
+                else:
+                    bitrate_urls[size] = play_addr.get("UrlList").copy()
+            # Sort the URLs by descending quality.
+            sizes = list(bitrate_urls)
+            sizes.sort(reverse=True)
+            urls = [url for size in sizes for url in bitrate_urls[size]]
+        else:
+            urls = []
+
+        # As a fallback, try to look for the root playAddr,
+        # which won't necessarily point to the best quality.
+        if "playAddr" in video:
+            urls.append(video["playAddr"])
+
+        return urls
 
     def _extract_audio(self, post):
         audio = post["music"]
