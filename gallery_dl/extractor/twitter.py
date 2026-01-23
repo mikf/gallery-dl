@@ -2246,12 +2246,26 @@ class TwitterAPI():
         rl = self.extractor.config("ratelimit")
         if rl == "abort":
             raise exception.AbortExtraction("Rate limit exceeded")
-        elif rl and isinstance(rl, str) and rl.startswith("wait:"):
-            until = None
-            seconds = text.parse_float(rl.partition(":")[2]) or 60.0
-        else:
-            until = response.headers.get("x-rate-limit-reset")
-            seconds = None if until else 60.0
+
+        until = response.headers.get("x-rate-limit-reset")
+        seconds = None if until else 60.0
+
+        if rl and isinstance(rl, str) and ":" in rl:
+            rl, _, num = rl.partition(":")
+            if rl == "abort":
+                amt = getattr(self, "_ratelimit_amt", 1)
+                num = text.parse_int(num)
+                msg = f"Rate limit exceeded ({amt}/{num})"
+                if amt >= num:
+                    raise exception.AbortExtraction(msg)
+                self.log.warning(msg)
+                self._ratelimit_amt = amt + 1
+            elif rl == "wait":
+                until = None
+                seconds = text.parse_float(num) or 60.0
+            else:
+                self.log.warning("Unsupported 'ratelimit' setting '%s'", rl)
+
         self.extractor.wait(until=until, seconds=seconds)
 
     def _process_tombstone(self, entry, tombstone):

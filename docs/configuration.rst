@@ -6472,6 +6472,9 @@ Description
 
     ``"abort"``
         Raise an error and stop extraction
+    ``"abort:N"``
+        Raise an error and stop extraction
+        after waiting ``N`` times until rate limit reset
     ``"wait"``
         Wait until rate limit reset
     ``"wait:N"``
