@@ -91,6 +91,7 @@ class TiktokExtractor(Extractor):
                     ytdl_media = "video"
                 elif self.video and (url := self._extract_video(post)):
                     yield Message.Url, url, post
+                    del post["_fallback"]
                 if self.cover and (url := self._extract_cover(post, "video")):
                     yield Message.Url, url, post
 
