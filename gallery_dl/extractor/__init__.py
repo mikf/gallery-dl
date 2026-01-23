@@ -109,6 +109,7 @@ modules = [
     "iwara",
     "jschan",
     "kabeuchi",
+    "kaliscan",
     "keenspot",
     "kemono",
     "khinsider",
