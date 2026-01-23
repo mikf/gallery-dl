@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -65,12 +65,20 @@ class WeebdexChapterExtractor(WeebdexBase, ChapterExtractor):
         data = self.data
         base = f"{data['node']}/data/{data['id']}/"
 
+        if self.config("data-saver", False):
+            pages = data["data_optimized"]
+            original = False
+        else:
+            pages = data["data"]
+            original = True
+
         return [
             (base + page["name"], {
                 "width" : page["dimensions"][0],
                 "height": page["dimensions"][1],
+                "original": original,
             })
-            for page in data["data"]
+            for page in pages
         ]
 
 

@@ -6936,6 +6936,16 @@ Description
     Useful for creating CBZ archives with actual source thumbnails.
 
 
+extractor.weebdex.data-saver
+----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Enable `Data Saver` mode and download lower quality versions of chapters.
+
+
 extractor.weibo.gifs
 --------------------
 Type
