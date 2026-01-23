@@ -89,8 +89,7 @@ class TiktokExtractor(Extractor):
             elif "video" in post:
                 if self.video == "ytdl":
                     ytdl_media = "video"
-                elif self.video and (url := self._extract_video(post,
-                                                                tiktok_url)):
+                elif self.video and (url := self._extract_video(post)):
                     yield Message.Url, url, post
                 if self.cover and (url := self._extract_cover(post, "video")):
                     yield Message.Url, url, post
@@ -210,13 +209,14 @@ class TiktokExtractor(Extractor):
             profile_url, ("userInfo", "user", id_key))
         return None if match(id) is None else id
 
-    def _extract_video(self, post, given_url):
+    def _extract_video(self, post):
         video = post["video"]
-        urls = self._extract_video_urls(video, given_url)
+        urls = self._extract_video_urls(video)
         if not urls:
-            raise exception.ExtractionError(f"{given_url}: Failed to extract "
-                                            "video URLs, you may need cookies "
-                                            "to continue")
+            raise exception.ExtractionError(
+                f"{post['id']}: Failed to extract video URLs. "
+                f"You may need cookies to continue.")
+
         url = urls[0]
         text.nameext_from_url(url, post)
         post.update({
@@ -234,7 +234,7 @@ class TiktokExtractor(Extractor):
             post["extension"] = video.get("format", "mp4")
         return url
 
-    def _extract_video_urls(self, video, given_url):
+    def _extract_video_urls(self, video):
         urls = []
         # First, look for bitrateInfo. This will include URLs pointing to the
         # best quality videos.
