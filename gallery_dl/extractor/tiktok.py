@@ -180,7 +180,7 @@ class TiktokExtractor(Extractor):
     def _ensure_rehydration_data_app_context_cache_is_populated(self):
         if not self.rehydration_data_app_context_cache:
             self.rehydration_data_app_context_cache = \
-                self._extract_rehydration_data_user(
+                self._extract_rehydration_data(
                     "https://www.tiktok.com/", ["webapp.app-context"])
 
     def _extract_sec_uid(self, profile_url, user_name):
