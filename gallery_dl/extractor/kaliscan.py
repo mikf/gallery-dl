@@ -29,10 +29,10 @@ class KaliscanBase():
 
         title = text.unescape(extr("<h1>", "<"))
         alt_titles = extr("<h2>", "<")
-        if alt_titles:
-            alt_titles = [t.strip() for t in alt_titles.split(",")]
-        else:
-            alt_titles = []
+        alt_titles = (
+            [t.strip() for t in alt_titles.split(",")]
+            if alt_titles else []
+        )
 
         author = text.remove_html(extr(
             "Authors :</strong>", "</p>"))
@@ -42,11 +42,10 @@ class KaliscanBase():
             "Genres :</strong>", "</p>"))]
 
         desc_html = extr('class="content"', '<div class="readmore"')
-        if desc_html:
-            description = text.remove_html(
-                desc_html.partition(">")[2]).strip()
-        else:
-            description = ""
+        description = (
+            text.remove_html(desc_html.partition(">")[2]).strip()
+            if desc_html else ""
+        )
 
         manga_id = text.parse_int(text.extr(page, "bookId =", ";"))
 
@@ -72,7 +71,6 @@ class KaliscanChapterExtractor(KaliscanBase, ChapterExtractor):
     def __init__(self, match):
         ChapterExtractor.__init__(self, match)
         self.manga_slug = self.groups[1]
-        self.chapter_string = self.groups[2]
 
     def metadata(self, page):
         extr = text.extract_from(page)
@@ -100,9 +98,9 @@ class KaliscanChapterExtractor(KaliscanBase, ChapterExtractor):
         if not images_str:
             return []
         return [
-            (url.strip(), None)
-            for url in images_str.split(",")
-            if url.strip()
+            (url, None)
+            for url in (u.strip() for u in images_str.split(","))
+            if url
         ]
 
 
