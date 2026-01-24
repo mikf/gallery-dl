@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2022 Mike Fährmann
+# Copyright 2019-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -30,15 +30,14 @@ class MtimePP(PostProcessor):
         job.register_hooks({event: self.run for event in events}, options)
 
     def run(self, pathfmt):
-        mtime = self._get(pathfmt.kwdict)
-        if mtime is None:
-            return
-
-        pathfmt.kwdict["_mtime_meta"] = (
-            dt.to_ts(mtime)
-            if isinstance(mtime, dt.datetime) else
-            text.parse_int(mtime)
-        )
+        if mtime := self._get(pathfmt.kwdict):
+            if isinstance(mtime, dt.datetime):
+                mtime = dt.to_ts(mtime)
+            else:
+                mtime = text.parse_int(mtime)
+        else:
+            mtime = None
+        pathfmt.kwdict["_mtime_meta"] = mtime
 
 
 __postprocessor__ = MtimePP
