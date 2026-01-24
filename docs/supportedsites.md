@@ -691,6 +691,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
+<tr id="mangatown" title="mangatown">
+    <td>MangaTown</td>
+    <td>https://www.mangatown.com/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
 <tr id="mangoxo" title="mangoxo">
     <td>Mangoxo</td>
     <td>https://www.mangoxo.com/</td>

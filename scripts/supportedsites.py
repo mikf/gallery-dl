@@ -128,6 +128,7 @@ CATEGORY_MAP = {
     "mangafox"       : "Manga Fox",
     "mangahere"      : "Manga Here",
     "mangakakalot"   : "MangaKakalot",
+    "mangatown"      : "MangaTown",
     "manganato"      : "MangaNato",
     "mangapark"      : "MangaPark",
     "mangaread"      : "MangaRead",
