@@ -21,7 +21,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import extractor, output, path, util, exception  # noqa E402
-from gallery_dl import postprocessor, config, archive  # noqa E402
+from gallery_dl import postprocessor, config, archive, dt  # noqa E402
 from gallery_dl.postprocessor.common import PostProcessor  # noqa E402
 
 
@@ -931,12 +931,22 @@ class MtimeTest(BasePostprocessorTest):
     def test_mtime_none(self):
         self._create(None, {"date": None})
         self._trigger()
-        self.assertNotIn("_mtime_meta", self.pathfmt.kwdict)
+        self.assertFalse(self.pathfmt.kwdict["_mtime_meta"])
+
+    def test_mtime_none_dt(self):
+        self._create(None, {"date": dt.NONE})
+        self._trigger()
+        self.assertFalse(self.pathfmt.kwdict["_mtime_meta"])
 
     def test_mtime_undefined(self):
         self._create(None, {})
         self._trigger()
-        self.assertNotIn("_mtime_meta", self.pathfmt.kwdict)
+        self.assertFalse(self.pathfmt.kwdict["_mtime_meta"])
+
+    def test_mtime_invalid(self):
+        self._create(None, {"date": "foobar"})
+        self._trigger()
+        self.assertFalse(self.pathfmt.kwdict["_mtime_meta"])
 
     def test_mtime_key(self):
         self._create({"key": "foo"}, {"foo": 315532800})
