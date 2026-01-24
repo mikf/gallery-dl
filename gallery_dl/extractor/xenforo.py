@@ -178,7 +178,8 @@ class XenforoExtractor(BaseExtractor):
 
         if not response.history:
             err = self._extract_error(response.text)
-            raise exception.AuthenticationError(f'"{err}"')
+            err = f'"{err}"' if err else None
+            raise exception.AuthenticationError(err)
 
         return {
             cookie.name: cookie.value
@@ -237,8 +238,9 @@ class XenforoExtractor(BaseExtractor):
             page = self.request_page(url).text
 
     def _extract_error(self, html):
-        return text.unescape(text.extr(
-            html, "blockMessage--error", "</").rpartition(">")[2].strip())
+        if msg := (text.extr(html, "blockMessage--error", "</") or
+                   text.extr(html, '"blockMessage"', "</div>")):
+            return text.unescape(msg[msg.find(">")+1:].strip())
 
     def _parse_post(self, html):
         extr = text.extract_from(html)
