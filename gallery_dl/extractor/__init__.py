@@ -133,6 +133,7 @@ modules = [
     "mangaread",
     "mangareader",
     "mangataro",
+    "mangatown",
     "mangoxo",
     "misskey",
     "motherless",
