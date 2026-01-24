@@ -23,7 +23,7 @@ class XenforoExtractor(BaseExtractor):
 
     def __init__(self, match):
         BaseExtractor.__init__(self, match)
-        self.cookies_domain = "." + self.root.split("/")[2]
+        self.cookies_domain = self.root.split("/")[2]
         self.cookies_names = self.config_instance("cookies") or ("xf_user",)
 
     def items(self):
@@ -154,7 +154,8 @@ class XenforoExtractor(BaseExtractor):
             raise
 
     def login(self):
-        if self.cookies_names and self.cookies_check(self.cookies_names):
+        if self.cookies_names and self.cookies_check(
+                self.cookies_names, subdomains=True):
             return
 
         username, password = self._get_auth_info()
