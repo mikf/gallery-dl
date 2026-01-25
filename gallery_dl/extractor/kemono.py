@@ -82,6 +82,8 @@ class KemonoExtractor(Extractor):
             posts = self._revisions(posts)
 
         for post in posts:
+            if "post" in post:
+                post = post["post"]
             headers["Referer"] = (f"{self.root}/{post['service']}/user/"
                                   f"{post['user']}/post/{post['id']}")
             post["_http_headers"] = headers
@@ -250,11 +252,23 @@ class KemonoExtractor(Extractor):
         return itertools.chain.from_iterable(
             self._revisions_post(post) for post in posts)
 
+    def _revisions_get(self, post):
+        if (props := post.get("props")) and "revisions" in props:
+            return [
+                rev[1]
+                for rev in props["revisions"]
+                if "revision_id" in rev[1]
+            ]
+        return self.api.creator_post_revisions(
+            post["service"], post["user"], post["id"])
+
     def _revisions_post(self, post):
+        revs = self._revisions_get(post)
+
+        if "post" in post:
+            post = post["post"]
         post["revision_id"] = 0
 
-        revs = self.api.creator_post_revisions(
-            post["service"], post["user"], post["id"])
         if not revs:
             post["revision_hash"] = self._revision_hash(post)
             post["revision_index"] = 1
@@ -285,8 +299,8 @@ class KemonoExtractor(Extractor):
 
         return revs
 
-    def _revisions_all(self, service, creator_id, post_id):
-        revs = self.api.creator_post_revisions(service, creator_id, post_id)
+    def _revisions_all(self, post):
+        revs = self._revisions_get(post)
 
         cnt = idx = len(revs)
         for rev in revs:
@@ -373,11 +387,11 @@ class KemonoPostExtractor(KemonoExtractor):
         _, _, service, creator_id, post_id, revision, revision_id = self.groups
         post = self.api.creator_post(service, creator_id, post_id)
         if not revision:
-            return (post["post"],)
+            return (post,)
 
         self.revisions = False
 
-        revs = self._revisions_all(service, creator_id, post_id)
+        revs = self._revisions_all(post)
         if not revision_id:
             return revs
 
