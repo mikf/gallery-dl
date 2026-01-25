@@ -301,6 +301,11 @@ class KemonoExtractor(Extractor):
         return revs
 
     def _revision_hash(self, revision):
+        if isinstance(revision["file"], str):
+            revision["file"] = util.json_loads(revision["file"])
+            revision["attachments"] = [
+                util.json_loads(a) for a in revision["attachments"]]
+
         rev = revision.copy()
         rev.pop("revision_id", None)
         rev.pop("added", None)

@@ -561,6 +561,33 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.cr/patreon/user/17152737/post/126135488/revisions/11162541",
+    "#comment" : "'str' values instead of 'dict' for 'file' & 'attachments' (#8929)",
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoPostExtractor,
+    "#results" : "https://kemono.cr/data/b3/4d/b34d2ad89a59efa3746643c657310043bbada32751138aab7d23523fd1a5b765.png",
+
+    "revision_hash" : "758c2fe1d223a5d49093002ad162cef7e4ce5bb8",
+    "revision_id"   : 11162541,
+    "revision_index": 14,
+    "attachments"   : [{
+        "extension": "png",
+        "filename" : "448451741",
+        "hash"     : "b34d2ad89a59efa3746643c657310043bbada32751138aab7d23523fd1a5b765",
+        "name"     : "448451741.png",
+        "path"     : "/b3/4d/b34d2ad89a59efa3746643c657310043bbada32751138aab7d23523fd1a5b765.png",
+        "type"     : "attachment",
+        "url"      : "https://kemono.cr/data/b3/4d/b34d2ad89a59efa3746643c657310043bbada32751138aab7d23523fd1a5b765.png",
+    }],
+    "file"          : {
+        "hash": "b34d2ad89a59efa3746643c657310043bbada32751138aab7d23523fd1a5b765",
+        "name": "448451741.png",
+        "path": "/b3/4d/b34d2ad89a59efa3746643c657310043bbada32751138aab7d23523fd1a5b765.png",
+        "type": "file",
+    },
+},
+
+{
     "#url"     : "https://kemono.cr/discord/server/488668827274444803/608504710906904576",
     "#category": ("", "kemono", "discord"),
     "#class"   : kemono.KemonoDiscordExtractor,
