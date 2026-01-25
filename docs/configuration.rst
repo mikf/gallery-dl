@@ -6979,6 +6979,7 @@ Supported Values
     * ``newvideo``
     * ``article``
     * ``album``
+    * ``subalbums``
 Note
     It is possible to use ``"all"`` instead of listing all values separately.
 

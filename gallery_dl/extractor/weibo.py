@@ -324,7 +324,9 @@ class WeiboUserExtractor(WeiboExtractor):
             (WeiboNewvideoExtractor, base + "newVideo"),
             (WeiboArticleExtractor , base + "article"),
             (WeiboAlbumExtractor   , base + "album"),
-        ), ("feed",))
+        ), ("feed",), {
+            ("album", "subalbums", base + "album-only"),
+        })
 
 
 class WeiboHomeExtractor(WeiboExtractor):
