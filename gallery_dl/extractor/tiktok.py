@@ -10,8 +10,8 @@ from .common import Extractor, Message, Dispatch
 from .. import text, util, ytdl, exception
 import functools
 import itertools
+import binascii
 import hashlib
-import base64
 import random
 import time
 
@@ -203,16 +203,14 @@ class TiktokExtractor(Extractor):
 
     def _solve_challenge(self, html):
         cs = text.extr(text.extr(html, 'id="cs"', '>'), 'class="', '"')
-        cs = base64.b64decode(cs + '==', validate=False).decode()
-        c = util.json_loads(cs)
+        c = util.json_loads(binascii.a2b_base64(cs).decode())
 
-        expected = base64.b64decode(c["v"]["c"] + '==', validate=False)
-        base = hashlib.sha256(base64.b64decode(
-            c["v"]["a"] + '==', validate=False))
-
-        for i in range(1_000_000):
+        # find index of expected digest
+        expected = binascii.a2b_base64(c["v"]["c"])
+        base = hashlib.sha256(binascii.a2b_base64(c["v"]["a"]))
+        for idx in range(1_000_000):
             test = base.copy()
-            test.update(str(i).encode())
+            test.update(str(idx).encode())
             if test.digest() == expected:
                 break
         else:
@@ -226,10 +224,9 @@ class TiktokExtractor(Extractor):
         # set cookie values
         domain = self.cookies_domain
         expires = int(time.time()) + 5
-        c["d"] = base64.b64encode(str(i).encode()).decode()
-        self.cookies.set(
-            wci, base64.b64encode(util.json_dumps(c).encode()).decode(),
-            domain=domain, expires=expires)
+        c["d"] = binascii.b2a_base64(str(idx).encode(), newline=False).decode()
+        v = binascii.b2a_base64(util.json_dumps(c).encode(), newline=False)
+        self.cookies.set(wci, v.decode(), domain=domain, expires=expires)
         if rs:
             self.cookies.set(rci, rs, domain=domain, expires=expires)
 
