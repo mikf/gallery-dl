@@ -1,5 +1,88 @@
 # Changelog
 
+## 1.31.4 - 2026-01-24
+### Extractors
+#### Additions
+- [kaliscan] add support ([#8917](https://github.com/mikf/gallery-dl/issues/8917))
+- [turbo] add support - rewrite `saint` extractors ([#8893](https://github.com/mikf/gallery-dl/issues/8893) [#8896](https://github.com/mikf/gallery-dl/issues/8896))
+- [xenforo] support `celebforum.to` ([#8902](https://github.com/mikf/gallery-dl/issues/8902))
+- [xenforo] add `media-album` extractor ([#8902](https://github.com/mikf/gallery-dl/issues/8902))
+#### Fixes
+- [mangafire] fix extractors - generate `vrf` tokens ([#8400](https://github.com/mikf/gallery-dl/issues/8400) [#8906](https://github.com/mikf/gallery-dl/issues/8906))
+- [nitter] use `gallery-dl/<version>` User-Agent ([#7045](https://github.com/mikf/gallery-dl/issues/7045) [#8130](https://github.com/mikf/gallery-dl/issues/8130) [#8409](https://github.com/mikf/gallery-dl/issues/8409))
+- [tiktok] fix `following` extractor ([#8849](https://github.com/mikf/gallery-dl/issues/8849))
+- [xenforo] fix using cookies for custom instances ([#8902](https://github.com/mikf/gallery-dl/issues/8902))
+#### Improvements
+- [imagebam] raise `NotFoundError` for deleted images & galleries ([#8890](https://github.com/mikf/gallery-dl/issues/8890))
+- [kemono:discord] improve `filename` parsing
+- [kemono:discord] support server URLs with trailing `/`
+- [tiktok] download best quality videos ([#8846](https://github.com/mikf/gallery-dl/issues/8846))
+- [tiktok] prefer `legacy` endpoint for user post extraction ([#8812](https://github.com/mikf/gallery-dl/issues/8812) [#8847](https://github.com/mikf/gallery-dl/issues/8847))
+- [twitter] implement `"ratelimit": "abort:N"` ([#5251](https://github.com/mikf/gallery-dl/issues/5251) [#8864](https://github.com/mikf/gallery-dl/issues/8864))
+- [weebdex] add `data-saver` option ([#8914](https://github.com/mikf/gallery-dl/issues/8914))
+- [xenforo] ignore links starting with `#`
+#### Metadata
+- [kemono:discord] extract `archives` metadata ([#8898](https://github.com/mikf/gallery-dl/issues/8898))
+- [xenforo:media-album] extract `album` metadata ([#8902](https://github.com/mikf/gallery-dl/issues/8902))
+#### Removals
+- [batoto] remove module ([#8834](https://github.com/mikf/gallery-dl/issues/8834) [#8908](https://github.com/mikf/gallery-dl/issues/8908))
+### Miscellaneous
+- [common] implement `parent-session` option
+- [common] add `googlebot` User-Agent preset
+- [docker] build from `python:3.14-alpine`
+- [release] add more checks before committing a release
+- [util] replace classes with functions for predicates, Popen, HTTPBasicAuth
+
+## 1.31.3 - 2026-01-16
+### Extractors
+#### Additions
+- [booth] add `category` extractor ([#8867](https://github.com/mikf/gallery-dl/issues/8867))
+- [thefap] add support ([#8821](https://github.com/mikf/gallery-dl/issues/8821) [#8822](https://github.com/mikf/gallery-dl/issues/8822))
+- [xenforo] implement `media` support ([#8785](https://github.com/mikf/gallery-dl/issues/8785))
+  - add `media-item`, `media-user`, `media-category` extractors
+#### Fixes
+- [ahottie:album] support multiple pages ([#8862](https://github.com/mikf/gallery-dl/issues/8862) [#8886](https://github.com/mikf/gallery-dl/issues/8886))
+- [bellazon] use `data-full-image` URLs if available ([#8833](https://github.com/mikf/gallery-dl/issues/8833))
+- [fanbox] make `comments` extraction non-fatal ([#8814](https://github.com/mikf/gallery-dl/issues/8814))
+- [imagevenue] fix `NotFoundError` for valid image links ([#8818](https://github.com/mikf/gallery-dl/issues/8818))
+- [xenforo] fix/improve `bb*Wrapper` extraction ([#8868](https://github.com/mikf/gallery-dl/issues/8868))
+#### Improvements
+- [bellazon] match thread URLs with escaped characters
+- [bilibili] add support for Live Photo downloads ([#8860](https://github.com/mikf/gallery-dl/issues/8860))
+- [booth:item] support URLs with language codes
+- [chevereto] implement password support
+- [chevereto:user] support `album` results
+- [dankefuerslesen] support `/reader/series` URLs ([#8811](https://github.com/mikf/gallery-dl/issues/8811))
+- [furaffinity:favorite] support URLs with custom start position
+- [imagetwist:gallery] support multiple pages ([#8826](https://github.com/mikf/gallery-dl/issues/8826))
+- [koofr] refactor ([#8803](https://github.com/mikf/gallery-dl/issues/8803))
+- [pixeldrain:album] add `zip` option
+- [pixeldrain] warn about hotlink-protected files ([#8803](https://github.com/mikf/gallery-dl/issues/8803))
+- [pixeldrain] improve `filename` parsing
+- [rule34xyz] support URLs with `www` subdomain ([#8875](https://github.com/mikf/gallery-dl/issues/8875))
+- [saint] support `turbovid.cr` & `turbo.cr` URLs ([#8851](https://github.com/mikf/gallery-dl/issues/8851) [#8888](https://github.com/mikf/gallery-dl/issues/8888))
+- [shopify] support URLs starting with language codes
+- [webtoons] extend `bgm` option ([#8733](https://github.com/mikf/gallery-dl/issues/8733))
+- [weibo:album] implement `subalbum` support ([#8792](https://github.com/mikf/gallery-dl/issues/8792))
+- [wikimedia] use `gallery-dl/<version>` User-Agent ([#8770](https://github.com/mikf/gallery-dl/issues/8770) [#8861](https://github.com/mikf/gallery-dl/issues/8861))
+#### Metadata
+- [bellazon] unescape `thread[slug]` names
+- [imagetwist:gallery] extract `gallery_title` & `gallery_id` metadata
+- [motherless] fix gallery media metadata issues ([#8873](https://github.com/mikf/gallery-dl/issues/8873))
+- [rule34xyz] recognize `system` & `meta` tag types
+- [sexcom] fix `tags` when passing cookies ([#8880](https://github.com/mikf/gallery-dl/issues/8880))
+- [tiktok] provide `post_type` metadata ([#8815](https://github.com/mikf/gallery-dl/issues/8815))
+- [xenforo] extract `author_slug` metadata ([#8785](https://github.com/mikf/gallery-dl/issues/8785))
+### Downloaders
+- [ytdl] implement `_ytdl_manifest_remux`
+### Miscellaneous
+- [common] implement `"user-agent": "+PRESET"`
+- [docs/README] add Discord link
+- [formatter] overload `.` operator
+- [job] fix extractor `kwdict` values being unavailable in filters
+- [util] adjust Firefox/Chrome User-Agent versions
+- [util] rename `USERAGENT` to `USERAGENT_GALLERYDL` ([#8836](https://github.com/mikf/gallery-dl/issues/8836))
+
 ## 1.31.2 - 2026-01-02
 ### Extractors
 #### Additions

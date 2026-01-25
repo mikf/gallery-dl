@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2025 Mike Fährmann
+# Copyright 2015-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -209,9 +209,9 @@ class Job():
         for msg, url, kwdict in messages:
 
             if msg == Message.Directory:
+                self.update_kwdict(kwdict)
                 if self.pred_post(url, kwdict):
                     process = True
-                    self.update_kwdict(kwdict)
                     self.handle_directory(kwdict)
                 else:
                     process = None
@@ -224,19 +224,17 @@ class Job():
             elif msg == Message.Url:
                 if self.metadata_url:
                     kwdict[self.metadata_url] = url
+                self.update_kwdict(kwdict)
                 if self.pred_url(url, kwdict):
-                    self.update_kwdict(kwdict)
                     self.handle_url(url, kwdict)
                 if FLAGS.FILE is not None:
                     FLAGS.process("FILE")
 
             elif msg == Message.Queue:
-                if process is None:
-                    continue
+                self.update_kwdict(kwdict)
                 if self.metadata_url:
                     kwdict[self.metadata_url] = url
                 if self.pred_queue(url, kwdict):
-                    self.update_kwdict(kwdict)
                     self.handle_queue(url, kwdict)
                 if FLAGS.CHILD is not None:
                     FLAGS.process("CHILD")
@@ -276,32 +274,28 @@ class Job():
         self.pred_post = self._prepare_predicates("post", False)
         self.pred_queue = self._prepare_predicates("chapter", False)
 
-    def _prepare_predicates(self, target, skip=True):
+    def _prepare_predicates(self, target, skip):
         predicates = []
+        extr = self.extractor
 
-        if self.extractor.config(f"{target}-unique"):
-            predicates.append(util.UniquePredicate())
+        if extr.config(target + "-unique"):
+            predicates.append(util.predicate_unique())
 
-        if pfilter := self.extractor.config(f"{target}-filter"):
+        if pfilter := extr.config(target + "-filter"):
             try:
-                pred = util.FilterPredicate(pfilter, target)
+                predicates.append(util.predicate_filter(pfilter, target))
             except (SyntaxError, ValueError, TypeError) as exc:
-                self.extractor.log.warning(exc)
-            else:
-                predicates.append(pred)
+                extr.log.warning(exc)
 
-        if prange := self.extractor.config(f"{target}-range"):
+        if prange := extr.config(target + "-range"):
             try:
-                pred = util.RangePredicate(prange)
+                skip = extr.skip if skip and not pfilter else None
+                predicates.append(util.predicate_range(prange, skip))
             except ValueError as exc:
-                self.extractor.log.warning(
+                extr.log.warning(
                     "invalid %s range: %s", target, exc)
-            else:
-                if skip and pred.lower > 1 and not pfilter:
-                    pred.index += self.extractor.skip(pred.lower - 1)
-                predicates.append(pred)
 
-        return util.build_predicate(predicates)
+        return util.predicate_build(predicates)
 
     def get_logger(self, name):
         return self._wrap_logger(logging.getLogger(name))
@@ -464,6 +458,9 @@ class DownloadJob(Job):
                         job.kwdict.update(self.kwdict)
                     if kwdict:
                         job.kwdict.update(kwdict)
+
+            if pextr.config("parent-session", pextr.parent):
+                extr.session = pextr.session
 
             while True:
                 try:

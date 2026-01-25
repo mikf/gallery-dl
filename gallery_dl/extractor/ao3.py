@@ -139,7 +139,7 @@ class Ao3WorkExtractor(Ao3Extractor):
 
         work_id = self.groups[0]
         url = f"{self.root}/works/{work_id}"
-        response = self.request(url, notfound="work")
+        response = self.request(url, notfound=True)
 
         if response.url.endswith("/users/login?restricted=true"):
             raise exception.AuthorizationError(

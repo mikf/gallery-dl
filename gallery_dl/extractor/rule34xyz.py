@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024-2025 Mike Fährmann
+# Copyright 2024-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -13,7 +13,7 @@ from .. import text, exception
 from ..cache import cache
 import collections
 
-BASE_PATTERN = r"(?:https?://)?rule34\.xyz"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?rule34\.xyz"
 
 
 class Rule34xyzExtractor(BooruExtractor):
@@ -30,6 +30,8 @@ class Rule34xyzExtractor(BooruExtractor):
         2   : "copyright",
         4   : "character",
         8   : "artist",
+        16  : "system",
+        32  : "meta",
     }
     FORMATS = {
         "10" : "pic.jpg",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2025 Mike Fährmann
+# Copyright 2016-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -205,8 +205,8 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
 class ImagetwistImageExtractor(ImagehostImageExtractor):
     """Extractor for single images from imagetwist.com"""
     category = "imagetwist"
-    pattern = (r"(?:https?://)?((?:www\.|phun\.)?"
-               r"image(?:twist|haha)\.com/([a-z0-9]{12}))")
+    pattern = (r"(?:https?://)?((?:www\.|phun\.)?image(?:twist|haha)\.com"
+               r"/([a-z0-9]{12}))")
     example = "https://imagetwist.com/123456abcdef/NAME.EXT"
 
     @property
@@ -226,17 +226,35 @@ class ImagetwistGalleryExtractor(ImagehostImageExtractor):
     """Extractor for galleries from imagetwist.com"""
     category = "imagetwist"
     subcategory = "gallery"
-    pattern = (r"(?:https?://)?((?:www\.|phun\.)?"
-               r"image(?:twist|haha)\.com/(p/[^/?#]+/\d+))")
-    example = "https://imagetwist.com/p/USER/12345/NAME"
+    pattern = (r"(?:https?://)?((?:www\.|phun\.)?image(?:twist|haha)\.com/("
+               r"p/[^/?#]+/(\d+)|"
+               r"\?[^#]*\bfld_id=\d+[^#]*&page=\d+))")
+    example = "https://imagetwist.com/p/USER/12345/TITLE"
 
     def items(self):
-        data = {"_extractor": ImagetwistImageExtractor}
-        root = self.page_url[:self.page_url.find("/", 8)]
-        page = self.request(self.page_url).text
-        gallery = text.extr(page, 'class="gallerys', "</div")
-        for path in text.extract_iter(gallery, ' href="', '"'):
-            yield Message.Queue, root + path, data
+        url = self.page_url
+        root = url[:url.find("/", 8)]
+        page = self.request(url).text
+
+        extr = text.extract_from(page)
+        data = {
+            "_extractor"   : ImagetwistImageExtractor,
+            "gallery_title": text.unescape(extr('page_main_title">', "<")),
+            "gallery_id"   : self.groups[2] or extr("&amp;fld_id=", "&"),
+        }
+        del extr
+
+        while True:
+            gallery = text.extr(page, 'class="gallerys', "</div")
+            for path in text.extract_iter(gallery, ' href="', '"'):
+                yield Message.Queue, root + path, data
+
+            pos = page.find("&#187;</a>")
+            if pos < 0:
+                break
+            qs = text.unescape(text.rextr(page, "href='", "'", pos))
+
+            page = self.request(f"{root}/{qs}").text
 
 
 class ImgadultImageExtractor(ImagehostImageExtractor):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -14,7 +14,7 @@ import argparse
 import json
 import util
 from pyprint import pyprint
-from gallery_dl import extractor, job, config
+from gallery_dl import extractor, job, config, exception
 
 LOG = logging.getLogger("gen-test")
 
@@ -50,13 +50,6 @@ class LoggingCapture(logging.Handler):
         self.output.append(self.format(record))
 
 
-def module_name(opts):
-    category = opts["category"]
-    if category[0].isdecimal():
-        return f"_{category}"
-    return category
-
-
 def generate_test_result(args):
     head = generate_head(args)
 
@@ -85,7 +78,8 @@ def generate_test_result(args):
         with LoggingCapture(args) as log_info:
             djob.run()
 
-        opts = generate_opts(args, djob.data_urls, djob.exception, log_info)
+        opts = generate_opts(
+            args, djob.data_urls, djob.data_meta, djob.exception, log_info)
         ool = (len(opts) > 1 or "#options" in opts)
 
         if args.metadata:
@@ -115,7 +109,7 @@ def generate_head(args):
     return head
 
 
-def generate_opts(args, urls, exc=None, log=None):
+def generate_opts(args, urls, meta=(), exc=None, log=None):
     opts = {}
 
     if args.auth is not None:
@@ -128,7 +122,10 @@ def generate_opts(args, urls, exc=None, log=None):
         opts["#range"] = args.range
 
     if exc:
-        opts["#exception"] = exc.__class__
+        if isinstance(exc, exception.GalleryDLException):
+            opts["#exception"] = exc.__class__.__name__
+        else:
+            opts["#exception"] = exc.__class__
     elif not urls:
         opts["#count"] = 0
     elif len(urls) == 1:
@@ -136,8 +133,16 @@ def generate_opts(args, urls, exc=None, log=None):
     elif len(urls) < args.limit_urls:
         opts["#results"] = tuple(urls)
     else:
-        import re
-        opts["#pattern"] = re.escape(urls[0])
+        if meta and (extr := meta[0].get("_extractor")):
+            name = extr.__module__.rpartition(".")[2]
+            if name[0].isdecimal():
+                name = f"_{name}"
+            opts["#pattern"] = f"lit:{name}.{extr.__name__}.pattern"
+        else:
+            import re
+            opts["#pattern"] = re.escape(urls[0])
+        if "#range" in opts:
+            opts["#range"] = opts.pop("#range")
         opts["#count"] = len(urls)
 
     if log is not None:
@@ -179,6 +184,8 @@ def sort_key(key, value):
 
 
 def small(obj):
+    if not obj:
+        return True
     if isinstance(obj, list):
         return False if len(obj) > 1 else small(obj[0])
     if isinstance(obj, dict):

@@ -28,17 +28,14 @@ from gallery_dl import util, text, exception  # noqa E402
 
 class TestRange(unittest.TestCase):
 
-    def setUp(self):
-        self.predicate = util.RangePredicate("")
-
     def test_parse_empty(self):
-        f = self.predicate._parse
+        f = util.predicate_range_parse
 
         self.assertEqual(f(""), [])
         self.assertEqual(f([]), [])
 
     def test_parse_digit(self):
-        f = self.predicate._parse
+        f = util.predicate_range_parse
 
         self.assertEqual(f(2), [range(2, 3)])
         self.assertEqual(f("2"), [range(2, 3)])
@@ -57,7 +54,7 @@ class TestRange(unittest.TestCase):
         )
 
     def test_parse_range(self):
-        f = self.predicate._parse
+        f = util.predicate_range_parse
 
         self.assertEqual(f("1-2"), [range(1, 3)])
         self.assertEqual(f("2-"), [range(2, sys.maxsize)])
@@ -79,7 +76,7 @@ class TestRange(unittest.TestCase):
         )
 
     def test_parse_slice(self):
-        f = self.predicate._parse
+        f = util.predicate_range_parse
 
         self.assertEqual(f("2:4")  , [range(2, 4)])
         self.assertEqual(f("3::")  , [range(3, sys.maxsize)])
@@ -106,16 +103,16 @@ class TestRange(unittest.TestCase):
 
 class TestPredicate(unittest.TestCase):
 
-    def test_range_predicate(self):
+    def test_predicate_range(self):
         dummy = None
 
-        pred = util.RangePredicate(" - 3 , 4-  4, 2-6")
+        pred = util.predicate_range(" - 3 , 4-  4, 2-6")
         for i in range(6):
             self.assertTrue(pred(dummy, dummy))
         with self.assertRaises(exception.StopExtraction):
             pred(dummy, dummy)
 
-        pred = util.RangePredicate("1, 3, 5")
+        pred = util.predicate_range("1, 3, 5")
         self.assertTrue(pred(dummy, dummy))
         self.assertFalse(pred(dummy, dummy))
         self.assertTrue(pred(dummy, dummy))
@@ -124,13 +121,13 @@ class TestPredicate(unittest.TestCase):
         with self.assertRaises(exception.StopExtraction):
             pred(dummy, dummy)
 
-        pred = util.RangePredicate("")
+        pred = util.predicate_range("")
         with self.assertRaises(exception.StopExtraction):
             pred(dummy, dummy)
 
-    def test_unique_predicate(self):
+    def test_predicate_unique(self):
         dummy = None
-        pred = util.UniquePredicate()
+        pred = util.predicate_unique()
 
         # no duplicates
         self.assertTrue(pred("1", dummy))
@@ -145,22 +142,22 @@ class TestPredicate(unittest.TestCase):
         self.assertTrue(pred("text:123", dummy))
         self.assertTrue(pred("text:123", dummy))
 
-    def test_filter_predicate(self):
+    def test_predicate_filter(self):
         url = ""
 
-        pred = util.FilterPredicate("a < 3")
+        pred = util.predicate_filter("a < 3")
         self.assertTrue(pred(url, {"a": 2}))
         self.assertFalse(pred(url, {"a": 3}))
 
         with self.assertRaises(SyntaxError):
-            util.FilterPredicate("(")
+            util.predicate_filter("(")
 
         self.assertFalse(
-            util.FilterPredicate("a > 1")(url, {"a": None}))
+            util.predicate_filter("a > 1")(url, {"a": None}))
         self.assertFalse(
-            util.FilterPredicate("b > 1")(url, {"a": 2}))
+            util.predicate_filter("b > 1")(url, {"a": 2}))
 
-        pred = util.FilterPredicate(["a < 3", "b < 4", "c < 5"])
+        pred = util.predicate_filter(["a < 3", "b < 4", "c < 5"])
         self.assertTrue(pred(url, {"a": 2, "b": 3, "c": 4}))
         self.assertFalse(pred(url, {"a": 3, "b": 3, "c": 4}))
         self.assertFalse(pred(url, {"a": 2, "b": 4, "c": 4}))
@@ -168,20 +165,23 @@ class TestPredicate(unittest.TestCase):
 
         self.assertFalse(pred(url, {"a": 2}))
 
-        pred = util.FilterPredicate("re.search(r'.+', url)")
+        pred = util.predicate_filter("re.search(r'.+', url)")
         self.assertTrue(pred(url, {"url": "https://example.org/"}))
         self.assertFalse(pred(url, {"url": ""}))
 
-    def test_build_predicate(self):
-        pred = util.build_predicate([])
+    def test_predicate_build(self):
+        pred = util.predicate_build([])
         self.assertIsInstance(pred, type(lambda: True))
 
-        pred = util.build_predicate([util.UniquePredicate()])
-        self.assertIsInstance(pred, util.UniquePredicate)
+        pred = util.predicate_build([util.predicate_unique()])
+        self.assertTrue(callable(pred))
+        self.assertIn("predicate_unique.", repr(pred))
 
-        pred = util.build_predicate([util.UniquePredicate(),
-                                     util.UniquePredicate()])
-        self.assertIs(pred.func, util.chain_predicates)
+        pred = util.predicate_build([util.predicate_unique(),
+                                     util.predicate_unique()])
+        self.assertTrue(callable(pred))
+        self.assertIn("predicate_build.", repr(pred))
+        self.assertIn(".chain", repr(pred))
 
 
 class TestISO639_1(unittest.TestCase):

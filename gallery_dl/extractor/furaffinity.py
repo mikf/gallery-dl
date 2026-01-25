@@ -168,8 +168,10 @@ class FuraffinityExtractor(Extractor):
                 return
             num += 1
 
-    def _pagination_favorites(self):
+    def _pagination_favorites(self, start=None):
         path = f"/favorites/{self.user}/"
+        if start is not None:
+            path += start
 
         while path:
             page = self.request(self.root + path).text
@@ -271,11 +273,11 @@ class FuraffinityFavoriteExtractor(FuraffinityExtractor):
     """Extractor for a furaffinity user's favorites"""
     subcategory = "favorite"
     directory_fmt = ("{category}", "{user!l}", "Favorites")
-    pattern = BASE_PATTERN + r"/favorites/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/favorites/([^/?#]+)(/\d+/(?:next|prev))?"
     example = "https://www.furaffinity.net/favorites/USER/"
 
     def posts(self):
-        return self._pagination_favorites()
+        return self._pagination_favorites(self.groups[1])
 
     def _parse_post(self, post_id):
         if post := FuraffinityExtractor._parse_post(self, post_id):

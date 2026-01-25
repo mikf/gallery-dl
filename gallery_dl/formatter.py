@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2025 Mike Fährmann
+# Copyright 2021-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -142,37 +142,32 @@ class StringFormatter():
             ], fmt)
         else:
             key, funcs = parse_field_name(field_name)
-            if key in _GLOBALS:
-                return self._apply_globals(_GLOBALS[key], funcs, fmt)
-            if funcs:
-                return self._apply(key, funcs, fmt)
-            return self._apply_simple(key, fmt)
+            return self._apply(key, funcs, fmt)
 
     def _apply(self, key, funcs, fmt):
-        def wrap(kwdict):
-            try:
-                obj = kwdict[key]
-                for func in funcs:
-                    obj = func(obj)
-            except Exception:
-                obj = self.default
-            return fmt(obj)
-        return wrap
-
-    def _apply_globals(self, gobj, funcs, fmt):
-        def wrap(_):
-            try:
-                obj = gobj()
-                for func in funcs:
-                    obj = func(obj)
-            except Exception:
-                obj = self.default
-            return fmt(obj)
-        return wrap
-
-    def _apply_simple(self, key, fmt):
-        def wrap(kwdict):
-            return fmt(kwdict[key] if key in kwdict else self.default)
+        if key in _GLOBALS:
+            def wrap(_):
+                try:
+                    obj = gobj()
+                    for func in funcs:
+                        obj = func(obj)
+                except Exception:
+                    obj = self.default
+                return fmt(obj)
+            gobj = _GLOBALS[key]
+        elif funcs:
+            def wrap(kwdict):
+                try:
+                    obj = kwdict[key]
+                    for func in funcs:
+                        obj = func(obj)
+                except Exception:
+                    obj = self.default
+                return fmt(obj)
+        else:
+            def wrap(kwdict):
+                return fmt(kwdict[key] if key in kwdict else self.default)
+            del funcs
         return wrap
 
     def _apply_list(self, lst, fmt):
@@ -298,7 +293,7 @@ def parse_field_name(field_name):
 
     for is_attr, key in rest:
         if is_attr:
-            func = operator.attrgetter
+            func = _attrgetter
         else:
             func = operator.itemgetter
             try:
@@ -328,6 +323,22 @@ def _slice(indices):
         int(stop) if stop else None,
         int(step) if step else None,
     )
+
+
+def _attrgetter(key):
+
+    if key.isdecimal() or key[0] == "-":
+        try:
+            return operator.itemgetter(int(key))
+        except ValueError:
+            pass
+
+    def apply_key(obj):
+        try:
+            return obj[key]
+        except (TypeError, KeyError):
+            return getattr(obj, key)
+    return apply_key
 
 
 def _bytesgetter(slice):

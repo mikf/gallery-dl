@@ -38,7 +38,7 @@ class TiktokExtractor(Extractor):
         self.cover = self.config("covers", False)
 
         self.range = self.config("tiktok-range") or ""
-        self.range_predicate = util.RangePredicate(self.range)
+        self.range_predicate = util.predicate_range(self.range)
 
     def items(self):
         for tiktok_url in self.posts():
@@ -58,6 +58,7 @@ class TiktokExtractor(Extractor):
             post = video_detail["itemInfo"]["itemStruct"]
             post["user"] = (a := post.get("author")) and a["uniqueId"] or ""
             post["date"] = self.parse_timestamp(post["createTime"])
+            post["post_type"] = "image" if "imagePost" in post else "video"
             original_title = title = post["desc"]
 
             yield Message.Directory, "", post
@@ -93,6 +94,7 @@ class TiktokExtractor(Extractor):
                     ytdl_media = "video"
                 elif self.video and (url := self._extract_video(post)):
                     yield Message.Url, url, post
+                    del post["_fallback"]
                 if self.cover and (url := self._extract_cover(post, "video")):
                     yield Message.Url, url, post
 
@@ -198,7 +200,7 @@ class TiktokExtractor(Extractor):
     def _ensure_rehydration_data_app_context_cache_is_populated(self):
         if not self.rehydration_data_app_context_cache:
             self.rehydration_data_app_context_cache = \
-                self._extract_rehydration_data_user(
+                self._extract_rehydration_data(
                     "https://www.tiktok.com/", ["webapp.app-context"])
 
     def _solve_challenge(self, html):
@@ -260,13 +262,16 @@ class TiktokExtractor(Extractor):
 
     def _extract_video(self, post):
         video = post["video"]
-        try:
-            url = video["playAddr"]
-        except KeyError:
-            raise exception.ExtractionError("Failed to extract video URL, you "
-                                            "may need cookies to continue")
+        urls = self._extract_video_urls(video)
+        if not urls:
+            raise exception.ExtractionError(
+                f"{post['id']}: Failed to extract video URLs. "
+                f"You may need cookies to continue.")
+
+        url = urls[0]
         text.nameext_from_url(url, post)
         post.update({
+            "_fallback": urls[1:],
             "type"     : "video",
             "image"    : None,
             "title"    : post["desc"] or f"TikTok video #{post['id']}",
@@ -279,6 +284,37 @@ class TiktokExtractor(Extractor):
         if not post["extension"]:
             post["extension"] = video.get("format", "mp4")
         return url
+
+    def _extract_video_urls(self, video):
+        # First, look for bitrateInfo.
+        # This will include URLs pointing to the best quality videos.
+        if "bitrateInfo" in video:
+            bitrate_info = video["bitrateInfo"]
+            if not isinstance(bitrate_info, list):
+                bitrate_info = [bitrate_info]
+            bitrate_urls = {}
+            for video_info in bitrate_info:
+                play_addr = video_info["PlayAddr"]
+                width = text.parse_int(play_addr.get("Width"))
+                height = text.parse_int(play_addr.get("Height"))
+                size = width * height
+                if size in bitrate_urls:
+                    bitrate_urls[size] += play_addr.get("UrlList")
+                else:
+                    bitrate_urls[size] = play_addr.get("UrlList").copy()
+            # Sort the URLs by descending quality.
+            sizes = list(bitrate_urls)
+            sizes.sort(reverse=True)
+            urls = [url for size in sizes for url in bitrate_urls[size]]
+        else:
+            urls = []
+
+        # As a fallback, try to look for the root playAddr,
+        # which won't necessarily point to the best quality.
+        if "playAddr" in video:
+            urls.append(video["playAddr"])
+
+        return urls
 
     def _extract_audio(self, post):
         audio = post["music"]
@@ -524,33 +560,41 @@ class TiktokPostsExtractor(TiktokExtractor):
         self.post_order = self.config("order-posts") or "desc"
         if self.post_order not in ["desc", "asc", "reverse", "popular"]:
             self.post_order = "desc"
-
         sec_uid = self._extract_sec_uid(profile_url, user_name)
-        if not self.user_provided_cookies:
-            if self.post_order != "desc":
-                self.log.warning(
-                    "%s: no cookies have been provided so the order-posts "
-                    "option will not take effect. You must provide cookies in "
-                    "order to extract a profile's posts in non-descending "
-                    "order",
-                    profile_url
-                )
+
+        # If descending order is requested, opt for the more reliable legacy
+        # endpoint instead of trying with the "newer", flakier endpoint.
+        if self.post_order == "desc":
             return self._extract_posts_api_legacy(
                 profile_url, sec_uid, self.range_predicate)
-        try:
-            return self._extract_posts_api_order(
-                profile_url, sec_uid, self.range_predicate)
-        except Exception as exc:
-            self.log.error(
-                "%s: failed to extract user posts using post/item_list (make "
-                "sure you provide valid cookies). Attempting with legacy "
-                "creator/item_list endpoint that does not support post "
-                "ordering",
+
+        if not self.user_provided_cookies:
+            self.log.warning(
+                "%s: no cookies have been provided so the order-posts "
+                "option will not take effect. You must provide cookies in "
+                "order to extract a profile's posts in non-descending "
+                "order",
                 profile_url
             )
-            self.log.traceback(exc)
             return self._extract_posts_api_legacy(
                 profile_url, sec_uid, self.range_predicate)
+
+        try:
+            urls = self._extract_posts_api_order(
+                profile_url, sec_uid, self.range_predicate)
+            if urls:
+                return urls
+        except Exception as exc:
+            self.log.traceback(exc)
+
+        self.log.error(
+            "%s: failed to extract user posts using post/item_list (make sure "
+            "you provide valid cookies). Attempting with legacy "
+            "creator/item_list endpoint that does not support post ordering",
+            profile_url
+        )
+        return self._extract_posts_api_legacy(
+            profile_url, sec_uid, self.range_predicate)
 
     def _extract_posts_api_order(self, profile_url, sec_uid, range_predicate):
         post_item_list_request_type = "0"
@@ -565,7 +609,8 @@ class TiktokPostsExtractor(TiktokExtractor):
             "needPinnedItemIds": "false",
         }
         request = TiktokPostItemListRequest(range_predicate)
-        request.execute(self, profile_url, query_parameters)
+        if not request.execute(self, profile_url, query_parameters):
+            return []
         return request.generate_urls(profile_url, self.video, self.photo,
                                      self.audio)
 

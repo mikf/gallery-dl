@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"     : "https://weebdex.org/chapter/f6c0awnrba",
     "#class"   : weebdex.WeebdexChapterExtractor,
-    "#pattern" : r"https://s\d+\.notdelta\.xyz/data/f6c0awnrba/\d+-\w{64}\.png",
+    "#pattern" : r"https://s\d+\.weebdex\.net/data/f6c0awnrba/\d+-\w{64}\.png",
     "#count"   : 14,
 
     "artist"       : ["Nokomi (のこみ)"],
@@ -66,7 +66,7 @@ ___
 {
     "#url"     : "https://weebdex.org/chapter/itizot1rxc",
     "#class"   : weebdex.WeebdexChapterExtractor,
-    "#pattern" : r"https://s\d+\.notdelta\.xyz/data/itizot1rxc/\d+\-\w+\.jpg",
+    "#pattern" : r"https://s\d+\.weebdex\.net/data/itizot1rxc/\d+\-\w+\.jpg",
     "#count"   : 17,
 
     "artist"       : ["Matsuda Minoru"],
@@ -83,10 +83,23 @@ ___
     "manga_id"     : "3o0icxno26",
     "origin"       : "ja",
     "title"        : "Cuộc hẹn tại phía Đông vườn địa đàng",
-    "uploader"     : "sMrBjZf",
+    "uploader"     : "wSwPTgL",
     "version"      : 1,
     "volume"       : 2,
     "year"         : 2021,
+},
+
+{
+    "#url"     : "https://weebdex.org/chapter/itizot1rxc",
+    "#comment" : "'data-saver' option (#8914)",
+    "#class"   : weebdex.WeebdexChapterExtractor,
+    "#options" : {"data-saver": True},
+    "#range"   : "1-3",
+    "#results" : (
+        "https://s11.weebdex.net/data/itizot1rxc/1-fa838df3d9b2d16ab3f900a5d74d8e1fe2b15446825978209053297b8e3f7d0d.webp",
+        "https://s11.weebdex.net/data/itizot1rxc/2-b4914436ab21e7915440024a5b5bd705c3a844df314c3c7d722388b3ce81626a.webp",
+        "https://s11.weebdex.net/data/itizot1rxc/3-6b0e1901cfae7d6d5c21769d714c992fb1fa1af6e9e8e10083ea5a6bf5d53cef.webp",
+    ),
 },
 
 {
@@ -111,7 +124,7 @@ ___
     "manga_id"     : "3o0icxno26",
     "origin"       : "ja",
     "status"       : "ongoing",
-    "version"      : {1, 2},
+    "version"      : {1, 2, 3, 4},
     "year"         : 2021,
     "description"  : """\
 My brother died. When I went to visit my brother's grave with my brother's lover——……

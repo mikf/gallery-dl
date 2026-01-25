@@ -54,6 +54,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.furaffinity.net/favorites/mirlinthloth/46682246/next?",
+    "#comment" : "custom start location",
+    "#class"   : furaffinity.FuraffinityFavoriteExtractor,
+    "#auth"    : False,
+    "#range"   : "1-3",
+    "#results" : (
+        "https://d.furaffinity.net/art/kacey/1263424668/1263424668.kacey_mine.jpg",
+        "https://d.furaffinity.net/art/leomon32/1254250660/1254250660.leomon32_high_in_the_sky.jpg",
+        "https://d.furaffinity.net/art/firefoxzero/1262442028/1262442028.firefoxzero_resolute_model_4.png",
+    ),
+},
+
+{
     "#url"     : "https://www.furaffinity.net/search/?q=cute",
     "#category": ("", "furaffinity", "search"),
     "#class"   : furaffinity.FuraffinitySearchExtractor,

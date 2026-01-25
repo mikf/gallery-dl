@@ -200,6 +200,12 @@ https://www.melonbooks.co.jp/detail/detail.php?product_id=1872452""",
 },
 
 {
+    "#url"     : "https://booth.pm/zh-cn/items/1895090",
+    "#comment" : "URL with language code",
+    "#class"   : booth.BoothItemExtractor,
+},
+
+{
     "#url"     : "https://wanoazayaka.booth.pm/",
     "#class"   : booth.BoothShopExtractor,
     "#results" : (
@@ -252,6 +258,22 @@ https://www.melonbooks.co.jp/detail/detail.php?product_id=1872452""",
         "url"          : "https://caramel-crunch.booth.pm/",
         "verified"     : False,
     },
+},
+
+{
+    "#url"     : "https://booth.pm/en/browse/Audio%20Goods?adult=only&max_price=3000",
+    "#class"   : booth.BoothCategoryExtractor,
+    "#pattern" : booth.BoothItemExtractor.pattern,
+    "#range"   : "1-100",
+    "#count"   : 100,
+},
+
+{
+    "#url"     : "https://booth.pm/zh-cn/browse/Books%20(Other)",
+    "#class"   : booth.BoothCategoryExtractor,
+    "#pattern" : booth.BoothItemExtractor.pattern,
+    "#range"   : "1-100",
+    "#count"   : 100,
 },
 
 )

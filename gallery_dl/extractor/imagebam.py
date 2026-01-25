@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2025 Mike Fährmann
+# Copyright 2014-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Extractors for https://www.imagebam.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, exception
 
 
 class ImagebamExtractor(Extractor):
@@ -28,6 +28,8 @@ class ImagebamExtractor(Extractor):
     def _parse_image_page(self, path):
         page = self.request(self.root + path).text
         url, pos = text.extract(page, '<img src="https://images', '"')
+        if not url:
+            raise exception.NotFoundError("image")
         filename = text.unescape(text.extract(page, 'alt="', '"', pos)[0])
 
         return text.nameext_from_name(filename, {
@@ -47,7 +49,7 @@ class ImagebamGalleryExtractor(ImagebamExtractor):
     example = "https://www.imagebam.com/view/GID"
 
     def items(self):
-        page = self.request(self.root + self.path).text
+        page = self.request(self.root + self.path, notfound=True).text
 
         images = self.images(page)
         images.reverse()

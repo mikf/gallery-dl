@@ -39,7 +39,7 @@ class SexcomExtractor(Extractor):
                     pin["date"] = d
             except Exception:
                 pass
-            pin["tags"] = [t[1:] for t in pin["tags"]]
+            pin["tags"] = [t[1:] if t[0] == "@" else t for t in pin["tags"]]
 
             yield Message.Url, url, pin
 

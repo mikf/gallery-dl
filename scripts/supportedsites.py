@@ -42,6 +42,7 @@ CATEGORY_MAP = {
     "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
     "booth"          : "BOOTH",
+    "celebforum"     : "celebforum",
     "cfake"          : "Celebrity Fakes",
     "cien"           : "Ci-en",
     "cohost"         : "cohost!",
@@ -112,7 +113,9 @@ CATEGORY_MAP = {
     "itchio"         : "itch.io",
     "jpgfish"        : "JPG Fish",
     "kabeuchi"       : "かべうち",
+    "kaliscan"       : "KaliScan",
     "mangafire"      : "MangaFire",
+    "mangafreak"     : "MangaFreak",
     "mangareader"    : "MangaReader",
     "mangataro"      : "MangaTaro",
     "s3ndpics"       : "S3ND",
@@ -126,6 +129,7 @@ CATEGORY_MAP = {
     "mangafox"       : "Manga Fox",
     "mangahere"      : "Manga Here",
     "mangakakalot"   : "MangaKakalot",
+    "mangatown"      : "MangaTown",
     "manganato"      : "MangaNato",
     "mangapark"      : "MangaPark",
     "mangaread"      : "MangaRead",
@@ -193,11 +197,13 @@ CATEGORY_MAP = {
     "thebarchive"    : "The /b/ Archive",
     "thecollection"  : "The /co/llection",
     "thecollectionS" : "The /co/llection",
+    "thefap"         : "TheFap",
     "thehentaiworld" : "The Hentai World",
     "tiktok"         : "TikTok",
     "tmohentai"      : "TMOHentai",
     "tumblrgallery"  : "TumblrGallery",
     "turboimagehost" : "TurboImageHost.com",
+    "turbo"          : "turbo.cr",
     "vanillarock"    : "もえぴりあ",
     "vidyart2"       : "/v/idyart2",
     "vidyapics"      : "Vidya Booru",
@@ -265,6 +271,9 @@ SUBCATEGORY_MAP = {
     },
     "boosty": {
         "feed": "Subscriptions Feed",
+    },
+    "booth": {
+        "category": "Item Categories",
     },
     "cfake": {
         "created": "Created",
@@ -464,6 +473,12 @@ SUBCATEGORY_MAP = {
     },
     "wikimedia": {
         "article": ["Articles", "Categories", "Files"],
+    },
+    "xenforo": {
+        "media-user": "User Media",
+        "media-item": "Media Files",
+        "media-category": "Media Categories",
+        "media-album"   : "Albums",
     },
 }
 
