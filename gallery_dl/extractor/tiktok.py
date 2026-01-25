@@ -214,7 +214,7 @@ class TiktokExtractor(Extractor):
             if test.digest() == expected:
                 break
         else:
-            raise exception.ExtractionError("failed to find mstching digest")
+            raise exception.ExtractionError("failed to find matching digest")
 
         # extract cookie names
         wci = text.extr(text.extr(html, 'id="wci"', '>'), 'class="', '"')
