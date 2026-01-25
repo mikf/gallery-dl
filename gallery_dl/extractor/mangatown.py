@@ -26,7 +26,7 @@ class MangatownChapterExtractor(MangatownBase, ChapterExtractor):
 
     def __init__(self, match):
         self.part, self.volume, self.chapter = match.groups()
-        self.base = f"{self.root}/manga/{self.part}/"
+        self.base = self.root + self.part + "/"
         ChapterExtractor.__init__(self, match, self.base + "1.html")
 
     def metadata(self, page):
@@ -55,9 +55,8 @@ class MangatownChapterExtractor(MangatownBase, ChapterExtractor):
         pnum = 1
 
         while True:
-            url, pos = text.extract(page, 'id="image" src="', '"')
-            if not url:
-                url, pos = text.extract(page, '<img src="', '"')
+            url = (text.extr(page, 'id="image" src="', '"') or
+                   text.extr(page, '<img src="', '"'))
             if not url:
                 return
             yield text.ensure_http_scheme(url), None
