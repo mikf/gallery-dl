@@ -417,9 +417,19 @@ class WeiboAlbumExtractor(WeiboExtractor):
             self.kwdict["subalbum"] = data
             yield Message.Directory, "", {}
             for file in files:
-                file["filename"] = file["pid"]
-                file["extension"] = "jpg"
-                yield Message.Url, base + file["pid"], file
+                if "pid" in file:
+                    file["filename"] = file["pid"]
+                    file["extension"] = "jpg"
+                    yield Message.Url, base + file["pid"], file
+                elif "mid" in file:
+                    mid = file["mid"]
+                    status = self._status_by_id(mid)
+                    if status.get("ok") != 1:
+                        self.log.debug("Skipping status %s (%s)", mid, status)
+                    else:
+                        self.statuses = lambda: (status,)
+                        yield from WeiboExtractor.items(self)
+                        yield Message.Directory, "", {}
 
     def statuses(self):
         endpoint = "/profile/getImageWall"
