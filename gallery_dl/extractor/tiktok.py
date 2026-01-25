@@ -867,7 +867,9 @@ class TiktokItemCursor(TiktokPaginationCursor):
         # item list isn't in the response, the extraction was going to fail
         # anyway.
         self.cursor += len(data[self.list_key])
-        return not data.get("hasMore", False)
+        if "hasMore" in data:
+            return data["hasMore"]
+        return not data.get("HasMoreAfter", False)
 
 
 class TiktokPaginationRequest:
