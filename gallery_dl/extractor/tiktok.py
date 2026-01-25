@@ -223,13 +223,15 @@ class TiktokExtractor(Extractor):
         rci = text.extr(text.extr(html, 'id="rci"', '>'), 'class="', '"')
         rs = text.extr(text.extr(html, 'id="rs"', '>'), 'class="', '"')
 
+        # set cookie values
+        domain = self.cookies_domain
+        expires = int(time.time()) + 5
         c["d"] = base64.b64encode(str(i).encode()).decode()
-        self.cookies.set(wci, base64.b64encode(
-            util.json_dumps(c).encode()).decode())
+        self.cookies.set(
+            wci, base64.b64encode(util.json_dumps(c).encode()).decode(),
+            domain=domain, expires=expires)
         if rs:
-            self.cookies.set(rci, rs)
-        self.cookies.set("Max-Age", "1")
-        return
+            self.cookies.set(rci, rs, domain=domain, expires=expires)
 
     def _extract_sec_uid(self, profile_url, user_name):
         sec_uid = self._extract_id(
