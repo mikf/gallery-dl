@@ -160,12 +160,11 @@ class TiktokExtractor(Extractor):
                         self._attempt_to_resolve_challenge(
                             url.rpartition("/")[2], html)
                     except Exception as exc:
-                        self.log.warning("Failed to resolve JavaScript "
-                                         "challenge. If you keep encountering "
-                                         "this issue, please try again with "
-                                         "the --write-pages option and "
-                                         "include the resulting page in your "
-                                         "bug report")
+                        self.log.warning(
+                            "Failed to resolve JavaScript challenge. If you "
+                            "keep encountering this issue, please try again "
+                            "with the --write-pages option and include the "
+                            "resulting page in your bug report")
                         self.log.traceback(exc)
                         self.sleep(self._timeout, "retry")
                     html = None
