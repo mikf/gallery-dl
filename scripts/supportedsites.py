@@ -115,6 +115,7 @@ CATEGORY_MAP = {
     "kabeuchi"       : "かべうち",
     "kaliscan"       : "KaliScan",
     "mangafire"      : "MangaFire",
+    "mangafreak"     : "MangaFreak",
     "mangareader"    : "MangaReader",
     "mangataro"      : "MangaTaro",
     "s3ndpics"       : "S3ND",
