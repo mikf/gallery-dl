@@ -122,7 +122,7 @@ class TiktokExtractor(Extractor):
                                   has_keys=[]):
         tries = 0
         html = None
-        challenge_resolution_attempt_made = False
+        challenge_attempt = False
         while True:
             try:
                 response = self.request(url)
@@ -143,32 +143,31 @@ class TiktokExtractor(Extractor):
                 return data
             except (ValueError, KeyError):
                 # We failed to retrieve rehydration data. This happens
-                # relatively frequently when making many requests, so
-                # retry.
+                # relatively frequently when making many requests, so retry.
                 if tries >= self._retries:
                     raise
                 tries += 1
                 self.log.warning("%s: Failed to retrieve rehydration data "
                                  "(%s/%s)", url.rpartition("/")[2], tries,
                                  self._retries)
-                if challenge_resolution_attempt_made:
+                if challenge_attempt:
                     self.sleep(self._timeout, "retry")
-                    challenge_resolution_attempt_made = False
+                    challenge_attempt = False
                 else:
-                    self.log.info("Attempting to resolve JavaScript challenge")
+                    self.log.info("Solving JavaScript challenge")
                     try:
-                        self._attempt_to_resolve_challenge(
-                            url.rpartition("/")[2], html)
+                        self._solve_challenge(html)
                     except Exception as exc:
+                        self.log.traceback(exc)
                         self.log.warning(
-                            "Failed to resolve JavaScript challenge. If you "
+                            "%s: Failed to solve JavaScript challenge. If you "
                             "keep encountering this issue, please try again "
                             "with the --write-pages option and include the "
-                            "resulting page in your bug report")
-                        self.log.traceback(exc)
+                            "resulting page in your bug report",
+                            url.rpartition("/")[2])
                         self.sleep(self._timeout, "retry")
                     html = None
-                    challenge_resolution_attempt_made = True
+                    challenge_attempt = True
 
     def _extract_rehydration_data_user(self, profile_url, additional_keys=()):
         if profile_url in self.rehydration_data_cache:
@@ -202,7 +201,7 @@ class TiktokExtractor(Extractor):
                 self._extract_rehydration_data_user(
                     "https://www.tiktok.com/", ["webapp.app-context"])
 
-    def _attempt_to_resolve_challenge(self, tiktok_url, html):
+    def _solve_challenge(self, html):
         cs = text.extr(text.extr(html, 'id="cs"', '>'), 'class="', '"')
         cs = base64.b64decode(cs + '==', validate=False).decode()
         c = util.json_loads(cs)
@@ -217,9 +216,9 @@ class TiktokExtractor(Extractor):
             if test.digest() == expected:
                 break
         else:
-            return self.log.error(
-                "%s: Failed to resolve JavaScript challenge", tiktok_url)
+            raise exception.ExtractionError("failed to find mstching digest")
 
+        # extract cookie names
         wci = text.extr(text.extr(html, 'id="wci"', '>'), 'class="', '"')
         rci = text.extr(text.extr(html, 'id="rci"', '>'), 'class="', '"')
         rs = text.extr(text.extr(html, 'id="rs"', '>'), 'class="', '"')
