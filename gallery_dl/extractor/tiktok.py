@@ -36,7 +36,7 @@ class TiktokExtractor(Extractor):
         self.cover = self.config("covers", False)
 
         self.range = self.config("tiktok-range") or ""
-        self.range_predicate = util.predicate_range(self.range)
+        self.range_predicate = util.predicate_range_parse(self.range)
 
     def items(self):
         for tiktok_url in self.posts():
@@ -1137,14 +1137,11 @@ class TiktokItemListRequest(TiktokPaginationRequest):
                                   url, self.type_of_items)
             return True
         if not self.range_predicate:
-            # No range predicate given.
-            return False
-        if len(self.range_predicate.ranges) == 0:
-            # No range predicates given in the predicate object.
+            # No range predicates given.
             return False
         # If our current selection of items can't satisfy the upper bound of
         # the predicate, we must continue extracting them until we can.
-        return len(self.items) > self.range_predicate.upper
+        return len(self.items) > max(r.stop for r in self.range_predicate) - 1
 
     def generate_urls(self, profile_url, video, photo, audio):
         urls = []
@@ -1168,8 +1165,8 @@ class TiktokItemListRequest(TiktokPaginationRequest):
         # First, check if this index falls within any of our configured ranges.
         # If it doesn't, we filter it out.
         if self.range_predicate:
-            range_match = len(self.range_predicate.ranges) == 0
-            for range in self.range_predicate.ranges:
+            range_match = False
+            for range in self.range_predicate:
                 if index in range:
                     range_match = True
                     break
