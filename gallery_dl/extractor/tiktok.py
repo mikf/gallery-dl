@@ -205,11 +205,11 @@ class TiktokExtractor(Extractor):
 
     def _solve_challenge(self, html):
         cs = text.extr(text.extr(html, 'id="cs"', '>'), 'class="', '"')
-        c = util.json_loads(binascii.a2b_base64(cs).decode())
+        c = util.json_loads(binascii.a2b_base64(cs + "==").decode())
 
         # find index of expected digest
-        expected = binascii.a2b_base64(c["v"]["c"])
-        base = hashlib.sha256(binascii.a2b_base64(c["v"]["a"]))
+        expected = binascii.a2b_base64(c["v"]["c"] + "==")
+        base = hashlib.sha256(binascii.a2b_base64(c["v"]["a"] + "=="))
         for idx in range(1_000_000):
             test = base.copy()
             test.update(str(idx).encode())
