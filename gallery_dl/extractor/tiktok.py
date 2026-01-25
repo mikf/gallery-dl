@@ -868,7 +868,7 @@ class TiktokItemCursor(TiktokPaginationCursor):
         # anyway.
         self.cursor += len(data[self.list_key])
         if "hasMore" in data:
-            return data["hasMore"]
+            return not data["hasMore"]
         return not data.get("HasMoreAfter", False)
 
 
