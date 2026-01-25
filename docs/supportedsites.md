@@ -667,6 +667,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
+<tr id="mangafreak" title="mangafreak">
+    <td>MangaFreak</td>
+    <td>https://ww2.mangafreak.me/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
 <tr id="mangapark" title="mangapark">
     <td>MangaPark</td>
     <td>https://mangapark.net/</td>
