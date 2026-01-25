@@ -28,6 +28,7 @@ __tests__ = (
         "https://weibo.com/u/1758989602?tabtype=newVideo",
         "https://weibo.com/u/1758989602?tabtype=article",
         "https://weibo.com/u/1758989602?tabtype=album",
+        "https://weibo.com/u/1758989602?tabtype=album-only",
     ),
 },
 
