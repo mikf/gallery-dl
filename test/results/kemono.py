@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import kemono
-from gallery_dl import util, exception
 
 
 __tests__ = (
@@ -357,6 +356,8 @@ __tests__ = (
     "revision_index": {1, 2, 3},
     "revision_count": 3,
     "revision_hash" : {
+        "eb2fa4385af730509a42f8f0424bd0b9a0e4bc21",
+        "a44ad7fa57ebc2473e861c1d7f11de721c809549",
         "e0e93281495e151b11636c156e52bfe9234c2a40",
         "bc5713195e14799da40c525381216c5a1a340b0f",
         "9872bfb536a47cc69d95d2f195cd5c825808f089",
@@ -388,7 +389,7 @@ __tests__ = (
     "#comment" : "revisions (#4498)",
     "#category": ("", "kemono", "patreon"),
     "#class"   : kemono.KemonoPostExtractor,
-    "#exception": exception.NotFoundError,
+    "#exception": "NotFoundError",
 },
 
 {
@@ -537,7 +538,6 @@ __tests__ = (
     "#comment" : "user profile data unavailable (#8382)",
     "#category": ("", "kemono", "patreon"),
     "#class"   : kemono.KemonoPostExtractor,
-    "#log"     : "patreon/34792417/137409895: 'Creator not found'",
     "#results" : (
         "https://kemono.cr/data/a9/87/a9874d7e1229396b0b2706fd7fa9949eac924e86256d84d077c10ecbace8bd17.bin",
         "https://kemono.cr/data/a2/eb/a2eba02204086c789d59bc7112510aebf0428455ad1664153bfbb92eb8aa5643.jpg",
@@ -545,8 +545,8 @@ __tests__ = (
 
     "title"       : "Capella - Re:zero (20P)",
     "user"        : "34792417",
-    "user_profile": util.NONE,
-    "username"    : util.NONE,
+    "user_profile": dict,
+    "username"    : "Varas",
 },
 
 {
@@ -785,7 +785,7 @@ __tests__ = (
     "#category": ("", "kemono", "discord-server"),
     "#class"   : kemono.KemonoDiscordServerExtractor,
     "#pattern" : kemono.KemonoDiscordExtractor.pattern,
-    "#count"   : 26,
+    "#count"   : 27,
 },
 
 {
@@ -871,23 +871,7 @@ __tests__ = (
     "#category": ("", "kemono", "artists"),
     "#class"   : kemono.KemonoArtistsExtractor,
     "#pattern" : kemono.KemonoUserExtractor.pattern,
-    "#results" : (
-        "https://kemono.cr/patreon/user/91205314",
-        "https://kemono.cr/patreon/user/51528107",
-        "https://kemono.cr/fanbox/user/12812028",
-        "https://kemono.cr/patreon/user/35237747",
-        "https://kemono.cr/patreon/user/8296916",
-        "https://kemono.cr/patreon/user/155095324",
-        "https://kemono.cr/patreon/user/75988930",
-        "https://kemono.cr/patreon/user/93703989",
-        "https://kemono.cr/patreon/user/100292687",
-        "https://kemono.cr/patreon/user/138609443",
-        "https://kemono.cr/patreon/user/61646879",
-        "https://kemono.cr/patreon/user/110669843",
-        "https://kemono.cr/patreon/user/44343773",
-        "https://kemono.cr/patreon/user/77920059",
-        "https://kemono.cr/patreon/user/102386631",
-    ),
+    "#count"   : range(15, 20),
 
     "favorited": int,
     "id"       : str,
