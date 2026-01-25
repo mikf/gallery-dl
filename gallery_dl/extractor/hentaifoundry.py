@@ -134,7 +134,7 @@ class HentaifoundryExtractor(Extractor):
 
         for c in ("Chapters", "Words", "Comments", "Views", "Rating"):
             data[c.lower()] = text.parse_int(extr(
-                ">" + c + ":</span>", "<").replace(",", ""))
+                f">{c}:</span>", "<").replace(",", ""))
 
         data["description"] = text.unescape(extr(
             "class='storyDescript'>", '<div class="storyRead">')).replace(
@@ -221,14 +221,10 @@ class HentaifoundryUserExtractor(Dispatch, HentaifoundryExtractor):
         root = self.root
         user = "/user/" + self.user
         return self._dispatch_extractors((
-            (HentaifoundryPicturesExtractor ,
-                root + "/pictures" + user),
-            (HentaifoundryScrapsExtractor,
-                root + "/pictures" + user + "/scraps"),
-            (HentaifoundryStoriesExtractor,
-                root + "/stories" + user),
-            (HentaifoundryFavoriteExtractor,
-                root + user + "/faves/pictures"),
+            (HentaifoundryPicturesExtractor, f"{root}/pictures{user}"),
+            (HentaifoundryScrapsExtractor  , f"{root}/pictures{user}/scraps"),
+            (HentaifoundryStoriesExtractor , f"{root}/stories{user}"),
+            (HentaifoundryFavoriteExtractor, f"{root}{user}/faves/pictures"),
         ), ("pictures",))
 
 
