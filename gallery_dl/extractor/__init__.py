@@ -127,6 +127,7 @@ modules = [
     "mangadex",
     "mangafire",
     "mangafox",
+    "mangafreak",
     "mangahere",
     "manganelo",
     "mangapark",
