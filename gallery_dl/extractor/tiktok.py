@@ -203,50 +203,34 @@ class TiktokExtractor(Extractor):
                     "https://www.tiktok.com/", ["webapp.app-context"])
 
     def _attempt_to_resolve_challenge(self, tiktok_url, html):
-        rci = text.extr(html, 'id="rci"', '>')
-        rci = text.extr(rci, 'class="', '"')
-        rs = text.extr(html, 'id="rs"', '>')
-        rs = text.extr(rs, 'class="', '"')
-        wci = text.extr(html, 'id="wci"', '>')
-        wci = text.extr(wci, 'class="', '"')
-        cs = text.extr(html, 'id="cs"', '>')
-        cs = text.extr(cs, 'class="', '"')
+        cs = text.extr(text.extr(html, 'id="cs"', '>'), 'class="', '"')
         cs = base64.b64decode(cs + '==', validate=False).decode()
         c = util.json_loads(cs)
-        prefix = [int(b) for b in base64.b64decode(c["v"]["a"] + '==',
-                                                   validate=False)]
-        cvc = base64.b64decode(c["v"]["c"] + '==', validate=False)
-        expect = "".join([hex(byte)[2:].rjust(2, "0") for byte in cvc])
 
-        def s256(s1, s2):
-            s = [ord(s2char) for s2char in s2]
-            sha = hashlib.sha256()
-            sha.update(s1)
-            sha.update(s)
-            digest = sha.digest()
-            for i in range(len(digest)):
-                res = []
-                c = digest[i]
-                if c < 0:
-                    c += 256
-                res.append(hex(c >> 4)[2:])
-                res.append(hex(c & 0xf)[2:])
-                digest[i] = "".join(res)
-            return "".join(digest)
+        expected = base64.b64decode(c["v"]["c"] + '==', validate=False)
+        base = hashlib.sha256(base64.b64decode(
+            c["v"]["a"] + '==', validate=False))
 
-        # The original code has 1_000_000 iterations, which is far too many.
-        for i in range(20_000):
-            if (expect == s256(prefix, str(i))):
-                c["d"] = base64.b64encode(str(i).encode()).decode()
-                self.cookies.set(wci, base64.b64encode(
-                    util.json_dumps(c).encode()).decode())
-                if rs:
-                    self.cookies.set(rci, rs)
-                self.cookies.set("Max-Age", "1")
-                return
+        for i in range(1_000_000):
+            test = base.copy()
+            test.update(str(i).encode())
+            if test.digest() == expected:
+                break
+        else:
+            return self.log.error(
+                "%s: Failed to resolve JavaScript challenge", tiktok_url)
 
-        self.log.error("%s: Failed to resolve JavaScript challenge",
-                       tiktok_url)
+        wci = text.extr(text.extr(html, 'id="wci"', '>'), 'class="', '"')
+        rci = text.extr(text.extr(html, 'id="rci"', '>'), 'class="', '"')
+        rs = text.extr(text.extr(html, 'id="rs"', '>'), 'class="', '"')
+
+        c["d"] = base64.b64encode(str(i).encode()).decode()
+        self.cookies.set(wci, base64.b64encode(
+            util.json_dumps(c).encode()).decode())
+        if rs:
+            self.cookies.set(rci, rs)
+        self.cookies.set("Max-Age", "1")
+        return
 
     def _extract_sec_uid(self, profile_url, user_name):
         sec_uid = self._extract_id(
