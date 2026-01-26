@@ -105,6 +105,7 @@ class FanslyExtractor(Extractor):
             (fmts is None or type in fmts)
         ]
 
+        # TODO: check post["deleted"] and/or post["deletedAt"] (bookmarks) for better error reporting
         try:
             variant = max(formats)[-1]
         except Exception:
@@ -212,6 +213,57 @@ class FanslyListsExtractor(FanslyExtractor):
             yield Message.Queue, url, list
 
 
+class FanslyBookmarkExtractor(FanslyExtractor):
+    subcategory = "bookmark"
+    pattern = rf"{BASE_PATTERN}/bookmarks/(\d+)#(\w+)?"
+    example = "https://fansly.com/bookmarks/1234567890"
+    directory_fmt = ("{category}", "[Bookmarks] {title} ({id})", "{accountId}")
+    filename_fmt = "{id}_{num}_{file[id]}.{extension}"
+    archive_fmt = "{id}_{num}_{file[id]}_bookmark"
+
+    def items(self):
+        album = {
+            "id": self.groups[0],
+            "title": self.groups[1] or "untitled",
+        }
+
+        for media in self.api.uservault_album_content(album["id"]):
+            files = []
+            try:
+                self._extract_attachment(files, media, media)
+            except Exception as exc:
+                self.log.traceback(exc)
+                self.log.error(
+                    "%s/%s, Failed to extract media (%s: %s)",
+                    media["id"], media["media"].get("id"),
+                    exc.__class__.__name__, exc)
+
+            album["bookmarkId"] = media["id"]
+            album["accountId"] = media["accountId"]
+            # TODO: pull account info by id for directory/file formatting
+
+            yield Message.Directory, "", album
+            
+            for media["num"], file in enumerate(files, 1):
+                media.update(file)
+                url = file["url"]
+                file["album"] = album
+                yield Message.Url, url, text.nameext_from_url(url, media)
+
+
+class FanslyBookmarksExtractor(FanslyExtractor):
+    subcategory = "bookmarks"
+    pattern = rf"{BASE_PATTERN}/bookmarks"
+    example = "https://fansly.com/bookmarks"
+
+    def items(self):
+        base = f"{self.root}/bookmarks/"
+        for album in self.api.uservault_albumsnew()["albums"]:
+            album["_extractor"] = FanslyBookmarkExtractor
+            url = f"{base}{album['id']}#{album['title']}"
+            yield Message.Queue, url, album
+
+
 class FanslyCreatorPostsExtractor(FanslyExtractor):
     subcategory = "creator-posts"
     pattern = BASE_PATTERN + r"/([^/?#]+)/posts(?:/wall/(\d+))?"
@@ -286,6 +338,22 @@ class FanslyAPI():
             "sortMode": sort,
         }
         return self._pagination_list(endpoint, params)
+    
+    def uservault_albumsnew(self):
+        endpoint = "/v1/uservault/albumsnew"
+        params = {"accountId": ""}
+        return self._call(endpoint, params)
+
+    def uservault_album_content(self, album_id):
+        endpoint = "/v1/uservault/album/content"
+        params = {
+            "albumId": album_id,
+            "before": "0",
+            "after" : "0",
+            "limit" : "25",
+            "offset": "0",
+        }
+        return self._pagination_album(endpoint, params)
 
     def mediaoffers_location(self, account_id, wall_id):
         endpoint = "/v1/mediaoffers/location"
@@ -435,3 +503,30 @@ class FanslyAPI():
                 return
             yield from self._update_media(data, response["aggregationData"])
             params["before"] = data[-1]["id"]
+    
+    def _pagination_album(self, endpoint, params):
+        while True:
+            response = self._call(endpoint, params)
+            if not response:
+                return
+            
+            data = response["albumContent"]
+            if not data:
+                return
+            yield from self._update_album_media(response["aggregationData"])
+            params["before"] = data[-1]["id"]
+
+    # TODO: evaluate if media bundles provide any additional info
+    def _update_album_media(self, response):
+        #media = {
+        #    media["id"]: media
+        #    for media in response["accountMedia"]
+        #}
+        #bundles = {
+        #    bundle["id"]: bundle
+        #    for bundle in response["accountMediaBundles"]
+        #}
+
+        #return media, bundles
+
+        return response["accountMedia"]
