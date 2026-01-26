@@ -913,7 +913,7 @@ class TiktokItemCursor(TiktokPaginationCursor):
         # Sometimes less items are returned than what was requested in the
         # count parameter! We could fall back onto the count query parameter
         # but we could miss out on some posts.
-        self.cursor += len(data.get(self.list_key, []))
+        self.cursor += len(data.get(self.list_key, ()))
         if "hasMore" in data:
             return not data["hasMore"]
         return not data.get("HasMoreAfter", False)
