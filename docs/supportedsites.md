@@ -613,6 +613,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries</td>
     <td></td>
 </tr>
+<tr id="listal" title="listal">
+    <td>Listal</td>
+    <td>https://listal.com</td>
+    <td>individual Images, People</td>
+    <td></td>
+</tr>
 <tr id="livedoor" title="livedoor">
     <td>livedoor Blog</td>
     <td>http://blog.livedoor.jp/</td>
