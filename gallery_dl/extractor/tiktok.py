@@ -10,6 +10,8 @@ from .common import Extractor, Message, Dispatch
 from .. import text, util, ytdl, exception
 import functools
 import itertools
+import binascii
+import hashlib
 import random
 import time
 
@@ -121,6 +123,8 @@ class TiktokExtractor(Extractor):
     def _extract_rehydration_data(self, url, additional_keys=[], *,
                                   has_keys=[]):
         tries = 0
+        html = None
+        challenge_attempt = False
         while True:
             try:
                 response = self.request(url)
@@ -141,15 +145,31 @@ class TiktokExtractor(Extractor):
                 return data
             except (ValueError, KeyError):
                 # We failed to retrieve rehydration data. This happens
-                # relatively frequently when making many requests, so
-                # retry.
+                # relatively frequently when making many requests, so retry.
                 if tries >= self._retries:
                     raise
                 tries += 1
                 self.log.warning("%s: Failed to retrieve rehydration data "
                                  "(%s/%s)", url.rpartition("/")[2], tries,
                                  self._retries)
-                self.sleep(self._timeout, "retry")
+                if challenge_attempt:
+                    self.sleep(self._timeout, "retry")
+                    challenge_attempt = False
+                else:
+                    self.log.info("Solving JavaScript challenge")
+                    try:
+                        self._solve_challenge(html)
+                    except Exception as exc:
+                        self.log.traceback(exc)
+                        self.log.warning(
+                            "%s: Failed to solve JavaScript challenge. If you "
+                            "keep encountering this issue, please try again "
+                            "with the --write-pages option and include the "
+                            "resulting page in your bug report",
+                            url.rpartition("/")[2])
+                        self.sleep(self._timeout, "retry")
+                    html = None
+                    challenge_attempt = True
 
     def _extract_rehydration_data_user(self, profile_url, additional_keys=()):
         if profile_url in self.rehydration_data_cache:
@@ -182,6 +202,35 @@ class TiktokExtractor(Extractor):
             self.rehydration_data_app_context_cache = \
                 self._extract_rehydration_data(
                     "https://www.tiktok.com/", ["webapp.app-context"])
+
+    def _solve_challenge(self, html):
+        cs = text.extr(text.extr(html, 'id="cs"', '>'), 'class="', '"')
+        c = util.json_loads(binascii.a2b_base64(cs + "==").decode())
+
+        # find index of expected digest
+        expected = binascii.a2b_base64(c["v"]["c"] + "==")
+        base = hashlib.sha256(binascii.a2b_base64(c["v"]["a"] + "=="))
+        for idx in range(1_000_000):
+            test = base.copy()
+            test.update(str(idx).encode())
+            if test.digest() == expected:
+                break
+        else:
+            raise exception.ExtractionError("failed to find matching digest")
+
+        # extract cookie names
+        wci = text.extr(text.extr(html, 'id="wci"', '>'), 'class="', '"')
+        rci = text.extr(text.extr(html, 'id="rci"', '>'), 'class="', '"')
+        rs = text.extr(text.extr(html, 'id="rs"', '>'), 'class="', '"')
+
+        # set cookie values
+        domain = self.cookies_domain
+        expires = int(time.time()) + 5
+        c["d"] = binascii.b2a_base64(str(idx).encode(), newline=False).decode()
+        v = binascii.b2a_base64(util.json_dumps(c).encode(), newline=False)
+        self.cookies.set(wci, v.decode(), domain=domain, expires=expires)
+        if rs:
+            self.cookies.set(rci, rs, domain=domain, expires=expires)
 
     def _extract_sec_uid(self, profile_url, user_name):
         sec_uid = self._extract_id(
