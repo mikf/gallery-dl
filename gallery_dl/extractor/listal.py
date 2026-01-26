@@ -5,7 +5,6 @@
 # published by the Free Software Foundation.
 
 """Extractors for https://listal.com"""
-import re
 
 from .common import Extractor, Message
 from .. import text
@@ -23,9 +22,7 @@ class ListalExtractor(Extractor):
     archive_fmt = "{id}/{url_filename}"
 
     def _pagination(self, base_url, pnum=None):
-        page_pattern = text.re(r"^(.*)/(\d+)$")
-        match = re.search(page_pattern, base_url)
-        if match:
+        if match := text.re(r"^(.*)/(\d+)$").search(base_url):
             pnum = int(match.group(2))
             url = base_url
             base_url = match.group(1)
