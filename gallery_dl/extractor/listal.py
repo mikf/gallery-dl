@@ -8,7 +8,6 @@
 
 from .common import Extractor, Message
 from .. import text
-from datetime import datetime
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?listal\.com"
 
@@ -50,9 +49,8 @@ class ListalExtractor(Extractor):
         return url
 
     def _extract_date(self, page):
-        date_text = text.extract(page, " ago on ", "</span>")[0]
-        date = datetime.strptime(date_text, "%d %B %Y %H:%M")
-        return date
+        date_text = text.extr(page, " ago on ", "</span>")
+        return self.parse_datetime(date_text, "%d %B %Y %H:%M")
 
     def _extract_metadata_from_viewimage(self, page):
         id = text.extract(page, "data-id='", "'>")[0]
