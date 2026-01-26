@@ -126,15 +126,16 @@ def _manga_info(self, mid):
     rel = manga["relationships"]
 
     return {
-        "manga"   : manga["title"],
-        "manga_id": manga["id"],
-        "manga_date": self.parse_datetime_iso(manga["created_at"]),
-        "year"    : manga["year"],
-        "status"  : manga["status"],
-        "origin"  : manga["language"],
-        "description": manga["description"],
-        "demographic": manga["demographic"],
-        "tags"    : [f"{t['group']}:{t['name']}" for t in rel["tags"]],
-        "author"  : [a["name"] for a in rel["authors"]],
-        "artist"  : [a["name"] for a in rel["artists"]],
+        "manga"   : manga.get("title"),
+        "manga_id": manga.get("id"),
+        "manga_date": self.parse_datetime_iso(manga.get("created_at")),
+        "year"    : manga.get("year"),
+        "status"  : manga.get("status"),
+        "origin"  : manga.get("language"),
+        "description": manga.get("description"),
+        "demographic": manga.get("demographic"),
+        "tags"    : [f"{t['group']}:{t['name']}"
+                     for t in rel.get("tags") or ()],
+        "author"  : [a["name"] for a in rel.get("authors") or ()],
+        "artist"  : [a["name"] for a in rel.get("artists") or ()],
     }
