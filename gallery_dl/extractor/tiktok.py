@@ -912,10 +912,8 @@ class TiktokItemCursor(TiktokPaginationCursor):
         # We should offset the cursor by the number of items in the response.
         # Sometimes less items are returned than what was requested in the
         # count parameter! We could fall back onto the count query parameter
-        # but we could miss out on some posts, and truth is if the expected
-        # item list isn't in the response, the extraction was going to fail
-        # anyway.
-        self.cursor += len(data[self.list_key])
+        # but we could miss out on some posts.
+        self.cursor += len(data.get(self.list_key, ()))
         if "hasMore" in data:
             return not data["hasMore"]
         return not data.get("HasMoreAfter", False)
