@@ -199,6 +199,7 @@ modules = [
     "smugmug",
     "soundgasm",
     "speakerdeck",
+    "steamcommunity",
     "steamgriddb",
     "subscribestar",
     "sxypix",
