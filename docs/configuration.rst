@@ -212,12 +212,34 @@ Description
     Specifying a default |Path|_ with ``""`` is required.
 
 
+extractor.*.parent
+------------------
+Type
+    ``bool``
+Default
+    ``true``
+        ``[chevereto]`` |
+        ``erome``       |
+        ``[imagehost]``
+    ``false``
+        otherwise
+Description
+    Mark an extractor as a `parent` and enable
+
+    * `parent-directory <extractor.*.parent-directory_>`__
+    * `parent-metadata  <extractor.*.parent-metadata_>`__
+    * `parent-session   <extractor.*.parent-session_>`__
+    * `parent-skip      <extractor.*.parent-skip_>`__
+
+    for it by default.
+
+
 extractor.*.parent-directory
 ----------------------------
 Type
     ``bool``
 Default
-    ``false``
+    `extractor.parent <extractor.*.parent_>`__
 Description
     Use an extractor's current target directory as
     base-directory_ for any spawned child extractors.
@@ -231,11 +253,7 @@ Type
     * ``bool``
     * ``string``
 Default
-    ``true``
-        ``[chevereto]`` |
-        ``[imagehost]``
-    ``false``
-        otherwise
+    `extractor.parent <extractor.*.parent_>`__
 Description
     Forward a parent's metadata to its child extractors.
 
@@ -256,11 +274,7 @@ extractor.*.parent-session
 Type
     ``bool``
 Default
-    ``true``
-        ``[chevereto]`` |
-        ``[imagehost]``
-    ``false``
-        otherwise
+    `extractor.parent <extractor.*.parent_>`__
 Description
     Share a parent's
     `session <https://requests.readthedocs.io/en/latest/user/advanced/#session-objects>`__
@@ -275,7 +289,7 @@ extractor.*.parent-skip
 Type
     ``bool``
 Default
-    ``false``
+    `extractor.parent <extractor.*.parent_>`__
 Description
     Share number of skipped downloads between parent and child extractors.
 

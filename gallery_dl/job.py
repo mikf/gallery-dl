@@ -440,14 +440,15 @@ class DownloadJob(Job):
             job = self.__class__(extr, self)
             pfmt = self.pathfmt
             pextr = self.extractor
+            parent = pextr.config("parent", pextr.parent)
 
-            if pfmt and pextr.config("parent-directory"):
+            if pfmt and pextr.config("parent-directory", parent):
                 extr._parentdir = pfmt.directory
             else:
                 extr._parentdir = pextr._parentdir
 
             if pmeta := pextr.config2(
-                    "parent-metadata", "metadata-parent", pextr.parent):
+                    "parent-metadata", "metadata-parent", parent):
                 if isinstance(pmeta, str):
                     data = self.kwdict.copy()
                     if kwdict:
@@ -459,12 +460,12 @@ class DownloadJob(Job):
                     if kwdict:
                         job.kwdict.update(kwdict)
 
-            if pextr.config("parent-session", pextr.parent):
+            if pextr.config("parent-session", parent):
                 extr.session = pextr.session
 
             while True:
                 try:
-                    if pextr.config("parent-skip"):
+                    if pextr.config("parent-skip", parent):
                         job._skipcnt = self._skipcnt
                         status = job.run()
                         self._skipcnt = job._skipcnt
