@@ -1951,6 +1951,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
     <td></td>
 </tr>
+<tr id="titsintops" title="titsintops">
+    <td>Tits In Tops Forum</td>
+    <td>https://titsintops.com/phpBB2/</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td></td>
+</tr>
 
 <tr id="moebooru" title="moebooru">
     <td colspan="4"><strong>Moebooru and MyImouto</strong></td>
