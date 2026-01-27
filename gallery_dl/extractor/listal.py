@@ -17,15 +17,19 @@ class ListalExtractor(Extractor):
     category = "listal"
     root = "https://www.listal.com"
     directory_fmt = ("{category}", "{title}")
-    filename_fmt = "{id}_{url_filename}.{extension}"
-    archive_fmt = "{id}/{url_filename}"
+    filename_fmt = "{id}_{filename}.{extension}"
+    archive_fmt = "{id}/{filename}"
+
+    def items(self):
+        for image_id in self.image_ids():
+            img = self._extract_image(image_id)
+            url = img["url"]
+            text.nameext_from_url(url, img)
+            yield Message.Directory, "", img
+            yield Message.Url, url, img
 
     def _pagination(self, base_url, pnum=None):
-        if match := text.re(r"^(.*)/(\d+)$").search(base_url):
-            pnum = int(match.group(2))
-            url = base_url
-            base_url = match.group(1)
-        elif pnum is None:
+        if pnum is None:
             url = base_url
             pnum = 1
         else:
@@ -41,74 +45,41 @@ class ListalExtractor(Extractor):
             pnum += 1
             url = f"{base_url}/{pnum}"
 
-    def _hires_viewer_url(self, url):
-        """This adds h after the url
-        to get the largest size available picture"""
-        if not url.endswith("h"):
-            url += "h"
-        return url
+    def _extract_image(self, image_id):
+        url = f"{self.root}/viewimage/{image_id}h"
+        page = self.request(url).text
+        extr = text.extract_from(page)
 
-    def _extract_date(self, page):
-        date_text = text.extr(page, " ago on ", "</span>")
-        return self.parse_datetime(date_text, "%d %B %Y %H:%M")
-
-    def _extract_metadata_from_viewimage(self, page):
-        id = text.extract(page, "data-id='", "'>")[0]
-        metadata = {"id": id}
-        author_link = text.extract(page, "Added by <a href='", "</a>")[0]
-        metadata["author_url"] = author_link.replace("'>", "")
-        author_name = text.extract(author_link, "'>", "")[0]
-        metadata["author"] = author_name
-        title = text.extract(page, 'title="', '"')[0]
-        metadata["title"] = title
-        date = self._extract_date(page)
-        metadata["date"] = date
-        width = text.extract(page, 'width="', '"')[0]
-        metadata["width"] = width
-        height = text.extract(page, 'height="', '"')[0]
-        metadata["height"] = height
-        img_url = text.extract(page, "<div><center><img src='https://", "'")[0]
-        img_url = "https://" + img_url
-        metadata["url"] = img_url
-        url_filename, extension = img_url.split("/")[-1].rsplit(".", 1)
-        metadata["url_filename"] = url_filename
-        metadata["extension"] = extension
-        return metadata
-
-    def _extract_picture(self, view_image_url):
-        """This extracts photo from the viewimage url scheme"""
-        page = self.request(view_image_url).text
-        metadata = self._extract_metadata_from_viewimage(page)
-        return metadata
+        return {
+            "id"        : image_id,
+            "url"       : extr("<div><center><img src='", "'"),
+            "title"     : text.unescape(extr('title="', '"')),
+            "width"     : text.parse_int(extr("width='", "'")),
+            "height"    : text.parse_int(extr("height='", "'")),
+            "author_url": extr("Added by <a href='", "'"),
+            "author"    : text.unescape(extr(">", "<")),
+            "date"      : self.parse_datetime(extr(
+                " ago on ", "<"), "%d %B %Y %H:%M"),
+        }
 
 
 class ListalImageExtractor(ListalExtractor):
     """Extractor for listal pictures"""
     subcategory = "image"
-    pattern = BASE_PATTERN + r"/viewimage/\d+h?"
+    pattern = BASE_PATTERN + r"/viewimage/(\d+)"
     example = "https://www.listal.com/viewimage/12345678"
 
-    def items(self):
-        url = self._hires_viewer_url(self.url)
-        page = self.request(url).text
-        metadata = self._extract_metadata_from_viewimage(page)
-        yield Message.Directory, "", metadata
-        yield Message.Url, metadata["url"], metadata
+    def image_ids(self):
+        return (self.groups[0],)
 
 
 class ListalPeopleExtractor(ListalExtractor):
-    """Extractor for listal people"""
+    """Extractor for listal people pictures"""
     subcategory = "people"
-    pattern = BASE_PATTERN + r"/[^/?#]+/pictures"
+    pattern = BASE_PATTERN + r"/([^/?#]+)/pictures"
     example = "https://www.listal.com/NAME/pictures"
 
-    def items(self):
-        for page in self._pagination(self.url):
-            for image_id in text.extract_iter(
-                    page, "listal.com/viewimage/", ">"):
-                image_id = image_id.replace("'", "").replace('"', "")
-                image_viewer_url = ("https://www.listal.com/viewimage/" +
-                                    self._hires_viewer_url(image_id))
-                metadata = self._extract_picture(image_viewer_url)
-                yield Message.Directory, "", metadata
-                yield Message.Url, metadata["url"], metadata
+    def image_ids(self):
+        url = f"{self.root}/{self.groups[0]}/pictures"
+        for page in self._pagination(url):
+            yield from text.extract_iter(page, "listal.com/viewimage/", "'")
