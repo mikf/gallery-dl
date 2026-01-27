@@ -119,6 +119,7 @@ modules = [
     "lensdump",
     "lexica",
     "lightroom",
+    "listal",
     "livedoor",
     "lofter",
     "luscious",
