@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2025 Mike Fährmann
+# Copyright 2021-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,6 +22,7 @@ class EromeExtractor(Extractor):
     filename_fmt = "{album_id} {title} {num:>02}.{extension}"
     archive_fmt = "{album_id}_{num}"
     root = "https://www.erome.com"
+    parent = True
     _cookies = True
 
     def items(self):
