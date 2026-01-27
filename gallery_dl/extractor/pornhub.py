@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2025 Mike Fährmann
+# Copyright 2019-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -85,7 +85,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
         extr = text.extract_from(self.request(url).text)
 
         title = extr("<title>", "</title>")
-        self._token = extr('name="token" value="', '"')
+        self._token = extr('data-token="', '"')
         score = extr('<div id="albumGreenBar" style="width:', '"')
         views = extr('<div id="viewsPhotAlbumCounter">', '<')
         tags = extr('<div id="photoTagsBox"', '<script')
