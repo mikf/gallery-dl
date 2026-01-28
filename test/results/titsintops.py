@@ -61,6 +61,34 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://titsintops.com/phpBB2/threads/sofi_zeus-sexy-curvy-big-titty-camgirl.13586747/post-3443278",
+    "#comment" : "video attachment (#8947)",
+    "#category": ("xenforo", "titsintops", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+    "#auth"    : True,
+    "#results" : (
+        "https://chaturbate.com/sofi_zeus/",
+        "https://titsintops.com/phpBB2/data/video/6436/6436292-e23925aebd8cd253097bbee0f884cf52.mp4?hash=wbvMEhEJZC",
+        "https://titsintops.com/phpBB2/attachments/sofi-webp.6512452/",
+    ),
+
+    "thread"      : {
+        "author"     : "monsieurmoose",
+        "author_id"  : "1358306",
+        "author_slug": "monsieurmoose",
+        "author_url" : "https://titsintops.com/phpBB2/members/monsieurmoose.1358306/",
+        "date"       : "dt:2026-01-16 16:34:59",
+        "id"         : "13586747",
+        "posts"      : int,
+        "section"    : "Busty Amateurs",
+        "tags"       : (),
+        "title"      : "sofi_zeus - sexy curvy big titty camgirl",
+        "url"        : "https://titsintops.com/phpBB2/threads/sofi_zeus-sexy-curvy-big-titty-camgirl.13586747/",
+        "views"      : int,
+    },
+},
+
+{
     "#url"     : "https://titsintops.com/phpBB2/threads/mia-big-titty-boston-blonde.13575039/",
     "#category": ("xenforo", "titsintops", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,

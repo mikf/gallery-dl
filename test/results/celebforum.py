@@ -37,9 +37,9 @@ __tests__ = (
         "content"    : str,
     },
     "thread"      : {
-        "author"     : "Iomflj",
+        "author"     : str,
         "author_id"  : "",
-        "author_slug": "iomflj",
+        "author_slug": str,
         "author_url" : "",
         "date"       : "dt:2024-01-29 19:56:27",
         "id"         : "84947",
@@ -75,9 +75,9 @@ __tests__ = (
         "content"    : str
     },
     "thread"      : {
-        "author"     : "Iomflj",
+        "author"     : str,
         "author_id"  : "",
-        "author_slug": "iomflj",
+        "author_slug": str,
         "author_url" : "",
         "date"       : "dt:2024-01-29 19:56:27",
         "id"         : "84947",

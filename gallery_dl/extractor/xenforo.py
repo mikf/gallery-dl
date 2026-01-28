@@ -46,7 +46,9 @@ class XenforoExtractor(BaseExtractor):
         for post in self.posts():
             urls = extract_urls(post["content"])
             if post["attachments"]:
-                urls.extend(extract_urls(post["attachments"]))
+                for att in text.extract_iter(
+                        post["attachments"], "<li", "</li>"):
+                    urls.append((None, att[att.find('href="')+6:], None, None))
 
             data = {"post": post}
             post["count"] = data["count"] = len(urls)
@@ -93,7 +95,8 @@ class XenforoExtractor(BaseExtractor):
                             continue
                         else:
                             id_last = id
-                    if alt := text.extr(inline, 'alt="', '"'):
+                    if alt := (text.extr(inline, 'alt="', '"') or
+                               text.extr(inline, 'title="', '"')):
                         text.nameext_from_name(alt, data)
                         if not data["extension"]:
                             data["extension"] = name.rpartition("-")[2]
