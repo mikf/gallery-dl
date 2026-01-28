@@ -90,6 +90,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://exhentai.org/mpv/1200119/d55c44d3d0/",
+    "#class"   : exhentai.ExhentaiGalleryExtractor,
+},
+
+{
+    "#url"     : "https://exhentai.org/mpv/1200119/d55c44d3d0/#page3",
+    "#class"   : exhentai.ExhentaiGalleryExtractor,
+},
+
+{
     "#url"     : "https://e-hentai.org/?f_search=touhou",
     "#category": ("", "exhentai", "search"),
     "#class"   : exhentai.ExhentaiSearchExtractor,

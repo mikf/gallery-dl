@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2025 Mike Fährmann
+# Copyright 2014-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -116,21 +116,22 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
     """Extractor for image galleries from exhentai.org"""
     subcategory = "gallery"
     pattern = (BASE_PATTERN +
-               r"(?:/g/(\d+)/([\da-f]{10})"
-               r"|/s/([\da-f]{10})/(\d+)-(\d+))")
+               r"(?:/(?:g|mpv)/(\d+)/([0-9a-f]{10})(?:/#page(\d+))?"
+               r"|/s/([0-9a-f]{10})/(\d+)-(\d+))")
     example = "https://e-hentai.org/g/12345/67890abcde/"
 
     def __init__(self, match):
         ExhentaiExtractor.__init__(self, match)
-        self.gallery_id = text.parse_int(match[2] or match[5])
+        self.gallery_id = text.parse_int(match[2] or match[6])
         self.gallery_token = match[3]
-        self.image_token = match[4]
-        self.image_num = text.parse_int(match[6], 1)
+        self.image_token = match[5]
+        self.image_num = text.parse_int(match[4] or match[7], 1)
         self.key_start = None
         self.key_show = None
         self.key_next = None
         self.count = 0
         self.data = None
+        self.mpv = False
 
     def _init(self):
         source = self.config("source")
@@ -150,7 +151,15 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.original = self.config("original", True)
 
     def finalize(self):
-        if self.data and (token := self.data.get("image_token")):
+        if not self.data:
+            return
+
+        if self.mpv:
+            self.log.info("Use '%s/mpv/%s/%s/#page%s' as input URL "
+                          "to continue downloading from the current position",
+                          self.root, self.gallery_id, self.gallery_token,
+                          self.data["num"])
+        elif token := self.data.get("image_token"):
             self.log.info("Use '%s/s/%s/%s-%s' as input URL "
                           "to continue downloading from the current position",
                           self.root, token, self.gallery_id, self.data["num"])
@@ -174,12 +183,13 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         if self.gallery_token:
             gpage = self._gallery_page()
-            self.image_token = text.extr(gpage, 'hentai.org/s/', '"')
-            if not self.image_token:
-                self.log.debug("Page content:\n%s", gpage)
-                raise exception.AbortExtraction(
-                    "Failed to extract initial image token")
-            ipage = self._image_page()
+            if not self.mpv:
+                self.image_token = text.extr(gpage, 'hentai.org/s/', '"')
+                if not self.image_token:
+                    self.log.debug("Page content:\n%s", gpage)
+                    raise exception.AbortExtraction(
+                        "Failed to extract initial image token")
+                ipage = self._image_page()
         else:
             ipage = self._image_page()
             part = text.extr(ipage, 'hentai.org/g/', '"')
@@ -194,8 +204,12 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.count = text.parse_int(data["filecount"])
         yield Message.Directory, "", data
 
-        images = itertools.chain(
-            (self.image_from_page(ipage),), self.images_from_api())
+        if self.mpv:
+            images = self.images_from_mpv()
+        else:
+            images = itertools.chain(
+                (self.image_from_page(ipage),), self.images_from_api())
+
         for url, image in images:
             data.update(image)
             if self.limits:
@@ -388,6 +402,58 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
             request["imgkey"] = nextkey
 
+    def images_from_mpv(self):
+        """Get image url and data from MPV"""
+        url = f"{self.root}/mpv/{self.gallery_id}/{self.gallery_token}/"
+        page = self.request(url).text
+        images = util.json_loads(text.extr(page, "var imagelist = ", ";"))
+
+        api_url = self.api_url
+        pnum = self.image_num - 1
+        request = {
+            "method": "imagedispatch",
+            "gid"   : self.gallery_id,
+            "page"  : 0,
+            "imgkey": "",
+            "mpvkey": text.extr(page, 'var mpvkey = "', '"'),
+        }
+
+        if pnum:
+            images = util.advance(images, pnum)
+        for image in images:
+            pnum += 1
+            request["page"] = pnum
+            request["imgkey"] = imgkey = image["k"]
+            info = self.request_json(api_url, method="POST", json=request)
+
+            try:
+                imgurl = info["i"]
+                if self.original and info.get("o"):
+                    url = f"{self.root}/{info['lf']}"
+                    data = self._parse_mpv_info(info)
+                    data["_fallback"] = self._fallback_mpv_original(info)
+                else:
+                    url = imgurl
+                    data = self._parse_image_info(url)
+                    data["_fallback"] = self._fallback_mpv_1280(info, request)
+            except IndexError:
+                self.log.debug("Page content:\n%s", info)
+                raise exception.AbortExtraction(
+                    f"Unable to parse image info for '{url}'")
+
+            data["num"] = pnum
+            data["_nl"] = info["s"]
+            data["_url_1280"] = imgurl
+            data["image_token"] = imgkey
+
+            self._check_509(imgurl)
+            if name := image.get("name"):
+                text.nameext_from_name(name, data)
+            else:
+                text.nameext_from_url(url, data)
+
+            yield url, data
+
     def _validate_response(self, response):
         if response.history or not response.headers.get(
                 "content-type", "").startswith("text/html"):
@@ -497,7 +563,10 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if page.startswith(("Key missing", "Gallery not found")):
             raise exception.NotFoundError("gallery")
         if page.count("hentai.org/mpv/") > 1:
-            self.log.warning("Enabled Multi-Page Viewer is not supported")
+            if self.gallery_token is None:
+                raise exception.AbortExtraction(
+                    "'/s/' URLs in MPV mode are not supported")
+            self.mpv = True
         return page
 
     def _image_page(self):
@@ -511,6 +580,11 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
     def _fallback_original(self, nl, fullimg):
         url = f"{fullimg}?nl={nl}"
+        for _ in util.repeat(self.fallback_retries):
+            yield url
+
+    def _fallback_mpv_original(self, info):
+        url = f"{self.root}/{info['lf']}?nl={info['s']}"
         for _ in util.repeat(self.fallback_retries):
             yield url
 
@@ -528,6 +602,12 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             yield url
 
             nl = data["_nl"]
+
+    def _fallback_mpv_1280(self, info, request):
+        for _ in util.repeat(self.fallback_retries):
+            request["nl"] = info["s"]
+            info = self.request_json(self.api_url, method="POST", json=request)
+            yield info["i"]
 
     def _parse_image_info(self, url):
         for part in url.split("/")[4:]:
@@ -552,10 +632,22 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         return {
             # 1 initial point + 1 per 0.1 MB
-            "cost"  : 1 + math.ceil(size / 100000),
+            "cost"  : 1 + math.ceil(size / 100_000),
             "size"  : size,
             "width" : text.parse_int(parts[0]),
             "height": text.parse_int(parts[2]),
+        }
+
+    def _parse_mpv_info(self, info):
+        _, _, w, _, h, s, u, _ = info["o"].split()
+        size = text.parse_bytes(s + u[0])
+
+        return {
+            # 1 initial point + 1 per 0.1 MB
+            "cost"  : 1 + math.ceil(size / 100_000),
+            "size"  : size,
+            "width" : text.parse_int(w),
+            "height": text.parse_int(h),
         }
 
 
