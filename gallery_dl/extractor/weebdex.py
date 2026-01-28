@@ -49,14 +49,14 @@ class WeebdexChapterExtractor(WeebdexBase, ChapterExtractor):
         return {
             **_manga_info(self, rel["manga"]["id"]),
             "title"   : data.get("title", ""),
-            "version" : data["version"],
-            "volume"  : text.parse_int(data["volume"]),
+            "version" : data.get("version", 0),
+            "volume"  : text.parse_int(data.get("volume")),
             "chapter" : text.parse_int(chapter),
             "chapter_minor": sep + minor,
             "chapter_id"   : cid,
-            "date"         : self.parse_datetime_iso(data["created_at"]),
-            "date_updated" : self.parse_datetime_iso(data["updated_at"]),
-            "lang"    : data["language"],
+            "date"         : self.parse_datetime_iso(data.get("created_at")),
+            "date_updated" : self.parse_datetime_iso(data.get("updated_at")),
+            "lang"    : data.get("language"),
             "uploader": rel["uploader"]["name"] if "uploader" in rel else "",
             "group"   : [g["name"] for g in rel.get("groups") or ()],
         }
@@ -106,7 +106,7 @@ class WeebdexMangaExtractor(WeebdexBase, MangaExtractor):
 
             for ch in data["data"]:
                 chapter, sep, minor = ch["chapter"].partition(".")
-                ch["volume"] = text.parse_int(ch["volume"])
+                ch["volume"] = text.parse_int(ch.get("volume"))
                 ch["chapter"] = text.parse_int(chapter)
                 ch["chapter_minor"] = sep + minor
                 ch.update(manga)

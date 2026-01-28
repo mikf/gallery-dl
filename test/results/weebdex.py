@@ -131,6 +131,26 @@ ___
 },
 
 {
+    "#url"     : "https://weebdex.org/chapter/0fignihbv8",
+    "#comment" : "no 'volume' data",
+    "#class"   : weebdex.WeebdexChapterExtractor,
+    "#count"   : 47,
+
+    "artist"       : ["Azuma Kiyohiko"],
+    "author"       : ["Azuma Kiyohiko"],
+    "chapter"      : 114,
+    "chapter_id"   : "0fignihbv8",
+    "chapter_minor": "",
+    "count"        : 47,
+    "date"         : "dt:2025-10-17 23:36:27",
+    "demographic"  : "shounen",
+    "group"        : ["Ralen"],
+    "lang"         : "en",
+    "manga"        : "Yotsuba to!",
+    "volume"       : 0,
+},
+
+{
     "#url"     : "https://weebdex.org/title/3o0icxno26/ani-datta-mono",
     "#class"   : weebdex.WeebdexMangaExtractor,
     "#pattern" : weebdex.WeebdexChapterExtractor.pattern,
@@ -172,6 +192,23 @@ ___
         "theme:Ghosts",
         "theme:Supernatural",
     ],
+},
+
+{
+    "#url"     : "https://weebdex.org/title/f29vfu3dd4/yotsuba-to",
+    "#comment" : "no 'volume' data (#8954)",
+    "#class"   : weebdex.WeebdexMangaExtractor,
+    "#pattern" : weebdex.WeebdexChapterExtractor.pattern,
+
+    "artist"     : ["Azuma Kiyohiko"],
+    "author"     : ["Azuma Kiyohiko"],
+    "demographic": "shounen",
+    "manga"      : "Yotsuba to!",
+    "manga_date" : "dt:2025-10-09 09:34:27",
+    "manga_id"   : "f29vfu3dd4",
+    "origin"     : "ja",
+    "volume"     : int,
+    "year"       : 2003,
 },
 
 )
