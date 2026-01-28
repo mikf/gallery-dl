@@ -6,12 +6,13 @@
 
 from gallery_dl.extractor import tiktok
 
-PATTERN = r"https://p1[69]-[^/?#.]+\.tiktokcdn[^/?#.]*\.com/[^/?#]+/\w+~.*\.jpe?g"
+PATTERN = r"https://p1[69]-[^/?#.]+\.tiktokcdn[^/?#.]*\.com/[^/?#]+/\w+~.*\.(jpe?g|image)"
 PATTERN_WITH_AUDIO = r"(?:" + PATTERN + r"|https://v\d+m?\.tiktokcdn[^/?#.]*\.com/[^?#]+\?[^/?#]+)"
 VIDEO_PATTERN = r"https://v1[69]-webapp-prime.tiktok.com/video/tos/[^?#]+\?[^/?#]+"
 OLD_VIDEO_PATTERN = r"https://www.tiktok.com/aweme/v1/play/\?[^/?#]+"
 COMBINED_VIDEO_PATTERN = r"(?:" + VIDEO_PATTERN + r")|(?:" + OLD_VIDEO_PATTERN + r")"
 USER_PATTERN = r"(https://www.tiktok.com/@([\w_.-]+)/video/(\d+)|" + PATTERN + r")"
+SUBTITLE_PATTERN = r"https://v1[69]-[^/?#.]+\.tiktokcdn[^/?#.]*\.com/[^/?#]+/.*"
 
 
 __tests__ = (
@@ -127,8 +128,20 @@ __tests__ = (
     "#url"      : "https://www.tiktok.com/@memezar/video/7449708266168274208",
     "#comment"  : "video post cover image",
     "#class"    : tiktok.TiktokPostExtractor,
-    "#pattern"  : r"https://p19-common-sign-useastred.tiktokcdn-eu.com/tos-useast2a-p-0037-euttp/o4rVzhI1bABhooAaEqtCAYGi6nijIsDib8NGfC~tplv-tiktokx-origin.image\?dr=10395&x-expires=\d+&x-signature=.+",
+    "#pattern"  : PATTERN,
+    "#count"    : 1,
     "#options"  : {"videos": False, "covers": True},
+
+
+},
+
+{
+    "#url"      : "https://www.tiktok.com/@memezar/video/7449708266168274208",
+    "#comment"  : "all video post cover images",
+    "#class"    : tiktok.TiktokPostExtractor,
+    "#pattern"  : PATTERN,
+    "#count"    : 3,
+    "#options"  : {"videos": False, "covers": "all"},
 
 
 },
@@ -209,6 +222,44 @@ __tests__ = (
     "#class"   : tiktok.TiktokPostExtractor,
     "#results" : "ytdl:https://www.tiktok.com/@veronicaperasso_1/video/7212008840433274118",
     "#options" : {"videos": "ytdl"},
+},
+
+{
+    "#url"     : "https://www.tiktok.com/@memezar/video/7588916452304997635",
+    "#comment" : "default subtitles",
+    "#class"   : tiktok.TiktokPostExtractor,
+    "#pattern" : SUBTITLE_PATTERN,
+    "#count"   : 1,
+    "#options" : {"videos": False, "covers": False, "subtitles": True}
+},
+
+{
+    "#url"     : "https://www.tiktok.com/@memezar/video/7588916452304997635",
+    "#comment" : "english subtitles",
+    "#class"   : tiktok.TiktokPostExtractor,
+    "#pattern" : SUBTITLE_PATTERN,
+    "#count"   : 1,
+    "#options" : {"videos": False, "covers": False, "subtitles": "eng-US"}
+},
+
+# This test is prone to break when more translation agents are added!
+{
+    "#url"     : "https://www.tiktok.com/@memezar/video/7588916452304997635",
+    "#comment" : "combined subtitle filter",
+    "#class"   : tiktok.TiktokPostExtractor,
+    "#pattern" : SUBTITLE_PATTERN,
+    "#count"   : 6,
+    "#options" : {"videos": False, "covers": False, "subtitles": "ASR,deu-DE"}
+},
+
+# This test is prone to break when new languages or more translation agents are added!
+{
+    "#url"     : "https://www.tiktok.com/@memezar/video/7588916452304997635",
+    "#comment" : "all subtitles",
+    "#class"   : tiktok.TiktokPostExtractor,
+    "#pattern" : SUBTITLE_PATTERN,
+    "#count"   : 64,
+    "#options" : {"videos": False, "covers": False, "subtitles": "all"}
 },
 
 {
