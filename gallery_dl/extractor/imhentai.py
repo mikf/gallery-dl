@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -123,7 +123,11 @@ class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
         return results
 
     def images(self, page):
-        data = util.json_loads(text.extr(page, "$.parseJSON('", "'"))
+        try:
+            data = util.json_loads(text.extr(page, "$.parseJSON('", "'"))
+        except Exception:
+            self.log.warning("%s: Missing image data", self.gallery_id)
+            return ()
         base = text.extr(page, 'data-src="', '"').rpartition("/")[0] + "/"
         exts = {"j": "jpg", "p": "png", "g": "gif", "w": "webp", "a": "avif"}
 

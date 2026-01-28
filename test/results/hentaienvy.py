@@ -110,11 +110,33 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://hentaienvy.com/gallery/1119432/",
+    "#comment" : "empty 'var g_th = $.parseJSON('');' (#8951)",
+    "#category": ("IMHentai", "hentaienvy", "gallery"),
+    "#class"   : imhentai.ImhentaiGalleryExtractor,
+    "#metadata": "post",
+    "#count"   : 0,
+    "#log"     : "1119432: Missing image data",
+
+    "artist"    : [],
+    "character" : [],
+    "gallery_id": 1119432,
+    "group"     : [],
+    "lang"      : "ja",
+    "language"  : ["japanese"],
+    "parody"    : ["super mario brothers"],
+    "tags"      : list,
+    "title"     : "hentai girls",
+    "title_alt" : "",
+    "type"      : "western",
+},
+
+{
     "#url"     : "https://hentaienvy.com/artist/asutora/",
     "#category": ("IMHentai", "hentaienvy", "tag"),
     "#class"   : imhentai.ImhentaiTagExtractor,
     "#pattern" : imhentai.ImhentaiGalleryExtractor.pattern,
-    "#count"   : range(45, 50),
+    "#count"   : range(45, 60),
 },
 
 {
