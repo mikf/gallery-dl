@@ -68,10 +68,10 @@ __tests__ = (
     "#auth"    : True,
     "#results" : (
         "https://jpg6.su/img/NNFssUg",
-        "https://turbovid.cr/embed/nPy1kG3w55V",
-        "https://turbovid.cr/embed/c0KhPjU4-F3",
-        "https://turbovid.cr/embed/sZWnVZ_mQsV",
-        "https://turbovid.cr/embed/MEBiLx6DETQ",
+        "https://turbo.cr/embed/nPy1kG3w55V",
+        "https://turbo.cr/embed/c0KhPjU4-F3",
+        "https://turbo.cr/embed/sZWnVZ_mQsV",
+        "https://turbo.cr/embed/MEBiLx6DETQ",
     ),
 },
 
@@ -245,7 +245,7 @@ __tests__ = (
     "#category": ("xenforo", "simpcity", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
     "#auth"    : True,
-    "#pattern" : r"https://(jpg6\.su/img/\w+|bunkr\.\w+/[fiv]/\w+|pixeldrain.com/l/\w+|alua.com/tatakai)|turbovid.cr/embed",
+    "#pattern" : r"https://(jpg6\.su/img/\w+|bunkr\.\w+/[fiv]/\w+|pixeldrain.com/l/\w+|alua.com/tatakai)|turbo(vid)?.cr/embed",
     "#count"   : range(100, 300),
 
     "count" : int,
