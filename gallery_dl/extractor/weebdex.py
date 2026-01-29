@@ -85,17 +85,21 @@ class WeebdexChapterExtractor(WeebdexBase, ChapterExtractor):
 class WeebdexMangaExtractor(WeebdexBase, MangaExtractor):
     """Extractor for weebdex manga"""
     chapterclass = WeebdexChapterExtractor
-    pattern = BASE_PATTERN + r"/title/(\w+)"
+    reverse = False
+    pattern = BASE_PATTERN + r"/title/(\w+)(?:/[^/?#]+/?\?([^#]+))?"
     example = "https://weebdex.org/title/ID/SLUG"
 
     def chapters(self, page):
-        mid = self.groups[0]
-        url = f"{self.root_api}/manga/{mid}/chapters"
-        params = {
-            "limit": 100,
-            "order": "asc" if self.config("chapter-reverse") else "desc",
-        }
+        mid, qs = self.groups
 
+        params = text.parse_query(qs)
+        params.setdefault("limit", 100)
+        if "tlang" not in params:
+            params["tlang"] = self.config("lang", "en")
+        if "order" not in params:
+            params["order"] = ("desc" if self.config("chapter-reverse") else
+                               "asc")
+        url = f"{self.root_api}/manga/{mid}/chapters"
         base = self.root + "/chapter/"
         manga = _manga_info(self, mid)
         results = []
