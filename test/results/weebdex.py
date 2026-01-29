@@ -154,6 +154,7 @@ ___
     "#url"     : "https://weebdex.org/title/3o0icxno26/ani-datta-mono",
     "#class"   : weebdex.WeebdexMangaExtractor,
     "#pattern" : weebdex.WeebdexChapterExtractor.pattern,
+    "#options" : {"lang": None},
     "#count"   : range(120, 300),
 
     "artist"       : ["Matsuda Minoru"],
@@ -209,6 +210,74 @@ ___
     "origin"     : "ja",
     "volume"     : int,
     "year"       : 2003,
+},
+
+{
+    "#url"     : "https://weebdex.org/title/3o0icxno26/ani-datta-mono",
+    "#comment" : "'lang' option (#8957)",
+    "#class"   : weebdex.WeebdexMangaExtractor,
+    "#pattern" : weebdex.WeebdexChapterExtractor.pattern,
+    "#options" : {"lang": "vi"},
+    "#count"   : 105,
+
+    "artist"       : ["Matsuda Minoru"],
+    "author"       : ["Matsuda Minoru"],
+    "chapter"      : range(1, 105),
+    "chapter_minor": {"", ".5"},
+    "demographic"  : "seinen",
+    "description"  : str,
+    "language"     : "vi",
+    "manga"        : "Ani Datta Mono",
+    "manga_date"   : "dt:2025-10-09 19:02:04",
+    "manga_id"     : "3o0icxno26",
+    "origin"       : "ja",
+    "status"       : "ongoing",
+    "version"      : int,
+    "volume"       : int,
+    "year"         : 2021,
+    "tags"         : [
+        "genre:Drama",
+        "genre:Horror",
+        "genre:Psychological",
+        "genre:Romance",
+        "genre:Thriller",
+        "theme:Ghosts",
+        "theme:Supernatural",
+    ],
+    "relationships": {
+        "groups"  : [{
+            "id"  : "u7kmeka8v6",
+            "name": "BBB Translation (Big Beaming Bluewhale)",
+        }],
+    },
+},
+
+{
+    "#url"     : "https://weebdex.org/title/3o0icxno26/ani-datta-mono?group=j0fsj3oem3&order=asc",
+    "#comment" : "query parameters (#8957)",
+    "#class"   : weebdex.WeebdexMangaExtractor,
+    "#range"   : "1-3",
+    "#results" : (
+        "https://weebdex.org/chapter/xv2cm9bj1a",
+        "https://weebdex.org/chapter/etoaxmxgcq",
+        "https://weebdex.org/chapter/24ew0mo562",
+    ),
+
+    "artist"       : ["Matsuda Minoru"],
+    "author"       : ["Matsuda Minoru"],
+    "chapter"      : range(1, 3),
+    "language"     : "en",
+    "manga"        : "Ani Datta Mono",
+    "manga_date"   : "dt:2025-10-09 19:02:04",
+    "manga_id"     : "3o0icxno26",
+    "version"      : 1,
+    "volume"       : 1,
+    "relationships": {
+        "groups"  : [{
+            "id"  : "j0fsj3oem3",
+            "name": "Rainbow D Translations",
+        }],
+    },
 },
 
 )

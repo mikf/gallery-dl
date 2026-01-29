@@ -6963,6 +6963,16 @@ Description
     Enable `Data Saver` mode and download lower quality versions of chapters.
 
 
+extractor.weebdex.manga.lang
+----------------------------
+Type
+    ``string``
+Default
+    ``"en"``
+Description
+    |ISO 639-1| code selecting which chapters to download.
+
+
 extractor.weibo.gifs
 --------------------
 Type
