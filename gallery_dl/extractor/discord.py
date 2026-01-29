@@ -126,6 +126,14 @@ class DiscordExtractor(Extractor):
                     message_metadata_file.update(file)
                     yield Message.Url, file["url"], message_metadata_file
 
+    def extract_search(self, server_id, params):
+        for messages in self.api.get_search_messages(server_id, params):
+            for message in messages:
+                if message["channel_id"] not in self.server_channels_metadata:
+                    self.parse_channel(self.api.get_channel(
+                        message["channel_id"]))
+                yield from self.extract_message(message)
+
     def extract_channel_text(self, channel_id):
         for message in self.api.get_channel_messages(channel_id):
             yield from self.extract_message(message)
@@ -312,6 +320,30 @@ class DiscordServerAssetsExtractor(DiscordExtractor):
                 yield Message.Url, asset["url"], asset
 
 
+class DiscordServerSearchExtractor(DiscordExtractor):
+    subcategory = "server-search"
+    pattern = BASE_PATTERN + r"/channels/(\d+)/search/?\?([^#]+)"
+    example = "https://discord.com/channels/1234567890/search?QUERY"
+
+    def items(self):
+        server_id, query = self.groups
+        server = self.api.get_server(server_id)
+        self.kwdict.update(self.parse_server(server))
+
+        params = {
+            **text.parse_query_list(query, {
+                "from", "in", "has", "mentions", "author_id", "channel_id"}),
+            "sort_by"   : "timestamp",
+            "sort_order": "desc",
+        }
+        if "from" in params:
+            params["author_id"] = params.pop("from")
+        if "in" in params:
+            params["channel_id"] = params.pop("in")
+
+        return self.extract_search(server_id, params)
+
+
 class DiscordServerExtractor(DiscordExtractor):
     subcategory = "server"
     pattern = BASE_PATTERN + r"/channels/(\d+)/?$"
@@ -408,6 +440,17 @@ class DiscordAPI():
                 before = messages[-1]["id"]
             return messages
 
+        return self._pagination(_method, MESSAGES_BATCH)
+
+    def get_search_messages(self, server_id, params):
+        """Get search messages"""
+        MESSAGES_BATCH = 25
+
+        def _method(offset):
+            params["offset"] = offset
+            return self._call(url, params)["messages"]
+
+        url = f"/guilds/{server_id}/messages/search"
         return self._pagination(_method, MESSAGES_BATCH)
 
     def get_message(self, channel_id, message_id):

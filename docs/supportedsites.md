@@ -268,7 +268,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="discord" title="discord">
     <td>Discord</td>
     <td>https://discord.com/</td>
-    <td>Channels, DMs, Messages, Servers, Server Assets</td>
+    <td>Channels, DMs, Messages, Servers, Server Assets, Server Searches</td>
     <td></td>
 </tr>
 <tr id="dynastyscans" title="dynastyscans">

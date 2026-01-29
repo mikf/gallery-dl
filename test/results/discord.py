@@ -107,4 +107,14 @@ __tests__ = (
     "url"      : str,
 },
 
+{
+    "#url"     : "https://discord.com/channels/1067148002722062416/search?from=429235270664060948",
+    "#class"   : discord.DiscordServerSearchExtractor,
+},
+
+{
+    "#url"     : "https://discord.com/channels/1067148002722062416/search?has=file&has=link&mentions=429235270664060948",
+    "#class"   : discord.DiscordServerSearchExtractor,
+},
+
 )
