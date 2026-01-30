@@ -359,6 +359,25 @@ class TestDataJob(TestJob):
         self.assertEqual(tjob.data[-1][0], Message.Url)
         self.assertEqual(tjob.data[-1][2]["num"], "3")
 
+    def test_jsonl(self):
+        extr = TestExtractor.from_url("test:")
+        tjob = self.jobclass(extr, file=io.StringIO())
+        with patch("gallery_dl.job.DataJob.out") as out:
+            tjob.run()
+        self.assertEqual(len(out.call_args_list), 0)
+
+        config.set(("output",), "jsonl", True)
+        extr = TestExtractor.from_url("test:")
+        file = io.StringIO()
+        tjob = self.jobclass(extr, file=file)
+        with patch("gallery_dl.job.DataJob.out") as out:
+            tjob.run()
+        self.assertEqual(len(out.call_args_list), 4)
+
+        tjob.run()
+        for line in file.getvalue().split():
+            self.assertRegex(line, r"""^\[[23],("http[^"]+",)?\{.+\}\]$""")
+
 
 class TestExtractor(Extractor):
     category = "test_category"
