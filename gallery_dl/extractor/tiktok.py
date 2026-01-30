@@ -120,12 +120,11 @@ class TiktokExtractor(Extractor):
                         yield Message.Url, url, post
 
                     # remove the subtitle related fields for the next item
-                    post.pop('subtitle_lang_id', None)
-                    post.pop('subtitle_lang_codename', None)
-                    post.pop('subtitle_format', None)
-                    post.pop('subtitle_version', None)
-                    post.pop('subtitle_source', None)
-
+                    post.pop("subtitle_lang_id", None)
+                    post.pop("subtitle_lang_codename", None)
+                    post.pop("subtitle_format", None)
+                    post.pop("subtitle_version", None)
+                    post.pop("subtitle_source", None)
             else:
                 self.log.info("%s: Skipping post", tiktok_url)
 
