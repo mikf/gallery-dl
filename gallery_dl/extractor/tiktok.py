@@ -50,12 +50,8 @@ class TiktokExtractor(Extractor):
 
             known_sources = {"ASR", "MT", "LC"}
             filters = set(self.subtitles.split(","))
-            self.subtitle_sources = known_sources.intersection(filters)
-            self.subtitle_langs = filters.difference(known_sources)
-            if not self.subtitle_sources:
-                self.subtitle_sources = None
-            if not self.subtitle_langs:
-                self.subtitle_langs = None
+            self.subtitle_sources = known_sources.intersection(filters) or None
+            self.subtitle_langs = filters.difference(known_sources) or None
 
     def items(self):
         for tiktok_url in self.posts():
@@ -341,6 +337,8 @@ class TiktokExtractor(Extractor):
 
     def _extract_subtitles(self, post, type):
         media = post[type]
+        sources_filtered = self.subtitle_sources is not None
+        langs_filtered = self.subtitle_langs is not None
 
         for subtitle in media.get("subtitleInfos", []):
             sub_lang_id = subtitle.get("LanguageID")
@@ -349,8 +347,6 @@ class TiktokExtractor(Extractor):
             sub_version = subtitle.get("Version")
             sub_source = subtitle.get("Source")
 
-            sources_filtered = self.subtitle_sources is not None
-            langs_filtered = self.subtitle_langs is not None
             # guard the iterable access
             sources_match = sources_filtered and \
                 sub_source in self.subtitle_sources
