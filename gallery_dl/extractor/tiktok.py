@@ -150,9 +150,9 @@ class TiktokExtractor(Extractor):
                     })
                     yield Message.Url, "ytdl:" + tiktok_url, post
             except Exception as exc:
-                self.log.error("%s: Failed to extract post: %s", tiktok_url,
-                               exc)
                 self.log.traceback(exc)
+                self.log.error("%s: Failed to extract post (%s: %s)",
+                               tiktok_url, exc.__class__.__name__, exc)
 
     def _sanitize_url(self, url):
         return text.ensure_http_scheme(url.replace("/photo/", "/video/", 1))
