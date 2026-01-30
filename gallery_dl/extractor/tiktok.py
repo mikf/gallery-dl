@@ -376,8 +376,9 @@ class TiktokExtractor(Extractor):
                 post.update({
                     "type"                  : "subtitle",
                     "image"                 : None,
-                    "title"                 : post["desc"] or
-                    f"TikTok {type} subtitle #{post['id']}",
+                    "title"                 :
+                        post["desc"] or
+                        f"TikTok {type} subtitle #{post['id']}",
                     "duration"              : media.get("duration"),
                     "num"                   : 0,
                     "file_id"               :
