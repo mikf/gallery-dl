@@ -11,7 +11,8 @@
 This site uses Cloudflare protection. You have two options:
 
 1. Use FlareSolverr (recommended):
-   - Install: docker run -d -p 8191:8191 ghcr.io/flaresolverr/flaresolverr:latest
+   - Install:
+     docker run -d -p 8191:8191 ghcr.io/flaresolverr/flaresolverr
    - Configure: Add to gallery-dl config:
      {
        "extractor": {
@@ -72,13 +73,15 @@ class ToongodBase():
         }
 
         try:
-            response = requests.post(flaresolverr_url, json=payload, timeout=65)
+            response = requests.post(
+                flaresolverr_url, json=payload, timeout=65)
             response.raise_for_status()
             result = response.json()
 
             if result.get("status") != "ok":
+                msg = result.get("message", "Unknown error")
                 raise exception.HttpError(
-                    "FlareSolverr failed: " + result.get("message", "Unknown error"))
+                    "FlareSolverr failed: " + msg)
 
             return _FlaresolverrResponse(result["solution"])
 
@@ -100,7 +103,7 @@ class ToongodChapterExtractor(ToongodBase, ChapterExtractor):
 
     def metadata(self, page):
         title = text.extr(page, "<h1>", "</h1>") or \
-                text.extr(page, 'property="og:title" content="', '"')
+            text.extr(page, 'property="og:title" content="', '"')
 
         if title and " - " in title:
             manga = title.split(" - ")[0]
@@ -131,10 +134,11 @@ class ToongodWebtoonExtractor(ToongodBase, MangaExtractor):
 
     def chapters(self, page):
         manga = text.extr(page, "<h1>", "</h1>") or \
-                text.extr(page, 'property="og:title" content="', '"')
+            text.extr(page, 'property="og:title" content="', '"')
 
-        chapter_list = text.extr(page, 'class="wp-manga-chapter', '</ul>') or \
-                       text.extr(page, 'id="chapter-list', '</ul>') or ""
+        chapter_list = text.extr(
+            page, 'class="wp-manga-chapter', '</ul>') or \
+            text.extr(page, 'id="chapter-list', '</ul>') or ""
 
         results = []
         for url in text.extract_iter(chapter_list, '<a href="', '"'):
