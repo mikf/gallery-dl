@@ -5914,13 +5914,24 @@ Description
         * ``cover``
         * ``originCover``
         * ``dynamicCover``
-
+    ``false``
+        Do not download covers
     ``"all"``
-        Download all available covers.
+        Download all available covers
+
+
+extractor.tiktok.photos
+-----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download photos.
 
 
 extractor.tiktok.subtitles
------------------------
+--------------------------
 Type
     * ``bool``
     * ``string``
@@ -5938,15 +5949,16 @@ Description
     * ``ASR`` - Automatic Speech Recognition
     * ``MT`` - Machine Translation
     * ``LC`` - Local Captions / Creator Captions
+
     If both source types and language codes are provided,
     only subtitles matching both are downloaded.
 
     ``true``
-        Download all subtitles tagged ``ASR``.
-
+        Download all subtitles tagged ``ASR``
+    ``false``
+        Do not download subtitles
     ``"all"``
         Download all available subtitles.
-
     ``"ASR,MT,eng-US,cmn-Hans-CN"``
         Download english and simplified chinese subtitles
         that are either automatically recognized or machine translated.
@@ -5957,16 +5969,6 @@ Note
     while also filtering for additional languages of another source type.
     (e.g. any ASR subtitle + fra-FR of any source type)
     For this, refer to `extractor.*.image-filter`_.
-
-
-extractor.tiktok.photos
------------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Download photos.
 
 
 extractor.tiktok.videos
