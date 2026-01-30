@@ -116,7 +116,7 @@ class TiktokExtractor(Extractor):
                 if self.cover:
                     for url in self._extract_covers(post, "video"):
                         yield Message.Url, url, post
-                        if self.cover == "all":
+                        if self.cover != "all":
                             break
 
                 if self.subtitles:
