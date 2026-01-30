@@ -353,7 +353,8 @@ class TiktokExtractor(Extractor):
                 sub_lang_codename in self.subtitle_langs
 
             # Subtitles will be extracted when either filter matches.
-            if not sources_match and not langs_match:
+            if not sources_match and not langs_match and \
+                    (sources_filtered or langs_filtered):
                 continue
 
             if url := subtitle.get("Url"):
