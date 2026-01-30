@@ -68,8 +68,8 @@ class TiktokExtractor(Extractor):
                         data["seo.abtest"]["canonical"])
                     data = self._extract_rehydration_data(tiktok_url)
                 video_detail = data["webapp.video-detail"]
-                if not self._check_status_code(video_detail, tiktok_url,
-                                               "post"):
+                if not self._check_status_code(
+                        video_detail, tiktok_url, "post"):
                     continue
                 post = video_detail["itemInfo"]["itemStruct"]
 
