@@ -321,16 +321,16 @@ class TiktokExtractor(Extractor):
             if url := media.get(cover_id):
                 text.nameext_from_url(url, post)
                 post.update({
-                    "type"      : "cover",
-                    "extension" : "jpg",
-                    "image"     : url,
-                    "title"     :
-                    post["desc"] or f"TikTok {type} cover #{post['id']}",
-                    "duration"  : media.get("duration"),
-                    "num"       : 0,
-                    "file_id"   : cover_id,
-                    "width"     : 0,
-                    "height"    : 0,
+                    "type"     : "cover",
+                    "extension": "jpg",
+                    "image"    : url,
+                    "title"    : post["desc"] or
+                                 f"TikTok {type} cover #{post['id']}",
+                    "duration" : media.get("duration"),
+                    "num"      : 0,
+                    "file_id"  : cover_id,
+                    "width"    : 0,
+                    "height"   : 0,
                 })
                 yield url
 
@@ -339,7 +339,7 @@ class TiktokExtractor(Extractor):
         sources_filtered = self.subtitle_sources is not None
         langs_filtered = self.subtitle_langs is not None
 
-        for subtitle in media.get("subtitleInfos", []):
+        for subtitle in media.get("subtitleInfos", ()):
             sub_lang_id = subtitle.get("LanguageID")
             sub_lang_codename = subtitle.get("LanguageCodeName")
             sub_format = subtitle.get("Format")
@@ -353,20 +353,17 @@ class TiktokExtractor(Extractor):
                 sub_lang_codename in self.subtitle_langs
 
             # Subtitles will be extracted when either filter matches.
-            if sources_filtered and \
-                    not sources_match and \
-                    not (langs_filtered and langs_match):
-                continue
-
-            if langs_filtered and \
-                    not langs_match and \
-                    not sources_filtered:
+            if not sources_match and not langs_match:
                 continue
 
             if url := subtitle.get("Url"):
+                text.nameext_from_url(url, post)
+
                 # subtitle urls may not specify a filename,
                 # so the metadata can be used to build one.
-                if (text.nameext_from_url(url, post))["filename"] == "":
+                if not post["filename"]:
+                    post["filename"] = (f"{post['id']}_{sub_lang_codename}_"
+                                        f"{sub_version}_{sub_source}")
                     post["extension"] = sub_format.lower()
 
                     # replace extensions for known formats
@@ -375,24 +372,16 @@ class TiktokExtractor(Extractor):
                     elif post["extension"] == "creator_caption":
                         post["extension"] = "json"
 
-                    post["filename"] = \
-                        f"{post['id']}_" \
-                        f"{sub_lang_codename}_" \
-                        f"{sub_version}_" \
-                        f"{sub_source}"
-
                 post.update({
-                    "type"                  : "subtitles",
+                    "type"                  : "subtitle",
                     "image"                 : None,
                     "title"                 :
-                    post["desc"] or "TikTok {type} #{post['id']}",
+                        post["desc"] or "TikTok {type} #{post['id']}",
                     "duration"              : media.get("duration"),
                     "num"                   : 0,
-                    "file_id"               : f"{sub_lang_id}_"
-                        f"{sub_lang_codename}_"
-                        f"{sub_source}_"
-                        f"{sub_version}_"
-                        f"{sub_format}",
+                    "file_id"               :
+                        f"{sub_lang_id}_{sub_lang_codename}_{sub_source}_"
+                        f"{sub_version}_{sub_format}",
                     "subtitle_lang_id"      : sub_lang_id,
                     "subtitle_lang_codename": sub_lang_codename,
                     "subtitle_format"       : sub_format,
