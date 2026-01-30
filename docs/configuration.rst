@@ -8035,6 +8035,17 @@ Description
     Include fallback URLs in the output of ``-g/--get-urls``.
 
 
+output.jsonl
+------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Output ``-j/--dump-json`` & ``-J/--resolve-json``
+    data in `JSON Lines <https://jsonlines.org/>`__ format.
+
+
 output.private
 --------------
 Type
