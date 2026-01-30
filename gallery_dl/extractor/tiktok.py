@@ -43,6 +43,7 @@ class TiktokExtractor(Extractor):
     def items(self):
         for tiktok_url in self.posts():
             tiktok_url = self._sanitize_url(tiktok_url)
+
             data = self._extract_rehydration_data(tiktok_url)
             if "webapp.video-detail" not in data:
                 # Only /video/ links result in the video-detail dict we need.
@@ -51,11 +52,10 @@ class TiktokExtractor(Extractor):
                     data["seo.abtest"]["canonical"])
                 data = self._extract_rehydration_data(tiktok_url)
             video_detail = data["webapp.video-detail"]
-
             if not self._check_status_code(video_detail, tiktok_url, "post"):
                 continue
-
             post = video_detail["itemInfo"]["itemStruct"]
+
             post["user"] = (a := post.get("author")) and a["uniqueId"] or ""
             post["date"] = self.parse_timestamp(post["createTime"])
             post["post_type"] = "image" if "imagePost" in post else "video"
@@ -414,7 +414,7 @@ class TiktokPostExtractor(TiktokExtractor):
     def posts(self):
         user, post_id = self.groups
         url = f"{self.root}/@{user or ''}/video/{post_id}"
-        return (url,)
+        return {url: None}
 
 
 class TiktokVmpostExtractor(TiktokExtractor):
@@ -709,13 +709,13 @@ class TiktokSavedExtractor(TiktokExtractor):
                                      self.audio)
 
 
-class TiktokFollowingExtractor(TiktokUserExtractor):
+class TiktokFollowingExtractor(TiktokExtractor):
     """Extract all of the stories of all of the users you follow"""
     subcategory = "following"
     pattern = rf"{BASE_PATTERN}/following"
     example = "https://www.tiktok.com/following"
 
-    def items(self):
+    def posts(self):
         """Attempt to extract all of the stories of all of the accounts
         the user follows"""
 
@@ -732,7 +732,7 @@ class TiktokFollowingExtractor(TiktokUserExtractor):
             self.log.warning("%s: No followers with stories could be "
                              "extracted", self.url)
 
-        entries = []
+        entries = {}
         # Batch all of the users up into groups of at most ten and use the
         # batch endpoint to improve performance. The response to the story user
         # list request may also include the user themselves, so skip them if
@@ -769,13 +769,11 @@ class TiktokFollowingExtractor(TiktokUserExtractor):
             request.execute(self, f"Batch {batch_number}", query_parameters)
             # We technically don't need to have the correct user name in the
             # URL and it's easier to just ignore it here.
-            entries += request.generate_urls("https://www.tiktok.com/@_",
-                                             self.video, self.photo,
-                                             self.audio)
+            entries.update(request.generate_urls("https://www.tiktok.com/@_",
+                                                 self.video, self.photo,
+                                                 self.audio))
 
-        for video in entries:
-            data = {"_extractor": TiktokPostExtractor}
-            yield Message.Queue, video, data
+        return entries
 
     def _is_current_user(self, user_id):
         self._ensure_rehydration_data_app_context_cache_is_populated()
@@ -1084,9 +1082,10 @@ class TiktokPaginationRequest:
 
         Returns
         -------
-        list
-            Ideally one URL for each item, although subclasses are
-            permitted to return a list of any format they wish.
+        dict
+            Ideally one URL for each item, that points to a video detail
+            object, although subclasses are permitted to return a list
+            or dict of any format they wish.
         """
 
         return []
@@ -1193,7 +1192,7 @@ class TiktokItemListRequest(TiktokPaginationRequest):
         return len(self.items) > max(r.stop for r in self.range_predicate) - 1
 
     def generate_urls(self, profile_url, video, photo, audio):
-        urls = []
+        urls = {}
         for index, id in enumerate(self.items.keys()):
             if not self._matches_filters(self.items.get(id), index + 1, video,
                                          photo, audio):
@@ -1207,7 +1206,7 @@ class TiktokItemListRequest(TiktokPaginationRequest):
             except KeyError:
                 # Use the given profile URL as a back up.
                 url = f"{profile_url}/video/{id}"
-            urls.append(url)
+            urls[url] = self.items.get(id)
         return urls
 
     def _matches_filters(self, item, index, video, photo, audio):
