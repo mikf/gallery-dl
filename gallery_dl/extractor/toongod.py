@@ -164,6 +164,7 @@ class ToongodChapterExtractor(ToongodBase, ChapterExtractor):
 
 class ToongodWebtoonExtractor(ToongodBase, MangaExtractor):
     """Extractor for toongod webtoons"""
+    subcategory = "webtoon"
     chapterclass = ToongodChapterExtractor
     pattern = BASE_PATTERN + r"/webtoon/([^/?#]+)/?$"
     example = "https://www.toongod.org/webtoon/SLUG"
