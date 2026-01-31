@@ -1963,6 +1963,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
     <td></td>
 </tr>
+<tr id="socialmediagirlsforum" title="socialmediagirlsforum">
+    <td>Social Media Girls Forums</td>
+    <td>https://forums.socialmediagirls.com/</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td></td>
+</tr>
 
 <tr id="moebooru" title="moebooru">
     <td colspan="4"><strong>Moebooru and MyImouto</strong></td>

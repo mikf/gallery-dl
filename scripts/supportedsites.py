@@ -187,6 +187,7 @@ CATEGORY_MAP = {
     "slickpic"       : "SlickPic",
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
+    "socialmediagirlsforum": "Social Media Girls Forums",
     "speakerdeck"    : "Speaker Deck",
     "steamgriddb"    : "SteamGridDB",
     "subscribestar"  : "SubscribeStar",

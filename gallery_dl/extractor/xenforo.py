@@ -405,6 +405,10 @@ BASE_PATTERN = XenforoExtractor.update({
         "root": "https://titsintops.com/phpBB2",
         "pattern": r"(?:www\.)?titsintops\.com/phpBB2",
     },
+    "socialmediagirlsforum": {
+        "root": "https://forums.socialmediagirls.com",
+        "pattern": r"forums\.socialmediagirls\.com",
+    },
 })
 
 
