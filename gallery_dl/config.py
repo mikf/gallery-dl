@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2025 Mike Fährmann
+# Copyright 2015-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -21,19 +21,34 @@ log = logging.getLogger("config")
 
 _config = {}
 _files = []
+_type = os.environ.get("GDL_CONFIG_TYPE")
+
+if not _type or (_type := _type.lower()) == "json":
+    _type = "json"
+    _load = util.json_loads
+elif _type == "yaml":
+    from yaml import safe_load as _load
+elif _type == "toml":
+    try:
+        from tomllib import loads as _load
+    except ImportError:
+        from toml import loads as _load
+else:
+    raise ValueError(f"Unsupported config file type "
+                     f"'{os.environ['GDL_CONFIG_TYPE']}'")
 
 if util.WINDOWS:
     _default_configs = [
-        r"%APPDATA%\gallery-dl\config.json",
-        r"%USERPROFILE%\gallery-dl\config.json",
+        r"%APPDATA%\gallery-dl\config." + _type,
+        r"%USERPROFILE%\gallery-dl\config." + _type,
         r"%USERPROFILE%\gallery-dl.conf",
     ]
 else:
     _default_configs = [
         "/etc/gallery-dl.conf",
-        "${XDG_CONFIG_HOME}/gallery-dl/config.json"
+        "${XDG_CONFIG_HOME}/gallery-dl/config." + _type
         if os.environ.get("XDG_CONFIG_HOME") else
-        "${HOME}/.config/gallery-dl/config.json",
+        "${HOME}/.config/gallery-dl/config." + _type,
         "${HOME}/.gallery-dl.conf",
     ]
 
@@ -120,7 +135,7 @@ def open_extern():
     if not retcode:
         try:
             with open(path, encoding="utf-8") as fp:
-                util.json_loads(fp.read())
+                _load(fp.read())
         except Exception as exc:
             log.warning("%s when parsing '%s': %s",
                         exc.__class__.__name__, path, exc)
@@ -138,7 +153,7 @@ def status():
 
         try:
             with open(path, encoding="utf-8") as fp:
-                util.json_loads(fp.read())
+                _load(fp.read())
         except FileNotFoundError:
             status = "Not Present"
         except OSError:
@@ -187,7 +202,7 @@ def remap_categories():
             opts[new] = opts[old]
 
 
-def load(files=None, strict=False, loads=util.json_loads, conf=_config):
+def load(files=None, strict=False, loads=_load, conf=_config):
     """Load JSON configuration files"""
     for pathfmt in files or _default_configs:
         path = util.expand_path(pathfmt)
