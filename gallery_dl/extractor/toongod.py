@@ -52,6 +52,7 @@ class ToongodBase():
     root = "https://www.toongod.org"
     cookies_domain = ".toongod.org"
     cookies_names = ("cf_clearance",)
+    _flaresolverr_session = None
 
     def request(self, url, **kwargs):
         flaresolverr_url = self.config("flaresolverr-url")
@@ -62,15 +63,49 @@ class ToongodBase():
         headers.setdefault("Referer", self.root + "/")
         return Extractor.request(self, url, **kwargs)
 
+    def _get_or_create_session(self, flaresolverr_url):
+        """Get or create a FlareSolverr session for cookie reuse"""
+        if ToongodBase._flaresolverr_session:
+            return ToongodBase._flaresolverr_session
+
+        self.log.debug("Creating FlareSolverr session")
+        payload = {"cmd": "sessions.create"}
+
+        try:
+            response = requests.post(
+                flaresolverr_url, json=payload, timeout=30)
+            response.raise_for_status()
+            result = response.json()
+
+            if result.get("status") == "ok":
+                session_id = result["session"]
+                ToongodBase._flaresolverr_session = session_id
+                self.log.info("Created FlareSolverr session: %s", session_id)
+                return session_id
+            else:
+                self.log.warning(
+                    "Failed to create session, will use one-off requests")
+                return None
+
+        except Exception as exc:
+            self.log.warning("Session creation failed: %s", exc)
+            return None
+
     def _request_with_flaresolverr(self, url, flaresolverr_url):
-        """Use FlareSolverr to bypass Cloudflare"""
-        self.log.debug("Using FlareSolverr: %s", flaresolverr_url)
+        """Use FlareSolverr to bypass Cloudflare with session support"""
+        session_id = self._get_or_create_session(flaresolverr_url)
 
         payload = {
             "cmd": "request.get",
             "url": url,
             "maxTimeout": 60000,
         }
+
+        if session_id:
+            payload["session"] = session_id
+            self.log.debug("Using FlareSolverr session: %s", session_id)
+        else:
+            self.log.debug("Using FlareSolverr without session")
 
         try:
             response = requests.post(
