@@ -137,8 +137,8 @@ class ToongodChapterExtractor(ToongodBase, ChapterExtractor):
         ChapterExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        title = text.extr(page, "<h1>", "</h1>") or \
-            text.extr(page, 'property="og:title" content="', '"')
+        title = (text.extr(page, "<h1>", "</h1>") or
+                 text.extr(page, 'property="og:title" content="', '"'))
 
         if title and " - " in title:
             manga = title.split(" - ")[0]
@@ -146,18 +146,19 @@ class ToongodChapterExtractor(ToongodBase, ChapterExtractor):
             manga = self.slug.replace("-", " ").title()
 
         return {
-            "manga": manga,
-            "slug": self.slug,
-            "chapter": text.parse_int(self.chapter),
+            "manga"        : manga,
+            "slug"         : self.slug,
+            "chapter"      : text.parse_int(self.chapter),
             "chapter_minor": "",
-            "title": "",
+            "title"        : "",
         }
 
     def images(self, page):
         return [
-            (url.strip(), None)
+            (clean_url, None)
             for url in text.extract_iter(page, 'data-src="', '"')
-            if url.startswith("http") and "tngcdn.com/manga_" in url
+            if (clean_url := url.strip()).startswith("http") and
+            "tngcdn.com/manga_" in clean_url
         ]
 
 
@@ -173,12 +174,12 @@ class ToongodWebtoonExtractor(ToongodBase, MangaExtractor):
         MangaExtractor.__init__(self, match, url)
 
     def chapters(self, page):
-        manga = text.extr(page, "<h1>", "</h1>") or \
-            text.extr(page, 'property="og:title" content="', '"')
+        manga = (text.extr(page, "<h1>", "</h1>") or
+                 text.extr(page, 'property="og:title" content="', '"'))
 
-        chapter_list = text.extr(
-            page, 'class="wp-manga-chapter', '</ul>') or \
-            text.extr(page, 'id="chapter-list', '</ul>') or ""
+        chapter_list = (
+            text.extr(page, 'class="wp-manga-chapter', '</ul>') or
+            text.extr(page, 'id="chapter-list', '</ul>') or "")
 
         results = []
         for url in text.extract_iter(chapter_list, '<a href="', '"'):
@@ -187,8 +188,8 @@ class ToongodWebtoonExtractor(ToongodBase, MangaExtractor):
             chapter = text.extr(url, "/chapter-", "/")
             if chapter:
                 results.append((url, {
-                    "manga": manga,
-                    "chapter": text.parse_int(chapter),
+                    "manga"        : manga,
+                    "chapter"      : text.parse_int(chapter),
                     "chapter_minor": "",
                 }))
         return results
