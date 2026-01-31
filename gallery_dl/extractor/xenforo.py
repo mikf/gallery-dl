@@ -11,6 +11,7 @@
 from .common import BaseExtractor, Message
 from .. import text, exception
 from ..cache import cache
+import binascii
 
 
 class XenforoExtractor(BaseExtractor):
@@ -65,6 +66,9 @@ class XenforoExtractor(BaseExtractor):
                     if ext[0] == "/":
                         if ext[1] == "/":
                             ext = "https:" + ext
+                        elif ext.startswith("/goto/link-confirmation?"):
+                            params = text.parse_query(text.unescape(ext[24:]))
+                            ext = binascii.a2b_base64(params["url"]).decode()
                         else:
                             continue
                     data["num"] += 1
