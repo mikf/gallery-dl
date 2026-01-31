@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2025 Mike Fährmann
+# Copyright 2016-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -1720,8 +1720,7 @@ class TwitterAPI():
     def _client_transaction(self):
         self.log.info("Initializing client transaction keys")
 
-        from .. import transaction_id
-        ct = transaction_id.ClientTransaction()
+        ct = self.extractor.utils("transaction_id").ClientTransaction()
         ct.initialize(self.extractor)
 
         # update 'x-csrf-token' header (#7467)
