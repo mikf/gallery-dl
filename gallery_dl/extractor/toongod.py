@@ -132,6 +132,11 @@ class ToongodWebtoonExtractor(ToongodBase, MangaExtractor):
     pattern = BASE_PATTERN + r"/webtoon/([^/?#]+)/?$"
     example = "https://www.toongod.org/webtoon/SLUG"
 
+    def __init__(self, match):
+        self.slug = match.group(1)
+        url = "{}/webtoon/{}/".format(self.root, self.slug)
+        MangaExtractor.__init__(self, match, url)
+
     def chapters(self, page):
         manga = text.extr(page, "<h1>", "</h1>") or \
             text.extr(page, 'property="og:title" content="', '"')
