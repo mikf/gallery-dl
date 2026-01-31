@@ -354,6 +354,17 @@ class Extractor():
                        seconds, reason)
         time.sleep(seconds)
 
+    def utils(self, module="", name=None):
+        module = (self.__class__.category if not module else
+                  module[1:] if module[0] == "/" else
+                  f"{self.__class__.category}_{module}")
+        if module in CACHE_UTILS:
+            res = CACHE_UTILS[module]
+        else:
+            res = CACHE_UTILS[module] = __import__(
+                "utils." + module, globals(), None, module, 1)
+        return res if name is None else getattr(res, name, None)
+
     def input(self, prompt, echo=True):
         self._check_input_allowed(prompt)
 
@@ -1130,6 +1141,7 @@ def _browser_useragent(browser):
 
 CACHE_ADAPTERS = {}
 CACHE_COOKIES = {}
+CACHE_UTILS = {}
 CATEGORY_MAP = ()
 
 
