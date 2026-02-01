@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2025 Mike Fährmann
+# Copyright 2016-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -18,15 +18,15 @@ class LusciousExtractor(Extractor):
     cookies_domain = ".luscious.net"
     root = "https://members.luscious.net"
 
-    def _graphql(self, op, variables, query):
+    def _request_graphql(self, opname, variables):
         data = {
             "id"           : 1,
-            "operationName": op,
-            "query"        : query,
+            "operationName": opname,
+            "query"        : self.utils("graphql", opname),
             "variables"    : variables,
         }
         response = self.request(
-            f"{self.root}/graphql/nobatch/?operationName={op}",
+            f"{self.root}/graphql/nobatch/?operationName={opname}",
             method="POST", json=data, fatal=False,
         )
 
@@ -49,11 +49,8 @@ class LusciousAlbumExtractor(LusciousExtractor):
                r"/(?:albums|pictures/c/[^/?#]+/album)/[^/?#]+_(\d+)")
     example = "https://luscious.net/albums/TITLE_12345/"
 
-    def __init__(self, match):
-        LusciousExtractor.__init__(self, match)
-        self.album_id = match[1]
-
     def _init(self):
+        self.album_id = self.groups[0]
         self.gif = self.config("gif", False)
 
     def items(self):
@@ -83,98 +80,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
             "id": self.album_id,
         }
 
-        query = """
-query AlbumGet($id: ID!) {
-    album {
-        get(id: $id) {
-            ... on Album {
-                ...AlbumStandard
-            }
-            ... on MutationError {
-                errors {
-                    code
-                    message
-                }
-            }
-        }
-    }
-}
-
-fragment AlbumStandard on Album {
-    __typename
-    id
-    title
-    labels
-    description
-    created
-    modified
-    like_status
-    number_of_favorites
-    rating
-    status
-    marked_for_deletion
-    marked_for_processing
-    number_of_pictures
-    number_of_animated_pictures
-    slug
-    is_manga
-    url
-    download_url
-    permissions
-    cover {
-        width
-        height
-        size
-        url
-    }
-    created_by {
-        id
-        name
-        display_name
-        user_title
-        avatar {
-            url
-            size
-        }
-        url
-    }
-    content {
-        id
-        title
-        url
-    }
-    language {
-        id
-        title
-        url
-    }
-    tags {
-        id
-        category
-        text
-        url
-        count
-    }
-    genres {
-        id
-        title
-        slug
-        url
-    }
-    audiences {
-        id
-        title
-        url
-        url
-    }
-    last_viewed_picture {
-        id
-        position
-        url
-    }
-}
-"""
-        album = self._graphql("AlbumGet", variables, query)["album"]["get"]
+        album = self._request_graphql("AlbumGet", variables)["album"]["get"]
         if "errors" in album:
             raise exception.NotFoundError("album")
 
@@ -204,66 +110,8 @@ fragment AlbumStandard on Album {
             },
         }
 
-        query = """
-query AlbumListOwnPictures($input: PictureListInput!) {
-    picture {
-        list(input: $input) {
-            info {
-                ...FacetCollectionInfo
-            }
-            items {
-                ...PictureStandardWithoutAlbum
-            }
-        }
-    }
-}
-
-fragment FacetCollectionInfo on FacetCollectionInfo {
-    page
-    has_next_page
-    has_previous_page
-    total_items
-    total_pages
-    items_per_page
-    url_complete
-    url_filters_only
-}
-
-fragment PictureStandardWithoutAlbum on Picture {
-    __typename
-    id
-    title
-    created
-    like_status
-    number_of_comments
-    number_of_favorites
-    status
-    width
-    height
-    resolution
-    aspect_ratio
-    url_to_original
-    url_to_video
-    is_animated
-    position
-    tags {
-        id
-        category
-        text
-        url
-    }
-    permissions
-    url
-    thumbnails {
-        width
-        height
-        size
-        url
-    }
-}
-"""
         while True:
-            data = self._graphql("AlbumListOwnPictures", variables, query)
+            data = self._request_graphql("AlbumListOwnPictures", variables)
             yield from data["picture"]["list"]["items"]
 
             if not data["picture"]["list"]["info"]["has_next_page"]:
@@ -278,12 +126,8 @@ class LusciousSearchExtractor(LusciousExtractor):
                r"/albums/list/?(?:\?([^#]+))?")
     example = "https://luscious.net/albums/list/?tagged=TAG"
 
-    def __init__(self, match):
-        LusciousExtractor.__init__(self, match)
-        self.query = match[1]
-
     def items(self):
-        query = text.parse_query(self.query)
+        query = text.parse_query(self.groups[0])
         display = query.pop("display", "date_newest")
         page = query.pop("page", None)
 
@@ -295,89 +139,8 @@ class LusciousSearchExtractor(LusciousExtractor):
             },
         }
 
-        query = """
-query AlbumListWithPeek($input: AlbumListInput!) {
-    album {
-        list(input: $input) {
-            info {
-                ...FacetCollectionInfo
-            }
-            items {
-                ...AlbumMinimal
-                peek_thumbnails {
-                    width
-                    height
-                    size
-                    url
-                }
-            }
-        }
-    }
-}
-
-fragment FacetCollectionInfo on FacetCollectionInfo {
-    page
-    has_next_page
-    has_previous_page
-    total_items
-    total_pages
-    items_per_page
-    url_complete
-    url_filters_only
-}
-
-fragment AlbumMinimal on Album {
-    __typename
-    id
-    title
-    labels
-    description
-    created
-    modified
-    number_of_favorites
-    number_of_pictures
-    slug
-    is_manga
-    url
-    download_url
-    cover {
-        width
-        height
-        size
-        url
-    }
-    content {
-        id
-        title
-        url
-    }
-    language {
-        id
-        title
-        url
-    }
-    tags {
-        id
-        category
-        text
-        url
-        count
-    }
-    genres {
-        id
-        title
-        slug
-        url
-    }
-    audiences {
-        id
-        title
-        url
-    }
-}
-"""
         while True:
-            data = self._graphql("AlbumListWithPeek", variables, query)
+            data = self._request_graphql("AlbumListWithPeek", variables)
 
             for album in data["album"]["list"]["items"]:
                 album["url"] = self.root + album["url"]
