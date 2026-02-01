@@ -447,8 +447,17 @@ class DiscordAPI():
         MESSAGES_BATCH = 25
 
         def _method(offset):
-            params["offset"] = offset
-            return self._call(url, params)["messages"]
+            messages = self._call(url, params)["messages"]
+
+            max_id = 0
+            for msgs in messages:
+                for msg in msgs:
+                    mid = int(msg["id"])
+                    if max_id > mid or not max_id:
+                        max_id = mid
+            params["max_id"] = max_id
+
+            return messages
 
         url = f"/guilds/{server_id}/messages/search"
         return self._pagination(_method, MESSAGES_BATCH)
