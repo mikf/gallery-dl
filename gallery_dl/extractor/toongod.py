@@ -30,8 +30,33 @@ This site uses Cloudflare protection. You have two options:
 from .common import Extractor, ChapterExtractor, MangaExtractor
 from .. import text, exception
 import requests
+import re
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?toongod\.org"
+
+
+def _clean_manga_title(title):
+    """Clean manga title by removing classification tags and encoded IDs"""
+    if not title:
+        return title
+
+    # Strip whitespace first
+    title = title.strip()
+
+    # Remove content type suffixes (case-insensitive)
+    title = re.sub(r'\s+(Manhwa|Webtoon|Manhua|Manga)\s*',
+                   ' ', title, flags=re.IGNORECASE)
+
+    # Remove single-word uppercase/mixed-case codes at the end
+    # Pattern 1: Mixed case word (e.g., "Afahbb")
+    title = re.sub(r'\s+[A-Z][a-z]*[A-Z][a-z]*\s*$', '', title)
+    # Pattern 2: All uppercase word (e.g., "ABCD")
+    title = re.sub(r'\s+[A-Z]{2,}\s*$', '', title)
+
+    # Clean up extra whitespace
+    title = ' '.join(title.split()).strip()
+
+    return title
 
 
 class _FlaresolverrResponse:
@@ -137,13 +162,43 @@ class ToongodChapterExtractor(ToongodBase, ChapterExtractor):
         ChapterExtractor.__init__(self, match, url)
 
     def metadata(self, page):
-        title = (text.extr(page, "<h1>", "</h1>") or
-                 text.extr(page, 'property="og:title" content="', '"'))
+        manga = None
 
-        if title and " - " in title:
-            manga = title.split(" - ")[0]
-        else:
-            manga = self.slug.replace("-", " ").title()
+        # Try breadcrumb first (most reliable, always clean)
+        breadcrumb = text.extr(page, 'class="breadcrumb"', '</ol>')
+        if breadcrumb:
+            # Get all link texts from breadcrumb
+            link_texts = []
+            for link_html in text.extract_iter(
+                    breadcrumb, '<a href="', '</a>'):
+                # link_html contains: URL">TEXT
+                # Split on "> and take the second part
+                if '">' in link_html:
+                    link_text = link_html.split('">', 1)[1].strip()
+                    if link_text:
+                        link_texts.append(link_text)
+
+            # Series name is the last or second-to-last link
+            if link_texts:
+                # Check if last link looks like a chapter
+                if (len(link_texts) >= 2 and
+                        'chapter' in link_texts[-1].lower()):
+                    manga = link_texts[-2]  # Second-to-last
+                else:
+                    manga = link_texts[-1]  # Last is series
+
+        # Fallback to h1 extraction if breadcrumb failed
+        if not manga:
+            title = (text.extr(page, "<h1>", "</h1>") or
+                     text.extr(page, 'property="og:title" content="', '"'))
+
+            if title and " - " in title:
+                manga = title.split(" - ")[0].strip()
+            else:
+                manga = self.slug.replace("-", " ").title()
+
+            # Clean manga title (remove "Manhwa", "Webtoon", encoded IDs, etc.)
+            manga = _clean_manga_title(manga)
 
         return {
             "manga"        : manga,
@@ -175,8 +230,29 @@ class ToongodWebtoonExtractor(ToongodBase, MangaExtractor):
         MangaExtractor.__init__(self, match, url)
 
     def chapters(self, page):
-        manga = (text.extr(page, "<h1>", "</h1>") or
-                 text.extr(page, 'property="og:title" content="', '"'))
+        manga = None
+
+        # Try breadcrumb first (most reliable, always clean)
+        breadcrumb = text.extr(page, 'class="breadcrumb"', '</ol>')
+        if breadcrumb:
+            # Get all link texts from breadcrumb
+            for link_html in text.extract_iter(
+                    breadcrumb, '<a href="', '</a>'):
+                # link_html contains: URL">TEXT
+                # Split on "> and take the second part
+                if '">' in link_html:
+                    link_text = link_html.split('">', 1)[1].strip()
+                    if link_text:
+                        # The last non-empty link is the series name
+                        manga = link_text
+
+        # Fallback to h1 if breadcrumb extraction failed
+        if not manga:
+            manga = (text.extr(page, "<h1>", "</h1>") or
+                     text.extr(page, 'property="og:title" content="',
+                               '"'))
+            # Clean manga title (remove junk suffixes)
+            manga = _clean_manga_title(manga)
 
         chapter_list = (
             text.extr(page, 'class="wp-manga-chapter', '</ul>') or
