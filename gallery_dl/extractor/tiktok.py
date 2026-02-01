@@ -223,7 +223,7 @@ class TiktokExtractor(Extractor):
             data = data["webapp.user-detail"]
         if not self._check_status_code(data, profile_url, "profile"):
             raise exception.ExtractionError(
-                "%s: could not extract rehydration data", profile_url)
+                f"{profile_url}: could not extract rehydration data")
         try:
             for key in additional_keys:
                 data = data[key]
