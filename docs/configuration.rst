@@ -640,7 +640,6 @@ Description
     * ``simpcity``
     * ``subscribestar``
     * ``tapas``
-    * ``tsumino``
     * ``vipergirls``
     * ``zerochan``
 
