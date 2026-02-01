@@ -8673,6 +8673,10 @@ Description
         e.g. a Tweet on Twitter or a post on Patreon.
     ``post-after``
         After downloading all files of a `post`
+    ``child``
+        When spawning a new `child` extractor
+    ``child-after``
+        After a `child` extractor ran
 
 
 metadata.include

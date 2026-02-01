@@ -431,6 +431,12 @@ class DownloadJob(Job):
             return
         self.visited.add(url)
 
+        if "child" in self.hooks:
+            pathfmt = self.pathfmt
+            pathfmt.kwdict = kwdict
+            for callback in self.hooks["child"]:
+                callback(pathfmt)
+
         if cls := kwdict.get("_extractor"):
             extr = cls.from_url(url)
         else:
@@ -501,6 +507,12 @@ class DownloadJob(Job):
 
         else:
             self._write_unsupported(url)
+
+        if "child-after" in self.hooks:
+            pathfmt = self.pathfmt
+            pathfmt.kwdict = kwdict
+            for callback in self.hooks["child-after"]:
+                callback(pathfmt)
 
     def handle_finalize(self):
         if self.archive:
