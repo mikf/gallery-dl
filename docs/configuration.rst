@@ -666,6 +666,28 @@ Note
     is *required*
 
 
+extractor.*.init
+----------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``false``
+Description
+    | Controls when to initialize extractor internals.
+    | (
+      `postprocessors <extractor.*.postprocessors_>`_,
+      `archives <extractor.*.archive_>`_,
+      `path-*` options, etc
+      )
+
+    ``true``
+        Initialize everything immediately upon extractor start
+    ``false`` | ``"lazy"``
+        Initialize data structures when processing the first ``post``
+        or not at all when an extractor never yields a ``post``.
+
+
 extractor.*.input
 -----------------
 Type

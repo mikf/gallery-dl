@@ -274,6 +274,10 @@ class Job():
         self.pred_post = self._prepare_predicates("post", False)
         self.pred_queue = self._prepare_predicates("chapter", False)
 
+        init = self.extractor.config("init", False)
+        if init and init != "lazy":
+            self.initialize()
+
     def _prepare_predicates(self, target, skip):
         predicates = []
         extr = self.extractor
