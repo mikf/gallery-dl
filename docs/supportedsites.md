@@ -1123,12 +1123,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Art, individual Images</td>
     <td></td>
 </tr>
-<tr id="tsumino" title="tsumino">
-    <td>Tsumino</td>
-    <td>https://www.tsumino.com/</td>
-    <td>Galleries, Search Results</td>
-    <td>Supported</td>
-</tr>
 <tr id="tumblr" title="tumblr">
     <td>Tumblr</td>
     <td>https://www.tumblr.com/</td>
