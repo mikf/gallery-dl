@@ -1028,10 +1028,8 @@ class BaseExtractor(Extractor):
                 pattern = re.escape(root[root.index(":") + 3:])
             pattern_list.append(pattern + "()")
 
-        return (
-            r"(?:" + cls.basecategory + r":(https?://[^/?#]+)|"
-            r"(?:https?://)?(?:" + "|".join(pattern_list) + r"))"
-        )
+        return (f"(?:{cls.basecategory}:(https?://[^/?#]+)|"
+                f"(?:https?://)?(?:{'|'.join(pattern_list)}))")
 
 
 class RequestsAdapter(HTTPAdapter):
