@@ -212,6 +212,7 @@ modules = [
     "thehentaiworld",
     "tiktok",
     "tmohentai",
+    "toongod",
     "toyhouse",
     "tsumino",
     "tumblr",
