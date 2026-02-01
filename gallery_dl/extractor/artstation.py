@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2025 Mike Fährmann
+# Copyright 2018-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -88,7 +88,8 @@ class ArtstationExtractor(Extractor):
                 if not self.videos:
                     return
                 page = self.request(url).text
-                return text.extr(page, ' src="', '"')
+                return text.extract(
+                    page, ' src="', '"', page.find('id="video"')+1)[0]
 
         if url:
             # external URL
