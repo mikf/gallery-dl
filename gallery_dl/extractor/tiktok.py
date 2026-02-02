@@ -475,6 +475,8 @@ class TiktokExtractor(Extractor):
                 self.log.error("%s: Login required to access this %s, or this "
                                "profile has no videos posted", url,
                                type_of_url)
+        elif status == 10221:
+            self.log.error("%s: User account could not be found", url)
         elif status == 10204:
             self.log.error("%s: Requested %s not available", url, type_of_url)
         elif status == 10231:
