@@ -170,6 +170,32 @@ class ScrolllerSubredditExtractor(ScrolllerExtractor):
             "SubredditChildrenQuery", variables, subreddit["children"])
 
 
+class ScrolllerUserExtractor(ScrolllerExtractor):
+    """Extractor for media from a scrolller Reddit user"""
+    subcategory = "user"
+    directory_fmt = ("{category}", "User", "{posted_by}")
+    pattern = BASE_PATTERN + r"/reddit-user/([^/?#]+)(?:/?\?([^#]+))?"
+    example = "https://scrolller.com/reddit-user/USER"
+
+    def posts(self):
+        query = "UserPostsQuery"
+        variables = {
+            "username": text.unquote(self.groups[0]),
+            "iterator": None,
+            "limit"   : 40,
+            "filter"  : None,
+            "sortBy"  : "RANDOM",
+            "isNsfw"  : True,
+        }
+
+        posts = self._request_graphql(query, variables)["getUserPosts"]
+        if not posts.get("items"):
+            posts = None
+            variables["isNsfw"] = False
+
+        return self._pagination(query, variables, posts)
+
+
 class ScrolllerFollowingExtractor(ScrolllerExtractor):
     """Extractor for followed scrolller subreddits"""
     subcategory = "following"
