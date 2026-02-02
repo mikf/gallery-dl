@@ -235,6 +235,7 @@ def _parse_option(opt):
 
 def build_parser():
     """Build and configure an ArgumentParser object"""
+    SUPPRESS = argparse.SUPPRESS
     parser = argparse.ArgumentParser(
         formatter_class=Formatter,
         add_help=False,
@@ -318,7 +319,7 @@ def build_parser():
     input.add_argument(
         "urls",
         metavar="URL", nargs="*",
-        help=argparse.SUPPRESS,
+        help=SUPPRESS,
     )
     input.add_argument(
         "-i", "--input-file",
@@ -620,7 +621,7 @@ def build_parser():
     configuration.add_argument(
         "--ignore-config",
         dest="config_load", action="store_false",
-        help=argparse.SUPPRESS,
+        help=SUPPRESS,
     )
 
     authentication = parser.add_argument_group("Authentication Options")
@@ -698,7 +699,7 @@ def build_parser():
     )
     selection.add_argument(
         "--range",
-        dest="image-range", metavar="RANGE", action=ConfigAction,
+        dest="file-range", metavar="RANGE", action=ConfigAction,
         help=("Index range(s) specifying which files to download. "
               "These can be either a constant value, range, or slice "
               "(e.g. '5', '8-20', or '1:24:3')"),
@@ -709,14 +710,14 @@ def build_parser():
         help=("Like '--range', but for posts"),
     )
     selection.add_argument(
-        "--chapter-range",
-        dest="chapter-range", metavar="RANGE", action=ConfigAction,
+        "--child-range",
+        dest="child-range", metavar="RANGE", action=ConfigAction,
         help=("Like '--range', but for child extractors handling "
               "manga chapters, external URLs, etc."),
     )
     selection.add_argument(
         "--filter",
-        dest="image-filter", metavar="EXPR", action=ConfigAction,
+        dest="file-filter", metavar="EXPR", action=ConfigAction,
         help=("Python expression controlling which files to download. "
               "Files for which the expression evaluates to False are ignored. "
               "Available keys are the filename-specific ones listed by '-K'. "
@@ -729,11 +730,23 @@ def build_parser():
         help=("Like '--filter', but for posts"),
     )
     selection.add_argument(
-        "--chapter-filter",
-        dest="chapter-filter", metavar="EXPR", action=ConfigAction,
+        "--child-filter",
+        dest="child-filter", metavar="EXPR", action=ConfigAction,
         help=("Like '--filter', but for child extractors handling "
               "manga chapters, external URLs, etc."),
     )
+    selection.add_argument(
+        "--file-range", "--image-range",
+        dest="file-range", action=ConfigAction, help=SUPPRESS)
+    selection.add_argument(
+        "--chapter-range",
+        dest="child-range", action=ConfigAction, help=SUPPRESS)
+    selection.add_argument(
+        "--file-filter", "--image-filter",
+        dest="file-filter", action=ConfigAction, help=SUPPRESS)
+    selection.add_argument(
+        "--chapter-filter",
+        dest="child-filter", action=ConfigAction, help=SUPPRESS)
 
     infojson = {
         "name"    : "metadata",
@@ -773,7 +786,7 @@ def build_parser():
         "--write-infojson",
         dest="postprocessors",
         action="append_const", const=infojson,
-        help=argparse.SUPPRESS,
+        help=SUPPRESS,
     )
     postprocessor.add_argument(
         "--write-tags",
@@ -806,7 +819,7 @@ def build_parser():
         "--mtime-from-date",
         dest="postprocessors", nargs=0, action=MtimeAction,
         const="date|status[date]",
-        help=argparse.SUPPRESS,
+        help=SUPPRESS,
     )
     postprocessor.add_argument(
         "--rename",
@@ -830,18 +843,18 @@ def build_parser():
     postprocessor.add_argument(
         "--ugoira-conv",
         dest="postprocessors", nargs=0, action=UgoiraAction, const="vp8",
-        help=argparse.SUPPRESS,
+        help=SUPPRESS,
     )
     postprocessor.add_argument(
         "--ugoira-conv-lossless",
         dest="postprocessors", nargs=0, action=UgoiraAction,
         const="vp9-lossless",
-        help=argparse.SUPPRESS,
+        help=SUPPRESS,
     )
     postprocessor.add_argument(
         "--ugoira-conv-copy",
         dest="postprocessors", nargs=0, action=UgoiraAction, const="copy",
-        help=argparse.SUPPRESS,
+        help=SUPPRESS,
     )
     postprocessor.add_argument(
         "--exec",
