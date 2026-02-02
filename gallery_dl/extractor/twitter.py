@@ -9,7 +9,7 @@
 """Extractors for https://x.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, util, dt, exception
 from ..cache import cache, memcache
 import itertools
 import random
@@ -365,14 +365,13 @@ class TwitterExtractor(Extractor):
         author = self._transform_user(author)
 
         if tweet_id >= 300_000_000_000_000:
-            date = self.parse_timestamp(
-                ((tweet_id >> 22) + 1_288_834_974_657) / 1000)
+            date = self._tweetid_to_datetime(tweet_id)
         else:
             try:
-                date = self.parse_datetime(
+                date = dt.parse(
                     legacy["created_at"], "%a %b %d %H:%M:%S %z %Y")
             except Exception:
-                date = util.NONE
+                date = dt.NONE
         source = tweet.get("source")
 
         tget = legacy.get
@@ -460,8 +459,8 @@ class TwitterExtractor(Extractor):
                 tdata, legacy["extended_entities"]["media"][0])
         if tdata["retweet_id"]:
             tdata["content"] = f"RT @{author['name']}: {tdata['content']}"
-            tdata["date_original"] = self.parse_timestamp(
-                ((tdata["retweet_id"] >> 22) + 1_288_834_974_657) / 1000)
+            tdata["date_original"] = self._tweetid_to_datetime(
+                tdata["retweet_id"])
 
         return tdata
 
@@ -497,7 +496,7 @@ class TwitterExtractor(Extractor):
             "id": text.parse_int(cid),
             "name": com.get("name"),
             "description": com.get("description"),
-            "date": self.parse_timestamp(com.get("created_at", 0) / 1000),
+            "date": dt.parse_ts(com.get("created_at", 0) / 1000),
             "nsfw": com.get("is_nsfw"),
             "role": com.get("role"),
             "member_count": com.get("member_count"),
@@ -536,7 +535,7 @@ class TwitterExtractor(Extractor):
             "id"              : text.parse_int(uid),
             "name"            : core.get("screen_name"),
             "nick"            : core.get("name"),
-            "date"            : self.parse_datetime(
+            "date"            : dt.parse(
                 core["created_at"], "%a %b %d %H:%M:%S %z %Y"),
             "profile_banner"  : lget("profile_banner_url", ""),
             "favourites_count": lget("favourites_count"),
@@ -653,6 +652,9 @@ class TwitterExtractor(Extractor):
         self.log.debug("Cursor: %s", cursor)
         self._cursor = cursor
         return cursor
+
+    def _tweetid_to_datetime(self, tweet_id):
+        return dt.parse_ts(((tweet_id >> 22) + 1_288_834_974_657) / 1000)
 
     def metadata(self):
         """Return general metadata"""
@@ -927,7 +929,7 @@ class TwitterBookmarkExtractor(TwitterExtractor):
 
     def _transform_tweet(self, tweet):
         tdata = TwitterExtractor._transform_tweet(self, tweet)
-        tdata["date_bookmarked"] = self.parse_timestamp(
+        tdata["date_bookmarked"] = dt.parse_ts(
             (int(tweet["sortIndex"] or 0) >> 20) / 1000)
         return tdata
 
