@@ -988,7 +988,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="scrolller" title="scrolller">
     <td>Scrolller</td>
     <td>https://scrolller.com/</td>
-    <td>Followed Subreddits, Posts, Subreddits</td>
+    <td>Followed Subreddits, Posts, Subreddits, Reddit Users</td>
     <td>Supported</td>
 </tr>
 <tr id="senmanga" title="senmanga">

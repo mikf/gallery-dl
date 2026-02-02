@@ -25,6 +25,39 @@ query SubredditPostQuery(
 }
 """
 
+UserPostsQuery = """\
+query UserPostsQuery(
+    $username: String!
+    $iterator: String
+    $limit: Int!
+    $filter: GalleryFilter
+    $sortBy: GallerySortBy
+    $isNsfw: Boolean
+) {
+    getUserPosts(
+        data: {
+            username: $username
+            iterator: $iterator
+            limit: $limit
+            filter: $filter
+            sortBy: $sortBy
+            isNsfw: $isNsfw
+        }
+    ) {
+        iterator items {
+            __typename id url title posted_by reddit_posted_by subredditId
+            subredditTitle subredditUrl subredditIsFollowing redditPath isNsfw
+            hasAudio fullLengthSource gfycatSource redgifsSource ownerAvatar
+            username displayName favoriteCount isPaid tags commentsCount
+            commentsRepliesCount duration createdAt isFavorite
+            albumContent { mediaSources { url width height isOptimized } }
+            mediaSources { url width height isOptimized }
+            blurredMediaSources { url width height isOptimized type }
+        }
+    }
+}
+"""
+
 SubredditQuery = """\
 query SubredditQuery(
     $url: String!

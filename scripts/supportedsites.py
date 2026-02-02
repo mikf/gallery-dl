@@ -414,6 +414,7 @@ SUBCATEGORY_MAP = {
         "books": "Book Searches",
     },
     "scrolller": {
+        "user"     : "Reddit Users",
         "following": "Followed Subreddits",
     },
     "sexcom": {
