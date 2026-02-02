@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2025 Mike Fährmann
+# Copyright 2022-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -27,6 +27,13 @@ class _8chanExtractor(Extractor):
 
     @memcache()
     def cookies_tos_name(self):
+        domain = "8chan." + self.groups[0]
+        for cookie in self.cookies:
+            if cookie.domain == domain and \
+                    cookie.name.lower().startswith("tos"):
+                self.log.debug("TOS cookie name: %s", cookie.name)
+                return cookie.name
+
         url = self.root + "/.static/pages/confirmed.html"
         headers = {"Referer": self.root + "/.static/pages/disclaimer.html"}
         response = self.request(url, headers=headers, allow_redirects=False)
@@ -37,7 +44,7 @@ class _8chanExtractor(Extractor):
                 return cookie.name
 
         self.log.error("Unable to determin TOS cookie name")
-        return "TOS20241009"
+        return "TOS20250418"
 
     @memcache()
     def cookies_prepare(self):
