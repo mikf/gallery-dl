@@ -245,9 +245,9 @@ Description
     base-directory_ for any spawned child extractors.
 
 
+.. _extractor.*.metadata-parent:
+
 extractor.*.parent-metadata
----------------------------
-extractor.*.metadata-parent
 ---------------------------
 Type
     * ``bool``
@@ -1083,9 +1083,9 @@ Note
     with the same name.
 
 
+.. _extractor.*.url-metadata:
+
 extractor.*.metadata-url
-------------------------
-extractor.*.url-metadata
 ------------------------
 Type
     ``string``
@@ -1099,9 +1099,9 @@ Description
     with a ``metadata`` post processor, etc.
 
 
+.. _extractor.*.path-metadata:
+
 extractor.*.metadata-path
--------------------------
-extractor.*.path-metadata
 -------------------------
 Type
     ``string``
@@ -1114,9 +1114,9 @@ Description
     to access the current file's filename as ``"{gdl_path.filename}"``.
 
 
+.. _extractor.*.extractor-metadata:
+
 extractor.*.metadata-extractor
-------------------------------
-extractor.*.extractor-metadata
 ------------------------------
 Type
     ``string``
@@ -1126,9 +1126,9 @@ Description
     object into metadata dictionaries as the given name.
 
 
+.. _extractor.*.http-metadata:
+
 extractor.*.metadata-http
--------------------------
-extractor.*.http-metadata
 -------------------------
 Type
     ``string``
@@ -1142,9 +1142,9 @@ Description
     and its parsed form as ``"{gdl_http[date]}"``.
 
 
+.. _extractor.*.version-metadata:
+
 extractor.*.metadata-version
-----------------------------
-extractor.*.version-metadata
 ----------------------------
 Type
     ``string``
@@ -1515,10 +1515,10 @@ Description
     Use fallback download URLs when a download fails.
 
 
+.. _extractor.*.image-range:
+
 extractor.*.file-range
 ----------------------
-extractor.*.image-range
------------------------
 Type
     * ``string``
     * ``list`` of ``strings``
@@ -1552,10 +1552,10 @@ Description
     but for posts.
 
 
+.. _extractor.*.chapter-range:
+
 extractor.*.child-range
 -----------------------
-extractor.*.chapter-range
--------------------------
 Type
     ``string``
 Description
@@ -1563,10 +1563,10 @@ Description
     but for child extractors handling manga chapters, external URLs, etc.
 
 
+.. _extractor.*.image-filter:
+
 extractor.*.file-filter
 -----------------------
-extractor.*.image-filter
-------------------------
 Type
     * Condition_
     * ``list`` of Conditions_
@@ -1596,10 +1596,10 @@ Description
     Available values are the directory-specific ones listed by ``-K`` or ``-j``.
 
 
+.. _extractor.*.chapter-filter:
+
 extractor.*.child-filter
 ------------------------
-extractor.*.chapter-filter
---------------------------
 Type
     * Condition_
     * ``list`` of Conditions_
@@ -1611,10 +1611,10 @@ Description
     but for child extractors handling manga chapters, external URLs, etc.
 
 
+.. _extractor.*.image-unique:
+
 extractor.*.file-unique
 -----------------------
-extractor.*.image-unique
-------------------------
 Type
     ``bool``
 Default
@@ -1624,10 +1624,10 @@ Description
     current extractor run.
 
 
+.. _extractor.*.chapter-unique:
+
 extractor.*.child-unique
 ------------------------
-extractor.*.chapter-unique
---------------------------
 Type
     ``bool``
 Default
@@ -9109,10 +9109,10 @@ Description
     Additional |ffmpeg| command-line arguments.
 
 
+.. _ugoira.ffmpeg-demuxer:
+
 ugoira.mode
 -----------
-ugoira.ffmpeg-demuxer
----------------------
 Type
     ``string``
 Default
