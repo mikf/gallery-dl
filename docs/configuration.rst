@@ -9979,6 +9979,13 @@ Example
     .. code:: json
 
         {
+            "name"  : "metadata/print@prepare",
+            "format": "{id}: {date}"
+        }
+
+    .. code:: json
+
+        {
             "name"       : "zip",
             "compression": "store",
             "extension"  : "cbz",
@@ -9989,13 +9996,21 @@ Description
     An ``object`` containing a ``"name"`` attribute specifying the
     post-processor type, as well as any of its `options <Postprocessor Options_>`__.
 
-    It is possible to set a ``"filter"`` Condition_ similar to
-    `file-filter <extractor.*.file-filter_>`_
-    to only run a post-processor conditionally.
+    * It is possible to set a ``"filter"`` Condition_ similar to
+      `file-filter <extractor.*.file-filter_>`_
+      to only run a post-processor conditionally.
 
-    It is also possible set a ``"whitelist"`` or ``"blacklist"`` to
-    only enable or disable a post-processor for the specified
-    extractor categories.
+    * It is possible set a ``"whitelist"`` or ``"blacklist"`` to
+      only enable or disable a post-processor for the specified
+      extractor categories.
+
+    * It is possible to specify a post-processor's ``mode`` & ``event``
+      as part of its ``name`` by adding ``/MODE`` & ``@EVENT``.
+      For example
+
+        * ``"name": "metadata/jsonl@post"``
+        * ``"name": "ugoira/archive"``
+        * ``"name": "exec@error"``
 
     The available post-processor types are
 
