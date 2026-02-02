@@ -300,7 +300,8 @@ class Job():
                 alt is not None and (prange := extr.config(alt + "-range")):
             try:
                 skip = extr.skip if skip and not pfilter else None
-                predicates.append(util.predicate_range(prange, skip))
+                flag = target if alt is not None else None
+                predicates.append(util.predicate_range(prange, skip, flag))
             except ValueError as exc:
                 extr.log.warning("invalid %s range: %s", target, exc)
 

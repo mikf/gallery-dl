@@ -997,7 +997,7 @@ def predicate_filter(expr, target="image"):
     return _pred
 
 
-def predicate_range(ranges, skip=None):
+def predicate_range(ranges, skip=None, flag=None):
     """Predicate; True if the current index is in the given range(s)"""
     if ranges := predicate_range_parse(ranges):
         # technically wrong for 'step > 2', but good enough for now
@@ -1009,17 +1009,32 @@ def predicate_range(ranges, skip=None):
     else:
         index = upper = 0
 
-    def _pred(_url, _kwdict):
-        nonlocal index
+    if flag is None:
+        def _pred(_url, _kwdict):
+            nonlocal index
 
-        if index >= upper:
-            raise exception.StopExtraction()
-        index += 1
+            if index >= upper:
+                raise exception.StopExtraction()
+            index += 1
 
-        for range in ranges:
-            if index in range:
-                return True
-        return False
+            for range in ranges:
+                if index in range:
+                    return True
+            return False
+    else:
+        def _pred(_url, _kwdict):
+            nonlocal index
+
+            index += 1
+            if index >= upper:
+                if index > upper:
+                    raise exception.StopExtraction()
+                FLAGS.__dict__[flag.upper()] = "stop"
+
+            for range in ranges:
+                if index in range:
+                    return True
+            return False
     return _pred
 
 
