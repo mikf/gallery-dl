@@ -1515,6 +1515,8 @@ Description
     Use fallback download URLs when a download fails.
 
 
+extractor.*.file-range
+----------------------
 extractor.*.image-range
 -----------------------
 Type
@@ -1546,19 +1548,23 @@ extractor.*.post-range
 Type
     ``string``
 Description
-    Like `image-range <extractor.*.image-range_>`__,
+    Like `file-range <extractor.*.file-range_>`__,
     but for posts.
 
 
+extractor.*.child-range
+-----------------------
 extractor.*.chapter-range
 -------------------------
 Type
     ``string``
 Description
-    Like `image-range <extractor.*.image-range_>`__,
+    Like `file-range <extractor.*.file-range_>`__,
     but for child extractors handling manga chapters, external URLs, etc.
 
 
+extractor.*.file-filter
+-----------------------
 extractor.*.image-filter
 ------------------------
 Type
@@ -1584,10 +1590,14 @@ Example
     * ``"post['id'] > 12345"``
     * ``["date >= datetime(2025, 5, 1)", "print(post_id)"]``
 Description
-    Like `image-filter <extractor.*.image-filter_>`__,
+    Like `file-filter <extractor.*.file-filter_>`__,
     but for posts.
 
+    Available values are the directory-specific ones listed by ``-K`` or ``-j``.
 
+
+extractor.*.child-filter
+------------------------
 extractor.*.chapter-filter
 --------------------------
 Type
@@ -1597,10 +1607,12 @@ Example
     * ``"lang == 'en'"``
     * ``["language == 'French'", "10 <= chapter < 20"]``
 Description
-    Like `image-filter <extractor.*.image-filter_>`__,
+    Like `file-filter <extractor.*.file-filter_>`__,
     but for child extractors handling manga chapters, external URLs, etc.
 
 
+extractor.*.file-unique
+-----------------------
 extractor.*.image-unique
 ------------------------
 Type
@@ -1608,10 +1620,12 @@ Type
 Default
     ``false``
 Description
-    Ignore image URLs that have been encountered before during the
+    Ignore file URLs that have been encountered before during the
     current extractor run.
 
 
+extractor.*.child-unique
+------------------------
 extractor.*.chapter-unique
 --------------------------
 Type
@@ -1619,7 +1633,7 @@ Type
 Default
     ``false``
 Description
-    Like `image-unique <extractor.*.image-unique_>`__,
+    Like `file-unique <extractor.*.file-unique_>`__,
     but applies to delegated URLs like manga chapters, etc.
 
 
@@ -6003,7 +6017,7 @@ Note
     It is not possible to filter all subtitles of a specific source type,
     while also filtering for additional languages of another source type.
     (e.g. any ASR subtitle + fra-FR of any source type)
-    For this, refer to `extractor.*.image-filter`_.
+    For this, refer to `extractor.*.file-filter`_.
 
 
 extractor.tiktok.videos
@@ -6601,8 +6615,8 @@ Note
     use the ``/with_replies`` timeline while logged in. For example,
     media from Tweets which the user replied to will also be downloaded.
 
-    It is possible to exclude unwanted Tweets using `image-filter
-    <extractor.*.image-filter_>`__.
+    It is possible to exclude unwanted Tweets using `file-filter
+    <extractor.*.file-filter_>`__.
 
 
 extractor.twitter.retries-api
@@ -9976,7 +9990,7 @@ Description
     post-processor type, as well as any of its `options <Postprocessor Options_>`__.
 
     It is possible to set a ``"filter"`` Condition_ similar to
-    `image-filter <extractor.*.image-filter_>`_
+    `file-filter <extractor.*.file-filter_>`_
     to only run a post-processor conditionally.
 
     It is also possible set a ``"whitelist"`` or ``"blacklist"`` to
