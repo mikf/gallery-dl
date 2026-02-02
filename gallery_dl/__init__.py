@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2025 Mike Fährmann
+# Copyright 2014-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
+import os
 import sys
 import logging
 from . import version, config, option, output, extractor, job, util, exception
@@ -542,11 +543,14 @@ class InputManager():
 
     def _rewrite(self):
         url, path, action, indicies = self._item
+        path_tmp = path + ".tmp"
         lines = self.files[path]
         action(lines, indicies)
+
         try:
-            with open(path, "w", encoding="utf-8") as fp:
+            with open(path_tmp, "w", encoding="utf-8") as fp:
                 fp.writelines(lines)
+            os.replace(path_tmp, path)
         except Exception as exc:
             self.log.warning(
                 "Unable to update '%s' (%s: %s)",
