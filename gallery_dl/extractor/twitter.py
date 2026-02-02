@@ -1500,8 +1500,12 @@ class TwitterAPI():
             "withGrokTranslatedBio": False,
         }
 
-        if cfg("search-pagination") in ("max_id", "maxid", "id"):
-            update_variables = self._update_variables_search
+        pgn = cfg("search-pagination")
+        if pgn in ("max_id", "maxid", "id"):
+            update_variables = self._update_variables_search_maxid
+        elif pgn in {"until", "date", "datetime", "dt"}:
+            update_variables = self._update_variables_search_date
+            self._var_date_prev = None
         else:
             update_variables = None
 
@@ -2280,7 +2284,7 @@ class TwitterAPI():
 
         self.log.debug("Skipping %s ('%s')", tweet_id, text)
 
-    def _update_variables_search(self, variables, cursor, tweet):
+    def _update_variables_search_maxid(self, variables, cursor, tweet):
         try:
             tweet_id = tweet.get("id_str") or tweet["legacy"]["id_str"]
             max_id = "max_id:" + str(int(tweet_id)-1)
@@ -2299,6 +2303,36 @@ class TwitterAPI():
         except Exception as exc:
             self.extractor.log.debug(
                 "Failed to update 'max_id' search query (%s: %s). Falling "
+                "back to 'cursor' pagination", exc.__class__.__name__, exc)
+            variables["cursor"] = self.extractor._update_cursor(cursor)
+
+        return variables
+
+    def _update_variables_search_date(self, variables, cursor, tweet):
+        try:
+            tweet_id = tweet.get("id_str") or tweet["legacy"]["id_str"]
+            date = self.extractor._tweetid_to_datetime(int(tweet_id))
+
+            if date == self._var_date_prev:
+                variables["cursor"] = self.extractor._update_cursor(cursor)
+                return variables
+
+            dstr = f"until:{date.year:>04}-{date.month:>02}-{date.day:>02}"
+            query, n = text.re(r"\buntil:\d{4}-\d{2}-\d{2}").subn(
+                dstr, variables["rawQuery"])
+            if n:
+                variables["rawQuery"] = query
+            else:
+                variables["rawQuery"] = f"{query} {dstr}"
+
+            if prefix := getattr(self.extractor, "_cursor_prefix", None):
+                self.extractor._cursor_prefix = \
+                    f"{prefix.partition('_')[0]}_{tweet_id}/"
+            variables["cursor"] = None
+            self._var_date_prev = date
+        except Exception as exc:
+            self.extractor.log.debug(
+                "Failed to update 'until' search query (%s: %s). Falling "
                 "back to 'cursor' pagination", exc.__class__.__name__, exc)
             variables["cursor"] = self.extractor._update_cursor(cursor)
 

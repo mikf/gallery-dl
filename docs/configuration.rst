@@ -6663,6 +6663,9 @@ Description
     ``"max_id"`` | ``"maxid"`` | ``"id"``
         Update the ``max_id`` search query parameter
         to the Tweet ID value of the last retrieved Tweet.
+    ``"until"`` | ``"date"`` | ``"datetime"`` | ``"dt"``
+        Update the ``until`` search query parameter
+        to the date value of the last retrieved Tweet.
 
 
 extractor.twitter.search-results
