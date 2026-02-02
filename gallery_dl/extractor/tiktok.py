@@ -223,7 +223,7 @@ class TiktokExtractor(Extractor):
             data = data["webapp.user-detail"]
         if not self._check_status_code(data, profile_url, "profile"):
             raise exception.ExtractionError(
-                "%s: could not extract rehydration data", profile_url)
+                f"{profile_url}: could not extract rehydration data")
         try:
             for key in additional_keys:
                 data = data[key]
@@ -1048,8 +1048,10 @@ class TiktokPaginationRequest:
         cursor_type = self.cursor_type(query_parameters)
         cursor = cursor_type() if cursor_type else None
         for page in itertools.count(start=1):
-            extractor.log.info("%s: retrieving %s page %d", url, self.endpoint,
-                               page)
+            item_count = len(self.items)
+            extractor.log.info("%s: retrieving %s page %d (%d item%s)", url,
+                               self.endpoint, page, item_count,
+                               "" if item_count == 1 else "s")
             tries = 0
             while True:
                 try:
@@ -1268,7 +1270,8 @@ class TiktokItemListRequest(TiktokPaginationRequest):
 
     def extract_items(self, data):
         if "itemList" not in data:
-            self.exit_early_due_to_no_items = True
+            if not data.get("hasMorePrevious", data.get("hasMore", False)):
+                self.exit_early_due_to_no_items = True
             return {}
         return {item["id"]: item for item in data["itemList"]}
 
