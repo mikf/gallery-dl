@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2025 Mike Fährmann
+# Copyright 2019-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -112,7 +112,7 @@ class XhamsterUserExtractor(XhamsterExtractor):
         while url:
             extr = text.extract_from(self.request(url).text)
             while True:
-                url = extr('thumb-image-container role-pop" href="', '"')
+                url = extr(' role-pop" href="', '"')
                 if not url:
                     break
                 yield Message.Queue, url, data
