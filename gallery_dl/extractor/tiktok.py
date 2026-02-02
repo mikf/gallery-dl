@@ -605,8 +605,7 @@ class TiktokPostsExtractor(TiktokExtractor):
                   f"{user_name}"
         if not ytdl:
             message += ", try extracting post information using " \
-                       "yt-dlp with the -o " \
-                       "tiktok-user-extractor=ytdl argument"
+                       "yt-dlp with the -o ytdl=true argument"
         self.log.warning(message)
         return ()
 
