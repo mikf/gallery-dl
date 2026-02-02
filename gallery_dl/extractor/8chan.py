@@ -107,6 +107,7 @@ class _8chanThreadExtractor(_8chanExtractor):
             for num, file in enumerate(files):
                 file.update(thread)
                 file["num"] = num
+                file["_http_validate"] = _validate
                 text.nameext_from_url(file["originalName"], file)
                 yield Message.Url, self.root + file["path"], file
 
@@ -137,3 +138,12 @@ class _8chanBoardExtractor(_8chanExtractor):
                 return
             url = f"{self.root}/{board}/{pnum}.json"
             threads = self.request_json(url)["threads"]
+
+
+def _validate(response):
+    hget = response.headers.get
+    return not (
+        hget("expires") == "0" and
+        hget("content-length") == "166" and
+        hget("content-type") == "image/png"
+    )
