@@ -190,6 +190,18 @@ Conversion specifiers allow to *convert* the value to a different form or type. 
     <td><code>2010-01-01 00:00:00</code></td>
 </tr>
 <tr>
+    <td align="center"><code>q</code></td>
+    <td><a href="https://docs.python.org/3/library/urllib.parse.html#urllib.parse.quote">URL-encode</a> a value</td>
+    <td><code>{jpn!q}</code></td>
+    <td><code>%E6%A3%AE</code></td>
+</tr>
+<tr>
+    <td align="center"><code>Q</code></td>
+    <td><a href="https://docs.python.org/3/library/urllib.parse.html#urllib.parse.unquote">URL-decode</a> a value</td>
+    <td><code>{jpn_url!Q}</code></td>
+    <td><code>森</code></td>
+</tr>
+<tr>
     <td align="center"><code>U</code></td>
     <td>Convert HTML entities</td>
     <td><code>{html!U}</code></td>

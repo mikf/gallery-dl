@@ -606,6 +606,8 @@ _CONVERSIONS = {
     "T": dt.to_ts_string,
     "d": dt.parse_ts,
     "D": dt.convert,
+    "q": text.quote,
+    "Q": text.unquote,
     "U": text.unescape,
     "H": lambda s: text.unescape(text.remove_html(s)),
     "g": text.slugify,

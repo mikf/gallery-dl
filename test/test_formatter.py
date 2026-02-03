@@ -32,6 +32,7 @@ class TestFormatter(unittest.TestCase):
         "a": "hElLo wOrLd",
         "b": "äöü",
         "j": "げんそうきょう",
+        "J": "%E3%81%92%E3%82%93%E3%81%9D",
         "d": {"a": "foo", "b": 0, "c": None},
         "i": 2,
         "l": ["a", "b", "c"],
@@ -109,9 +110,13 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{i_str!i}", 12345)
         self._run_test("{i_str!f}", 12345.0)
         self._run_test("{f_str!f}", 12.45)
+        self._run_test("{j!q}", "%E3%81%92%E3%82%93%E3%81%9D"
+                                "%E3%81%86%E3%81%8D%E3%82%87%E3%81%86")
+        self._run_test("{J!Q}", "げんそ")
 
+        # undefined conversion
         with self.assertRaises(KeyError):
-            self._run_test("{a!q}", "hello world")
+            self._run_test("{a!z}", "hello world")
 
     def test_optional(self):
         self._run_test("{name}{title1}", "NameTitle")
