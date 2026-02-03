@@ -3068,7 +3068,7 @@ extractor.exhentai.tags
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Group ``tags`` by type and
     provide them as ``tags_<type>`` metadata fields,
@@ -5564,7 +5564,7 @@ extractor.schalenetwork.tags
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Group ``tags`` by type and
     provide them as ``tags_<type>`` metadata fields,
