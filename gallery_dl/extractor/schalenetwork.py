@@ -138,7 +138,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
             name = tag["name"]
             namespace = tag.get("namespace", 0)
             tags.append(types[namespace] + ":" + name)
-        if self.config("tags", False):
+        if self.config("tags", True):
             categories = collections.defaultdict(list)
             for tag in data["tags"]:
                 categories[tag.get("namespace", 0)].append(tag["name"])

@@ -247,7 +247,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if self.config("metadata", False):
             data.update(self.metadata_from_api())
             data["date"] = self.parse_timestamp(data["posted"])
-        if self.config("tags", False):
+        if self.config("tags", True):
             tags = collections.defaultdict(list)
             for tag in data["tags"]:
                 type, _, value = tag.partition(":")
