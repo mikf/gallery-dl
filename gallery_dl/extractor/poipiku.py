@@ -71,6 +71,8 @@ class PoipikuExtractor(Extractor):
                 "password"   : False,
                 "requires"   : None,
                 "original"   : logged_in,
+                "password_used": "",
+                "success"    : False,
                 "_http_headers": {"Referer": post_url},
             }
 
@@ -81,9 +83,14 @@ class PoipikuExtractor(Extractor):
                     "PasswordIcon", ">"):
                 post["password"] = True
 
+            files = list(extract_files(post, thumb, extr))
+            post["success"] = bool(files)
+
+            if post["success"] and post["password"] and self.password:
+                post["password_used"] = self.password
+
             yield Message.Directory, "", post
-            for post["num"], url in enumerate(extract_files(
-                    post, thumb, extr), 1):
+            for post["num"], url in enumerate(files, 1):
                 yield Message.Url, url, text.nameext_from_url(url, post)
 
     def _extract_thumb(self, post, extr):
