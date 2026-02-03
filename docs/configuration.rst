@@ -253,7 +253,10 @@ Type
     * ``bool``
     * ``string``
 Default
-    `extractor.parent <extractor.*.parent_>`__
+    ``true``
+        `extractor.parent <extractor.*.parent_>`__
+    ``"_parent"``
+        otherwise
 Description
     Forward a parent's metadata to its child extractors.
 
@@ -1089,6 +1092,8 @@ extractor.*.metadata-url
 ------------------------
 Type
     ``string``
+Default
+    ``"_url"``
 Description
     Insert a file's download URL into its metadata dictionary as the given name.
 
@@ -1105,6 +1110,8 @@ extractor.*.metadata-path
 -------------------------
 Type
     ``string``
+Default
+    ``"_path"``
 Description
     Insert a reference to the current
     `PathFormat <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/path.py#L27>`__
@@ -1120,6 +1127,8 @@ extractor.*.metadata-extractor
 ------------------------------
 Type
     ``string``
+Default
+    ``"_extr"``
 Description
     Insert a reference to the current
     `Extractor <https://github.com/mikf/gallery-dl/blob/v1.27.0/gallery_dl/extractor/common.py#L28>`__
@@ -1132,6 +1141,8 @@ extractor.*.metadata-http
 -------------------------
 Type
     ``string``
+Default
+    ``null``
 Description
     Insert an ``object`` containing a file's HTTP headers and
     ``filename``, ``extension``, and ``date`` parsed from them
@@ -1148,6 +1159,8 @@ extractor.*.metadata-version
 ----------------------------
 Type
     ``string``
+Default
+    ``null``
 Description
     Insert an ``object`` containing gallery-dl's version info into
     metadata dictionaries as the given name.

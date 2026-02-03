@@ -69,12 +69,16 @@ class Job():
         extr.log = self._wrap_logger(extr.log)
         extr.log.debug("Using %s for '%s'", extr.__class__.__name__, extr.url)
 
-        self.metadata_url = extr.config2("metadata-url", "url-metadata")
-        self.metadata_http = extr.config2("metadata-http", "http-metadata")
-        metadata_path = extr.config2("metadata-path", "path-metadata")
-        metadata_version = extr.config2("metadata-version", "version-metadata")
+        self.metadata_url = extr.config2(
+            "metadata-url", "url-metadata", "_url")
+        self.metadata_http = extr.config2(
+            "metadata-http", "http-metadata")
+        metadata_path = extr.config2(
+            "metadata-path", "path-metadata", "_path")
+        metadata_version = extr.config2(
+            "metadata-version", "version-metadata")
         metadata_extractor = extr.config2(
-            "metadata-extractor", "extractor-metadata")
+            "metadata-extractor", "extractor-metadata", "_extr")
 
         if metadata_path:
             self.kwdict[metadata_path] = path_proxy
@@ -467,7 +471,7 @@ class DownloadJob(Job):
                 extr._parentdir = pextr._parentdir
 
             if pmeta := pextr.config2(
-                    "parent-metadata", "metadata-parent", parent):
+                    "parent-metadata", "metadata-parent", parent or "_parent"):
                 if isinstance(pmeta, str):
                     data = self.kwdict.copy()
                     if kwdict:
