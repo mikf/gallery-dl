@@ -572,6 +572,15 @@ class TwitterExtractor(Extractor):
             url = entities["url"]["urls"][0]
             udata["url"] = url.get("expanded_url") or url.get("url")
 
+        if self.config("metadata-user", False) and (
+                about := self.api.user_about_account(
+                udata["name"]).get("about_profile")):
+            udata["source"] = about.get("source")
+            udata["based_in"] = about.get("account_based_in")
+            udata["location_accurate"] = about.get("location_accurate")
+            udata["name_changes"] = (d := about.get(
+                "username_changes")) and d.get("count") or 0
+
         return udata
 
     def _assign_user(self, user):
@@ -1691,6 +1700,13 @@ class TwitterAPI():
             }),
         }
         return self._call(endpoint, params)["data"]["user"]["result"]
+
+    @memcache(keyarg=1)
+    def user_about_account(self, screen_name):
+        endpoint = "/graphql/zs_jFPFT78rBpXv9Z3U2YQ/AboutAccountQuery"
+        params = {"variables": self._json_dumps({"screenName": screen_name})}
+        return (self._call(endpoint, params)
+                ["data"]["user_result_by_screen_name"]["result"])
 
     def _user_id_by_screen_name(self, screen_name):
         user = ()
