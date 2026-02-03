@@ -6554,6 +6554,23 @@ Description
     Logout and retry as guest when access to another user's Tweets is blocked.
 
 
+extractor.twitter.metadata-user
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata for user accounts (``author``, ``user``)
+
+    * ``based_in``
+    * ``location_accurate``
+    * ``name_changes``
+    * ``source``
+Note
+    This requires 1 additional HTTP request per user.
+
+
 extractor.twitter.pinned
 ------------------------
 Type
