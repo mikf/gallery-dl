@@ -148,7 +148,7 @@ class PixeldrainFolderExtractor(PixeldrainExtractor):
         }
 
     def items(self):
-        recursive = self.config("recursive")
+        recursive = self.config("recursive", True)
 
         url = f"{self.root}/api/filesystem/{self.groups[0]}"
         stat = self.request_json(url + "?stat")

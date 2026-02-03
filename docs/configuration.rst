@@ -3491,7 +3491,7 @@ extractor.gofile.recursive
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Recursively download files from subfolders.
 
@@ -4862,7 +4862,7 @@ extractor.pixeldrain.recursive
 Type
     ``bool``
 Default
-    ``false``
+    ``true``
 Description
     Recursively download files from subfolders.
 

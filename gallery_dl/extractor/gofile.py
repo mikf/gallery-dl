@@ -26,7 +26,7 @@ class GofileFolderExtractor(Extractor):
         self.content_id = match[1]
 
     def items(self):
-        recursive = self.config("recursive")
+        recursive = self.config("recursive", True)
         password = self.config("password")
 
         token = self.config("api-token")
