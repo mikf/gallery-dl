@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2025 Mike Fährmann
+# Copyright 2021-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -51,19 +51,45 @@ class TestDownloadJob(TestJob):
         func = tjob._build_extractor_filter()
         self.assertEqual(func(TestExtractor)      , False)
         self.assertEqual(func(TestExtractorParent), False)
-        self.assertEqual(func(TestExtractorAlt)   , True)
+        self.assertEqual(func(TestExtractorNoop)  , True)
 
         config.set((), "blacklist", ":test_subcategory")
         func = tjob._build_extractor_filter()
         self.assertEqual(func(TestExtractor)      , False)
         self.assertEqual(func(TestExtractorParent), True)
-        self.assertEqual(func(TestExtractorAlt)   , False)
+        self.assertEqual(func(TestExtractorNoop)  , False)
 
         config.set((), "whitelist", "test_category:test_subcategory")
         func = tjob._build_extractor_filter()
         self.assertEqual(func(TestExtractor)      , True)
         self.assertEqual(func(TestExtractorParent), False)
-        self.assertEqual(func(TestExtractorAlt)   , False)
+        self.assertEqual(func(TestExtractorNoop)  , False)
+
+    def test_opt_init(self):
+        config.set((), "init", True)
+        config.set((), "archive", ":memory:")
+        config.set((), "postprocessors", "directory")
+
+        extr = TestExtractorNoop.from_url("test:noop")
+        tjob = self.jobclass(extr)
+        tjob._init()
+
+        self.assertTrue(tjob.pathfmt)
+        self.assertTrue(tjob.archive)
+        self.assertTrue(tjob.hooks)
+
+    def test_opt_init_false(self):
+        config.set((), "init", False)
+        config.set((), "archive", ":memory:")
+        config.set((), "postprocessors", "directory")
+
+        extr = TestExtractorNoop.from_url("test:noop")
+        tjob = self.jobclass(extr)
+        tjob._init()
+
+        self.assertFalse(tjob.pathfmt)
+        self.assertFalse(tjob.archive)
+        self.assertFalse(tjob.hooks)
 
 
 class TestKeywordJob(TestJob):
@@ -122,6 +148,13 @@ user['self']
   <circular reference>
 """)
 
+    def test_opt_init(self):
+        config.set((), "init", True)
+
+        extr = TestExtractorNoop.from_url("test:noop")
+        tjob = self.jobclass(extr)
+        tjob._init()
+
 
 class TestUrlJob(TestJob):
     jobclass = job.UrlJob
@@ -164,6 +197,13 @@ https://example.org/1.jpg
 https://example.org/2.jpg
 https://example.org/3.jpg
 """)
+
+    def test_opt_init(self):
+        config.set((), "init", True)
+
+        extr = TestExtractorNoop.from_url("test:noop")
+        tjob = self.jobclass(extr)
+        tjob._init()
 
 
 class TestInfoJob(TestJob):
@@ -227,6 +267,13 @@ Directory format (default):
   ["{category}"]
 
 """)
+
+    def test_opt_init(self):
+        config.set((), "init", True)
+
+        extr = TestExtractorNoop.from_url("test:noop")
+        tjob = self.jobclass(extr)
+        tjob._init()
 
 
 class TestDataJob(TestJob):
@@ -378,6 +425,13 @@ class TestDataJob(TestJob):
         for line in file.getvalue().split():
             self.assertRegex(line, r"""^\[[23],("http[^"]+",)?\{.+\}\]$""")
 
+    def test_opt_init(self):
+        config.set((), "init", True)
+
+        extr = TestExtractorNoop.from_url("test:noop")
+        tjob = self.jobclass(extr)
+        tjob._init()
+
 
 class TestExtractor(Extractor):
     category = "test_category"
@@ -437,9 +491,10 @@ class TestExtractorException(Extractor):
         return 1/0
 
 
-class TestExtractorAlt(Extractor):
+class TestExtractorNoop(Extractor):
     category = "test_category_alt"
     subcategory = "test_subcategory"
+    pattern = r"test:noop"
 
 
 if __name__ == "__main__":

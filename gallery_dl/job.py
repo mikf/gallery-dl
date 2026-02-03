@@ -268,6 +268,9 @@ class Job():
             for key, valuegen in self.kwdict_eval:
                 kwdict[key] = valuegen(kwdict)
 
+    def initialize(self):
+        pass
+
     def _init(self):
         self.extractor.initialize()
         self.pred_url = self._prepare_predicates(
@@ -596,7 +599,7 @@ class DownloadJob(Job):
         return instance
 
     def initialize(self, kwdict=None):
-        """Delayed initialization of PathFormat, etc."""
+        """initialize PathFormat, postprocessors, archive, options, etc"""
         extr = self.extractor
         cfg = extr.config
 
