@@ -195,14 +195,14 @@ class XenforoExtractor(BaseExtractor):
             if cookie.domain.endswith(self.cookies_domain)
         }
 
-    def _pagination(self, base, pnum=None, callback=None):
+    def _pagination(self, base, pnum=None, callback=None, params=""):
         base = self.root + base
 
         if pnum is None:
-            url = base + "/"
+            url = f"{base}/{params}"
             pnum = 1
         else:
-            url = f"{base}/page-{pnum}"
+            url = f"{base}/page-{pnum}{params}"
             pnum = None
 
         page = self.request_page(url).text
@@ -214,7 +214,7 @@ class XenforoExtractor(BaseExtractor):
             if pnum is None or "pageNav-jump--next" not in page:
                 return
             pnum += 1
-            page = self.request_page(f"{base}/page-{pnum}").text
+            page = self.request_page(f"{base}/page-{pnum}{params}").text
 
     def _pagination_reverse(self, base, pnum=None, callback=None):
         base = self.root + base
@@ -482,7 +482,12 @@ class XenforoThreadExtractor(XenforoExtractor):
 
         if (order := self.config("order-posts")) and \
                 order[0] not in ("d", "r"):
-            pages = self._pagination(path, pnum)
+            params = "?order=reaction_score" if order[0] == "s" else ""
+            pages = self._pagination(path, pnum, params=params)
+            reverse = False
+        elif order == "reaction":
+            pages = self._pagination(
+                path, pnum, params="?order=reaction_score")
             reverse = False
         else:
             pages = self._pagination_reverse(path, pnum)
