@@ -241,6 +241,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://simpcity.cr/threads/arianaskyeshelby-itsarianaskyebaby-busty.1237895/post-40205575",
+    "#comment" : "tiktok s9e media embed iframe (#8994)",
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+    "#auth"    : True,
+    "#results" : "https://www.tiktok.com/@/video/7556556034794425631",
+},
+
+{
     "#url"     : "https://simpcity.cr/threads/alua-tatakai.89490/",
     "#category": ("xenforo", "simpcity", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
