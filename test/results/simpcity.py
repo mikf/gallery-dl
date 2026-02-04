@@ -303,6 +303,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://simpcity.cr/threads/ririkana-rr_loveit.10731/",
+    "#comment" : "post order by reaction score (#8997)",
+    "#category": ("xenforo", "simpcity", "thread"),
+    "#class"   : xenforo.XenforoThreadExtractor,
+    "#auth"    : True,
+    "#options" : {
+        "post-range" : 1,
+        "order-posts": "reaction",
+    },
+    "#results" : "https://bunkr.cr/v/BKLYkkr9KK6dg",
+},
+
+{
     "#url"     : "https://simpcity.cr/forums/asians.48/",
     "#category": ("xenforo", "simpcity", "forum"),
     "#class"   : xenforo.XenforoForumExtractor,
