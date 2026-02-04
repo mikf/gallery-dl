@@ -7307,15 +7307,20 @@ extractor.[xenforo].order-posts
 Type
     ``string``
 Default
-    ``"desc"``
+    ``thread``
+        ``"desc"``
+    otherwise
+        ``"asc"``
 Description
     Controls the order in which
-    posts of a ``thread`` are processed.
+    posts of a ``thread`` or `media` files are processed.
 
     ``"asc"``
         Ascending order (oldest first)
     ``"desc"`` | ``"reverse"``
         Descending order (newest first)
+    ``"reaction"`` | ``"score"``
+        Reaction Score order (``threads`` only)
 
 
 extractor.ytdl.cmdline-args
