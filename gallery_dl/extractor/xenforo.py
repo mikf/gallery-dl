@@ -42,13 +42,16 @@ class XenforoExtractor(BaseExtractor):
             r')'
         ).findall
 
+        embeds = self.config("embeds", True)
+        attachments = self.config("attachments", True)
+
         root = self.root
         base = root if (pos := root.find("/", 8)) < 0 else root[:pos]
         for post in self.posts():
             urls = extract_urls(post["content"])
-            if "data-s9e-mediaembed-iframe=" in post["content"]:
+            if embeds and "data-s9e-mediaembed-iframe=" in post["content"]:
                 self._extract_embeds(urls, post)
-            if post["attachments"]:
+            if attachments and post["attachments"]:
                 self._extract_attachments(urls, post)
 
             data = {"post": post}
