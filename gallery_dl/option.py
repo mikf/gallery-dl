@@ -274,11 +274,6 @@ def build_parser():
         help="Load external extractors from PATH",
     )
     general.add_argument(
-        "-a", "--user-agent",
-        dest="user-agent", metavar="UA", action=ConfigAction,
-        help="User-Agent request header",
-    )
-    general.add_argument(
         "--clear-cache",
         dest="clear_cache", metavar="MODULE",
         help="Delete cached login sessions, cookies, etc. for MODULE "
@@ -481,6 +476,11 @@ def build_parser():
               "or -1 for infinite retries (default: 4)"),
     )
     networking.add_argument(
+        "-a", "--user-agent",
+        dest="user-agent", metavar="UA", action=ConfigAction,
+        help="User-Agent request header",
+    )
+    networking.add_argument(
         "--http-timeout",
         dest="timeout", metavar="SECONDS", type=float, action=ConfigAction,
         help="Timeout for HTTP connections (default: 30.0)",
@@ -489,6 +489,13 @@ def build_parser():
         "--proxy",
         dest="proxy", metavar="URL", action=ConfigAction,
         help="Use the specified proxy",
+    )
+    networking.add_argument(
+        "--xff",
+        dest="geo-bypass", metavar="VALUE", action=ConfigAction,
+        help=("Use a fake 'X-Forwarded-For' HTTP header to try bypassing "
+              "geographic restrictions. Can be an IP block in CIDR notation "
+              "or a two-letter ISO 3166-2 country code")
     )
     networking.add_argument(
         "--source-address",

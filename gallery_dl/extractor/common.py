@@ -48,6 +48,7 @@ class Extractor():
     tls12 = True
     browser = None
     useragent = util.USERAGENT_FIREFOX
+    geobypass = None
     request_interval = 0.0
     request_interval_min = 0.0
     request_interval_429 = 60.0
@@ -516,6 +517,17 @@ class Extractor():
         elif self.useragent is Extractor.useragent and not self.browser or \
                 custom_ua is not config.get(("extractor",), "user-agent"):
             headers["User-Agent"] = custom_ua
+
+        custom_xff = self.config("geo-bypass")
+        if custom_xff is None or custom_xff == "auto":
+            custom_xff = self.geobypass
+        if custom_xff is not None:
+            if ip := self.utils("/geo").random_ipv4(custom_xff):
+                headers["X-Forwarded-For"] = ip
+                self.log.debug("Using fake IP %s as 'X-Forwarded-For'", ip)
+            else:
+                self.log.warning("xff: Invalid ISO 3166 country code '%s'",
+                                 custom_xff)
 
         if custom_headers := self.config("headers"):
             if isinstance(custom_headers, str):
