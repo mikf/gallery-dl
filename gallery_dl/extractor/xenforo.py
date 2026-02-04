@@ -9,7 +9,7 @@
 """Extractors for XenForo forums"""
 
 from .common import BaseExtractor, Message
-from .. import text, exception
+from .. import text, util, exception
 from ..cache import cache
 import binascii
 
@@ -46,10 +46,10 @@ class XenforoExtractor(BaseExtractor):
         base = root if (pos := root.find("/", 8)) < 0 else root[:pos]
         for post in self.posts():
             urls = extract_urls(post["content"])
+            if "data-s9e-mediaembed-iframe=" in post["content"]:
+                self._extract_embeds(urls, post)
             if post["attachments"]:
-                for att in text.extract_iter(
-                        post["attachments"], "<li", "</li>"):
-                    urls.append((None, att[att.find('href="')+6:], None, None))
+                self._extract_attachments(urls, post)
 
             data = {"post": post}
             post["count"] = data["count"] = len(urls)
@@ -339,6 +339,37 @@ class XenforoExtractor(BaseExtractor):
             data["author_slug"] = text.slugify(data["author"][:15])
             data["author_id"] = data["author"][15:]
         return data
+
+    def _extract_attachments(self, urls, post):
+        for att in text.extract_iter(post["attachments"], "<li", "</li>"):
+            urls.append((None, att[att.find('href="')+6:], None, None))
+
+    def _extract_embeds(self, urls, post):
+        for embed in text.extract_iter(
+                post["content"], "data-s9e-mediaembed-iframe='", "'"):
+            data = {}
+            key = None
+            for value in util.json_loads(embed):
+                if key is None:
+                    key = value
+                else:
+                    data[key] = value
+                    key = None
+
+            src = data.get("src")
+            if not src:
+                self.log.debug(data)
+                continue
+
+            type = data.get("data-s9e-mediaembed")
+            if type == "tiktok":
+                url = ("https://www.tiktok.com/@/video/" +
+                       src[src.rfind("#")+1:])
+            else:
+                self.log.warning("%s: Unsupported media embed type '%s'",
+                                 post["id"], type)
+                continue
+            urls.append((None, None, None, url))
 
     def _extract_media(self, url, file):
         media = {}
