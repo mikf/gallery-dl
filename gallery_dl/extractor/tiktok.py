@@ -205,7 +205,7 @@ class TiktokExtractor(Extractor):
                 # resolving it failed, or resolving it didn't get us the
                 # rehydration data, so fail this attempt.
                 self.log.warning("%s: Failed to retrieve rehydration data "
-                                 "(%s/%s)", url.rpartition("/")[2], tries,
+                                 "(%s/%s)", url.rpartition("/")[2], tries + 1,
                                  self._retries)
                 if tries >= self._retries:
                     raise
