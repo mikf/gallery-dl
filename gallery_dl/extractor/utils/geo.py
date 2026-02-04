@@ -258,12 +258,21 @@ COUNTRY_IP_MAP = {
 }
 
 
-def random_ipv4(block):
-    if len(block) == 2:
-        block = COUNTRY_IP_MAP.get(block.upper())
-        if not block:
-            return None
+def random_ipv4(blocks):
+    if isinstance(blocks, str):
+        blocks = blocks.split(",")
 
+    cidr = []
+    for block in blocks:
+        if len(block) == 2:
+            block = COUNTRY_IP_MAP.get(block.upper())
+            if not block:
+                continue
+        cidr.append(block)
+    if not cidr:
+        return None
+
+    block = random.choice(cidr)
     addr, _, preflen = block.partition("/")
     if not preflen:
         return addr

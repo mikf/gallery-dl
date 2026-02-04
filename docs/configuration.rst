@@ -973,21 +973,24 @@ Description
 extractor.*.geo-bypass
 ----------------------
 Type
-    ``string``
+    * ``string``
+    * ``list`` of ``string``
 Default
     ``"auto"``
 Example
     * ``"JP"``
     * ``"105.48.0.0/12"``
+    * ``"JP,CN,105.48.0.0/12"``
+    * ``["JP", "CN", "105.48.0.0/12"]``
 Description
-    Use fake IPs as
+    Use a random IP as fake
     `X-Forwarded-For <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For>`__
     header to try bypassing geographic restrictions.
 
-    | Can be either an
+    | Can be either
       `ISO 3166-2 <https://en.wikipedia.org/wiki/ISO_3166-2>`__
-      country code
-    | or an IP block in CIDR notation.
+      country codes
+    | or IP blocks in CIDR notation.
 
 
 extractor.*.headers
