@@ -459,6 +459,8 @@ class DownloadJob(Job):
                         job.kwdict.update(self.kwdict)
                     if kwdict:
                         job.kwdict.update(kwdict)
+                        if "_extractor" in kwdict:
+                            del job.kwdict["_extractor"]
 
             if pextr.config("parent-session", parent):
                 extr.session = pextr.session
