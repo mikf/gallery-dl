@@ -970,6 +970,26 @@ Description
     instead of the extractor's ``root`` domain.
 
 
+extractor.*.geo-bypass
+----------------------
+Type
+    ``string``
+Default
+    ``"auto"``
+Example
+    * ``"JP"``
+    * ``"105.48.0.0/12"``
+Description
+    Use fake IPs as
+    `X-Forwarded-For <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Forwarded-For>`__
+    header to try bypassing geographic restrictions.
+
+    | Can be either an
+      `ISO 3166-2 <https://en.wikipedia.org/wiki/ISO_3166-2>`__
+      country code
+    | or an IP block in CIDR notation.
+
+
 extractor.*.headers
 -------------------
 Type

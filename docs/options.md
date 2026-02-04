@@ -25,7 +25,6 @@
     -d, --destination PATH      Target location for file downloads
     -D, --directory PATH        Exact location for file downloads
     -X, --extractors PATH       Load external extractors from PATH
-    -a, --user-agent UA         User-Agent request header
     --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
                                 MODULE (ALL to delete everything)
     --compat                    Restore legacy 'category' names
@@ -90,8 +89,13 @@
     -R, --retries N             Maximum number of retries for failed HTTP
                                 requests or -1 for infinite retries (default:
                                 4)
+    -a, --user-agent UA         User-Agent request header
     --http-timeout SECONDS      Timeout for HTTP connections (default: 30.0)
     --proxy URL                 Use the specified proxy
+    --xff VALUE                 Use a fake 'X-Forwarded-For' HTTP header to try
+                                bypassing geographic restrictions. Can be an IP
+                                block in CIDR notation or a two-letter ISO
+                                3166-2 country code
     --source-address IP         Client-side IP address to bind to
     -4, --force-ipv4            Make all connections via IPv4
     -6, --force-ipv6            Make all connections via IPv6
