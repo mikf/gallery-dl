@@ -199,7 +199,6 @@ class TiktokExtractor(Extractor):
                             "with the --write-pages option and include the "
                             "resulting page in your bug report",
                             url.rpartition("/")[2])
-                        html = None
 
                 # We've already tried resolving the challenge, and either
                 # resolving it failed, or resolving it didn't get us the
@@ -212,6 +211,7 @@ class TiktokExtractor(Extractor):
                 tries += 1
                 self.sleep(self._timeout, "retry")
                 challenge_attempt = False
+                html = None
 
     def _extract_rehydration_data_user(self, profile_url, additional_keys=()):
         if profile_url in self.rehydration_data_cache:
