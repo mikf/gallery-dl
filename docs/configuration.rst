@@ -7247,6 +7247,26 @@ Description
     For ``Category:`` pages, recursively descent into subcategories.
 
 
+extractor.[xenforo].attachments
+-------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract forum post attachments.
+
+
+extractor.[xenforo].embeds
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Extract URLs of forum post embeds.
+
+
 extractor.[xenforo].metadata
 ----------------------------
 Type
