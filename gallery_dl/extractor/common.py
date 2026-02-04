@@ -74,6 +74,9 @@ class Extractor():
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
 
+    def __str__(self):
+        return f"{self.__class__.__name__} <{self.url}>"
+
     @classmethod
     def from_url(cls, url):
         if isinstance(cls.pattern, str):
