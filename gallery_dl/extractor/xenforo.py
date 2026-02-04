@@ -362,9 +362,11 @@ class XenforoExtractor(BaseExtractor):
                 continue
 
             type = data.get("data-s9e-mediaembed")
+            frag = src[src.find("#")+1:]
             if type == "tiktok":
-                url = ("https://www.tiktok.com/@/video/" +
-                       src[src.rfind("#")+1:])
+                url = "https://www.tiktok.com/@/video/" + frag
+            elif type == "reddit":
+                url = "https://embed.reddit.com/r/" + frag
             else:
                 self.log.warning("%s: Unsupported media embed type '%s'",
                                  post["id"], type)
