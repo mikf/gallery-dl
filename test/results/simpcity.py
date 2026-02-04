@@ -250,6 +250,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://simpcity.cr/threads/alrightsierra.70601/post-571509",
+    "#comment" : "reddit s9e media embed iframe (#8996)",
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+    "#auth"    : True,
+    "#results" : "https://embed.reddit.com/r/TikTokFeet/comments/rtzwnz#theme=auto",
+},
+
+{
     "#url"     : "https://simpcity.cr/threads/alua-tatakai.89490/",
     "#category": ("xenforo", "simpcity", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
