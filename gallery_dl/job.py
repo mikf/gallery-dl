@@ -112,7 +112,9 @@ class Job():
         extr = self.extractor
         cfgpath = []
 
-        if parent:
+        if parent is None:
+            self.parents = ()
+        else:
             pextr = parent.extractor
             if extr.category == pextr.category or \
                     extr.category in parent.parents:
@@ -133,8 +135,6 @@ class Job():
                     cfgpath.append((cat, sub))
                     cfgpath.append((category + ">*", sub))
                 cfgpath.append((extr.category, sub))
-        else:
-            self.parents = ()
 
         if extr.basecategory:
             if not cfgpath:
@@ -337,7 +337,7 @@ class DownloadJob(Job):
         self.hooks = ()
         self.downloaders = {}
         self.out = output.select()
-        self.visited = parent.visited if parent else set()
+        self.visited = set() if parent is None else parent.visited
         self._extractor_filter = None
         self._skipcnt = 0
 
