@@ -494,8 +494,8 @@ def build_parser():
         "--xff",
         dest="geo-bypass", metavar="VALUE", action=ConfigAction,
         help=("Use a fake 'X-Forwarded-For' HTTP header to try bypassing "
-              "geographic restrictions. Can be an IP block in CIDR notation "
-              "or a two-letter ISO 3166-2 country code")
+              "geographic restrictions. Can be IP blocks in CIDR notation "
+              "or two-letter ISO 3166-2 country codes (12.0.0.0/8,FR,CN)")
     )
     networking.add_argument(
         "--source-address",

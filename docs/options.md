@@ -93,9 +93,9 @@
     --http-timeout SECONDS      Timeout for HTTP connections (default: 30.0)
     --proxy URL                 Use the specified proxy
     --xff VALUE                 Use a fake 'X-Forwarded-For' HTTP header to try
-                                bypassing geographic restrictions. Can be an IP
-                                block in CIDR notation or a two-letter ISO
-                                3166-2 country code
+                                bypassing geographic restrictions. Can be IP
+                                blocks in CIDR notation or two-letter ISO
+                                3166-2 country codes (12.0.0.0/8,FR,CN)
     --source-address IP         Client-side IP address to bind to
     -4, --force-ipv4            Make all connections via IPv4
     -6, --force-ipv6            Make all connections via IPv6
