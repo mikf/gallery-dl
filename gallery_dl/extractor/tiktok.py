@@ -181,21 +181,16 @@ class TiktokExtractor(Extractor):
                         raise KeyError(assert_key)
                 return data
             except (ValueError, KeyError):
-                # We failed to retrieve rehydration data. This happens
-                # relatively frequently when making many requests, so retry.
-                if tries >= self._retries:
-                    raise
-                tries += 1
-                self.log.warning("%s: Failed to retrieve rehydration data "
-                                 "(%s/%s)", url.rpartition("/")[2], tries,
-                                 self._retries)
-                if challenge_attempt:
-                    self.sleep(self._timeout, "retry")
-                    challenge_attempt = False
-                else:
+                # Even if the retries option has been set to 0, we should
+                # always at least try to solve the JS challenge and go again
+                # immediately.
+                if not challenge_attempt:
+                    challenge_attempt = True
                     self.log.info("Solving JavaScript challenge")
                     try:
                         self._solve_challenge(html)
+                        html = None
+                        continue
                     except Exception as exc:
                         self.log.traceback(exc)
                         self.log.warning(
@@ -204,9 +199,19 @@ class TiktokExtractor(Extractor):
                             "with the --write-pages option and include the "
                             "resulting page in your bug report",
                             url.rpartition("/")[2])
-                        self.sleep(self._timeout, "retry")
-                    html = None
-                    challenge_attempt = True
+                        html = None
+
+                # We've already tried resolving the challenge, and either
+                # resolving it failed, or resolving it didn't get us the
+                # rehydration data, so fail this attempt.
+                self.log.warning("%s: Failed to retrieve rehydration data "
+                                 "(%s/%s)", url.rpartition("/")[2], tries,
+                                 self._retries)
+                if tries >= self._retries:
+                    raise
+                tries += 1
+                self.sleep(self._timeout, "retry")
+                challenge_attempt = False
 
     def _extract_rehydration_data_user(self, profile_url, additional_keys=()):
         if profile_url in self.rehydration_data_cache:
