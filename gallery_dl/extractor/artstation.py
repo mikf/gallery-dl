@@ -64,7 +64,7 @@ class ArtstationExtractor(Extractor):
                     if "/images/images/" in url:
                         lhs, _, rhs = url.partition("/large/")
                         if rhs:
-                            url = f"{lhs}/4k/{rhs}"
+                            url = f"{lhs}/8k/{rhs}"
                             asset["_fallback"] = self._image_fallback(lhs, rhs)
 
                     yield Message.Url, url, asset
@@ -103,6 +103,7 @@ class ArtstationExtractor(Extractor):
                          adict.get("id"))
 
     def _image_fallback(self, lhs, rhs):
+        yield f"{lhs}/4k/{rhs}"
         yield f"{lhs}/large/{rhs}"
         yield f"{lhs}/medium/{rhs}"
         yield f"{lhs}/small/{rhs}"
