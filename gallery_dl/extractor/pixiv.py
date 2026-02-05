@@ -376,6 +376,8 @@ class PixivExtractor(Extractor):
             "meta_single_page": {"original_image_url": url},
             "page_count"      : 1,
             "sanity_level"    : 0,
+            "total_comments"  : 0,
+            "is_bookmarked"   : False,
             "tags"            : (),
             "title"           : kind,
             "type"            : kind,
@@ -520,7 +522,10 @@ class PixivAvatarExtractor(PixivExtractor):
 
     def _init(self):
         PixivExtractor._init(self)
-        self.sanity_workaround = self.meta_comments = False
+        self.sanity_workaround = \
+            self.meta_bookmark = \
+            self.meta_comments = \
+            self.meta_captions = False
 
     def works(self):
         user = self.api.user_detail(self.groups[0])["user"]
@@ -536,9 +541,7 @@ class PixivBackgroundExtractor(PixivExtractor):
     pattern = USER_PATTERN + "/background"
     example = "https://www.pixiv.net/en/users/12345/background"
 
-    def _init(self):
-        PixivExtractor._init(self)
-        self.sanity_workaround = self.meta_comments = False
+    _init = PixivAvatarExtractor._init
 
     def works(self):
         detail = self.api.user_detail(self.groups[0])
