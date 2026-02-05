@@ -155,13 +155,15 @@ def status():
             with open(path, encoding="utf-8") as fp:
                 _load(fp.read())
         except FileNotFoundError:
-            status = "Not Present"
-        except OSError:
+            status = ""
+        except OSError as exc:
+            log.debug("%s: %s", exc.__class__.__name__, exc)
             status = "Inaccessible"
-        except ValueError:
-            status = "Invalid JSON"
+        except ValueError as exc:
+            log.debug("%s: %s", exc.__class__.__name__, exc)
+            status = "Invalid " + _type.upper()
         except Exception as exc:
-            log.debug(exc)
+            log.debug("%s: %s", exc.__class__.__name__, exc)
             status = "Unknown"
         else:
             status = "OK"
@@ -169,7 +171,6 @@ def status():
         paths.append((path, status))
 
     fmt = f"{{:<{max(len(p[0]) for p in paths)}}} : {{}}\n".format
-
     for path, status in paths:
         stdout_write(fmt(path, status))
 
