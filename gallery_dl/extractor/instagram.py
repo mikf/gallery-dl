@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2018-2020 Leonardo Taccari
-# Copyright 2018-2025 Mike Fährmann
+# Copyright 2018-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,7 @@
 
 from .common import Extractor, Message, Dispatch
 from .. import text, util, exception
-from ..cache import cache, memcache
+from ..cache import cache
 import itertools
 import binascii
 
@@ -869,7 +869,7 @@ class InstagramRestAPI():
         }
         return self._pagination_sections(endpoint, data)
 
-    @memcache(keyarg=1)
+    @cache(maxage=36500*86400, keyarg=1)
     def user_by_name(self, screen_name):
         endpoint = "/v1/users/web_profile_info/"
         params = {"username": screen_name}
@@ -879,7 +879,7 @@ class InstagramRestAPI():
         except KeyError:
             raise exception.NotFoundError("user")
 
-    @memcache(keyarg=1)
+    @cache(maxage=36500*86400, keyarg=1)
     def user_by_id(self, user_id):
         endpoint = f"/v1/users/{user_id}/info/"
         return self._call(endpoint)["user"]
@@ -892,6 +892,7 @@ class InstagramRestAPI():
 
         user = self.user_by_name(screen_name)
         if user is None:
+            self.user_by_name.invalidate(screen_name)
             raise exception.AuthorizationError(
                 "Login required to access this profile")
         if check_private and user["is_private"] and \
