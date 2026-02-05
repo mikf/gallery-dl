@@ -211,12 +211,24 @@ __tests__ = (
 {
     "#url"     : "https://www.pixiv.net/en/users/173530/avatar",
     "#class"   : pixiv.PixivAvatarExtractor,
+    "#options" : {
+        "metadata"         : True,
+        "metadata-bookmark": True,
+        "captions"         : True,
+        "comments"         : True,
+    },
     "#sha1_content": "4e57544480cc2036ea9608103e8f024fa737fe66",
 },
 
 {
     "#url"     : "https://www.pixiv.net/en/users/194921/background",
     "#class"   : pixiv.PixivBackgroundExtractor,
+    "#options" : {
+        "metadata"         : True,
+        "metadata-bookmark": True,
+        "captions"         : True,
+        "comments"         : True,
+    },
     "#pattern" : r"https://i\.pximg\.net/background/img/2021/01/30/16/12/02/194921_af1f71e557a42f499213d4b9eaccc0f8\.jpg",
 },
 
