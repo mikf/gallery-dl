@@ -91,6 +91,22 @@ class TestDownloadJob(TestJob):
         self.assertFalse(tjob.archive)
         self.assertFalse(tjob.hooks)
 
+    def test_parent_metadata_extractor(self):
+        config.set((), "parent-metadata", True)
+
+        config.set(("output",), "mode", False)
+        config.set((), "download", False)
+
+        config.set((), "postprocessors", [{
+            "name"  : "metadata/print@init",
+            "format": "{num}",
+        }])
+
+        extr = TestExtractorParent.from_url("test:parent:3")
+        out = self._capture_stdout(extr)
+        # no output if '_extractor' is overwritten (#8958)
+        self.assertEqual(out, "11\n")
+
 
 class TestKeywordJob(TestJob):
     jobclass = job.KeywordJob
