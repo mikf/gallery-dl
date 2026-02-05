@@ -108,10 +108,28 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://www.artstation.com/contests/beyond-human/challenges/23?sorting=winners",
+    "#url"     : "https://www.artstation.com/challenges/beyond-human/categories/23/submissions",
+    "#class"   : artstation.ArtstationChallengeExtractor,
+},
+
+{
+    "#url"     : "https://www.artstation.com/contests/beyond-human/challenges/23?sorting=popular",
     "#class"   : artstation.ArtstationChallengeExtractor,
     "#range"   : "1-30",
     "#count"   : 30,
+
+    "challenge": {
+        "id"        : 23,
+        "headline"  : "Imagining Where Future Humans Live",
+        "created_at": "2017-06-26T14:45:43+00:00",
+        "contest"   : {
+            "archived" : True,
+            "published": True,
+            "slug"     : "beyond-human",
+            "title"    : "Beyond Human",
+            "submissions_count": 4258,
+        },
+    },
 },
 
 {
