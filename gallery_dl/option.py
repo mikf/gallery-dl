@@ -269,6 +269,19 @@ def build_parser():
         help="Exact location for file downloads",
     )
     general.add_argument(
+        "--restrict-filenames",
+        dest="path-restrict", metavar="VALUE", action=ConfigAction,
+        help=("Replace restricted filename characters with underscores. "
+              "One of 'windows', 'unix', 'ascii', 'ascii+', "
+              "or a custom set of characters"),
+    )
+    general.add_argument(
+        "--windows-filenames",
+        dest="path-restrict", nargs=0, action=ConfigConstAction,
+        const="windows",
+        help="Force filenames to be Windows-compatible",
+    )
+    general.add_argument(
         "-X", "--extractors",
         dest="extractor_sources", metavar="PATH", action="append",
         help="Load external extractors from PATH",
