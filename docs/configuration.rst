@@ -6284,6 +6284,16 @@ Description
     Fetch media from promoted Tweets.
 
 
+extractor.twitter.articles
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download media embedded in articles.
+
+
 extractor.twitter.cards
 -----------------------
 Type
