@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2025 Mike Fährmann
+# Copyright 2015-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -390,6 +390,22 @@ class TestText(unittest.TestCase):
         self.assertEqual(e("[", "]"), "d")
         self.assertEqual(e("[", "]"), "END")
         self.assertEqual(e("[", "]"), "END")
+
+    def test_extract_urls(self, f=text.extract_urls):
+        txt = ""
+        self.assertEqual(f(txt), [])
+
+        txt = "<p>foo </p> &amp; bar <p> </p>"
+        self.assertEqual(f(txt), [])
+
+        txt = """<p>
+  <a href="http://www.example.com">Lorem ipsum dolor sit amet</a>.
+  Duis aute irure <a href="http://blog.example.org/lorem?foo=bar">
+  http://blog.example.org</a>.
+</p>"""
+        self.assertEqual(f(txt), ["http://www.example.com",
+                                  "http://blog.example.org/lorem?foo=bar",
+                                  "http://blog.example.org"])
 
     def test_parse_unicode_escapes(self, f=text.parse_unicode_escapes):
         self.assertEqual(f(""), "")
