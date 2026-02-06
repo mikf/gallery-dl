@@ -385,10 +385,9 @@ class HttpDownloader(DownloaderBase):
     def receive(self, fp, content, bytes_total, bytes_start):
         write = fp.write
         for data in content:
-            write(data)
-
             if FLAGS.DOWNLOAD is not None:
-                FLAGS.process("DOWNLOAD")
+                return FLAGS.process("DOWNLOAD")
+            write(data)
 
     def _receive_rate(self, fp, content, bytes_total, bytes_start):
         rate = self.rate() if self.rate else None
@@ -399,13 +398,12 @@ class HttpDownloader(DownloaderBase):
         time_start = time.monotonic()
 
         for data in content:
+            if FLAGS.DOWNLOAD is not None:
+                return FLAGS.process("DOWNLOAD")
             time_elapsed = time.monotonic() - time_start
             bytes_downloaded += len(data)
 
             write(data)
-
-            if FLAGS.DOWNLOAD is not None:
-                FLAGS.process("DOWNLOAD")
 
             if progress is not None:
                 if time_elapsed > progress:
