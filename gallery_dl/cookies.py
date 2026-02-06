@@ -26,7 +26,7 @@ from . import aes, text, util
 
 SUPPORTED_BROWSERS_CHROMIUM = {
     "brave", "chrome", "chromium", "edge", "opera", "thorium", "vivaldi"}
-SUPPORTED_BROWSERS_FIREFOX = {"firefox", "librewolf", "zen"}
+SUPPORTED_BROWSERS_FIREFOX = {"firefox", "librewolf", "zen", "floorp"}
 SUPPORTED_BROWSERS_WEBKIT = {"safari", "orion"}
 SUPPORTED_BROWSERS = \
     SUPPORTED_BROWSERS_CHROMIUM \
@@ -272,6 +272,7 @@ def _firefox_browser_directory(browser_name):
             "firefox"  : join(appdata, R"Mozilla\Firefox\Profiles"),
             "librewolf": join(appdata, R"librewolf\Profiles"),
             "zen"      : join(appdata, R"zen\Profiles"),
+            "floorp"   : join(appdata, R"Floorp\Profiles")
         }[browser_name]
     elif sys.platform == "darwin":
         appdata = os.path.expanduser("~/Library/Application Support")
@@ -279,6 +280,7 @@ def _firefox_browser_directory(browser_name):
             "firefox"  : join(appdata, R"Firefox/Profiles"),
             "librewolf": join(appdata, R"librewolf/Profiles"),
             "zen"      : join(appdata, R"zen/Profiles"),
+            "floorp"   : join(appdata, R"Floorp/Profiles")
         }[browser_name]
     else:
         home = os.path.expanduser("~")
@@ -286,6 +288,7 @@ def _firefox_browser_directory(browser_name):
             "firefox"  : join(home, R".mozilla/firefox"),
             "librewolf": join(home, R".librewolf"),
             "zen"      : join(home, R".zen"),
+            "floorp"   : join(home, R".floorp"),
         }[browser_name]
 
 
