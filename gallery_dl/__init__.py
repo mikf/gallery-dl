@@ -140,7 +140,7 @@ def main():
             config.set(("downloader",), "progress", None)
         elif args.loglevel <= logging.DEBUG:
             import platform
-            import requests
+            import niquests as requests
 
             if util.EXECUTABLE:
                 extra = f" - Executable ({version.__variant__})"
@@ -183,7 +183,7 @@ def main():
                 return config.open_extern()
 
         if args.print_traffic:
-            import requests
+            import niquests as requests
             requests.packages.urllib3.connection.HTTPConnection.debuglevel = 1
 
         if args.update:

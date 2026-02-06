@@ -17,10 +17,10 @@ import queue
 import random
 import getpass
 import logging
-import requests
+import niquests as requests
 import threading
 from xml.etree import ElementTree
-from requests.adapters import HTTPAdapter
+from niquests.adapters import HTTPAdapter
 from .message import Message
 from .. import config, output, text, util, dt, cache, exception
 urllib3 = requests.packages.urllib3

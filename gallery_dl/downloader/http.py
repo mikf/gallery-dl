@@ -10,7 +10,7 @@
 
 import time
 import mimetypes
-from requests.exceptions import RequestException, ConnectionError, Timeout
+from niquests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
 from .. import text, util, output, exception
 from ssl import SSLError

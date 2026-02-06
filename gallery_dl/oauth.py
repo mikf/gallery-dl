@@ -16,8 +16,8 @@ import hashlib
 import binascii
 import urllib.parse
 
-import requests
-import requests.auth
+import niquests as requests
+import niquests.auth as requests_auth
 
 from . import text
 from .cache import cache
@@ -56,7 +56,7 @@ class OAuth1Session(requests.Session):
             prepared_request.prepare_auth(self.auth)
 
 
-class OAuth1Client(requests.auth.AuthBase):
+class OAuth1Client(requests_auth.AuthBase):
     """OAuth1.0a authentication"""
 
     def __init__(self, consumer_key, consumer_secret,

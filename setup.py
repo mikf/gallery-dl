@@ -104,14 +104,14 @@ def build_setuptools():
         license="GPL-2.0-only",
         python_requires=">=3.8",
         install_requires=[
-            "requests>=2.11.0",
+            "niquests>=3.17.0",
         ],
         extras_require={
             "video": [
                 "yt-dlp",
             ],
             "extra": [
-                "requests[socks]",
+                "niquests[socks]",
                 "yt-dlp[default]",
                 "jinja2",
                 "pyyaml",
