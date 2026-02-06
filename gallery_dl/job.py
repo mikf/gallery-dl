@@ -201,7 +201,8 @@ class Job():
             if extractor.status:
                 self.status |= extractor.status
             self.handle_finalize()
-            extractor.finalize(self.status)
+            if extractor.finalize is not None:
+                extractor.finalize(self.status)
 
         return self.status
 
@@ -285,15 +286,17 @@ class Job():
         pass
 
     def _init(self):
-        self.extractor.initialize()
-        self.pred_url = self._prepare_predicates(
-            "file", "image", True)
-        self.pred_post = self._prepare_predicates(
-            "post", None, False)
-        self.pred_queue = self._prepare_predicates(
-            "child", "chapter", False)
+        extr = self.extractor
 
-        init = self.extractor.config("init", False)
+        extr.initialize()
+        self.pred_url = self._prepare_predicates(
+            "file", "image", extr.skip)
+        self.pred_post = self._prepare_predicates(
+            "post", None, None)
+        self.pred_queue = self._prepare_predicates(
+            "child", "chapter", None)
+
+        init = extr.config("init", False)
         if init and init != "lazy":
             self.initialize()
 
@@ -315,7 +318,8 @@ class Job():
         if (prange := extr.config(target + "-range")) or \
                 alt is not None and (prange := extr.config(alt + "-range")):
             try:
-                skip = extr.skip if skip and not pfilter else None
+                if pfilter:
+                    skip = None
                 flag = target if alt is not None else None
                 predicates.append(util.predicate_range(prange, skip, flag))
             except ValueError as exc:
