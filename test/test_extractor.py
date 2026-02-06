@@ -160,13 +160,15 @@ class TestExtractorModule(unittest.TestCase):
 
             extr.request = fail_request
             extr.initialize()
-            extr.finalize()
+            if extr.finalize is not None:
+                extr.finalize(0)
 
     def test_init_ytdl(self):
         try:
             extr = extractor.find("ytdl:")
             extr.initialize()
-            extr.finalize()
+            if extr.finalize is not None:
+                extr.finalize(0)
         except ImportError as exc:
             if exc.name in ("youtube_dl", "yt_dlp"):
                 raise unittest.SkipTest(f"cannot import module '{exc.name}'")
