@@ -26,8 +26,8 @@ class VkExtractor(Extractor):
     def _init(self):
         self.offset = text.parse_int(self.config("offset"))
 
-    def finalize(self):
-        if self.offset:
+    def finalize(self, status):
+        if status and self.offset:
             self.log.info("Use '-o offset=%s' to continue downloading "
                           "from the current position", self.offset)
 

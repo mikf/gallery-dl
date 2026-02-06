@@ -122,8 +122,8 @@ class InstagramExtractor(Extractor):
     def posts(self):
         return ()
 
-    def finalize(self):
-        if self._cursor:
+    def finalize(self, status):
+        if status and self._cursor:
             self.log.info("Use '-o cursor=%s' to continue downloading "
                           "from the current position", self._cursor)
 
