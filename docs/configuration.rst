@@ -10173,7 +10173,7 @@ Description
 
         | Expected syntax is ``<flag>[ = <value>]`` (e.g. ``post = stop``)
         | ``<flag>`` can be one of ``file``, ``post``, ``child``, ``download``
-        | ``<value>`` can be one of ``stop``, ``abort``, ``terminate``, ``restart`` (default ``stop``)
+        | ``<value>`` can be one of ``stop``, ``abort``, ``terminate``, ``restart``, ``skip`` (default ``stop``)
     ``wait``:
         | Sleep for a given Duration_ or
         | wait until Enter is pressed when no argument was given.

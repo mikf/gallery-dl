@@ -224,12 +224,18 @@ class Job():
 
             elif process is None:
                 continue
+            elif FLAGS.POST is False:
+                FLAGS.POST = process = None
+                continue
 
             elif msg == Message.Url:
                 if self.metadata_url:
                     kwdict[self.metadata_url] = url
                 self.update_kwdict(kwdict)
                 if self.pred_url(url, kwdict):
+                    if FLAGS.FILE is False:
+                        FLAGS.FILE = None
+                        continue
                     self.handle_url(url, kwdict)
                 if FLAGS.FILE is not None:
                     FLAGS.process("FILE")
@@ -239,6 +245,9 @@ class Job():
                 if self.metadata_url:
                     kwdict[self.metadata_url] = url
                 if self.pred_queue(url, kwdict):
+                    if FLAGS.CHILD is False:
+                        FLAGS.CHILD = None
+                        continue
                     self.handle_queue(url, kwdict)
                 if FLAGS.CHILD is not None:
                     FLAGS.process("CHILD")

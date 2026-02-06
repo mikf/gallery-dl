@@ -231,7 +231,13 @@ def action_flag(opts):
         r"(?i)(file|post|child|download)(?:\s*[= ]\s*(.+))?"
     ).match(opts).groups()
     flag = flag.upper()
-    value = "stop" if value is None else value.lower()
+
+    if value is None:
+        value = "stop"
+    elif value == "skip":
+        value = "stop" if flag == "DOWNLOAD" else False
+    else:
+        value = value.lower()
 
     def _flag(args):
         util.FLAGS.__dict__[flag] = value
