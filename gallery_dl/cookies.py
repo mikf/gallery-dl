@@ -288,7 +288,7 @@ def _firefox_browser_directory(browser_name):
             "firefox"  : join(home, R".mozilla/firefox"),
             "librewolf": join(home, R".librewolf"),
             "zen"      : join(home, R".zen"),
-            "floorp"  : join(home, R".floorp"),
+            "floorp"   : join(home, R".floorp"),
         }[browser_name]
 
 
