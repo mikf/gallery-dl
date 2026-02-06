@@ -123,18 +123,29 @@ class ImhentaiGalleryExtractor(ImhentaiExtractor, GalleryExtractor):
         return results
 
     def images(self, page):
+        base = text.extr(page, 'data-src="', '"').rpartition("/")[0] + "/"
+        exts = {"j": "jpg", "p": "png", "g": "gif", "w": "webp", "a": "avif"}
+
         try:
             data = util.json_loads(text.extr(page, "$.parseJSON('", "'"))
         except Exception:
+            data = None
+
+        if data is None:
             self.log.warning("%s: Missing image data", self.gallery_id)
-            return ()
-        base = text.extr(page, 'data-src="', '"').rpartition("/")[0] + "/"
-        exts = {"j": "jpg", "p": "png", "g": "gif", "w": "webp", "a": "avif"}
+
+            def _fallback_exts(i):
+                for ext in util.advance(exts.values(), 1):
+                    yield f"{base}{i}.{ext}"
+            cnt = text.parse_int(text.extr(
+                page, 'id="load_pages" value="', '"'))
+            return [(f"{base}{i}.jpg", {"_fallback": _fallback_exts(i)})
+                    for i in range(1, cnt+1)]
 
         results = []
         for i in map(str, range(1, len(data)+1)):
             ext, width, height = data[i].split(",")
-            url = base + i + "." + exts[ext]
+            url = f"{base}{i}.{exts[ext]}"
             results.append((url, {
                 "width" : text.parse_int(width),
                 "height": text.parse_int(height),
