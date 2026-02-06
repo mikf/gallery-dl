@@ -880,6 +880,17 @@ class InstagramRestAPI():
             raise exception.NotFoundError("user")
 
     @cache(maxage=36500*86400, keyarg=1)
+    def user_by_search(self, screen_name):
+        url = "https://www.instagram.com/web/search/topsearch/"
+        params = {"query": screen_name}
+
+        name = screen_name.lower()
+        for result in self._call(url, params=params)["users"]:
+            user = result["user"]
+            if user["username"].lower() == name:
+                return user
+
+    @cache(maxage=36500*86400, keyarg=1)
     def user_by_id(self, user_id):
         endpoint = f"/v1/users/{user_id}/info/"
         return self._call(endpoint)["user"]
@@ -890,16 +901,22 @@ class InstagramRestAPI():
                 self.extractor._user = self.user_by_id(screen_name[3:])
             return screen_name[3:]
 
-        user = self.user_by_name(screen_name)
+        user = self.user_by_search(screen_name)
         if user is None:
-            self.user_by_name.invalidate(screen_name)
-            raise exception.AuthorizationError(
-                "Login required to access this profile")
-        if check_private and user["is_private"] and \
-                not user["followed_by_viewer"]:
-            name = user["username"]
-            s = "" if name.endswith("s") else "s"
-            self.extractor.log.warning("%s'%s posts are private", name, s)
+            self.user_by_search.invalidate(screen_name)
+            self.log.warning("Failed to find profile '%s' via search. "
+                             "Trying 'web_profile_info' fallback", screen_name)
+            user = self.user_by_name(screen_name)
+            if user is None:
+                self.user_by_name.invalidate(screen_name)
+                raise exception.AuthorizationError(
+                    "Login required to access this profile")
+            if check_private and user["is_private"] and \
+                    not user.get("followed_by_viewer", True):
+                name = user["username"]
+                s = "" if name.endswith("s") else "s"
+                self.extractor.log.warning("%s'%s posts are private", name, s)
+
         self.extractor._assign_user(user)
         return user["id"]
 
@@ -946,7 +963,10 @@ class InstagramRestAPI():
     def _call(self, endpoint, **kwargs):
         extr = self.extractor
 
-        url = "https://www.instagram.com/api" + endpoint
+        if endpoint[0] == "/":
+            url = "https://www.instagram.com/api" + endpoint
+        else:
+            url = endpoint
         kwargs["headers"] = {
             "Accept"          : "*/*",
             "X-CSRFToken"     : extr.csrf_token,
