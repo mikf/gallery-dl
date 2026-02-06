@@ -74,8 +74,8 @@ class PatreonExtractor(Extractor):
                 else:
                     self.log.debug("skipping %s (%s %s)", url, fhash, kind)
 
-    def finalize(self):
-        if self._cursor:
+    def finalize(self, status):
+        if status and self._cursor:
             self.log.info("Use '-o cursor=%s' to continue downloading "
                           "from the current position", self._cursor)
 

@@ -103,7 +103,7 @@ class Extractor():
         self._init()
         self.initialize = util.noop
 
-    def finalize(self):
+    def finalize(self, status):
         pass
 
     def items(self):

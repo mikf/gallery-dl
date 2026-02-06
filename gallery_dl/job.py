@@ -198,11 +198,11 @@ class Job():
             if msg is None:
                 log.info("No results for %s", extractor.url)
         finally:
+            if extractor.status:
+                self.status |= extractor.status
             self.handle_finalize()
-            extractor.finalize()
+            extractor.finalize(self.status)
 
-        if s := extractor.status:
-            self.status |= s
         return self.status
 
     def dispatch(self, messages):

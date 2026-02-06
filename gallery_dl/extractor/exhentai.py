@@ -150,8 +150,8 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         self.fallback_retries = self.config("fallback-retries", 2)
         self.original = self.config("original", True)
 
-    def finalize(self):
-        if not self.data:
+    def finalize(self, status):
+        if not status or not self.data:
             return
 
         if self.mpv:
