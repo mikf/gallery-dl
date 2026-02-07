@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2025 Mike Fährmann
+# Copyright 2017-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -632,6 +632,12 @@ def build_parser():
         "--config-open",
         dest="config", action="store_const", const="open",
         help="Open configuration file in external application",
+    )
+    configuration.add_argument(
+        "--config-type",
+        dest="config_type", metavar="TYPE",
+        help=("Set filetype of default configuration files "
+              "(json, yaml, toml)"),
     )
     configuration.add_argument(
         "--config-ignore",
