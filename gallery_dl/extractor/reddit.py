@@ -55,7 +55,7 @@ class RedditExtractor(Extractor):
             for submission, comments in submissions:
                 urls = []
 
-                if submission:
+                if submission and submission.get("_media", True):
                     submission["comment"] = None
                     submission["date"] = self.parse_timestamp(
                         submission["created_utc"])
@@ -126,7 +126,7 @@ class RedditExtractor(Extractor):
 
                         data = submission.copy()
                         data["comment"] = comment
-                        comment["date"] = self.parse_timestamp(
+                        comment["date"] = data["date"] = self.parse_timestamp(
                             comment["created_utc"])
 
                         if media:
@@ -325,7 +325,7 @@ class RedditUserExtractor(RedditExtractor):
         uid = "t2_" + user["id"]
         for submission, comments in submissions:
             if submission and submission.get("author_fullname") != uid:
-                submission = None
+                submission["_media"] = False
             comments = [
                 comment
                 for comment in (comments or ())
