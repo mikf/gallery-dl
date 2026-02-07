@@ -289,6 +289,7 @@ def parse_field_name(field_name):
         return "_lit", (operator.itemgetter(field_name[1:-1]),)
 
     first, rest = _string.formatter_field_name_split(field_name)
+    first = first.strip()
     funcs = []
 
     for is_attr, key in rest:

@@ -63,6 +63,7 @@ class TestFormatter(unittest.TestCase):
         "title2": "",
         "title3": None,
         "title4": 0,
+        "num": 7,
     }
 
     def test_conversions(self):
@@ -134,6 +135,13 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{name}{title4}", "Name0")
         self._run_test("{name}{title4:?//}", "Name")
         self._run_test("{name}{title4:? **/''/}", "Name")
+
+    def test_zero_fill(self):
+        self._run_test("{name}{num}", "Name7")
+        self._run_test("{name}{num:02}", "Name07")
+        self._run_test("{name}{num :02}", "Name07")
+        self._run_test("{name}{ num:02}", "Name07")
+        self._run_test("{name}{ num :02}", "Name07")
 
     def test_missing(self):
         replacement = "None"
