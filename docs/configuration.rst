@@ -212,6 +212,20 @@ Description
     Specifying a default |Path|_ with ``""`` is required.
 
 
+extractor.*.follow
+------------------
+Type
+    `Format String`_
+Default
+    ``null``
+Example
+    * ``"{content}"``
+    * ``"\fE body or html or text"``
+Description
+    Follow URLs in the given `Format String`_'s result and
+    process them with child extractors.
+
+
 extractor.*.parent
 ------------------
 Type
@@ -10230,7 +10244,7 @@ Example
     * ``"foo"``
     * ``"{username}"``
     * ``"{title} ({id}).{extension}"``
-    * ``"\fF {title.title()} ({num:>0:>0{len(str(a))}} / {count}).{extension}"``
+    * ``"\fF {title.title()} ({num:>0{len(str(count))}} / {count}).{extension}"``
 Description
     A `Format String`_ allows creating dynamic text
     by embedding metadata values directly into replacement fields
