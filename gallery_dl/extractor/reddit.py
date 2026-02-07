@@ -317,7 +317,22 @@ class RedditUserExtractor(RedditExtractor):
 
         submissions = self.api.submissions_user(
             user["name"], text.parse_query(qs))
+        if self.config("only", True):
+            submissions = self._only(submissions, user)
         return submissions
+
+    def _only(self, submissions, user):
+        uid = "t2_" + user["id"]
+        for submission, comments in submissions:
+            if submission and submission.get("author_fullname") != uid:
+                submission = None
+            comments = [
+                comment
+                for comment in (comments or ())
+                if comment.get("author_fullname") == uid
+            ]
+            if submission or comments:
+                yield submission, comments
 
 
 class RedditSubmissionExtractor(RedditExtractor):
