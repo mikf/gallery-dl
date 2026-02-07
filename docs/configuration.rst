@@ -5350,6 +5350,16 @@ Note
     but it will not always get the best video quality available.
 
 
+extractor.reddit.user.only
+--------------------------
+Type
+    ``bool``
+Default
+    ``trur``
+Description
+    Only process and return posts from the user specified in the input URL.
+
+
 extractor.redgifs.format
 ------------------------
 Type
