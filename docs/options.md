@@ -134,6 +134,8 @@
     --config-create             Create a basic configuration file
     --config-status             Show configuration file status
     --config-open               Open configuration file in external application
+    --config-type TYPE          Set filetype of default configuration files
+                                (json, yaml, toml)
     --config-ignore             Do not read default configuration files
 
 ## Authentication Options:

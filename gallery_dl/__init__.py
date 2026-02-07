@@ -26,6 +26,11 @@ def main():
         log = output.initialize_logging(args.loglevel)
 
         # configuration
+        if args.config_type:
+            try:
+                config.default(args.config_type)
+            except Exception as exc:
+                config.log.error(exc)
         if args.config_load:
             config.load()
         if args.configs_json:
