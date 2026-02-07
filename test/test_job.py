@@ -91,6 +91,22 @@ class TestDownloadJob(TestJob):
         self.assertFalse(tjob.archive)
         self.assertFalse(tjob.hooks)
 
+    def test_parent_metadata_extractor(self):
+        config.set((), "parent-metadata", True)
+
+        config.set(("output",), "mode", False)
+        config.set((), "download", False)
+
+        config.set((), "postprocessors", [{
+            "name"  : "metadata/print@init",
+            "format": "{num}",
+        }])
+
+        extr = TestExtractorParent.from_url("test:parent:3")
+        out = self._capture_stdout(extr)
+        # no output if '_extractor' is overwritten (#8958)
+        self.assertEqual(out, "11\n")
+
 
 class TestKeywordJob(TestJob):
     jobclass = job.KeywordJob
@@ -191,7 +207,7 @@ test:child
 
     def test_child(self):
         extr = TestExtractorParent.from_url("test:parent")
-        tjob = job.UrlJob(extr, depth=0)
+        tjob = self.jobclass(extr, depth=0)
         self.assertEqual(self._capture_stdout(tjob), 3 * """\
 https://example.org/1.jpg
 https://example.org/2.jpg
@@ -204,6 +220,20 @@ https://example.org/3.jpg
         extr = TestExtractorNoop.from_url("test:noop")
         tjob = self.jobclass(extr)
         tjob._init()
+
+    def test_opt_follow(self):
+        config.set((), "follow", "{user[bio]}")
+
+        extr = TestExtractor.from_url("test:urls")
+        tjob = self.jobclass(extr)
+        self.assertEqual(self._capture_stdout(tjob), """\
+https://example.org/1.jpg
+https://example.org/2.jpg
+https://example.org/3.jpg
+https://example1.org/content/abc
+https://example2.org/content?query=123
+https://example3.org/content/#frag
+""")
 
 
 class TestInfoJob(TestJob):
@@ -432,19 +462,75 @@ class TestDataJob(TestJob):
         tjob = self.jobclass(extr)
         tjob._init()
 
+    def test_opt_follow(self):
+        config.set((), "follow", "{user[bio]!R}")
+
+        extr = TestExtractor.from_url("test:urls")
+        tjob = self.jobclass(extr, file=None)
+        tjob.run()
+        self.assertEqual(tjob.data_urls, [
+            "https://example.org/1.jpg",
+            "https://example.org/2.jpg",
+            "https://example.org/3.jpg",
+            "https://example1.org/content/abc",
+            "https://example2.org/content?query=123",
+            "https://example3.org/content/#frag"
+        ])
+
+    def test_resolve(self):
+        extr = TestExtractorParent.from_url("test:parent:3")
+        tjob = self.jobclass(extr, file=None, resolve=0)
+        tjob.run()
+        self.assertEqual(len(tjob.data_urls), 3)
+        for url in tjob.data_urls:
+            self.assertEqual(url, "test:parent:2")
+
+        extr = TestExtractorParent.from_url("test:parent:3")
+        tjob = self.jobclass(extr, file=None, resolve=1)
+        tjob.run()
+        self.assertEqual(len(tjob.data_urls), 9)
+        for url in tjob.data_urls:
+            self.assertEqual(url, "test:parent:1")
+
+        extr = TestExtractorParent.from_url("test:parent")
+        tjob = self.jobclass(extr, file=None, resolve=64)
+        tjob.run()
+        self.assertEqual(len(tjob.data_urls), 9)
+        for url in tjob.data_urls:
+            self.assertRegex(url, r"^https://example.org/\d\.jpg$")
+
+        extr = TestExtractorParent.from_url("test:parent:1")
+        tjob = self.jobclass(extr, file=None, resolve=64)
+        tjob.run()
+        self.assertEqual(len(tjob.data_urls), 27)
+
+        extr = TestExtractorParent.from_url("test:parent:2")
+        tjob = self.jobclass(extr, file=None, resolve=64)
+        tjob.run()
+        self.assertEqual(len(tjob.data_urls), 81)
+
 
 class TestExtractor(Extractor):
     category = "test_category"
     subcategory = "test_subcategory"
     directory_fmt = ("{category}",)
     filename_fmt = "test_{filename}.{extension}"
-    pattern = r"test:(child|self)?$"
+    pattern = r"test:(child|self|urls)?$"
 
     def __init__(self, match):
         Extractor.__init__(self, match)
         self.user = {"id": 123, "name": "test"}
         if match[1] == "self":
             self.user["self"] = self.user
+        elif match[1] == "urls":
+            self.user["bio"] = """
+Site 1:
+* https://example1.org/content/abc
+Site 2:
+* https://example2.org/content?query=123
+
+<a href="https://example3.org/content/#frag">Site 3</a>
+"""
 
     def items(self):
         root = "https://example.org"
@@ -469,16 +555,22 @@ class TestExtractor(Extractor):
 class TestExtractorParent(Extractor):
     category = "test_category"
     subcategory = "test_subcategory_parent"
-    pattern = r"test:parent"
+    pattern = r"test:parent(:\d+)?"
 
     def items(self):
-        url = "test:child"
+        level = self.groups[0]
+        if level in {None, ":0"}:
+            url = "test:child"
+            extr = TestExtractor
+        else:
+            url = f"test:parent:{int(level[1:])-1}"
+            extr = TestExtractorParent
 
         for i in range(11, 14):
             yield Message.Queue, url, {
                 "num" : i,
                 "tags": ["abc", "def"],
-                "_extractor": TestExtractor,
+                "_extractor": extr,
             }
 
 

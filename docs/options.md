@@ -24,6 +24,10 @@
                                 ('/O' for "original" filenames)
     -d, --destination PATH      Target location for file downloads
     -D, --directory PATH        Exact location for file downloads
+    --restrict-filenames VALUE  Replace restricted filename characters with
+                                underscores. One of 'windows', 'unix', 'ascii',
+                                'ascii+', or a custom set of characters
+    --windows-filenames         Force filenames to be Windows-compatible
     -X, --extractors PATH       Load external extractors from PATH
     --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
                                 MODULE (ALL to delete everything)
@@ -130,6 +134,8 @@
     --config-create             Create a basic configuration file
     --config-status             Show configuration file status
     --config-open               Open configuration file in external application
+    --config-type TYPE          Set filetype of default configuration files
+                                (json, yaml, toml)
     --config-ignore             Do not read default configuration files
 
 ## Authentication Options:

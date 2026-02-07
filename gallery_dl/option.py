@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2025 Mike Fährmann
+# Copyright 2017-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -267,6 +267,19 @@ def build_parser():
         "-D", "--directory",
         dest="directory", metavar="PATH",
         help="Exact location for file downloads",
+    )
+    general.add_argument(
+        "--restrict-filenames",
+        dest="path-restrict", metavar="VALUE", action=ConfigAction,
+        help=("Replace restricted filename characters with underscores. "
+              "One of 'windows', 'unix', 'ascii', 'ascii+', "
+              "or a custom set of characters"),
+    )
+    general.add_argument(
+        "--windows-filenames",
+        dest="path-restrict", nargs=0, action=ConfigConstAction,
+        const="windows",
+        help="Force filenames to be Windows-compatible",
     )
     general.add_argument(
         "-X", "--extractors",
@@ -619,6 +632,12 @@ def build_parser():
         "--config-open",
         dest="config", action="store_const", const="open",
         help="Open configuration file in external application",
+    )
+    configuration.add_argument(
+        "--config-type",
+        dest="config_type", metavar="TYPE",
+        help=("Set filetype of default configuration files "
+              "(json, yaml, toml)"),
     )
     configuration.add_argument(
         "--config-ignore",

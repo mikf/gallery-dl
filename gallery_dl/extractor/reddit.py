@@ -55,7 +55,7 @@ class RedditExtractor(Extractor):
             for submission, comments in submissions:
                 urls = []
 
-                if submission:
+                if submission and submission.get("_media", True):
                     submission["comment"] = None
                     submission["date"] = self.parse_timestamp(
                         submission["created_utc"])
@@ -126,7 +126,7 @@ class RedditExtractor(Extractor):
 
                         data = submission.copy()
                         data["comment"] = comment
-                        comment["date"] = self.parse_timestamp(
+                        comment["date"] = data["date"] = self.parse_timestamp(
                             comment["created_utc"])
 
                         if media:
@@ -300,19 +300,39 @@ class RedditHomeExtractor(RedditSubredditExtractor):
 class RedditUserExtractor(RedditExtractor):
     """Extractor for URLs from posts by a reddit user"""
     subcategory = "user"
+    directory_fmt = ("{category}", "Users", "{user[name]}")
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/u(?:ser)?/"
                r"([^/?#]+(?:/([a-z]+))?)/?(?:\?([^#]*))?$")
     example = "https://www.reddit.com/user/USER/"
 
     def __init__(self, match):
-        self.user, sub, params = match.groups()
-        self.params = text.parse_query(params)
-        if sub:
+        if sub := match[2]:
             self.subcategory += "-" + sub
         RedditExtractor.__init__(self, match)
 
     def submissions(self):
-        return self.api.submissions_user(self.user, self.params)
+        username, sub, qs = self.groups
+        username = text.unquote(username)
+        self.kwdict["user"] = user = self.api.user_about(username)
+
+        submissions = self.api.submissions_user(
+            user["name"], text.parse_query(qs))
+        if self.config("only", True):
+            submissions = self._only(submissions, user)
+        return submissions
+
+    def _only(self, submissions, user):
+        uid = "t2_" + user["id"]
+        for submission, comments in submissions:
+            if submission and submission.get("author_fullname") != uid:
+                submission["_media"] = False
+            comments = [
+                comment
+                for comment in (comments or ())
+                if comment.get("author_fullname") == uid
+            ]
+            if submission or comments:
+                yield submission, comments
 
 
 class RedditSubmissionExtractor(RedditExtractor):
@@ -323,12 +343,8 @@ class RedditSubmissionExtractor(RedditExtractor):
                r"comments|gallery)|redd\.it)/([a-z0-9]+)")
     example = "https://www.reddit.com/r/SUBREDDIT/comments/id/"
 
-    def __init__(self, match):
-        RedditExtractor.__init__(self, match)
-        self.submission_id = match[1]
-
     def submissions(self):
-        return (self.api.submission(self.submission_id),)
+        return (self.api.submission(self.groups[0]),)
 
 
 class RedditImageExtractor(Extractor):
@@ -449,9 +465,9 @@ class RedditAPI():
         endpoint = subreddit + "/.json"
         return self._pagination(endpoint, params)
 
-    def submissions_user(self, user, params):
+    def submissions_user(self, username, params):
         """Collect all (submission, comments)-tuples posted by a user"""
-        endpoint = "/user/" + user + "/.json"
+        endpoint = f"/user/{username}/.json"
         return self._pagination(endpoint, params)
 
     def morechildren(self, link_id, children):
@@ -471,6 +487,10 @@ class RedditAPI():
                     children.extend(thing["data"]["children"])
                 else:
                     yield thing["data"]
+
+    def user_about(self, username):
+        endpoint = f"/user/{username}/about.json"
+        return self._call(endpoint, {})["data"]
 
     def authenticate(self):
         """Authenticate the application by requesting an access token"""

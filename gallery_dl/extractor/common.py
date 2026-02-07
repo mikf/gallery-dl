@@ -53,6 +53,7 @@ class Extractor():
     request_interval_min = 0.0
     request_interval_429 = 60.0
     request_timestamp = 0.0
+    finalize = skip = None
 
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
@@ -103,15 +104,9 @@ class Extractor():
         self._init()
         self.initialize = util.noop
 
-    def finalize(self):
-        pass
-
     def items(self):
         return
         yield
-
-    def skip(self, num):
-        return 0
 
     def config(self, key, default=None):
         return config.interpolate(self._cfgpath, key, default)

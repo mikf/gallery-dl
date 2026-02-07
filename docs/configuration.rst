@@ -212,6 +212,20 @@ Description
     Specifying a default |Path|_ with ``""`` is required.
 
 
+extractor.*.follow
+------------------
+Type
+    `Format String`_
+Default
+    ``null``
+Example
+    * ``"{content}"``
+    * ``"\fE body or html or text"``
+Description
+    Follow URLs in the given `Format String`_'s result and
+    process them with child extractors.
+
+
 extractor.*.parent
 ------------------
 Type
@@ -5421,6 +5435,16 @@ Note
     but it will not always get the best video quality available.
 
 
+extractor.reddit.user.only
+--------------------------
+Type
+    ``bool``
+Default
+    ``trur``
+Description
+    Only process and return posts from the user specified in the input URL.
+
+
 extractor.redgifs.format
 ------------------------
 Type
@@ -6353,6 +6377,16 @@ Default
     ``false``
 Description
     Fetch media from promoted Tweets.
+
+
+extractor.twitter.articles
+--------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download media embedded in articles.
 
 
 extractor.twitter.cards
@@ -10173,7 +10207,7 @@ Description
 
         | Expected syntax is ``<flag>[ = <value>]`` (e.g. ``post = stop``)
         | ``<flag>`` can be one of ``file``, ``post``, ``child``, ``download``
-        | ``<value>`` can be one of ``stop``, ``abort``, ``terminate``, ``restart`` (default ``stop``)
+        | ``<value>`` can be one of ``stop``, ``abort``, ``terminate``, ``restart``, ``skip`` (default ``stop``)
     ``wait``:
         | Sleep for a given Duration_ or
         | wait until Enter is pressed when no argument was given.
@@ -10220,7 +10254,7 @@ Example
     * ``"foo"``
     * ``"{username}"``
     * ``"{title} ({id}).{extension}"``
-    * ``"\fF {title.title()} ({num:>0:>0{len(str(a))}} / {count}).{extension}"``
+    * ``"\fF {title.title()} ({num:>0{len(str(count))}} / {count}).{extension}"``
 Description
     A `Format String`_ allows creating dynamic text
     by embedding metadata values directly into replacement fields

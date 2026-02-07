@@ -677,6 +677,8 @@ class Flags():
 
     def process(self, flag):
         value = self.__dict__[flag]
+        if value is False:  # flag was set to "skip"
+            return "skip"
         self.__dict__[flag] = None
 
         if value == "abort":

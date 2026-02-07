@@ -21,48 +21,56 @@ log = logging.getLogger("config")
 
 _config = {}
 _files = []
-_type = os.environ.get("GDL_CONFIG_TYPE")
-
-if not _type or (_type := _type.lower()) == "json":
-    _type = "json"
-    _load = util.json_loads
-elif _type == "yaml":
-    from yaml import safe_load as _load
-elif _type == "toml":
-    try:
-        from tomllib import loads as _load
-    except ImportError:
-        from toml import loads as _load
-else:
-    raise ValueError(f"Unsupported config file type "
-                     f"'{os.environ['GDL_CONFIG_TYPE']}'")
-
-if util.WINDOWS:
-    _default_configs = [
-        r"%APPDATA%\gallery-dl\config." + _type,
-        r"%USERPROFILE%\gallery-dl\config." + _type,
-        r"%USERPROFILE%\gallery-dl.conf",
-    ]
-else:
-    _default_configs = [
-        "/etc/gallery-dl.conf",
-        "${XDG_CONFIG_HOME}/gallery-dl/config." + _type
-        if os.environ.get("XDG_CONFIG_HOME") else
-        "${HOME}/.config/gallery-dl/config." + _type,
-        "${HOME}/.gallery-dl.conf",
-    ]
-
-
-if util.EXECUTABLE:
-    # look for config file in PyInstaller executable directory (#682)
-    _default_configs.append(os.path.join(
-        os.path.dirname(sys.executable),
-        "gallery-dl.conf",
-    ))
+_type = "json"
+_load = util.json_loads
+_default_configs = ()
 
 
 # --------------------------------------------------------------------
 # public interface
+
+
+def default(type=None):
+    global _type
+    global _load
+    global _default_configs
+
+    if not type or (type := type.lower()) == "json":
+        _type = type = "json"
+        _load = util.json_loads
+    elif type == "yaml":
+        _type = "yaml"
+        from yaml import safe_load as _load
+    elif type == "toml":
+        _type = "toml"
+        try:
+            from tomllib import loads as _load
+        except ImportError:
+            from toml import loads as _load
+    else:
+        raise ValueError(f"Unsupported config file type '{type}'")
+
+    if util.WINDOWS:
+        _default_configs = [
+            r"%APPDATA%\gallery-dl\config." + type,
+            r"%USERPROFILE%\gallery-dl\config." + type,
+            r"%USERPROFILE%\gallery-dl.conf",
+        ]
+    else:
+        _default_configs = [
+            "/etc/gallery-dl.conf",
+            "${XDG_CONFIG_HOME}/gallery-dl/config." + type
+            if os.environ.get("XDG_CONFIG_HOME") else
+            "${HOME}/.config/gallery-dl/config." + type,
+            "${HOME}/.gallery-dl.conf",
+        ]
+
+    if util.EXECUTABLE:
+        # look for config file in PyInstaller executable directory (#682)
+        _default_configs.append(os.path.join(
+            os.path.dirname(sys.executable),
+            "gallery-dl.conf",
+        ))
 
 
 def initialize():
@@ -155,13 +163,15 @@ def status():
             with open(path, encoding="utf-8") as fp:
                 _load(fp.read())
         except FileNotFoundError:
-            status = "Not Present"
-        except OSError:
+            status = ""
+        except OSError as exc:
+            log.debug("%s: %s", exc.__class__.__name__, exc)
             status = "Inaccessible"
-        except ValueError:
-            status = "Invalid JSON"
+        except ValueError as exc:
+            log.debug("%s: %s", exc.__class__.__name__, exc)
+            status = "Invalid " + _type.upper()
         except Exception as exc:
-            log.debug(exc)
+            log.debug("%s: %s", exc.__class__.__name__, exc)
             status = "Unknown"
         else:
             status = "OK"
@@ -169,7 +179,6 @@ def status():
         paths.append((path, status))
 
     fmt = f"{{:<{max(len(p[0]) for p in paths)}}} : {{}}\n".format
-
     for path, status in paths:
         stdout_write(fmt(path, status))
 
@@ -365,3 +374,6 @@ class apply():
                 unset(path, key)
             else:
                 set(path, key, value)
+
+
+default(os.environ.get("GDL_CONFIG_TYPE"))

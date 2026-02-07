@@ -37,6 +37,7 @@ class TwitterExtractor(Extractor):
     def _init(self):
         self.unavailable = self.config("unavailable", False)
         self.textonly = self.config("text-tweets", False)
+        self.articles = self.config("articles", True)
         self.retweets = self.config("retweets", False)
         self.replies = self.config("replies", True)
         self.twitpic = self.config("twitpic", False)
@@ -157,6 +158,15 @@ class TwitterExtractor(Extractor):
                 self.log.traceback(exc)
                 self.log.warning(
                     "%s: Error while extracting Card files (%s: %s)",
+                    data["id_str"], exc.__class__.__name__, exc)
+
+        if self.articles and "article" in tweet:
+            try:
+                self._extract_article(tweet, files)
+            except Exception as exc:
+                self.log.traceback(exc)
+                self.log.warning(
+                    "%s: Error while extracting article files (%s: %s)",
                     data["id_str"], exc.__class__.__name__, exc)
 
         if self.twitpic:
@@ -318,6 +328,31 @@ class TwitterExtractor(Extractor):
             tweet_id = tweet.get("rest_id") or tweet["id_str"]
             url = f"ytdl:{self.root}/i/web/status/{tweet_id}"
             files.append({"url": url})
+
+    def _extract_article(self, tweet, files):
+        article = tweet["article"]["article_results"]["result"]
+
+        if media := article.get("cover_media"):
+            info = media["media_info"]
+            files.append({
+                "media_id" : media["media_id"],
+                "media_key": media["media_key"],
+                "url"      : info["original_img_url"],
+                "width"    : info["original_img_width"],
+                "height"   : info["original_img_height"],
+                "type"     : "article:cover",
+            })
+
+        for media in article["media_entities"]:
+            info = media["media_info"]
+            files.append({
+                "media_id" : media["media_id"],
+                "media_key": media["media_key"],
+                "url"      : info["original_img_url"],
+                "width"    : info["original_img_width"],
+                "height"   : info["original_img_height"],
+                "type"     : "article:cover",
+            })
 
     def _extract_twitpic(self, tweet, files):
         urls = {}
@@ -672,8 +707,8 @@ class TwitterExtractor(Extractor):
     def tweets(self):
         """Yield all relevant tweet objects"""
 
-    def finalize(self):
-        if self._cursor:
+    def finalize(self, status):
+        if status and self._cursor:
             self.log.info("Use '-o cursor=%s' to continue downloading "
                           "from the current position", self._cursor)
 

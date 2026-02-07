@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2025 Mike Fährmann
+# Copyright 2016-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -28,10 +28,10 @@ class ImagefapExtractor(Extractor):
         response = Extractor.request(self, url, **kwargs)
 
         if response.history and response.url.endswith("/human-verification"):
+            self.log.warning("HTTP redirect to '%s'", response.url)
             if msg := text.extr(response.text, '<div class="mt-4', '<'):
                 msg = " ".join(msg.partition(">")[2].split())
                 raise exception.AbortExtraction(f"'{msg}'")
-            self.log.warning("HTTP redirect to %s", response.url)
 
         return response
 
@@ -42,12 +42,8 @@ class ImagefapGalleryExtractor(ImagefapExtractor):
     pattern = BASE_PATTERN + r"/(?:gallery\.php\?gid=|gallery/|pictures/)(\d+)"
     example = "https://www.imagefap.com/gallery/12345"
 
-    def __init__(self, match):
-        ImagefapExtractor.__init__(self, match)
-        self.gid = match[1]
-        self.image_id = ""
-
     def items(self):
+        self.gid = self.groups[0]
         url = f"{self.root}/gallery/{self.gid}"
         page = self.request(url).text
         data = self.get_job_metadata(page)
@@ -113,17 +109,13 @@ class ImagefapImageExtractor(ImagefapExtractor):
     pattern = BASE_PATTERN + r"/photo/(\d+)"
     example = "https://www.imagefap.com/photo/12345"
 
-    def __init__(self, match):
-        ImagefapExtractor.__init__(self, match)
-        self.image_id = match[1]
-
     def items(self):
         url, data = self.get_image()
         yield Message.Directory, "", data
         yield Message.Url, url, data
 
     def get_image(self):
-        url = f"{self.root}/photo/{self.image_id}/"
+        url = f"{self.root}/photo/{self.groups[0]}/"
         page = self.request(url).text
 
         url, pos = text.extract(
@@ -153,13 +145,8 @@ class ImagefapFolderExtractor(ImagefapExtractor):
                r"|profile/([^/?#]+)/galleries\?)folderid=)(\d+|-1)")
     example = "https://www.imagefap.com/organizer/12345"
 
-    def __init__(self, match):
-        ImagefapExtractor.__init__(self, match)
-        self._id, user, profile, self.folder_id = match.groups()
-        self.user = user or profile
-
     def items(self):
-        for gallery_id, name, folder in self.galleries(self.folder_id):
+        for gallery_id, name, folder in self.galleries():
             url = f"{self.root}/gallery/{gallery_id}"
             data = {
                 "gallery_id": gallery_id,
@@ -169,22 +156,25 @@ class ImagefapFolderExtractor(ImagefapExtractor):
             }
             yield Message.Queue, url, data
 
-    def galleries(self, folder_id):
+    def galleries(self):
         """Yield gallery IDs and titles of a folder"""
+        _id, user, profile, folder_id = self.groups
+
         if folder_id == "-1":
             folder_name = "Uncategorized"
-            if self._id:
+            if _id:
                 url = (f"{self.root}/usergallery.php"
-                       f"?userid={self.user}&folderid=-1")
+                       f"?userid={user}&folderid=-1")
             else:
-                url = f"{self.root}/profile/{self.user}/galleries?folderid=-1"
+                url = (f"{self.root}/profile/"
+                       f"{user or profile}/galleries?folderid=-1")
         else:
             folder_name = None
             url = f"{self.root}/organizer/{folder_id}/"
 
         params = {"page": 0}
         extr = text.extract_from(self.request(url, params=params).text)
-        if not folder_name:
+        if folder_name is None:
             folder_name = extr("class'blk_galleries'><b>", "</b>")
 
         while True:
@@ -211,26 +201,24 @@ class ImagefapUserExtractor(ImagefapExtractor):
                r"|usergallery\.php\?userid=(\d+))(?:$|#)")
     example = "https://www.imagefap.com/profile/USER"
 
-    def __init__(self, match):
-        ImagefapExtractor.__init__(self, match)
-        self.user, self.user_id = match.groups()
-
     def items(self):
         data = {"_extractor": ImagefapFolderExtractor}
 
         for folder_id in self.folders():
             if folder_id == "-1":
-                url = f"{self.root}/profile/{self.user}/galleries?folderid=-1"
+                url = (f"{self.root}/profile/{self.user}/galleries"
+                       f"?folderid=-1")
             else:
                 url = f"{self.root}/organizer/{folder_id}/"
             yield Message.Queue, url, data
 
     def folders(self):
         """Return a list of folder IDs of a user"""
-        if self.user:
-            url = f"{self.root}/profile/{self.user}/galleries"
+        user, user_id = self.groups
+        if user:
+            url = f"{self.root}/profile/{user}/galleries"
         else:
-            url = f"{self.root}/usergallery.php?userid={self.user_id}"
+            url = f"{self.root}/usergallery.php?userid={user_id}"
 
         response = self.request(url)
         self.user = response.url.split("/")[-2]
