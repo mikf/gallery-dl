@@ -211,13 +211,31 @@ class Job():
         msg = None
         process = True
 
+        if follow := self.extractor.config("follow"):
+            follow = formatter.parse(follow, None, util.identity).format_map
+            follow_urls = follow_kwdict = None
+        else:
+            follow = follow_urls = None
+
         for msg, url, kwdict in messages:
 
             if msg == Message.Directory:
+                if follow_urls is not None:
+                    for furl in follow_urls:
+                        if self.metadata_url:
+                            follow_kwdict[self.metadata_url] = furl
+                        if self.pred_queue(furl, follow_kwdict):
+                            self.handle_queue(furl, follow_kwdict)
+                    follow_urls = None
+
                 self.update_kwdict(kwdict)
                 if self.pred_post(url, kwdict):
                     process = True
                     self.handle_directory(kwdict)
+                    if follow is not None:
+                        follow_urls = self._collect_urls(follow(kwdict))
+                        if follow_urls is not None:
+                            follow_kwdict = kwdict.copy()
                 else:
                     process = None
                 if FLAGS.POST is not None:
@@ -252,6 +270,13 @@ class Job():
                     self.handle_queue(url, kwdict)
                 if FLAGS.CHILD is not None:
                     FLAGS.process("CHILD")
+
+        if follow_urls is not None:
+            for furl in follow_urls:
+                if self.metadata_url:
+                    follow_kwdict[self.metadata_url] = furl
+                if self.pred_queue(furl, follow_kwdict):
+                    self.handle_queue(furl, follow_kwdict)
 
         return msg
 
@@ -299,6 +324,15 @@ class Job():
         init = extr.config("init", False)
         if init and init != "lazy":
             self.initialize()
+
+    def _collect_urls(self, source):
+        if not source:
+            return None
+        if isinstance(source, list):
+            return source
+        if isinstance(source, str):
+            if urls := text.extract_urls(source):
+                return urls
 
     def _prepare_predicates(self, target, alt=None, skip=None):
         predicates = []
