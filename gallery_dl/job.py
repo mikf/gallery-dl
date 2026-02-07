@@ -210,6 +210,7 @@ class Job():
         """Call the appropriate message handler"""
         msg = None
         process = True
+        metadata_url = self.metadata_url
 
         if follow := self.extractor.config("follow"):
             follow = formatter.parse(follow, None, util.identity).format_map
@@ -222,8 +223,8 @@ class Job():
             if msg == Message.Directory:
                 if follow_urls is not None:
                     for furl in follow_urls:
-                        if self.metadata_url:
-                            follow_kwdict[self.metadata_url] = furl
+                        if metadata_url is not None:
+                            follow_kwdict[metadata_url] = furl
                         if self.pred_queue(furl, follow_kwdict):
                             self.handle_queue(furl, follow_kwdict)
                     follow_urls = None
@@ -248,8 +249,8 @@ class Job():
                 continue
 
             elif msg == Message.Url:
-                if self.metadata_url:
-                    kwdict[self.metadata_url] = url
+                if metadata_url is not None:
+                    kwdict[metadata_url] = url
                 self.update_kwdict(kwdict)
                 if self.pred_url(url, kwdict):
                     if FLAGS.FILE is False:
@@ -261,8 +262,8 @@ class Job():
 
             elif msg == Message.Queue:
                 self.update_kwdict(kwdict)
-                if self.metadata_url:
-                    kwdict[self.metadata_url] = url
+                if metadata_url is not None:
+                    kwdict[metadata_url] = url
                 if self.pred_queue(url, kwdict):
                     if FLAGS.CHILD is False:
                         FLAGS.CHILD = None
@@ -273,8 +274,8 @@ class Job():
 
         if follow_urls is not None:
             for furl in follow_urls:
-                if self.metadata_url:
-                    follow_kwdict[self.metadata_url] = furl
+                if metadata_url is not None:
+                    follow_kwdict[metadata_url] = furl
                 if self.pred_queue(furl, follow_kwdict):
                     self.handle_queue(furl, follow_kwdict)
 
