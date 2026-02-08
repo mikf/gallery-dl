@@ -208,4 +208,13 @@ __tests__ = (
     "#class"   : imagefap.ImagefapUserExtractor,
 },
 
+{
+    "#url"     : "https://www.imagefap.com/profile/brookdale",
+    "#comment" : "multiple pagea (#9016)",
+    "#class"   : imagefap.ImagefapUserExtractor,
+    "#pattern" : imagefap.ImagefapFolderExtractor.pattern,
+    "#range"   : "1-100",
+    "#count"   : 100,
+},
+
 )
