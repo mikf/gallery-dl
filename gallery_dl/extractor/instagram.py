@@ -570,7 +570,7 @@ class InstagramTaggedExtractor(InstagramExtractor):
             user = self.api.user_by_id(self.user_id)
         else:
             self.user_id = self.api.user_id(self.item)
-            user = self.api.user_by_name(self.item)
+            user = self.api.user_by_screen_name(self.item)
 
         return {
             "tagged_owner_id" : user["id"],
@@ -757,7 +757,7 @@ class InstagramInfoExtractor(InstagramExtractor):
         if screen_name.startswith("id:"):
             user = self.api.user_by_id(screen_name[3:])
         else:
-            user = self.api.user_by_name(screen_name)
+            user = self.api.user_by_screen_name(screen_name)
 
         return iter(((Message.Directory, "", user),))
 
@@ -779,7 +779,7 @@ class InstagramAvatarExtractor(InstagramExtractor):
             if user.startswith("id:"):
                 user = self.api.user_by_id(user[3:])
             else:
-                user = self.api.user_by_name(user)
+                user = self.api.user_by_screen_name(user)
                 user["pk"] = user["id"]
             url = user.get("profile_pic_url_hd") or user["profile_pic_url"]
             avatar = {"url": url, "width": 0, "height": 0}
@@ -895,12 +895,7 @@ class InstagramRestAPI():
         endpoint = f"/v1/users/{user_id}/info/"
         return self._call(endpoint)["user"]
 
-    def user_id(self, screen_name, check_private=True):
-        if screen_name.startswith("id:"):
-            if self.extractor.config("metadata"):
-                self.extractor._user = self.user_by_id(screen_name[3:])
-            return screen_name[3:]
-
+    def user_by_screen_name(self, screen_name):
         user = self.user_by_search(screen_name)
         if user is None:
             self.user_by_search.invalidate(screen_name)
@@ -911,11 +906,20 @@ class InstagramRestAPI():
                 self.user_by_name.invalidate(screen_name)
                 raise exception.AuthorizationError(
                     "Login required to access this profile")
-            if check_private and user["is_private"] and \
-                    not user.get("followed_by_viewer", True):
-                name = user["username"]
-                s = "" if name.endswith("s") else "s"
-                self.extractor.log.warning("%s'%s posts are private", name, s)
+        return user
+
+    def user_id(self, screen_name, check_private=True):
+        if screen_name.startswith("id:"):
+            if self.extractor.config("metadata"):
+                self.extractor._user = self.user_by_id(screen_name[3:])
+            return screen_name[3:]
+
+        user = self.user_by_search(screen_name)
+        if check_private and user.get("is_private") and \
+                not user.get("followed_by_viewer", True):
+            name = user["username"]
+            s = "" if name.endswith("s") else "s"
+            self.extractor.log.warning("%s'%s posts are private", name, s)
 
         self.extractor._assign_user(user)
         return user["id"]
@@ -1070,6 +1074,8 @@ class InstagramGraphqlAPI():
         self._json_dumps = util.json_dumps
 
         api = InstagramRestAPI(extractor)
+        self.user_by_screen_name = api.user_by_screen_name
+        self.user_by_search = api.user_by_search
         self.user_by_name = api.user_by_name
         self.user_by_id = api.user_by_id
         self.user_id = api.user_id
