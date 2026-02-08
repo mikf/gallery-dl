@@ -119,4 +119,10 @@ __tests__ = (
     "linkSidebar"    : dict,
 },
 
+{
+    "#url"     : "https://fikfap.com/user/Hot-sauce-34",
+    "#comment" : "'-' in username",
+    "#class"   : fikfap.FikfapUserExtractor,
+},
+
 )
