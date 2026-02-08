@@ -39,6 +39,7 @@ class PornpicsExtractor(Extractor):
             params = {"offset": 20}
 
         limit = params["limit"] = 20
+        limit //= 2
 
         headers = {
             "Accept": "application/json, text/javascript, */*; q=0.01",
