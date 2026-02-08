@@ -105,16 +105,14 @@ class FikfapUserExtractor(FikfapExtractor):
             params["afterId"] = data[-1]["postId"]
 
 
-class FikfapHashExtractor(FikfapExtractor):
-
+class FikfapHashtagExtractor(FikfapExtractor):
+    subcategory = "hashtag"
     directory_fmt = ("{category}", "{hashtag}")
-
-    subcategory = "hash"
     pattern = BASE_PATTERN + r"/hash/([\w-]+)"
     example = "https://fikfap.com/hash/HASH"
 
     def posts(self):
-        hashtag = self.groups[0]
+        self.kwdict["hashtag"] = hashtag = self.groups[0]
 
         url = f"{self.root_api}/hashtags/label/{hashtag}/posts"
         params = {"amount": "21"}
@@ -122,10 +120,7 @@ class FikfapHashExtractor(FikfapExtractor):
         while True:
             data = self.request_api(url, params)
 
-            for post in data:
-                post["hashtag"] = hashtag
-
-                yield post
+            yield from data
 
             if len(data) < 21:
                 return
