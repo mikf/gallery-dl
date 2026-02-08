@@ -219,8 +219,26 @@ class ImagefapUserExtractor(ImagefapExtractor):
             url = f"{self.root}/profile/{user}/galleries"
         else:
             url = f"{self.root}/usergallery.php?userid={user_id}"
+        params = {"page": 0}
+        pnum = 0
 
-        response = self.request(url)
-        self.user = response.url.split("/")[-2]
-        folders = text.extr(response.text, ' id="tgl_all" value="', '"')
-        return folders.rstrip("|").split("|")
+        self.user = None
+        while True:
+            response = self.request(url, params=params)
+
+            if self.user is None:
+                url = response.url.partition("?")[0]
+                self.user = url.rsplit("/", 2)[1]
+
+            page = response.text
+            folders = text.extr(
+                page, ' id="tgl_all" value="', '"').rstrip("|").split("|")
+            if folders and folders[-1] == "-1":
+                last = folders.pop()
+                if not pnum:
+                    folders.insert(0, last)
+            yield from folders
+
+            params["page"] = pnum = pnum + 1
+            if f'href="?page={pnum}">{pnum+1}</a>' not in page:
+                return
