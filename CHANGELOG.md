@@ -1,5 +1,41 @@
 # Changelog
 
+## 1.31.6 - 2026-02-08
+### Extractors
+#### Additions
+- [fikfap] add `hashtag` extractor ([#9018](https://github.com/mikf/gallery-dl/issues/9018))
+#### Fixes
+- [8chan] fail downloads of `POW` images ([#8975](https://github.com/mikf/gallery-dl/issues/8975))
+- [artstation] fix embedded videos ([#8972](https://github.com/mikf/gallery-dl/issues/8972) [#9003](https://github.com/mikf/gallery-dl/issues/9003))
+- [artstation] fix `challenge` extractor
+- [imagefap:user] support multiple pages ([#9016](https://github.com/mikf/gallery-dl/issues/9016))
+- [imhentai] use alternate strategy for galleries without image data ([#8951](https://github.com/mikf/gallery-dl/issues/8951))
+- [instagram] use `/topsearch/` to fetch user information ([#8978](https://github.com/mikf/gallery-dl/issues/8978))
+- [pixiv] fix errors when using metadata options for avatar/background
+- [simpcity] extract `tiktok` & `reddit` media embeds ([#8994](https://github.com/mikf/gallery-dl/issues/8994) [#8996](https://github.com/mikf/gallery-dl/issues/8996))
+- [tiktok] always try to resolve JS challenges ([#8993](https://github.com/mikf/gallery-dl/issues/8993))
+- [tiktok] use time cursor for story requests ([#8991](https://github.com/mikf/gallery-dl/issues/8991))
+- [tiktok] identify when user accounts do not exist ([#8977](https://github.com/mikf/gallery-dl/issues/8977))
+- [tiktok] do not exit early when rolling back cursor ([#8968](https://github.com/mikf/gallery-dl/issues/8968))
+- [xhamster] fix user profile extraction ([#8974](https://github.com/mikf/gallery-dl/issues/8974))
+#### Improvements
+- [8chan] skip `TOS` cookie name lookup if already present
+- [artstation] download `/8k/` images ([#9003](https://github.com/mikf/gallery-dl/issues/9003))
+- [discord:server-search] use `max_id` for pagination
+- [fikfap] allow for dashes in usernames ([#9019](https://github.com/mikf/gallery-dl/issues/9019))
+- [instagram] cache user profile results on disk ([#8978](https://github.com/mikf/gallery-dl/issues/8978))
+- [reddit:user] implement `only` option ([#8228](https://github.com/mikf/gallery-dl/issues/8228))
+- [reddit:user] provide `user` metadata ([#8228](https://github.com/mikf/gallery-dl/issues/8228))
+- [tiktok] fix outdated error message ([#8979](https://github.com/mikf/gallery-dl/issues/8979))
+- [twitter] support `article` media ([#8995](https://github.com/mikf/gallery-dl/issues/8995))
+- [xenforo] implement `"order-posts": "reaction"` ([#8997](https://github.com/mikf/gallery-dl/issues/8997))
+### Cookies
+- add support for `Floorp` ([#9005](https://github.com/mikf/gallery-dl/issues/9005))
+- support `Firefox` 147+ profile paths ([#8803](https://github.com/mikf/gallery-dl/issues/8803))
+### Miscellaneous
+- [job] fix overwriting `_extractor` fields ([#8958](https://github.com/mikf/gallery-dl/issues/8958))
+- use tempfile when updating input files ([#8981](https://github.com/mikf/gallery-dl/issues/8981))
+
 ## 1.31.5 - 2026-01-31
 ### Extractors
 #### Additions
