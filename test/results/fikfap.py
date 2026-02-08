@@ -121,7 +121,7 @@ __tests__ = (
 
 {
     "#url"     : "https://fikfap.com/hash/outercourse",
-    "#class"   : fikfap.FikfapHashExtractor,
+    "#class"   : fikfap.FikfapHashtagExtractor,
     "#pattern" : r"ytdl:https://[^/]+\.b\-cdn\.net/bcdn_token=.+/playlist\.m3u8$",
     "#count"   : range(50, 100),
 
