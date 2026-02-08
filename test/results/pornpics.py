@@ -146,6 +146,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pornpics.com/pornstars/paige-turnah/",
+    "#comment" : "results have less than 20 items per batch (#9022)",
+    "#class"   : pornpics.PornpicsSearchExtractor,
+    "#pattern" : pornpics.PornpicsGalleryExtractor.pattern,
+    "#range"   : "1-75",
+    "#count"   : 75,
+},
+
+{
     "#url"     : "https://www.pornpics.com/ass/",
     "#category": ("", "pornpics", "category"),
     "#class"   : pornpics.PornpicsCategoryExtractor,
