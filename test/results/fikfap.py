@@ -18,7 +18,7 @@ __tests__ = (
     "commentsCount"  : int,
     "createdAt"      : "2025-10-21T00:49:00.306Z",
     "date"           : "dt:2025-10-21 00:49:00",
-    "date_updated"   : "dt:2025-12-10 01:09:26",
+    "date_updated"   : "dt:2026-02-07 01:07:45",
     "deletedAt"      : None,
     "duration"       : None,
     "explicitnessRating": None,
@@ -27,15 +27,15 @@ __tests__ = (
     "inCollectionsCount": range(20, 50),
     "isBunnyVideoReady": True,
     "label"          : "⬇️check my FREE VIP OF ⬇️",
-    "likesCount"     : range(500, 2000),
+    "likesCount"     : range(300, 2000),
     "mediaId"        : "b821619e-96a1-49a3-a3f8-a8a3e8432a51",
     "postId"         : 1429486,
     "publishedAt"    : "2025-10-21T00:50:37.143Z",
-    "score"          : range(500, 2000),
+    "score"          : range(300, 2000),
     "sexualOrientation": "STRAIGHT",
     "tags"           : ["lesbian"],
     "thumbnailStreamUrl": str,
-    "updatedAt"      : "2025-12-10T01:09:26.902Z",
+    "updatedAt"      : "iso:dt",
     "uploadMethod"   : "USER_FILE",
     "userId"         : "32f4c8d6-2409-4db8-9e66-d3b5ff0c1a98",
     "videoStreamUrl" : str,
@@ -49,7 +49,7 @@ __tests__ = (
         "labelLower"     : "lesbian",
         "lastCountUpdatedAt": "iso:dt",
         "searchTags"     : [],
-        "thumbnailPostId": 301300,
+        "thumbnailPostId": 311180,
         "updatedAt"      : "iso:dt",
         "sexualOrientations": [
             "STRAIGHT",
@@ -117,6 +117,22 @@ __tests__ = (
     "author"         : dict,
     "linkDescription": dict,
     "linkSidebar"    : dict,
+},
+
+{
+    "#url"     : "https://fikfap.com/user/Hot-sauce-34",
+    "#comment" : "'-' in username",
+    "#class"   : fikfap.FikfapUserExtractor,
+},
+
+{
+    "#url"     : "https://fikfap.com/hash/outercourse",
+    "#class"   : fikfap.FikfapHashtagExtractor,
+    "#pattern" : r"ytdl:https://[^/]+\.b\-cdn\.net/bcdn_token=.+/playlist\.m3u8$",
+    "#count"   : range(50, 100),
+
+    "algorithm": "hashtag-posts",
+    "hashtag"  : "outercourse",
 },
 
 )
