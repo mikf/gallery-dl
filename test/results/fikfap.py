@@ -120,11 +120,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://fikfap.com/user/Hot-sauce-34",
+    "#comment" : "'-' in username",
+    "#class"   : fikfap.FikfapUserExtractor,
+},
+
+{
     "#url"     : "https://fikfap.com/hash/outercourse",
     "#class"   : fikfap.FikfapHashtagExtractor,
     "#pattern" : r"ytdl:https://[^/]+\.b\-cdn\.net/bcdn_token=.+/playlist\.m3u8$",
     "#count"   : range(50, 100),
-
+  
     "algorithm": "hashtag-posts",
     "hashtag"  : "outercourse",
 },
