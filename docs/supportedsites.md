@@ -346,7 +346,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="fikfap" title="fikfap">
     <td>FikFap</td>
     <td>https://fikfap.com/</td>
-    <td>Posts, User Profiles</td>
+    <td>Hashtags, Posts, User Profiles</td>
     <td></td>
 </tr>
 <tr id="fitnakedgirls" title="fitnakedgirls">
