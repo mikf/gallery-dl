@@ -302,12 +302,12 @@ class RedditUserExtractor(RedditExtractor):
     subcategory = "user"
     directory_fmt = ("{category}", "Users", "{user[name]}")
     pattern = (r"(?:https?://)?(?:\w+\.)?reddit\.com/u(?:ser)?/"
-               r"([^/?#]+(?:/([a-z]+))?)/?(?:\?([^#]*))?$")
+               r"([^/?#]+)(/[a-z]+)?/?(?:\?([^#]*))?")
     example = "https://www.reddit.com/user/USER/"
 
     def __init__(self, match):
         if sub := match[2]:
-            self.subcategory += "-" + sub
+            self.subcategory += "-" + sub[1:]
         RedditExtractor.__init__(self, match)
 
     def submissions(self):
@@ -316,7 +316,7 @@ class RedditUserExtractor(RedditExtractor):
         self.kwdict["user"] = user = self.api.user_about(username)
 
         submissions = self.api.submissions_user(
-            user["name"], text.parse_query(qs))
+            user["name"] + (sub or ""), text.parse_query(qs))
         if self.config("only", True):
             submissions = self._only(submissions, user)
         return submissions

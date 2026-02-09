@@ -92,6 +92,25 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.reddit.com/user/SeichiScout/submitted/?sort=hot",
+    "#category": ("", "reddit", "user-submitted"),
+    "#class"   : reddit.RedditUserExtractor,
+    "#pattern" : r"https://i\.redd\.it/\w+\.jpg",
+    "#range"   : "1-25",
+    "#count"   : 25,
+    "#archive" : False,
+
+    "author"          : "SeichiScout",
+    "author_fullname" : "t2_l8qpy6td6",
+    "user"            : {
+        "created_utc" : 1724480738.0,
+        "id"          : "l8qpy6td6",
+        "name"        : "SeichiScout",
+        "verified"    : True,
+    },
+},
+
+{
     "#url"     : "https://www.reddit.com/r/lavaporn/comments/8cqhub/",
     "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,
