@@ -128,7 +128,7 @@ class FikfapHashtagExtractor(FikfapExtractor):
 
 
 class FikfapSinglePostExtractor(FikfapExtractor):
-    subcategory = "singlepost"
+    subcategory = "singlePost"
     pattern = BASE_PATTERN + r"/post/(\d+)"
     example = "https://fikfap.com/post/12345"
 
