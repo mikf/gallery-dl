@@ -65,23 +65,6 @@ class FikfapExtractor(Extractor):
         })
 
 
-class FikfapSinglePostExtractor(FikfapExtractor):
-    subcategory = "post"
-    pattern = BASE_PATTERN + r"/post/(\d+)"
-    example = "https://fikfap.com/post/12345"
-
-    def posts(self):
-        pid = self.groups[0]
-
-        url = f"{self.root_api}/posts/{pid}"
-        params = {}
-        post = self.request_api(url, params)
-
-        if post["postId"] == int(pid):
-            return (post,)
-        raise exception.NotFoundError("post")
-
-
 class FikfapPostExtractor(FikfapExtractor):
     subcategory = "post"
     pattern = BASE_PATTERN + r"/user/(\w+)/post/(\d+)"
@@ -142,3 +125,20 @@ class FikfapHashtagExtractor(FikfapExtractor):
             if len(data) < 21:
                 return
             params["afterId"] = data[-1]["postId"]
+
+
+class FikfapSinglePostExtractor(FikfapExtractor):
+    subcategory = "singlepost"
+    pattern = BASE_PATTERN + r"/post/(\d+)"
+    example = "https://fikfap.com/post/12345"
+
+    def posts(self):
+        pid = self.groups[0]
+
+        url = f"{self.root_api}/posts/{pid}"
+        params = {}
+        post = self.request_api(url, params)
+
+        if post["postId"] == int(pid):
+            return (post,)
+        raise exception.NotFoundError("post")
