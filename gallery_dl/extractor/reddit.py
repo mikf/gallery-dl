@@ -484,7 +484,8 @@ class RedditAPI():
             data = self._call(endpoint, params)["json"]
             for thing in data["data"]["things"]:
                 if thing["kind"] == "more":
-                    children.extend(thing["data"]["children"])
+                    if more := thing["data"].get("children"):
+                        children.extend(more)
                 else:
                     yield thing["data"]
 
