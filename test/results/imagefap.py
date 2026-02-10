@@ -224,4 +224,9 @@ __tests__ = (
     "#count"   : 0,
 },
 
+{
+    "#url"     : "https://www.imagefap.com/profile/Tiffany_and_me/galleries?folderid=0",
+    "#class"   : imagefap.ImagefapUserExtractor,
+},
+
 )
