@@ -3865,6 +3865,22 @@ Description
     Download video previews.
 
 
+extractor.instagram.user-cache
+------------------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``"disk"``
+Description
+    Selects how to cache user profile data.
+
+    ``true`` | ``"disk"``
+        Cache user data on disk
+    ``false`` | ``"memory"``
+        Cache user data in memory
+
+
 extractor.instagram.videos
 --------------------------
 Type
