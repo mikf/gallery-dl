@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2025 Mike Fährmann
+# Copyright 2018-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -119,12 +119,14 @@ class TestExtractorModule(unittest.TestCase):
 
         try:
             extr = cls.from_url(url)
+            find = extractor.find(url)
         except ImportError as exc:
             if exc.name in ("youtube_dl", "yt_dlp"):
                 return sys.stdout.write(
                     f"Skipping '{cls.category}' category checks\n")
             raise
         self.assertTrue(extr, url)
+        self.assertIs(extr.__class__, find.__class__, url)
 
         categories = result.get("#category")
         if categories:

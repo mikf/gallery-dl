@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2025 Mike Fährmann
+# Copyright 2015-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -634,7 +634,8 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     subcategory = "gallery"
     archive_fmt = "g_{_username}_{index}.{extension}"
     pattern = (BASE_PATTERN + r"/gallery"
-               r"(?:/all|/recommended-for-you)?/?(\?(?!q=).*)?$")
+               r"(?:/all|/recommended-for-you)?"
+               r"/?(\?(?!q=|catpath=scraps).*)?$")
     example = "https://www.deviantart.com/USER/gallery/"
 
     def deviations(self):
