@@ -114,8 +114,8 @@ __tests__ = (
     "#comment" : "empty 'var g_th = $.parseJSON('');' (#8951)",
     "#category": ("IMHentai", "hentaienvy", "gallery"),
     "#class"   : imhentai.ImhentaiGalleryExtractor,
-    "#metadata": "post",
-    "#count"   : 0,
+    "#pattern" : r"https://m8.hentaienvy.com/026/3zf1yedx5m/\d+\.jpg",
+    "#count"   : 188,
     "#log"     : "1119432: Missing image data",
 
     "artist"    : [],
