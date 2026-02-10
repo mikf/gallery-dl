@@ -811,6 +811,13 @@ class InstagramRestAPI():
         self.user_by_name = _cache(36500*86400, 0)(self.user_by_name)
         self.user_by_search = _cache(36500*86400, 0)(self.user_by_search)
 
+        strategy = self.extractor.config("user-strategy")
+        if strategy is not None and strategy in {
+                "web_profile_info", "profile_info", "info"}:
+            self._topsearch = False
+        else:
+            self._topsearch = True
+
     def guide(self, guide_id):
         endpoint = "/v1/guides/web_info/"
         params = {"guide_id": guide_id}
@@ -899,18 +906,14 @@ class InstagramRestAPI():
                 return user
 
     def user_by_screen_name(self, screen_name):
-        if user := self.user_by_search(screen_name):
-            return user
-
-        self.user_by_search.invalidate(screen_name)
-        self.extractor.log.warning(
-            "Failed to find profile '%s' via search. "
-            "Trying 'web_profile_info' fallback", screen_name)
-
-        if user := self.user_by_name(screen_name):
-            return user
-
-        self.user_by_name.invalidate(screen_name)
+        if self._topsearch:
+            if user := self.user_by_search(screen_name):
+                return user
+            self.user_by_search.invalidate(screen_name)
+        else:
+            if user := self.user_by_name(screen_name):
+                return user
+            self.user_by_name.invalidate(screen_name)
         raise exception.NotFoundError("user")
 
     def user_id(self, screen_name, check_private=True):
