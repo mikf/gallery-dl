@@ -304,6 +304,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.reddit.com/r/vi/comments/1qi6tev/comment/o0v9zh8/",
+    "#comment" : "'external-preview' embed",
+    "#class"   : reddit.RedditSubmissionExtractor,
+    "#options" : {"comments": 100},
+    "#range"   : "2",
+    "#pattern" : r"https://external-preview.redd.it/0DT-wjorv2NNSSoTW-62QG4xs7ZqGE2jcn2OEa2Xnks\.gif\?width=200&height=200&s=\w+",
+    "#sha1_content": "5014a016d7d5fb2c9fdaa01f0b43afeff158cd9b",
+},
+
+{
     "#url"     : "https://i.redd.it/upjtjcx2npzz.jpg",
     "#category": ("", "reddit", "image"),
     "#class"   : reddit.RedditImageExtractor,
