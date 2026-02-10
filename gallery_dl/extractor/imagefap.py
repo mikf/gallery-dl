@@ -233,12 +233,14 @@ class ImagefapUserExtractor(ImagefapExtractor):
             page = response.text
             folders = text.extr(
                 page, ' id="tgl_all" value="', '"').rstrip("|").split("|")
-            if folders and folders[-1] == "-1":
+            if folders[-1] == "-1":
                 last = folders.pop()
                 if not pnum:
                     folders.insert(0, last)
+            elif not folders[0]:
+                break
             yield from folders
 
             params["page"] = pnum = pnum + 1
             if f'href="?page={pnum}">{pnum+1}</a>' not in page:
-                return
+                break
