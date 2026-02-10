@@ -215,7 +215,10 @@ class RedditExtractor(Extractor):
 
             if src := data.get("s"):
                 if url := src.get("u") or src.get("gif") or src.get("mp4"):
-                    yield url.partition("?")[0].replace("/preview.", "/i.", 1)
+                    if "//external" not in url:
+                        url = url.partition("?")[0].replace(
+                            "/preview.", "/i.", 1)
+                    yield url
                 else:
                     self.log.error(
                         "embed %s: unable to fetch download URL for item %s",
