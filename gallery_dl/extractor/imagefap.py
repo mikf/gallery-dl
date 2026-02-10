@@ -142,7 +142,7 @@ class ImagefapFolderExtractor(ImagefapExtractor):
     subcategory = "folder"
     pattern = (BASE_PATTERN + r"/(?:organizer/|"
                r"(?:usergallery\.php\?user(id)?=([^&#]+)&"
-               r"|profile/([^/?#]+)/galleries\?)folderid=)(\d+|-1)")
+               r"|profile/([^/?#]+)/galleries\?)folderid=(?!0\b))(\d+|-1)")
     example = "https://www.imagefap.com/organizer/12345"
 
     def items(self):
@@ -197,7 +197,8 @@ class ImagefapUserExtractor(ImagefapExtractor):
     """Extractor for an imagefap user profile"""
     subcategory = "user"
     pattern = (BASE_PATTERN +
-               r"/(?:profile(?:\.php\?user=|/)([^/?#]+)(?:/galleries)?"
+               r"/(?:profile(?:\.php\?user=|/)([^/?#]+)"
+               r"(?:/galleries(?:\?folderid=0)?)?"
                r"|usergallery\.php\?userid=(\d+))(?:$|#)")
     example = "https://www.imagefap.com/profile/USER"
 
