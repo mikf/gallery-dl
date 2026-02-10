@@ -114,6 +114,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://fikfap.com/user/Hot-sauce-34/post/1026309",
+    "#class"   : fikfap.FikfapPostExtractor,
+},
+
+{
     "#url"     : "https://fikfap.com/user/alinevs",
     "#class"   : fikfap.FikfapUserExtractor,
     "#range"   : "1-50",
@@ -147,6 +152,11 @@ __tests__ = (
 
     "algorithm": "hashtag-posts",
     "hashtag"  : "outercourse",
+},
+
+{
+    "#url"     : "https://fikfap.com/hash/foo-bar",
+    "#class"   : fikfap.FikfapHashtagExtractor,
 },
 
 )
