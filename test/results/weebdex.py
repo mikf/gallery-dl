@@ -30,7 +30,7 @@ __tests__ = (
     "width"        : range(800, 2800),
     "height"       : range(800, 2800),
     "lang"         : "en",
-    "manga"        : "Akuyaku Reijou Level 99 ~Watashi wa UraBoss desu ga Maou de wa Arimasen~",
+    "manga"        : "Akuyaku Reijou Level 99: Watashi wa UraBoss desu ga Maou de wa Arimasen",
     "manga_date"   : "dt:2025-10-09 07:32:07",
     "manga_id"     : "raa6dfy3da",
     "origin"       : "ja",
@@ -253,31 +253,44 @@ ___
 },
 
 {
-    "#url"     : "https://weebdex.org/title/3o0icxno26/ani-datta-mono?group=j0fsj3oem3&order=asc",
+    "#url"     : "https://weebdex.org/title/3o0icxno26/ani-datta-mono?group=j0fsj3oem3&order=desc",
     "#comment" : "query parameters (#8957)",
     "#class"   : weebdex.WeebdexMangaExtractor,
     "#range"   : "1-3",
     "#results" : (
-        "https://weebdex.org/chapter/xv2cm9bj1a",
-        "https://weebdex.org/chapter/etoaxmxgcq",
-        "https://weebdex.org/chapter/24ew0mo562",
+        "https://weebdex.org/chapter/u18zq7aclx",
+        "https://weebdex.org/chapter/2qb8jw9paz",
+        "https://weebdex.org/chapter/aht5ukglyv",
     ),
 
     "artist"       : ["Matsuda Minoru"],
     "author"       : ["Matsuda Minoru"],
-    "chapter"      : range(1, 3),
+    "chapter"      : range(30, 50),
     "language"     : "en",
     "manga"        : "Ani Datta Mono",
     "manga_date"   : "dt:2025-10-09 19:02:04",
     "manga_id"     : "3o0icxno26",
     "version"      : 1,
-    "volume"       : 1,
+    "volume"       : {3, 4, 5},
     "relationships": {
         "groups"  : [{
             "id"  : "j0fsj3oem3",
             "name": "Rainbow D Translations",
         }],
     },
+},
+
+{
+    "#url"     : "https://weebdex.org/title/3o0icxno26/ani-datta-mono?group=j0fsj3oem3",
+    "#comment" : "'chapter-reverse' option (#9041)",
+    "#class"   : weebdex.WeebdexMangaExtractor,
+    "#options" : {"chapter-reverse": True},
+    "#range"   : "1-3",
+    "#results" : (
+        "https://weebdex.org/chapter/xv2cm9bj1a",
+        "https://weebdex.org/chapter/etoaxmxgcq",
+        "https://weebdex.org/chapter/24ew0mo562",
+    ),
 },
 
 )
