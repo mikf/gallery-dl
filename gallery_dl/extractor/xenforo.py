@@ -38,7 +38,7 @@ class XenforoExtractor(BaseExtractor):
             r'|<div class="bb(?:Image|Media)Wrapper[^>]*?'
             r'data-src="([^"]+".*?) />'
             r'|(?:<a [^>]*?href="|<iframe [^>]*?src="|'
-            r'''onclick="loadMedia\(this, ')([^"']+)'''
+            r'''onclick="loadMedia\(this, ')([^"']+[^<]*?<)'''
             r')'
         ).findall
 
@@ -68,12 +68,19 @@ class XenforoExtractor(BaseExtractor):
                         continue
                     if ext[0] == "/":
                         if ext[1] == "/":
+                            if "'" in ext:
+                                ext = ext[:ext.find("'")]
                             ext = "https:" + ext
                         elif ext.startswith("/goto/link-confirmation?"):
                             params = text.parse_query(text.unescape(ext[24:]))
                             ext = binascii.a2b_base64(params["url"]).decode()
+                        elif ext.startswith("/redirect/"):
+                            ext = text.unescape(text.extr(
+                                ext, ">", "<").strip())
                         else:
                             continue
+                    elif '"' in ext:
+                        ext = ext[:ext.find('"')]
                     data["num"] += 1
                     data["num_external"] += 1
                     data["type"] = "external"
