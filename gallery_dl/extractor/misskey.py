@@ -255,7 +255,7 @@ class MisskeyAPI():
 
         date_min, date_max = extr._get_date_min_max()
         if (order := extr.config("order-posts")) and \
-                order[0] in ("a", "r"):
+                order[0] in {"a", "r"}:
             key = "sinceId"
             data["sinceDate"] = 1 if date_min is None else date_min * 1000
             date_stop = None if date_max is None else date_max

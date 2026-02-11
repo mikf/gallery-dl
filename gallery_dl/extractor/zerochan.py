@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2025 Mike Fährmann
+# Copyright 2022-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -294,7 +294,7 @@ class ZerochanImageExtractor(ZerochanExtractor):
         try:
             post = self._parse_entry_html(image_id)
         except exception.HttpError as exc:
-            if exc.status in (404, 410):
+            if exc.status in {404, 410}:
                 if msg := text.extr(exc.response.text, "<h2>", "<"):
                     self.log.warning(f"'{msg}'")
                 return ()

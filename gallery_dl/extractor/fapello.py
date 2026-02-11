@@ -97,7 +97,7 @@ class FapelloPathExtractor(Extractor):
 
     def items(self):
         num = 1
-        if self.path in ("top-likes", "top-followers"):
+        if self.path in {"top-likes", "top-followers"}:
             data = {"_extractor": FapelloModelExtractor}
         else:
             data = {"_extractor": FapelloPostExtractor}

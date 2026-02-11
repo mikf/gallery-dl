@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2025 Mike Fährmann
+# Copyright 2014-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -217,7 +217,7 @@ class GelbooruFavoriteExtractor(GelbooruBase,
                            "a" if order > 0 else "de")
 
         order_favs = self.config("order-posts")
-        if order_favs and order_favs[0] in ("r", "a"):
+        if order_favs and order_favs[0] in {"r", "a"}:
             self.log.debug("Returning them in reverse")
             order = -order
 

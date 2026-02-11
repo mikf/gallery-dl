@@ -66,7 +66,7 @@ def process_content(html, content):
         html.append(level)
         html.append(">")
 
-    elif type in ("listItem", "bulletList", "orderedList", "blockquote"):
+    elif type in {"listItem", "bulletList", "orderedList", "blockquote"}:
         c = type[1]
         tag = (
             "li" if c == "i" else

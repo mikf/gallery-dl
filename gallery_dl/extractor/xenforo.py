@@ -126,7 +126,7 @@ class XenforoExtractor(BaseExtractor):
 
     def items_media(self, path, pnum, callback=None):
         if (order := self.config("order-posts")) and \
-                order[0] in ("d", "r"):
+                order[0] in {"d", "r"}:
             pages = self._pagination_reverse(path, pnum, callback)
             reverse = True
         else:
@@ -491,7 +491,7 @@ class XenforoThreadExtractor(XenforoExtractor):
         pnum = self.groups[-1]
 
         if (order := self.config("order-posts")) and \
-                order[0] not in ("d", "r"):
+                order[0] not in {"d", "r"}:
             params = "?order=reaction_score" if order[0] == "s" else ""
             pages = self._pagination(path, pnum, params=params)
             reverse = False

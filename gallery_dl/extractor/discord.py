@@ -60,7 +60,7 @@ class DiscordExtractor(Extractor):
 
     def extract_message(self, message):
         # https://discord.com/developers/docs/resources/message#message-object-message-types
-        if message["type"] in (0, 19, 21):
+        if message["type"] in {0, 19, 21}:
             message_metadata = {}
             message_metadata.update(self.server_metadata)
             message_metadata.update(
@@ -92,7 +92,7 @@ class DiscordExtractor(Extractor):
             message_snapshots = [message]
             message_snapshots.extend(
                 msg["message"] for msg in message.get("message_snapshots", [])
-                if msg["message"]["type"] in (0, 19, 21)
+                if msg["message"]["type"] in {0, 19, 21}
             )
 
             for snapshot in message_snapshots:
@@ -153,15 +153,15 @@ class DiscordExtractor(Extractor):
             )
 
             # https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-            if channel_type in (0, 5):
+            if channel_type in {0, 5}:
                 yield from self.extract_channel_text(channel_id)
                 if self.enabled_threads:
                     yield from self.extract_channel_threads(channel_id)
-            elif channel_type in (1, 3, 10, 11, 12):
+            elif channel_type in {1, 3, 10, 11, 12}:
                 yield from self.extract_channel_text(channel_id)
-            elif channel_type in (15, 16):
+            elif channel_type in {15, 16}:
                 yield from self.extract_channel_threads(channel_id)
-            elif channel_type in (4,):
+            elif channel_type == 4:
                 for channel in self.server_channels_metadata.copy().values():
                     if channel["parent_id"] == channel_id:
                         yield from self.extract_channel(
@@ -192,7 +192,7 @@ class DiscordExtractor(Extractor):
                 "parent_type": parent_metadata["channel_type"]
             })
 
-        if channel_metadata["channel_type"] in (1, 3):
+        if channel_metadata["channel_type"] in {1, 3}:
             channel_metadata.update({
                 "channel": "DMs",
                 "recipients": (
@@ -355,7 +355,7 @@ class DiscordServerExtractor(DiscordExtractor):
         self.build_server_and_channels(server_id)
 
         for channel in self.server_channels_metadata.copy().values():
-            if channel["channel_type"] in (0, 5, 15, 16):
+            if channel["channel_type"] in {0, 5, 15, 16}:
                 yield from self.extract_channel(
                     channel["channel_id"], safe=True)
 
