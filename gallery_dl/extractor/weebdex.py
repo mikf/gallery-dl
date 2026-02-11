@@ -94,11 +94,10 @@ class WeebdexMangaExtractor(WeebdexBase, MangaExtractor):
 
         params = text.parse_query(qs)
         params.setdefault("limit", 100)
+        params.setdefault("order", "asc")
         if "tlang" not in params:
             params["tlang"] = self.config("lang", "en")
-        if "order" not in params:
-            params["order"] = ("desc" if self.config("chapter-reverse") else
-                               "asc")
+
         url = f"{self.root_api}/manga/{mid}/chapters"
         base = self.root + "/chapter/"
         manga = _manga_info(self, mid)
