@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2025 Mike Fährmann
+# Copyright 2018-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -352,14 +352,13 @@ class UgoiraPP(PostProcessor):
 
     def _process_mkvmerge(self, pathfmt, tempdir):
         self._realpath = pathfmt.realpath
-        pathfmt.realpath = tempdir + "/temp." + self.extension
+        pathfmt.realpath = f"{tempdir}/temp.{self.extension}"
 
         return [
             self.ffmpeg,
-            "-f", "image2",
-            "-pattern_type", "sequence",
-            "-i", (f"{tempdir.replace('%', '%%')}/%06d."
-                   f"{self._frames[0]['file'].rpartition('.')[2]}"),
+            "-r", "25",
+            "-f", "concat",
+            "-i", self._write_ffmpeg_concat(tempdir, False),
         ]
 
     def _finalize_mkvmerge(self, pathfmt, tempdir):
@@ -375,12 +374,16 @@ class UgoiraPP(PostProcessor):
         pathfmt.realpath = self._realpath
         self._exec(args)
 
-    def _write_ffmpeg_concat(self, tempdir):
+    def _write_ffmpeg_concat(self, tempdir, duration=True):
         content = ["ffconcat version 1.0"]
 
-        for frame in self._frames:
-            content.append(f"file '{frame['file']}'\n"
-                           f"duration {frame['delay'] / 1000}")
+        if duration:
+            for frame in self._frames:
+                content.append(f"file '{frame['file']}'\n"
+                               f"duration {frame['delay'] / 1000}")
+        else:
+            for frame in self._frames:
+                content.append(f"file '{frame['file']}'")
         if self.repeat:
             content.append(f"file '{frame['file']}'")
         content.append("")

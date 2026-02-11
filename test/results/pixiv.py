@@ -276,7 +276,7 @@ __tests__ = (
 
 {
     "#url"     : "https://www.pixiv.net/artworks/101003492",
-    "#comment" : "original ugoira frames (#6056)",
+    "#comment" : "ugoira - original '.png' frames (#6056)",
     "#class"   : pixiv.PixivWorkExtractor,
     "#options" : {"ugoira": "original"},
     "#results" : (
@@ -290,6 +290,18 @@ __tests__ = (
 
     "frames": list,
     "count" : 6,
+},
+
+{
+    "#url"     : "https://www.pixiv.net/en/artworks/108469527",
+    "#comment" : "ugoira - '.gif' frames",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#options" : {"ugoira": "original"},
+    "#pattern" : r"https://i\.pximg\.net/img\-original/img/2023/05/27/02/23/48/108469527_ugoira\d+\.gif",
+    "#count"   : 30,
+
+    "frames": list,
+    "count" : 30,
 },
 
 {
