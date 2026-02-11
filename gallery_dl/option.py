@@ -93,17 +93,15 @@ class RenameAction(argparse.Action):
 class UgoiraAction(argparse.Action):
     """Configure ugoira post processors"""
     def __call__(self, parser, namespace, value, option_string=None):
-        if self.const:
-            value = self.const
-        else:
-            value = value.strip().lower()
+        value = self.const or value.strip().lower()
 
-        if value in ("webm", "vp9"):
+        if value in {"webm", "vp9"}:
             pp = {
                 "extension"        : "webm",
                 "ffmpeg-args"      : ("-c:v", "libvpx-vp9",
                                       "-crf", "12",
-                                      "-b:v", "0", "-an"),
+                                      "-b:v", "0",
+                                      "-pix_fmt", "yuv420p", "-an"),
             }
         elif value == "vp9-lossless":
             pp = {
@@ -117,12 +115,15 @@ class UgoiraAction(argparse.Action):
                 "extension"        : "webm",
                 "ffmpeg-args"      : ("-c:v", "libvpx",
                                       "-crf", "4",
-                                      "-b:v", "5000k", "-an"),
+                                      "-b:v", "5M",
+                                      "-pix_fmt", "yuv420p", "-an"),
             }
         elif value == "mp4":
             pp = {
                 "extension"        : "mp4",
-                "ffmpeg-args"      : ("-c:v", "libx264", "-an", "-b:v", "5M"),
+                "ffmpeg-args"      : ("-c:v", "libx264",
+                                      "-b:v", "5M",
+                                      "-pix_fmt", "yuv420p", "-an"),
                 "libx264-prevent-odd": True,
             }
         elif value == "gif":
@@ -132,13 +133,13 @@ class UgoiraAction(argparse.Action):
                                       "[a] palettegen [p];[b][p] paletteuse"),
                 "repeat-last-frame": False,
             }
-        elif value == "mkv" or value == "copy":
+        elif value in {"mkv", "copy"}:
             pp = {
                 "extension"        : "mkv",
                 "ffmpeg-args"      : ("-c:v", "copy"),
                 "repeat-last-frame": False,
             }
-        elif value == "zip" or value == "archive":
+        elif value in {"zip", "archive"}:
             pp = {
                 "mode"             : "archive",
             }
