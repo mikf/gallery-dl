@@ -143,14 +143,13 @@ class UgoiraAction(argparse.Action):
             pp = {
                 "mode"             : "archive",
             }
-            namespace.options.append(((), "ugoira", "original"))
         else:
             parser.error(f"Unsupported Ugoira format '{value}'")
 
         pp["name"] = "ugoira"
         pp["whitelist"] = ("pixiv", "danbooru")
 
-        namespace.options.append((("extractor",), "ugoira", True))
+        namespace.options.append((("extractor",), "ugoira", "original"))
         namespace.postprocessors.append(pp)
 
 
