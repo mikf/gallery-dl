@@ -54,7 +54,7 @@ class InstagramExtractor(Extractor):
         self._warn_video = True if self.config("warn-videos", True) else False
         self._warn_image = (
             9 if not (wi := self.config("warn-images", True)) else
-            1 if wi in ("all", "both") else
+            1 if wi in {"all", "both"} else
             0)
 
     def items(self):
@@ -70,7 +70,7 @@ class InstagramExtractor(Extractor):
         max_posts = self.config("max-posts")
 
         order = self.config("order-files")
-        reverse = order[0] in ("r", "d") if order else False
+        reverse = order[0] in {"r", "d"} if order else False
 
         posts = self.posts()
         if max_posts:
@@ -831,9 +831,9 @@ class InstagramRestAPI():
         reel_ids = [hl["id"] for hl in self.highlights_tray(user_id)]
 
         if order := self.extractor.config("order-posts"):
-            if order in ("desc", "reverse"):
+            if order in {"desc", "reverse"}:
                 reel_ids.reverse()
-            elif order in ("id", "id_asc"):
+            elif order in {"id", "id_asc"}:
                 reel_ids.sort(key=lambda r: int(r[10:]))
             elif order == "id_desc":
                 reel_ids.sort(key=lambda r: int(r[10:]), reverse=True)

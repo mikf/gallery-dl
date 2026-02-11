@@ -30,7 +30,7 @@ class WikimediaExtractor(BaseExtractor):
             labels = self.root.split(".")
             self.lang = labels[-3][-2:]
             self.category = labels[-2]
-        elif self.category in ("fandom", "wikigg"):
+        elif self.category in {"fandom", "wikigg"}:
             self.lang = "en"
             self.format = "original"
             self.basesubcategory = self.category

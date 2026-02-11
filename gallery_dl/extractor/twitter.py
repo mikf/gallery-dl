@@ -299,7 +299,7 @@ class TwitterExtractor(Extractor):
                 if domain in cbl or name + ":" + domain in cbl:
                     return
 
-        if name in ("summary", "summary_large_image"):
+        if name in {"summary", "summary_large_image"}:
             for prefix in ("photo_image_full_size_",
                            "summary_photo_image_",
                            "thumbnail_image_"):
@@ -1080,7 +1080,7 @@ class TwitterTweetExtractor(TwitterExtractor):
             return self._tweets_conversation(self.tweet_id)
 
         endpoint = self.config("tweet-endpoint")
-        if endpoint == "detail" or endpoint in (None, "auto") and \
+        if endpoint == "detail" or endpoint in {None, "auto"} and \
                 self.api.headers["x-twitter-auth-type"]:
             return self._tweets_detail(self.tweet_id)
 
@@ -1402,7 +1402,7 @@ class TwitterAPI():
 
         if tweet.get("__typename") == "TweetUnavailable":
             reason = tweet.get("reason")
-            if reason in ("NsfwViewerHasNoStatedAge", "NsfwLoggedOut"):
+            if reason in {"NsfwViewerHasNoStatedAge", "NsfwLoggedOut"}:
                 raise exception.AuthRequired(message="NSFW Tweet")
             if reason == "Protected":
                 raise exception.AuthRequired(message="Protected Tweet")
@@ -1545,7 +1545,7 @@ class TwitterAPI():
         }
 
         pgn = cfg("search-pagination")
-        if pgn in ("max_id", "maxid", "id"):
+        if pgn in {"max_id", "maxid", "id"}:
             update_variables = self._update_variables_search_maxid
         elif pgn in {"until", "date", "datetime", "dt"}:
             update_variables = self._update_variables_search_date
@@ -1856,7 +1856,7 @@ class TwitterAPI():
 
             if response.status_code < 400:
                 return data
-            elif response.status_code in (403, 404) and \
+            elif response.status_code in {403, 404} and \
                     not self.headers["x-twitter-auth-type"]:
                 raise exception.AuthRequired(
                     "authenticated cookies", "timeline")

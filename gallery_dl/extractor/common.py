@@ -784,7 +784,7 @@ class Extractor():
             with open(path + ".txt", 'wb') as fp:
                 util.dump_response(
                     response, fp,
-                    headers=(self._write_pages in ("all", "ALL")),
+                    headers=(self._write_pages in {"all", "ALL"}),
                     hide_auth=(self._write_pages != "ALL")
                 )
             self.log.info("Writing '%s' response to '%s'",

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2017-2025 Mike Fährmann
+# Copyright 2017-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -454,7 +454,7 @@ class OAuthPixiv(OAuthBase):
 
         if "error" in data:
             stdout_write(f"\n{data}\n")
-            if data["error"] in ("invalid_request", "invalid_grant"):
+            if data["error"] in {"invalid_request", "invalid_grant"}:
                 stdout_write("'code' expired, try again\n\n")
             return
 

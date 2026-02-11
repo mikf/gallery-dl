@@ -160,9 +160,9 @@ class HotleakCategoryExtractor(HotleakExtractor):
     def items(self):
         url = f"{self.root}/{self._category}"
 
-        if self._category in ("hot", "creators"):
+        if self._category in {"hot", "creators"}:
             data = {"_extractor": HotleakCreatorExtractor}
-        elif self._category in ("videos", "photos"):
+        elif self._category in {"videos", "photos"}:
             data = {"_extractor": HotleakPostExtractor}
 
         for item in self._pagination(url, self.params):

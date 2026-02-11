@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2025 Mike Fährmann
+# Copyright 2021-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -42,7 +42,7 @@ class KemonoExtractor(Extractor):
         if self.revisions:
             self.revisions_unique = (self.revisions == "unique")
         order = self.config("order-revisions")
-        self.revisions_reverse = order[0] in ("r", "a") if order else False
+        self.revisions_reverse = order[0] in {"r", "a"} if order else False
 
         self._find_inline = text.re(
             r'src="(?:https?://(?:kemono\.cr|coomer\.st))?(/inline/[^"]+'
@@ -352,7 +352,7 @@ class KemonoUserExtractor(KemonoExtractor):
         _, _, service, creator_id, query = self.groups
         params = text.parse_query(query)
 
-        if self.config("endpoint") in ("posts+", "legacy+"):
+        if self.config("endpoint") in {"posts+", "legacy+"}:
             endpoint = self.api.creator_posts_expand
         else:
             endpoint = self.api.creator_posts
@@ -439,7 +439,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
         archives = True if self.config("archives") else False
         exts_archive = util.EXTS_ARCHIVE
 
-        if (order := self.config("order-posts")) and order[0] in ("r", "d"):
+        if (order := self.config("order-posts")) and order[0] in {"r", "d"}:
             posts = self.api.discord_channel(channel_id, channel["post_count"])
         else:
             posts = self.api.discord_channel(channel_id)

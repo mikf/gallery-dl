@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2025 Mike Fährmann
+# Copyright 2014-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -131,11 +131,11 @@ class PixivExtractor(Extractor):
             self.log.debug("%s: %s", work_id, url)
 
             limit_type = url.rpartition("/")[2]
-            if limit_type in (
+            if limit_type in {
                 "limit_",  # for '_extend_sanity()' inserts
                 "limit_unviewable_360.png",
                 "limit_sanity_level_360.png",
-            ):
+            }:
                 work["_ajax"] = True
                 self.log.warning("%s: 'limit_sanity_level' warning", work_id)
                 if self.sanity_workaround:
