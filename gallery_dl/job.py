@@ -491,8 +491,8 @@ class DownloadJob(Job):
         if self._capacity["limit"] is not None:
             self._capacity["used"] += size
             if self._capacity["used"] > self._capacity["limit"]:
-                used = self._capacity["used"]
-                limit = self._capacity["limit"]
+                used = text.format_bytes(self._capacity["used"])
+                limit = text.format_bytes(self._capacity["limit"])
                 self.log.info(f"Reached --stop-after limit ({used} > {limit})")
                 raise exception.StopExtraction()
 
