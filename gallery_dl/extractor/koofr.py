@@ -18,7 +18,7 @@ class KoofrSharedExtractor(Extractor):
     subcategory = "shared"
     root = "https://app.koofr.net"
     directory_fmt = ("{category}", "{post[title]} ({post[id]})", "{path:I}")
-    filename_fmt = "{filename} ({hash[:8]}).{extension}"
+    filename_fmt = "{num:>03} {filename} ({hash|id:[:8]}).{extension}"
     archive_fmt = "{post[id]}_{path:J/}_{hash|id}"
     pattern = (r"(?:https?://)?(?:"
                r"(?:app\.)?koofr\.(?:net|eu)/links/([\w-]+)|"
@@ -48,10 +48,10 @@ class KoofrSharedExtractor(Extractor):
         file = data["file"]
         file["path"] = []
         if file["type"] == "dir" and self.config("recursive", True):
-            files = self._extract_files(file, url + "/bundle", params, headers)
+            items = self._extract_files(file, url + "/bundle", params, headers)
             recursive = True
         else:
-            files = (file,)
+            items = ((file, (file,)),)
             recursive = False
 
         post = {
@@ -65,42 +65,54 @@ class KoofrSharedExtractor(Extractor):
         headers = {"Referer": referer}
         password = "&password=" + text.escape(password) if password else ""
 
-        for file in files:
-            file["post"] = post
-            file["date"] = self.parse_timestamp(file["modified"] / 1000)
-            file["_http_headers"] = headers
+        for dir, files in items:
+            dir["post"] = post
+            dir["count"] = count = len(files)
+            yield Message.Directory, "", dir
 
-            name = file["name"]
-            text.nameext_from_name(name, file)
+            num = 0
+            for file in files:
+                num += 1
+                file["num"] = num
+                file["count"] = count
+                file["post"] = post
+                file["date"] = self.parse_timestamp(file["modified"] / 1000)
+                file["_http_headers"] = headers
 
-            if recursive:
-                if path := file["path"]:
-                    path = f"{'/'.join(path)}/{name}"
+                name = file["name"]
+                text.nameext_from_name(name, file)
+
+                if recursive:
+                    if path := file["path"]:
+                        path = f"{'/'.join(path)}/{name}"
+                    else:
+                        path = name
                 else:
-                    path = name
-            else:
-                path = ""
-                password += "&force"
+                    path = ""
+                    password += "&force"
 
-            url = (f"{base}{text.escape(name)}"
-                   f"?path=/{text.escape(path)}{password}")
-
-            yield Message.Directory, "", file
-            yield Message.Url, url, file
+                url = (f"{base}{text.escape(name)}"
+                       f"?path=/{text.escape(path)}{password}")
+                yield Message.Url, url, file
 
     def _extract_files(self, dir, url, params, headers):
         path = dir["path"]
         params["path"] = "/" + "/".join(path)
 
-        files = self.request_json(
+        items = self.request_json(
             url, params=params, headers=headers)["files"]
 
-        for file in files:
-            if file["type"] == "dir":
-                file["path"] = path.copy()
-                file["path"].append(file["name"])
-                yield from self._extract_files(
-                    file, url, params.copy(), headers)
+        dirs = []
+        files = []
+        for item in items:
+            if item["type"] == "dir":
+                item["path"] = path.copy()
+                item["path"].append(item["name"])
+                dirs.append(item)
             else:
-                file["path"] = path
-                yield file
+                item["path"] = path
+                files.append(item)
+
+        yield dir, files
+        for sub in dirs:
+            yield from self._extract_files(sub, url, params.copy(), headers)
