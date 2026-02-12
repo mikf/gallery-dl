@@ -33,11 +33,12 @@ class FoolfuukaExtractor(BaseExtractor):
     def items(self):
         yield Message.Directory, "", self.metadata()
         for post in filter(lambda p: p.get("media"), self.posts()):
+            board = post["board"]["shortname"]
             media = post["media"]
             url = media["media_link"]
 
             if not url and "remote_media_link" in media:
-                url = self.remote(media)
+                url = self.remote(board, media)
             if url and url[0] == "/":
                 url = self.root + url
 
@@ -54,8 +55,10 @@ class FoolfuukaExtractor(BaseExtractor):
     def posts(self):
         """Return an iterable with all relevant posts"""
 
-    def remote(self, media):
+    def remote(self, board, media):
         """Resolve a remote media link"""
+        if board in ["wsg", "gif"]:
+            return f"https://i.4cdn.org/{board}/{media['media_orig']}"
         page = self.request(media["remote_media_link"]).text
         url = text.extr(page, 'http-equiv="Refresh" content="0; url=', '"')
 
@@ -82,7 +85,6 @@ class FoolfuukaExtractor(BaseExtractor):
                 "sci": "warosu.org",
                 "tg" : "archive.4plebs.org",
             }
-            board = url.split("/", 4)[3]
             if board in board_domains:
                 domain = board_domains[board]
                 url = f"https://{domain}/{board}/full_image/{filename}"
@@ -96,7 +98,7 @@ class FoolfuukaExtractor(BaseExtractor):
 
         return url
 
-    def _remote_direct(self, media):
+    def _remote_direct(self, board, media):
         return media["remote_media_link"]
 
 
