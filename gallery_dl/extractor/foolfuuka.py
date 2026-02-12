@@ -32,10 +32,8 @@ class FoolfuukaExtractor(BaseExtractor):
 
     def items(self):
         yield Message.Directory, "", self.metadata()
-        for post in self.posts():
+        for post in filter(lambda p: p.get("media"), self.posts()):
             media = post["media"]
-            if not media:
-                continue
             url = media["media_link"]
 
             if not url and "remote_media_link" in media:
