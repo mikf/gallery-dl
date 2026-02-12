@@ -256,8 +256,8 @@ class Extractor():
                 s = self._interval()
                 if seconds < s:
                     seconds = s
-            if code == 429 and self._interval_429:
-                s = self._interval_429()
+            if code == 429 and self._interval_429 is not None:
+                s = self._interval_429(tries)
                 if seconds < s:
                     seconds = s
                 self.wait(seconds=seconds, reason="429 Too Many Requests")
@@ -418,9 +418,17 @@ class Extractor():
             self.config("sleep-request", self.request_interval),
             self.request_interval_min,
         )
-        self._interval_429 = util.build_duration_func(
-            self.config("sleep-429", self.request_interval_429),
-        )
+
+        _interval_429 = self.config("sleep-429")
+        if _interval_429 is None:
+            _interval_429 = self.request_interval_429
+        try:
+            self._interval_429 = util.build_duration_func_ex(_interval_429)
+        except Exception as exc:
+            self.log.error("Invalid 'sleep-429' value '%s' (%s: %s)",
+                           _interval_429, exc.__class__.__name__, exc)
+            self._interval_429 = util.build_duration_func_ex(
+                self.request_interval_429)
 
         if self._retries < 0:
             self._retries = float("inf")

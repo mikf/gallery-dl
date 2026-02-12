@@ -540,12 +540,21 @@ Description
 extractor.*.sleep-429
 ---------------------
 Type
-    |Duration|_
+    |Duration+|_
 Default
     ``60``
+Example
+    * ``"30-50"``
+    * ``"exp=40"``
+    * ``"lin:20=30-60"``
 Description
-    Number of seconds to sleep when receiving a `429 Too Many Requests`
+    Number of seconds to sleep when receiving a
+    `429 Too Many Requests <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429>`__
     response before `retrying <extractor.*.retries_>`__ the request.
+
+    If this is a ``string``, its |Duration|_ value can be prefixed with
+    ``lin[:START[:MAX]]`` or ``exp[:BASE[:START[:MAX]]]``
+    for `linear` or `exponential` backoff respectively.
 
 
 extractor.*.sleep-request
@@ -9965,6 +9974,24 @@ Description
       value (``"2.85"``) or a range  (``"1.5-3.0"``).
 
 
+Duration+
+---------
+Type
+    * |Duration|_
+    * ``string``
+Example
+    ``"1.5-3.0"``
+    * ``"lin=5"``
+    * ``"lin:20=30-60"``
+    * ``"exp:1.8=40"``
+Description
+    A |Duration|_ value.
+
+    When given as ``string``, it can optionally be prefixed with
+    ``lin[:START[:MAX]]=`` for `linear` or
+    ``exp[:BASE[:START[:MAX]]]=`` for `exponential` growth.
+
+
 Module
 ------
 Type
@@ -10316,6 +10343,7 @@ Reference
 .. |datetime.max| replace:: ``datetime.max``
 .. |Date| replace:: ``Date``
 .. |Duration| replace:: ``Duration``
+.. |Duration+| replace:: ``Duration+``
 .. |Module| replace:: ``Module``
 .. |Path| replace:: ``Path``
 .. |Last-Modified| replace:: ``Last-Modified``
