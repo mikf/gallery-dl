@@ -8,6 +8,7 @@
 
 import sys
 import errno
+import os
 import logging
 import functools
 import collections
@@ -376,7 +377,7 @@ class Job():
 class DownloadJob(Job):
     """Download images into appropriate directory/filename locations"""
 
-    def __init__(self, url, parent=None):
+    def __init__(self, url, parent=None, capacity=None):
         Job.__init__(self, url, parent)
         self.log = self.get_logger("download")
         self.fallback = None
@@ -386,6 +387,15 @@ class DownloadJob(Job):
         self.downloaders = {}
         self.out = output.select()
         self.visited = set() if parent is None else parent.visited
+        if parent is None:
+            if capacity is None:
+                self._capacity = {"limit": None, "used": 0}
+            else:
+                self._capacity = capacity
+                self._capacity.setdefault("limit", None)
+                self._capacity.setdefault("used", 0)
+        else:
+            self._capacity = parent._capacity
         self._extractor_filter = None
         self._skipcnt = 0
 
@@ -394,6 +404,10 @@ class DownloadJob(Job):
         hooks = self.hooks
         pathfmt = self.pathfmt
         archive = self.archive
+
+        if self._capacity["limit"] is not None and \
+                self._capacity["used"] > self._capacity["limit"]:
+            raise exception.StopExtraction()
 
         # prepare download
         pathfmt.set_filename(kwdict)
@@ -460,6 +474,8 @@ class DownloadJob(Job):
             for callback in hooks["file"]:
                 callback(pathfmt)
 
+        size = os.path.getsize(pathfmt.temppath)
+
         # download succeeded
         pathfmt.finalize()
         self.out.success(pathfmt.path)
@@ -471,6 +487,14 @@ class DownloadJob(Job):
                 callback(pathfmt)
         if archive is not None and self._archive_write_after:
             archive.add(kwdict)
+
+        if self._capacity["limit"] is not None:
+            self._capacity["used"] += size
+            if self._capacity["used"] > self._capacity["limit"]:
+                used = self._capacity["used"]
+                limit = self._capacity["limit"]
+                self.log.info(f"Reached --stop-after limit ({used} > {limit})")
+                raise exception.StopExtraction()
 
     def handle_directory(self, kwdict):
         """Set and create the target directory for downloads"""
@@ -664,6 +688,14 @@ class DownloadJob(Job):
         self.sleep = util.build_duration_func(cfg("sleep"))
         self.sleep_skip = util.build_duration_func(cfg("sleep-skip"))
         self.fallback = cfg("fallback", True)
+        if self._capacity["limit"] is None:
+            limit = cfg("stop-after")
+            if limit is not None:
+                parsed = text.parse_bytes(limit, None)
+                if parsed is None:
+                    extr.log.warning("Invalid stop-after limit (%r)", limit)
+                else:
+                    self._capacity["limit"] = parsed
         if not cfg("download", True):
             # monkey-patch method to do nothing and always return True
             self.download = pathfmt.fix_extension
@@ -859,7 +891,7 @@ class SimulationJob(DownloadJob):
 class KeywordJob(Job):
     """Print available keywords"""
 
-    def __init__(self, url, parent=None):
+    def __init__(self, url, parent=None, capacity=None):
         Job.__init__(self, url, parent)
         self.private = config.get(("output",), "private")
 
