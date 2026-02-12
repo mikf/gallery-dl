@@ -843,9 +843,7 @@ def import_file(path):
 
 def build_selection_func(value, min=0.0, conv=float):
     if not value:
-        if min:
-            return lambda: min
-        return None
+        return (lambda: min) if min else None
 
     if isinstance(value, str):
         lower, _, upper = value.partition("-")
@@ -853,7 +851,8 @@ def build_selection_func(value, min=0.0, conv=float):
         try:
             lower, upper = value
         except TypeError:
-            lower, upper = value, None
+            lower = value
+            upper = None
     lower = conv(lower)
 
     if upper:
@@ -870,6 +869,38 @@ def build_selection_func(value, min=0.0, conv=float):
 
 
 build_duration_func = build_selection_func
+
+
+def build_duration_func_ex(value):
+    if not value:
+        return None
+    if not isinstance(value, str) or "=" not in value:
+        value = build_duration_func(value)
+        return lambda _: value()
+
+    args, _, value = value.partition("=")
+    type, _, args = args.partition(":")
+    value = build_duration_func(value)
+
+    if "exponential".startswith(type):
+        if not args:
+            return lambda n: value() * (2 ** (n-1))
+        base, _, start = args.partition(":")
+        start, _, max = start.partition(":")
+        start = float(start) if start else 0
+        base = float(base) if base else 2
+        max = int(max) if max else 3600
+        return lambda n: min(start + value() * (base ** (n-1)), max)
+
+    if "linear".startswith(type):
+        if not args:
+            return lambda n: value() * n
+        start, _, max = args.partition(":")
+        start = float(start) if start else 0
+        max = int(max) if max else 3600
+        return lambda n: min(start + value() * n, max)
+
+    raise ValueError("Invalid duration type " + repr(type))
 
 
 def build_extractor_filter(categories, negate=True, special=None):

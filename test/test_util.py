@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2025 Mike Fährmann
+# Copyright 2015-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -613,9 +613,63 @@ value = 123
         test_single(f("3", 0, pb)     , 3, int)
         test_single(f("3.0-", 0, pb)  , 3, int)
         test_single(f("  3  -", 0, pb), 3, int)
-
         test_range(f("2k-4k", 0, pb)        , 2048, 4096, int)
         test_range(f("  2.0k  - 4k ", 0, pb), 2048, 4096, int)
+
+    def test_build_duration_func_ex(self, f=util.build_duration_func_ex):
+
+        def test(v, a, b=None):
+            df = f(v)
+            if "=" in v:
+                if b is None:
+                    for n, a in enumerate(a, 1):
+                        self.assertEqual(df(n), a)
+                else:
+                    for n, (a, b) in enumerate(zip(a, b), 1):
+                        v = df(n)
+                        self.assertGreaterEqual(v, a)
+                        self.assertLessEqual(v, b)
+            else:
+                if b is None:
+                    for n in range(10):
+                        self.assertEqual(df(n), a)
+                else:
+                    for n in range(10):
+                        v = df(n)
+                        self.assertGreaterEqual(v, a)
+                        self.assertLessEqual(v, b)
+
+        for v in (0, 0.0, "", None, (), []):
+            self.assertIsNone(f(v))
+
+        test("3", 3.0)
+        test("3-5", 3.0, 5.0)
+
+        test("lin=3"     , ( 3, 6, 9, 12, 15))   # noqa E201
+        test("lin:8=3"  , (11, 14, 17, 20, 23))
+        test("lin:8:20=5", (13, 18, 20, 20, 20))
+        test("lin=2-5"     ,
+             (2,  4,  6,  8, 10),  # noqa E241
+             (5, 10, 15, 20, 25))
+        test("lin:8=2-5"   ,
+             (10, 12, 14, 16, 18),
+             (13, 18, 23, 28, 33))
+        test("lin:8:20=2-5",
+             (10, 12, 14, 16, 18),
+             (13, 18, 20, 20, 20))
+
+        test("exp=3"       , (3*1, 3*2, 3*4, 3*8, 3*16))
+        test("exp:1.5=3"   , (3*1, 3*1.5, 3*1.5**2, 3*1.5**3))
+        test("exp::20:40=3", (23, 26, 32, 40, 40))
+        test("exp=2-4"    ,
+             (2*1, 2*2, 2*4, 2*8, 2*16),
+             (4*1, 4*2, 4*4, 4*8, 4*16))
+        test("exp:3=2-4"  ,
+             (2*1, 2*3, 2*9, 2*27, 2*81),
+             (4*1, 4*3, 4*9, 4*27, 4*81))
+        test("exp:3::40=2-4",
+             (2*1, 2*3, 2*9, 40, 40),
+             (4*1, 4*3,  40, 40, 40))  # noqa E241
 
     def test_extractor_filter(self):
         # empty
