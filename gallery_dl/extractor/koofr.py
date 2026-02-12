@@ -18,6 +18,7 @@ class KoofrSharedExtractor(Extractor):
     subcategory = "shared"
     root = "https://app.koofr.net"
     directory_fmt = ("{category}", "{post[title]} ({post[id]})", "{path:I}")
+    filename_fmt = "{filename} ({hash[:8]}).{extension}"
     archive_fmt = "{post[id]}_{path:J/}_{hash|id}"
     pattern = (r"(?:https?://)?(?:"
                r"(?:app\.)?koofr\.(?:net|eu)/links/([\w-]+)|"
