@@ -56,8 +56,8 @@ __tests__ = (
     "#count"   : 18,
 
     "contentType": "application/octet-stream",
-    "!count"     : 18,
-    "!num"       : range(1, 18),
+    "count"      : 18,
+    "num"        : range(1, 18),
     "date"       : "type:datetime",
     "extension"  : "pcm",
     "filename"   : r"re:smw_msu1-\d+",
@@ -83,8 +83,8 @@ __tests__ = (
     "#results" : "https://app.koofr.net/content/links/01deac62-f5d6-4d2b-7043-53b24cc0a038/files/get/Church of Kondo?path=/&force",
 
     "contentType": "",
-    "!count"     : 1,
-    "!num"       : 1,
+    "count"     : 1,
+    "num"       : 1,
     "date"       : "dt:2023-11-19 16:27:56",
     "extension"  : "",
     "filename"   : "Church of Kondo",
@@ -109,6 +109,8 @@ __tests__ = (
     "#count"   : 16,
 
     "contentType": "image/png",
+    "count"     : 4,
+    "num"       : range(1, 4),
     "date"       : "type:datetime",
     "extension"  : "png",
     "filename"   : r"re:^[1-8a-d]$",
