@@ -352,7 +352,7 @@ class XenforoExtractor(BaseExtractor):
 
     def _extract_attachments(self, urls, post):
         for att in text.extract_iter(post["attachments"], "<li", "</li>"):
-            urls.append((None, att[att.find('href="')+6:], None, None))
+            urls.append((None, att[att.find(' href="')+7:], None, None))
 
     def _extract_embeds(self, urls, post):
         for embed in text.extract_iter(
