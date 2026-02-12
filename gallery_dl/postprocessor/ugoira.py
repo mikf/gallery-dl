@@ -32,6 +32,7 @@ class UgoiraPP(PostProcessor):
         self.args = options.get("ffmpeg-args") or ()
         self.twopass = options.get("ffmpeg-twopass", False)
         self.output = options.get("ffmpeg-output", "error")
+        self.output_mkvm = options.get("mkvmerge-output", False)
         self.delete = not options.get("keep-files", False)
         self.repeat = options.get("repeat-last-frame", True)
         self.metadata = options.get("metadata", True)
@@ -367,6 +368,8 @@ class UgoiraPP(PostProcessor):
             "-o", pathfmt.path,  # mkvmerge does not support "raw" paths
             "--timecodes", "0:" + self._write_mkvmerge_timecodes(tempdir),
         ]
+        if not self.output_mkvm:
+            args.append("--quiet")
         if self.extension == "webm":
             args.append("--webm")
         args += ("=", pathfmt.realpath)

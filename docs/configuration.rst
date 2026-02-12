@@ -9309,6 +9309,16 @@ Description
     `mkvmerge demuxer <ugoira.ffmpeg-demuxer_>`__.
 
 
+ugoira.mkvmerge-output
+----------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Enable ``mkvmerge`` output.
+
+
 ugoira.ffmpeg-output
 --------------------
 Type
