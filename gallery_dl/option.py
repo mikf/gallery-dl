@@ -544,36 +544,6 @@ def build_parser():
         help="Size of in-memory data chunks (default: 32k)",
     )
     downloader.add_argument(
-        "--sleep",
-        dest="sleep", metavar="SECONDS", action=ConfigAction,
-        help=("Number of seconds to wait before each download. "
-              "This can be either a constant value or a range "
-              "(e.g. 2.7 or 2.0-3.5)"),
-    )
-    downloader.add_argument(
-        "--sleep-skip",
-        dest="sleep-skip", metavar="SECONDS", action=ConfigAction,
-        help=("Number of seconds to wait after skipping a file download"),
-    )
-    downloader.add_argument(
-        "--sleep-request",
-        dest="sleep-request", metavar="SECONDS", action=ConfigAction,
-        help=("Number of seconds to wait between HTTP requests "
-              "during data extraction"),
-    )
-    downloader.add_argument(
-        "--sleep-429",
-        dest="sleep-429", metavar="SECONDS", action=ConfigAction,
-        help=("Number of seconds to wait when receiving a "
-              "'429 Too Many Requests' response"),
-    )
-    downloader.add_argument(
-        "--sleep-extractor",
-        dest="sleep-extractor", metavar="SECONDS", action=ConfigAction,
-        help=("Number of seconds to wait before starting data extraction "
-              "for an input URL"),
-    )
-    downloader.add_argument(
         "--no-part",
         dest="part", nargs=0, action=ConfigConstAction, const=False,
         help="Do not use .part files",
@@ -595,6 +565,41 @@ def build_parser():
         help=("Do not download any files")
     )
 
+    sleep = parser.add_argument_group("Sleep Options")
+    sleep.add_argument(
+        "--sleep",
+        dest="sleep", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait before each download. "
+              "This can be either a constant value or a range "
+              "(e.g. 2.7 or 2.0-3.5)"),
+    )
+    sleep.add_argument(
+        "--sleep-skip",
+        dest="sleep-skip", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait after skipping a file download"),
+    )
+    sleep.add_argument(
+        "--sleep-extractor",
+        dest="sleep-extractor", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait before starting data extraction "
+              "for an input URL"),
+    )
+    sleep.add_argument(
+        "--sleep-request",
+        dest="sleep-request", metavar="SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait between HTTP requests "
+              "during data extraction"),
+    )
+    sleep.add_argument(
+        "--sleep-429",
+        dest="sleep-429", metavar="[TYPE=]SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait when receiving a "
+              "'429 Too Many Requests' response. Can be prefixed with "
+              "'lin[:START[:MAX]]' or 'exp[:BASE[:START[:MAX]]]' "
+              "for linear or exponential growth "
+              "(e.g. '30', 'exp=40', 'lin:20=30-60'"),
+    )
+
     configuration = parser.add_argument_group("Configuration Options")
     configuration.add_argument(
         "-o", "--option",
@@ -606,7 +611,7 @@ def build_parser():
     configuration.add_argument(
         "-c", "--config",
         dest="configs_json", metavar="FILE", action="append",
-        help="Additional configuration files",
+        help="Additional configuration files in JSON format",
     )
     configuration.add_argument(
         "--config-yaml",
@@ -617,6 +622,22 @@ def build_parser():
         "--config-toml",
         dest="configs_toml", metavar="FILE", action="append",
         help="Additional configuration files in TOML format",
+    )
+    configuration.add_argument(
+        "--config-type",
+        dest="config_type", metavar="TYPE",
+        help=("Set filetype of default configuration files "
+              "(json, yaml, toml)"),
+    )
+    configuration.add_argument(
+        "--config-ignore",
+        dest="config_load", action="store_false",
+        help="Do not load default configuration files",
+    )
+    configuration.add_argument(
+        "--ignore-config",
+        dest="config_load", action="store_false",
+        help=SUPPRESS,
     )
     configuration.add_argument(
         "--config-create",
@@ -632,22 +653,6 @@ def build_parser():
         "--config-open",
         dest="config", action="store_const", const="open",
         help="Open configuration file in external application",
-    )
-    configuration.add_argument(
-        "--config-type",
-        dest="config_type", metavar="TYPE",
-        help=("Set filetype of default configuration files "
-              "(json, yaml, toml)"),
-    )
-    configuration.add_argument(
-        "--config-ignore",
-        dest="config_load", action="store_false",
-        help="Do not read default configuration files",
-    )
-    configuration.add_argument(
-        "--ignore-config",
-        dest="config_load", action="store_false",
-        help=SUPPRESS,
     )
 
     authentication = parser.add_argument_group("Authentication Options")

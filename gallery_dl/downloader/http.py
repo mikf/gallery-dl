@@ -87,7 +87,12 @@ class HttpDownloader(DownloaderBase):
         if interval_429 is None:
             self.interval_429 = extractor._interval_429
         else:
-            self.interval_429 = util.build_duration_func(interval_429)
+            try:
+                self.interval_429 = util.build_duration_func_ex(interval_429)
+            except Exception as exc:
+                self.log.error("Invalid 'sleep-429' value '%s' (%s: %s)",
+                               interval_429, exc.__class__.__name__, exc)
+                self.interval_429 = extractor._interval_429
 
     def download(self, url, pathfmt):
         try:
@@ -128,7 +133,7 @@ class HttpDownloader(DownloaderBase):
                     return False
 
                 if code == 429 and self.interval_429:
-                    s = self.interval_429()
+                    s = self.interval_429(tries)
                     time.sleep(s if s > tries else tries)
                 else:
                     time.sleep(tries)

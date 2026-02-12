@@ -11,6 +11,7 @@
 * [Output Options](#output-options)
 * [Networking Options](#networking-options)
 * [Downloader Options](#downloader-options)
+* [Sleep Options](#sleep-options)
 * [Configuration Options](#configuration-options)
 * [Authentication Options](#authentication-options)
 * [Cookie Options](#cookie-options)
@@ -109,34 +110,40 @@
     -r, --limit-rate RATE       Maximum download rate (e.g. 500k, 2.5M, or
                                 800k-2M)
     --chunk-size SIZE           Size of in-memory data chunks (default: 32k)
-    --sleep SECONDS             Number of seconds to wait before each download.
-                                This can be either a constant value or a range
-                                (e.g. 2.7 or 2.0-3.5)
-    --sleep-skip SECONDS        Number of seconds to wait after skipping a file
-                                download
-    --sleep-request SECONDS     Number of seconds to wait between HTTP requests
-                                during data extraction
-    --sleep-429 SECONDS         Number of seconds to wait when receiving a '429
-                                Too Many Requests' response
-    --sleep-extractor SECONDS   Number of seconds to wait before starting data
-                                extraction for an input URL
     --no-part                   Do not use .part files
     --no-skip                   Do not skip downloads; overwrite existing files
     --no-mtime                  Do not set file modification times according to
                                 Last-Modified HTTP response headers
     --no-download               Do not download any files
 
+## Sleep Options:
+    --sleep SECONDS             Number of seconds to wait before each download.
+                                This can be either a constant value or a range
+                                (e.g. 2.7 or 2.0-3.5)
+    --sleep-skip SECONDS        Number of seconds to wait after skipping a file
+                                download
+    --sleep-extractor SECONDS   Number of seconds to wait before starting data
+                                extraction for an input URL
+    --sleep-request SECONDS     Number of seconds to wait between HTTP requests
+                                during data extraction
+    --sleep-429 [TYPE=]SECONDS  Number of seconds to wait when receiving a '429
+                                Too Many Requests' response. Can be prefixed
+                                with 'lin[:START[:MAX]]' or
+                                'exp[:BASE[:START[:MAX]]]' for linear or
+                                exponential growth (e.g. '30', 'exp=40',
+                                'lin:20=30-60'
+
 ## Configuration Options:
     -o, --option KEY=VALUE      Additional options. Example: -o browser=firefox
-    -c, --config FILE           Additional configuration files
+    -c, --config FILE           Additional configuration files in JSON format
     --config-yaml FILE          Additional configuration files in YAML format
     --config-toml FILE          Additional configuration files in TOML format
+    --config-type TYPE          Set filetype of default configuration files
+                                (json, yaml, toml)
+    --config-ignore             Do not load default configuration files
     --config-create             Create a basic configuration file
     --config-status             Show configuration file status
     --config-open               Open configuration file in external application
-    --config-type TYPE          Set filetype of default configuration files
-                                (json, yaml, toml)
-    --config-ignore             Do not read default configuration files
 
 ## Authentication Options:
     -u, --username USER         Username to login with
