@@ -376,6 +376,18 @@ def expand_path(path):
     return os.path.expandvars(os.path.expanduser(path))
 
 
+def unextended_path(path):
+    """Convert Windows extended-length paths to regular paths."""
+    if not path or not WINDOWS:
+        return path
+
+    if path.startswith("\\\\?\\UNC\\"):
+        return "\\\\" + path[8:]
+    if path.startswith("\\\\?\\"):
+        return path[4:]
+    return path
+
+
 def remove_file(path):
     try:
         os.unlink(path)

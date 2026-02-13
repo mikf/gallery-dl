@@ -220,6 +220,29 @@ class ExecTest(BasePostprocessorTest):
         )
         i.wait.assert_called_once_with()
 
+    @patch.object(util, "WINDOWS", True)
+    def test_command_string_windows_path_fields(self):
+        self._create({
+            "command": "echo {_directoryW} {_pathW} {_temppathW}",
+        })
+        self.pathfmt.realdirectory = "\\\\?\\C:\\tmp\\gallery-dl\\"
+        self.pathfmt.realpath = "\\\\?\\C:\\tmp\\gallery-dl\\file.ext"
+        self.pathfmt.temppath = "\\\\?\\C:\\tmp\\gallery-dl\\file.ext.part"
+
+        with patch("gallery_dl.util.Popen") as p:
+            i = Mock()
+            i.wait.return_value = 0
+            p.return_value = i
+            self._trigger(("after",))
+
+        p.assert_called_once_with(
+            "echo 'C:\\tmp\\gallery-dl\\' 'C:\\tmp\\gallery-dl\\file.ext' "
+            "'C:\\tmp\\gallery-dl\\file.ext.part'",
+            shell=True,
+            creationflags=0,
+            start_new_session=False,
+        )
+
     def test_command_list(self):
         self._create({
             "command": ["~/script.sh", "{category}",
@@ -237,6 +260,33 @@ class ExecTest(BasePostprocessorTest):
                 os.path.expanduser("~/script.sh"),
                 self.pathfmt.kwdict["category"],
                 self.pathfmt.realdirectory.upper(),
+            ],
+            shell=False,
+            creationflags=0,
+            start_new_session=False,
+        )
+
+    @patch.object(util, "WINDOWS", True)
+    def test_command_list_windows_path_fields(self):
+        self._create({
+            "command": ["echo", "{_directoryW}", "{_pathW}", "{_temppathW}"],
+        })
+        self.pathfmt.realdirectory = "\\\\?\\C:\\tmp\\gallery-dl\\"
+        self.pathfmt.realpath = "\\\\?\\C:\\tmp\\gallery-dl\\file.ext"
+        self.pathfmt.temppath = "\\\\?\\C:\\tmp\\gallery-dl\\file.ext.part"
+
+        with patch("gallery_dl.util.Popen") as p:
+            i = Mock()
+            i.wait.return_value = 0
+            p.return_value = i
+            self._trigger(("after",))
+
+        p.assert_called_once_with(
+            [
+                "echo",
+                "C:\\tmp\\gallery-dl\\",
+                "C:\\tmp\\gallery-dl\\file.ext",
+                "C:\\tmp\\gallery-dl\\file.ext.part",
             ],
             shell=False,
             creationflags=0,

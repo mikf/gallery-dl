@@ -894,6 +894,8 @@ def build_parser():
         help=("Execute CMD for each downloaded file. "
               "Supported replacement fields are "
               "{} or {_path}, {_directory}, {_filename}. "
+              "On Windows, use {_pathW}, {_directoryW}, {_temppathW} "
+              "for non-UNC paths. "
               "Example: --exec \"convert {} {}.png && rm {}\""),
     )
     postprocessor.add_argument(
@@ -902,7 +904,7 @@ def build_parser():
         action=AppendCommandAction, const={
             "name": "exec", "event": "finalize"},
         help=("Execute CMD after all files were downloaded. "
-              "Example: --exec-after \"cd {_directory} "
+              "Example: --exec-after \"cd {_directoryW} "
               "&& convert * ../doc.pdf\""),
     )
 

@@ -61,7 +61,8 @@ class ExecPP(PostProcessor):
     def _prepare_cmd(self, cmd):
         if isinstance(cmd, str):
             self._sub = util.re(
-                r"\{(_directory|_filename|_(?:temp)?path|)\}").sub
+                r"\{(_directoryW|_temppathW|_pathW|_directory|_filename|"
+                r"_(?:temp)?path|)\}").sub
             return self.exec_string, cmd
         else:
             return self.exec_list, [formatter.parse(arg) for arg in cmd]
@@ -73,10 +74,7 @@ class ExecPP(PostProcessor):
         if archive and archive.check(kwdict):
             return
 
-        kwdict["_directory"] = pathfmt.realdirectory
-        kwdict["_filename"] = pathfmt.filename
-        kwdict["_temppath"] = pathfmt.temppath
-        kwdict["_path"] = pathfmt.realpath
+        self._set_path_kv(pathfmt, kwdict)
 
         args = [arg.format_map(kwdict) for arg in self.args]
         args[0] = os.path.expanduser(args[0])
@@ -136,11 +134,27 @@ class ExecPP(PostProcessor):
         name = match[1]
         if name == "_directory":
             return quote(self.pathfmt.realdirectory)
+        if name == "_directoryW":
+            return quote(self.pathfmt._unextended_path(
+                self.pathfmt.realdirectory))
         if name == "_filename":
             return quote(self.pathfmt.filename)
         if name == "_temppath":
             return quote(self.pathfmt.temppath)
+        if name == "_temppathW":
+            return quote(self.pathfmt._unextended_path(self.pathfmt.temppath))
+        if name == "_pathW":
+            return quote(self.pathfmt._unextended_path(self.pathfmt.realpath))
         return quote(self.pathfmt.realpath)
+
+    def _set_path_kv(self, pathfmt, kwdict):
+        kwdict["_directory"] = pathfmt.realdirectory
+        kwdict["_directoryW"] = pathfmt._unextended_path(pathfmt.realdirectory)
+        kwdict["_filename"] = pathfmt.filename
+        kwdict["_temppath"] = pathfmt.temppath
+        kwdict["_temppathW"] = pathfmt._unextended_path(pathfmt.temppath)
+        kwdict["_path"] = pathfmt.realpath
+        kwdict["_pathW"] = pathfmt._unextended_path(pathfmt.realpath)
 
 
 __postprocessor__ = ExecPP

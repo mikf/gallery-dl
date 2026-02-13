@@ -220,6 +220,9 @@ class PathFormat():
             return path + os.sep
         return path
 
+    def _unextended_path(self, path):
+        return util.unextended_path(path)
+
     def set_filename(self, kwdict):
         """Set general filename data"""
         self.kwdict = kwdict

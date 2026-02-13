@@ -1023,6 +1023,28 @@ value = 123
             self.assertIs(response, ctx)
 
 
+class TestPathUtilities(unittest.TestCase):
+
+    @patch.object(util, "WINDOWS", True)
+    def test_unextended_path_windows_drive(self):
+        self.assertEqual(
+            util.unextended_path("\\\\?\\C:\\temp\\file.txt"),
+            "C:\\temp\\file.txt",
+        )
+
+    @patch.object(util, "WINDOWS", True)
+    def test_unextended_path_windows_unc(self):
+        self.assertEqual(
+            util.unextended_path("\\\\?\\UNC\\server\\share\\file.txt"),
+            "\\\\server\\share\\file.txt",
+        )
+
+    @patch.object(util, "WINDOWS", False)
+    def test_unextended_path_non_windows(self):
+        path = "\\\\?\\C:\\temp\\file.txt"
+        self.assertEqual(util.unextended_path(path), path)
+
+
 class TestExtractor():
     category = "test_category"
     subcategory = "test_subcategory"
