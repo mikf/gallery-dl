@@ -591,13 +591,19 @@ def build_parser():
               "during data extraction"),
     )
     sleep.add_argument(
+        "--sleep-retries",
+        dest="sleep-retries", metavar="[TYPE=]SECONDS", action=ConfigAction,
+        help=("Number of seconds to wait before retrying an HTTP request. "
+              "Can be prefixed with "
+              "'lin[:START[:MAX]]' or 'exp[:BASE[:START[:MAX]]]' "
+              "for linear or exponential growth between consecutive retries "
+              "(e.g. '30', 'exp=40', 'lin:20=30-60'"),
+    )
+    sleep.add_argument(
         "--sleep-429",
         dest="sleep-429", metavar="[TYPE=]SECONDS", action=ConfigAction,
         help=("Number of seconds to wait when receiving a "
-              "'429 Too Many Requests' response. Can be prefixed with "
-              "'lin[:START[:MAX]]' or 'exp[:BASE[:START[:MAX]]]' "
-              "for linear or exponential growth "
-              "(e.g. '30', 'exp=40', 'lin:20=30-60'"),
+              "'429 Too Many Requests' response"),
     )
 
     configuration = parser.add_argument_group("Configuration Options")

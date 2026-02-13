@@ -126,12 +126,15 @@
                                 extraction for an input URL
     --sleep-request SECONDS     Number of seconds to wait between HTTP requests
                                 during data extraction
-    --sleep-429 [TYPE=]SECONDS  Number of seconds to wait when receiving a '429
-                                Too Many Requests' response. Can be prefixed
-                                with 'lin[:START[:MAX]]' or
+    --sleep-retries [TYPE=]SECONDS
+                                Number of seconds to wait before retrying an
+                                HTTP request. Can be prefixed with
+                                'lin[:START[:MAX]]' or
                                 'exp[:BASE[:START[:MAX]]]' for linear or
-                                exponential growth (e.g. '30', 'exp=40',
-                                'lin:20=30-60'
+                                exponential growth between consecutive retries
+                                (e.g. '30', 'exp=40', 'lin:20=30-60'
+    --sleep-429 [TYPE=]SECONDS  Number of seconds to wait when receiving a '429
+                                Too Many Requests' response
 
 ## Configuration Options:
     -o, --option KEY=VALUE      Additional options. Example: -o browser=firefox
