@@ -223,7 +223,8 @@ class PathFormat():
     def set_filename(self, kwdict):
         """Set general filename data"""
         self.kwdict = kwdict
-        self.filename = self.temppath = self.prefix = ""
+        self.filename = self.path = self.realpath = self.temppath = \
+            self.prefix = ""
 
         ext = kwdict["extension"]
         kwdict["extension"] = self.extension = self.extension_map(ext, ext)

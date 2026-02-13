@@ -152,5 +152,35 @@ class TestShortenEAW(unittest.TestCase):
         self.assertEqual(f(s, 19, "")   , "幻-想-郷###幻-想-郷")
 
 
+class TestPathfmtProxy(unittest.TestCase):
+
+    def _proxy(self, path="", directory="", filename=""):
+        class Job:
+            pass
+
+        class Pathfmt:
+            pass
+
+        job = Job()
+        job.pathfmt = Pathfmt()
+        job.pathfmt.path = path
+        job.pathfmt.directory = directory
+        job.pathfmt.filename = filename
+        return output.PathfmtProxy(job)
+
+    def test_str_uses_path_when_available(self):
+        proxy = self._proxy(
+            path="a/b/c.ext", directory="a/b/", filename="c.ext")
+        self.assertEqual(str(proxy), "a/b/c.ext")
+
+    def test_str_falls_back_to_directory_and_filename(self):
+        proxy = self._proxy(path="", directory="a/b/", filename="c.ext")
+        self.assertEqual(str(proxy), "a/b/c.ext")
+
+    def test_str_falls_back_to_directory_only(self):
+        proxy = self._proxy(path="", directory="a/b/", filename="")
+        self.assertEqual(str(proxy), "a/b/")
+
+
 if __name__ == "__main__":
     unittest.main()

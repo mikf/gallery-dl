@@ -51,6 +51,12 @@ class DownloaderBase():
         """Interpolate downloader config value for 'key'"""
         return config.interpolate(("downloader", self.scheme), key, default)
 
+    def config2(self, key, key2, default=None, sentinel=util.SENTINEL):
+        value = self.config(key, sentinel)
+        if value is not sentinel:
+            return value
+        return self.config(key2, default)
+
     def config_opts(self, key, default=None, conf=_config):
         if key in conf:
             return conf[key]

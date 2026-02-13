@@ -166,6 +166,20 @@ class TestDownloaderConfig(unittest.TestCase):
         self.assertEqual(dl.rate(), 42)
         self.assertEqual(dl.part, False)
 
+    def test_config_http_metadata_alias(self):
+        config.set(("extractor", "generic"), "metadata-http", "_meta_alias")
+        job = FakeJob()
+        dl = downloader.find("http")(job)
+        self.assertEqual(dl.metadata, "_meta_alias")
+
+    def test_config_http_metadata_downloader_override(self):
+        config.set(
+            ("extractor", "generic"), "http-metadata", "_meta_extractor")
+        config.set(("downloader", "http"), "metadata-http", "_meta_downloader")
+        job = FakeJob()
+        dl = downloader.find("http")(job)
+        self.assertEqual(dl.metadata, "_meta_downloader")
+
 
 class TestDownloaderBase(unittest.TestCase):
 

@@ -85,6 +85,20 @@ class TestPathObject(TestPath):
         self.assertEqual(str(pfmt), pfmt.realpath)
         self.assertEqual(str(pfmt), "./gallery-dl/test/file.ext")
 
+    def test_set_filename_resets_paths(self):
+        kwdict = KWDICT.copy()
+        pfmt = self._pfmt(kwdict=True)
+
+        pfmt.set_filename(kwdict)
+        pfmt.build_path()
+        self.assertTrue(pfmt.path)
+        self.assertTrue(pfmt.realpath)
+
+        kwdict["filename"] = "next"
+        pfmt.set_filename(kwdict)
+        self.assertEqual(pfmt.path, "")
+        self.assertEqual(pfmt.realpath, "")
+
 
 class TestPathOptions(TestPath):
 

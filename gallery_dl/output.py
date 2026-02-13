@@ -127,7 +127,11 @@ class PathfmtProxy():
 
     def __str__(self):
         if pathfmt := object.__getattribute__(self, "job").pathfmt:
-            return pathfmt.path or pathfmt.directory
+            if pathfmt.path:
+                return pathfmt.path
+            if pathfmt.filename:
+                return pathfmt.directory + pathfmt.filename
+            return pathfmt.directory
         return ""
 
 

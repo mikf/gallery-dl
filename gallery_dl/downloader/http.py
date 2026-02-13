@@ -27,7 +27,9 @@ class HttpDownloader(DownloaderBase):
 
         self.adjust_extension = self.config("adjust-extensions", True)
         self.chunk_size = self.config("chunk-size", 32768)
-        self.metadata = extractor.config("http-metadata")
+        metadata = extractor.config2("http-metadata", "metadata-http")
+        self.metadata = self.config2(
+            "http-metadata", "metadata-http", metadata)
         self.progress = self.config("progress", 3.0)
         self.validate = self.config("validate", True)
         self.validate_html = self.config("validate-html", True)
