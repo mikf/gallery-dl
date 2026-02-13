@@ -343,9 +343,16 @@ class Extractor():
             return
 
         if reason:
-            t = dt.datetime.fromtimestamp(until).time()
-            isotime = f"{t.hour:02}:{t.minute:02}:{t.second:02}"
-            self.log.info("Waiting until %s (%s)", isotime, reason)
+            if seconds >= 3600.0:
+                h, m = divmod(seconds, 3600.0)
+                dur = f"{int(h)}h {int(m/60.0)}min"
+            elif seconds >= 60.0:
+                dur = str(int(seconds/60.0)) + " minutes"
+            else:
+                dur = str(int(seconds)) + " seconds"
+            t = time.localtime(until)
+            iso = f"{t.tm_hour:02}:{t.tm_min:02}:{t.tm_sec:02}"
+            self.log.info("Waiting for %s until %s (%s)", dur, iso, reason)
         time.sleep(seconds)
 
     def sleep(self, seconds, reason):

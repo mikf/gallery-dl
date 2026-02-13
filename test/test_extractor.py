@@ -217,7 +217,23 @@ class TestExtractorWait(unittest.TestCase):
 
             calls = log.info.mock_calls
             self.assertEqual(len(calls), 1)
-            self._assert_isotime(calls[0][1][1], until)
+            self.assertEqual(calls[0][1][1], "6 seconds")
+            self._assert_isotime(calls[0][1][2], until)
+
+    def test_wait_seconds_long(self):
+        extr = extractor.find("generic:https://example.org/")
+        seconds = 5000
+        until = time.time() + seconds
+
+        with patch("time.sleep") as sleep, patch.object(extr, "log") as log:
+            extr.wait(seconds=seconds)
+
+            sleep.assert_called_once_with(5001.0)
+
+            calls = log.info.mock_calls
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(calls[0][1][1], "1h 23min")
+            self._assert_isotime(calls[0][1][2], until)
 
     def test_wait_until(self):
         extr = extractor.find("generic:https://example.org/")
@@ -232,7 +248,8 @@ class TestExtractorWait(unittest.TestCase):
 
             calls = log.info.mock_calls
             self.assertEqual(len(calls), 1)
-            self._assert_isotime(calls[0][1][1], until)
+            self.assertEqual(calls[0][1][1], "5 seconds")
+            self._assert_isotime(calls[0][1][2], until)
 
     def test_wait_until_datetime(self):
         extr = extractor.find("generic:https://example.org/")
@@ -251,7 +268,8 @@ class TestExtractorWait(unittest.TestCase):
 
             calls = log.info.mock_calls
             self.assertEqual(len(calls), 1)
-            self._assert_isotime(calls[0][1][1], until_local)
+            self.assertEqual(calls[0][1][1], "5 seconds")
+            self._assert_isotime(calls[0][1][2], until_local)
 
     def _assert_isotime(self, output, until):
         if not isinstance(until, dt.datetime):
