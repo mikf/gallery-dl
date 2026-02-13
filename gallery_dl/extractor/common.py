@@ -184,8 +184,8 @@ class Extractor():
         response = challenge = None
         tries = 1
 
-        if self._interval and interval:
-            seconds = (self._interval() -
+        if self._interval_request is not None and interval:
+            seconds = (self._interval_request() -
                        (time.time() - Extractor.request_timestamp))
             if seconds > 0.0:
                 self.sleep(seconds, "request")
@@ -251,9 +251,9 @@ class Extractor():
             if tries > retries:
                 break
 
-            seconds = tries
-            if self._interval:
-                s = self._interval()
+            seconds = self._interval_retry(tries)
+            if self._interval_request is not None:
+                s = self._interval_request()
                 if seconds < s:
                     seconds = s
             if code == 429 and self._interval_429 is not None:
@@ -414,10 +414,27 @@ class Extractor():
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
         self._proxies = util.build_proxy_map(self.config("proxy"), self.log)
-        self._interval = util.build_duration_func(
+
+        if self._retries < 0:
+            self._retries = float("inf")
+        if not self._retry_codes:
+            self._retry_codes = ()
+
+        self._interval_request = util.build_duration_func(
             self.config("sleep-request", self.request_interval),
-            self.request_interval_min,
-        )
+            self.request_interval_min)
+
+        _interval_retry = self.config("sleep-retries")
+        if _interval_retry is None:
+            self._interval_retry = util.identity
+        else:
+            try:
+                self._interval_retry = util.build_duration_func_ex(
+                    _interval_retry)
+            except Exception as exc:
+                self.log.error("Invalid 'sleep-retry' value '%s' (%s: %s)",
+                               _interval_retry, exc.__class__.__name__, exc)
+                self._interval_retry = util.identity
 
         _interval_429 = self.config("sleep-429")
         if _interval_429 is None:
@@ -429,11 +446,6 @@ class Extractor():
                            _interval_429, exc.__class__.__name__, exc)
             self._interval_429 = util.build_duration_func_ex(
                 self.request_interval_429)
-
-        if self._retries < 0:
-            self._retries = float("inf")
-        if not self._retry_codes:
-            self._retry_codes = ()
 
     def _init_session(self):
         self.session = session = requests.Session()

@@ -537,6 +537,30 @@ Description
     i.e. before starting a new extractor.
 
 
+extractor.*.sleep-retries
+-------------------------
+Type
+    |Duration+|_
+Default
+    ``"lin=1"``
+Example
+    * ``"30-50"``
+    * ``"exp=40"``
+    * ``"lin:20=30-60"``
+Description
+    Number of seconds to sleep before
+    `retrying <extractor.*.retries_>`__
+    an HTTP request.
+
+    If this is a ``string``, its |Duration|_ value can be prefixed with
+    ``lin[:START[:MAX]]`` for `linear` or
+    ``exp[:BASE[:START[:MAX]]]`` for `exponential` growth.
+Note
+    | ``lin`` and ``exp`` can be any starting characters of
+      ``linear`` and ``exponential``.
+    | For example ``l``, ``li``, ``lin``, ``line``, ``linea``, or ``linear``.
+
+
 extractor.*.sleep-429
 ---------------------
 Type
@@ -545,16 +569,16 @@ Default
     ``60``
 Example
     * ``"30-50"``
-    * ``"exp=40"``
-    * ``"lin:20=30-60"``
+    * ``"e=40"``
+    * ``"linear:20=30-60"``
 Description
     Number of seconds to sleep when receiving a
     `429 Too Many Requests <https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429>`__
     response before `retrying <extractor.*.retries_>`__ the request.
 
     If this is a ``string``, its |Duration|_ value can be prefixed with
-    ``lin[:START[:MAX]]`` or ``exp[:BASE[:START[:MAX]]]``
-    for `linear` or `exponential` backoff respectively.
+    ``lin[:START[:MAX]]`` for `linear` or
+    ``exp[:BASE[:START[:MAX]]]`` for `exponential` backoff.
 
 
 extractor.*.sleep-request
