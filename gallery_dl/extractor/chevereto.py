@@ -108,6 +108,7 @@ class CheveretoImageExtractor(CheveretoExtractor):
         page = self.request(url).text
         extr = text.extract_from(page)
 
+        title = extr('property="og:title" content="', '"')
         url = (extr('<meta property="og:image" content="', '"') or
                extr('url: "', '"'))
         if not url or url.endswith("/loading.svg"):
@@ -122,6 +123,7 @@ class CheveretoImageExtractor(CheveretoExtractor):
         file = {
             "id"   : self.path.rpartition("/")[2].rpartition(".")[2],
             "url"  : url,
+            "title": text.unescape(title),
             "album": text.remove_html(album_name),
             "date" : self.parse_datetime_iso(extr('<span title="', '"')),
             "user" : extr('username: "', '"'),
