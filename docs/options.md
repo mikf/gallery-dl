@@ -138,7 +138,9 @@
 
 ## Configuration Options:
     -o, --option KEY=VALUE      Additional options. Example: -o browser=firefox
-    -c, --config FILE           Additional configuration files in JSON format
+    -c, --config FILE           Additional configuration files in default
+                                format
+    --config-json FILE          Additional configuration files in JSON format
     --config-yaml FILE          Additional configuration files in YAML format
     --config-toml FILE          Additional configuration files in TOML format
     --config-type TYPE          Set filetype of default configuration files
