@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2025 Mike Fährmann
+# Copyright 2019-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -196,7 +196,8 @@ class ExecTest(BasePostprocessorTest):
 
     def test_command_string(self):
         self._create({
-            "command": "echo {} {_path} {_temppath} {_directory} {_filename} "
+            "command": "echo {} {_path} {_path_unc} {_temppath} "
+                       "{_directory} {_directory_unc} {_filename} "
                        "&& rm {};",
         })
 
@@ -208,12 +209,14 @@ class ExecTest(BasePostprocessorTest):
 
         p.assert_called_once_with(
             (f"echo "
-             f"{self.pathfmt.realpath} "
+             f"{self.pathfmt.path} "
+             f"{self.pathfmt.path} "
              f"{self.pathfmt.realpath} "
              f"{self.pathfmt.temppath} "
+             f"{self.pathfmt.directory} "
              f"{self.pathfmt.realdirectory} "
              f"{self.pathfmt.filename} "
-             f"&& rm {self.pathfmt.realpath};"),
+             f"&& rm {self.pathfmt.path};"),
             shell=True,
             creationflags=0,
             start_new_session=False,
