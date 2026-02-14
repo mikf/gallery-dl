@@ -41,4 +41,9 @@ __tests__ = (
     "#class"   : eporner.EpornerGalleryExtractor,
 },
 
+{
+    "#url"     : "https://eporner.com/gallery/mHNhErACQFE",
+    "#class"   : eporner.EpornerGalleryExtractor,
+},
+
 )
