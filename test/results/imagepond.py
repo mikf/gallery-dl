@@ -56,6 +56,12 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.imagepond.net/i/chv_317512",
+    "#category": ("chevereto", "imagepond", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
+},
+
+{
     "#url"     : "https://imagepond.net/album/CDilP/?sort=date_desc&page=1",
     "#category": ("chevereto", "imagepond", "album"),
     "#class"   : chevereto.CheveretoAlbumExtractor,
