@@ -50,10 +50,8 @@ __tests__ = (
     "date"    : "type:datetime",
     "date_updated": "dt:2024-10-30 10:20:58",
     "lang"    : "en",
-    "language": "English",
     "manga"   : "Aria",
     "status"  : "Completed",
-    "title"   : "",
     "tags": [
         "Adventure",
         "Comedy",
