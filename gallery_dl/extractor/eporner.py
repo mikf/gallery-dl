@@ -23,6 +23,8 @@ class EpornerGalleryExtractor(GalleryExtractor):
         GalleryExtractor.__init__(self, match, url)
 
     def metadata(self, page):
+        if page.find("Age Verification<", 0, 240) >= 0:
+            raise self.exc.AuthRequired("Age Verification", "gallery")
         title = text.extr(page, "<title>", " - EPORNER</title>")
         if title.endswith(" Photo Gallery"):
             title = title[:-14]
