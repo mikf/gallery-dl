@@ -98,10 +98,10 @@ BASE_PATTERN = CheveretoExtractor.update({
 })
 
 
-class CheveretoImageExtractor(CheveretoExtractor):
-    """Extractor for chevereto images"""
-    subcategory = "image"
-    pattern = BASE_PATTERN + r"(/im(?:g|age)/[^/?#]+)"
+class CheveretoFileExtractor(CheveretoExtractor):
+    """Extractor for chevereto files"""
+    subcategory = "file"
+    pattern = BASE_PATTERN + r"(/(?:im(?:g|age)|video)/[^/?#]+)"
     example = "https://jpg7.cr/img/TITLE.ID"
 
     def items(self):
@@ -109,76 +109,67 @@ class CheveretoImageExtractor(CheveretoExtractor):
         page = self.request(url).text
         extr = text.extract_from(page)
 
+        type = text.extr(page, 'property="og:type" content="', '"')
         title = extr('property="og:title" content="', '"')
-        url = (extr('<meta property="og:image" content="', '"') or
-               extr('url: "', '"'))
-        if not url or url.endswith("/loading.svg"):
-            pos = page.find(" download=")
-            url = text.rextr(page, 'href="', '"', pos)
-            if not url.startswith("https://"):
-                url = util.decrypt_xor(
-                    url, b"seltilovessimpcity@simpcityhatesscrapers",
-                    fromhex=True)
 
-        album_url, _, album_name = extr("Added to <a", "</a>").rpartition(">")
-        file = {
-            "id"   : self.path.rpartition("/")[2].rpartition(".")[2],
-            "url"  : url,
-            "title": text.unescape(title),
-            "album": text.remove_html(album_name),
-            "date" : self.parse_datetime_iso(extr('<span title="', '"')),
-            "user" : extr('username: "', '"'),
-        }
+        if type == "video":
+            file = {
+                "id"       : self.path.rpartition(".")[2],
+                "type"     : "video",
+                "title"    : text.unescape(extr(
+                    'property="og:title" content="', '"')),
+                "thumbnail": extr(
+                    'property="og:image" content="', '"'),
+                "url"      : extr(
+                    'property="og:video" content="', '"'),
+                "width"    : text.parse_int(extr(
+                    'property="video:width" content="', '"')),
+                "height"   : text.parse_int(extr(
+                    'property="video:height" content="', '"')),
+                "duration" : extr(
+                    'class="far fa-clock"></i>', "—"),
+                "album"    : extr(
+                    "Added to <a", "</a>"),
+                "date"     : self.parse_datetime_iso(extr(
+                    '<span title="', '"')),
+                "user"     : extr('username: "', '"'),
+            }
 
-        file["album_slug"], _, file["album_id"] = text.rextr(
-            album_url, "/", '"').rpartition(".")
+            album_url, _, album_name = file["album"].rpartition(">")
+            file["album"] = text.remove_html(album_name)
+            file["album_slug"], _, file["album_id"] = text.rextr(
+                album_url, "/", '"').rpartition(".")
 
-        text.nameext_from_url(file["url"], file)
-        yield Message.Directory, "", file
-        yield Message.Url, file["url"], file
+            try:
+                min, _, sec = file["duration"].partition(":")
+                file["duration"] = int(min) * 60 + int(sec)
+            except Exception:
+                pass
+        else:
+            url = (extr('<meta property="og:image" content="', '"') or
+                   extr('url: "', '"'))
+            if not url or url.endswith("/loading.svg"):
+                pos = page.find(" download=")
+                url = text.rextr(page, 'href="', '"', pos)
+                if not url.startswith("https://"):
+                    url = util.decrypt_xor(
+                        url, b"seltilovessimpcity@simpcityhatesscrapers",
+                        fromhex=True)
 
+            album_url, _, album_name = extr(
+                "Added to <a", "</a>").rpartition(">")
+            file = {
+                "id"   : self.path.rpartition("/")[2].rpartition(".")[2],
+                "url"  : url,
+                "type" : type,
+                "title": text.unescape(title),
+                "album": text.remove_html(album_name),
+                "date" : self.parse_datetime_iso(extr('<span title="', '"')),
+                "user" : extr('username: "', '"'),
+            }
 
-class CheveretoVideoExtractor(CheveretoExtractor):
-    """Extractor for chevereto videos"""
-    subcategory = "video"
-    pattern = BASE_PATTERN + r"(/video/[^/?#]+)"
-    example = "https://imagepond.net/video/TITLE.ID"
-
-    def items(self):
-        url = self.root + self.path
-        page = self.request(url).text
-        extr = text.extract_from(page)
-
-        file = {
-            "id"       : self.path.rpartition(".")[2],
-            "title"    : text.unescape(extr(
-                'property="og:title" content="', '"')),
-            "thumbnail": extr(
-                'property="og:image" content="', '"'),
-            "url"      : extr(
-                'property="og:video" content="', '"'),
-            "width"    : text.parse_int(extr(
-                'property="video:width" content="', '"')),
-            "height"   : text.parse_int(extr(
-                'property="video:height" content="', '"')),
-            "duration" : extr(
-                'class="far fa-clock"></i>', "—"),
-            "album"    : extr(
-                "Added to <a", "</a>"),
-            "date"     : self.parse_datetime_iso(extr('<span title="', '"')),
-            "user"     : extr('username: "', '"'),
-        }
-
-        album_url, _, album_name = file["album"].rpartition(">")
-        file["album"] = text.remove_html(album_name)
-        file["album_slug"], _, file["album_id"] = text.rextr(
-            album_url, "/", '"').rpartition(".")
-
-        try:
-            min, _, sec = file["duration"].partition(":")
-            file["duration"] = int(min) * 60 + int(sec)
-        except Exception:
-            pass
+            file["album_slug"], _, file["album_id"] = text.rextr(
+                album_url, "/", '"').rpartition(".")
 
         text.nameext_from_url(file["url"], file)
         yield Message.Directory, "", file
@@ -193,19 +184,16 @@ class CheveretoAlbumExtractor(CheveretoExtractor):
 
     def items(self):
         url = self.root + self.path
-        data_image = {"_extractor": CheveretoImageExtractor}
-        data_video = {"_extractor": CheveretoVideoExtractor}
+        data = {"_extractor": CheveretoFileExtractor}
 
         if self.path.endswith("/sub"):
             albums = self._pagination(url)
         else:
             albums = (url,)
 
-        kwdict = self.kwdict
         for album in albums:
-            for kwdict["num"], item_url in enumerate(self._pagination(
+            for self.kwdict["num"], item_url in enumerate(self._pagination(
                     album, self._extract_metadata_album), 1):
-                data = data_video if "/video/" in item_url else data_image
                 yield Message.Queue, item_url, data
 
     def _extract_metadata_album(self, page):
@@ -229,7 +217,7 @@ class CheveretoCategoryExtractor(CheveretoExtractor):
     example = "https://imglike.com/category/TITLE"
 
     def items(self):
-        data = {"_extractor": CheveretoImageExtractor}
+        data = {"_extractor": CheveretoFileExtractor}
         for image in self._pagination(self.root + self.path):
             yield Message.Queue, image, data
 
@@ -241,11 +229,8 @@ class CheveretoUserExtractor(CheveretoExtractor):
     example = "https://jpg7.cr/USER"
 
     def items(self):
-        data_image = {"_extractor": CheveretoImageExtractor}
-        data_video = {"_extractor": CheveretoVideoExtractor}
+        data_file = {"_extractor": CheveretoFileExtractor}
         data_album = {"_extractor": CheveretoAlbumExtractor}
         for url in self._pagination(self.root + self.path):
-            data = (data_album if "/album/" in url else
-                    data_video if "/video/" in url else
-                    data_image)
+            data = data_album if "/album/" in url else data_file
             yield Message.Queue, url, data
