@@ -22,6 +22,7 @@ __tests__ = (
     "extension": "jpg",
     "filename" : "funnymeme",
     "id"       : "LecXGS",
+    "title"    : "funnymeme",
     "url"      : "https://simp3.selti-delivery.ru/images/funnymeme.jpg",
     "user"     : "exearco",
 },
@@ -111,6 +112,24 @@ __tests__ = (
     "#url"     : "https://www.jpg6.su/img/funnymeme.LecXGS",
     "#category": ("chevereto", "jpgfish", "image"),
     "#class"   : chevereto.CheveretoImageExtractor,
+},
+
+{
+    "#url"     : "https://jpg6.su/img/test.NLqFQHc",
+    "#category": ("chevereto", "jpgfish", "image"),
+    "#class"   : chevereto.CheveretoImageExtractor,
+    "#results" : "https://simp6.selti-delivery.ru/images3/test--2219f2531862b749d5.png",
+
+    "album"     : "",
+    "album_id"  : "",
+    "album_slug": "",
+    "date"      : "dt:2025-08-31 08:10:35",
+    "extension" : "png",
+    "filename"  : "test--2219f2531862b749d5",
+    "id"        : "NLqFQHc",
+    "title"     : """test テスト "&>""",
+    "url"       : "https://simp6.selti-delivery.ru/images3/test--2219f2531862b749d5.png",
+    "user"      : "gdldev",
 },
 
 {
