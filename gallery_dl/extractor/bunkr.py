@@ -10,7 +10,7 @@
 
 from .common import Extractor
 from .lolisafe import LolisafeAlbumExtractor
-from .. import text, util, config, exception
+from .. import text, util, config
 from ..cache import memcache
 import random
 
@@ -110,7 +110,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                 self.log.debug("Redirect to known CF challenge domain '%s'",
                                root)
 
-            except exception.HttpError as exc:
+            except self.exc.HttpError as exc:
                 if exc.status != 403:
                     raise
 
@@ -125,7 +125,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                     pass
                 else:
                     if not DOMAINS:
-                        raise exception.AbortExtraction(
+                        raise self.exc.AbortExtraction(
                             "All Bunkr domains require solving a CF challenge")
 
             # select alternative domain
@@ -172,15 +172,15 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
                     item, 'timestamp: "', '"'), "%H:%M:%S %d/%m/%Y")
 
                 yield file
-            except exception.ControlException:
+            except self.exc.ControlException:
                 raise
             except Exception as exc:
                 self.log.error("%s: %s", exc.__class__.__name__, exc)
                 self.log.debug("%s", item, exc_info=exc)
-                if isinstance(exc, exception.HttpError) and \
+                if isinstance(exc, self.exc.HttpError) and \
                         exc.status == 400 and \
                         exc.response.url.startswith(self.root_api):
-                    raise exception.AbortExtraction("Album deleted")
+                    raise self.exc.AbortExtraction("Album deleted")
 
     def _extract_file(self, data_id):
         referer = f"{self.root_dl}/file/{data_id}"

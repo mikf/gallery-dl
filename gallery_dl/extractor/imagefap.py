@@ -9,7 +9,7 @@
 """Extractors for https://www.imagefap.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|beta\.)?imagefap\.com"
 
@@ -31,7 +31,7 @@ class ImagefapExtractor(Extractor):
             self.log.warning("HTTP redirect to '%s'", response.url)
             if msg := text.extr(response.text, '<div class="mt-4', '<'):
                 msg = " ".join(msg.partition(">")[2].split())
-                raise exception.AbortExtraction(f"'{msg}'")
+                raise self.exc.AbortExtraction(f"'{msg}'")
 
         return response
 

@@ -10,7 +10,7 @@
 
 from .booru import BooruExtractor
 from .common import Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 import collections
 
@@ -284,7 +284,7 @@ class SankakuAPI():
             if response.status_code == 429:
                 until = response.headers.get("X-RateLimit-Reset")
                 if not until and b"_tags-explicit-limit" in response.content:
-                    raise exception.AuthorizationError(
+                    raise self.exc.AuthorizationError(
                         "Search tag limit exceeded")
                 seconds = None if until else 600
                 self.extractor.wait(until=until, seconds=seconds)
@@ -305,7 +305,7 @@ class SankakuAPI():
                     code = f"'{code.rpartition('__')[2].replace('-', ' ')}'"
                 except Exception:
                     pass
-                raise exception.AbortExtraction(code)
+                raise self.exc.AbortExtraction(code)
             return data
 
     def _pagination(self, endpoint, params):
@@ -365,5 +365,5 @@ def _authenticate_impl(extr, username, password):
     data = response.json()
 
     if response.status_code >= 400 or not data.get("success"):
-        raise exception.AuthenticationError(data.get("error"))
+        raise extr.exc.AuthenticationError(data.get("error"))
     return "Bearer " + data["access_token"]

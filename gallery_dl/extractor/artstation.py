@@ -9,7 +9,7 @@
 """Extractors for https://www.artstation.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 import itertools
 
 
@@ -121,7 +121,7 @@ class ArtstationExtractor(Extractor):
 
         try:
             data = self.request_json(url)
-        except exception.HttpError as exc:
+        except self.exc.HttpError as exc:
             self.log.warning(exc)
             return
 
@@ -239,7 +239,7 @@ class ArtstationAlbumExtractor(ArtstationExtractor):
             if album["id"] == self.album_id:
                 break
         else:
-            raise exception.NotFoundError("album")
+            raise self.exc.NotFoundError("album")
 
         return {
             "userinfo": userinfo,

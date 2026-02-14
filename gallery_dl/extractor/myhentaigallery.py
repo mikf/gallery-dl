@@ -7,7 +7,7 @@
 """Extractors for https://myhentaigallery.com/"""
 
 from .common import Extractor, GalleryExtractor, Message
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?myhentaigallery\.com"
 
@@ -40,7 +40,7 @@ class MyhentaigalleryGalleryExtractor(MyhentaigalleryBase, GalleryExtractor):
             title = title[4:]
 
         if not title:
-            raise exception.NotFoundError("gallery")
+            raise self.exc.NotFoundError("gallery")
 
         return {
             "title"     : text.unescape(title),

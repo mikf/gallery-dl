@@ -7,7 +7,7 @@
 """Extractors for https://urlgalleries.net/"""
 
 from .common import GalleryExtractor, Message
-from .. import text, exception
+from .. import text
 
 
 class UrlgalleriesGalleryExtractor(GalleryExtractor):
@@ -29,8 +29,8 @@ class UrlgalleriesGalleryExtractor(GalleryExtractor):
             if 300 <= response.status_code < 500:
                 if response.headers.get("location", "").endswith(
                         "/not_found_adult.php"):
-                    raise exception.NotFoundError("gallery")
-                raise exception.HttpError(None, response)
+                    raise self.exc.NotFoundError("gallery")
+                raise self.exc.HttpError(None, response)
             page = response.text
 
         imgs = self.images(page)

@@ -9,7 +9,7 @@
 """Extractors for https://www.pixiv.net/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, dt, exception
+from .. import text, util, dt
 from ..cache import cache, memcache
 import itertools
 import hashlib
@@ -205,7 +205,7 @@ class PixivExtractor(Extractor):
                         url = f"{base}0.{ext}"
                         self.request(url, method="HEAD")
                         break
-                    except exception.HttpError:
+                    except self.exc.HttpError:
                         pass
                 else:
                     self.log.warning(
@@ -329,7 +329,7 @@ class PixivExtractor(Extractor):
                 url = f"{base}_p0.{ext}"
                 self.request(url, method="HEAD")
                 return url
-            except exception.HttpError:
+            except self.exc.HttpError:
                 pass
 
     def _sanitize_ajax_caption(self, caption):
@@ -721,7 +721,7 @@ class PixivRankingExtractor(PixivExtractor):
         try:
             self.mode = mode = mode_map[mode]
         except KeyError:
-            raise exception.AbortExtraction(f"Invalid mode '{mode}'")
+            raise self.exc.AbortExtraction(f"Invalid mode '{mode}'")
 
         if date := query.get("date"):
             if len(date) == 8 and date.isdecimal():
@@ -772,7 +772,7 @@ class PixivSearchExtractor(PixivExtractor):
             try:
                 self.word = query["word"]
             except KeyError:
-                raise exception.AbortExtraction("Missing search term")
+                raise self.exc.AbortExtraction("Missing search term")
 
         sort = query.get("order", "date_d")
         sort_map = {
@@ -785,7 +785,7 @@ class PixivSearchExtractor(PixivExtractor):
         try:
             self.sort = sort = sort_map[sort]
         except KeyError:
-            raise exception.AbortExtraction(f"Invalid search order '{sort}'")
+            raise self.exc.AbortExtraction(f"Invalid search order '{sort}'")
 
         target = query.get("s_mode", "s_tag_full")
         target_map = {
@@ -796,7 +796,7 @@ class PixivSearchExtractor(PixivExtractor):
         try:
             self.target = target = target_map[target]
         except KeyError:
-            raise exception.AbortExtraction(f"Invalid search mode '{target}'")
+            raise self.exc.AbortExtraction(f"Invalid search mode '{target}'")
 
         self.date_start = query.get("scd")
         self.date_end = query.get("ecd")
@@ -1153,7 +1153,7 @@ class PixivAppAPI():
     @cache(maxage=3600, keyarg=1)
     def _login_impl(self, username):
         if not self.refresh_token:
-            raise exception.AuthenticationError(
+            raise self.exc.AuthenticationError(
                 "'refresh-token' required.\n"
                 "Run `gallery-dl oauth:pixiv` to get one.")
 
@@ -1178,7 +1178,7 @@ class PixivAppAPI():
             url, method="POST", headers=headers, data=data, fatal=False)
         if response.status_code >= 400:
             self.log.debug(response.text)
-            raise exception.AuthenticationError("Invalid refresh token")
+            raise self.exc.AuthenticationError("Invalid refresh token")
 
         data = response.json()["response"]
         return data["user"], "Bearer " + data["access_token"]
@@ -1305,7 +1305,7 @@ class PixivAppAPI():
             self.log.debug(data)
 
             if response.status_code == 404:
-                raise exception.NotFoundError()
+                raise self.exc.NotFoundError()
 
             error = data["error"]
             if "rate limit" in (error.get("message") or "").lower():
@@ -1315,7 +1315,7 @@ class PixivAppAPI():
             msg = (f"'{msg}'" if (msg := error.get("user_message")) else
                    f"'{msg}'" if (msg := error.get("message")) else
                    error)
-            raise exception.AbortExtraction("API request failed: " + msg)
+            raise self.exc.AbortExtraction("API request failed: " + msg)
 
     def _pagination(self, endpoint, params,
                     key_items="illusts", key_data=None, key_user=None):
@@ -1326,7 +1326,7 @@ class PixivAppAPI():
         if key_user is not None and not data[key_user].get("id"):
             user = self.user_detail(self.extractor.user_id, fatal=False)
             if user.get("error"):
-                raise exception.NotFoundError("user")
+                raise self.exc.NotFoundError("user")
             return
 
         while True:

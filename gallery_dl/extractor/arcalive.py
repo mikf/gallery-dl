@@ -7,7 +7,7 @@
 """Extractors for https://arca.live/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?arca\.live"
 
@@ -173,7 +173,7 @@ class ArcaliveAPI():
             msg = "API request failed: " + msg
         else:
             msg = "API request failed"
-        raise exception.AbortExtraction(msg)
+        raise self.exc.AbortExtraction(msg)
 
     def _pagination(self, endpoint, params, key):
         while True:

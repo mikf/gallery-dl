@@ -9,7 +9,7 @@
 """Extractors for https://www.plurk.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, dt, exception
+from .. import text, util, dt
 
 
 class PlurkExtractor(Extractor):
@@ -59,7 +59,7 @@ class PlurkExtractor(Extractor):
 
     def _load(self, data):
         if not data:
-            raise exception.NotFoundError("user")
+            raise self.exc.NotFoundError("user")
         return util.json_loads(
             text.re(r"new Date\(([^)]+)\)").sub(r"\1", data))
 

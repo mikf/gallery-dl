@@ -7,7 +7,7 @@
 """Extractors for Postmill instances"""
 
 from .common import BaseExtractor, Message
-from .. import text, exception
+from .. import text
 
 
 class PostmillExtractor(BaseExtractor):
@@ -102,7 +102,7 @@ class PostmillSubmissionsExtractor(PostmillExtractor):
             if response.history:
                 redirect_url = response.url
                 if redirect_url == self.root + "/login":
-                    raise exception.AbortExtraction(
+                    raise self.exc.AbortExtraction(
                         f"HTTP redirect to login page ({redirect_url})")
             page = response.text
 

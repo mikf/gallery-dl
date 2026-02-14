@@ -9,7 +9,7 @@
 """Extractors for https://fikfap.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?fikfap\.com"
 
@@ -78,7 +78,7 @@ class FikfapPostExtractor(FikfapExtractor):
 
         if post["postId"] == int(pid):
             return (post,)
-        raise exception.NotFoundError("post")
+        raise self.exc.NotFoundError("post")
 
 
 class FikfapUserExtractor(FikfapExtractor):

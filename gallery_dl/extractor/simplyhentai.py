@@ -9,7 +9,7 @@
 """Extract hentai-manga from https://www.simply-hentai.com/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 
 
 class SimplyhentaiGalleryExtractor(GalleryExtractor):
@@ -38,7 +38,7 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor):
         title = extr('<meta property="og:title" content="', '"')
         image = extr('<meta property="og:image" content="', '"')
         if not title:
-            raise exception.NotFoundError("gallery")
+            raise self.exc.NotFoundError("gallery")
         data = {
             "title"     : text.unescape(title),
             "gallery_id": text.parse_int(image.split("/")[-2]),

@@ -9,7 +9,7 @@
 """Extractors for https://www.civitai.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, util
 from ..cache import memcache
 import itertools
 import time
@@ -201,7 +201,7 @@ class CivitaiExtractor(Extractor):
         if "Authorization" not in self.api.headers and \
                 not self.cookies.get(
                 "__Secure-civitai-token", domain=".civitai.com"):
-            raise exception.AuthRequired(("api-key", "authenticated cookies"))
+            raise self.exc.AuthRequired(("api-key", "authenticated cookies"))
 
     def _parse_query(self, value):
         return text.parse_query_list(

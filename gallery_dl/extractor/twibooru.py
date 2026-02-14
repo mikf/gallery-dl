@@ -9,7 +9,7 @@
 """Extractors for https://twibooru.org/"""
 
 from .booru import BooruExtractor
-from .. import text, exception
+from .. import text
 import operator
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?twibooru\.org"
@@ -153,7 +153,7 @@ class TwibooruAPI():
 
             # error
             self.extractor.log.debug(response.content)
-            raise exception.HttpError("", response)
+            raise self.exc.HttpError("", response)
 
     def _pagination(self, endpoint, params):
         extr = self.extractor

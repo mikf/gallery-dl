@@ -9,7 +9,7 @@
 """Extractors for https://manga.madokami.al/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?manga\.madokami\.al"
 
@@ -31,7 +31,7 @@ class MadokamiMangaExtractor(MadokamiExtractor):
     def items(self):
         username, password = self._get_auth_info()
         if not username:
-            raise exception.AuthRequired("username & password")
+            raise self.exc.AuthRequired("username & password")
         self.session.auth = util.HTTPBasicAuth(username, password)
 
         url = f"{self.root}/Manga/{self.groups[0]}"

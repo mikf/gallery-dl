@@ -9,7 +9,7 @@
 """Extractors for https://seiga.nicovideo.jp/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 
 
@@ -45,7 +45,7 @@ class SeigaExtractor(Extractor):
         url = f"{self.root}/image/source/{image_id}"
         location = self.request_location(url, notfound="image")
         if "nicovideo.jp/login" in location:
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"HTTP redirect to login page ({location.partition('?')[0]})")
         return location.replace("/o/", "/priv/", 1)
 
@@ -57,7 +57,7 @@ class SeigaExtractor(Extractor):
         if username:
             return self.cookies_update(self._login_impl(username, password))
 
-        raise exception.AuthorizationError(
+        raise self.exc.AuthorizationError(
             "username & password or 'user_session' cookie required")
 
     @cache(maxage=365*86400, keyarg=1)
@@ -76,7 +76,7 @@ class SeigaExtractor(Extractor):
         response = self.request(url, method="POST", data=data)
 
         if "message=cant_login" in response.url:
-            raise exception.AuthenticationError()
+            raise self.exc.AuthenticationError()
 
         if "/mfa" in response.url:
             page = response.text
@@ -93,7 +93,7 @@ class SeigaExtractor(Extractor):
 
             if not response.history and \
                     b"Confirmation code is incorrect" in response.content:
-                raise exception.AuthenticationError(
+                raise self.exc.AuthenticationError(
                     "Incorrect Confirmation Code")
 
         return {
@@ -133,7 +133,7 @@ class SeigaUserExtractor(SeigaExtractor):
         ))[0]
 
         if not data["name"] and "ユーザー情報が取得出来ませんでした" in page:
-            raise exception.NotFoundError("user")
+            raise self.exc.NotFoundError("user")
 
         return {
             "user": {

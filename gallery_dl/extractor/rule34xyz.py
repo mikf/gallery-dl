@@ -9,7 +9,7 @@
 """Extractors for https://rule34.xyz/"""
 
 from .booru import BooruExtractor
-from .. import text, exception
+from .. import text
 from ..cache import cache
 import collections
 
@@ -129,7 +129,7 @@ class Rule34xyzExtractor(BooruExtractor):
 
         if jwt := response.get("jwt"):
             return "Bearer " + jwt
-        raise exception.AuthenticationError(
+        raise self.exc.AuthenticationError(
             (msg := response.get("message")) and f'"{msg}"')
 
 

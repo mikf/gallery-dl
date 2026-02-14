@@ -7,7 +7,7 @@
 """Extractors for https://www.bilibili.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 
 
 class BilibiliExtractor(Extractor):
@@ -123,7 +123,7 @@ class BilibiliAPI():
 
         if data["code"]:
             self.extractor.log.debug("Server response: %s", data)
-            raise exception.AbortExtraction("API request failed")
+            raise self.exc.AbortExtraction("API request failed")
 
         return data
 
@@ -151,7 +151,7 @@ class BilibiliAPI():
                     page, "window.__INITIAL_STATE__=", "};") + "}")
             except Exception:
                 if "window._riskdata_" not in page:
-                    raise exception.AbortExtraction(
+                    raise self.exc.AbortExtraction(
                         article_id + ": Unable to extract INITIAL_STATE data")
             self.extractor.wait(seconds=300)
 
@@ -174,9 +174,9 @@ class BilibiliAPI():
 
         if data["code"] != 0:
             self.extractor.log.debug("Server response: %s", data)
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 "API request failed. Are you logges in?")
         try:
             return data["data"]["profile"]["mid"]
         except Exception:
-            raise exception.AbortExtraction("API request failed")
+            raise self.exc.AbortExtraction("API request failed")

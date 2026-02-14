@@ -9,7 +9,7 @@
 """Extractors for https://mangadex.org/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache, memcache
 from collections import defaultdict
 
@@ -129,7 +129,7 @@ class MangadexChapterExtractor(MangadexExtractor):
             data = self._transform(chapter)
 
         if data.get("_external_url") and not data["count"]:
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"Chapter {data['chapter']}{data['chapter_minor']} is not "
                 f"available on MangaDex and can instead be read on the "
                 f"official publisher's website at {data['_external_url']}.")
@@ -333,7 +333,7 @@ class MangadexAPI():
         try:
             access_token = data["access_token"]
         except Exception:
-            raise exception.AuthenticationError(data.get("error_description"))
+            raise self.exc.AuthenticationError(data.get("error_description"))
 
         if refresh_token != data.get("refresh_token"):
             _refresh_token_cache.update(
@@ -356,7 +356,7 @@ class MangadexAPI():
         data = self.extractor.request_json(
             url, method="POST", json=json, fatal=None)
         if data.get("result") != "ok":
-            raise exception.AuthenticationError()
+            raise self.exc.AuthenticationError()
 
         if refresh_token != data["token"]["refresh"]:
             _refresh_token_cache.update(username, data["token"]["refresh"])
@@ -381,7 +381,7 @@ class MangadexAPI():
 
             msg = ", ".join(f'{error["title"]}: "{error["detail"]}"'
                             for error in response.json()["errors"])
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"{response.status_code} {response.reason} ({msg})")
 
     def _pagination_chapters(self, endpoint, params=None, auth=False):

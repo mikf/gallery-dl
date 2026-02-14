@@ -9,7 +9,7 @@
 """Extractors for https://www.behance.net/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 
 
 class BehanceExtractor(Extractor):
@@ -139,13 +139,13 @@ class BehanceGalleryExtractor(BehanceExtractor):
         if not data["modules"]:
             access = data.get("matureAccess")
             if access == "logged-out":
-                raise exception.AuthorizationError(
+                raise self.exc.AuthorizationError(
                     "Mature content galleries require logged-in cookies")
             if access == "restricted-safe":
-                raise exception.AuthorizationError(
+                raise self.exc.AuthorizationError(
                     "Mature content blocked in account settings")
             if access and access != "allowed":
-                raise exception.AuthorizationError()
+                raise self.exc.AuthorizationError()
             return ()
 
         results = []

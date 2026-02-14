@@ -9,7 +9,7 @@
 """Extractors for https://www.deviantart.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, dt, exception
+from .. import text, util, dt
 from ..cache import cache, memcache
 import collections
 import mimetypes
@@ -123,7 +123,7 @@ class DeviantartExtractor(Extractor):
                     self.group = False
                 elif group == "skip":
                     self.log.info("Skipping group '%s'", self.user)
-                    raise exception.AbortExtraction()
+                    raise self.exc.AbortExtraction()
                 else:
                     self.subcategory = "group-" + self.subcategory
                     self.group = True
@@ -457,7 +457,7 @@ class DeviantartExtractor(Extractor):
                     for subfolder in folder["subfolders"]:
                         if subfolder["folderid"] == uuid:
                             return subfolder
-        raise exception.NotFoundError("folder")
+        raise self.exc.NotFoundError("folder")
 
     def _folder_urls(self, folders, category, extractor):
         base = f"{self.root}/{self.user}/{category}/"
@@ -1027,7 +1027,7 @@ class DeviantartDeviationExtractor(DeviantartExtractor):
         page = self._limited_request(url, notfound=True).text
         uuid = text.extr(page, '"deviationUuid\\":\\"', '\\')
         if not uuid:
-            raise exception.NotFoundError("deviation")
+            raise self.exc.NotFoundError("deviation")
 
         deviation = self.api.deviation(uuid)
         deviation["_page"] = page
@@ -1111,7 +1111,7 @@ class DeviantartSearchExtractor(DeviantartExtractor):
             response = self.request(url, params=params)
 
             if response.history and "/users/login" in response.url:
-                raise exception.AbortExtraction("HTTP redirect to login page")
+                raise self.exc.AbortExtraction("HTTP redirect to login page")
             page = response.text
 
             for user, type, did in find(page)[:-3:3]:
@@ -1476,7 +1476,7 @@ class DeviantartOAuthAPI():
 
         if response.status_code != 200:
             self.log.debug("Server response: %s", data)
-            raise exception.AuthenticationError(
+            raise self.exc.AuthenticationError(
                 f"\"{data.get('error_description')}\" ({data.get('error')})")
         if refresh_token_key:
             _refresh_token_cache.update(
@@ -1515,9 +1515,9 @@ class DeviantartOAuthAPI():
 
             error = data.get("error_description")
             if error == "User not found.":
-                raise exception.NotFoundError("user or group")
+                raise self.exc.NotFoundError("user or group")
             if error == "Deviation not downloadable.":
-                raise exception.AuthorizationError()
+                raise self.exc.AuthorizationError()
 
             self.log.debug(response.text)
             msg = f"API responded with {status} {response.reason}"
@@ -1808,7 +1808,7 @@ class DeviantartEclipseAPI():
 
         pos = page.find('\\"name\\":\\"watching\\"')
         if pos < 0:
-            raise exception.NotFoundError("'watching' module ID")
+            raise self.exc.NotFoundError("'watching' module ID")
         module_id = text.rextr(page, '\\"id\\":', ',', pos).strip('" ')
 
         self._fetch_csrf_token(page)
@@ -1863,7 +1863,7 @@ def _login_impl(extr, username, password):
     response = extr.request(url, method="POST", data=data)
 
     if not response.history:
-        raise exception.AuthenticationError()
+        raise extr.exc.AuthenticationError()
 
     return {
         cookie.name: cookie.value

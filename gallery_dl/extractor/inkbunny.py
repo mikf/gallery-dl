@@ -9,7 +9,7 @@
 """Extractors for https://inkbunny.net/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 from ..cache import cache
 
 
@@ -278,7 +278,7 @@ class InkbunnyPostExtractor(InkbunnyExtractor):
     def posts(self):
         submissions = self.api.detail(({"submission_id": self.submission_id},))
         if submissions[0] is None:
-            raise exception.NotFoundError("submission")
+            raise self.exc.NotFoundError("submission")
         return submissions
 
 
@@ -348,7 +348,7 @@ class InkbunnyAPI():
                 self.authenticate(invalidate=True)
                 continue
 
-            raise exception.AbortExtraction(data.get("error_message"))
+            raise self.exc.AbortExtraction(data.get("error_message"))
 
     def _pagination_search(self, params):
         params["page"] = 1
@@ -379,5 +379,5 @@ def _authenticate_impl(api, username, password):
     data = api.extractor.request_json(url, method="POST", data=data)
 
     if "sid" not in data:
-        raise exception.AuthenticationError(data.get("error_message"))
+        raise Extractor.exc.AuthenticationError(data.get("error_message"))
     return data["sid"]

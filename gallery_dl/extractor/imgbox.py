@@ -9,7 +9,7 @@
 """Extractors for https://imgbox.com/"""
 
 from .common import Extractor, Message, AsynchronousMixin
-from .. import text, exception
+from .. import text
 
 
 class ImgboxExtractor(Extractor):
@@ -68,7 +68,7 @@ class ImgboxGalleryExtractor(AsynchronousMixin, ImgboxExtractor):
     def get_job_metadata(self):
         page = self.request(self.root + "/g/" + self.gallery_key).text
         if "The specified gallery could not be found." in page:
-            raise exception.NotFoundError("gallery")
+            raise self.exc.NotFoundError("gallery")
         self.image_keys = text.re(
             r'<a href="/([^"]+)"><img alt="').findall(page)
 
@@ -104,5 +104,5 @@ class ImgboxImageExtractor(ImgboxExtractor):
     def get_image_metadata(self, page):
         data = ImgboxExtractor.get_image_metadata(self, page)
         if not data["filename"]:
-            raise exception.NotFoundError("image")
+            raise self.exc.NotFoundError("image")
         return data

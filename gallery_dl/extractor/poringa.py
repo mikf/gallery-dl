@@ -7,7 +7,7 @@
 """Extractors for http://www.poringa.net/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 from ..cache import cache
 import itertools
 
@@ -32,7 +32,7 @@ class PoringaExtractor(Extractor):
 
             try:
                 response = self.request(url)
-            except exception.HttpError as exc:
+            except self.exc.HttpError as exc:
                 self.log.warning(
                     "Unable to fetch posts for '%s' (%s)", post_id, exc)
                 continue

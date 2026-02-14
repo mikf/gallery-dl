@@ -9,7 +9,7 @@
 """Extractors for https://www.mangoxo.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 from ..cache import cache
 import hashlib
 import time
@@ -50,7 +50,7 @@ class MangoxoExtractor(Extractor):
 
         data = response.json()
         if str(data.get("result")) != "1":
-            raise exception.AuthenticationError(data.get("msg"))
+            raise self.exc.AuthenticationError(data.get("msg"))
         return {"SESSION": self.cookies.get("SESSION")}
 
     def _sign_by_md5(self, username, password, token):

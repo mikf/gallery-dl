@@ -9,7 +9,7 @@
 """Extractors for https://kemono.cr/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache, memcache
 import itertools
 import json
@@ -98,7 +98,7 @@ class KemonoExtractor(Extractor):
                     try:
                         creator = creator_info[key] = self.api.creator_profile(
                             service, creator_id)
-                    except exception.HttpError:
+                    except self.exc.HttpError:
                         self.log.warning("%s/%s/%s: 'Creator not found'",
                                          service, creator_id, post["id"])
                         creator = creator_info[key] = util.NONE
@@ -211,7 +211,7 @@ class KemonoExtractor(Extractor):
                 msg = f'"{response.json()["error"]}"'
             except Exception:
                 msg = '"Username or password is incorrect"'
-            raise exception.AuthenticationError(msg)
+            raise self.exc.AuthenticationError(msg)
 
         return {c.name: c.value for c in response.cookies}
 
@@ -399,7 +399,7 @@ class KemonoPostExtractor(KemonoExtractor):
             if str(rev["revision_id"]) == revision_id:
                 return (rev,)
 
-        raise exception.NotFoundError("revision")
+        raise self.exc.NotFoundError("revision")
 
 
 class KemonoDiscordExtractor(KemonoExtractor):
@@ -419,7 +419,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
             server, channels = discord_server_info(self, server_id)
             channel = channels[channel_id]
         except Exception:
-            raise exception.NotFoundError("channel")
+            raise self.exc.NotFoundError("channel")
 
         data = {
             "server"       : server["name"],

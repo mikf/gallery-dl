@@ -7,7 +7,7 @@
 """Extractors for https://discord.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?discord\.com"
 
@@ -167,10 +167,10 @@ class DiscordExtractor(Extractor):
                         yield from self.extract_channel(
                             channel["channel_id"], safe=True)
             elif not safe:
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     "This channel type is not supported."
                 )
-        except exception.HttpError as exc:
+        except self.exc.HttpError as exc:
             if not (exc.status == 403 and safe):
                 raise
 
@@ -474,7 +474,7 @@ class DiscordAPI():
         try:
             response = self.extractor.request(
                 url, params=params, headers=self.headers)
-        except exception.HttpError as exc:
+        except self.exc.HttpError as exc:
             if exc.status == 401:
                 self._raise_invalid_token()
             raise
@@ -490,7 +490,7 @@ class DiscordAPI():
             offset += len(data)
 
     def _raise_invalid_token(self):
-        raise exception.AuthenticationError("""Invalid or missing token.
+        raise self.exc.AuthenticationError("""Invalid or missing token.
 Please provide a valid token following these instructions:
 
 1) Open Discord in your browser (https://discord.com/app);

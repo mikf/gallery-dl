@@ -9,7 +9,7 @@
 """Extractors for https://motherless.com/"""
 
 from .common import Extractor, Message
-from .. import text, dt, exception
+from .. import text, dt
 from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?motherless\.com"
@@ -28,7 +28,7 @@ class MotherlessExtractor(Extractor):
         content = response.content
         if (b'<div class="error-page' in content or
                 b">The page you're looking for cannot be found.<" in content):
-            raise exception.NotFoundError("page")
+            raise self.exc.NotFoundError("page")
 
         self.request = Extractor.request.__get__(self)
         return response

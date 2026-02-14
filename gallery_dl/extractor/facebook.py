@@ -7,7 +7,7 @@
 """Extractors for https://www.facebook.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, util
 from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?facebook\.com"
@@ -236,12 +236,12 @@ class FacebookExtractor(Extractor):
         res = self.request(url, **kwargs)
 
         if res.url.startswith(self.root + "/login"):
-            raise exception.AuthRequired(
+            raise self.exc.AuthRequired(
                 message=("You must be logged in to continue viewing images." +
                          LEFT_OFF_TXT))
 
         if b'{"__dr":"CometErrorRoot.react"}' in res.content:
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 "You've been temporarily blocked from viewing images.\n"
                 "Please try using a different account, "
                 "using a VPN or waiting before you retry." + LEFT_OFF_TXT)
@@ -331,7 +331,7 @@ class FacebookExtractor(Extractor):
                 break
             if ('"props":{"title":"This content isn\'t available right now"' in
                     page):
-                raise exception.AuthRequired(
+                raise self.exc.AuthRequired(
                     "authenticated cookies", "profile",
                     "This content isn't available right now")
 

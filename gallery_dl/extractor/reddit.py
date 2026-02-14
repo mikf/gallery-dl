@@ -9,7 +9,7 @@
 """Extractors for https://www.reddit.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 
 
@@ -525,7 +525,7 @@ class RedditAPI():
 
         if response.status_code != 200:
             self.log.debug("Server response: %s", data)
-            raise exception.AuthenticationError(
+            raise self.exc.AuthenticationError(
                 f"\"{data.get('error')}: {data.get('message')}\"")
         return "Bearer " + data["access_token"]
 
@@ -555,16 +555,16 @@ class RedditAPI():
             try:
                 data = response.json()
             except ValueError:
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     text.remove_html(response.text))
 
             if "error" in data:
                 if data["error"] == 403:
-                    raise exception.AuthorizationError()
+                    raise self.exc.AuthorizationError()
                 if data["error"] == 404:
-                    raise exception.NotFoundError()
+                    raise self.exc.NotFoundError()
                 self.log.debug(data)
-                raise exception.AbortExtraction(data.get("message"))
+                raise self.exc.AbortExtraction(data.get("message"))
             return data
 
     def _pagination(self, endpoint, params):
@@ -592,7 +592,7 @@ class RedditAPI():
                         if post["num_comments"] and self.comments:
                             try:
                                 yield self.submission(post["id"])
-                            except exception.AuthorizationError:
+                            except self.exc.AuthorizationError:
                                 pass
                         else:
                             yield post, ()

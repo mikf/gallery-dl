@@ -9,7 +9,7 @@
 """Extractors for https://downloads.khinsider.com/"""
 
 from .common import Extractor, Message, AsynchronousMixin
-from .. import text, exception
+from .. import text
 
 
 class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
@@ -32,7 +32,7 @@ class KhinsiderSoundtrackExtractor(AsynchronousMixin, Extractor):
         url = self.root + "/game-soundtracks/album/" + self.album
         page = self.request(url, encoding="utf-8").text
         if "Download all songs at once:" not in page:
-            raise exception.NotFoundError("soundtrack")
+            raise self.exc.NotFoundError("soundtrack")
 
         data = self.metadata(page)
         yield Message.Directory, "", data

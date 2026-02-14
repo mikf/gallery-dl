@@ -9,7 +9,7 @@
 """Utility classes to setup OAuth and link accounts to gallery-dl"""
 
 from .common import Extractor
-from .. import text, oauth, util, config, exception
+from .. import text, oauth, util, config
 from ..output import stdout_write
 from ..cache import cache, memcache
 
@@ -74,7 +74,7 @@ class OAuthBase(Extractor):
                 msg = "Received invalid"
             if exc:
                 exc = f" ({exc.__class__.__name__}: {exc})"
-            raise exception.AbortExtraction(f"{msg} OAuth response{exc}")
+            raise self.exc.AbortExtraction(f"{msg} OAuth response{exc}")
 
     def send(self, msg):
         """Send 'msg' to the socket opened in 'recv()'"""
@@ -396,7 +396,7 @@ class OAuthMastodon(OAuthBase):
         data = self.request_json(url, method="POST", data=data)
 
         if "client_id" not in data or "client_secret" not in data:
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"Failed to register new application: '{data}'")
 
         data["client-id"] = data.pop("client_id")

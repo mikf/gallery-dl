@@ -9,7 +9,7 @@
 """Extractors for https://kabe-uchiroom.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 
 class KabeuchiUserExtractor(Extractor):
@@ -47,7 +47,7 @@ class KabeuchiUserExtractor(Extractor):
         url = f"{self.root}/mypage/?id={uid}"
         response = self.request(url)
         if response.history and response.url == self.root + "/":
-            raise exception.NotFoundError("user")
+            raise self.exc.NotFoundError("user")
         target_id = text.extr(response.text, 'user_friend_id = "', '"')
         return self._pagination(target_id)
 

@@ -9,7 +9,7 @@
 """Extractors for https://www.bellazon.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?bellazon\.com/main"
 
@@ -207,7 +207,7 @@ class BellazonPostExtractor(BellazonExtractor):
 
         pos = page.find('id="elComment_' + post_id)
         if pos < 0:
-            raise exception.NotFoundError("post")
+            raise self.exc.NotFoundError("post")
         html = text.extract(page, "<article ", "</article>", pos-100)[0]
 
         self.kwdict["thread"] = self._parse_thread(page)

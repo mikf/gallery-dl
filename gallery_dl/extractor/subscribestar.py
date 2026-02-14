@@ -9,7 +9,7 @@
 """Extractors for https://www.subscribestar.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?subscribestar\.(com|adult)"
@@ -71,7 +71,7 @@ class SubscribestarExtractor(Extractor):
             if response.history and (
                     "/verify_subscriber" in response.url or
                     "/age_confirmation_warning" in response.url):
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     "HTTP redirect to " + response.url)
 
             content = response.content
@@ -127,7 +127,7 @@ class SubscribestarExtractor(Extractor):
                     msg = f'"{errors.popitem()[1]}"'
                 except Exception:
                     msg = None
-                raise exception.AuthenticationError(msg)
+                raise self.exc.AuthenticationError(msg)
             return response
 
         # submit username / email

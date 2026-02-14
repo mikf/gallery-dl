@@ -7,7 +7,7 @@
 """Extractors for https://pholder.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?pholder\.com"
 
@@ -50,7 +50,7 @@ class PholderExtractor(Extractor):
                 except ValueError:
                     pass
 
-        raise exception.AbortExtraction("Could not locate window.data JSON.")
+        raise self.exc.AbortExtraction("Could not locate window.data JSON.")
 
     def _posts(self, page_url):
         params = {"page": 1}

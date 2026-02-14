@@ -7,7 +7,7 @@
 """Extractors for https://www.boosty.to/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 import itertools
 
 BASE_PATTERN = r"(?:https?://)?boosty\.to"
@@ -380,14 +380,14 @@ class BoostyAPI():
                 return response.json()
 
             elif response.status_code < 400:
-                raise exception.AuthenticationError("Invalid API access token")
+                raise self.exc.AuthenticationError("Invalid API access token")
 
             elif response.status_code == 429:
                 self.extractor.wait(seconds=600)
 
             else:
                 self.extractor.log.debug(response.text)
-                raise exception.AbortExtraction("API request failed")
+                raise self.exc.AbortExtraction("API request failed")
 
     def _pagination(self, endpoint, params, transform=None, key=None):
         if "is_only_allowed" not in params and self.extractor.only_allowed:

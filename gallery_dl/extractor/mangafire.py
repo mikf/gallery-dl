@@ -9,7 +9,7 @@
 """Extractors for https://mangafire.to/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, exception
+from .. import text
 from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangafire\.to"
@@ -42,7 +42,7 @@ class MangafireChapterExtractor(MangafireBase, ChapterExtractor):
             chapters = _manga_chapters(self, (manga_id, self.type, lang))
             anchor = chapters[chapter_info]
         except KeyError:
-            raise exception.NotFoundError("chapter")
+            raise self.exc.NotFoundError("chapter")
         self.chapter_id = text.extr(anchor, 'data-id="', '"')
 
         return {

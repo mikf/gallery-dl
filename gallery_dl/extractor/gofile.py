@@ -7,7 +7,7 @@
 """Extractors for https://gofile.io/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 from ..cache import cache, memcache
 import hashlib
 
@@ -44,7 +44,7 @@ class GofileFolderExtractor(Extractor):
         try:
             contents = folder.pop("children")
         except KeyError:
-            raise exception.AuthorizationError("Password required")
+            raise self.exc.AuthorizationError("Password required")
 
         num = 0
         for content in contents.values():
@@ -94,10 +94,10 @@ class GofileFolderExtractor(Extractor):
 
         if response["status"] != "ok":
             if response["status"] == "error-notFound":
-                raise exception.NotFoundError("content")
+                raise self.exc.NotFoundError("content")
             if response["status"] == "error-passwordRequired":
-                raise exception.AuthorizationError("Password required")
-            raise exception.AbortExtraction(
+                raise self.exc.AuthorizationError("Password required")
+            raise self.exc.AbortExtraction(
                 f"{endpoint} failed (Status: {response['status']})")
 
         return response["data"]

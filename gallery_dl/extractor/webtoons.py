@@ -10,7 +10,7 @@
 """Extractors for https://www.webtoons.com/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import exception, text, util
+from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com"
 LANG_PATTERN = BASE_PATTERN + r"/(([^/?#]+)"
@@ -40,7 +40,7 @@ class WebtoonsBase():
     def request(self, url, **kwargs):
         response = Extractor.request(self, url, **kwargs)
         if response.history and "/ageGate" in response.url:
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"HTTP redirect to age gate check ('{response.url}')")
         return response
 

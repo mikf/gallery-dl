@@ -9,7 +9,7 @@
 """Extractors for https://www.tumblr.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, dt, oauth, exception
+from .. import text, util, dt, oauth
 
 
 BASE_PATTERN = (
@@ -473,7 +473,7 @@ class TumblrAPI(oauth.OAuth1API):
             self.log.debug(data)
 
             if status == 403:
-                raise exception.AuthorizationError()
+                raise self.exc.AuthorizationError()
 
             elif status == 404:
                 try:
@@ -492,8 +492,8 @@ class TumblrAPI(oauth.OAuth1API):
                     else:
                         self.log.info("Run 'gallery-dl oauth:tumblr' "
                                       "to access dashboard-only blogs")
-                    raise exception.AuthorizationError(error)
-                raise exception.NotFoundError("user or post")
+                    raise self.exc.AuthorizationError(error)
+                raise self.exc.NotFoundError("user or post")
 
             elif status == 429:
                 # daily rate limit
@@ -514,7 +514,7 @@ class TumblrAPI(oauth.OAuth1API):
                         continue
 
                     t = (dt.now() + dt.timedelta(0, float(reset))).time()
-                    raise exception.AbortExtraction(
+                    raise self.exc.AbortExtraction(
                         f"Aborting - Rate limit will reset at "
                         f"{t.hour:02}:{t.minute:02}:{t.second:02}")
 
@@ -524,7 +524,7 @@ class TumblrAPI(oauth.OAuth1API):
                     self.extractor.wait(seconds=reset)
                     continue
 
-            raise exception.AbortExtraction(data)
+            raise self.exc.AbortExtraction(data)
 
     def _pagination(self, endpoint, params,
                     blog=None, key="posts", cache=False):

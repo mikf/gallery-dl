@@ -9,7 +9,7 @@
 """Extractors for https://readcomiconline.li/"""
 
 from .common import Extractor, ChapterExtractor, MangaExtractor
-from .. import text, exception
+from .. import text
 import binascii
 
 BASE_PATTERN = r"(?i)(?:https?://)?(?:www\.)?readcomiconline\.(?:li|to)"
@@ -36,7 +36,7 @@ class ReadcomiconlineBase():
                     "the CAPTCHA, and press ENTER to continue", response.url)
                 self.input()
             else:
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     f"Redirect to \n{response.url}\nVisit this URL in your "
                     f"browser and solve the CAPTCHA to continue")
 

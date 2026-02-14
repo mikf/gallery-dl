@@ -7,7 +7,7 @@
 """Extractors for https://www.iwara.tv/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache, memcache
 import hashlib
 
@@ -100,7 +100,7 @@ class IwaraExtractor(Extractor):
         if type == "user":
             return self.items_user(results)
 
-        raise exception.AbortExtraction(f"Unsupported result type '{type}'")
+        raise self.exc.AbortExtraction(f"Unsupported result type '{type}'")
 
     def extract_media_info(self, item, key, include_file_info=True):
         info = {
@@ -344,7 +344,7 @@ class IwaraAPI():
 
     def favorites(self, type):
         if not self.username:
-            raise exception.AuthRequired(
+            raise self.exc.AuthRequired(
                 "username & password", "your favorites")
         endpoint = f"/favorites/{type}s"
         return self._pagination(endpoint)
@@ -398,7 +398,7 @@ class IwaraAPI():
 
             if not (refresh_token := data.get("token")):
                 self.extractor.log.debug(data)
-                raise exception.AuthenticationError(data.get("message"))
+                raise self.exc.AuthenticationError(data.get("message"))
             _refresh_token_cache.update(username, refresh_token)
 
         self.extractor.log.info("Refreshing access token for %s", username)
@@ -410,7 +410,7 @@ class IwaraAPI():
 
         if not (access_token := data.get("accessToken")):
             self.extractor.log.debug(data)
-            raise exception.AuthenticationError(data.get("message"))
+            raise self.exc.AuthenticationError(data.get("message"))
         return "Bearer " + access_token
 
     def _call(self, endpoint, params=None, headers=None):

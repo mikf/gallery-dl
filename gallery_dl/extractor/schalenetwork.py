@@ -9,7 +9,7 @@
 """Extractors for https://niyaniya.moe/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text, exception
+from .. import text
 import collections
 
 BASE_PATTERN = (
@@ -66,7 +66,7 @@ class SchalenetworkExtractor(Extractor):
         if token := self.config("token"):
             return "Bearer " + token.rpartition(' ')[2]
         if required:
-            raise exception.AuthRequired("'token'", "your favorites")
+            raise self.exc.AuthRequired("'token'", "your favorites")
 
     def _crt(self):
         crt = self.config("crt")
@@ -88,7 +88,7 @@ class SchalenetworkExtractor(Extractor):
             msg = None
         else:
             msg = f"{exc.status} {exc.response.reason}"
-        raise exception.AuthRequired(
+        raise self.exc.AuthRequired(
             "'crt' query parameter & matching 'user-agent'", None, msg)
 
 
@@ -153,7 +153,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
         try:
             data_fmt = self.request_json(
                 url, method="POST", headers=headers)
-        except exception.HttpError as exc:
+        except self.exc.HttpError as exc:
             self._require_auth(exc)
 
         self.fmt = self._select_format(data_fmt["data"])
@@ -217,7 +217,7 @@ class SchalenetworkGalleryExtractor(SchalenetworkExtractor, GalleryExtractor):
                 self.log.debug("%s: Format %s is not available",
                                self.groups[1], fmtid)
         else:
-            raise exception.NotFoundError("format")
+            raise self.exc.NotFoundError("format")
 
         self.log.debug("%s: Selected format %s", self.groups[1], fmtid)
         fmt["w"] = fmtid

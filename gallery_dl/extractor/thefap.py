@@ -7,7 +7,7 @@
 """Extractors for https://thefap.net/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?thefap\.net"
 
@@ -47,7 +47,7 @@ class ThefapPostExtractor(ThefapExtractor):
 
         page = self.request(self.root + path).text
         if "Not Found" in page:
-            raise exception.NotFoundError("post")
+            raise self.exc.NotFoundError("post")
 
         if model_name := text.extr(page, "<title>", " / "):
             model_name = text.unescape(model_name)
@@ -86,7 +86,7 @@ class ThefapModelExtractor(ThefapExtractor):
         page = self.request(url).text
 
         if 'id="content"' not in page:
-            raise exception.NotFoundError("model")
+            raise self.exc.NotFoundError("model")
 
         if model_name := text.extr(page, "<h2", "</h2>"):
             model_name = text.unescape(model_name[model_name.find(">")+1:])

@@ -9,7 +9,7 @@
 """Extractors for https://www.erome.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 import itertools
 
@@ -74,12 +74,12 @@ class EromeAlbumExtractor(EromeExtractor):
 
         try:
             page = self.request(url).text
-        except exception.HttpError as exc:
+        except self.exc.HttpError as exc:
             if exc.status == 410:
                 msg = text.extr(exc.response.text, "<h1>", "<")
             else:
                 msg = "Unable to fetch album page"
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"{album_id}: {msg} ({exc})")
 
         title, pos = text.extract(

@@ -9,7 +9,7 @@
 """Extractors for sites supported by youtube-dl"""
 
 from .common import Extractor, Message
-from .. import ytdl, config, exception
+from .. import ytdl, config
 
 
 class YoutubeDLExtractor(Extractor):
@@ -39,7 +39,7 @@ class YoutubeDLExtractor(Extractor):
                     self.ytdl_ie_key = ie.ie_key()
                     break
             if not generic and self.ytdl_ie_key == "Generic":
-                raise exception.NoExtractorError()
+                raise self.exc.NoExtractorError()
             self.force_generic_extractor = False
 
         if self.ytdl_ie_key == "Generic" and config.interpolate(
@@ -94,9 +94,9 @@ class YoutubeDLExtractor(Extractor):
                 ytdl_instance.get_info_extractor(self.ytdl_ie_key),
                 False, {}, True)
         #  except ytdl_module.utils.YoutubeDLError:
-        #     raise exception.AbortExtraction("Failed to extract video data")
+        #     raise self.exc.AbortExtraction("Failed to extract video data")
         except Exception as exc:
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"Failed to extract video data "
                 f"({exc.__class__.__name__}: {exc})")
 

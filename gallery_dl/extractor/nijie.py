@@ -9,7 +9,7 @@
 """Extractors for nijie instances"""
 
 from .common import BaseExtractor, Message, Dispatch, AsynchronousMixin
-from .. import text, dt, exception
+from .. import text, dt
 from ..cache import cache
 
 
@@ -134,7 +134,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
         if username:
             return self.cookies_update(self._login_impl(username, password))
 
-        raise exception.AuthenticationError("Username and password required")
+        raise self.exc.AuthenticationError("Username and password required")
 
     @cache(maxage=90*86400, keyarg=1)
     def _login_impl(self, username, password):
@@ -145,7 +145,7 @@ class NijieExtractor(AsynchronousMixin, BaseExtractor):
 
         response = self.request(url, method="POST", data=data)
         if "/login.php" in response.text:
-            raise exception.AuthenticationError()
+            raise self.exc.AuthenticationError()
         return self.cookies
 
     def _pagination(self, path):

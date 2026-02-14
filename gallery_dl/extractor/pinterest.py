@@ -9,7 +9,7 @@
 """Extractors for https://www.pinterest.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 import itertools
 
 BASE_PATTERN = r"(?:https?://)?(?:\w+\.)?pinterest\.[\w.]+"
@@ -394,7 +394,7 @@ class PinterestPinitExtractor(PinterestExtractor):
                f"/{self.groups[0]}/redirect/")
         location = self.request_location(url)
         if not location:
-            raise exception.NotFoundError("pin")
+            raise self.exc.NotFoundError("pin")
         elif PinterestPinExtractor.pattern.match(location):
             yield Message.Queue, location, {
                 "_extractor": PinterestPinExtractor}
@@ -402,7 +402,7 @@ class PinterestPinitExtractor(PinterestExtractor):
             yield Message.Queue, location, {
                 "_extractor": PinterestBoardExtractor}
         else:
-            raise exception.NotFoundError("pin")
+            raise self.exc.NotFoundError("pin")
 
 
 class PinterestAPI():
@@ -545,9 +545,9 @@ class PinterestAPI():
             return data
         if response.status_code == 404:
             resource = self.extractor.subcategory.rpartition("-")[2]
-            raise exception.NotFoundError(resource)
+            raise self.exc.NotFoundError(resource)
         self.extractor.log.debug("Server response: %s", response.text)
-        raise exception.AbortExtraction("API request failed")
+        raise self.exc.AbortExtraction("API request failed")
 
     def _pagination(self, resource, options):
         while True:

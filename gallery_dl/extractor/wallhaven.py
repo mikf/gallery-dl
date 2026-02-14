@@ -9,7 +9,7 @@
 """Extractors for https://wallhaven.cc/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, exception
+from .. import text
 
 
 class WallhavenExtractor(Extractor):
@@ -199,7 +199,7 @@ class WallhavenAPI():
                 continue
 
             self.extractor.log.debug("Server response: %s", response.text)
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"API request failed "
                 f"({response.status_code} {response.reason})")
 

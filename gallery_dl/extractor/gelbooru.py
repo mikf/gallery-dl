@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from . import gelbooru_v02
-from .. import text, exception
+from .. import text
 import binascii
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?gelbooru\.com/(?:index\.php)?\?"
@@ -33,9 +33,9 @@ class GelbooruBase():
         url = self.root + "/index.php?page=dapi&q=index&json=1"
         try:
             data = self.request_json(url, params=params)
-        except exception.HttpError as exc:
+        except self.exc.HttpError as exc:
             if exc.status == 401:
-                raise exception.AuthRequired(
+                raise self.exc.AuthRequired(
                     "'api-key' & 'user-id'", "the API")
             raise
 
@@ -172,7 +172,7 @@ class GelbooruPoolExtractor(GelbooruBase,
 
         name, pos = text.extract(page, "<h3>Now Viewing: ", "</h3>")
         if not name:
-            raise exception.NotFoundError("pool")
+            raise self.exc.NotFoundError("pool")
 
         return {
             "pool": text.parse_int(self.pool_id),

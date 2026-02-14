@@ -7,7 +7,7 @@
 """Extractors for https://mangaread.org/"""
 
 from .common import ChapterExtractor, MangaExtractor
-from .. import text, exception
+from .. import text
 
 
 class MangareadBase():
@@ -40,7 +40,7 @@ class MangareadChapterExtractor(MangareadBase, ChapterExtractor):
         data = {"tags": list(text.split_html(tags)[::2])}
         info = text.extr(page, '<h1 id="chapter-heading">', "</h1>")
         if not info:
-            raise exception.NotFoundError("chapter")
+            raise self.exc.NotFoundError("chapter")
         self.parse_chapter_string(info, data)
         return data
 
@@ -61,7 +61,7 @@ class MangareadMangaExtractor(MangareadBase, MangaExtractor):
 
     def chapters(self, page):
         if 'class="error404' in page:
-            raise exception.NotFoundError("manga")
+            raise self.exc.NotFoundError("manga")
         data = self.metadata(page)
         results = []
         for chapter in text.extract_iter(

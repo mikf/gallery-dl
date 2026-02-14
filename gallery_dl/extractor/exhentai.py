@@ -9,7 +9,7 @@
 """Extractors for https://e-hentai.org/ and https://exhentai.org/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 import collections
 import itertools
@@ -53,13 +53,13 @@ class ExhentaiExtractor(Extractor):
         response = Extractor.request(self, url, **kwargs)
         if "Cache-Control" not in response.headers and not response.content:
             self.log.info("blank page")
-            raise exception.AuthorizationError()
+            raise self.exc.AuthorizationError()
         return response
 
     def login(self):
         """Login and set necessary cookies"""
         if self.LIMIT:
-            raise exception.AbortExtraction("Image limit reached!")
+            raise self.exc.AbortExtraction("Image limit reached!")
 
         if self.cookies_check(self.cookies_names):
             return
@@ -99,9 +99,9 @@ class ExhentaiExtractor(Extractor):
         content = response.content
         if b"You are now logged in as:" not in content:
             if b"The captcha was not entered correctly" in content:
-                raise exception.AuthenticationError(
+                raise self.exc.AuthenticationError(
                     "CAPTCHA required. Use cookies instead.")
-            raise exception.AuthenticationError()
+            raise self.exc.AuthenticationError()
 
         # collect more cookies
         url = self.root + "/favorites.php"
@@ -187,7 +187,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 self.image_token = text.extr(gpage, 'hentai.org/s/', '"')
                 if not self.image_token:
                     self.log.debug("Page content:\n%s", gpage)
-                    raise exception.AbortExtraction(
+                    raise self.exc.AbortExtraction(
                         "Failed to extract initial image token")
                 ipage = self._image_page()
         else:
@@ -195,7 +195,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             part = text.extr(ipage, 'hentai.org/g/', '"')
             if not part:
                 self.log.debug("Page content:\n%s", ipage)
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     "Failed to extract gallery token")
             self.gallery_token = part.split("/")[1]
             gpage = self._gallery_page()
@@ -313,7 +313,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         data = self.request_json(self.api_url, method="POST", json=data)
         if "error" in data:
-            raise exception.AbortExtraction(data["error"])
+            raise self.exc.AbortExtraction(data["error"])
 
         return data["gmetadata"][0]
 
@@ -338,7 +338,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                 data["_fallback"] = self._fallback_1280(nl, self.image_num)
         except IndexError:
             self.log.debug("Page content:\n%s", page)
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"Unable to parse image info for '{url}'")
 
         data["num"] = self.image_num
@@ -389,7 +389,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                         nl, request["page"], imgkey)
             except IndexError:
                 self.log.debug("Page content:\n%s", page)
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     f"Unable to parse image info for '{url}'")
 
             data["num"] = request["page"]
@@ -438,7 +438,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
                     data["_fallback"] = self._fallback_mpv_1280(info, request)
             except IndexError:
                 self.log.debug("Page content:\n%s", info)
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     f"Unable to parse image info for '{url}'")
 
             data["num"] = pnum
@@ -465,7 +465,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         if " requires GP" in page:
             gp = self.config("gp")
             if gp == "stop":
-                raise exception.AbortExtraction("Not enough GP")
+                raise self.exc.AbortExtraction("Not enough GP")
             elif gp == "wait":
                 self.input("Press ENTER to continue.")
                 return response.url
@@ -475,7 +475,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
             return self.data["_url_1280"]
 
         if " temporarily banned " in page:
-            raise exception.AuthorizationError("Temporarily Banned")
+            raise self.exc.AuthorizationError("Temporarily Banned")
 
         self._limits_exceeded()
         return response.url
@@ -526,7 +526,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
         if not action or action == "stop":
             ExhentaiExtractor.LIMIT = True
-            raise exception.AbortExtraction(msg)
+            raise self.exc.AbortExtraction(msg)
 
         self.log.warning(msg)
         if action == "wait":
@@ -559,12 +559,12 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         page = response.text
 
         if response.status_code == 404 and "Gallery Not Available" in page:
-            raise exception.AuthorizationError()
+            raise self.exc.AuthorizationError()
         if page.startswith(("Key missing", "Gallery not found")):
-            raise exception.NotFoundError("gallery")
+            raise self.exc.NotFoundError("gallery")
         if page.count("hentai.org/mpv/") > 1:
             if self.gallery_token is None:
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     "'/s/' URLs in MPV mode are not supported")
             self.mpv = True
         return page
@@ -575,7 +575,7 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
         page = self.request(url, fatal=False).text
 
         if page.startswith(("Invalid page", "Keep trying")):
-            raise exception.NotFoundError("image page")
+            raise self.exc.NotFoundError("image page")
         return page
 
     def _fallback_original(self, nl, fullimg):

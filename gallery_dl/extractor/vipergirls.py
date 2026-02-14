@@ -9,7 +9,7 @@
 """Extractors for https://vipergirls.to/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?vipergirls\.to"
@@ -104,7 +104,7 @@ class VipergirlsExtractor(Extractor):
 
         response = self.request(url, method="POST", data=data)
         if not response.cookies.get("vg_password"):
-            raise exception.AuthenticationError()
+            raise self.exc.AuthenticationError()
 
         return {cookie.name: cookie.value
                 for cookie in response.cookies}

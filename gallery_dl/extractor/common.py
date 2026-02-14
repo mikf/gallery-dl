@@ -54,6 +54,7 @@ class Extractor():
     request_interval_429 = 60.0
     request_timestamp = 0.0
     finalize = skip = None
+    exc = exception
 
     def __init__(self, match):
         self.log = logging.getLogger(self.category)
