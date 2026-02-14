@@ -1360,19 +1360,19 @@ Consider all listed sites to potentially be NSFW.
 <tr id="jpgfish" title="jpgfish">
     <td>JPG Fish</td>
     <td>https://jpg7.cr/</td>
-    <td>Albums, Categories, individual Images, User Profiles, Videos</td>
+    <td>Albums, Categories, Files, User Profiles</td>
     <td></td>
 </tr>
 <tr id="imagepond" title="imagepond">
     <td>ImagePond</td>
     <td>https://imagepond.net/</td>
-    <td>Albums, Categories, individual Images, User Profiles, Videos</td>
+    <td>Albums, Categories, Files, User Profiles</td>
     <td></td>
 </tr>
 <tr id="imglike" title="imglike">
     <td>Nude Celeb</td>
     <td>https://imglike.com/</td>
-    <td>Albums, Categories, individual Images, User Profiles, Videos</td>
+    <td>Albums, Categories, Files, User Profiles</td>
     <td></td>
 </tr>
 

@@ -10,8 +10,8 @@ from gallery_dl.extractor import chevereto
 __tests__ = (
 {
     "#url"     : "https://imglike.com/image/EMT-Skills-Verification-by-EMSA.Lx6dT",
-    "#category": ("chevereto", "imglike", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "imglike", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
     "#results" : "https://imglike.com/images/2022/08/12/EMT-Skills-Verification-by-EMSA.gif",
 
     "album"    : "",
@@ -25,8 +25,8 @@ __tests__ = (
 
 {
     "#url"     : "https://www.imglike.com/image/EMT-Skills-Verification-by-EMSA.Lx6dT",
-    "#category": ("chevereto", "imglike", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "imglike", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
 },
 
 {
@@ -59,7 +59,7 @@ __tests__ = (
     "#url"     : "https://imglike.com/category/Bursting-boobs",
     "#category": ("chevereto", "imglike", "category"),
     "#class"   : chevereto.CheveretoCategoryExtractor,
-    "#pattern" : chevereto.CheveretoImageExtractor.pattern,
+    "#pattern" : chevereto.CheveretoFileExtractor.pattern,
     "#range"   : "1-100",
     "#count"   : 100,
 },

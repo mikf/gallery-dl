@@ -10,8 +10,8 @@ from gallery_dl.extractor import chevereto
 __tests__ = (
 {
     "#url"     : "https://imagepond.net/image/IMG-20250217-160622.TJNphg",
-    "#category": ("chevereto", "imagepond", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "imagepond", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
     "#results"     : "https://media.imagepond.net/media/IMG_20250217_1606226b345a5dbd0e8971.jpg",
     "#sha1_content": "ec7fac6b427f7af01038619208cd69478e91ddef",
 
@@ -20,20 +20,22 @@ __tests__ = (
     "extension": "jpg",
     "filename" : "IMG_20250217_1606226b345a5dbd0e8971",
     "id"       : "TJNphg",
+    "title"    : "IMG_20250217_160622.jpg",
+    "type"     : "image",
     "url"      : "https://media.imagepond.net/media/IMG_20250217_1606226b345a5dbd0e8971.jpg",
     "user"     : "dariusbbb24",
 },
 
 {
     "#url"     : "https://www.imagepond.net/image/IMG-20250217-160622.TJNphg",
-    "#category": ("chevereto", "imagepond", "image"),
-    "#class"   : chevereto.CheveretoImageExtractor,
+    "#category": ("chevereto", "imagepond", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
 },
 
 {
     "#url"     : "https://imagepond.net/video/1000423939.zb8Fxy",
-    "#category": ("chevereto", "imagepond", "video"),
-    "#class"   : chevereto.CheveretoVideoExtractor,
+    "#category": ("chevereto", "imagepond", "file"),
+    "#class"   : chevereto.CheveretoFileExtractor,
     "#results" : "https://media.imagepond.net/media/100042393993a6bfa75fc505e9.mp4",
 
     "album"    : "",
@@ -47,6 +49,7 @@ __tests__ = (
     "id"       : "zb8Fxy",
     "thumbnail": "https://media.imagepond.net/media/100042393993a6bfa75fc505e9.fr.jpeg",
     "title"    : "1000423939",
+    "type"     : "video",
     "url"      : "https://media.imagepond.net/media/100042393993a6bfa75fc505e9.mp4",
     "user"     : "christiankita",
     "width"    : 720,
