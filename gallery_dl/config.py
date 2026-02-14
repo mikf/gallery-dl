@@ -73,6 +73,9 @@ def default(type=None):
         ))
 
 
+default(os.environ.get("GDL_CONFIG_TYPE"))
+
+
 def initialize():
     paths = list(map(util.expand_path, _default_configs))
 
@@ -211,8 +214,11 @@ def remap_categories():
             opts[new] = opts[old]
 
 
-def load(files=None, strict=False, loads=_load, conf=_config):
-    """Load JSON configuration files"""
+def load(files=None, strict=False, loads=None, conf=_config):
+    """Load configuration files"""
+    if loads is None:
+        loads = _load
+
     for pathfmt in files or _default_configs:
         path = util.expand_path(pathfmt)
         try:
@@ -374,6 +380,3 @@ class apply():
                 unset(path, key)
             else:
                 set(path, key, value)
-
-
-default(os.environ.get("GDL_CONFIG_TYPE"))
