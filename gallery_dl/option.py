@@ -899,7 +899,8 @@ def build_parser():
         action=AppendCommandAction, const={"name": "exec"},
         help=("Execute CMD for each downloaded file. "
               "Supported replacement fields are "
-              "{} or {_path}, {_directory}, {_filename}. "
+              "{} or {_path}, {_temppath}, {_directory}, {_filename}. "
+              "On Windows, use {_path_unc} or {_directory_unc} for UNC paths. "
               "Example: --exec \"convert {} {}.png && rm {}\""),
     )
     postprocessor.add_argument(
