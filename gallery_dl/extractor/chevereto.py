@@ -88,7 +88,7 @@ BASE_PATTERN = CheveretoExtractor.update({
         "pattern": r"(?:www\.)?jpe?g\d?\.(?:cr|su|pet|fish(?:ing)?|church)",
     },
     "imagepond": {
-        "root": "https://imagepond.net",
+        "root": "https://www.imagepond.net",
         "pattern": r"(?:www\.)?imagepond\.net",
     },
     "imglike": {
@@ -101,7 +101,7 @@ BASE_PATTERN = CheveretoExtractor.update({
 class CheveretoFileExtractor(CheveretoExtractor):
     """Extractor for chevereto files"""
     subcategory = "file"
-    pattern = BASE_PATTERN + r"(/(?:im(?:g|age)|video)/[^/?#]+)"
+    pattern = BASE_PATTERN + r"(/(?:im(?:g|age)|video|i)/[^/?#]+)"
     example = "https://jpg7.cr/img/TITLE.ID"
 
     def items(self):
@@ -232,5 +232,6 @@ class CheveretoUserExtractor(CheveretoExtractor):
         data_file = {"_extractor": CheveretoFileExtractor}
         data_album = {"_extractor": CheveretoAlbumExtractor}
         for url in self._pagination(self.root + self.path):
-            data = data_album if "/album/" in url else data_file
+            data = (data_album if "/album/" in url or "/a/" in url else
+                    data_file)
             yield Message.Queue, url, data

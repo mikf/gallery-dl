@@ -1365,7 +1365,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr id="imagepond" title="imagepond">
     <td>ImagePond</td>
-    <td>https://imagepond.net/</td>
+    <td>https://www.imagepond.net/</td>
     <td>Albums, Categories, Files, User Profiles</td>
     <td></td>
 </tr>
