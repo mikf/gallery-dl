@@ -25,7 +25,8 @@ class CheveretoExtractor(BaseExtractor):
     def _pagination(self, url, callback=None):
         page = self.request(url).text
 
-        if form := text.extr(page, "<form ", "</form"):
+        if len(page) < 45_000 and "assword required" in page and (
+                form := text.extr(page, "<form ", "</form")):
             page = self._password_submit(url, form) or page
 
         if callback is not None:
