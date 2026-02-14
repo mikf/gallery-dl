@@ -216,8 +216,10 @@
                                 'vp8', 'vp9', 'vp9-lossless', 'copy', 'zip'.
     --exec CMD                  Execute CMD for each downloaded file. Supported
                                 replacement fields are {} or {_path},
-                                {_directory}, {_filename}. Example: --exec
-                                "convert {} {}.png && rm {}"
+                                {_temppath}, {_directory}, {_filename}. On
+                                Windows, use {_path_unc} or {_directory_unc}
+                                for UNC paths. Example: --exec "convert {}
+                                {}.png && rm {}"
     --exec-after CMD            Execute CMD after all files were downloaded.
                                 Example: --exec-after "cd {_directory} &&
                                 convert * ../doc.pdf"
