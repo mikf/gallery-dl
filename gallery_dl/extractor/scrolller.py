@@ -9,7 +9,7 @@
 """Extractors for https://scrolller.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?scrolller\.com"
@@ -82,9 +82,9 @@ class ScrolllerExtractor(Extractor):
 
         try:
             data = self._request_graphql("LoginQuery", variables, False)
-        except exception.HttpError as exc:
+        except self.exc.HttpError as exc:
             if exc.status == 403:
-                raise exception.AuthenticationError()
+                raise self.exc.AuthenticationError()
             raise
 
         return data["login"]["token"]
@@ -206,7 +206,7 @@ class ScrolllerFollowingExtractor(ScrolllerExtractor):
         self.login()
 
         if not self.auth_token:
-            raise exception.AuthorizationError("Login required")
+            raise self.exc.AuthorizationError("Login required")
 
         variables = {
             "iterator": None,

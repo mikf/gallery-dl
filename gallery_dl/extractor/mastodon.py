@@ -9,7 +9,7 @@
 """Extractors for Mastodon instances"""
 
 from .common import BaseExtractor, Message
-from .. import text, exception
+from .. import text
 from ..cache import cache
 
 
@@ -246,7 +246,7 @@ class MastodonAPI():
             if account["acct"] == username:
                 self.extractor._check_moved(account)
                 return account["id"]
-        raise exception.NotFoundError("account")
+        raise self.exc.NotFoundError("account")
 
     def account_bookmarks(self):
         """Statuses the user has bookmarked"""
@@ -312,16 +312,16 @@ class MastodonAPI():
             if code < 400:
                 return response
             if code == 401:
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     f"Invalid or missing access token.\nRun 'gallery-dl oauth:"
                     f"mastodon:{self.extractor.instance}' to obtain one.")
             if code == 404:
-                raise exception.NotFoundError()
+                raise self.exc.NotFoundError()
             if code == 429:
                 self.extractor.wait(until=self.extractor.parse_datetime_iso(
                     response.headers["x-ratelimit-reset"]))
                 continue
-            raise exception.AbortExtraction(response.json().get("error"))
+            raise self.exc.AbortExtraction(response.json().get("error"))
 
     def _pagination(self, endpoint, params):
         url = endpoint

@@ -7,7 +7,7 @@
 """Extractors for https://www.steamgriddb.com"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?steamgriddb\.com"
@@ -74,7 +74,7 @@ class SteamgriddbExtractor(Extractor):
     def _call(self, endpoint, **kwargs):
         data = self.request_json(self.root + endpoint, **kwargs)
         if not data["success"]:
-            raise exception.AbortExtraction(data["error"])
+            raise self.exc.AbortExtraction(data["error"])
         return data["data"]
 
 
@@ -96,7 +96,7 @@ class SteamgriddbAssetsExtractor(SteamgriddbExtractor):
         sort = self.config("sort", "score_desc")
         if sort not in ("score_desc", "score_asc", "score_old_desc",
                         "score_old_asc", "age_desc", "age_asc"):
-            raise exception.AbortExtraction(f"Invalid sort '{sort}'")
+            raise self.exc.AbortExtraction(f"Invalid sort '{sort}'")
 
         json = {
             "static"  : self.config("static", True),
@@ -149,7 +149,7 @@ class SteamgriddbAssetsExtractor(SteamgriddbExtractor):
 
         for i in value:
             if i not in valid_values:
-                raise exception.AbortExtraction(f"Invalid {type_name} '{i}'")
+                raise self.exc.AbortExtraction(f"Invalid {type_name} '{i}'")
 
         return value
 
@@ -169,7 +169,7 @@ class SteamgriddbAssetExtractor(SteamgriddbExtractor):
         endpoint = "/api/public/asset/" + self.asset_type + "/" + self.asset_id
         asset = self._call(endpoint)["asset"]
         if asset is None:
-            raise exception.NotFoundError(
+            raise self.exc.NotFoundError(
                 f"asset ({self.asset_type}:{self.asset_id})")
         return (asset,)
 

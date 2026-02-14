@@ -10,7 +10,7 @@
 """Extractors for https://www.instagram.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache, memcache
 import itertools
 import binascii
@@ -143,7 +143,7 @@ class InstagramExtractor(Extractor):
                 page = None
 
             if page is not None:
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     f"HTTP redirect to {page} page ({url.partition('?')[0]})")
 
         www_claim = response.headers.get("x-ig-set-www-claim")
@@ -678,7 +678,7 @@ class InstagramStoriesExtractor(InstagramExtractor):
                     reel["items"] = (item,)
                     break
             else:
-                raise exception.NotFoundError("story")
+                raise self.exc.NotFoundError("story")
 
         elif self.config("split"):
             reel = reels[0]
@@ -860,7 +860,7 @@ class InstagramRestAPI():
         try:
             return self._call(endpoint, params=params)["reels_media"]
         except KeyError:
-            raise exception.AuthRequired("authenticated cookies")
+            raise self.exc.AuthRequired("authenticated cookies")
 
     def reels_tray(self):
         endpoint = "/v1/feed/reels_tray/"
@@ -893,7 +893,7 @@ class InstagramRestAPI():
             return self._call(
                 endpoint, params=params, notfound="user")["data"]["user"]
         except KeyError:
-            raise exception.NotFoundError("user")
+            raise self.exc.NotFoundError("user")
 
     def user_by_search(self, username):
         url = "https://www.instagram.com/web/search/topsearch/"
@@ -914,7 +914,7 @@ class InstagramRestAPI():
             if user := self.user_by_name(screen_name):
                 return user
             self.user_by_name.invalidate(screen_name)
-        raise exception.NotFoundError("user")
+        raise self.exc.NotFoundError("user")
 
     def user_id(self, screen_name, check_private=True):
         if screen_name.startswith("id:"):
@@ -1087,7 +1087,7 @@ class InstagramGraphqlAPI():
         self.user_id = api.user_id
 
     def _unsupported(self, _=None):
-        raise exception.AbortExtraction("Unsupported with GraphQL API")
+        raise self.exc.AbortExtraction("Unsupported with GraphQL API")
 
     def highlights_tray(self, user_id):
         query_hash = "d4d88dc1500312af6f937f7b804c68c3"
@@ -1175,7 +1175,7 @@ class InstagramGraphqlAPI():
             elif not data["edges"]:
                 user = self.extractor.item
                 s = "" if user.endswith("s") else "s"
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     f"{user}'{s} posts are private")
 
             variables["after"] = extr._update_cursor(info["end_cursor"])

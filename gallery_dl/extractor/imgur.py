@@ -9,7 +9,7 @@
 """Extractors for https://imgur.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|[im]\.)?imgur\.(?:com|io)"
 
@@ -296,7 +296,7 @@ class ImgurAPI():
                 return self.extractor.request_json(
                     "https://api.imgur.com" + endpoint,
                     params=params, headers=(headers or self.headers))
-            except exception.HttpError as exc:
+            except self.exc.HttpError as exc:
                 if exc.status not in (403, 429) or \
                         b"capacity" not in exc.response.content:
                     raise

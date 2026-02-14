@@ -9,7 +9,7 @@
 """Extractors for https://fansly.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 import time
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?fansly\.com"
@@ -54,7 +54,7 @@ class FanslyExtractor(Extractor):
                 if wall["id"] == wall_id:
                     break
             else:
-                raise exception.NotFoundError("wall")
+                raise self.exc.NotFoundError("wall")
             walls = (wall,)
 
         for wall in walls:

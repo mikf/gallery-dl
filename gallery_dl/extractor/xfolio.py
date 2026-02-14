@@ -9,7 +9,7 @@
 """Extractors for https://xfolio.jp/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?xfolio\.jp(?:/[^/?#]+)?"
 
@@ -38,7 +38,7 @@ class XfolioExtractor(Extractor):
         response = Extractor.request(self, url, **kwargs)
 
         if "/system/recaptcha" in response.url:
-            raise exception.AbortExtraction("Bot check / CAPTCHA page")
+            raise self.exc.AbortExtraction("Bot check / CAPTCHA page")
 
         return response
 

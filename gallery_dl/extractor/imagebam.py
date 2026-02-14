@@ -9,7 +9,7 @@
 """Extractors for https://www.imagebam.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 
 class ImagebamExtractor(Extractor):
@@ -29,7 +29,7 @@ class ImagebamExtractor(Extractor):
         page = self.request(self.root + path).text
         url, pos = text.extract(page, '<img src="https://images', '"')
         if not url:
-            raise exception.NotFoundError("image")
+            raise self.exc.NotFoundError("image")
         filename = text.unescape(text.extract(page, 'alt="', '"', pos)[0])
 
         return text.nameext_from_name(filename, {

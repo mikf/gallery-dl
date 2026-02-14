@@ -9,7 +9,7 @@
 """Extractors for Gelbooru Beta 0.2 sites"""
 
 from . import booru
-from .. import text, util, exception
+from .. import text, util
 import collections
 
 
@@ -38,9 +38,9 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         if root.tag == "error":
             msg = root.text
             if msg.lower().startswith("missing authentication"):
-                raise exception.AuthRequired(
+                raise self.exc.AuthRequired(
                     "'api-key' & 'user-id'", "the API", msg)
-            raise exception.AbortExtraction(f"'{msg}'")
+            raise self.exc.AbortExtraction(f"'{msg}'")
 
         return root
 
@@ -229,7 +229,7 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
 
         name, pos = text.extract(page, "<h4>Pool: ", "</h4>")
         if not name:
-            raise exception.NotFoundError("pool")
+            raise self.exc.NotFoundError("pool")
         self.post_ids = text.extract_iter(
             page, 'class="thumb" id="p', '"', pos)
 

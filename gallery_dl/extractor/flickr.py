@@ -9,7 +9,7 @@
 """Extractors for https://www.flickr.com/"""
 
 from .common import Extractor, Message
-from .. import text, oauth, util, exception
+from .. import text, oauth, util
 from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.|secure\.|m\.)?flickr\.com"
@@ -459,14 +459,14 @@ class FlickrAPI(oauth.OAuth1API):
             msg = data.get("message", "")
             self.log.debug("Server response: %s", data)
             if data["code"] == 1:
-                raise exception.NotFoundError(self.extractor.subcategory)
+                raise self.exc.NotFoundError(self.extractor.subcategory)
             elif data["code"] == 2:
-                raise exception.AuthorizationError(msg)
+                raise self.exc.AuthorizationError(msg)
             elif data["code"] == 98:
-                raise exception.AuthenticationError(msg)
+                raise self.exc.AuthenticationError(msg)
             elif data["code"] == 99:
-                raise exception.AuthorizationError(msg)
-            raise exception.AbortExtraction("API request failed: " + msg)
+                raise self.exc.AuthorizationError(msg)
+            raise self.exc.AbortExtraction("API request failed: " + msg)
         return data
 
     def _pagination(self, method, params, key="photos"):

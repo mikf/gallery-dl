@@ -9,7 +9,7 @@
 """Extractors for https://cyberfile.me/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?cyberfile\.me"
 
@@ -39,7 +39,7 @@ class CyberfileExtractor(Extractor):
             resp = self.request_json(
                 url_pw, method="POST", headers=headers, data=data_pw)
             if not resp.get("success"):
-                raise exception.AuthorizationError(f"'{resp.get('msg')}'")
+                raise self.exc.AuthorizationError(f"'{resp.get('msg')}'")
             resp = self.request_json(
                 url, method="POST", headers=headers, data=data)
 

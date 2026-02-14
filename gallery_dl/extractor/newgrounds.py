@@ -9,7 +9,7 @@
 """Extractors for https://www.newgrounds.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, dt, exception
+from .. import text, util, dt
 from ..cache import cache
 import itertools
 
@@ -143,7 +143,7 @@ class NewgroundsExtractor(Extractor):
             if result.get("success"):
                 break
             if "errors" in result:
-                raise exception.AuthenticationError(
+                raise self.exc.AuthenticationError(
                     '"' + '", "'.join(result["errors"]) + '"')
 
             if result.get("requiresMfa"):
@@ -370,7 +370,7 @@ class NewgroundsExtractor(Extractor):
                     return
                 if "errors" in data:
                     msg = ", ".join(text.unescape(e) for e in data["errors"])
-                    raise exception.AbortExtraction(msg)
+                    raise self.exc.AbortExtraction(msg)
 
             items = data.get("items")
             if not items:

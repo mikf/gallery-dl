@@ -9,7 +9,7 @@
 """Extractors for https://www.weibo.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 import random
 
@@ -65,7 +65,7 @@ class WeiboExtractor(Extractor):
 
         if response.history:
             if "login.sina.com" in response.url:
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     f"HTTP redirect to login page "
                     f"({response.url.partition('?')[0]})")
             if "passport.weibo.com" in response.url:
@@ -189,7 +189,7 @@ class WeiboExtractor(Extractor):
                 not text.ext_from_url(video["url"]):
             try:
                 video["url"] = self.request_location(video["url"])
-            except exception.HttpError as exc:
+            except self.exc.HttpError as exc:
                 self.log.warning("%s: %s", exc.__class__.__name__, exc)
                 video["url"] = ""
 
@@ -230,7 +230,7 @@ class WeiboExtractor(Extractor):
             if not data.get("ok"):
                 self.log.debug(response.content)
                 if "since_id" not in params:  # first iteration
-                    raise exception.AbortExtraction(
+                    raise self.exc.AbortExtraction(
                         f'"{data.get("msg") or "unknown error"}"')
 
             try:
@@ -479,14 +479,14 @@ class WeiboAlbumExtractor(WeiboExtractor):
             try:
                 sub = subalbums[int(subalbum)-1]
             except Exception:
-                raise exception.NotFoundError("subalbum")
+                raise self.exc.NotFoundError("subalbum")
         else:
             subalbum = text.unquote(subalbum)
             for sub in subalbums:
                 if sub["pic_title"] == subalbum:
                     break
             else:
-                raise exception.NotFoundError("subalbum")
+                raise self.exc.NotFoundError("subalbum")
         return ((sub, self._pagination_subalbum(uid, sub)),)
 
     def _pagination_subalbum(self, uid, sub):
@@ -504,7 +504,7 @@ class WeiboStatusExtractor(WeiboExtractor):
         status = self._status_by_id(self.user)
         if status.get("ok") != 1:
             self.log.debug(status)
-            raise exception.NotFoundError("status")
+            raise self.exc.NotFoundError("status")
         return (status,)
 
 

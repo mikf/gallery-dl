@@ -10,7 +10,7 @@
 """Extractors for https://www.mangakakalot.gg/ and mirror sites"""
 
 from .common import BaseExtractor, ChapterExtractor, MangaExtractor, Message
-from .. import text, util, exception
+from .. import text, util
 
 
 class ManganeloExtractor(BaseExtractor):
@@ -144,7 +144,7 @@ class ManganeloBookmarkExtractor(ManganeloExtractor):
 
         response = self.request(url, params=params)
         if response.history:
-            raise exception.AuthRequired(
+            raise self.exc.AuthRequired(
                 "authenticated cookies", "your bookmarks")
         page = response.text
         last = text.parse_int(text.extr(page, ">Last(", ")"))

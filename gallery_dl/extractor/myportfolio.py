@@ -9,7 +9,7 @@
 """Extractors for https://www.myportfolio.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 
 class MyportfolioGalleryExtractor(Extractor):
@@ -34,7 +34,7 @@ class MyportfolioGalleryExtractor(Extractor):
         url = "https://" + self.domain + (self.path or "")
         response = self.request(url)
         if response.history and response.url.endswith(".adobe.com/missing"):
-            raise exception.NotFoundError()
+            raise self.exc.NotFoundError()
         page = response.text
 
         projects = text.extr(
@@ -72,7 +72,7 @@ class MyportfolioGalleryExtractor(Extractor):
         elif user:
             user, _, title = user.partition(" - ")
         else:
-            raise exception.NotFoundError()
+            raise self.exc.NotFoundError()
 
         return {
             "user": text.unescape(user),

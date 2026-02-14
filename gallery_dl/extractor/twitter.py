@@ -9,7 +9,7 @@
 """Extractors for https://x.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, dt, exception
+from .. import text, util, dt
 from ..cache import cache, memcache
 import itertools
 import random
@@ -906,7 +906,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
             return self.api.user_media
         if strategy == "with_replies":
             return self.api.user_tweets_and_replies
-        raise exception.AbortExtraction(f"Invalid strategy '{strategy}'")
+        raise self.exc.AbortExtraction(f"Invalid strategy '{strategy}'")
 
 
 class TwitterTweetsExtractor(TwitterExtractor):
@@ -1092,7 +1092,7 @@ class TwitterTweetExtractor(TwitterExtractor):
         try:
             self._assign_user(tweet["core"]["user_results"]["result"])
         except KeyError:
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"'{tweet.get('reason') or 'Unavailable'}'")
 
         yield tweet
@@ -1403,10 +1403,10 @@ class TwitterAPI():
         if tweet.get("__typename") == "TweetUnavailable":
             reason = tweet.get("reason")
             if reason in {"NsfwViewerHasNoStatedAge", "NsfwLoggedOut"}:
-                raise exception.AuthRequired(message="NSFW Tweet")
+                raise self.exc.AuthRequired(message="NSFW Tweet")
             if reason == "Protected":
-                raise exception.AuthRequired(message="Protected Tweet")
-            raise exception.AbortExtraction(f"Tweet unavailable ('{reason}')")
+                raise self.exc.AuthRequired(message="Protected Tweet")
+            raise self.exc.AbortExtraction(f"Tweet unavailable ('{reason}')")
 
         return tweet
 
@@ -1754,9 +1754,9 @@ class TwitterAPI():
             return user["rest_id"]
         except KeyError:
             if user and user.get("__typename") == "UserUnavailable":
-                raise exception.NotFoundError(user["message"], False)
+                raise self.exc.NotFoundError(user["message"], False)
             else:
-                raise exception.NotFoundError("user")
+                raise self.exc.NotFoundError("user")
 
     @cache(maxage=3600)
     def _guest_token(self):
@@ -1835,13 +1835,13 @@ class TwitterAPI():
                 if "this account is temporarily locked" in msg:
                     msg = "Account temporarily locked"
                     if self.extractor.config("locked") != "wait":
-                        raise exception.AuthorizationError(msg)
+                        raise self.exc.AuthorizationError(msg)
                     self.log.warning(msg)
                     self.extractor.input("Press ENTER to retry.")
                     retry = True
 
                 elif "Could not authenticate you" in msg:
-                    raise exception.AbortExtraction(f"'{msg}'")
+                    raise self.exc.AbortExtraction(f"'{msg}'")
 
                 elif msg.lower().startswith("timeout"):
                     retry = True
@@ -1858,7 +1858,7 @@ class TwitterAPI():
                 return data
             elif response.status_code in {403, 404} and \
                     not self.headers["x-twitter-auth-type"]:
-                raise exception.AuthRequired(
+                raise self.exc.AuthRequired(
                     "authenticated cookies", "timeline")
             elif response.status_code == 429:
                 self._handle_ratelimit(response)
@@ -1870,7 +1870,7 @@ class TwitterAPI():
             except Exception:
                 pass
 
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"{response.status_code} {response.reason} ({errors})")
 
     def _pagination_rest(self, endpoint, params):
@@ -2065,13 +2065,13 @@ class TwitterAPI():
                             self.headers["x-twitter-auth-type"] = None
                             extr.log.info("Retrying API request as guest")
                             continue
-                        raise exception.AuthorizationError(
+                        raise self.exc.AuthorizationError(
                             user["screen_name"] + " blocked your account")
                     elif user.get("protected"):
-                        raise exception.AuthorizationError(
+                        raise self.exc.AuthorizationError(
                             user["screen_name"] + "'s Tweets are protected")
 
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     "Unable to retrieve Tweets from this timeline")
 
             tweets = []
@@ -2301,7 +2301,7 @@ class TwitterAPI():
     def _handle_ratelimit(self, response):
         rl = self.extractor.config("ratelimit")
         if rl == "abort":
-            raise exception.AbortExtraction("Rate limit exceeded")
+            raise self.exc.AbortExtraction("Rate limit exceeded")
 
         until = response.headers.get("x-rate-limit-reset")
         seconds = None if until else 60.0
@@ -2313,7 +2313,7 @@ class TwitterAPI():
                 num = text.parse_int(num)
                 msg = f"Rate limit exceeded ({amt}/{num})"
                 if amt >= num:
-                    raise exception.AbortExtraction(msg)
+                    raise self.exc.AbortExtraction(msg)
                 self.log.warning(msg)
                 self._ratelimit_amt = amt + 1
             elif rl == "wait":

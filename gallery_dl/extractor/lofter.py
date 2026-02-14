@@ -7,7 +7,7 @@
 """Extractors for https://www.lofter.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 
 
 class LofterExtractor(Extractor):
@@ -132,11 +132,11 @@ class LofterAPI():
         info = response.json()
 
         if info["meta"]["status"] == 4200:
-            raise exception.NotFoundError("blog")
+            raise self.exc.NotFoundError("blog")
 
         if info["meta"]["status"] != 200:
             self.extractor.log.debug("Server response: %s", info)
-            raise exception.AbortExtraction("API request failed")
+            raise self.exc.AbortExtraction("API request failed")
 
         return info["response"]
 

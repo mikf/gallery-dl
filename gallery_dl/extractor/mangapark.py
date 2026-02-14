@@ -9,7 +9,7 @@
 """Extractors for https://mangapark.net/"""
 
 from .common import ChapterExtractor, Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import memcache
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.)?(?:"
@@ -175,5 +175,5 @@ class MangaparkMangaExtractor(MangaparkBase, Extractor):
                     not lang or data["lang"] == lang):
                 return data["id"]
 
-        raise exception.AbortExtraction(
+        raise self.exc.AbortExtraction(
             f"'{source}' does not match any available source")

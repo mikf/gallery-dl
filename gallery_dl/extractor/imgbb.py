@@ -9,7 +9,7 @@
 """Extractors for https://imgbb.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 
 
@@ -60,7 +60,7 @@ class ImgbbExtractor(Extractor):
         response = self.request(url, method="POST", headers=headers, data=data)
 
         if not response.history:
-            raise exception.AuthenticationError()
+            raise self.exc.AuthenticationError()
         return self.cookies
 
     def _pagination(self, page, url, params):
@@ -193,10 +193,10 @@ class ImgbbUserExtractor(ImgbbExtractor):
             return self._pagination(response.text, url + "json", params)
 
         if response.status_code == 301:
-            raise exception.NotFoundError("user")
+            raise self.exc.NotFoundError("user")
         redirect = "HTTP redirect to " + response.headers.get("Location", "")
         if response.status_code == 302:
-            raise exception.AuthRequired(
+            raise self.exc.AuthRequired(
                 ("username & password", "authenticated cookies"),
                 "profile", redirect)
-        raise exception.AbortExtraction(redirect)
+        raise self.exc.AbortExtraction(redirect)

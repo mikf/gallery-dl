@@ -9,7 +9,7 @@
 """Extractors for XenForo forums"""
 
 from .common import BaseExtractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 import binascii
 
@@ -165,7 +165,7 @@ class XenforoExtractor(BaseExtractor):
     def request_page(self, url):
         try:
             return self.request(url)
-        except exception.HttpError as exc:
+        except self.exc.HttpError as exc:
             if exc.status == 403 and b">Log in<" in exc.response.content:
                 self._require_auth(exc.response)
             raise
@@ -197,7 +197,7 @@ class XenforoExtractor(BaseExtractor):
         if not response.history:
             err = self._extract_error(response.text)
             err = f'"{err}"' if err else None
-            raise exception.AuthenticationError(err)
+            raise self.exc.AuthenticationError(err)
 
         return {
             cookie.name: cookie.value
@@ -420,7 +420,7 @@ class XenforoExtractor(BaseExtractor):
         return main["contentUrl"], media
 
     def _require_auth(self, response=None):
-        raise exception.AuthRequired(
+        raise self.exc.AuthRequired(
             ("username & password", "authenticated cookies"), None,
             None if response is None else self._extract_error(response.text))
 
@@ -473,7 +473,7 @@ class XenforoPostExtractor(XenforoExtractor):
 
         pos = page.find(f'data-content="post-{post_id}"')
         if pos < 0:
-            raise exception.NotFoundError("post")
+            raise self.exc.NotFoundError("post")
         html = text.extract(page, "<article ", "<footer", pos-200)[0]
 
         self._parse_thread(page)

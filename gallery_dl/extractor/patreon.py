@@ -9,7 +9,7 @@
 """Extractors for https://www.patreon.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, dt, exception
+from .. import text, util, dt
 from ..cache import memcache
 import collections
 import itertools
@@ -347,7 +347,7 @@ class PatreonExtractor(Extractor):
             except Exception:
                 pass
 
-        raise exception.AbortExtraction("Unable to extract bootstrap data")
+        raise self.exc.AbortExtraction("Unable to extract bootstrap data")
 
 
 class PatreonCollectionExtractor(PatreonExtractor):
@@ -428,12 +428,12 @@ class PatreonCreatorExtractor(PatreonExtractor):
             data = None
             data = self._extract_bootstrap(page)
             return data["campaign"]["data"]["id"]
-        except exception.ControlException:
+        except self.exc.ControlException:
             pass
         except Exception as exc:
             if data:
                 self.log.debug(data)
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"Unable to extract campaign ID "
                 f"({exc.__class__.__name__}: {exc})")
 
@@ -442,7 +442,7 @@ class PatreonCreatorExtractor(PatreonExtractor):
                 page, r'{\"value\":{\"campaign\":{\"data\":{\"id\":\"', '\\"'):
             return cid
 
-        raise exception.AbortExtraction("Failed to extract campaign ID")
+        raise self.exc.AbortExtraction("Failed to extract campaign ID")
 
     def _get_filters(self, params):
         return "".join(

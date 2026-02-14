@@ -10,7 +10,7 @@
 """Extractors for https://imgchest.com/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text, util, exception
+from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?imgchest\.com"
 
@@ -40,7 +40,7 @@ class ImagechestGalleryExtractor(GalleryExtractor):
             post = data["props"]["post"]
         except Exception:
             if "<title>Not Found</title>" in page:
-                raise exception.NotFoundError("gallery")
+                raise self.exc.NotFoundError("gallery")
             self.files = ()
             return {}
 
@@ -142,11 +142,11 @@ class ImagechestAPI():
                 return response.json()["data"]
 
             elif response.status_code < 400:
-                raise exception.AuthenticationError("Invalid API access token")
+                raise self.exc.AuthenticationError("Invalid API access token")
 
             elif response.status_code == 429:
                 self.extractor.wait(seconds=600)
 
             else:
                 self.extractor.log.debug(response.text)
-                raise exception.AbortExtraction("API request failed")
+                raise self.exc.AbortExtraction("API request failed")

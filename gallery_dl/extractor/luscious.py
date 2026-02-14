@@ -9,7 +9,7 @@
 """Extractors for https://members.luscious.net/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 
 class LusciousExtractor(Extractor):
@@ -32,7 +32,7 @@ class LusciousExtractor(Extractor):
 
         if response.status_code >= 400:
             self.log.debug("Server response: %s", response.text)
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"GraphQL query failed "
                 f"('{response.status_code} {response.reason}')")
 
@@ -82,7 +82,7 @@ class LusciousAlbumExtractor(LusciousExtractor):
 
         album = self._request_graphql("AlbumGet", variables)["album"]["get"]
         if "errors" in album:
-            raise exception.NotFoundError("album")
+            raise self.exc.NotFoundError("album")
 
         album["audiences"] = [item["title"] for item in album["audiences"]]
         album["genres"] = [item["title"] for item in album["genres"]]

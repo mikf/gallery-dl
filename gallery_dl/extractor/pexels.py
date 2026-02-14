@@ -9,7 +9,7 @@
 """Extractors for https://pexels.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?pexels\.com"
 
@@ -174,7 +174,7 @@ class PexelsAPI():
 
             else:
                 self.extractor.log.debug(response.text)
-                raise exception.AbortExtraction("API request failed")
+                raise self.exc.AbortExtraction("API request failed")
 
     def _pagination(self, endpoint, params):
         while True:

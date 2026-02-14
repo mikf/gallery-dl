@@ -7,7 +7,7 @@
 """Extractors for https://www.tiktok.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, ytdl, exception
+from .. import text, util, ytdl
 import functools
 import itertools
 import binascii
@@ -166,7 +166,7 @@ class TiktokExtractor(Extractor):
             try:
                 response = self.request(url)
                 if response.history and "/login" in response.url:
-                    raise exception.AuthorizationError(
+                    raise self.exc.AuthorizationError(
                         "HTTP redirect to login page "
                         f"('{response.url.partition('?')[0]}')")
                 html = response.text
@@ -227,14 +227,14 @@ class TiktokExtractor(Extractor):
                 data["webapp.app-context"]
             data = data["webapp.user-detail"]
         if not self._check_status_code(data, profile_url, "profile"):
-            raise exception.ExtractionError(
+            raise self.exc.ExtractionError(
                 f"{profile_url}: could not extract rehydration data")
         try:
             for key in additional_keys:
                 data = data[key]
         except KeyError as exc:
             self.log.traceback(exc)
-            raise exception.ExtractionError(
+            raise self.exc.ExtractionError(
                 "%s: could not extract rehydration data (%s)",
                 profile_url, ", ".join(additional_keys))
         return data
@@ -258,7 +258,7 @@ class TiktokExtractor(Extractor):
             if test.digest() == expected:
                 break
         else:
-            raise exception.ExtractionError("failed to find matching digest")
+            raise self.exc.ExtractionError("failed to find matching digest")
 
         # extract cookie names
         wci = text.extr(text.extr(html, 'id="wci"', '>'), 'class="', '"')
@@ -278,7 +278,7 @@ class TiktokExtractor(Extractor):
         sec_uid = self._extract_id(
             profile_url, user_name, r"MS4wLjABAAAA[\w-]{64}", "secUid")
         if sec_uid is None:
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"{user_name}: unable to extract secondary user ID")
         return sec_uid
 
@@ -286,7 +286,7 @@ class TiktokExtractor(Extractor):
         author_id = self._extract_id(
             profile_url, user_name, r"[0-9]+", "id")
         if author_id is None:
-            raise exception.AbortExtraction(
+            raise self.exc.AbortExtraction(
                 f"{user_name}: unable to extract user ID")
         return author_id
 
@@ -306,7 +306,7 @@ class TiktokExtractor(Extractor):
         video = post["video"]
         urls = self._extract_video_urls(video)
         if not urls:
-            raise exception.ExtractionError(
+            raise self.exc.ExtractionError(
                 f"{post['id']}: Failed to extract video URLs. "
                 f"You may need cookies to continue.")
 
@@ -533,7 +533,7 @@ class TiktokVmpostExtractor(TiktokExtractor):
         url = self.request_location(url, headers=headers, notfound="post")
         if not url or len(url) <= 28:
             # https://www.tiktok.com/?_r=1
-            raise exception.NotFoundError("post")
+            raise self.exc.NotFoundError("post")
 
         data = {"_extractor": TiktokPostExtractor}
         yield Message.Queue, url.partition("?")[0], data
@@ -944,7 +944,7 @@ class TiktokTimeCursor(TiktokPaginationCursor):
             elif not self.reverse and (new_cursor < self.cursor or no_cursor):
                 new_cursor = self.fallback_cursor(data)
         elif no_cursor:
-            raise exception.ExtractionError("Could not extract next cursor")
+            raise self.exc.ExtractionError("Could not extract next cursor")
         self.cursor = new_cursor
         return not data.get(self.has_more_key, False)
 
@@ -1273,7 +1273,7 @@ class TiktokPaginationRequest:
             extractor.log.warning("%s: TikTok API keeps sending the same "
                                   "page. Taking measures to avoid an infinite "
                                   "loop", url)
-            raise exception.ExtractionError(
+            raise self.exc.ExtractionError(
                 "TikTok API keeps sending the same page")
 
 

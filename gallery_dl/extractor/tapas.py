@@ -9,7 +9,7 @@
 """Extractors for https://tapas.io/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 from ..cache import cache
 
 BASE_PATTERN = r"(?:https?://)?tapas\.io"
@@ -61,7 +61,7 @@ class TapasExtractor(Extractor):
 
         if not response.history or \
                 "/account/signin_fail" in response.history[-1].url:
-            raise exception.AuthenticationError()
+            raise self.exc.AuthenticationError()
 
         return {"_cpc_": response.history[0].cookies.get("_cpc_")}
 
@@ -84,7 +84,7 @@ class TapasEpisodeExtractor(TapasExtractor):
 
         episode = data["episode"]
         if not episode.get("free") and not episode.get("unlocked"):
-            raise exception.AuthorizationError(
+            raise self.exc.AuthorizationError(
                 f"{episode_id}: Episode '{episode['title']}' not unlocked")
 
         html = data["html"]

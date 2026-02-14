@@ -10,7 +10,7 @@
 """Extractors for Wikimedia sites"""
 
 from .common import BaseExtractor, Message
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 
 
@@ -71,7 +71,7 @@ class WikimediaExtractor(BaseExtractor):
             response = self.request(url, method="HEAD", fatal=None)
             if response.status_code < 400:
                 return url
-        raise exception.AbortExtraction("Unable to find API endpoint")
+        raise self.exc.AbortExtraction("Unable to find API endpoint")
 
     def prepare_info(self, info):
         """Adjust the content of an image info object"""

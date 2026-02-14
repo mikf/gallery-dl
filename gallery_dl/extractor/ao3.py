@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024-2025 Mike Fährmann
+# Copyright 2024-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,7 @@
 """Extractors for https://archiveofourown.org/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, util, exception
+from .. import text, util
 from ..cache import cache
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.)?"
@@ -88,11 +88,11 @@ class Ao3Extractor(Extractor):
 
         response = self.request(url, method="POST", data=data)
         if not response.history:
-            raise exception.AuthenticationError()
+            raise self.exc.AuthenticationError()
 
         remember = response.history[0].cookies.get("remember_user_token")
         if not remember:
-            raise exception.AuthenticationError()
+            raise self.exc.AuthenticationError()
 
         return {
             "remember_user_token": remember,
@@ -142,12 +142,12 @@ class Ao3WorkExtractor(Ao3Extractor):
         response = self.request(url, notfound=True)
 
         if response.url.endswith("/users/login?restricted=true"):
-            raise exception.AuthorizationError(
+            raise self.exc.AuthorizationError(
                 "Login required to access member-only works")
         page = response.text
         if len(page) < 20000 and \
                 '<h2 class="landmark heading">Adult Content Warning</' in page:
-            raise exception.AbortExtraction("Adult Content")
+            raise self.exc.AbortExtraction("Adult Content")
 
         extr = text.extract_from(page)
 

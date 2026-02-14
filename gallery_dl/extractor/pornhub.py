@@ -9,7 +9,7 @@
 """Extractors for https://www.pornhub.com/"""
 
 from .common import Extractor, Message, Dispatch
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?pornhub\.com"
 
@@ -109,7 +109,7 @@ class PornhubGalleryExtractor(PornhubExtractor):
         data = self.request_json(url, params=params)
 
         if not (images := data.get("photos")):
-            raise exception.AuthorizationError()
+            raise self.exc.AuthorizationError()
         key = end = self._first
 
         results = []

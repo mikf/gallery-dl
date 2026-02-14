@@ -7,7 +7,7 @@
 """Extractors for Misskey instances"""
 
 from .common import BaseExtractor, Message, Dispatch
-from .. import text, dt, exception
+from .. import text, dt
 from ..cache import memcache
 
 
@@ -239,7 +239,7 @@ class MisskeyAPI():
     def i_favorites(self):
         endpoint = "/i/favorites"
         if not self.access_token:
-            raise exception.AuthenticationError()
+            raise self.exc.AuthenticationError()
         data = {"i": self.access_token}
         return self._pagination(endpoint, data)
 

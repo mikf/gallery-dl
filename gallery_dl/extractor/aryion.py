@@ -9,7 +9,7 @@
 """Extractors for https://aryion.com/"""
 
 from .common import Extractor, Message
-from .. import text, util, dt, exception
+from .. import text, util, dt
 from ..cache import cache
 from email.utils import parsedate_tz
 
@@ -52,7 +52,7 @@ class AryionExtractor(Extractor):
 
         response = self.request(url, method="POST", data=data)
         if b"You have been successfully logged in." not in response.content:
-            raise exception.AuthenticationError()
+            raise self.exc.AuthenticationError()
         return {c: response.cookies[c] for c in self.cookies_names}
 
     def items(self):
@@ -258,7 +258,7 @@ class AryionWatchExtractor(AryionExtractor):
 
     def posts(self):
         if not self.cookies_check(self.cookies_names):
-            raise exception.AuthRequired(
+            raise self.exc.AuthRequired(
                 ("username & password", "authenticated cookies"),
                 "watched Submissions")
         self.cookies.set("g4p_msgpage_style", "plain", domain="aryion.com")

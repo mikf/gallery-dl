@@ -10,7 +10,7 @@
 
 from .common import Extractor, Message
 from ..cache import cache
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?www\.pillowfort\.social"
 
@@ -108,7 +108,7 @@ class PillowfortExtractor(Extractor):
         response = self.request(url, method="POST", headers=headers, data=data)
 
         if not response.history:
-            raise exception.AuthenticationError()
+            raise self.exc.AuthenticationError()
 
         return {
             cookie.name: cookie.value

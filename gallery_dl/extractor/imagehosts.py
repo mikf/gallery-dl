@@ -9,7 +9,7 @@
 """Collection of extractors for various imagehosts"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 from ..cache import memcache
 
 
@@ -81,7 +81,7 @@ class ImagehostImageExtractor(Extractor):
         return ()
 
     def not_found(self, resource=None):
-        raise exception.NotFoundError(resource or self.__class__.subcategory)
+        raise self.exc.NotFoundError(resource or self.__class__.subcategory)
 
 
 class ImxtoImageExtractor(ImagehostImageExtractor):

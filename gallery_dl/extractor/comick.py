@@ -9,7 +9,7 @@
 """Extractors for https://comick.io/"""
 
 from .common import GalleryExtractor, ChapterExtractor, MangaExtractor, Message
-from .. import text, exception
+from .. import text
 from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?comick\.io"
@@ -71,7 +71,7 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
         while True:
             try:
                 props = _chapter_info(self, manga, chstr)
-            except exception.HttpError as exc:
+            except self.exc.HttpError as exc:
                 if exc.response.status_code != 404:
                     raise
                 if exc.response.headers.get(
@@ -84,7 +84,7 @@ class ComickChapterExtractor(ComickBase, ChapterExtractor):
                     manga = _manga_info(self, slug)
                     continue
                 if b'"notFound":true' in exc.response.content:
-                    raise exception.NotFoundError("chapter")
+                    raise self.exc.NotFoundError("chapter")
                 raise
 
             if "__N_REDIRECT" in props:

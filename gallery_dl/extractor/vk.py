@@ -9,7 +9,7 @@
 """Extractors for https://vk.com/"""
 
 from .common import Extractor, Message
-from .. import text, exception
+from .. import text
 
 BASE_PATTERN = r"(?:https://)?(?:www\.|m\.)?vk\.com"
 
@@ -100,13 +100,13 @@ class VkExtractor(Extractor):
             response = self.request(
                 url, method="POST", headers=headers, data=data)
             if response.history and "/challenge.html" in response.url:
-                raise exception.AbortExtraction(
+                raise self.exc.AbortExtraction(
                     "HTTP redirect to 'challenge' page:\n" + response.url)
 
             payload = response.json()["payload"][1]
             if len(payload) < 4:
                 self.log.debug(payload)
-                raise exception.AuthorizationError(
+                raise self.exc.AuthorizationError(
                     text.unescape(payload[0]) if payload[0] else None)
 
             total = payload[1]
