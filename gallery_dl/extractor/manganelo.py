@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2020 Jake Mannens
-# Copyright 2021-2025 Mike Fährmann
+# Copyright 2021-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -96,34 +96,36 @@ class ManganeloMangaExtractor(ManganeloExtractor, MangaExtractor):
     def chapters(self, page):
         extr = text.extract_from(page)
 
-        manga = text.unescape(extr("<h1>", "<"))
-        author = text.remove_html(extr("<li>Author(s) :", "</a>"))
-        status = extr("<li>Status :", "<").strip()
-        update = self.parse_datetime(extr(
-            "<li>Last updated :", "<").strip(), "%b-%d-%Y %I:%M:%S %p")
-        tags = text.split_html(extr(">Genres :", "</li>"))[::2]
+        url = extr('property="og:url" content="', '"')
+        slug = url[url.rfind("/")+1:]
+
+        info = {
+            "manga" : text.unescape(extr("<h1>", "<")),
+            "manga_url" : url,
+            "manga_slug": slug,
+            "author": text.remove_html(extr("<li>Author(s) :", "</li>")),
+            "status": extr("<li>Status :", "<").strip(),
+            "date_updated": self.parse_datetime(extr(
+                "<li>Last updated :", "<").strip(), "%b-%d-%Y %I:%M:%S %p"),
+            "tags"  : text.split_html(extr(">Genres :", "</li>"))[::2],
+            "lang"  : "en",
+        }
+        info["tags"].sort()
+
+        base = url + "/"
+        url = f"{self.root}/api/manga/{slug}/chapters?limit=-1"
 
         results = []
-        for chapter in text.extract_iter(page, '<div class="row">', '</div>'):
-            url, pos = text.extract(chapter, '<a href="', '"')
-            title, pos = text.extract(chapter, '>', '</a>', pos)
-            date, pos = text.extract(chapter, '<span title="', '"', pos)
-            chapter, sep, minor = url.rpartition("/chapter-")[2].partition("-")
-
-            if url[0] == "/":
-                url = self.root + url
-            results.append((url, {
-                "manga"   : manga,
-                "author"  : author,
-                "status"  : status,
-                "tags"    : tags,
-                "date_updated": update,
-                "chapter" : text.parse_int(chapter),
+        data = self.request_json(url)["data"]
+        for ch in data["chapters"]:
+            slug = ch["chapter_slug"]
+            chapter, sep, minor = slug[8:].partition("-")
+            results.append((base + slug, {
+                **info,
+                "chapter": text.parse_int(chapter),
                 "chapter_minor": (sep and ".") + minor,
-                "title"   : title.partition(": ")[2],
-                "date"    : self.parse_datetime(date, "%b-%d-%Y %H:%M"),
-                "lang"    : "en",
-                "language": "English",
+                "date"   : self.parse_datetime_iso(ch["updated_at"]),
+                "views"  : ch["view"],
             }))
         return results
 
