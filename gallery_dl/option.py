@@ -616,6 +616,11 @@ def build_parser():
     )
     configuration.add_argument(
         "-c", "--config",
+        dest="configs_extra", metavar="FILE", action="append",
+        help="Additional configuration files in default format",
+    )
+    configuration.add_argument(
+        "--config-json",
         dest="configs_json", metavar="FILE", action="append",
         help="Additional configuration files in JSON format",
     )

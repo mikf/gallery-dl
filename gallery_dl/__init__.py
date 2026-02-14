@@ -33,8 +33,10 @@ def main():
                 config.log.error(exc)
         if args.config_load:
             config.load()
+        if args.configs_extra:
+            config.load(args.configs_extra, strict=True)
         if args.configs_json:
-            config.load(args.configs_json, strict=True)
+            config.load(args.configs_json, strict=True, loads=util.json_loads)
         if args.configs_yaml:
             import yaml
             config.load(args.configs_yaml, strict=True, loads=yaml.safe_load)
