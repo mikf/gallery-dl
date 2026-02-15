@@ -72,7 +72,8 @@ class PholderExtractor(Extractor):
                     # (can also see from item["is_gallery"])
                     # pholder does not preserver gallery order, but assigns
                     # each image a sub-id.
-                    data["id"], data["gallery_id"] = data["id"].partition(":")
+                    data["id"], _, data["gallery_id"] = \
+                        data["id"].partition(":")
 
                 yield Message.Directory, "", data
 
