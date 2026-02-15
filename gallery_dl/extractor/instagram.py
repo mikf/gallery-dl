@@ -910,10 +910,11 @@ class InstagramRestAPI():
             if user := self.user_by_search(screen_name):
                 return user
             self.user_by_search.invalidate(screen_name)
-        else:
-            if user := self.user_by_name(screen_name):
-                return user
-            self.user_by_name.invalidate(screen_name)
+
+        if user := self.user_by_name(screen_name):
+            return user
+        self.user_by_name.invalidate(screen_name)
+
         raise exception.NotFoundError("user")
 
     def user_id(self, screen_name, check_private=True):
