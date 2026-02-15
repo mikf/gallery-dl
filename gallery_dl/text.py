@@ -265,6 +265,15 @@ def parse_bytes(value, default=0, suffixes="bkmgtp"):
         return default
 
 
+def format_bytes(value):
+    """Convert a byte amount (int) to a human-readable string (e.g. 2.5M)"""
+    n = float(value)
+    for unit in ("B", "K", "M", "G", "T", "P"):
+        if n < 1024 or unit == "P":
+            return f"{n:.2f}{unit}"
+        n /= 1024
+
+
 def parse_int(value, default=0):
     """Convert 'value' to int"""
     if not value:

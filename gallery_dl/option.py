@@ -544,6 +544,12 @@ def build_parser():
         help="Size of in-memory data chunks (default: 32k)",
     )
     downloader.add_argument(
+        "--stop-after",
+        dest="stop-after", metavar="SIZE", action=ConfigAction,
+        help=("Stop downloads after SIZE bytes have been downloaded "
+              "(e.g. 100k, 10M, or 1G)")
+    )
+    downloader.add_argument(
         "--no-part",
         dest="part", nargs=0, action=ConfigConstAction, const=False,
         help="Do not use .part files",

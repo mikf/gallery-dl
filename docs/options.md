@@ -110,6 +110,8 @@
     -r, --limit-rate RATE       Maximum download rate (e.g. 500k, 2.5M, or
                                 800k-2M)
     --chunk-size SIZE           Size of in-memory data chunks (default: 32k)
+    --stop-after SIZE           Stop downloads after SIZE bytes have been
+                                downloaded (e.g. 100k, 10M, or 1G)
     --no-part                   Do not use .part files
     --no-skip                   Do not skip downloads; overwrite existing files
     --no-mtime                  Do not set file modification times according to
