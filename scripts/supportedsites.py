@@ -381,9 +381,6 @@ SUBCATEGORY_MAP = {
         "followed": "Followed Users",
         "nuita" : "Nuita History",
     },
-    "pholder": {
-        "media": "Search Results",
-    },
     "pinterest": {
         "board": "",
         "pinit": "pin.it Links",
