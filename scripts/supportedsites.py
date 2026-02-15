@@ -153,6 +153,7 @@ CATEGORY_MAP = {
     "nudostarforum"  : "NudoStar Forums",
     "okporn"         : "OK.PORN",
     "paheal"         : "Rule 34",
+    "pholder"        : "pholder",
     "photovogue"     : "PhotoVogue",
     "picstate"       : "PicState",
     "pidgiwiki"      : "PidgiWiki",
