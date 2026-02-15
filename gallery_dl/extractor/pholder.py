@@ -15,7 +15,7 @@ BASE_PATTERN = r"(?:https?://)?(?:www\.)?pholder\.com"
 def _thumb_resolution(thumbnail):
     try:
         return int(thumbnail["width"]) * int(thumbnail["height"])
-    except ValueError:
+    except Exception:
         return 0
 
 
