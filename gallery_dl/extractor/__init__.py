@@ -157,6 +157,7 @@ modules = [
     "patreon",
     "pexels",
     "philomena",
+    "pholder",
     "photovogue",
     "picarto",
     "picazor",
