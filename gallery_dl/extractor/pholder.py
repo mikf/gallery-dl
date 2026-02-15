@@ -85,14 +85,12 @@ class PholderExtractor(Extractor):
                         # ":small", so we have to strip out any trailing
                         # ":word" bits.
                         url = url.rpartition(":")[0]
-                    data["extension"] = text.ext_from_url(url)
-                    yield Message.Url, url, data
+                    yield Message.Url, url, text.nameext_from_url(url, data)
                     break
                 else:
                     # Fallback to origin
                     url = item["_source"]["origin"]
-                    data["extension"] = text.ext_from_url(url)
-                    yield Message.Url, url, data
+                    yield Message.Url, url, text.nameext_from_url(url, data)
 
             if len(window_data["media"]) < 150:
                 break
