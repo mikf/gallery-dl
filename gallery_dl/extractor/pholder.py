@@ -27,6 +27,7 @@ class PholderExtractor(Extractor):
     filename_fmt = "{id}{gallery_id:? / /}{title:? //[:225]}.{extension}"
     archive_fmt = "{id}_{filename}_{gallery_id:? / /}"
     request_interval = (2.0, 4.0)
+    referer = False
 
     def _parse_window_data(self, html):
         # sometimes, window.data content is split across multiple script

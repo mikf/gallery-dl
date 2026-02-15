@@ -1006,6 +1006,7 @@ Default
         ``4chanarchives`` |
         ``archivedmoe``   |
         ``nsfwalbum``     |
+        ``pholder``       |
         ``tumblrgallery``
     ``true``
         otherwise
