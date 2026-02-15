@@ -6,8 +6,6 @@
 
 """Extractors for https://pholder.com/"""
 
-import json
-
 from .common import Extractor, Message
 from .. import text, util, exception
 
@@ -30,13 +28,6 @@ class PholderExtractor(Extractor):
     archive_fmt = "{id}_{filename}_{gallery_id:? / /}"
     request_interval = (2.0, 4.0)
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-
-    def request(self, url, **kwargs):
-        response = Extractor.request(self, url, **kwargs)
-        return response
-
     def _parse_window_data(self, html):
         # sometimes, window.data content is split across multiple script
         # blocks.
@@ -48,14 +39,14 @@ class PholderExtractor(Extractor):
             if tag.startswith("window.data = "):
                 try:
                     return util.json_loads(tag[tag_prefix:])
-                except json.decoder.JSONDecodeError:
+                except ValueError:
                     split_data = True
 
             if split_data:
                 try:
                     window_data_content += tag
                     return util.json_loads(window_data_content[tag_prefix:])
-                except json.decoder.JSONDecodeError:
+                except ValueError:
                     pass
 
         raise exception.AbortExtraction("Could not locate window.data JSON.")
@@ -110,7 +101,7 @@ class PholderExtractor(Extractor):
 
     def items(self):
         url = f"{self.root}/{self.groups[0]}"
-        yield from self._posts(url)
+        return self._posts(url)
 
 
 class PholderSubredditExtractor(PholderExtractor):
