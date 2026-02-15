@@ -59,13 +59,9 @@ class PholderExtractor(Extractor):
             window_data = self._parse_window_data(html)
 
             for item in window_data["media"]:
-                data = {
-                    "id": item["_id"],
-                    "gallery_id": "",
-                    "subredditTitle": item["_source"]["sub"],
-                    "title": text.unquote(item["_source"]["title"]),
-                    "tags": item["_source"]["tags"],
-                }
+                data = item["_source"]
+                data["id"] = item["_id"]
+                data["date"] = self.parse_timestamp(data.get("submitted_utc"))
 
                 if ":" in data["id"]:
                     # this is a gallery
@@ -74,11 +70,13 @@ class PholderExtractor(Extractor):
                     # each image a sub-id.
                     data["id"], _, data["gallery_id"] = \
                         data["id"].partition(":")
+                else:
+                    data["gallery_id"] = ""
 
                 yield Message.Directory, "", data
 
                 for thumb in sorted(
-                        item["_source"]["thumbnails"],
+                        data["thumbnails"],
                         key=lambda e: _thumb_resolution(e), reverse=True):
                     # try to use highest-resolution URLs from thumbnails first.
                     url = thumb["url"]
@@ -91,7 +89,7 @@ class PholderExtractor(Extractor):
                     break
                 else:
                     # Fallback to origin
-                    url = item["_source"]["origin"]
+                    url = data["origin"]
                     yield Message.Url, url, text.nameext_from_url(url, data)
 
             if len(window_data["media"]) < 150:
