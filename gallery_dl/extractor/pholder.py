@@ -112,6 +112,7 @@ class PholderSubredditExtractor(PholderExtractor):
 class PholderUserExtractor(PholderExtractor):
     """Extractor for URLs from pholder-stored posts for a reddit user"""
     subcategory = "user"
+    directory_fmt = ("{category}", "u_{author}")
     pattern = BASE_PATTERN + r"(/u/[^/?#]+)(?:/?\?([^#]+))?"
     example = "https://www.pholder.com/u/USER"
 
