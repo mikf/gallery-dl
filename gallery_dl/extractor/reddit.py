@@ -319,8 +319,8 @@ class RedditUserExtractor(RedditExtractor):
         self.kwdict["user"] = user = self.api.user_about(username)
 
         submissions = self.api.submissions_user(
-            user["name"] + (sub or ""), text.parse_query(qs))
-        if self.config("only", True):
+            (user.get("name") or username) + (sub or ""), text.parse_query(qs))
+        if self.config("only", sub != "/saved"):
             submissions = self._only(submissions, user)
         return submissions
 

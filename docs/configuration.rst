@@ -5506,7 +5506,10 @@ extractor.reddit.user.only
 Type
     ``bool``
 Default
-    ``trur``
+    ``user-saved``
+        ``false``
+    otherwise
+        ``true``
 Description
     Only process and return posts from the user specified in the input URL.
 
