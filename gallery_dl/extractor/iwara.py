@@ -297,6 +297,7 @@ class IwaraAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
+        self.exc = extractor.exc
         self.headers = {
             "Referer"     : extractor.root + "/",
             "Content-Type": "application/json",

@@ -1187,6 +1187,7 @@ class DeviantartOAuthAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.log = extractor.log
+        self.exc = extractor.exc
         self.headers = {"dA-minor-version": "20210526"}
         self._warn_429 = True
 
@@ -1808,7 +1809,7 @@ class DeviantartEclipseAPI():
 
         pos = page.find('\\"name\\":\\"watching\\"')
         if pos < 0:
-            raise self.exc.NotFoundError("'watching' module ID")
+            raise self.extractor.exc.NotFoundError("'watching' module ID")
         module_id = text.rextr(page, '\\"id\\":', ',', pos).strip('" ')
 
         self._fetch_csrf_token(page)

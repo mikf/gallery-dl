@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2025 Mike Fährmann
+# Copyright 2016-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -545,9 +545,9 @@ class PinterestAPI():
             return data
         if response.status_code == 404:
             resource = self.extractor.subcategory.rpartition("-")[2]
-            raise self.exc.NotFoundError(resource)
+            raise self.extractor.exc.NotFoundError(resource)
         self.extractor.log.debug("Server response: %s", response.text)
-        raise self.exc.AbortExtraction("API request failed")
+        raise self.extractor.exc.AbortExtraction("API request failed")
 
     def _pagination(self, resource, options):
         while True:

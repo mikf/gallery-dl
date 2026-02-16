@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -174,7 +174,7 @@ class PexelsAPI():
 
             else:
                 self.extractor.log.debug(response.text)
-                raise self.exc.AbortExtraction("API request failed")
+                raise self.extractor.exc.AbortExtraction("API request failed")
 
     def _pagination(self, endpoint, params):
         while True:

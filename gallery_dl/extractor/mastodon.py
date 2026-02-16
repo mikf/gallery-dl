@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2025 Mike Fährmann
+# Copyright 2019-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -215,6 +215,7 @@ class MastodonAPI():
     def __init__(self, extractor):
         self.root = extractor.root
         self.extractor = extractor
+        self.exc = extractor.exc
 
         access_token = extractor.config("access-token")
         if access_token is None or access_token == "cache":

@@ -239,7 +239,7 @@ class MisskeyAPI():
     def i_favorites(self):
         endpoint = "/i/favorites"
         if not self.access_token:
-            raise self.exc.AuthenticationError()
+            raise self.extractor.exc.AuthenticationError()
         data = {"i": self.access_token}
         return self._pagination(endpoint, data)
 

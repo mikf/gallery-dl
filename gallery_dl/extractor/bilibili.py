@@ -116,6 +116,7 @@ class BilibiliUserArticlesFavoriteExtractor(BilibiliExtractor):
 class BilibiliAPI():
     def __init__(self, extractor):
         self.extractor = extractor
+        self.exc = extractor.exc
 
     def _call(self, endpoint, params):
         url = "https://api.bilibili.com/x/polymer/web-dynamic/v1" + endpoint

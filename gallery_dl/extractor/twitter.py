@@ -1247,6 +1247,7 @@ class TwitterAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.log = extractor.log
+        self.exc = extractor.exc
 
         self.root = "https://x.com/i/api"
         self._nsfw_warning = True

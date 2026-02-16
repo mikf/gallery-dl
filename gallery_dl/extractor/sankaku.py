@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2025 Mike Fährmann
+# Copyright 2014-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -284,7 +284,7 @@ class SankakuAPI():
             if response.status_code == 429:
                 until = response.headers.get("X-RateLimit-Reset")
                 if not until and b"_tags-explicit-limit" in response.content:
-                    raise self.exc.AuthorizationError(
+                    raise self.extractor.exc.AuthorizationError(
                         "Search tag limit exceeded")
                 seconds = None if until else 600
                 self.extractor.wait(until=until, seconds=seconds)
@@ -305,7 +305,7 @@ class SankakuAPI():
                     code = f"'{code.rpartition('__')[2].replace('-', ' ')}'"
                 except Exception:
                     pass
-                raise self.exc.AbortExtraction(code)
+                raise self.extractor.exc.AbortExtraction(code)
             return data
 
     def _pagination(self, endpoint, params):

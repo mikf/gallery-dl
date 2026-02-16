@@ -380,14 +380,15 @@ class BoostyAPI():
                 return response.json()
 
             elif response.status_code < 400:
-                raise self.exc.AuthenticationError("Invalid API access token")
+                raise self.extractor.exc.AuthenticationError(
+                    "Invalid API access token")
 
             elif response.status_code == 429:
                 self.extractor.wait(seconds=600)
 
             else:
                 self.extractor.log.debug(response.text)
-                raise self.exc.AbortExtraction("API request failed")
+                raise self.extractor.exc.AbortExtraction("API request failed")
 
     def _pagination(self, endpoint, params, transform=None, key=None):
         if "is_only_allowed" not in params and self.extractor.only_allowed:

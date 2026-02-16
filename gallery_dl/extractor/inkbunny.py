@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2025 Mike Fährmann
+# Copyright 2020-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -348,7 +348,7 @@ class InkbunnyAPI():
                 self.authenticate(invalidate=True)
                 continue
 
-            raise self.exc.AbortExtraction(data.get("error_message"))
+            raise self.extractor.exc.AbortExtraction(data.get("error_message"))
 
     def _pagination_search(self, params):
         params["page"] = 1

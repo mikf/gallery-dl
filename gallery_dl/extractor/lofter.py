@@ -132,11 +132,11 @@ class LofterAPI():
         info = response.json()
 
         if info["meta"]["status"] == 4200:
-            raise self.exc.NotFoundError("blog")
+            raise self.extractor.exc.NotFoundError("blog")
 
         if info["meta"]["status"] != 200:
             self.extractor.log.debug("Server response: %s", info)
-            raise self.exc.AbortExtraction("API request failed")
+            raise self.extractor.exc.AbortExtraction("API request failed")
 
         return info["response"]
 

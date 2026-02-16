@@ -490,7 +490,8 @@ class DiscordAPI():
             offset += len(data)
 
     def _raise_invalid_token(self):
-        raise self.exc.AuthenticationError("""Invalid or missing token.
+        raise self.extractor.exc.AuthenticationError("""\
+Invalid or missing token.
 Please provide a valid token following these instructions:
 
 1) Open Discord in your browser (https://discord.com/app);

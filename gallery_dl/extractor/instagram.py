@@ -804,6 +804,7 @@ class InstagramRestAPI():
 
     def __init__(self, extractor):
         self.extractor = extractor
+        self.exc = extractor.exc
 
         _cache = self.extractor.config("user-cache", True)
         _cache = memcache if not _cache or _cache == "memory" else cache
@@ -1087,7 +1088,8 @@ class InstagramGraphqlAPI():
         self.user_id = api.user_id
 
     def _unsupported(self, _=None):
-        raise self.exc.AbortExtraction("Unsupported with GraphQL API")
+        raise self.extractor.exc.AbortExtraction(
+            "Unsupported with GraphQL API")
 
     def highlights_tray(self, user_id):
         query_hash = "d4d88dc1500312af6f937f7b804c68c3"
