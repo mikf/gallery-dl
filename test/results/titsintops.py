@@ -89,6 +89,57 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://titsintops.com/phpBB2/threads/cute_caprice-alexa-young-camgirl-with-big-tits-and-ass.13560733/post-2771597",
+    "#comment" : "attachments",
+    "#category": ("xenforo", "titsintops", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+    "#results" : (
+        "https://chaturbate.com/cute_caprice/",
+        "https://titsintops.com/phpBB2/attachments/1-gif.5021643/",
+        "https://titsintops.com/phpBB2/attachments/2024-07-26-1-mp4.5021644/",
+        "https://titsintops.com/phpBB2/attachments/2024-07-26-2-mp4.5021645/",
+        "https://titsintops.com/phpBB2/attachments/2024-07-26-3-mp4.5021646/",
+    ),
+
+    "count"       : 5,
+    "post"        : {
+        "author_id"  : "132601",
+        "author_slug": "salmonskrank",
+        "date"       : "dt:2024-07-26 20:40:24",
+        "id"         : "2771597",
+    },
+    "thread"      : {
+        "author_id"  : "132601",
+        "author_slug": "salmonskrank",
+        "date"       : "dt:2024-07-26 20:40:24",
+        "id"         : "13560733",
+    },
+},
+
+{
+    "#url"     : "https://titsintops.com/phpBB2/threads/cute_caprice-alexa-young-camgirl-with-big-tits-and-ass.13560733/post-2778563",
+    "#comment" : "attachments 2",
+    "#category": ("xenforo", "titsintops", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+    "#results" : (
+        "https://titsintops.com/phpBB2/attachments/4-webp.5037692/",
+        "https://titsintops.com/phpBB2/attachments/3-webp.5037693/",
+        "https://titsintops.com/phpBB2/attachments/2-webp.5037694/",
+        "https://titsintops.com/phpBB2/attachments/1-webp.5037695/",
+    ),
+
+    "count"       : 4,
+    "extension"   : "webp",
+    "type"        : "inline",
+    "post"        : {
+        "author_id"  : "132601",
+        "author_slug": "salmonskrank",
+        "date"       : "dt:2024-07-31 19:36:20",
+        "id"         : "2778563",
+    },
+},
+
+{
     "#url"     : "https://titsintops.com/phpBB2/threads/mia-big-titty-boston-blonde.13575039/",
     "#category": ("xenforo", "titsintops", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
