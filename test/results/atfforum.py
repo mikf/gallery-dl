@@ -160,4 +160,16 @@ __tests__ = (
     "#class"   : xenforo.XenforoMediaAlbumExtractor,
 },
 
+{
+    "#url"     : "https://allthefallen.moe/forum/index.php?members/spammy.195035/",
+    "#category": ("xenforo", "atfforum", "profile"),
+    "#class"   : xenforo.XenforoProfileExtractor,
+},
+
+{
+    "#url"     : "https://allthefallen.moe/forum/index.php?members/spammy.195035/page-2",
+    "#category": ("xenforo", "atfforum", "profile"),
+    "#class"   : xenforo.XenforoProfileExtractor,
+},
+
 )
