@@ -1936,37 +1936,37 @@ Consider all listed sites to potentially be NSFW.
 <tr id="simpcity" title="simpcity">
     <td>SimpCity Forums</td>
     <td>https://simpcity.cr/</td>
-    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Profiles, Threads</td>
     <td>Supported</td>
 </tr>
 <tr id="nudostarforum" title="nudostarforum">
     <td>NudoStar Forums</td>
     <td>https://nudostar.com/forum/</td>
-    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Profiles, Threads</td>
     <td>Supported</td>
 </tr>
 <tr id="atfforum" title="atfforum">
     <td>All The Fallen</td>
     <td>https://allthefallen.moe/forum/</td>
-    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Profiles, Threads</td>
     <td></td>
 </tr>
 <tr id="celebforum" title="celebforum">
     <td>celebforum</td>
     <td>https://celebforum.to/</td>
-    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Profiles, Threads</td>
     <td></td>
 </tr>
 <tr id="titsintops" title="titsintops">
     <td>Tits In Tops Forum</td>
     <td>https://titsintops.com/phpBB2/</td>
-    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Profiles, Threads</td>
     <td></td>
 </tr>
 <tr id="socialmediagirlsforum" title="socialmediagirlsforum">
     <td>Social Media Girls Forums</td>
     <td>https://forums.socialmediagirls.com/</td>
-    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Threads</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Profiles, Threads</td>
     <td></td>
 </tr>
 
