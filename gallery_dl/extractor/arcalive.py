@@ -173,7 +173,7 @@ class ArcaliveAPI():
             msg = "API request failed: " + msg
         else:
             msg = "API request failed"
-        raise self.exc.AbortExtraction(msg)
+        raise self.extractor.exc.AbortExtraction(msg)
 
     def _pagination(self, endpoint, params, key):
         while True:

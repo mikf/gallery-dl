@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2025 Mike Fährmann
+# Copyright 2018-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -333,7 +333,8 @@ class MangadexAPI():
         try:
             access_token = data["access_token"]
         except Exception:
-            raise self.exc.AuthenticationError(data.get("error_description"))
+            raise self.extractor.exc.AuthenticationError(
+                data.get("error_description"))
 
         if refresh_token != data.get("refresh_token"):
             _refresh_token_cache.update(
@@ -356,7 +357,7 @@ class MangadexAPI():
         data = self.extractor.request_json(
             url, method="POST", json=json, fatal=None)
         if data.get("result") != "ok":
-            raise self.exc.AuthenticationError()
+            raise self.extractor.exc.AuthenticationError()
 
         if refresh_token != data["token"]["refresh"]:
             _refresh_token_cache.update(username, data["token"]["refresh"])
@@ -381,7 +382,7 @@ class MangadexAPI():
 
             msg = ", ".join(f'{error["title"]}: "{error["detail"]}"'
                             for error in response.json()["errors"])
-            raise self.exc.AbortExtraction(
+            raise self.extractor.exc.AbortExtraction(
                 f"{response.status_code} {response.reason} ({msg})")
 
     def _pagination_chapters(self, endpoint, params=None, auth=False):

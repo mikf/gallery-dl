@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2025 Mike Fährmann
+# Copyright 2022-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -153,7 +153,7 @@ class TwibooruAPI():
 
             # error
             self.extractor.log.debug(response.content)
-            raise self.exc.HttpError("", response)
+            raise self.extractor.exc.HttpError("", response)
 
     def _pagination(self, endpoint, params):
         extr = self.extractor

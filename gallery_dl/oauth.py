@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2020 Mike Fährmann
+# Copyright 2018-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -109,6 +109,7 @@ class OAuth1API():
     API_SECRET = None
 
     def __init__(self, extractor):
+        self.exc = extractor.exc
         self.log = extractor.log
         self.extractor = extractor
 

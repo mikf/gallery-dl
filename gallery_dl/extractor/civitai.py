@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024-2025 Mike Fährmann
+# Copyright 2024-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -201,7 +201,8 @@ class CivitaiExtractor(Extractor):
         if "Authorization" not in self.api.headers and \
                 not self.cookies.get(
                 "__Secure-civitai-token", domain=".civitai.com"):
-            raise self.exc.AuthRequired(("api-key", "authenticated cookies"))
+            raise self.extractor.exc.AuthRequired(
+                ("api-key", "authenticated cookies"))
 
     def _parse_query(self, value):
         return text.parse_query_list(

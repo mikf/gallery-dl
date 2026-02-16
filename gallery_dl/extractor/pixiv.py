@@ -1123,6 +1123,7 @@ class PixivAppAPI():
     def __init__(self, extractor):
         self.extractor = extractor
         self.log = extractor.log
+        self.exc = extractor.exc
         self.username = extractor._get_auth_info()[0]
         self.user = None
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright 2020 Leonid "Bepis" Pavel
-# Copyright 2023-2025 Mike Fährmann
+# Copyright 2023-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -142,11 +142,12 @@ class ImagechestAPI():
                 return response.json()["data"]
 
             elif response.status_code < 400:
-                raise self.exc.AuthenticationError("Invalid API access token")
+                raise self.extractor.exc.AuthenticationError(
+                    "Invalid API access token")
 
             elif response.status_code == 429:
                 self.extractor.wait(seconds=600)
 
             else:
                 self.extractor.log.debug(response.text)
-                raise self.exc.AbortExtraction("API request failed")
+                raise self.extractor.exc.AbortExtraction("API request failed")

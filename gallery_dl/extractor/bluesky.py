@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024-2025 Mike Fährmann
+# Copyright 2024-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -569,7 +569,7 @@ class BlueskyAPI():
 
         if response.status_code != 200:
             self.log.debug("Server response: %s", data)
-            raise self.exc.AuthenticationError(
+            raise self.extractor.exc.AuthenticationError(
                 f"\"{data.get('error')}: {data.get('message')}\"")
 
         _refresh_token_cache.update(self.username, data["refreshJwt"])
@@ -600,7 +600,7 @@ class BlueskyAPI():
                 msg = f"{msg} ({response.status_code} {response.reason})"
 
             self.extractor.log.debug("Server response: %s", response.text)
-            raise self.exc.AbortExtraction(msg)
+            raise self.extractor.exc.AbortExtraction(msg)
 
     def _pagination(self, endpoint, params,
                     key="feed", root=None, check_empty=False):
