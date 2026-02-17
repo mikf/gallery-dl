@@ -702,7 +702,9 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
             yield url, folder
 
     def _update_content_default(self, deviation, content):
-        if "premium_folder_data" in deviation or deviation.get("is_mature"):
+        if "premium_folder_data" in deviation or \
+                "tier_access" in deviation or \
+                deviation.get("is_mature"):
             public = False
         else:
             public = None
@@ -1769,7 +1771,8 @@ class DeviantartOAuthAPI():
             error = data.get("error_description")
             if error == "User not found.":
                 raise exception.NotFoundError("user or group")
-            if error == "Deviation not downloadable.":
+            if error in {"Deviation not downloadable.",
+                         "Only subscribers may have access to this download."}:
                 raise exception.AuthorizationError()
 
             self.log.debug(response.text)
