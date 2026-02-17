@@ -41,6 +41,15 @@ class Message():
       - 2nd element is the (external) URL as a string
       - 3rd element is a dictionary containing URL-specific metadata
 
+      Optional metadata keys for Queue messages:
+      - Message.QueueRollback:
+        - Tuple/list of top-level integer metadata fields that should be
+          decremented if queue handling gets skipped (for example due to an
+          extractor blacklist).
+      - Message.QueueRollbackNested:
+        - Tuple/list of dotted metadata paths (e.g. "post.count") that should
+          be decremented under the same conditions.
+
     - Message.Urllist:  # obsolete
       - Same as Message.Url, but its 2nd element is a list of multiple URLs
       - The additional URLs serve as a fallback if the primary one fails
@@ -52,5 +61,7 @@ class Message():
     #  Headers = 4
     #  Cookies = 5
     Queue = 6
+    QueueRollback = "_queue_rollback"
+    QueueRollbackNested = "_queue_rollback_nested"
     #  Urllist = 7
     #  Metadata = 8
