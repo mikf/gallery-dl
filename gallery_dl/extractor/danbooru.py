@@ -38,7 +38,7 @@ class DanbooruExtractor(BaseExtractor):
             self.log.debug("Using HTTP Basic Auth for user '%s'", username)
             self.session.auth = util.HTTPBasicAuth(username, api_key)
 
-    def skip(self, num):
+    def skip_files(self, num):
         pages = num // self.per_page
         if pages >= self.page_limit:
             pages = self.page_limit - 1

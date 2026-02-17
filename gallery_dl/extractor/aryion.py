@@ -218,7 +218,7 @@ class AryionGalleryExtractor(AryionExtractor):
         self.offset = 0
         self.recursive = self.config("recursive", True)
 
-    def skip(self, num):
+    def skip_files(self, num):
         if self.recursive:
             return 0
         self.offset += num

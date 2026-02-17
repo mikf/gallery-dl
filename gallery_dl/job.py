@@ -316,11 +316,11 @@ class Job():
 
         extr.initialize()
         self.pred_url = self._prepare_predicates(
-            "file", "image", extr.skip)
+            "file", "image", extr.skip_files)
         self.pred_post = self._prepare_predicates(
-            "post", None, None)
+            "post", None, extr.skip_posts)
         self.pred_queue = self._prepare_predicates(
-            "child", "chapter", None)
+            "child", "chapter", extr.skip_children)
 
         init = extr.config("init", False)
         if init and init != "lazy":

@@ -156,10 +156,9 @@ class GelbooruPoolExtractor(GelbooruBase,
                             gelbooru_v02.GelbooruV02PoolExtractor):
     """Extractor for gelbooru pools"""
     per_page = 45
+    skip_files = GelbooruBase._skip_offset
     pattern = BASE_PATTERN + r"page=pool&s=show&id=(\d+)"
     example = "https://gelbooru.com/index.php?page=pool&s=show&id=12345"
-
-    skip = GelbooruBase._skip_offset
 
     def metadata(self):
         url = self.root + "/index.php"
@@ -187,10 +186,9 @@ class GelbooruFavoriteExtractor(GelbooruBase,
                                 gelbooru_v02.GelbooruV02FavoriteExtractor):
     """Extractor for gelbooru favorites"""
     per_page = 100
+    skip_files = GelbooruBase._skip_offset
     pattern = BASE_PATTERN + r"page=favorites&s=view&id=(\d+)"
     example = "https://gelbooru.com/index.php?page=favorites&s=view&id=12345"
-
-    skip = GelbooruBase._skip_offset
 
     def posts(self):
         # get number of favorites

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2025 Mike Fährmann
+# Copyright 2015-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -46,7 +46,7 @@ class HentaifoundryExtractor(Extractor):
             yield Message.Directory, "", image
             yield Message.Url, image["src"], image
 
-    def skip(self, num):
+    def skip_files(self, num):
         pages, posts = divmod(num, self.per_page)
         self.start_page += pages
         self.start_post += posts
@@ -312,11 +312,10 @@ class HentaifoundryPopularExtractor(HentaifoundryExtractor):
 class HentaifoundryImageExtractor(HentaifoundryExtractor):
     """Extractor for a single image from hentaifoundry.com"""
     subcategory = "image"
+    skip_files = None
     pattern = (r"(https?://)?(?:www\.|pictures\.)?hentai-foundry\.com"
                r"/(?:pictures/user|[^/?#])/([^/?#]+)/(\d+)")
     example = "https://www.hentai-foundry.com/pictures/user/USER/12345/TITLE"
-
-    skip = Extractor.skip
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)
@@ -354,10 +353,9 @@ class HentaifoundryStoryExtractor(HentaifoundryExtractor):
     """Extractor for a hentaifoundry story"""
     subcategory = "story"
     archive_fmt = "s_{index}"
+    skip_files = None
     pattern = BASE_PATTERN + r"/stories/user/([^/?#]+)/(\d+)"
     example = "https://www.hentai-foundry.com/stories/user/USER/12345/TITLE"
-
-    skip = Extractor.skip
 
     def __init__(self, match):
         HentaifoundryExtractor.__init__(self, match)

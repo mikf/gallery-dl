@@ -51,7 +51,7 @@ class UnsplashExtractor(Extractor):
     def metadata(self):
         return None
 
-    def skip(self, num):
+    def skip_files(self, num):
         pages = num // self.per_page
         self.page_start += pages
         return pages * self.per_page

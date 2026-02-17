@@ -40,7 +40,7 @@ class SankakuExtractor(BooruExtractor):
         9: "meta",
     }
 
-    def skip(self, num):
+    def skip_files(self, num):
         return 0
 
     def _init(self):

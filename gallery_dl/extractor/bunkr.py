@@ -85,7 +85,7 @@ class BunkrAlbumExtractor(LolisafeAlbumExtractor):
         self.endpoint = endpoint
         self.offset = 0
 
-    def skip(self, num):
+    def skip_files(self, num):
         self.offset = num
         return num
 
