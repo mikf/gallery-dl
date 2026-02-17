@@ -410,7 +410,7 @@ class MangadexAPI():
         lang = self.extractor.config("lang")
         if isinstance(lang, str) and "," in lang:
             lang = lang.split(",")
-        params["locales"] = lang
+        params["locales[]"] = lang
         params["contentRating"] = None
         params["order[volume]"] = \
             "desc" if self.extractor.config("chapter-reverse") else "asc"
