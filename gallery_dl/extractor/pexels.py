@@ -8,7 +8,7 @@
 
 """Extractors for https://pexels.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, media_source
 from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?pexels\.com"
@@ -38,12 +38,26 @@ class PexelsExtractor(Extractor):
             post["date"] = self.parse_datetime_iso(post["created_at"][:-5])
 
             if "image" in post:
-                url, _, query = post["image"]["download_link"].partition("?")
+                download_link = media_source(post["image"], "download_link")
+                if not download_link:
+                    self.log.warning(
+                        "%s: image payload has no download link",
+                        post.get("id", "?"),
+                    )
+                    continue
+
+                url, _, query = download_link.partition("?")
                 name = text.extr(query, "&dl=", "&")
             elif "video" in post:
                 video = post["video"]
-                name = video["src"]
-                url = video["download_link"]
+                url = media_source(video, "download_link", "src")
+                name = media_source(video, "src", "download_link")
+                if not url or not name:
+                    self.log.warning(
+                        "%s: video payload has no media source URL",
+                        post.get("id", "?"),
+                    )
+                    continue
             else:
                 self.log.warning("%s: Unsupported post type", post.get("id"))
                 continue

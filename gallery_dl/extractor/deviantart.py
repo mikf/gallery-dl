@@ -8,8 +8,8 @@
 
 """Extractors for https://www.deviantart.com/"""
 
-from .common import Extractor, Message, Dispatch
-from .. import text, util, dt
+from .common import Extractor, Message, Dispatch, media_source
+from .. import text, util, dt, exception
 from ..cache import cache, memcache
 import collections
 import mimetypes
@@ -158,22 +158,31 @@ class DeviantartExtractor(Extractor):
 
             if "content" in deviation:
                 content = self._extract_content(deviation)
-                yield self.commit(deviation, content)
+                if msg := self.commit(deviation, content):
+                    yield msg
 
             elif deviation["is_downloadable"]:
-                content = self.api.deviation_download(deviation["deviationid"])
-                deviation["is_original"] = True
-                yield self.commit(deviation, content)
+                try:
+                    content = self.api.deviation_download(
+                        deviation["deviationid"])
+                except exception.AuthorizationError as exc:
+                    self.log.warning("%s: %s", deviation["deviationid"], exc)
+                else:
+                    deviation["is_original"] = True
+                    if msg := self.commit(deviation, content):
+                        yield msg
 
             if "videos" in deviation and deviation["videos"]:
                 video = max(deviation["videos"],
                             key=lambda x: text.parse_int(x["quality"][:-1]))
                 deviation["is_original"] = False
-                yield self.commit(deviation, video)
+                if msg := self.commit(deviation, video):
+                    yield msg
 
             if "flash" in deviation:
                 deviation["is_original"] = True
-                yield self.commit(deviation, deviation["flash"])
+                if msg := self.commit(deviation, deviation["flash"]):
+                    yield msg
 
             if self.commit_journal:
                 if journal := self._extract_journal(deviation):
@@ -200,12 +209,14 @@ class DeviantartExtractor(Extractor):
                 preview = deviation["preview"]
                 deviation["is_preview"] = True
                 if self.previews_images:
-                    yield self.commit(deviation, preview)
+                    if msg := self.commit(deviation, preview):
+                        yield msg
                 else:
                     mtype = mimetypes.guess_type(
                         "a." + deviation["extension"], False)[0]
                     if mtype and not mtype.startswith("image/"):
-                        yield self.commit(deviation, preview)
+                        if msg := self.commit(deviation, preview):
+                            yield msg
                 del deviation["is_preview"]
 
             if not self.extra:
@@ -277,9 +288,17 @@ class DeviantartExtractor(Extractor):
         ))
 
     def commit(self, deviation, target):
-        url = target["src"]
+        url = media_source(target, "src", "url")
+        if not url:
+            self.log.warning(
+                "%s: Missing media source URL in target payload; skipping",
+                deviation.get("deviationid", deviation.get("index", "?")),
+            )
+            return None
+
         name = target.get("filename") or url
         target = target.copy()
+        target["src"] = url
         target["filename"] = deviation["filename"]
         deviation["target"] = target
         deviation["extension"] = target["extension"] = text.ext_from_url(name)
@@ -472,13 +491,38 @@ class DeviantartExtractor(Extractor):
         else:
             public = None
 
-        data = self.api.deviation_download(deviation["deviationid"], public)
+        try:
+            data = self.api.deviation_download(deviation["deviationid"], public)
+        except exception.AuthorizationError as exc:
+            self.log.debug("%s: %s", deviation["deviationid"], exc)
+            return
+
+        if not media_source(data, "src", "url"):
+            self.log.warning(
+                "%s: Download payload has no media source URL",
+                deviation["deviationid"],
+            )
+            return
+
         content.update(data)
         deviation["is_original"] = True
 
     def _update_content_image(self, deviation, content):
-        data = self.api.deviation_download(deviation["deviationid"])
-        url = data["src"].partition("?")[0]
+        try:
+            data = self.api.deviation_download(deviation["deviationid"])
+        except exception.AuthorizationError as exc:
+            self.log.debug("%s: %s", deviation["deviationid"], exc)
+            return
+
+        src_url = media_source(data, "src", "url")
+        if not src_url:
+            self.log.warning(
+                "%s: Download payload has no media source URL",
+                deviation["deviationid"],
+            )
+            return
+
+        url = src_url.partition("?")[0]
         mtype = mimetypes.guess_type(url, False)[0]
         if mtype and mtype.startswith("image/"):
             content.update(data)
@@ -1360,12 +1404,27 @@ class DeviantartOAuthAPI():
         params = {"mature_content": self.mature}
 
         try:
-            return self._call(
+            data = self._call(
                 endpoint, params=params, public=public, log=False)
         except Exception:
             if not self.refresh_token_key:
                 raise
-            return self._call(endpoint, params=params, public=False)
+            data = self._call(endpoint, params=params, public=False)
+
+        if media_source(data, "src", "url"):
+            return data
+
+        if data:
+            msg = data.get("error_description")
+            if not msg:
+                self.log.debug(
+                    "Unexpected /deviation/download payload for %s: %s",
+                    deviation_id, data)
+                msg = "Deviation not downloadable."
+        else:
+            msg = "Deviation not downloadable."
+
+        raise exception.AuthorizationError(msg)
 
     def deviation_metadata(self, deviations):
         """ Fetch deviation metadata for a set of deviations"""
