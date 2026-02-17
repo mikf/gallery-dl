@@ -123,7 +123,7 @@ class ThehentaiworldTagExtractor(ThehentaiworldExtractor):
         self.kwdict["search_tags"] = tag = self.groups[0]
         return util.advance(self._pagination(f"/tag/{tag}/"), self.post_start)
 
-    def skip(self, num):
+    def skip_files(self, num):
         pages, posts = divmod(num, self.per_page)
         self.page_start += pages
         self.post_start += posts

@@ -56,7 +56,7 @@ class RealbooruExtractor(booru.BooruExtractor):
         post["md5"] = post["file_url"].rpartition("/")[2].partition(".")[0]
         return post
 
-    def skip(self, num):
+    def skip_files(self, num):
         self.page_start += num
         return num
 

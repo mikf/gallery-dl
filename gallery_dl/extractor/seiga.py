@@ -117,7 +117,7 @@ class SeigaUserExtractor(SeigaExtractor):
         self.user_id, self.order = match.groups()
         self.start_page = 1
 
-    def skip(self, num):
+    def skip_files(self, num):
         pages, images = divmod(num, 40)
         self.start_page += pages
         self.start_image += images
@@ -189,7 +189,7 @@ class SeigaImageExtractor(SeigaExtractor):
         SeigaExtractor.__init__(self, match)
         self.image_id = match[1]
 
-    def skip(self, num):
+    def skip_files(self, num):
         self.start_image += num
         return num
 

@@ -31,7 +31,7 @@ class VkExtractor(Extractor):
             self.log.info("Use '-o offset=%s' to continue downloading "
                           "from the current position", self.offset)
 
-    def skip(self, num):
+    def skip_files(self, num):
         self.offset += num
         return num
 

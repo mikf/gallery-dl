@@ -65,7 +65,7 @@ class FuraffinityExtractor(Extractor):
     def metadata(self):
         return None
 
-    def skip(self, num):
+    def skip_files(self, num):
         self.offset += num
         return num
 

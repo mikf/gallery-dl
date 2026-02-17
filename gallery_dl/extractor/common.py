@@ -53,7 +53,7 @@ class Extractor():
     request_interval_min = 0.0
     request_interval_429 = 60.0
     request_timestamp = 0.0
-    finalize = skip = None
+    finalize = skip_files = skip_posts = skip_children = None
     exc = exception
 
     def __init__(self, match):
@@ -965,7 +965,7 @@ class Dispatch():
     subcategory = "user"
     cookies_domain = None
     finalize = Extractor.finalize
-    skip = Extractor.skip
+    skip_files = None
 
     def __iter__(self):
         return self.items()

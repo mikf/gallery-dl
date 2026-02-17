@@ -53,7 +53,7 @@ class ComicvineTagExtractor(BooruExtractor):
                 return
             params["start"] += self.per_page
 
-    def skip(self, num):
+    def skip_files(self, num):
         self.page_start = num
         return num
 

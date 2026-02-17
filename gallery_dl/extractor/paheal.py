@@ -83,7 +83,7 @@ class PahealTagExtractor(PahealExtractor):
         if self.config("metadata"):
             self._extract_data = self._extract_data_ex
 
-    def skip(self, num):
+    def skip_files(self, num):
         pages = num // self.per_page
         self.page_start += pages
         return pages * self.per_page

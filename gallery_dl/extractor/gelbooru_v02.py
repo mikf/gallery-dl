@@ -219,7 +219,7 @@ class GelbooruV02PoolExtractor(GelbooruV02Extractor):
         else:
             self.post_ids = ()
 
-    def skip(self, num):
+    def skip_files(self, num):
         self.page_start += num
         return num
 

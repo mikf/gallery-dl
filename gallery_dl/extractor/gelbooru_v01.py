@@ -39,7 +39,7 @@ class GelbooruV01Extractor(booru.BooruExtractor):
 
         return post
 
-    def skip(self, num):
+    def skip_files(self, num):
         self.page_start += num
         return num
 
