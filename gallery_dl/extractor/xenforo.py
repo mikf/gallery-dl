@@ -8,7 +8,7 @@
 
 """Extractors for XenForo forums"""
 
-from .common import BaseExtractor, Message
+from .common import BaseExtractor, Message, mark_queue_rollback
 from .. import text, util
 from ..cache import cache
 import binascii
@@ -62,6 +62,11 @@ class XenforoExtractor(BaseExtractor):
             data["_http_expected_status"] = (403,)
             data["_http_validate"] = self._validate
             data["num"] = data["num_internal"] = data["num_external"] = 0
+            mark_queue_rollback(
+                data,
+                ("num", "num_external", "count"),
+                ("post.count",),
+            )
             for video, inl, bb, ext in urls:
                 if ext:
                     if ext[0] == "#":

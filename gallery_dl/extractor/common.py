@@ -26,6 +26,15 @@ from .. import config, output, text, util, dt, cache, exception
 urllib3 = requests.packages.urllib3
 
 
+def mark_queue_rollback(data, counters=(), nested=()):
+    """Annotate Queue metadata with rollback fields for skipped children."""
+    if counters:
+        data[Message.QueueRollback] = counters
+    if nested:
+        data[Message.QueueRollbackNested] = nested
+    return data
+
+
 class Extractor():
 
     category = ""

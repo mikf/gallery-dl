@@ -489,6 +489,7 @@ class DownloadJob(Job):
 
     def handle_queue(self, url, kwdict):
         if url in self.visited:
+            self._rollback_queue_metadata(kwdict)
             return
         self.visited.add(url)
 
@@ -498,6 +499,7 @@ class DownloadJob(Job):
             for callback in self.hooks["child"]:
                 callback(pathfmt)
 
+        filtered = False
         if cls := kwdict.get("_extractor"):
             extr = cls.from_url(url)
         else:
@@ -505,6 +507,7 @@ class DownloadJob(Job):
                 if self._extractor_filter is None:
                     self._extractor_filter = self._build_extractor_filter()
                 if not self._extractor_filter(extr):
+                    filtered = True
                     extr = None
 
         if extr:
@@ -569,6 +572,8 @@ class DownloadJob(Job):
                     pass
 
         else:
+            if filtered:
+                self._rollback_queue_metadata(kwdict)
             self._write_unsupported(url)
 
         if "child-after" in self.hooks:
@@ -576,6 +581,37 @@ class DownloadJob(Job):
             pathfmt.kwdict = kwdict
             for callback in self.hooks["child-after"]:
                 callback(pathfmt)
+
+    @staticmethod
+    def _decrement_counter(mapping, key):
+        value = mapping.get(key)
+        if isinstance(value, int) and value > 0:
+            mapping[key] = value - 1
+            return True
+        return False
+
+    def _rollback_queue_metadata(self, kwdict):
+        rolled_back = False
+
+        for key in kwdict.get(Message.QueueRollback, ()):
+            if self._decrement_counter(kwdict, key):
+                rolled_back = True
+
+        for path in kwdict.get(Message.QueueRollbackNested, ()):
+            parts = path.split(".")
+            if len(parts) < 2:
+                continue
+
+            current = kwdict
+            for part in parts[:-1]:
+                current = current.get(part)
+                if not isinstance(current, dict):
+                    break
+            else:
+                if self._decrement_counter(current, parts[-1]):
+                    rolled_back = True
+
+        return rolled_back
 
     def handle_finalize(self):
         if self.archive:

@@ -16,7 +16,11 @@ import io
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import job, config, text  # noqa E402
-from gallery_dl.extractor.common import Extractor, Message  # noqa E402
+from gallery_dl.extractor.common import (  # noqa E402
+    Extractor,
+    Message,
+    mark_queue_rollback,
+)
 
 
 class TestJob(unittest.TestCase):
@@ -106,6 +110,34 @@ class TestDownloadJob(TestJob):
         out = self._capture_stdout(extr)
         # no output if '_extractor' is overwritten (#8958)
         self.assertEqual(out, "11\n")
+
+    def test_queue_rollback_for_blacklisted_extractor(self):
+        config.set((), "download", False)
+        config.set((), "blacklist", "reddit")
+        config.set(
+            ("extractor", "test_category", "test_queue_counter"),
+            "queue-url",
+            "https://www.reddit.com/r/python/",
+        )
+
+        extr = TestExtractorQueueCounter.from_url("test:queue-counter")
+        self.jobclass(extr).run()
+
+        self.assertEqual(extr.data["num"], 0)
+        self.assertEqual(extr.data["num_external"], 0)
+        self.assertEqual(extr.data["count"], 0)
+        self.assertEqual(extr.data["post"]["count"], 0)
+
+    def test_queue_rollback_keeps_counts_when_queue_is_processed(self):
+        config.set((), "download", False)
+
+        extr = TestExtractorQueueCounter.from_url("test:queue-counter")
+        self.jobclass(extr).run()
+
+        self.assertEqual(extr.data["num"], 1)
+        self.assertEqual(extr.data["num_external"], 1)
+        self.assertEqual(extr.data["count"], 1)
+        self.assertEqual(extr.data["post"]["count"], 1)
 
 
 class TestKeywordJob(TestJob):
@@ -572,6 +604,27 @@ class TestExtractorParent(Extractor):
                 "tags": ["abc", "def"],
                 "_extractor": extr,
             }
+
+
+class TestExtractorQueueCounter(Extractor):
+    category = "test_category"
+    subcategory = "test_queue_counter"
+    pattern = r"test:queue-counter$"
+
+    def items(self):
+        self.data = data = {
+            "num": 1,
+            "num_external": 1,
+            "count": 1,
+            "post": {"count": 1},
+        }
+        mark_queue_rollback(
+            data,
+            ("num", "num_external", "count"),
+            ("post.count",),
+        )
+        yield Message.Directory, "", data
+        yield Message.Queue, self.config("queue-url", "test:noop"), data
 
 
 class TestExtractorException(Extractor):

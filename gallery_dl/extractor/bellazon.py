@@ -8,7 +8,7 @@
 
 """Extractors for https://www.bellazon.com/"""
 
-from .common import Extractor, Message
+from .common import Extractor, Message, mark_queue_rollback
 from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?bellazon\.com/main"
@@ -48,6 +48,11 @@ class BellazonExtractor(Extractor):
 
             yield Message.Directory, "", data
             data["num"] = data["num_internal"] = data["num_external"] = 0
+            mark_queue_rollback(
+                data,
+                ("num", "num_external", "count"),
+                ("post.count",),
+            )
             for info, url, url_img in urls:
                 if url_img:
                     url = text.unescape(
