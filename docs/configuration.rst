@@ -4368,6 +4368,16 @@ Description
     List of acceptable content ratings for returned chapters.
 
 
+extractor.mangadex.manga.covers
+-------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download `manga` `cover` images.
+
+
 extractor.mangafire.manga.lang
 ------------------------------
 Type

@@ -33,7 +33,7 @@ class MangadexExtractor(Extractor):
         self.uuid = self.groups[0]
         self.api = MangadexAPI(self)
 
-    def items(self):
+    def _items_chapters(self):
         for chapter in self.chapters():
             uuid = chapter["id"]
             data = self._transform(chapter)
@@ -46,6 +46,8 @@ class MangadexExtractor(Extractor):
         for manga in self.manga():
             url = f"{self.root}/title/{manga['id']}"
             yield Message.Queue, url, data
+
+    items = _items_chapters
 
     def _transform(self, chapter):
         relationships = defaultdict(list)
@@ -159,6 +161,15 @@ class MangadexMangaExtractor(MangadexExtractor):
     pattern = BASE_PATTERN + r"/(?:title|manga)/(?!follows|feed$)([0-9a-f-]+)"
     example = ("https://mangadex.org/title"
                "/01234567-89ab-cdef-0123-456789abcdef")
+
+    def items(self):
+        items = self._items_chapters()
+        if self.config("covers", False):
+            import itertools
+            url = f"{self.root}/title/{self.uuid}?tab=art"
+            data = {"_extractor": MangadexCoversExtractor}
+            items = itertools.chain(((Message.Queue, url, data),), items)
+        return items
 
     def chapters(self):
         return self.api.manga_feed(self.uuid)

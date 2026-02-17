@@ -15,8 +15,8 @@ __tests__ = (
     "#class"   : mangadex.MangadexChapterExtractor,
     "#count"   : 5,
 
-    "artist"       : ["Oda Eiichiro"],
-    "author"       : ["Oda Eiichiro"],
+    "artist"       : ["Oda Eiichirou"],
+    "author"       : ["Oda Eiichirou"],
     "chapter"      : 6,
     "chapter_id"   : "f946ac53-0b71-4b5d-aeb2-7931b13c4aaa",
     "chapter_minor": "",
@@ -164,10 +164,25 @@ __tests__ = (
     "#comment" : "mutliple values for 'lang' (#4093)",
     "#class"   : mangadex.MangadexMangaExtractor,
     "#options" : {"lang": "fr,it"},
-    "#count"   : 2,
+    "#results" : (
+        "https://mangadex.org/chapter/5f82bd70-2285-416e-8bcb-cd2487e09872",
+        "https://mangadex.org/chapter/e68583a7-12f5-431a-8559-9e667afc1a1a",
+    ),
 
     "manga"   : "Souten no Koumori",
     "lang"    : {"fr", "it"},
+},
+
+{
+    "#url"     : "https://mangadex.org/title/f90c4398-8aad-4f51-8a1f-024ca09fdcbc",
+    "#comment" : "'covers' results",
+    "#class"   : mangadex.MangadexMangaExtractor,
+    "#options" : {"covers": True, "lang": "fr"},
+    "#range"   : "1-2",
+    "#results" : (
+        "https://mangadex.org/title/f90c4398-8aad-4f51-8a1f-024ca09fdcbc?tab=art",
+        "https://mangadex.org/chapter/5f82bd70-2285-416e-8bcb-cd2487e09872",
+    ),
 },
 
 {
@@ -181,12 +196,14 @@ __tests__ = (
 {
     "#url"     : "https://mangadex.org/title/7c1e2742-a086-4fd3-a3be-701fd6cf0be9",
     "#class"   : mangadex.MangadexMangaExtractor,
+    "#pattern" : mangadex.MangadexChapterExtractor.pattern,
     "#count"   : ">= 25",
 },
 
 {
     "#url"     : "https://mangadex.org/title/584ef094-b2ab-40ce-962c-bce341fb9d10",
     "#class"   : mangadex.MangadexMangaExtractor,
+    "#pattern" : mangadex.MangadexChapterExtractor.pattern,
     "#count"   : ">= 20",
 },
 
