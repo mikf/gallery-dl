@@ -298,8 +298,9 @@ __tests__ = (
 {
     "#url"     : "https://mangadex.org/title/192aa767-2479-42c1-9780-8d65a2efd36a/gachiakuta?tab=art",
     "#class"   : mangadex.MangadexCoversExtractor,
+    "#options" : {"lang": ["ja", "en", "fa", "zh"]},
     "#pattern" : r"https://mangadex\.org/covers/192aa767-2479-42c1-9780-8d65a2efd36a/[\w-]+\.jpg",
-    "#count"   : 20,
+    "#count"   : 21,
 
     "artist"      : ["Urana Kei"],
     "author"      : ["Urana Kei"],
@@ -309,7 +310,7 @@ __tests__ = (
     "extension"   : {"jpg", "png"},
     "filename"    : str,
     "lang"        : {"ja", "fa"},
-    "manga"       : "GACHIAKUTA",
+    "manga"       : "Gachiakuta",
     "manga_id"    : "192aa767-2479-42c1-9780-8d65a2efd36a",
     "status"      : "ongoing",
     "volume"      : range(1, 20),
