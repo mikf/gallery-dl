@@ -8,7 +8,7 @@
 
 """Extractors for https://www.newgrounds.com/"""
 
-from .common import Extractor, Message, Dispatch
+from .common import Extractor, Message, Dispatch, media_source
 from .. import text, util, dt
 from ..cache import cache
 import itertools
@@ -321,17 +321,22 @@ class NewgroundsExtractor(Extractor):
         }
 
     def _video_formats(self, sources):
-        src = sources["360p"][0]["src"]
+        src = media_source((sources.get("360p") or ({},))[0], "src")
         sub = text.re(r"\.360p\.\w+").sub
 
         for fmt in self.format:
             try:
                 if isinstance(fmt, int):
-                    yield sources[str(fmt) + "p"][0]["src"]
+                    url = media_source(
+                        (sources.get(str(fmt) + "p") or ({},))[0], "src")
                 elif fmt in sources:
-                    yield sources[fmt][0]["src"]
+                    url = media_source((sources.get(fmt) or ({},))[0], "src")
                 else:
-                    yield sub("." + fmt, src, 1)
+                    url = sub("." + fmt, src, 1) if src else ""
+
+                if not url:
+                    raise KeyError("missing source URL")
+                yield url
             except Exception as exc:
                 self.log.debug("Video format '%s' not available (%s: %s)",
                                fmt, exc.__class__.__name__, exc)
@@ -341,11 +346,13 @@ class NewgroundsExtractor(Extractor):
         for fmt, src in sources.items():
             width = text.parse_int(fmt.rstrip("p"))
             if width <= self.format:
-                formats.append((width, src))
+                url = media_source((src or ({},))[0], "src")
+                if url:
+                    formats.append((width, url))
 
         formats.sort(reverse=True)
         for fmt in formats:
-            yield fmt[1][0]["src"]
+            yield fmt[1]
 
     def _pagination(self, kind, pnum=1):
         url = f"{self.user_root}/{kind}"

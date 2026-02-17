@@ -26,6 +26,17 @@ from .. import config, output, text, util, dt, cache, exception
 urllib3 = requests.packages.urllib3
 
 
+def media_source(data, *keys):
+    """Return the first non-empty media URL value from a mapping."""
+    if not isinstance(data, dict):
+        return ""
+    for key in keys:
+        value = data.get(key)
+        if value:
+            return value
+    return ""
+
+
 class Extractor():
 
     category = ""

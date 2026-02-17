@@ -8,7 +8,7 @@
 
 """Extractors for Shopify instances"""
 
-from .common import BaseExtractor, Message
+from .common import BaseExtractor, Message, media_source
 from .. import text
 
 
@@ -24,11 +24,19 @@ class ShopifyExtractor(BaseExtractor):
 
         for product in self.products():
             for num, image in enumerate(product.pop("images"), 1):
-                text.nameext_from_url(image["src"], image)
+                url = media_source(image, "src", "url")
+                if not url:
+                    self.log.warning(
+                        "%s: image payload has no media source URL",
+                        product.get("id", "?"),
+                    )
+                    continue
+
+                text.nameext_from_url(url, image)
                 image.update(data)
                 image["product"] = product
                 image["num"] = num
-                yield Message.Url, image["src"], image
+                yield Message.Url, url, image
 
     def metadata(self):
         """Return general metadata"""
