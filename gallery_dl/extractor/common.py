@@ -14,6 +14,7 @@ import ssl
 import time
 import netrc
 import queue
+import pickle
 import random
 import getpass
 import logging
@@ -371,6 +372,47 @@ class Extractor():
             res = CACHE_UTILS[module] = __import__(
                 "utils." + module, globals(), None, module, 1)
         return res if name is None else getattr(res, name, None)
+
+    def cache(self, func, *args, _key=None, _exp=0, _mem=True):
+        if _key is None:
+            key = f"{func.__module__}.{func.__name__}"
+        else:
+            key = f"{func.__module__}.{func.__name__}-{args[_key]}"
+
+        try:
+            value, expires = CACHE_MEMORY[key]
+        except KeyError:
+            expires = 1
+
+        if not expires or expires > (now := int(time.time())):
+            return value
+
+        if _mem or not cache.database():
+            value = func(*args)
+            expires = _exp and _exp+now
+        else:
+            with cache.database() as db:
+                cursor = db.cursor()
+                try:
+                    cursor.execute("BEGIN EXCLUSIVE")
+                except Exception:
+                    pass  # swallow exception when already in a transaction
+                cursor.execute(
+                    "SELECT value, expires FROM data WHERE key=? LIMIT 1",
+                    (key,))
+
+                if (result := cursor.fetchone()) and result[1] > now:
+                    value, expires = result
+                    value = pickle.loads(value)
+                else:
+                    value = func(*args)
+                    expires = _exp and _exp+now
+                    cursor.execute(
+                        "INSERT OR REPLACE INTO data VALUES (?,?,?)",
+                        (key, pickle.dumps(value), expires))
+
+        CACHE_MEMORY[key] = value, expires
+        return value
 
     def input(self, prompt, echo=True):
         self._check_input_allowed(prompt)
@@ -1177,6 +1219,7 @@ def _browser_useragent(browser):
 
 CACHE_ADAPTERS = {}
 CACHE_COOKIES = {}
+CACHE_MEMORY = {}
 CACHE_UTILS = {}
 CATEGORY_MAP = ()
 
