@@ -391,6 +391,7 @@ SUBCATEGORY_MAP = {
         "folder": "Filesystems",
     },
     "pixiv": {
+        "followed": "Follows",
         "me"  : "pixiv.me Links",
         "pixivision": "pixivision",
         "sketch": "Sketch",

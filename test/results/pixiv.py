@@ -665,12 +665,12 @@ __tests__ = (
 
 {
     "#url"     : "https://www.pixiv.net/bookmark_new_illust.php",
-    "#class"   : pixiv.PixivFollowExtractor,
+    "#class"   : pixiv.PixivFollowedExtractor,
 },
 
 {
     "#url"     : "https://touch.pixiv.net/bookmark_new_illust.php",
-    "#class"   : pixiv.PixivFollowExtractor,
+    "#class"   : pixiv.PixivFollowedExtractor,
 },
 
 {
