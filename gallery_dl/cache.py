@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2021 Mike Fährmann
+# Copyright 2016-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -14,6 +14,8 @@ import time
 import os
 import functools
 from . import config, util
+
+DATABASE = None
 
 
 class CacheDecorator():
@@ -69,8 +71,6 @@ class MemoryCacheDecorator(CacheDecorator):
 
 class DatabaseCacheDecorator():
     """Database cache"""
-    db = None
-    _init = True
 
     def __init__(self, func, keyarg, maxage):
         self.key = f"{func.__module__}.{func.__name__}"
@@ -96,7 +96,7 @@ class DatabaseCacheDecorator():
 
         # database lookup
         fullkey = f"{self.key}-{key}"
-        with self.database() as db:
+        with database() as db:
             cursor = db.cursor()
             try:
                 cursor.execute("BEGIN EXCLUSIVE")
@@ -125,7 +125,7 @@ class DatabaseCacheDecorator():
     def update(self, key, value):
         expires = int(time.time()) + self.maxage
         self.cache[key] = value, expires
-        with self.database() as db:
+        with database() as db:
             db.execute(
                 "INSERT OR REPLACE INTO data VALUES (?,?,?)",
                 (f"{self.key}-{key}", pickle.dumps(value), expires),
@@ -136,20 +136,11 @@ class DatabaseCacheDecorator():
             del self.cache[key]
         except KeyError:
             pass
-        with self.database() as db:
+        with database() as db:
             db.execute(
                 "DELETE FROM data WHERE key=?",
                 (f"{self.key}-{key}",),
             )
-
-    def database(self):
-        if self._init:
-            self.db.execute(
-                "CREATE TABLE IF NOT EXISTS data "
-                "(key TEXT PRIMARY KEY, value TEXT, expires INTEGER)"
-            )
-            DatabaseCacheDecorator._init = False
-        return self.db
 
 
 def memcache(maxage=None, keyarg=None):
@@ -168,9 +159,28 @@ def cache(maxage=3600, keyarg=None):
     return wrap
 
 
+def database():
+    global DATABASE
+
+    try:
+        path = _path()
+        # restrict access permissions for new db files
+        os.close(os.open(path, os.O_CREAT | os.O_RDONLY, 0o600))
+
+        DATABASE = sqlite3.connect(path, timeout=60, check_same_thread=False)
+        DATABASE.execute(
+            "CREATE TABLE IF NOT EXISTS data "
+            "(key TEXT PRIMARY KEY, value TEXT, expires INTEGER)")
+    except Exception:
+        pass
+
+    globals()["database"] = lambda: DATABASE
+    return DATABASE
+
+
 def clear(module):
     """Delete database entries for 'module'"""
-    db = DatabaseCacheDecorator.db
+    db = database()
     if not db:
         return None
 
@@ -209,20 +219,3 @@ def _path():
     cachedir = util.expand_path(os.path.join(cachedir, "gallery-dl"))
     os.makedirs(cachedir, exist_ok=True)
     return os.path.join(cachedir, "cache.sqlite3")
-
-
-def _init():
-    try:
-        dbfile = _path()
-
-        # restrict access permissions for new db files
-        os.close(os.open(dbfile, os.O_CREAT | os.O_RDONLY, 0o600))
-
-        DatabaseCacheDecorator.db = sqlite3.connect(
-            dbfile, timeout=60, check_same_thread=False)
-    except (OSError, TypeError, sqlite3.OperationalError):
-        global cache
-        cache = memcache
-
-
-_init()
