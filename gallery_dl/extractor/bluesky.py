@@ -40,7 +40,68 @@ class BlueskyExtractor(Extractor):
         self.videos = self.config("videos", True)
         self.quoted = self.config("quoted", False)
 
+    def _expand_posts(self, posts):
+        depth = self.config("depth", "0")
+        seen = set()
+        all_posts = []
+        posts = list(posts)
+        self.log.debug("expanding from initial %d posts", len(posts))
+        while True:
+            seen_new_post = False
+
+            self.log.debug("expand iteration: %d posts", len(posts))
+            for post in posts:
+                assert "post" in post
+                post["post"] = {**post["post"], **post["post"]["record"]}
+
+                assert "text" in post["post"], f"no text: {post!r}"
+                assert "uri" in post["post"], f"no uri: {post!r}"
+
+                uri = post["post"]["uri"]
+                self.log.debug("uri %r", uri)
+                if uri in seen:
+                    self.log.debug("Skipping %s (already seen)", uri)
+                    continue
+
+                seen_new_post = True
+                seen.add(uri)
+
+                # appview says the post has replies, but it hasn't given
+                # anything. we probably should expand into it and add
+                # those posts to our context
+                reply_count = post["post"]["replyCount"]
+                replies = post.get("replies", [])
+                if reply_count > 0 and not replies:
+                    self.log.debug("expanding to %r", uri)
+
+                    # fetch post view
+                    thread = self.api.get_post_thread_uri(uri, depth)
+                    thread = thread or []
+                    self.log.debug(
+                        "got %d posts from thread at uri %r", len(thread), uri
+                    )
+                    for post in thread:
+                        all_posts.append(post)
+                else:
+                    self.log.debug("not expanding to %r", uri)
+                    all_posts.append(post)
+
+            # if there hasn't been any new posts, we're done
+            if not seen_new_post:
+                break
+
+            self.log.debug("set posts to %d posts", len(posts))
+            posts = list(all_posts)
+
+        self.log.debug("finished collection with %d posts", len(all_posts))
+        for post in all_posts:
+            yield post["post"]
+
     def items(self):
+        if self.config("expand"):
+            posts = self._expand_posts(self.posts())
+            self.posts = lambda: posts
+
         for post in self.posts():
             if "post" in post:
                 post = post["post"]
