@@ -565,6 +565,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
+    <tr id="kaliscan" title="kaliscan">
+    <td>KaliScan</td>
+    <td>https://kaliscan.site/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
 <tr id="keenspot" title="keenspot">
     <td>Keenspot</td>
     <td>http://www.keenspot.com/</td>
@@ -1303,6 +1309,8 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries, User Profiles</td>
     <td></td>
 </tr>
+
+    
 <tr id="yiffverse" title="yiffverse">
     <td>Yiff verse</td>
     <td>https://yiffverse.com/</td>
