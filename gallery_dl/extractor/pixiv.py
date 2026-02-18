@@ -810,9 +810,9 @@ class PixivSearchExtractor(PixivExtractor):
         }}
 
 
-class PixivFollowExtractor(PixivExtractor):
+class PixivFollowedExtractor(PixivExtractor):
     """Extractor for new illustrations from your followed artists"""
-    subcategory = "follow"
+    subcategory = "followed"
     archive_fmt = "F_{user_follow[id]}_{id}{num}.{extension}"
     directory_fmt = ("{category}", "following")
     pattern = BASE_PATTERN + r"/bookmark_new_illust\.php"
