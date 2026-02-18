@@ -387,11 +387,8 @@ class Extractor():
         if not expires or expires > (now := int(time.time())):
             return value
 
-        if _mem or not cache.database():
-            value = func(*args)
-            expires = _exp and _exp+now
-        else:
-            with cache.database() as db:
+        if not _mem and (db := cache.database()):
+            with db:
                 cursor = db.cursor()
                 try:
                     cursor.execute("BEGIN EXCLUSIVE")
@@ -410,9 +407,37 @@ class Extractor():
                     cursor.execute(
                         "INSERT OR REPLACE INTO data VALUES (?,?,?)",
                         (key, pickle.dumps(value), expires))
+        else:
+            value = func(*args)
+            expires = _exp and _exp+now
 
         CACHE_MEMORY[key] = value, expires
         return value
+
+    def cache_update(self, func, key=None, value=None, _exp=0, _mem=True):
+        if key is None:
+            key = f"{func.__module__}.{func.__name__}"
+        else:
+            key = f"{func.__module__}.{func.__name__}-{key}"
+
+        if value is None:
+            # delete cached value
+            try:
+                del CACHE_MEMORY[key]
+            except KeyError:
+                pass
+            if not _mem and (db := cache.database()):
+                with db:
+                    db.execute("DELETE FROM data WHERE key=?", (key,))
+        else:
+            # replace cached value
+            expires = _exp and _exp+int(time.time())
+            CACHE_MEMORY[key] = value, expires
+            if not _mem and (db := cache.database()):
+                with db:
+                    db.execute(
+                        "INSERT OR REPLACE INTO data VALUES (?,?,?)",
+                        (key, pickle.dumps(value), expires))
 
     def input(self, prompt, echo=True):
         self._check_input_allowed(prompt)
