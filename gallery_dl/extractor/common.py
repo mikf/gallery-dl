@@ -373,7 +373,7 @@ class Extractor():
                 "utils." + module, globals(), None, module, 1)
         return res if name is None else getattr(res, name, None)
 
-    def cache(self, func, *args, _key=None, _exp=0, _mem=True):
+    def cache(self, func, *args, _key=0, _exp=0, _mem=True):
         if _key is None:
             key = f"{func.__module__}.{func.__name__}"
         else:
@@ -398,7 +398,8 @@ class Extractor():
                     "SELECT value, expires FROM data WHERE key=? LIMIT 1",
                     (key,))
 
-                if (result := cursor.fetchone()) and result[1] > now:
+                if (result := cursor.fetchone()) and (
+                        not (expires := result[1]) or expires > now):
                     value, expires = result
                     value = pickle.loads(value)
                 else:
@@ -414,7 +415,7 @@ class Extractor():
         CACHE_MEMORY[key] = value, expires
         return value
 
-    def cache_update(self, func, key=None, value=None, _exp=0, _mem=True):
+    def cache_update(self, func, key=None, value=None, _exp=0, _mem=False):
         if key is None:
             key = f"{func.__module__}.{func.__name__}"
         else:
