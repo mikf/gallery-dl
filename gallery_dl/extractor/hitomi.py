@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2025 Mike Fährmann
+# Copyright 2015-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import GalleryExtractor, Extractor, Message
 from .nozomi import decode_nozomi
-from ..cache import memcache
 from .. import text, util
 import string
 
@@ -94,7 +93,8 @@ class HitomiGalleryExtractor(HitomiExtractor, GalleryExtractor):
 
     def images(self, _):
         # https://ltn.gold-usergeneratedcontent.net/gg.js
-        gg_m, gg_b, gg_default = _parse_gg(self)
+        gg_m, gg_b, gg_default = self.cache(
+            _parse_gg, self, _key=None, _exp=1800)
 
         fmt = ext = self.config("format") or "webp"
         check = (fmt != "webp")
@@ -247,7 +247,6 @@ class HitomiSearchExtractor(HitomiExtractor):
         return sorted(result, reverse=True) if result else ()
 
 
-@memcache(maxage=1800)
 def _parse_gg(extr):
     page = extr.request("https://ltn.gold-usergeneratedcontent.net/gg.js").text
 

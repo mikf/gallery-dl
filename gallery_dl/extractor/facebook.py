@@ -8,7 +8,6 @@
 
 from .common import Extractor, Message, Dispatch
 from .. import text, util
-from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:[\w-]+\.)?facebook\.com"
 USER_PATTERN = (BASE_PATTERN +
@@ -315,7 +314,6 @@ class FacebookExtractor(Extractor):
 
             i += 1
 
-    @memcache(keyarg=1)
     def _extract_profile(self, profile, set_id=False):
         if set_id:
             url = f"{self.root}/{profile}/photos_by"
@@ -490,7 +488,7 @@ class FacebookInfoExtractor(FacebookExtractor):
     example = "https://www.facebook.com/USERNAME/info"
 
     def items(self):
-        user = self._extract_profile(self.groups[0])
+        user = self.cache(self._extract_profile, self.groups[0])
         return iter(((Message.Directory, "", user),))
 
 
@@ -534,7 +532,8 @@ class FacebookPhotosExtractor(FacebookExtractor):
     example = "https://www.facebook.com/USERNAME/photos"
 
     def items(self):
-        set_id = self._extract_profile(self.groups[0], True)["set_id"]
+        set_id = self.cache(
+            self._extract_profile, self.groups[0], True)["set_id"]
         if not set_id:
             return iter(())
 
@@ -551,7 +550,7 @@ class FacebookAvatarExtractor(FacebookExtractor):
     example = "https://www.facebook.com/USERNAME/avatar"
 
     def items(self):
-        user = self._extract_profile(self.groups[0])
+        user = self.cache(self._extract_profile, self.groups[0])
         avatar_page_url = user["profilePhoto"]["url"]
         avatar_page = self.photo_page_request_wrapper(avatar_page_url).text
 
