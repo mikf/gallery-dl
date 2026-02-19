@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020-2025 Mike Fährmann
+# Copyright 2020-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text
-from ..cache import memcache
 
 
 class RedgifsExtractor(Extractor):
@@ -253,7 +252,8 @@ class RedgifsAPI():
 
     def _call(self, endpoint, params=None):
         url = self.API_ROOT + endpoint
-        self.headers["Authorization"] = self._auth()
+        self.headers["Authorization"] = self.extractor.cache(
+            self._auth, _key=None, _exp=600)
         return self.extractor.request_json(
             url, params=params, headers=self.headers)
 
@@ -270,7 +270,6 @@ class RedgifsAPI():
                 return
             params["page"] += 1
 
-    @memcache(maxage=600)
     def _auth(self):
         # https://github.com/Redgifs/api/wiki/Temporary-tokens
         url = self.API_ROOT + "/v2/auth/temporary"

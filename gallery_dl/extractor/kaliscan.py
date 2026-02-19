@@ -8,7 +8,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
-from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?kaliscan\.me"
 
@@ -18,7 +17,6 @@ class KaliscanBase():
     category = "kaliscan"
     root = "https://kaliscan.me"
 
-    @memcache(keyarg=1)
     def manga_data(self, manga_slug, page=None):
         if page is None:
             url = f"{self.root}/manga/{manga_slug}"
@@ -75,10 +73,10 @@ class KaliscanChapterExtractor(KaliscanBase, ChapterExtractor):
         chapter, sep, minor = chapter_number.partition(".")
 
         data = {
+            **self.cache(self.manga_data, self.groups[1]),
             "chapter"      : text.parse_int(chapter),
             "chapter_minor": sep + minor,
             "chapter_id"   : chapter_id,
-            **self.manga_data(self.groups[1]),
         }
         if manga_id and not data["manga_id"]:
             data["manga_id"] = manga_id
@@ -102,7 +100,7 @@ class KaliscanMangaExtractor(KaliscanBase, MangaExtractor):
     example = "https://kaliscan.me/manga/ID-MANGA"
 
     def chapters(self, page):
-        data = self.manga_data(self.groups[1], page)
+        data = self.cache(self.manga_data, self.groups[1], page)
 
         chapter_list = text.extr(page, 'id="chapter-list">', '</ul>')
         if not chapter_list:

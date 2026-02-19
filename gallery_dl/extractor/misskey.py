@@ -8,7 +8,6 @@
 
 from .common import BaseExtractor, Message, Dispatch
 from .. import text, dt
-from ..cache import memcache
 
 
 class MisskeyExtractor(BaseExtractor):
@@ -224,8 +223,10 @@ class MisskeyAPI():
         data = {"userId": user_id}
         return self._pagination(endpoint, data)
 
-    @memcache(keyarg=1)
     def users_show(self, username):
+        return self.extractor.cache(self._users_show_impl, username)
+
+    def _users_show_impl(self, username):
         endpoint = "/users/show"
         username, _, host = username.partition("@")
         data = {"username": username, "host": host or None}
