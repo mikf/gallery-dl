@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message, Dispatch
 from .. import text, util, dt
-from ..cache import cache, memcache
 import itertools
 import random
 
@@ -607,9 +606,9 @@ class TwitterExtractor(Extractor):
             url = entities["url"]["urls"][0]
             udata["url"] = url.get("expanded_url") or url.get("url")
 
-        if self.config("metadata-user", False) and (
-                about := self.api.user_about_account(
-                udata["name"]).get("about_profile")):
+        if self.config("metadata-user", False) and (about := self.cache(
+                self.api.user_about_account, udata["name"]).get(
+                "about_profile")):
             udata["source"] = about.get("source")
             udata["based_in"] = about.get("account_based_in")
             udata["location_accurate"] = about.get("location_accurate")
@@ -718,7 +717,13 @@ class TwitterExtractor(Extractor):
 
         username, password = self._get_auth_info()
         if username:
-            return self.cookies_update(_login_impl(self, username, password))
+            return self.cookies_update(self.cache(
+                self._login_impl, username, password, _mem=False))
+
+    def _login_impl(self, username, password):
+        self.log.error("Login with username & password is no longer "
+                       "supported. Use browser cookies instead.")
+        return {}
 
 
 class TwitterHomeExtractor(TwitterExtractor):
@@ -1167,9 +1172,9 @@ class TwitterInfoExtractor(TwitterExtractor):
 
         screen_name = self.user
         if screen_name.startswith("id:"):
-            user = api.user_by_rest_id(screen_name[3:])
+            user = self.cache(api.user_by_rest_id, screen_name[3:])
         else:
-            user = api.user_by_screen_name(screen_name)
+            user = self.cache(api.user_by_screen_name, screen_name)
 
         return iter(((Message.Directory, "", self._transform_user(user)),))
 
@@ -1705,7 +1710,6 @@ class TwitterAPI():
         }
         return self._pagination_users(endpoint, variables)
 
-    @memcache(keyarg=1)
     def user_by_rest_id(self, rest_id):
         endpoint = "/graphql/8r5oa_2vD0WkhIAOkY4TTA/UserByRestId"
         features = self.features
@@ -1717,7 +1721,6 @@ class TwitterAPI():
         }
         return self._call(endpoint, params)["data"]["user"]["result"]
 
-    @memcache(keyarg=1)
     def user_by_screen_name(self, screen_name):
         endpoint = "/graphql/ck5KkZ8t5cOmoLssopN99Q/UserByScreenName"
         features = self.features.copy()
@@ -1737,7 +1740,6 @@ class TwitterAPI():
         }
         return self._call(endpoint, params)["data"]["user"]["result"]
 
-    @memcache(keyarg=1)
     def user_about_account(self, screen_name):
         endpoint = "/graphql/zs_jFPFT78rBpXv9Z3U2YQ/AboutAccountQuery"
         params = {"variables": self._json_dumps({"screenName": screen_name})}
@@ -1746,20 +1748,20 @@ class TwitterAPI():
 
     def _user_id_by_screen_name(self, screen_name):
         user = ()
+        extr = self.extractor
         try:
             if screen_name.startswith("id:"):
-                user = self.user_by_rest_id(screen_name[3:])
+                user = extr.cache(self.user_by_rest_id, screen_name[3:])
             else:
-                user = self.user_by_screen_name(screen_name)
-            self.extractor._assign_user(user)
+                user = extr.cache(self.user_by_screen_name, screen_name)
+            extr._assign_user(user)
             return user["rest_id"]
         except KeyError:
             if user and user.get("__typename") == "UserUnavailable":
-                raise self.exc.NotFoundError(user["message"], False)
+                raise extr.exc.NotFoundError(user["message"], False)
             else:
-                raise self.exc.NotFoundError("user")
+                raise extr.exc.NotFoundError("user")
 
-    @cache(maxage=3600)
     def _guest_token(self):
         endpoint = "/1.1/guest/activate.json"
         self.log.info("Requesting guest token")
@@ -1768,13 +1770,13 @@ class TwitterAPI():
         )["guest_token"])
 
     def _authenticate_guest(self):
-        guest_token = self._guest_token()
+        guest_token = self.extractor.cache(
+            self._guest_token, _key=None, _exp=3600, _mem=False)
         if guest_token != self.headers["x-guest-token"]:
             self.headers["x-guest-token"] = guest_token
             self.extractor.cookies.set(
                 "gt", guest_token, domain=self.extractor.cookies_domain)
 
-    @cache(maxage=10800)
     def _client_transaction(self):
         self.log.info("Initializing client transaction keys")
 
@@ -1791,7 +1793,8 @@ class TwitterAPI():
 
     def _transaction_id(self, url, method="GET"):
         if self.client_transaction is None:
-            TwitterAPI.client_transaction = self._client_transaction()
+            TwitterAPI.client_transaction = self.extractor.cache(
+                self._client_transaction, _key=None, _exp=10_800, _mem=False)
         path = url[url.find("/", 8):]
         self.headers["x-client-transaction-id"] = \
             self.client_transaction.generate_transaction_id(method, path)
@@ -2389,10 +2392,3 @@ class TwitterAPI():
             variables["cursor"] = self.extractor._update_cursor(cursor)
 
         return variables
-
-
-@cache(maxage=365*86400, keyarg=1)
-def _login_impl(extr, username, password):
-    extr.log.error("Login with username & password is no longer supported. "
-                   "Use browser cookies instead.")
-    return {}
