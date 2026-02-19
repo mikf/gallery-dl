@@ -9,46 +9,33 @@ from gallery_dl.extractor import urlgalleries
 
 __tests__ = (
 {
-    "#url"     : "https://urlgalleries.net/b/photos2q/porn-gallery-7851311/clarice-window-8",
-    "#category": ("", "urlgalleries", "gallery"),
+    "#url"     : "https://urlgalleries.com/photos2q/7851311/clarice-window-8/",
+    "#comment" : "'legacy' gallery",
     "#class"   : urlgalleries.UrlgalleriesGalleryExtractor,
     "#range"   : "1-3",
     "#results" : (
-        "https://fappic.com/x207mqkn2463/4gq1yv.jpg?gname=Clarice+window+8",
-        "https://fappic.com/q684ua2rp0j9/4gq1xv.jpg?gname=Clarice+window+8",
-        "https://fappic.com/8vf3n8fgz9po/4gq1ya.jpg?gname=Clarice+window+8",
+        "https://fappic.com/x207mqkn2463/4gq1yv.jpg",
+        "https://fappic.com/q684ua2rp0j9/4gq1xv.jpg",
+        "https://fappic.com/8vf3n8fgz9po/4gq1ya.jpg",
     ),
 
     "blog"      : "photos2q",
     "count"     : 39,
-    "date"      : "dt:2023-12-08 00:00:00",
-    "gallery_id": "7851311",
     "num"       : range(1, 3),
-    "title"     : "Clarice window 8 g7rn2ebbao",
+    "date"      : "dt:2023-12-08 12:59:31",
+    "gallery_id": "7851311",
+    "title"     : "Clarice window 8",
+    "tags"      : [
+        "Blondes",
+        "Softcore",
+        "Teens",
+        "Brunettes",
+    ],
 },
 
 {
-    "#url"     : "https://photos2q.urlgalleries.net/porn-gallery-7851311/clarice-window-8",
-    "#category": ("", "urlgalleries", "gallery"),
-    "#class"   : urlgalleries.UrlgalleriesGalleryExtractor,
-    "#range"   : "1-3",
-    "#results" : (
-        "https://fappic.com/x207mqkn2463/4gq1yv.jpg?gname=Clarice+window+8",
-        "https://fappic.com/q684ua2rp0j9/4gq1xv.jpg?gname=Clarice+window+8",
-        "https://fappic.com/8vf3n8fgz9po/4gq1ya.jpg?gname=Clarice+window+8",
-    ),
-
-    "blog"      : "photos2q",
-    "count"     : 39,
-    "date"      : "dt:2023-12-08 00:00:00",
-    "gallery_id": "7851311",
-    "num"       : range(1, 3),
-    "title"     : "Clarice window 8 g7rn2ebbao",
-},
-
-{
-    "#url"     : "https://dreamer.urlgalleries.net/7645840",
-    "#category": ("", "urlgalleries", "gallery"),
+    "#url"     : "https://urlgalleries.com/dreamer/7645840",
+    "#comment" : "no slug",
     "#class"   : urlgalleries.UrlgalleriesGalleryExtractor,
     "#range"   : "1-3",
     "#results" : (
@@ -59,14 +46,20 @@ __tests__ = (
 
     "blog"      : "Dreamer",
     "count"     : 105,
-    "date"      : "dt:2020-03-10 00:00:00",
-    "gallery_id": "7645840",
     "num"       : range(1, 3),
-    "title"     : "Angelika - Rustic Charm - AmourAngels 2016-09-27 7722lhrmys",
+    "date"      : "dt:2020-03-10 20:17:23",
+    "gallery_id": "7645840",
+    "title"     : "Angelika - Rustic Charm - AmourAngels 2016-09-27",
+    "tags": [
+        "Outdoors",
+        "Teens",
+        "Complete-Sets",
+        "Brunettes",
+    ],
 },
 
 {
-    "#url"     : "https://urlgalleries.net/b/xarchivesx/porn-gallery-6722560/caroline",
+    "#url"     : "https://urlgalleries.com/xarchivesx/6722560/caroline/",
     "#comment" : "image host URLs with query parameters (#7888)",
     "#class"   : urlgalleries.UrlgalleriesGalleryExtractor,
     "#range"   : "1-3",
@@ -78,10 +71,36 @@ __tests__ = (
 
     "blog"      : "The Archives Blog",
     "count"     : 141,
-    "date"      : "dt:2016-06-11 00:00:00",
-    "gallery_id": "6722560",
     "num"       : range(1, 3),
-    "title"     : "Caroline q5c75eeybn",
+    "date"      : "dt:2016-06-11 12:20:06",
+    "gallery_id": "6722560",
+    "title"     : "Caroline",
+    "tags"      : ["Complete-Sets"],
+},
+
+{
+    "#url"     : "https://urlgalleries.com/beautiesonearth/7893239/bianca-bell-alluring-smile/",
+    "#comment" : "'new-style' gallery",
+    "#class"   : urlgalleries.UrlgalleriesGalleryExtractor,
+    "#range"   : "1-3",
+    "#results" : (
+        "https://fappic.com/8w2tgkh73bqw/89nywrd17cru.jpg",
+        "https://fappic.com/rc7rvvlqq6tz/8opev82wdj12.jpg",
+        "https://fappic.com/61j49l13pc1x/7b3d9bydrsg0.jpg",
+    ),
+
+    "blog"      : "Beautiesonearth",
+    "count"     : 44,
+    "num"       : range(1, 3),
+    "date"      : "dt:2026-02-19 05:02:37",
+    "gallery_id": "7893239",
+    "title"     : "Bianca Bell - Alluring Smile",
+    "tags"      : [
+        "Blondes",
+        "Softcore",
+        "Teens",
+        "Voyeur",
+    ],
 },
 
 )

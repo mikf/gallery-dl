@@ -1179,7 +1179,7 @@ Consider all listed sites to potentially be NSFW.
 </tr>
 <tr id="urlgalleries" title="urlgalleries">
     <td>Urlgalleries</td>
-    <td>https://urlgalleries.net/</td>
+    <td>https://urlgalleries.com/</td>
     <td>Galleries</td>
     <td></td>
 </tr>
