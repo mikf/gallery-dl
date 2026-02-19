@@ -12,7 +12,7 @@ import time
 import mimetypes
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
-from .. import text, util, output, exception
+from .. import text, dt, util, output, exception, ffprobe
 from ssl import SSLError
 FLAGS = util.FLAGS
 
@@ -34,6 +34,8 @@ class HttpDownloader(DownloaderBase):
         self.headers = self.config("headers")
         self.minsize = self.config("filesize-min")
         self.maxsize = self.config("filesize-max")
+        self.minlength = self.config("videolength-min")
+        self.maxlength = self.config("videolength-max")
         self.retries = self.config("retries", extractor._retries)
         self.retry_codes = self.config("retry-codes", extractor._retry_codes)
         self.timeout = self.config("timeout", extractor._timeout)
@@ -41,6 +43,7 @@ class HttpDownloader(DownloaderBase):
         self.mtime = self.config("mtime", True)
         self.rate = self.config("rate")
         interval_429 = self.config("sleep-429")
+        self._ffprobe_cache = {}
 
         if not self.config("consume-content", False):
             # this resets the underlying TCP connection, and therefore
@@ -62,6 +65,20 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning(
                     "Invalid maximum file size (%r)", self.maxsize)
             self.maxsize = maxsize
+        if self.minlength:
+            minlength = dt.parse_duration(self.minlength)
+            if not minlength:
+                self.log.warning(
+                    "Invalid maximum videolength duration (%r)",
+                    self.minlength)
+            self.minlength = minlength
+        if self.maxlength:
+            maxlength = dt.parse_duration(self.maxlength)
+            if not maxlength:
+                self.log.warning(
+                    "Invalid maximum videolength duration (%r)",
+                    self.maxlength)
+            self.maxlength = maxlength
         if isinstance(self.chunk_size, str):
             chunk_size = text.parse_bytes(self.chunk_size)
             if not chunk_size:
@@ -265,6 +282,35 @@ class HttpDownloader(DownloaderBase):
             if metadata:
                 kwdict[metadata] = util.extract_headers(response)
                 build_path = True
+
+            # check video length using ffprobe request
+            if self.minlength or self.maxlength:
+                sentinel = object()
+                length = self._ffprobe_cache.get(url, sentinel)
+                if length is sentinel:
+                    length = ffprobe.get_video_length(self, url)
+                    if length is not False:
+                        # cache successful ffprobe results per URL to avoid
+                        # re-running the probe when retries occur later
+                        self._ffprobe_cache[url] = length
+
+                if length and self.minlength and length < self.minlength:
+                    self.release_conn(response)
+                    self.log.warning(
+                        "Video length is shorter than allowed minimum "
+                        "(%s < %s)",
+                        length, self.minlength)
+                    pathfmt.temppath = ""
+                    return True
+
+                if length and self.maxlength and length > self.maxlength:
+                    self.release_conn(response)
+                    self.log.warning(
+                        "Video length is longer than allowed maximum "
+                        "(%s > %s)",
+                        length, self.maxlength)
+                    pathfmt.temppath = ""
+                    return True
 
             # build and check file path
             if build_path:

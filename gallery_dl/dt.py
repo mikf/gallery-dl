@@ -10,6 +10,7 @@
 
 import sys
 import time
+import re as re_module
 from datetime import datetime, date, timedelta, timezone  # noqa F401
 
 
@@ -113,3 +114,26 @@ def to_ts_string(dt):
         return str((dt - EPOCH) // SECOND)
     except Exception:
         return ""
+
+
+def parse_duration(duration_string, default=None):
+    try:
+        patterns = {
+            'hours': r'(\d+)\s*h(our(s)?)?',
+            'minutes': r'(\d+)\s*m(in(ute)?(s)?)?',
+            'seconds': r'(\d+)\s*s(ec(ond)?(s)?)?'
+        }
+        parsed_values = {unit: 0 for unit in patterns}
+
+        for unit, pattern in patterns.items():
+            match = re_module.search(
+                pattern, duration_string, re_module.IGNORECASE)
+            if match:
+                parsed_values[unit] = int(match.group(1))
+
+        return timedelta(
+            hours=parsed_values['hours'],
+            minutes=parsed_values['minutes'],
+            seconds=parsed_values['seconds'])
+    except Exception:
+        return default
