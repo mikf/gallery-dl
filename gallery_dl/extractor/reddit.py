@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util
-from ..cache import cache
 
 
 class RedditExtractor(Extractor):
@@ -444,8 +443,8 @@ class RedditAPI():
 
             token = config("refresh-token")
             if token is None or token == "cache":
-                key = "#" + self.client_id
-                self.refresh_token = _refresh_token_cache(key)
+                self.refresh_token = extractor._cache(
+                    _refresh_token_cache, "#"+self.client_id, _mem=False)
             else:
                 self.refresh_token = token
 
@@ -498,10 +497,9 @@ class RedditAPI():
 
     def authenticate(self):
         """Authenticate the application by requesting an access token"""
-        self.headers["Authorization"] = \
-            self._authenticate_impl(self.refresh_token)
+        self.headers["Authorization"] = self.extractor.cache(
+            self._authenticate_impl, self.refresh_token, _exp=3600, _mem=False)
 
-    @cache(maxage=3600, keyarg=1)
     def _authenticate_impl(self, refresh_token=None):
         """Actual authenticate implementation"""
         url = "https://www.reddit.com/api/v1/access_token"
@@ -629,7 +627,6 @@ class RedditAPI():
         return util.bdecode(sid, "0123456789abcdefghijklmnopqrstuvwxyz")
 
 
-@cache(maxage=36500*86400, keyarg=0)
 def _refresh_token_cache(token):
     if token and token[0] == "#":
         return None
