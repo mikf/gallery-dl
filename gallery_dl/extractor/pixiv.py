@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message, Dispatch
 from .. import text, util, dt
-from ..cache import cache, memcache
 import itertools
 import hashlib
 
@@ -1143,15 +1142,16 @@ class PixivAppAPI():
 
         token = extractor.config("refresh-token")
         if token is None or token == "cache":
-            token = _refresh_token_cache(self.username)
+            token = extractor.cache(
+                _refresh_token_cache, self.username, _mem=False)
         self.refresh_token = token
 
     def login(self):
         """Login and gain an access token"""
-        self.user, auth = self._login_impl(self.username)
+        self.user, auth = self.extractor.cache(
+            self._login_impl, self.username, _exp=3600, _mem=False)
         self.extractor.session.headers["Authorization"] = auth
 
-    @cache(maxage=3600, keyarg=1)
     def _login_impl(self, username):
         if not self.refresh_token:
             raise self.exc.AuthenticationError(
@@ -1267,8 +1267,10 @@ class PixivAppAPI():
         return self._pagination(
             "/v1/user/bookmark-tags/illust", params, "bookmark_tags")
 
-    @memcache(keyarg=1)
     def user_detail(self, user_id, fatal=True):
+        return self.extractor.cache(self._user_detail_impl, user_id, fatal)
+
+    def _user_detail_impl(self, user_id, fatal):
         params = {"user_id": user_id}
         return self._call("/v1/user/detail", params, fatal=fatal)
 
@@ -1382,6 +1384,5 @@ class PixivAppAPI():
                 params.pop("offset", None)
 
 
-@cache(maxage=36500*86400, keyarg=0)
 def _refresh_token_cache(username):
     return None
