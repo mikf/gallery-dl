@@ -540,12 +540,9 @@ class BlueskyAPI():
         self.headers["Authorization"] = self.extractor.cache(
             self._authenticate_impl, self.username, _exp=3600, _mem=False)
 
-    def _refresh_token_cache(self, username):
-        return None
-
     def _authenticate_impl(self, username):
         if refresh_token := self.extractor.cache(
-                self._refresh_token_cache, username, _mem=False):
+                _refresh_token_cache, username, _mem=False):
             self.log.info("Refreshing access token for %s", username)
             endpoint = "com.atproto.server.refreshSession"
             headers = {"Authorization": "Bearer " + refresh_token}
@@ -569,7 +566,7 @@ class BlueskyAPI():
             raise self.extractor.exc.AuthenticationError(
                 f"\"{data.get('error')}: {data.get('message')}\"")
 
-        self.extractor.cache_update(self._refresh_token_cache, self.username,
+        self.extractor.cache_update(_refresh_token_cache, self.username,
                                     data["refreshJwt"], _exp=84*86400)
         return "Bearer " + data["accessJwt"]
 
@@ -613,3 +610,7 @@ class BlueskyAPI():
             if not cursor:
                 return
             params["cursor"] = cursor
+
+
+def _refresh_token_cache(username):
+    return None

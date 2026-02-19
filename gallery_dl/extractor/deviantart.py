@@ -1251,7 +1251,7 @@ class DeviantartOAuthAPI():
         token = extractor.config("refresh-token")
         if token is None or token == "cache":
             token = "#" + self.client_id
-            if not extractor.cache(self._refresh_token_cache, token):
+            if not extractor.cache(_refresh_token_cache, token):
                 token = None
         self.refresh_token_key = token
 
@@ -1494,18 +1494,13 @@ class DeviantartOAuthAPI():
         self.headers["Authorization"] = self.extractor.cache(
             self._authenticate_impl, refresh_token_key, _exp=3600, _mem=False)
 
-    def _refresh_token_cache(self, token):
-        if token and token[0] == "#":
-            return None
-        return token
-
     def _authenticate_impl(self, refresh_token_key):
         """Actual authenticate implementation"""
         url = "https://www.deviantart.com/oauth2/token"
         if refresh_token_key:
             self.log.info("Refreshing private access token")
             token = self.extractor.cache(
-                self._refresh_token_cache, refresh_token_key, _mem=False)
+                _refresh_token_cache, refresh_token_key, _mem=False)
             data = {"grant_type": "refresh_token",
                     "refresh_token": token}
         else:
@@ -1523,8 +1518,7 @@ class DeviantartOAuthAPI():
                 f"\"{data.get('error_description')}\" ({data.get('error')})")
         if refresh_token_key:
             self.extractor.cache_update(
-                self._refresh_token_cache,
-                refresh_token_key, data["refresh_token"])
+                _refresh_token_cache, refresh_token_key, data["refresh_token"])
         return "Bearer " + data["access_token"]
 
     def _call(self, endpoint, fatal=True, log=True, public=None, **kwargs):
@@ -1896,3 +1890,9 @@ def eclipse_media(media, format="preview"):
         url.append(tokens[-1])
 
     return "".join(url), formats
+
+
+def _refresh_token_cache(token):
+    if token and token[0] == "#":
+        return None
+    return token
