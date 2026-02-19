@@ -232,9 +232,10 @@ Type
     ``bool``
 Default
     ``true``
-        ``[chevereto]`` |
-        ``erome``       |
-        ``[imagehost]``
+        ``[chevereto]``  |
+        ``erome``        |
+        ``[imagehost]``  |
+        ``urlgalleries``
     ``false``
         otherwise
 Description
