@@ -209,7 +209,7 @@ class OAuthBase(Extractor):
 
         # write to cache
         if self.cache and cache:
-            cache.update(instance or ("#" + str(client_id)), token)
+            self.cache_update(cache, instance or ("#" + str(client_id)), token)
             self.log.info("Writing '%s' to cache", token_name)
 
         # display token
