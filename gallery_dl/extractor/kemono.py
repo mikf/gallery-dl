@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util
-from ..cache import cache, memcache
 import itertools
 import json
 
@@ -194,10 +193,10 @@ class KemonoExtractor(Extractor):
     def login(self):
         username, password = self._get_auth_info()
         if username:
-            self.cookies_update(self._login_impl(
-                (username, self.cookies_domain), password))
+            self.cookies_update(self.cache(
+                self._login_impl, (username, self.cookies_domain), password),
+                _exp=3650*86400, _mem=False)
 
-    @cache(maxage=3650*86400, keyarg=1)
     def _login_impl(self, username, password):
         username = username[0]
         self.log.info("Logging in as %s", username)
@@ -332,6 +331,13 @@ class KemonoExtractor(Extractor):
             a.pop("name", None)
         return util.sha1(self._json_dumps(rev))
 
+    def _discord_server_info(self, server_id):
+        server = self.api.discord_server(server_id)
+        return server, {
+            channel["id"]: channel
+            for channel in server.pop("channels")
+        }
+
 
 def _validate(response):
     return (response.headers["content-length"] != "9" or
@@ -416,7 +422,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
         _, _, server_id, channel_id = self.groups
 
         try:
-            server, channels = discord_server_info(self, server_id)
+            server, channels = self.cache(self._discord_server_info, server_id)
             channel = channels[channel_id]
         except Exception:
             raise self.exc.NotFoundError("channel")
@@ -510,7 +516,7 @@ class KemonoDiscordServerExtractor(KemonoExtractor):
 
     def items(self):
         server_id = self.groups[2]
-        server, channels = discord_server_info(self, server_id)
+        server, channels = self.cache(self._discord_server_info, server_id)
         for channel in channels.values():
             url = (f"{self.root}/discord/server/{server_id}/"
                    f"{channel['id']}#{channel['name']}")
@@ -519,15 +525,6 @@ class KemonoDiscordServerExtractor(KemonoExtractor):
                 "channel"   : channel,
                 "_extractor": KemonoDiscordExtractor,
             }
-
-
-@memcache(keyarg=1)
-def discord_server_info(extr, server_id):
-    server = extr.api.discord_server(server_id)
-    return server, {
-        channel["id"]: channel
-        for channel in server.pop("channels")
-    }
 
 
 class KemonoFavoriteExtractor(KemonoExtractor):
