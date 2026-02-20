@@ -87,10 +87,6 @@ BASE_PATTERN = CheveretoExtractor.update({
         "root": "https://jpg7.cr",
         "pattern": r"(?:www\.)?jpe?g\d?\.(?:cr|su|pet|fish(?:ing)?|church)",
     },
-    "imagepond": {
-        "root": "https://www.imagepond.net",
-        "pattern": r"(?:www\.)?imagepond\.net",
-    },
     "imglike": {
         "root": "https://imglike.com",
         "pattern": r"(?:www\.)?imglike\.com",
