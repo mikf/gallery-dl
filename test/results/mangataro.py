@@ -11,7 +11,7 @@ __tests__ = (
 {
     "#url"     : "https://mangataro.org/read/majo-to-youhei/ch8-356833",
     "#class"   : mangataro.MangataroChapterExtractor,
-    "#pattern" : r"https://bx1\.mangapeak\.me/storage/chapters/b99b2860f0444d924c9446b4ecf1cdad/\d+\.webp",
+    "#pattern" : r"https://(mangataro.yachts|bx1\.mangapeak\.me)/storage/chapters/b99b2860f0444d924c9446b4ecf1cdad/\d+\.webp",
     "#count"   : 22,
 
     "chapter"      : 8,
@@ -47,7 +47,7 @@ __tests__ = (
 {
     "#url"     : "https://mangataro.org/read/sono-akuyaku-kizoku-mama-heroine-ga-sukisugiru-shinshi-na-doryoku-de-saikyou-to-nari-fuguu-na-oshi-chara-tasukemakuru/ch12-2-337633",
     "#class"   : mangataro.MangataroChapterExtractor,
-    "#pattern" : r"https://bx1\.mangapeak\.me/storage/chapters/200aa5d11c6ef1f049a2c68163c3a1d7/\d+\.webp",
+    "#pattern" : r"https://(mangataro.yachts|bx1\.mangapeak\.me)/storage/chapters/200aa5d11c6ef1f049a2c68163c3a1d7/\d+\.webp",
     "#count"   : 13,
 
     "chapter"      : 12,

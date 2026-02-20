@@ -47,15 +47,9 @@ class MangataroChapterExtractor(MangataroBase, ChapterExtractor):
         }
 
     def images(self, page):
-        pos = page.find('class="comic-image-container')
-        img, pos = text.extract(page, ' src="', '"', pos)
-
-        images = [(img, None)]
-        images.extend(
-            (url, None)
-            for url in text.extract_iter(page, 'data-src="', '"', pos)
-        )
-        return images
+        url = f"{self.root}/auth/chapter-content?chapter_id={self.groups[2]}"
+        data = self.request_json(url)
+        return [(url, None) for url in data["images"]]
 
 
 class MangataroMangaExtractor(MangataroBase, MangaExtractor):
