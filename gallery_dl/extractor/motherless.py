@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024-2025 Mike Fährmann
+# Copyright 2024-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, dt
-from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?motherless\.com"
 
@@ -63,12 +62,12 @@ class MotherlessExtractor(Extractor):
             pass
         elif path[0] == "G":
             data["gallery_id"] = path[1:]
-            data["gallery_title"] = self._extract_gallery_title(
-                page, data["gallery_id"])
+            data["gallery_title"] = self.cache(
+                self._extract_gallery_title, data["gallery_id"], page)
         elif path[0] == "g":
             data["group_id"] = path[2:]
-            data["group_title"] = self._extract_group_title(
-                page, data["group_id"])
+            data["group_title"] = self.cache(
+                self._extract_group_title, data["group_id"], page)
 
         return data
 
@@ -88,9 +87,9 @@ class MotherlessExtractor(Extractor):
 
         gid = self.groups[-1]
         if category == "gallery":
-            title = self._extract_gallery_title(page, gid)
+            title = self.cache(self._extract_gallery_title, gid, page)
         else:
-            title = self._extract_group_title(page, gid)
+            title = self.cache(self._extract_group_title, gid, page)
         creator = text.remove_html(extr(
             f'class="{category}-member-username">', "</"))
 
@@ -126,8 +125,7 @@ class MotherlessExtractor(Extractor):
                  dt.timedelta(value))
         return (dt.now() - delta).replace(hour=0, minute=0, second=0)
 
-    @memcache(keyarg=2)
-    def _extract_gallery_title(self, page, gallery_id):
+    def _extract_gallery_title(self, gallery_id, page):
         title = text.extr(
             text.extr(page, '<h1 class="content-title">', "</h1>"),
             "From the gallery:", "<")
@@ -140,8 +138,7 @@ class MotherlessExtractor(Extractor):
 
         return ""
 
-    @memcache(keyarg=2)
-    def _extract_group_title(self, page, group_id):
+    def _extract_group_title(self, group_id, page):
         title = text.extr(
             text.extr(page, '<h1 class="group-bio-name">', "</h1>"),
             ">", "<")

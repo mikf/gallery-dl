@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2014-2025 Mike Fährmann
+# Copyright 2014-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from . import danbooru
-from ..cache import memcache
 from .. import text, util
 
 
@@ -46,8 +45,8 @@ class E621Extractor(danbooru.DanbooruExtractor):
                 post["notes"] = self._get_notes(post["id"])
 
             if pools and post["pools"]:
-                post["pools"] = self._get_pools(
-                    ",".join(map(str, post["pools"])))
+                post["pools"] = self.cache(
+                    self._get_pools, ",".join(map(str, post["pools"])))
 
             post["filename"] = file["md5"]
             post["extension"] = file["ext"]
@@ -67,7 +66,6 @@ class E621Extractor(danbooru.DanbooruExtractor):
         return self.request_json(
             f"{self.root}/notes.json?search[post_id]={id}")
 
-    @memcache(keyarg=1)
     def _get_pools(self, ids):
         pools = self.request_json(
             f"{self.root}/pools.json?search[id]={ids}")

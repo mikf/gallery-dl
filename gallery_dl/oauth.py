@@ -20,7 +20,6 @@ import requests
 import requests.auth
 
 from . import text
-from .cache import cache
 
 
 def nonce(size, alphabet=string.ascii_letters):
@@ -120,8 +119,8 @@ class OAuth1API():
         key_type = "default" if api_key == self.API_KEY else "custom"
 
         if token is None or token == "cache":
-            key = (extractor.category, api_key)
-            token, token_secret = _token_cache(key)
+            token, token_secret = extractor.cache(
+                _token_cache, (extractor.category, api_key), _mem=False)
 
         if api_key and api_secret and token and token_secret:
             self.log.debug("Using %s OAuth1.0 authentication", key_type)
@@ -139,6 +138,5 @@ class OAuth1API():
         return self.extractor.request(url, **kwargs)
 
 
-@cache(maxage=36500*86400, keyarg=0)
 def _token_cache(key):
     return None, None

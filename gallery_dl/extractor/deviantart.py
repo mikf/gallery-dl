@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message, Dispatch
 from .. import text, util, dt
-from ..cache import cache, memcache
 import collections
 import mimetypes
 import binascii
@@ -112,13 +111,46 @@ class DeviantartExtractor(Extractor):
 
         username, password = self._get_auth_info()
         if username:
-            self.cookies_update(_login_impl(self, username, password))
+            self.cookies_update(self.cache(
+                self._login_impl, username, password,
+                _exp=28*86400, _mem=False))
             return True
+
+    def _login_impl(self, username, password):
+        self.log.info("Logging in as %s", username)
+
+        url = "https://www.deviantart.com/users/login"
+        page = self.request(url).text
+
+        data = {}
+        for item in text.extract_iter(
+                page, '<input type="hidden" name="', '"/>'):
+            name, _, value = item.partition('" value="')
+            data[name] = value
+
+        challenge = data.get("challenge")
+        if challenge and challenge != "0":
+            self.log.warning("Login requires solving a CAPTCHA")
+            self.log.debug(challenge)
+
+        data["username"] = username
+        data["password"] = password
+        data["remember"] = "on"
+
+        self.sleep(2.0, "login")
+        url = "https://www.deviantart.com/_sisu/do/signin"
+        response = self.request(url, method="POST", data=data)
+
+        if not response.history:
+            raise self.exc.AuthenticationError()
+
+        return {cookie.name: cookie.value
+                for cookie in self.cookies}
 
     def items(self):
         if self.user:
             if group := self.config("group", True):
-                if user := _user_details(self, self.user):
+                if user := self.cache(self._user_details, self.user):
                     self.user = user["username"]
                     self.group = False
                 elif group == "skip":
@@ -190,7 +222,8 @@ class DeviantartExtractor(Extractor):
                         self.log.debug(
                             "Skipping avatar of '%s' (default)", name)
                         continue
-                    _user_details.update(name, user)
+                    self.cache_update(
+                        self._user_details, name, user, _mem=True)
 
                     url = f"{self.root}/{name}/avatar/"
                     comment["_extractor"] = DeviantartAvatarExtractor
@@ -609,6 +642,12 @@ class DeviantartExtractor(Extractor):
                    .replace("\\'", "'") \
                    .replace("\\\\", "\\")
 
+    def _user_details(self, name):
+        try:
+            return self.cache(self.api.user_profile, name)["user"]
+        except Exception:
+            return None
+
 
 class DeviantartUserExtractor(Dispatch, DeviantartExtractor):
     """Extractor for an artist's user profile"""
@@ -643,7 +682,7 @@ class DeviantartGalleryExtractor(DeviantartExtractor):
     def deviations(self):
         if self.flat and not self.group:
             return self.api.gallery_all(self.user, self.offset)
-        folders = self.api.gallery_folders(self.user)
+        folders = self.cache(self.api.gallery_folders, self.user)
         return self._folder_urls(folders, "gallery", DeviantartFolderExtractor)
 
 
@@ -656,7 +695,7 @@ class DeviantartAvatarExtractor(DeviantartExtractor):
 
     def deviations(self):
         name = self.user.lower()
-        user = _user_details(self, name)
+        user = self.cache(self._user_details, name)
         if not user:
             return ()
 
@@ -710,7 +749,7 @@ class DeviantartBackgroundExtractor(DeviantartExtractor):
 
     def deviations(self):
         try:
-            return (self.api.user_profile(self.user.lower())
+            return (self.cache(self.api.user_profile, self.user.lower())
                     ["cover_deviation"]["cover_deviation"],)
         except Exception:
             return ()
@@ -731,7 +770,7 @@ class DeviantartFolderExtractor(DeviantartExtractor):
         self.folder_name = match[4]
 
     def deviations(self):
-        folders = self.api.gallery_folders(self.user)
+        folders = self.cache(self.api.gallery_folders, self.user)
         folder = self._find_folder(folders, self.folder_name, self.folder_id)
 
         # Leaving this here for backwards compatibility
@@ -844,7 +883,7 @@ class DeviantartFavoriteExtractor(DeviantartExtractor):
     def deviations(self):
         if self.flat:
             return self.api.collections_all(self.user, self.offset)
-        folders = self.api.collections_folders(self.user)
+        folders = self.cache(self.api.collections_folders, self.user)
         return self._folder_urls(
             folders, "favourites", DeviantartCollectionExtractor)
 
@@ -865,7 +904,7 @@ class DeviantartCollectionExtractor(DeviantartExtractor):
         self.collection_name = match[4]
 
     def deviations(self):
-        folders = self.api.collections_folders(self.user)
+        folders = self.cache(self.api.collections_folders, self.user)
         folder = self._find_folder(
             folders, self.collection_name, self.collection_id)
         self.collection = {
@@ -1212,7 +1251,7 @@ class DeviantartOAuthAPI():
         token = extractor.config("refresh-token")
         if token is None or token == "cache":
             token = "#" + self.client_id
-            if not _refresh_token_cache(token):
+            if not extractor.cache(_refresh_token_cache, token):
                 token = None
         self.refresh_token_key = token
 
@@ -1305,7 +1344,6 @@ class DeviantartOAuthAPI():
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
-    @memcache(keyarg=1)
     def collections_folders(self, username, offset=0):
         """Yield all collection folders of a specific user"""
         endpoint = "/collections/folders"
@@ -1393,7 +1431,6 @@ class DeviantartOAuthAPI():
                   "mature_content": self.mature}
         return self._pagination(endpoint, params)
 
-    @memcache(keyarg=1)
     def gallery_folders(self, username, offset=0):
         """Yield all gallery folders of a specific user"""
         endpoint = "/gallery/folders"
@@ -1432,7 +1469,6 @@ class DeviantartOAuthAPI():
             endpoint, method="POST", public=False, fatal=False,
         ).get("success")
 
-    @memcache(keyarg=1)
     def user_profile(self, username):
         """Get user profile information"""
         endpoint = "/user/profile/" + username
@@ -1455,17 +1491,18 @@ class DeviantartOAuthAPI():
 
     def authenticate(self, refresh_token_key):
         """Authenticate the application by requesting an access token"""
-        self.headers["Authorization"] = \
-            self._authenticate_impl(refresh_token_key)
+        self.headers["Authorization"] = self.extractor.cache(
+            self._authenticate_impl, refresh_token_key, _exp=3600, _mem=False)
 
-    @cache(maxage=3600, keyarg=1)
     def _authenticate_impl(self, refresh_token_key):
         """Actual authenticate implementation"""
         url = "https://www.deviantart.com/oauth2/token"
         if refresh_token_key:
             self.log.info("Refreshing private access token")
+            token = self.extractor.cache(
+                _refresh_token_cache, refresh_token_key, _mem=False)
             data = {"grant_type": "refresh_token",
-                    "refresh_token": _refresh_token_cache(refresh_token_key)}
+                    "refresh_token": token}
         else:
             self.log.info("Requesting public access token")
             data = {"grant_type": "client_credentials"}
@@ -1480,8 +1517,8 @@ class DeviantartOAuthAPI():
             raise self.exc.AuthenticationError(
                 f"\"{data.get('error_description')}\" ({data.get('error')})")
         if refresh_token_key:
-            _refresh_token_cache.update(
-                refresh_token_key, data["refresh_token"])
+            self.extractor.cache_update(
+                _refresh_token_cache, refresh_token_key, data["refresh_token"])
         return "Bearer " + data["access_token"]
 
     def _call(self, endpoint, fatal=True, log=True, public=None, **kwargs):
@@ -1648,14 +1685,14 @@ class DeviantartOAuthAPI():
     def _folders(self, deviations):
         """Add a list of all containing folders to each deviation object"""
         for deviation in deviations:
-            deviation["folders"] = self._folders_map(
-                deviation["author"]["username"])[deviation["deviationid"]]
+            username = deviation["author"]["username"]
+            deviation["folders"] = self.extractor.cache(
+                self._folders_map, username)[deviation["deviationid"]]
 
-    @memcache(keyarg=1)
     def _folders_map(self, username):
         """Generate a deviation_id -> folders mapping for 'username'"""
         self.log.info("Collecting folder information for '%s'", username)
-        folders = self.gallery_folders(username)
+        folders = self.extractor.cache(self.gallery_folders, username)
 
         # create 'folderid'-to-'folder' mapping
         fmap = {
@@ -1824,55 +1861,6 @@ class DeviantartEclipseAPI():
         return token
 
 
-@memcache(keyarg=1)
-def _user_details(extr, name):
-    try:
-        return extr.api.user_profile(name)["user"]
-    except Exception:
-        return None
-
-
-@cache(maxage=36500*86400, keyarg=0)
-def _refresh_token_cache(token):
-    if token and token[0] == "#":
-        return None
-    return token
-
-
-@cache(maxage=28*86400, keyarg=1)
-def _login_impl(extr, username, password):
-    extr.log.info("Logging in as %s", username)
-
-    url = "https://www.deviantart.com/users/login"
-    page = extr.request(url).text
-
-    data = {}
-    for item in text.extract_iter(page, '<input type="hidden" name="', '"/>'):
-        name, _, value = item.partition('" value="')
-        data[name] = value
-
-    challenge = data.get("challenge")
-    if challenge and challenge != "0":
-        extr.log.warning("Login requires solving a CAPTCHA")
-        extr.log.debug(challenge)
-
-    data["username"] = username
-    data["password"] = password
-    data["remember"] = "on"
-
-    extr.sleep(2.0, "login")
-    url = "https://www.deviantart.com/_sisu/do/signin"
-    response = extr.request(url, method="POST", data=data)
-
-    if not response.history:
-        raise extr.exc.AuthenticationError()
-
-    return {
-        cookie.name: cookie.value
-        for cookie in extr.cookies
-    }
-
-
 _ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
 
 
@@ -1902,3 +1890,9 @@ def eclipse_media(media, format="preview"):
         url.append(tokens[-1])
 
     return "".join(url), formats
+
+
+def _refresh_token_cache(token):
+    if token and token[0] == "#":
+        return None
+    return token

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2025 Mike Fährmann
+# Copyright 2022-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -11,7 +11,6 @@
 from .common import Extractor
 from .lolisafe import LolisafeAlbumExtractor
 from .. import text, util, config
-from ..cache import memcache
 import random
 
 if config.get(("extractor", "bunkr"), "tlds"):
@@ -233,8 +232,8 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
             self.log.error("%s: %s", exc.__class__.__name__, exc)
             return (), {}
 
-        album_id, album_name, album_size = self._album_info(text.extr(
-            page, ' href="../a/', '"'))
+        album_id, album_name, album_size = self.cache(
+            self._album_info, text.extr(page, ' href="../a/', '"'))
         return (file,), {
             "album_id"  : album_id,
             "album_name": album_name,
@@ -242,7 +241,6 @@ class BunkrMediaExtractor(BunkrAlbumExtractor):
             "count"     : 1,
         }
 
-    @memcache(keyarg=1)
     def _album_info(self, album_id):
         if album_id:
             try:

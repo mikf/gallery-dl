@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2025 Mike Fährmann
+# Copyright 2019-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util, dt
-from ..cache import memcache
 import collections
 import itertools
 
@@ -195,7 +194,7 @@ class PatreonExtractor(Extractor):
 
         user = relationships["user"]
         attr["creator"] = (
-            self._user(user["links"]["related"]) or
+            self.cache(self._user, user["links"]["related"]) or
             included["user"][user["data"]["id"]])
 
         return attr
@@ -217,7 +216,6 @@ class PatreonExtractor(Extractor):
             ]
         return []
 
-    @memcache(keyarg=1)
     def _user(self, url):
         """Fetch user information"""
         response = self.request(url, fatal=False)

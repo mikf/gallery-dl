@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
-from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?weebcentral\.com"
 
@@ -20,8 +19,7 @@ class WeebcentralBase():
     root = "https://weebcentral.com"
     request_interval = (0.5, 1.5)
 
-    @memcache(keyarg=1)
-    def _extract_manga_data(self, manga_id):
+    def _manga_info(self, manga_id):
         url = f"{self.root}/series/{manga_id}"
         page = self.request(url).text
         extr = text.extract_from(page)
@@ -53,15 +51,13 @@ class WeebcentralChapterExtractor(WeebcentralBase, ChapterExtractor):
         chapter_type = extr("'chapter_type': '", "'")
         chapter, sep, minor = extr("'number': '", "'").partition(".")
 
-        data = {
+        return {
+            **self.cache(self._manga_info, manga_id),
             "chapter": text.parse_int(chapter),
             "chapter_id": self.groups[1],
             "chapter_type": chapter_type,
             "chapter_minor": sep + minor,
         }
-        data.update(self._extract_manga_data(manga_id))
-
-        return data
 
     def images(self, page):
         referer = self.page_url
@@ -111,7 +107,7 @@ class WeebcentralMangaExtractor(WeebcentralBase, MangaExtractor):
         }
         page = self.request(url, headers=headers).text
         extr = text.extract_from(page)
-        data = self._extract_manga_data(manga_id)
+        data = self.cache(self._manga_info, manga_id)
         base = self.root + "/chapters/"
 
         results = []

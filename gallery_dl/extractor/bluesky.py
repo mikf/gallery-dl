@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message, Dispatch
 from .. import text, util
-from ..cache import cache, memcache
 
 BASE_PATTERN = (r"(?:https?://)?"
                 r"(?:(?:www\.)?(?:c|[fv]x)?bs[ky]y[ex]?\.app|main\.bsky\.dev)")
@@ -63,8 +62,8 @@ class BlueskyExtractor(Extractor):
                 yield Message.Directory, "", post
                 if files:
                     did = post["author"]["did"]
-                    base = (f"{self.api.service_endpoint(did)}/xrpc"
-                            f"/com.atproto.sync.getBlob?did={did}&cid=")
+                    base = (f"{self.cache(self.api.service_endpoint, did)}"
+                            f"/xrpc/com.atproto.sync.getBlob?did={did}&cid=")
                     for post["num"], file in enumerate(files, 1):
                         post.update(file)
                         yield Message.Url, base + file["filename"], post
@@ -106,7 +105,6 @@ class BlueskyExtractor(Extractor):
     def _pid(self, post):
         return post["uri"].rpartition("/")[2]
 
-    @memcache(keyarg=1)
     def _instance(self, handle):
         return ".".join(handle.rsplit(".", 2)[-2:])
 
@@ -186,7 +184,7 @@ class BlueskyExtractor(Extractor):
 
     def _make_post(self, actor, kind):
         did = self.api._did_from_actor(actor)
-        profile = self.api.get_profile(did)
+        profile = self.cache(self.api.get_profile, did)
 
         if kind not in profile:
             return ()
@@ -477,7 +475,6 @@ class BlueskyAPI():
             index += 1
         return posts
 
-    @memcache(keyarg=1)
     def get_profile(self, did):
         endpoint = "app.bsky.actor.getProfile"
         params = {"actor": did}
@@ -486,25 +483,23 @@ class BlueskyAPI():
     def list_records(self, actor, collection):
         endpoint = "com.atproto.repo.listRecords"
         actor_did = self._did_from_actor(actor)
+        service = self.extractor.cache(self.service_endpoint, actor_did)
         params = {
             "repo"      : actor_did,
             "collection": collection,
             "limit"     : "100",
             #  "reverse"   : "false",
         }
-        return self._pagination(endpoint, params, "records",
-                                self.service_endpoint(actor_did))
+        return self._pagination(endpoint, params, "records", service)
 
-    @memcache(keyarg=1)
     def resolve_handle(self, handle):
         endpoint = "com.atproto.identity.resolveHandle"
         params = {"handle": handle}
         return self._call(endpoint, params)["did"]
 
-    @memcache(keyarg=1)
     def service_endpoint(self, did):
         if did.startswith('did:web:'):
-            url = "https://" + did[8:] + "/.well-known/did.json"
+            url = f"https://{did[8:]}/.well-known/did.json"
         else:
             url = "https://plc.directory/" + did
 
@@ -530,25 +525,24 @@ class BlueskyAPI():
         if actor.startswith("did:"):
             did = actor
         else:
-            did = self.resolve_handle(actor)
+            did = self.extractor.cache(self.resolve_handle, actor)
 
         extr = self.extractor
         if user_did and not extr.config("reposts", False):
             extr._user_did = did
         if extr._metadata_user:
-            extr._user = user = self.get_profile(did)
+            extr._user = user = extr.cache(self.get_profile, did)
             user["instance"] = extr._instance(user["handle"])
 
         return did
 
     def authenticate(self):
-        self.headers["Authorization"] = self._authenticate_impl(self.username)
+        self.headers["Authorization"] = self.extractor.cache(
+            self._authenticate_impl, self.username, _exp=3600, _mem=False)
 
-    @cache(maxage=3600, keyarg=1)
     def _authenticate_impl(self, username):
-        refresh_token = _refresh_token_cache(username)
-
-        if refresh_token:
+        if refresh_token := self.extractor.cache(
+                _refresh_token_cache, username, _mem=False):
             self.log.info("Refreshing access token for %s", username)
             endpoint = "com.atproto.server.refreshSession"
             headers = {"Authorization": "Bearer " + refresh_token}
@@ -572,7 +566,8 @@ class BlueskyAPI():
             raise self.extractor.exc.AuthenticationError(
                 f"\"{data.get('error')}: {data.get('message')}\"")
 
-        _refresh_token_cache.update(self.username, data["refreshJwt"])
+        self.extractor.cache_update(_refresh_token_cache, self.username,
+                                    data["refreshJwt"], _exp=84*86400)
         return "Bearer " + data["accessJwt"]
 
     def _call(self, endpoint, params, root=None):
@@ -617,6 +612,5 @@ class BlueskyAPI():
             params["cursor"] = cursor
 
 
-@cache(maxage=84*86400, keyarg=0)
 def _refresh_token_cache(username):
     return None

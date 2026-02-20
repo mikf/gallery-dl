@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
-from ..cache import memcache
 import hashlib
 import time
 
@@ -21,6 +20,28 @@ class MangataroBase():
     """Base class for mangataro extractors"""
     category = "mangataro"
     root = "https://mangataro.org"
+
+    def _manga_info(self, slug):
+        url = f"{self.root}/manga/{slug}"
+        page = self.request(url).text
+        manga = self._extract_jsonld(page)
+
+        return {
+            "manga"      : manga["name"].rpartition(
+                " | ")[0].rpartition(" ")[0],
+            "manga_id"   : text.extr(page, 'data-manga-id="', '"'),
+            "manga_url"  : manga["url"],
+            "cover"      : manga["image"],
+            "author"     : manga["author"]["name"].split(", "),
+            "genre"      : manga["genre"],
+            "status"     : manga["status"],
+            "description": text.unescape(text.extr(
+                page, 'id="description-content-tab">', "</div></div>")),
+            "tags"       : text.split_html(text.extr(
+                page, ">Genres</h4>", "</div>")),
+            "publisher"  : text.remove_html(text.extr(
+                page, '>Serialization</h4>', "</div>")),
+        }
 
 
 class MangataroChapterExtractor(MangataroBase, ChapterExtractor):
@@ -36,7 +57,7 @@ class MangataroChapterExtractor(MangataroBase, ChapterExtractor):
         desc = comic["description"].split(" - ", 3)
 
         return {
-            **_manga_info(self, slug),
+            **self.cache(self._manga_info, slug),
             "title"    : desc[1] if len(desc) > 3 else "",
             "chapter"  : int(chapter),
             "chapter_minor": str(round(minor, 5))[1:] if minor else "",
@@ -59,7 +80,7 @@ class MangataroMangaExtractor(MangataroBase, MangaExtractor):
     example = "https://mangataro.org/manga/MANGA"
 
     def chapters(self, _):
-        manga = _manga_info(self, self.groups[0])
+        manga = self.cache(self._manga_info, self.groups[0])
 
         url = self.root + "/auth/manga-chapters"
         params = {
@@ -104,26 +125,3 @@ class MangataroMangaExtractor(MangataroBase, MangaExtractor):
         secret = f"{ts}mng_ch_{Y:>04}{m:>02}{d:>02}{H:>02}"
         params["_t"] = hashlib.md5(secret.encode()).hexdigest()[:16]
         params["_ts"] = ts
-
-
-@memcache(keyarg=1)
-def _manga_info(self, slug):
-    url = f"{self.root}/manga/{slug}"
-    page = self.request(url).text
-    manga = self._extract_jsonld(page)
-
-    return {
-        "manga"      : manga["name"].rpartition(" | ")[0].rpartition(" ")[0],
-        "manga_id"   : text.extr(page, 'data-manga-id="', '"'),
-        "manga_url"  : manga["url"],
-        "cover"      : manga["image"],
-        "author"     : manga["author"]["name"].split(", "),
-        "genre"      : manga["genre"],
-        "status"     : manga["status"],
-        "description": text.unescape(text.extr(
-            page, 'id="description-content-tab">', "</div></div>")),
-        "tags"       : text.split_html(text.extr(
-            page, ">Genres</h4>", "</div>")),
-        "publisher"  : text.remove_html(text.extr(
-            page, '>Serialization</h4>', "</div>")),
-    }
