@@ -63,12 +63,14 @@ class IwaraExtractor(Extractor):
                 if "fileUrl" not in video:
                     video = self.api.video(video["id"])
                 file_url = video["fileUrl"]
+
                 sources = self.api.source(file_url)
-                source = next((s for s in sources
-                              if s.get("name") == "Source"), None)
-                download_url = source.get('src', {}).get('download')
+                sources.sort(key=self._sort_formats, reverse=True)
+                source = sources[0]
+                download_url = source["src"].get("download")
 
                 info = self.extract_media_info(video, "file")
+                info["format"] = source.get("name")
                 info["count"] = info["num"] = 1
                 info["user"] = (self.extract_user_info(video)
                                 if user is None else user)
@@ -154,6 +156,11 @@ class IwaraExtractor(Extractor):
         profile = self.api.profile(user)
         params["user"] = profile["user"]["id"]
         return self.extract_user_info(profile), params
+
+    def _sort_formats(self, fmt):
+        return (0 if not fmt.get("src") else
+                99999 if (name := fmt.get("name")) == "Source" else
+                text.parse_int(name))
 
 
 class IwaraUserExtractor(Dispatch, IwaraExtractor):
