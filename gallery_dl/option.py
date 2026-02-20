@@ -75,6 +75,15 @@ class MtimeAction(argparse.Action):
         })
 
 
+class DirmtimeAction(argparse.Action):
+    """Configure dirmtime post processors"""
+    def __call__(self, parser, namespace, value, option_string=None):
+        namespace.postprocessors.append({
+            "name": "dirmtime",
+            "value": f"{{{self.const or value}}}",
+        })
+
+
 class RenameAction(argparse.Action):
     """Configure rename post processors"""
     def __call__(self, parser, namespace, value, option_string=None):
@@ -858,10 +867,22 @@ def build_parser():
               "selected by NAME. Examples: 'date' or 'status[date]'"),
     )
     postprocessor.add_argument(
+        "--dirmtime",
+        dest="postprocessors", metavar="NAME", action=DirmtimeAction,
+        help=("Set folder modification times according to metadata "
+              "selected by NAME. Examples: 'date' or 'status[date]'"),
+    )
+    postprocessor.add_argument(
         "--mtime-from-date",
         dest="postprocessors", nargs=0, action=MtimeAction,
         const="date|status[date]",
         help=SUPPRESS,
+    )
+    postprocessor.add_argument(
+        "--dirmtime-from-date",
+        dest="postprocessors", nargs=0, action=DirmtimeAction,
+        const="date|status[date]",
+        help=argparse.SUPPRESS,
     )
     postprocessor.add_argument(
         "--rename",

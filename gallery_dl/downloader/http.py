@@ -39,6 +39,7 @@ class HttpDownloader(DownloaderBase):
         self.timeout = self.config("timeout", extractor._timeout)
         self.verify = self.config("verify", extractor._verify)
         self.mtime = self.config("mtime", True)
+        self.dirmtime = self.config("dirmtime", True)
         self.rate = self.config("rate")
         interval_429 = self.config("sleep-429")
 
@@ -365,7 +366,7 @@ class HttpDownloader(DownloaderBase):
             break
 
         self.downloading = False
-        if self.mtime:
+        if self.mtime or self.dirmtime:
             if "_http_lastmodified" in kwdict:
                 kwdict["_mtime_http"] = kwdict["_http_lastmodified"]
             else:
