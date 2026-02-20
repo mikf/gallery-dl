@@ -293,7 +293,7 @@ class IwaraTagExtractor(IwaraExtractor):
 
 class IwaraAPI():
     """Interface for the Iwara API"""
-    root = "https://api.iwara.tv"
+    root = "https://apiq.iwara.tv"
 
     def __init__(self, extractor):
         self.extractor = extractor
