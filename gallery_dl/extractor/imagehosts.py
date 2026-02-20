@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text
-from ..cache import memcache
 
 
 class ImagehostImageExtractor(Extractor):
@@ -43,11 +42,15 @@ class ImagehostImageExtractor(Extractor):
             }
 
     def items(self):
+        _cookies = self._cookies
+        if _cookies is not None and callable(_cookies):
+            _cookies = self.cache(_cookies, _key=None, _exp=3*3600)
+
         page = self.request(
             self.page_url,
             method=("POST" if self._params else "GET"),
             data=self._params,
-            cookies=self._cookies,
+            cookies=_cookies,
             encoding=self._encoding,
         ).text
 
@@ -176,8 +179,6 @@ class ImagevenueImageExtractor(ImagehostImageExtractor):
                r"/([A-Z0-9]{8,10}|view/.*|img\.php\?.*))")
     example = "https://www.imagevenue.com/ME123456789"
 
-    @property
-    @memcache(maxage=3*3600)
     def _cookies(self):
         return self.request(self.page_url).cookies
 
@@ -209,8 +210,6 @@ class ImagetwistImageExtractor(ImagehostImageExtractor):
                r"/([a-z0-9]{12}))")
     example = "https://imagetwist.com/123456abcdef/NAME.EXT"
 
-    @property
-    @memcache(maxage=3*3600)
     def _cookies(self):
         return self.request(self.page_url).cookies
 

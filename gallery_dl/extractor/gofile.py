@@ -8,7 +8,6 @@
 
 from .common import Extractor, Message
 from .. import text
-from ..cache import cache, memcache
 import hashlib
 
 
@@ -31,12 +30,13 @@ class GofileFolderExtractor(Extractor):
 
         token = self.config("api-token")
         if not token:
-            token = self._create_account()
+            token = self.cache(self._create_account, _key=None)
         self.cookies.set("accountToken", token, domain=".gofile.io")
         self.api_token = token
 
         self.website_token = (self.config("website-token") or
-                              self._get_website_token())
+                              self.cache(self._get_website_token,
+                                         _key=None, _exp=86400, _mem=False))
 
         folder = self._get_content(self.content_id, password)
         yield Message.Directory, "", folder
@@ -67,12 +67,10 @@ class GofileFolderExtractor(Extractor):
                 self.log.debug("'%s' is of unknown type (%s)",
                                content.get("name"), content["type"])
 
-    @memcache()
     def _create_account(self):
         self.log.debug("Creating temporary account")
         return self._api_request("accounts", method="POST")["token"]
 
-    @cache(maxage=86400)
     def _get_website_token(self):
         self.log.debug("Fetching website token")
         page = self.request(self.root + "/dist/js/config.js").text

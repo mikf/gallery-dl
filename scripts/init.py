@@ -128,7 +128,6 @@ def generate_extractors_manga(args):
     return f'''\
 from .common import ChapterExtractor, MangaExtractor
 from .. import text
-from ..cache import memcache
 
 {build_base_pattern(args)}
 
@@ -136,6 +135,9 @@ class {ccat}Base():
     """Base class for {cat} extractors"""
     category = "{cat}"
     root = "{args.root}"
+
+    def _manga_info(self, slug):
+        return {{}}
 
 
 class {ccat}ChapterExtractor({ccat}Base, ChapterExtractor):
@@ -151,7 +153,7 @@ class {ccat}ChapterExtractor({ccat}Base, ChapterExtractor):
         chapter, sep, minor = chapter.partition(".")
 
         return {{
-            **_manga_info(self, manga_id),
+            **self.cache(self._manga_info, manga_id),
             "manga"   : text.unescape(manga),
             "manga_id": text.parse_int(manga_id),
             "title"   : "",
@@ -187,11 +189,6 @@ class {ccat}MangaExtractor({ccat}Base, MangaExtractor):
             results.append((url, None))
 
         return results
-
-
-@memcache(keyarg=1)
-def _manga_info(self, slug):
-    return {{}}
 '''
 
 

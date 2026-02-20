@@ -11,7 +11,6 @@
 from .common import Extractor
 from .. import text, oauth, util, config
 from ..output import stdout_write
-from ..cache import cache, memcache
 
 REDIRECT_URI_LOCALHOST = "http://localhost:6414/"
 REDIRECT_URI_HTTPS = "https://mikf.github.io/gallery-dl/oauth-redirect.html"
@@ -28,8 +27,9 @@ class OAuthBase(Extractor):
         self.client = None
 
     def _init(self):
+        from .. import cache
         self.cache = config.get(("extractor", self.category), "cache", True)
-        if self.cache and cache is memcache:
+        if self.cache and cache.database() is None:
             self.log.warning("cache file is not writeable")
             self.cache = False
 
@@ -368,7 +368,7 @@ class OAuthMastodon(OAuthBase):
             if self.instance == root.partition("://")[2]:
                 break
         else:
-            application = self._register(self.instance)
+            application = self.cache(self._register, self.instance, _mem=False)
 
         self._oauth2_authorization_code_grant(
             application["client-id"],
@@ -383,7 +383,6 @@ class OAuthMastodon(OAuthBase):
         )
         return iter(NOOP)
 
-    @cache(maxage=36500*86400, keyarg=1)
     def _register(self, instance):
         self.log.info("Registering application for '%s'", instance)
 
