@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2025 Mike Fährmann
+# Copyright 2019-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text
-from ..cache import cache
 import hashlib
 import time
 
@@ -26,13 +25,13 @@ class MangoxoExtractor(Extractor):
     def login(self):
         username, password = self._get_auth_info()
         if username:
-            self.cookies_update(self._login_impl(username, password))
+            self.cookies_update(self.cache(
+                self._login_impl, username, password, _exp=3*3600, _mem=False))
         elif MangoxoExtractor._warning:
             MangoxoExtractor._warning = False
             self.log.warning("Unauthenticated users cannot see "
                              "more than 5 images per album")
 
-    @cache(maxage=3*3600, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 

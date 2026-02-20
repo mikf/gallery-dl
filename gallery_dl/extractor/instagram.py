@@ -161,9 +161,16 @@ class InstagramExtractor(Extractor):
 
         username, password = self._get_auth_info()
         if username:
-            return self.cookies_update(_login_impl(self, username, password))
+            return self.cookies_update(self.cache(
+                self._login_impl, username, password,
+                _exp=90*86400, _mem=False))
 
         self._logged_in = False
+
+    def _login_impl(self, username, password):
+        self.log.error("Login with username & password is no longer "
+                       "supported. Use browser cookies instead.")
+        return {}
 
     def _parse_post_rest(self, post):
         if "items" in post:  # story or highlight
@@ -1181,13 +1188,6 @@ class InstagramGraphqlAPI():
                     f"{user}'{s} posts are private")
 
             variables["after"] = extr._update_cursor(info["end_cursor"])
-
-
-@cache(maxage=90*86400, keyarg=1)
-def _login_impl(extr, username, password):
-    extr.log.error("Login with username & password is no longer supported. "
-                   "Use browser cookies instead.")
-    return {}
 
 
 def id_from_shortcode(shortcode):

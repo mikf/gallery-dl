@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util
-from ..cache import cache
 import itertools
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?erome\.com"
@@ -37,12 +36,13 @@ class EromeExtractor(Extractor):
     def request(self, url, **kwargs):
         if self._cookies:
             self._cookies = False
-            self.cookies.update(_cookie_cache())
+            self.cookies_update(self.cache(
+                _cookie_cache, _key=None, _mem=False))
 
         for _ in range(5):
             response = Extractor.request(self, url, **kwargs)
             if response.cookies:
-                _cookie_cache.update("", response.cookies)
+                self.cache_update(_cookie_cache, None, response.cookies)
             if response.content.find(
                     b"<title>Please wait a few moments</title>", 0, 600) < 0:
                 return response
@@ -147,6 +147,5 @@ class EromeSearchExtractor(EromeExtractor):
         return self._pagination(url, params)
 
 
-@cache()
 def _cookie_cache():
     return ()

@@ -589,9 +589,11 @@ class Extractor():
         if not custom_ua or custom_ua == "auto":
             pass
         elif custom_ua == "browser":
-            headers["User-Agent"] = _browser_useragent(None)
+            headers["User-Agent"] = self.cache(
+                _browser_useragent, None, _exp=86400, _mem=False)
         elif custom_ua[0] == "@":
-            headers["User-Agent"] = _browser_useragent(custom_ua[1:])
+            headers["User-Agent"] = self.cache(
+                _browser_useragent, custom_ua[1:], _exp=86400, _mem=False)
         elif custom_ua[0] == "+":
             custom_ua = custom_ua[1:].lower()
             if custom_ua in {"firefox", "ff"}:
@@ -1200,7 +1202,6 @@ def _build_requests_adapter(
     return adapter
 
 
-@cache.cache(maxage=86400, keyarg=0)
 def _browser_useragent(browser):
     """Get User-Agent header from default browser"""
     import webbrowser

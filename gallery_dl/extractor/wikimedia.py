@@ -11,7 +11,6 @@
 
 from .common import BaseExtractor, Message
 from .. import text, util
-from ..cache import cache
 
 
 class WikimediaExtractor(BaseExtractor):
@@ -63,7 +62,6 @@ class WikimediaExtractor(BaseExtractor):
         self.per_page = self.config("limit", 50)
         self.subcategories = False
 
-    @cache(maxage=36500*86400, keyarg=1)
     def _search_api_path(self, root):
         self.log.debug("Probing possible API endpoints")
         for path in ("/api.php", "/w/api.php", "/wiki/api.php"):
@@ -136,9 +134,8 @@ class WikimediaExtractor(BaseExtractor):
         https://opendata.stackexchange.com/questions/13381
         """
 
-        url = self.api_url
-        if not url:
-            url = self._search_api_path(self.root)
+        url = self.api_url or \
+            self.cache(self._search_api_path, self.root, _mem=False)
 
         params["action"] = "query"
         params["format"] = "json"

@@ -10,7 +10,6 @@
 
 from .common import BaseExtractor, Message
 from .. import text, util
-from ..cache import cache
 import binascii
 
 
@@ -177,9 +176,10 @@ class XenforoExtractor(BaseExtractor):
 
         username, password = self._get_auth_info()
         if username:
-            self.cookies_update(self._login_impl(username, password))
+            return self.cookies_update(self.cache(
+                self._login_impl, username, password,
+                _exp=365*86400, _mem=False))
 
-    @cache(maxage=365*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 

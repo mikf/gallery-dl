@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util, dt
-from ..cache import cache
 from email.utils import parsedate_tz
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?aryion\.com/g4"
@@ -37,9 +36,10 @@ class AryionExtractor(Extractor):
 
         username, password = self._get_auth_info()
         if username:
-            self.cookies_update(self._login_impl(username, password))
+            return self.cookies_update(self.cache(
+                self._login_impl, username, password,
+                _exp=14*86400, _mem=False))
 
-    @cache(maxage=14*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 

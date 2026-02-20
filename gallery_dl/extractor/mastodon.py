@@ -10,7 +10,6 @@
 
 from .common import BaseExtractor, Message
 from .. import text
-from ..cache import cache
 
 
 class MastodonExtractor(BaseExtractor):
@@ -219,7 +218,8 @@ class MastodonAPI():
 
         access_token = extractor.config("access-token")
         if access_token is None or access_token == "cache":
-            access_token = _access_token_cache(extractor.instance)
+            access_token = self.cache(
+                _access_token_cache, extractor.instance, _mem=False)
         if not access_token:
             access_token = extractor.config_instance("access-token")
 
@@ -337,6 +337,5 @@ class MastodonAPI():
             params = None
 
 
-@cache(maxage=36500*86400, keyarg=0)
 def _access_token_cache(instance):
     return None

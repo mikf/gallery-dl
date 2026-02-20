@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text
-from ..cache import cache
 
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?inkbunny\.net"
@@ -325,14 +324,30 @@ class InkbunnyAPI():
         self._call("userrating", params)
 
     def authenticate(self, invalidate=False):
-        username, password = self.extractor._get_auth_info()
+        extr = self.extractor
+        username, password = extr._get_auth_info()
+        if not username:
+            username, password = "guest", ""
         if invalidate:
-            _authenticate_impl.invalidate(username or "guest")
-        if username:
-            self.session_id = _authenticate_impl(self, username, password)
-        else:
-            self.session_id = _authenticate_impl(self, "guest", "")
+            extr.cache_update(self._authenticate_impl, username, None)
+
+        self.session_id = extr.cache(
+            self._authenticate_impl, username, password,
+            _exp=365*86400, _mem=False)
+
+        if username == "guest":
             self.set_allowed_ratings()
+
+    def _authenticate_impl(self, username, password):
+        self.extractor.log.info("Logging in as %s", username)
+
+        url = "https://inkbunny.net/api_login.php"
+        data = {"username": username, "password": password}
+        data = self.extractor.request_json(url, method="POST", data=data)
+
+        if "sid" not in data:
+            raise Extractor.exc.AuthenticationError(data.get("error_message"))
+        return data["sid"]
 
     def _call(self, endpoint, params):
         url = "https://inkbunny.net/api_" + endpoint + ".php"
@@ -368,16 +383,3 @@ class InkbunnyAPI():
                 del params["get_rid"]
                 params["rid"] = data["rid"]
             params["page"] += 1
-
-
-@cache(maxage=365*86400, keyarg=1)
-def _authenticate_impl(api, username, password):
-    api.extractor.log.info("Logging in as %s", username)
-
-    url = "https://inkbunny.net/api_login.php"
-    data = {"username": username, "password": password}
-    data = api.extractor.request_json(url, method="POST", data=data)
-
-    if "sid" not in data:
-        raise Extractor.exc.AuthenticationError(data.get("error_message"))
-    return data["sid"]

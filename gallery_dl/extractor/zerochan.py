@@ -9,7 +9,6 @@
 """Extractors for https://www.zerochan.net/"""
 
 from .booru import BooruExtractor
-from ..cache import cache
 from .. import text, util
 import collections
 
@@ -36,11 +35,12 @@ class ZerochanExtractor(BooruExtractor):
 
         username, password = self._get_auth_info()
         if username:
-            return self.cookies_update(self._login_impl(username, password))
+            return self.cookies_update(self.cache(
+                self._login_impl, username, password,
+                _exp=90*86400, _mem=False))
 
         self._logged_in = False
 
-    @cache(maxage=90*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
