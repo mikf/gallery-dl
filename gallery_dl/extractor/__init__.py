@@ -95,6 +95,7 @@ modules = [
     "imagebam",
     "imagechest",
     "imagefap",
+    "imagepond",
     "imgbb",
     "imgbox",
     "imgpile",

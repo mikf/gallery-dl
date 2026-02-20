@@ -493,6 +493,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Folders, Galleries, individual Images, User Profiles</td>
     <td></td>
 </tr>
+<tr id="imagepond" title="imagepond">
+    <td>ImagePond</td>
+    <td>https://www.imagepond.net/</td>
+    <td>Albums, Files, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="imgbb" title="imgbb">
     <td>ImgBB</td>
     <td>https://imgbb.com/</td>
@@ -1366,12 +1372,6 @@ Consider all listed sites to potentially be NSFW.
 <tr id="jpgfish" title="jpgfish">
     <td>JPG Fish</td>
     <td>https://jpg7.cr/</td>
-    <td>Albums, Categories, Files, User Profiles</td>
-    <td></td>
-</tr>
-<tr id="imagepond" title="imagepond">
-    <td>ImagePond</td>
-    <td>https://www.imagepond.net/</td>
     <td>Albums, Categories, Files, User Profiles</td>
     <td></td>
 </tr>
