@@ -233,6 +233,8 @@ class KemonoExtractor(Extractor):
 
     def _build_file_generators(self, filetypes):
         if filetypes is None:
+            if self.category == "coomer":
+                return (self._file, self._attachments, self._inline)
             return (self._attachments, self._file, self._inline)
         genmap = {
             "file"       : self._file,
