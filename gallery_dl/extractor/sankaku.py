@@ -141,7 +141,13 @@ class SankakuTagExtractor(SankakuExtractor):
 
     def posts(self):
         params = {"tags": self.tags}
-        return self.api.posts_keyset(params)
+
+        m = text.re_module.search(r"\bparent:(\w+)\b", self.tags)
+        if m:
+            parent_id = m.group(1)
+            yield from self.api.posts(parent_id)
+
+        yield from self.api.posts_keyset(params)
 
 
 class SankakuPoolExtractor(SankakuExtractor):
