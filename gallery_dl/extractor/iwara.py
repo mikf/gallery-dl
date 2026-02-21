@@ -380,7 +380,7 @@ class IwaraAPI():
         if not (expires := text.extr(query, "expires=", "&")):
             return ()
         file_id = base.rpartition("/")[2]
-        sha_postfix = "5nFp9kmbNnHdAFhaqMvt"
+        sha_postfix = "mSvL05GfEmeEmsEYfGCnVpEjYgTJraJN"
         sha_key = f"{file_id}_{expires}_{sha_postfix}"
         hash = hashlib.sha1(sha_key.encode()).hexdigest()
         headers = {"X-Version": hash, **self.headers}
