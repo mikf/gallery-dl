@@ -391,11 +391,13 @@ class TextExtractorOAuth(unittest.TestCase):
 
         with patch.object(extr, "_oauth2_authorization_code_grant") as m, \
                 patch.object(extr, "_register") as r:
+            r.__name__ = "_register"
             r.return_value = {
                 "client-id"    : "foo",
                 "client-secret": "bar",
             }
 
+            extr.cache_update(r, "example.com", None)
             for msg in extr:
                 pass
 
