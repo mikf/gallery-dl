@@ -11,7 +11,6 @@
 
 from .common import Extractor, Message, Dispatch
 from .. import text, util
-from ..cache import cache, memcache
 import itertools
 import binascii
 
@@ -814,10 +813,7 @@ class InstagramRestAPI():
         self.exc = extractor.exc
 
         _cache = self.extractor.config("user-cache", True)
-        _cache = memcache if not _cache or _cache == "memory" else cache
-        self.user_by_id = _cache(36500*86400, 0)(self.user_by_id)
-        self.user_by_name = _cache(36500*86400, 0)(self.user_by_name)
-        self.user_by_search = _cache(36500*86400, 0)(self.user_by_search)
+        self._user_cache = True if not _cache or _cache == "memory" else False
 
         strategy = self.extractor.config("user-strategy")
         if strategy is not None and strategy in {
@@ -891,27 +887,46 @@ class InstagramRestAPI():
         return self._pagination_sections(endpoint, data)
 
     def user_by_id(self, user_id):
+        return self.extractor.cache(
+            self._user_by_id_impl, user_id, _mem=self._user_cache)
+
+    def _user_by_id_impl(self, user_id):
         endpoint = f"/v1/users/{user_id}/info/"
-        return self._call(endpoint)["user"]
+        try:
+            return self._call(endpoint, notfound="user")["user"]
+        except Exception:
+            raise self.exc.NotFoundError("user")
 
     def user_by_name(self, username):
+        return self.extractor.cache(
+            self._user_by_name_impl, username, _mem=self._user_cache)
+
+    def _user_by_name_impl(self, username):
         endpoint = "/v1/users/web_profile_info/"
         params = {"username": username}
         try:
             return self._call(
                 endpoint, params=params, notfound="user")["data"]["user"]
-        except KeyError:
+        except Exception:
             raise self.exc.NotFoundError("user")
 
     def user_by_search(self, username):
+        return self.extractor.cache(
+            self._user_by_search_impl, username, _mem=self._user_cache)
+
+    def _user_by_search_impl(self, username):
         url = "https://www.instagram.com/web/search/topsearch/"
         params = {"query": username}
 
         name = username.lower()
-        for result in self._call(url, params=params)["users"]:
-            user = result["user"]
-            if user["username"].lower() == name:
-                return user
+        try:
+            for result in self._call(url, params=params)["users"]:
+                user = result["user"]
+                if user["username"].lower() == name:
+                    return user
+        except Exception:
+            pass
+        raise self.exc.NotFoundError("user")
 
     def user_by_screen_name(self, screen_name):
         if self._topsearch:
