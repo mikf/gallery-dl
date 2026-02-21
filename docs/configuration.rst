@@ -2457,6 +2457,20 @@ Description
     |ISO 639-1| code(s) to filter chapters by.
 
 
+extractor.coomer.files
+----------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``["file", "attachments", "inline"]``
+Description
+    Determines the type and order of files to be downloaded.
+Available Types
+    * ``file``
+    * ``attachments``
+    * ``inline``
+
+
 extractor.cyberdrop.domain
 --------------------------
 Type
