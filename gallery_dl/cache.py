@@ -6,157 +6,14 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Decorators to keep function results in an in-memory and database cache"""
+"""Utilities for caching function results"""
 
 import sqlite3
 import pickle
-import time
 import os
-import functools
 from . import config, util
 
 DATABASE = None
-
-
-class CacheDecorator():
-    """Simplified in-memory cache"""
-    def __init__(self, func, keyarg):
-        self.func = func
-        self.cache = {}
-        self.keyarg = keyarg
-
-    def __get__(self, instance, cls):
-        return functools.partial(self.__call__, instance)
-
-    def __call__(self, *args, **kwargs):
-        key = "" if self.keyarg is None else args[self.keyarg]
-        try:
-            value = self.cache[key]
-        except KeyError:
-            value = self.cache[key] = self.func(*args, **kwargs)
-        return value
-
-    def update(self, key, value):
-        self.cache[key] = value
-
-    def invalidate(self, key=""):
-        try:
-            del self.cache[key]
-        except KeyError:
-            pass
-
-
-class MemoryCacheDecorator(CacheDecorator):
-    """In-memory cache"""
-    def __init__(self, func, keyarg, maxage):
-        CacheDecorator.__init__(self, func, keyarg)
-        self.maxage = maxage
-
-    def __call__(self, *args, **kwargs):
-        key = "" if self.keyarg is None else args[self.keyarg]
-        timestamp = int(time.time())
-        try:
-            value, expires = self.cache[key]
-        except KeyError:
-            expires = 0
-        if expires <= timestamp:
-            value = self.func(*args, **kwargs)
-            expires = timestamp + self.maxage
-            self.cache[key] = value, expires
-        return value
-
-    def update(self, key, value):
-        self.cache[key] = value, int(time.time()) + self.maxage
-
-
-class DatabaseCacheDecorator():
-    """Database cache"""
-
-    def __init__(self, func, keyarg, maxage):
-        self.key = f"{func.__module__}.{func.__name__}"
-        self.func = func
-        self.cache = {}
-        self.keyarg = keyarg
-        self.maxage = maxage
-
-    def __get__(self, obj, objtype):
-        return functools.partial(self.__call__, obj)
-
-    def __call__(self, *args, **kwargs):
-        key = "" if self.keyarg is None else args[self.keyarg]
-        timestamp = int(time.time())
-
-        # in-memory cache lookup
-        try:
-            value, expires = self.cache[key]
-            if expires > timestamp:
-                return value
-        except KeyError:
-            pass
-
-        # database lookup
-        fullkey = f"{self.key}-{key}"
-        with database() as db:
-            cursor = db.cursor()
-            try:
-                cursor.execute("BEGIN EXCLUSIVE")
-            except sqlite3.OperationalError:
-                pass  # Silently swallow exception - workaround for Python 3.6
-            cursor.execute(
-                "SELECT value, expires FROM data WHERE key=? LIMIT 1",
-                (fullkey,),
-            )
-            result = cursor.fetchone()
-
-            if result and result[1] > timestamp:
-                value, expires = result
-                value = pickle.loads(value)
-            else:
-                value = self.func(*args, **kwargs)
-                expires = timestamp + self.maxage
-                cursor.execute(
-                    "INSERT OR REPLACE INTO data VALUES (?,?,?)",
-                    (fullkey, pickle.dumps(value), expires),
-                )
-
-        self.cache[key] = value, expires
-        return value
-
-    def update(self, key, value):
-        expires = int(time.time()) + self.maxage
-        self.cache[key] = value, expires
-        with database() as db:
-            db.execute(
-                "INSERT OR REPLACE INTO data VALUES (?,?,?)",
-                (f"{self.key}-{key}", pickle.dumps(value), expires),
-            )
-
-    def invalidate(self, key):
-        try:
-            del self.cache[key]
-        except KeyError:
-            pass
-        with database() as db:
-            db.execute(
-                "DELETE FROM data WHERE key=?",
-                (f"{self.key}-{key}",),
-            )
-
-
-def memcache(maxage=None, keyarg=None):
-    if maxage:
-        def wrap(func):
-            return MemoryCacheDecorator(func, keyarg, maxage)
-    else:
-        def wrap(func):
-            return CacheDecorator(func, keyarg)
-    return wrap
-
-
-def cache(maxage=3600, keyarg=None):
-    def wrap(func):
-        return DatabaseCacheDecorator(func, keyarg, maxage)
-    return wrap
 
 
 def database():
@@ -176,6 +33,13 @@ def database():
 
     globals()["database"] = lambda: DATABASE
     return DATABASE
+
+
+def update(module, name, value, expires=0):
+    if db := database():
+        with db:
+            db.execute("INSERT OR REPLACE INTO data VALUES (?,?,?)",
+                       (f"{module}.{name}", pickle.dumps(value), expires))
 
 
 def clear(module):
