@@ -75,6 +75,7 @@ class Extractor():
 
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
+        self._creator_filter_count = 0
 
     def __str__(self):
         return f"{self.__class__.__name__} <{self.url}>"
@@ -155,6 +156,33 @@ class Extractor():
                     (self.subcategory,), key, conf=conf)
 
         return values
+
+    def _warn_creator_mismatch(self, expected, actual, context=""):
+        """Emit a warning when a paginated API response returns content
+        belonging to a different creator than requested.
+
+        Sites sometimes return fallback or "suggested" content for creators
+        with no public works or private profiles.  Calling this helper lets
+        extractors surface the mismatch clearly so users understand why items
+        are being skipped.  It also increments ``_creator_filter_count`` so
+        that callers (e.g. the download job) can report a summary when no
+        items are downloaded.
+
+        Parameters
+        ----------
+        expected : str
+            The creator/screen-name that was originally requested.
+        actual : str
+            The creator/screen-name found in the API response item.
+        context : str, optional
+            An extra label (e.g. a post path) to include in the message.
+        """
+        self.log.warning(
+            "Skipping %s: response creator '@%s' does not match "
+            "requested creator '@%s'",
+            context or "item", actual, expected,
+        )
+        self._creator_filter_count += 1
 
     def request(self, url, method="GET", session=None, fatal=True,
                 retries=None, retry_codes=None, expected=(), interval=True,

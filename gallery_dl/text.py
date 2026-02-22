@@ -75,6 +75,21 @@ def ensure_http_scheme(url, scheme="https://"):
     return url
 
 
+def normalize_screen_name(name):
+    """Return a lower-cased screen name, stripping a leading '@' if present.
+
+    Used to perform case-insensitive comparisons of at-prefixed usernames
+    such as those returned by Skeb, Twitter, or similar sites where the API
+    and the URL may use different case conventions.
+
+    >>> normalize_screen_name("@JohnDoe")
+    'johndoe'
+    >>> normalize_screen_name("JaneDoe")
+    'janedoe'
+    """
+    return name.lstrip("@").lower() if name else ""
+
+
 def root_from_url(url, scheme="https://"):
     """Extract scheme and domain from a URL"""
     if not url.startswith(("https://", "http://")):

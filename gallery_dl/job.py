@@ -196,7 +196,13 @@ class Job():
             raise
         else:
             if msg is None:
-                log.info("No results for %s", extractor.url)
+                if extractor._creator_filter_count:
+                    log.info(
+                        "No results for %s "
+                        "(%d item(s) skipped due to creator mismatch)",
+                        extractor.url, extractor._creator_filter_count)
+                else:
+                    log.info("No results for %s", extractor.url)
         finally:
             if extractor.status:
                 self.status |= extractor.status

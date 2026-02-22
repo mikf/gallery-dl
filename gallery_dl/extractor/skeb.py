@@ -75,8 +75,13 @@ class SkebExtractor(Extractor):
     def metadata(self):
         """Return additional metadata"""
 
-    def _pagination(self, url, params):
+    def _pagination(self, url, params, expected_user=None):
         params["offset"] = 0
+
+        if expected_user is not None:
+            expected_user_norm = text.normalize_screen_name(expected_user)
+        else:
+            expected_user_norm = None
 
         while True:
             posts = self.request_json(
@@ -86,6 +91,13 @@ class SkebExtractor(Extractor):
                 parts = post["path"].split("/")
                 user_name = parts[1][1:]
                 post_num = parts[3]
+
+                if expected_user_norm is not None and \
+                        text.normalize_screen_name(user_name) != expected_user_norm:
+                    self._warn_creator_mismatch(
+                        expected_user, user_name,
+                        context=f"@{user_name}/{post_num}")
+                    continue
 
                 if post["private"]:
                     self.log.debug("Skipping @%s/%s (private)",
@@ -210,7 +222,7 @@ class SkebWorksExtractor(SkebExtractor):
     def posts(self):
         url = f"{self.root}/api/users/{self.groups[0]}/works"
         params = {"role": "creator", "sort": "date"}
-        return self._pagination(url, params)
+        return self._pagination(url, params, expected_user=self.groups[0])
 
 
 class SkebSentrequestsExtractor(SkebExtractor):
