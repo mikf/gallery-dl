@@ -119,21 +119,6 @@ class Extractor():
             return value
         return self.config(key2, default)
 
-    def config_deprecated(self, key, deprecated, default=None,
-                          sentinel=util.SENTINEL, history=set()):
-        value = self.config(deprecated, sentinel)
-        if value is not sentinel:
-            if deprecated not in history:
-                history.add(deprecated)
-                self.log.warning("'%s' is deprecated. Use '%s' instead.",
-                                 deprecated, key)
-            default = value
-
-        value = self.config(key, sentinel)
-        if value is not sentinel:
-            return value
-        return default
-
     def config_accumulate(self, key):
         return config.accumulate(self._cfgpath, key)
 
@@ -825,13 +810,6 @@ class Extractor():
             text.extr(page, " id='__NEXT_DATA__' type='application/json'>",
                       "</script>"))
 
-    def _cache(self, func, maxage, keyarg=None):
-        #  return cache.DatabaseCacheDecorator(func, maxage, keyarg)
-        return cache.DatabaseCacheDecorator(func, keyarg, maxage)
-
-    def _cache_memory(self, func, maxage=None, keyarg=None):
-        return cache.Memcache()
-
     def _get_date_min_max(self, dmin=None, dmax=None):
         """Retrieve and parse 'date-min' and 'date-max' config values"""
         def get(key, default):
@@ -848,10 +826,6 @@ class Extractor():
             return ts
         fmt = self.config("date-format")
         return get("date-min", dmin), get("date-max", dmax)
-
-    @classmethod
-    def _dump(cls, obj):
-        util.dump_json(obj, ensure_ascii=False, indent=2)
 
     def _dump_response(self, response, history=True):
         """Write the response content to a .txt file in the current directory.
