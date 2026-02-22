@@ -21,8 +21,10 @@ def database():
 
     try:
         path = _path()
-        # restrict access permissions for new db files
-        os.close(os.open(path, os.O_CREAT | os.O_RDONLY, 0o600))
+
+        if path != ":memory:":
+            # restrict access permissions for new db files
+            os.close(os.open(path, os.O_CREAT | os.O_RDONLY, 0o600))
 
         DATABASE = sqlite3.connect(path, timeout=60, check_same_thread=False)
         DATABASE.execute(
