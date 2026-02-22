@@ -16,17 +16,16 @@ __tests__ = (
     "#count"   : range(70, 200),
 
     "date"     : "type:datetime",
-    "extension": r"re:jpg|png",
+    "extension": {"jpg", "png"},
     "filename" : r"re:\d+ - \w+",
     "duration" : float,
     "height"   : int,
     "id"       : int,
-    "md5"      : r"re:[0-9a-f]{32}",
+    "md5"      : "hash:md5",
     "search_tags": "Ayane_Suzuki",
     "size"     : int,
     "tags"     : str,
     "width"    : int,
-
 },
 
 {
