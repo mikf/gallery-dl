@@ -10,7 +10,6 @@
 
 from .common import ChapterExtractor, Extractor, Message
 from .. import text, util
-from ..cache import memcache
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.)?(?:"
                 r"(?:manga|comic|read)park\.(?:com|net|org|me|io|to)|"
@@ -31,7 +30,6 @@ class MangaparkBase():
         ).match(title)
         return match.groups() if match else (0, 0, "", "")
 
-    @memcache(keyarg=1)
     def _extract_manga(self, manga_id):
         variables = {
             "getComicNodeId": manga_id,
@@ -80,7 +78,7 @@ class MangaparkChapterExtractor(MangaparkBase, ChapterExtractor):
 
     def metadata(self, _):
         chapter = self._extract_chapter(self.groups[0])
-        manga = self._extract_manga(chapter["comicNode"]["id"])
+        manga = self.cache(self._extract_manga, chapter["comicNode"]["id"])
 
         self._urls = chapter["imageFile"]["urlList"]
         vol, ch, minor, title = self._parse_chapter_title(chapter["dname"])

@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text, util
-from ..cache import cache, memcache
 from collections import defaultdict
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?mangadex\.(?:org|cc)"
@@ -64,7 +63,7 @@ class MangadexExtractor(Extractor):
             chnum, sep, minor = 0, "", ""
 
         return {
-            **_manga_info(self, relationships["manga"][0]["id"]),
+            **self.cache(self._manga_info, relationships["manga"][0]["id"]),
             "title"   : cattributes["title"],
             "volume"  : text.parse_int(cattributes["volume"]),
             "chapter" : text.parse_int(chnum),
@@ -76,6 +75,34 @@ class MangadexExtractor(Extractor):
             "lang"    : lang,
             "count"   : cattributes["pages"],
             "_external_url": cattributes.get("externalUrl"),
+        }
+
+    def _manga_info(self, uuid):
+        manga = self.cache(self.api.manga, uuid)
+
+        rel = defaultdict(list)
+        for item in manga["relationships"]:
+            rel[item["type"]].append(item)
+        mattr = manga["attributes"]
+
+        return {
+            "manga" : (mattr["title"].get("en") or
+                       next(iter(mattr["title"].values()), "")),
+            "manga_id": manga["id"],
+            "manga_titles": [t.popitem()[1]
+                             for t in mattr.get("altTitles") or ()],
+            "manga_date"  : self.parse_datetime_iso(mattr.get("createdAt")),
+            "description" : (mattr["description"].get("en") or
+                             next(iter(mattr["description"].values()), "")),
+            "demographic": mattr.get("publicationDemographic"),
+            "origin": mattr.get("originalLanguage"),
+            "status": mattr.get("status"),
+            "year"  : mattr.get("year"),
+            "rating": mattr.get("contentRating"),
+            "links" : mattr.get("links"),
+            "tags"  : [t["attributes"]["name"]["en"] for t in mattr["tags"]],
+            "artist": [a["attributes"]["name"] for a in rel["artist"]],
+            "author": [a["attributes"]["name"] for a in rel["author"]],
         }
 
 
@@ -107,7 +134,7 @@ class MangadexCoversExtractor(MangadexExtractor):
         cattributes = cover["attributes"]
 
         return {
-            **_manga_info(self, relationships["manga"][0]["id"]),
+            **self.cache(self._manga_info, relationships["manga"][0]["id"]),
             "cover"   : cattributes["fileName"],
             "lang"    : cattributes.get("locale"),
             "volume"  : text.parse_int(cattributes["volume"]),
@@ -284,7 +311,6 @@ class MangadexAPI():
     def list_feed(self, uuid):
         return self._pagination_chapters(f"/list/{uuid}/feed", None, True)
 
-    @memcache(keyarg=1)
     def manga(self, uuid):
         params = {"includes[]": ("artist", "author")}
         return self._call("/manga/" + uuid, params)["data"]
@@ -312,12 +338,13 @@ class MangadexAPI():
             "/user/follows/manga/feed", params, True)
 
     def authenticate(self):
-        self.headers_auth["Authorization"] = \
-            self._authenticate_impl(self.username, self.password)
+        self.headers_auth["Authorization"] = self.cache(
+            self._authenticate_impl, self.username, self.password,
+            _exp=900, _mem=False)
 
-    @cache(maxage=900, keyarg=1)
     def _authenticate_impl_client(self, username, password):
-        if refresh_token := _refresh_token_cache((username, "personal")):
+        if refresh_token := self.extractor.cache(
+                _refresh_token_cache, (username, "personal"), _mem=False):
             self.extractor.log.info("Refreshing access token")
             data = {
                 "grant_type"   : "refresh_token",
@@ -348,14 +375,15 @@ class MangadexAPI():
                 data.get("error_description"))
 
         if refresh_token != data.get("refresh_token"):
-            _refresh_token_cache.update(
-                (username, "personal"), data["refresh_token"])
+            self.extractor.cache_update(
+                _refresh_token_cache,
+                (username, "personal"), data["refresh_token"], _exp=90*86400)
 
         return "Bearer " + access_token
 
-    @cache(maxage=900, keyarg=1)
     def _authenticate_impl_legacy(self, username, password):
-        if refresh_token := _refresh_token_cache(username):
+        if refresh_token := self.extractor.cache(
+                _refresh_token_cache, username, _mem=False):
             self.extractor.log.info("Refreshing access token")
             url = self.root + "/auth/refresh"
             json = {"token": refresh_token}
@@ -371,7 +399,10 @@ class MangadexAPI():
             raise self.extractor.exc.AuthenticationError()
 
         if refresh_token != data["token"]["refresh"]:
-            _refresh_token_cache.update(username, data["token"]["refresh"])
+            self.extractor.cache_update(
+                _refresh_token_cache,
+                username, data["token"]["refresh"], _exp=90*86400)
+
         return "Bearer " + data["token"]["session"]
 
     def _call(self, endpoint, params=None, auth=False):
@@ -452,36 +483,5 @@ class MangadexAPI():
                 return
 
 
-@cache(maxage=90*86400, keyarg=0)
 def _refresh_token_cache(username):
     return None
-
-
-@memcache(keyarg=1)
-def _manga_info(self, uuid):
-    manga = self.api.manga(uuid)
-
-    rel = defaultdict(list)
-    for item in manga["relationships"]:
-        rel[item["type"]].append(item)
-    mattr = manga["attributes"]
-
-    return {
-        "manga" : (mattr["title"].get("en") or
-                   next(iter(mattr["title"].values()), "")),
-        "manga_id": manga["id"],
-        "manga_titles": [t.popitem()[1]
-                         for t in mattr.get("altTitles") or ()],
-        "manga_date"  : self.parse_datetime_iso(mattr.get("createdAt")),
-        "description" : (mattr["description"].get("en") or
-                         next(iter(mattr["description"].values()), "")),
-        "demographic": mattr.get("publicationDemographic"),
-        "origin": mattr.get("originalLanguage"),
-        "status": mattr.get("status"),
-        "year"  : mattr.get("year"),
-        "rating": mattr.get("contentRating"),
-        "links" : mattr.get("links"),
-        "tags"  : [tag["attributes"]["name"]["en"] for tag in mattr["tags"]],
-        "artist": [artist["attributes"]["name"] for artist in rel["artist"]],
-        "author": [author["attributes"]["name"] for author in rel["author"]],
-    }

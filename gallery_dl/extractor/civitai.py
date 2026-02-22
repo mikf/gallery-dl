@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message, Dispatch
 from .. import text, util
-from ..cache import memcache
 import itertools
 import time
 
@@ -232,7 +231,7 @@ class CivitaiExtractor(Extractor):
     def _extract_meta_version(self, item, is_post=True):
         try:
             if version_id := self._extract_version_id(item, is_post):
-                version = self.api.model_version(version_id).copy()
+                version = self.cache(self.api.model_version, version_id).copy()
                 return version.pop("model", None), version
         except Exception as exc:
             self.log.traceback(exc)
@@ -281,7 +280,7 @@ class CivitaiModelExtractor(CivitaiExtractor):
                 if version["id"] == version_id:
                     break
             else:
-                version = self.api.model_version(version_id)
+                version = self.cache(self.api.model_version, version_id)
             versions = (version,)
 
         for version in versions:
@@ -651,7 +650,6 @@ class CivitaiRestAPI():
         endpoint = "/v1/models/" + str(model_id)
         return self._call(endpoint)
 
-    @memcache(keyarg=1)
     def model_version(self, model_version_id):
         endpoint = "/v1/model-versions/" + str(model_version_id)
         return self._call(endpoint)
@@ -762,7 +760,6 @@ class CivitaiTrpcAPI():
         params = {"id": int(model_id)}
         return self._call(endpoint, params)
 
-    @memcache(keyarg=1)
     def model_version(self, model_version_id):
         endpoint = "modelVersion.getById"
         params = {"id": int(model_version_id)}

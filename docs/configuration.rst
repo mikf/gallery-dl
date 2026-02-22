@@ -9741,8 +9741,8 @@ Description
     Path of the SQLite3 database used to cache login sessions,
     cookies and API tokens across `gallery-dl` invocations.
 
-    Set this option to ``null`` or an invalid path to disable
-    this cache.
+    Set this option to ``":memory:"``, ``null``, or an invalid path
+    to disable creating a file for this cache.
 
 
 filters-environment

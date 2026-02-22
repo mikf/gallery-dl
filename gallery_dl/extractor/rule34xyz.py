@@ -10,7 +10,6 @@
 
 from .booru import BooruExtractor
 from .. import text
-from ..cache import cache
 import collections
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?rule34\.xyz"
@@ -115,10 +114,10 @@ class Rule34xyzExtractor(BooruExtractor):
     def login(self):
         username, password = self._get_auth_info()
         if username:
-            self.session.headers["Authorization"] = \
-                self._login_impl(username, password)
+            self.session.headers["Authorization"] = self.cache(
+                self._login_impl, username, password,
+                _exp=3650*86400, _mem=False)
 
-    @cache(maxage=3650*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 

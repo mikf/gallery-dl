@@ -8,7 +8,6 @@
 
 from .common import Extractor, Message, Dispatch
 from .. import text, util
-from ..cache import cache, memcache
 import hashlib
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?iwara\.tv"
@@ -153,7 +152,7 @@ class IwaraExtractor(Extractor):
     def _user_params(self):
         user, qs = self.groups
         params = text.parse_query(qs)
-        profile = self.api.profile(user)
+        profile = self.cache(self.api.profile, user)
         params["user"] = profile["user"]["id"]
         return self.extract_user_info(profile), params
 
@@ -218,7 +217,7 @@ class IwaraFollowingExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/profile/USERNAME/following"
 
     def items(self):
-        uid = self.api.profile(self.groups[0])["user"]["id"]
+        uid = self.cache(self.api.profile, self.groups[0])["user"]["id"]
         return self.items_user(self.api.user_following(uid), "user")
 
 
@@ -228,7 +227,7 @@ class IwaraFollowersExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/profile/USERNAME/followers"
 
     def items(self):
-        uid = self.api.profile(self.groups[0])["user"]["id"]
+        uid = self.cache(self.api.profile, self.groups[0])["user"]["id"]
         return self.items_user(self.api.user_followers(uid), "follower")
 
 
@@ -362,7 +361,6 @@ class IwaraAPI():
         params = {"type": type, "query": query}
         return self._pagination(endpoint, params)
 
-    @memcache(keyarg=1)
     def profile(self, username):
         endpoint = "/profile/" + username
         return self._call(endpoint)
@@ -387,11 +385,12 @@ class IwaraAPI():
         return self.extractor.request_json(file_url, headers=headers)
 
     def authenticate(self):
-        self.headers["Authorization"] = self._authenticate_impl(self.username)
+        self.headers["Authorization"] = self.extractor.cache(
+            self._authenticate_impl, self.username, _exp=3600, _mem=False)
 
-    @cache(maxage=3600, keyarg=1)
     def _authenticate_impl(self, username):
-        refresh_token = _refresh_token_cache(username)
+        refresh_token = self.extractor.cache(
+            _refresh_token_cache, username, _exp=28*86400, _mem=False)
         if refresh_token is None:
             self.extractor.log.info("Logging in as %s", username)
 
@@ -407,7 +406,8 @@ class IwaraAPI():
             if not (refresh_token := data.get("token")):
                 self.extractor.log.debug(data)
                 raise self.exc.AuthenticationError(data.get("message"))
-            _refresh_token_cache.update(username, refresh_token)
+            self.extractor.cache_update(
+                _refresh_token_cache, username, refresh_token, _exp=28*86400)
 
         self.extractor.log.info("Refreshing access token for %s", username)
 
@@ -447,6 +447,5 @@ class IwaraAPI():
             params["page"] += 1
 
 
-@cache(maxage=28*86400, keyarg=0)
 def _refresh_token_cache(username):
     return None

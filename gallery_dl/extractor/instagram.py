@@ -11,7 +11,6 @@
 
 from .common import Extractor, Message, Dispatch
 from .. import text, util
-from ..cache import cache, memcache
 import itertools
 import binascii
 
@@ -161,9 +160,16 @@ class InstagramExtractor(Extractor):
 
         username, password = self._get_auth_info()
         if username:
-            return self.cookies_update(_login_impl(self, username, password))
+            return self.cookies_update(self.cache(
+                self._login_impl, username, password,
+                _exp=90*86400, _mem=False))
 
         self._logged_in = False
+
+    def _login_impl(self, username, password):
+        self.log.error("Login with username & password is no longer "
+                       "supported. Use browser cookies instead.")
+        return {}
 
     def _parse_post_rest(self, post):
         if "items" in post:  # story or highlight
@@ -807,10 +813,7 @@ class InstagramRestAPI():
         self.exc = extractor.exc
 
         _cache = self.extractor.config("user-cache", True)
-        _cache = memcache if not _cache or _cache == "memory" else cache
-        self.user_by_id = _cache(36500*86400, 0)(self.user_by_id)
-        self.user_by_name = _cache(36500*86400, 0)(self.user_by_name)
-        self.user_by_search = _cache(36500*86400, 0)(self.user_by_search)
+        self._user_cache = True if not _cache or _cache == "memory" else False
 
         strategy = self.extractor.config("user-strategy")
         if strategy is not None and strategy in {
@@ -884,27 +887,46 @@ class InstagramRestAPI():
         return self._pagination_sections(endpoint, data)
 
     def user_by_id(self, user_id):
+        return self.extractor.cache(
+            self._user_by_id_impl, user_id, _mem=self._user_cache)
+
+    def _user_by_id_impl(self, user_id):
         endpoint = f"/v1/users/{user_id}/info/"
-        return self._call(endpoint)["user"]
+        try:
+            return self._call(endpoint, notfound="user")["user"]
+        except Exception:
+            raise self.exc.NotFoundError("user")
 
     def user_by_name(self, username):
+        return self.extractor.cache(
+            self._user_by_name_impl, username, _mem=self._user_cache)
+
+    def _user_by_name_impl(self, username):
         endpoint = "/v1/users/web_profile_info/"
         params = {"username": username}
         try:
             return self._call(
                 endpoint, params=params, notfound="user")["data"]["user"]
-        except KeyError:
+        except Exception:
             raise self.exc.NotFoundError("user")
 
     def user_by_search(self, username):
+        return self.extractor.cache(
+            self._user_by_search_impl, username, _mem=self._user_cache)
+
+    def _user_by_search_impl(self, username):
         url = "https://www.instagram.com/web/search/topsearch/"
         params = {"query": username}
 
         name = username.lower()
-        for result in self._call(url, params=params)["users"]:
-            user = result["user"]
-            if user["username"].lower() == name:
-                return user
+        try:
+            for result in self._call(url, params=params)["users"]:
+                user = result["user"]
+                if user["username"].lower() == name:
+                    return user
+        except Exception:
+            pass
+        raise self.exc.NotFoundError("user")
 
     def user_by_screen_name(self, screen_name):
         if self._topsearch:
@@ -1181,13 +1203,6 @@ class InstagramGraphqlAPI():
                     f"{user}'{s} posts are private")
 
             variables["after"] = extr._update_cursor(info["end_cursor"])
-
-
-@cache(maxage=90*86400, keyarg=1)
-def _login_impl(extr, username, password):
-    extr.log.error("Login with username & password is no longer supported. "
-                   "Use browser cookies instead.")
-    return {}
 
 
 def id_from_shortcode(shortcode):

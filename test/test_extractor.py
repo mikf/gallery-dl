@@ -16,7 +16,7 @@ import time
 import string
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import extractor, util, dt, config  # noqa E402
+from gallery_dl import extractor, util, dt, config, cache  # noqa E402
 from gallery_dl.extractor import mastodon  # noqa E402
 from gallery_dl.extractor.common import Extractor, Message  # noqa E402
 from gallery_dl.extractor.directlink import DirectlinkExtractor  # noqa E402
@@ -31,6 +31,15 @@ try:
         from test import results
 except ImportError:
     results = None
+
+
+def setUpModule():
+    if cache.DATABASE is None:
+        import atexit
+        import tempfile
+        dbpath = tempfile.mkstemp()[1]
+        config.set(("cache",), "file", dbpath)
+        atexit.register(util.remove_file, dbpath)
 
 
 class FakeExtractor(Extractor):
@@ -391,11 +400,13 @@ class TextExtractorOAuth(unittest.TestCase):
 
         with patch.object(extr, "_oauth2_authorization_code_grant") as m, \
                 patch.object(extr, "_register") as r:
+            r.__name__ = "_register"
             r.return_value = {
                 "client-id"    : "foo",
                 "client-secret": "bar",
             }
 
+            extr.cache_update(r, "example.com", None)
             for msg in extr:
                 pass
 

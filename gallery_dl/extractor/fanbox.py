@@ -8,7 +8,6 @@
 
 from .common import Extractor, Message
 from .. import text, util
-from ..cache import memcache
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?fanbox\.cc"
 USER_PATTERN = (
@@ -136,9 +135,9 @@ class FanboxExtractor(Extractor):
 
         cid = post.get("creatorId")
         if self._meta_user and cid is not None:
-            post["user"] = self._get_user_data(cid)
+            post["user"] = self.cache(self._get_user_data, cid)
         if self._meta_plan and cid is not None:
-            plans = self._get_plan_data(post["creatorId"])
+            plans = self.cache(self._get_plan_data, cid)
             fee = post.get("feeRequired") or 0
             try:
                 post["plan"] = plans[fee]
@@ -170,7 +169,6 @@ class FanboxExtractor(Extractor):
 
         return new
 
-    @memcache(keyarg=1)
     def _get_user_data(self, creator_id):
         url = "https://api.fanbox.cc/creator.get"
         params = {"creatorId": creator_id}
@@ -181,7 +179,6 @@ class FanboxExtractor(Extractor):
 
         return user
 
-    @memcache(keyarg=1)
     def _get_plan_data(self, creator_id):
         url = "https://api.fanbox.cc/plan.listCreator"
         params = {"creatorId": creator_id}

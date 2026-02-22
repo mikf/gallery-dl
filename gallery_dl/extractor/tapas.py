@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2025 Mike Fährmann
+# Copyright 2021-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message
 from .. import text
-from ..cache import cache
 
 BASE_PATTERN = r"(?:https?://)?tapas\.io"
 
@@ -36,14 +35,15 @@ class TapasExtractor(Extractor):
 
         username, password = self._get_auth_info()
         if username:
-            return self.cookies_update(self._login_impl(username, password))
+            return self.cookies_update(self.cache(
+                self._login_impl, username, password,
+                _exp=14*86400, _mem=False))
 
         self.cookies.set(
             "birthDate"        , "1981-02-03", domain=self.cookies_domain)
         self.cookies.set(
             "adjustedBirthDate", "1981-02-03", domain=self.cookies_domain)
 
-    @cache(maxage=14*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 

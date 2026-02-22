@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2022-2025 Mike Fährmann
+# Copyright 2022-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,7 +9,6 @@
 """Extractors for https://itaku.ee/"""
 
 from .common import Extractor, Message, Dispatch
-from ..cache import memcache
 from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?itaku\.ee"
@@ -298,14 +297,13 @@ class ItakuAPI():
         endpoint = f"/posts/{post_id}/"
         return self._call(endpoint)
 
-    @memcache(keyarg=1)
     def user(self, username):
         return self._call(f"/user_profiles/{username}/")
 
     def user_id(self, username):
         if username.startswith("id:"):
             return int(username[3:])
-        return self.user(username)["owner"]
+        return self.extractor.cache(self.user, username)["owner"]
 
     def _call(self, endpoint, params=None):
         if not endpoint.startswith("http"):

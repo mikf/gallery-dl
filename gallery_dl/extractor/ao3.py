@@ -10,7 +10,6 @@
 
 from .common import Extractor, Message, Dispatch
 from .. import text, util
-from ..cache import cache
 
 BASE_PATTERN = (r"(?:https?://)?(?:www\.)?"
                 r"a(?:rchiveofourown|o3)\.(?:org|com|net)")
@@ -63,9 +62,10 @@ class Ao3Extractor(Extractor):
 
         username, password = self._get_auth_info()
         if username:
-            return self.cookies_update(self._login_impl(username, password))
+            return self.cookies_update(self.cache(
+                self._login_impl, username, password,
+                _exp=90*86400, _mem=False))
 
-    @cache(maxage=90*86400, keyarg=1)
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
