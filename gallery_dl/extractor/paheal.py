@@ -48,7 +48,6 @@ class PahealExtractor(Extractor):
         post = {
             "id"      : post_id,
             "tags"    : extr(": ", "<"),
-            "md5"     : extr("/_thumbs/", "/"),
             "file_url": (extr("id='main_image' src='", "'") or
                          extr("<source src='", "'")),
             "uploader": text.unquote(extr(
@@ -59,6 +58,7 @@ class PahealExtractor(Extractor):
         }
 
         dimensions, size, ext = extr("Info</th><td>", "<").split(" // ")
+        post["md5"] = post["file_url"].rpartition("/")[2]
         post["size"] = text.parse_bytes(size[:-1])
         post["width"], _, height = dimensions.partition("x")
         post["height"], _, duration = height.partition(", ")
@@ -115,7 +115,6 @@ class PahealTagExtractor(PahealExtractor):
     def _extract_data(self, post):
         pid , pos = text.extract(post, "", "'")
         data, pos = text.extract(post, "title='", "'", pos)
-        md5 , pos = text.extract(post, "/_thumbs/", "/", pos)
         url , pos = text.extract(post, "<a href='", "'", pos)
 
         tags, data, date = data.split("\n")
@@ -125,7 +124,7 @@ class PahealTagExtractor(PahealExtractor):
 
         return {
             "id"       : pid,
-            "md5"      : md5,
+            "md5"      : url[url.rfind("/")+1:],
             "file_url" : url,
             "width"    : width,
             "height"   : height,
