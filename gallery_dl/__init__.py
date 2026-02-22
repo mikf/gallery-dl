@@ -345,17 +345,29 @@ def main():
 
             # process input URLs
             retval = 0
+            capacity = {}
             for url in input_manager:
                 try:
                     log.debug("Starting %s for '%s'", jobtype.__name__, url)
+
+                    if issubclass(jobtype, job.DownloadJob):
+                        args = {"capacity": capacity}
+                    else:
+                        args = None
 
                     if isinstance(url, ExtendedUrl):
                         for opts in url.gconfig:
                             config.set(*opts)
                         with config.apply(url.lconfig):
-                            status = jobtype(url.value).run()
+                            if args is None:
+                                status = jobtype(url.value).run()
+                            else:
+                                status = jobtype(url.value, **args).run()
                     else:
-                        status = jobtype(url).run()
+                        if args is None:
+                            status = jobtype(url).run()
+                        else:
+                            status = jobtype(url, **args).run()
 
                     if status:
                         retval |= status
