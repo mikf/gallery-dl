@@ -300,6 +300,41 @@ def parse_float(value, default=0.0):
         return default
 
 
+def parse_stat_int(container, key, default=0):
+    """Safely parse an integer stat from a stats dict.
+
+    Many APIs (e.g. TikTok) return the same field as a plain ``int`` in one
+    variant of their stats object (``stats``) but as a ``str`` in another
+    (``statsV2``).  This helper handles both forms as well as a missing or
+    ``None`` container without raising.
+
+    Parameters
+    ----------
+    container : dict | None
+        The stats dict to read from.  If ``None`` or not a dict, *default* is
+        returned.
+    key : str
+        The key to look up in *container*.
+    default : int, optional
+        Value returned when *container* is absent, *key* is missing, or the
+        value cannot be converted.  Defaults to ``0``.
+
+    Examples
+    --------
+    >>> parse_stat_int({"videoCount": 42}, "videoCount")
+    42
+    >>> parse_stat_int({"videoCount": "42"}, "videoCount")
+    42
+    >>> parse_stat_int(None, "videoCount")
+    0
+    >>> parse_stat_int({}, "videoCount", default=-1)
+    -1
+    """
+    if not container:
+        return default
+    return parse_int(container.get(key), default)
+
+
 def parse_query(qs, empty=False):
     """Parse a query string into name-value pairs
 

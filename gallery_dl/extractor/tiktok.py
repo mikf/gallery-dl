@@ -470,16 +470,12 @@ class TiktokExtractor(Extractor):
             # We only care about this workaround for webapp.user-detail
             # objects, so always fail the workaround for e.g.
             # webapp.video-detail objects.
-            video_count = self._extract_video_count_from_user_detail(detail)
-            if video_count is None:
-                self.log.error("%s: Login required to access this %s", url,
-                               type_of_url)
-            elif video_count > 0:
+            if self._has_access_to_user_detail(detail):
                 return True
-            else:
-                self.log.error("%s: Login required to access this %s, or this "
-                               "profile has no videos posted", url,
-                               type_of_url)
+            self.log.error(
+                "%s: Login required to access this %s, or this "
+                "profile has no public videos posted",
+                url, type_of_url)
         elif status == 10221:
             self.log.error("%s: User account could not be found", url)
         elif status == 10204:
@@ -493,17 +489,46 @@ class TiktokExtractor(Extractor):
                 url, status, detail.get("statusMsg") or "")
         return False
 
-    def _extract_video_count_from_user_detail(self, detail):
+    def _has_access_to_user_detail(self, detail):
+        """Return True when we have access to a private (status 10222) account.
+
+        Three independent indicators are checked in order:
+
+        1. ``videoCount > 0`` — the existing yt-dlp workaround: if public
+           video stats are visible, the account is reachable.
+        2. ``_is_current_user(uid)`` — if the logged-in user is the account
+           owner, they always have full access, even when videoCount is 0.
+        3. ``diggCount > 0`` (liked-videos count) — for private accounts,
+           this stat is only exposed to authorised followers/owners; a
+           non-zero value therefore indicates that the current session has
+           access to the private profile.
+
+        Returns None-safe (falls back to False) when ``userInfo`` is absent.
+        """
         user_info = detail.get("userInfo")
         if not user_info:
-            return None
+            return False
+
         stats = user_info.get("stats") or user_info.get("statsV2")
-        try:
-            # stats.videoCount is an int, but statsV2.videoCount is a
-            # string, so we must explicitly convert the attribute.
-            return int(stats["videoCount"])
-        except (KeyError, ValueError):
-            return None
+
+        # Indicator 1: video count is the established workaround.
+        # text.parse_stat_int handles both int (stats) and string (statsV2)
+        # forms and is None-safe when stats is absent.
+        if text.parse_stat_int(stats, "videoCount") > 0:
+            return True
+
+        # Indicator 2: the logged-in account owns this profile.
+        user = user_info.get("user") or {}
+        uid = user.get("uid") or user.get("id")
+        if uid and self._is_current_user(uid):
+            return True
+
+        # Indicator 3: liked-video count is visible (only for authorised
+        # sessions on private accounts).
+        if text.parse_stat_int(stats, "diggCount") > 0:
+            return True
+
+        return False
 
 
 class TiktokPostExtractor(TiktokExtractor):
@@ -1283,12 +1308,30 @@ class TiktokItemListRequest(TiktokPaginationRequest):
         self.type_of_items = type_of_items
         self.range_predicate = range_predicate
         self.exit_early_due_to_no_items = False
+        self._extractor_ref = None
+
+    def execute(self, extractor, url, query_parameters):
+        # Store a reference to the extractor so extract_items() can call
+        # the empty-page guard without requiring a method-signature change.
+        self._extractor_ref = extractor
+        return super().execute(extractor, url, query_parameters)
 
     def extract_items(self, data):
         if "itemList" not in data:
-            if not data.get("hasMorePrevious", data.get("hasMore", False)):
+            has_more = data.get("hasMorePrevious", data.get("hasMore", False))
+            if not has_more:
                 self.exit_early_due_to_no_items = True
+            elif self._extractor_ref is not None:
+                # hasMore is True but no items were returned.  This happens on
+                # private accounts that the current session cannot fully access.
+                # Increment the guard counter; if it fires, treat it the same
+                # as a definitive "no items" signal so we stop paginating.
+                if self._extractor_ref._check_empty_page_guard(
+                        self._extractor_ref.url):
+                    self.exit_early_due_to_no_items = True
             return {}
+        if self._extractor_ref is not None:
+            self._extractor_ref._reset_empty_page_guard()
         return {item["id"]: item for item in data["itemList"]}
 
     def exit_early(self, extractor, url):

@@ -201,6 +201,12 @@ class Job():
                         "No results for %s "
                         "(%d item(s) skipped due to creator mismatch)",
                         extractor.url, extractor._creator_filter_count)
+                elif extractor._empty_page_count:
+                    log.info(
+                        "No results for %s "
+                        "(pagination returned %d consecutive empty page(s); "
+                        "the account may be private — try providing cookies)",
+                        extractor.url, extractor._empty_page_count)
                 else:
                     log.info("No results for %s", extractor.url)
         finally:

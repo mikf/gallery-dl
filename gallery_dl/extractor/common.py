@@ -76,6 +76,7 @@ class Extractor():
         self._cfgpath = ("extractor", self.category, self.subcategory)
         self._parentdir = ""
         self._creator_filter_count = 0
+        self._empty_page_count = 0
 
     def __str__(self):
         return f"{self.__class__.__name__} <{self.url}>"
@@ -183,6 +184,48 @@ class Extractor():
             context or "item", actual, expected,
         )
         self._creator_filter_count += 1
+
+    def _check_empty_page_guard(self, url, limit=5):
+        """Detect runaway pagination where the API returns ``hasMore: true``
+        but no items page after page.
+
+        Some endpoints (e.g. TikTok's ``favorite/item_list`` for private
+        accounts) continuously report that more pages are available yet never
+        deliver items, causing an infinite loop.  Calling this method on every
+        empty page increments a shared counter; when that counter exceeds
+        *limit* consecutive empty pages it logs a warning and returns ``True``
+        so that callers know they should abort pagination.
+
+        The counter is automatically reset to zero whenever a non-empty page
+        is received — call :meth:`_reset_empty_page_guard` for that.
+
+        Parameters
+        ----------
+        url : str
+            The URL being paginated (used in the warning message).
+        limit : int, optional
+            Number of consecutive empty pages before giving up.  Default: 5.
+
+        Returns
+        -------
+        bool
+            ``True`` when the limit has been exceeded and pagination should
+            stop, ``False`` otherwise.
+        """
+        self._empty_page_count += 1
+        if self._empty_page_count >= limit:
+            self.log.warning(
+                "%s: aborting pagination after %d consecutive empty pages "
+                "(the account may be private or have no items accessible "
+                "with the current cookies)",
+                url, self._empty_page_count,
+            )
+            return True
+        return False
+
+    def _reset_empty_page_guard(self):
+        """Reset the consecutive-empty-page counter after a non-empty page."""
+        self._empty_page_count = 0
 
     def request(self, url, method="GET", session=None, fatal=True,
                 retries=None, retry_codes=None, expected=(), interval=True,
