@@ -476,6 +476,13 @@ def build_parser():
         help="Display sent and read HTTP traffic",
     )
     output.add_argument(
+        "--truncate-filenames",
+        dest="truncate-filenames", nargs=0, action=ConfigConstAction,
+        const=True,
+        help=("Automatically truncate filenames so destination paths stay "
+              "within OS path-length limits"),
+    )
+    output.add_argument(
         "--no-colors",
         dest="colors", action="store_false",
         help="Do not emit ANSI color codes in output",

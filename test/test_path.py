@@ -10,6 +10,7 @@
 import os
 import sys
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import path, extractor, config  # noqa E402
@@ -291,6 +292,23 @@ class TestPathOptions(TestPath):
         pfmt = self._pfmt(kwdict=True)
         self.assertEqual(
             pfmt.realdirectory, ". test-テスト-'&>-_:~.txt ./", "custom")
+
+    def test_option_truncatefilenames(self):
+        config.set((), "truncate-filenames", True)
+        config.set((), "base-directory", "")
+        config.set((), "directory", [""])
+
+        with patch.object(path.os, "pathconf", side_effect=(
+            lambda _path, key: 4096 if key == "PC_PATH_MAX" else 12
+        )):
+            pfmt = self._pfmt(kwdict={
+                **KWDICT,
+                "filename": "abcdefghijklmn",
+            })
+            pfmt.set_filename(pfmt.kwdict)
+            pfmt.build_path()
+
+        self.assertEqual(pfmt.filename, "abcdefgh.ext")
 
 
 if __name__ == "__main__":

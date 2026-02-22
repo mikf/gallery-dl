@@ -105,6 +105,8 @@ class PathFormat():
         remove = config("path-remove", "\x00-\x1f\x7f")
         self.clean_path = _build_cleanfunc(remove, "")
 
+        self.truncate_filenames = config("truncate-filenames", False)
+
         strip = config("path-strip", "auto")
         if strip == "auto":
             strip = ". " if WINDOWS else ""
@@ -302,7 +304,12 @@ class PathFormat():
 
     def build_path(self):
         """Combine directory and filename to full paths"""
-        self.filename = filename = self.build_filename(self.kwdict)
+        filename = self.build_filename(self.kwdict)
+        if self.truncate_filenames:
+            filename = _truncate_filename(
+                self.realdirectory, filename, self.kwdict.get("extension"))
+
+        self.filename = filename
         self.path = self.directory + filename
         self.realpath = self.realdirectory + filename
         if not self.temppath:
@@ -311,7 +318,12 @@ class PathFormat():
     def part_enable(self, part_directory=None):
         """Enable .part file usage"""
         if self.extension:
-            self.temppath += ".part"
+            filename = self.filename
+            if self.truncate_filenames:
+                filename = _truncate_filename(
+                    self.realdirectory, filename,
+                    self.kwdict.get("extension"), ".part")
+            self.temppath = self.realdirectory + filename + ".part"
         else:
             self.kwdict["extension"] = self.prefix + self.extension_map(
                 "part", "part")
@@ -377,6 +389,43 @@ class PathFormat():
                 break
 
         self.set_mtime()
+
+
+def _truncate_filename(directory, filename, extension=None, suffix=""):
+    path_max = 0
+    name_max = 0
+    if WINDOWS:
+        path_max = 32767
+        name_max = 255
+    else:
+        try:
+            path_max = os.pathconf(directory, "PC_PATH_MAX")
+        except (AttributeError, OSError, ValueError):
+            path_max = os.pathconf(os.sep, "PC_PATH_MAX")
+        try:
+            name_max = os.pathconf(directory, "PC_NAME_MAX")
+        except (AttributeError, OSError, ValueError):
+            name_max = os.pathconf(os.sep, "PC_NAME_MAX")
+
+    if not path_max and not name_max:
+        return filename
+
+    ext = f".{extension}" if extension else ""
+    stem = filename[:-len(ext)] if ext and filename.endswith(ext) else filename
+
+    while stem:
+        full_name = stem + ext + suffix
+        full_path = directory + full_name
+        if name_max and len(full_name) > name_max:
+            overflow = len(full_name) - name_max
+        elif path_max and len(full_path) > path_max:
+            overflow = len(full_path) - path_max
+        else:
+            return stem + ext
+
+        stem = stem[:-overflow]
+
+    return ""
 
 
 def _build_convertfunc(func, conv):
