@@ -495,6 +495,24 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://kemono.cr/fanbox/user/49494721/post/9457614",
+    "#comment" : "archives-format dict (#9104)",
+    "#category": ("", "kemono", "fanbox"),
+    "#class"   : kemono.KemonoPostExtractor,
+    "#options" : {"archives-format": "dict"},
+    "#range"   : "1-2",
+
+    "archives": {
+        "c22c7e979355f633aaae4929b010816895a47ec37a9cfc25186a0952ec6e5774": dict,
+        "f7b4dedd9742aeb8da56dc6fe07deb7639880d0800ac0b7a6e91f64ff6b40178": dict,
+    },
+
+    "title": "モナ（Live2Dアニメ）",
+    "type": "archive",
+    "user": "49494721",
+},
+
+{
     "#url"     : "https://kemono.cr/boosty/user/felixf/post/d9d8d670-16be-4e06-8ff9-65b13e322ba8",
     "#comment" : r"'\' in file paths",
     "#category": ("", "kemono", "boosty"),
@@ -777,6 +795,22 @@ __tests__ = (
         "id"           : "798533277852893218",
         "public_flags" : 0,
         "username"     : "影おじ",
+    },
+},
+
+{
+    "#url"     : "https://kemono.cr/discord/server/814339508694155294/815230464306446346",
+    "#comment" : "discord archives-format (#9104)",
+    "#class"   : kemono.KemonoDiscordExtractor,
+    "#options" : {
+        "archives-format": "dict",
+        "order-posts"    : "asc",
+    },
+    "#range"   : "1",
+    "#results" : "https://kemono.cr/data/ae/16/ae16db15cc15cc250db003964d6cd3cf2590863d925d96730871b6e75db3e69a.zip",
+
+    "archives": {
+        "ae16db15cc15cc250db003964d6cd3cf2590863d925d96730871b6e75db3e69a": dict,
     },
 },
 
