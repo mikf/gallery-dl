@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2025 Mike Fährmann
+# Copyright 2018-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,10 +9,11 @@
 """Downloader module for URLs requiring youtube-dl support"""
 
 from .common import DownloaderBase
-from .. import ytdl, text
+from .. import ytdl, text, util
 from xml.etree import ElementTree
 from http.cookiejar import Cookie
 import os
+FLAGS = util.FLAGS
 
 
 class YoutubeDLDownloader(DownloaderBase):
@@ -85,6 +86,9 @@ class YoutubeDLDownloader(DownloaderBase):
             url = url[5:]
             manifest = kwdict.get("_ytdl_manifest")
             while True:
+                if FLAGS.DOWNLOAD is not None:
+                    return FLAGS.process("DOWNLOAD")
+
                 tries += 1
                 self.error = None
                 try:
@@ -120,6 +124,9 @@ class YoutubeDLDownloader(DownloaderBase):
             info_dict.update(extra)
 
         while True:
+            if FLAGS.DOWNLOAD is not None:
+                return FLAGS.process("DOWNLOAD")
+
             tries += 1
             self.error = None
             try:
