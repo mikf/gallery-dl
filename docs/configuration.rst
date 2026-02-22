@@ -4089,6 +4089,23 @@ Note
     This requires 1 additional HTTP request per ``archives`` file.
 
 
+extractor.kemono.archives-format
+--------------------------------
+Type
+    ``string``
+Default
+    ``"list"``
+Description
+    Determines the format/type of the
+    `archives <extractor.kemono.archives_>`__
+    metadata field.
+
+    ``"list"`` | ``"array"``
+        Plain ``list`` with archive files as elements
+    ``"dict"`` | ``"object"``
+        A ``dict`` with each archive file's ``hash`` as key.
+
+
 extractor.kemono.comments
 -------------------------
 Type

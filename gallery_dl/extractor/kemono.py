@@ -55,6 +55,8 @@ class KemonoExtractor(Extractor):
         generators = self._build_file_generators(self.config("files"))
         announcements = True if self.config("announcements") else None
         archives = True if self.config("archives") else False
+        archives_type = dict if self.config("archives-format") in {
+            "dict", "object"} else list
         comments = True if self.config("comments") else False
         dms = True if self.config("dms") else None
         max_posts = self.config("max-posts")
@@ -126,7 +128,7 @@ class KemonoExtractor(Extractor):
 
             files = []
             hashes = set()
-            post_archives = post["archives"] = []
+            post_archives = post["archives"] = archives_type()
 
             for file in itertools.chain.from_iterable(
                     g(post) for g in generators):
@@ -170,15 +172,18 @@ class KemonoExtractor(Extractor):
                         try:
                             data = self.api.file(hash)
                             data.update(file)
-                            post_archives.append(data)
                         except Exception as exc:
                             self.log.warning(
                                 "%s: Failed to retrieve archive metadata of "
                                 "'%s' (%s: %s)", post["id"], file.get("name"),
                                 exc.__class__.__name__, exc)
-                            post_archives.append(file.copy())
+                            data = file.copy()
                     else:
-                        post_archives.append(file.copy())
+                        data = file.copy()
+                    if archives_type is dict:
+                        post_archives[hash] = data
+                    else:
+                        post_archives.append(data)
 
                 files.append(file)
 
@@ -445,6 +450,8 @@ class KemonoDiscordExtractor(KemonoExtractor):
             r"(/[A-Za-z0-9-._~:/?#\[\]@!$&'()*+,;%=]+)").findall
         find_hash = text.re(HASH_PATTERN).match
         archives = True if self.config("archives") else False
+        archives_type = dict if self.config("archives-format") in {
+            "dict", "object"} else list
         exts_archive = util.EXTS_ARCHIVE
 
         if (order := self.config("order-posts")) and order[0] in {"r", "d"}:
@@ -474,7 +481,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
             yield Message.Directory, "", post
 
             for post["num"], file in enumerate(files, 1):
-                post["hash"] = file["hash"]
+                post["hash"] = hash = file["hash"]
                 post["type"] = file["type"]
                 url = file["path"]
 
@@ -489,20 +496,24 @@ class KemonoDiscordExtractor(KemonoExtractor):
 
                 if ext in exts_archive:
                     if not post_archives:
-                        post["archives"] = post_archives = []
+                        post["archives"] = post_archives = archives_type()
                     post["type"] = "archive"
                     if archives:
                         try:
-                            post_archives.append({
-                                **self.api.file(file["hash"]), **file})
+                            data = self.api.file(hash)
+                            data.update(file)
                         except Exception as exc:
                             self.log.warning(
                                 "%s: Failed to retrieve archive metadata of "
                                 "'%s' (%s: %s)", post["id"], file.get("name"),
                                 exc.__class__.__name__, exc)
-                            post_archives.append(file.copy())
+                            data = file.copy()
                     else:
-                        post_archives.append(file.copy())
+                        data = file.copy()
+                    if archives_type is dict:
+                        post_archives[hash] = data
+                    else:
+                        post_archives.append(data)
 
                 if url[0] == "/":
                     url = f"{self.root}/data{url}"
