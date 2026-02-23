@@ -50,7 +50,10 @@ class InstagramExtractor(Extractor):
         else:
             self.api = InstagramRestAPI(self)
 
-        self._warn_video = True if self.config("warn-videos", True) else False
+        self._static_video = \
+            True if self.config("static-videos", True) else False
+        self._warn_video = \
+            True if self.config("warn-videos", True) else False
         self._warn_image = (
             9 if not (wi := self.config("warn-images", True)) else
             1 if wi in {"all", "both"} else
@@ -243,6 +246,13 @@ class InstagramExtractor(Extractor):
                 self.log.warning("Missing media in post %s",
                                  data["post_shortcode"])
                 continue
+
+            if not self._static_video and \
+                    (type_orig := item.get("original_media_type")) and \
+                    type_orig == 1 and type_orig != item.get("media_type"):
+                if item.pop("video_versions", None):
+                    item["original_width"] = image["width"]
+                    item["original_height"] = image["height"]
 
             width_orig = item.get("original_width", 0)
             height_orig = item.get("original_height", 0)

@@ -3914,6 +3914,18 @@ Description
     Download video previews.
 
 
+extractor.instagram.static-videos
+---------------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download static story/highlight "videos" generated from a photo.
+
+    Disabling this option downloads the photo version instead.
+
+
 extractor.instagram.user-cache
 ------------------------------
 Type
