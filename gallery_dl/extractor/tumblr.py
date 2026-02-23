@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2016-2025 Mike Fährmann
+# Copyright 2016-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -473,7 +473,16 @@ class TumblrAPI(oauth.OAuth1API):
             self.log.debug(data)
 
             if status == 403:
-                raise self.exc.AuthorizationError()
+                msg = data.get("response")
+                if msg == "You do not have permission to view this blog" and \
+                        self.api_key is None:
+                    self.log.debug("Retrying with 'api_key' authentication")
+                    self.api_key = params["api_key"] = \
+                        self.session.auth.consumer_key
+                    self.session = self.extractor.session
+                    continue
+                msg = f"'{msg}'" if isinstance(msg, str) else None
+                raise self.exc.AuthorizationError(msg)
 
             elif status == 404:
                 try:
