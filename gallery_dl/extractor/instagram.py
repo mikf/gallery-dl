@@ -825,12 +825,12 @@ class InstagramRestAPI():
         _cache = self.extractor.config("user-cache", True)
         self._user_cache = True if not _cache or _cache == "memory" else False
 
-        strategy = self.extractor.config("user-strategy")
-        if strategy is not None and strategy in {
-                "web_profile_info", "profile_info", "info"}:
-            self._topsearch = False
+        if strategy := self.extractor.config("user-strategy"):
+            if isinstance(strategy, str):
+                strategy = strategy.split(",")
+            self._strategy_uid = strategy
         else:
-            self._topsearch = True
+            self._strategy_uid = ("search", "web")
 
     def guide(self, guide_id):
         endpoint = "/v1/guides/web_info/"
@@ -938,15 +938,46 @@ class InstagramRestAPI():
             pass
         raise self.exc.NotFoundError("user")
 
+    def user_by_web(self, username):
+        return self.extractor.cache(
+            self._user_by_web_impl, username, _mem=self._user_cache)
+
+    def _user_by_web_impl(self, username):
+        url = "https://www.instagram.com/" + username
+
+        try:
+            headers = {
+                "Accept": "text/html,application/xhtml+xml,"
+                          "application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.5",
+                "Accept-Encoding": "gzip, deflate, br, zstd",
+                "Alt-Used": "www.instagram.com",
+                "Connection": "keep-alive",
+                "Sec-Fetch-Dest": "document",
+                "Sec-Fetch-Mode": "navigate",
+                "Sec-Fetch-Site": "none",
+                "Priority": "u=0, i",
+            }
+            page = self.extractor.request(url, headers=headers).text
+            if uid := text.extr(page, '"profile_id":"', '"'):
+                return {"id": uid}
+        except Exception:
+            pass
+        raise self.exc.NotFoundError("user")
+
     def user_by_screen_name(self, screen_name):
-        if self._topsearch:
-            if user := self.user_by_search(screen_name):
-                return user
-            self.user_by_search.invalidate(screen_name)
-        else:
-            if user := self.user_by_name(screen_name):
-                return user
-            self.user_by_name.invalidate(screen_name)
+        for strategy in self._strategy_uid:
+            try:
+                if strategy in {"search", "topsearch"}:
+                    return self.user_by_search(screen_name)
+                elif strategy in {"info", "web_profile_info", "api"}:
+                    return self.user_by_name(screen_name)
+                elif strategy in {"web", "webpage"}:
+                    return self.user_by_web(screen_name)
+                else:
+                    self.extractor.log.warning("Invalid strategy %r", strategy)
+            except Exception:
+                self.extractor.log.debug("Failed to get user via %r", strategy)
         raise self.exc.NotFoundError("user")
 
     def user_id(self, screen_name, check_private=True):
