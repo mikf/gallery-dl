@@ -4058,6 +4058,21 @@ Description
     Download video files.
 
 
+extractor.iwara.format
+----------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Example
+    * ``"Source"``
+    * ``"360,540,Source"``
+    * ``["360", "540", "Source"]``
+Description
+    Selects the preferred format for video downloads.
+
+    When more than one format is given, the first available one is selected.
+
+
 extractor.iwara.include
 -----------------------
 Type

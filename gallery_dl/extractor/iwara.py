@@ -25,6 +25,14 @@ class IwaraExtractor(Extractor):
     def _init(self):
         self.api = IwaraAPI(self)
 
+        if fmts := self.config("format"):
+            if isinstance(fmts, str):
+                fmts = fmts.replace(" ", "").lower().split(",")
+            if not isinstance(fmts, (list, tuple)):
+                fmts = (str(fmts),)
+            self.formats = fmts
+            self.extract_video_source = self.extract_video_source_custom
+
     def items_image(self, images, user=None):
         for image in images:
             try:
@@ -63,9 +71,7 @@ class IwaraExtractor(Extractor):
                     video = self.api.video(video["id"])
                 file_url = video["fileUrl"]
 
-                sources = self.api.source(file_url)
-                sources.sort(key=self._sort_formats, reverse=True)
-                source = sources[0]
+                source = self.extract_video_source(self.api.source(file_url))
                 download_url = source["src"].get("download")
 
                 info = self.extract_media_info(video, "file")
@@ -75,6 +81,7 @@ class IwaraExtractor(Extractor):
                                 if user is None else user)
             except Exception as exc:
                 self.status |= 1
+                self.log.traceback(exc)
                 self.log.error("Failed to process video %s (%s: %s)",
                                video["id"], exc.__class__.__name__, exc)
                 continue
@@ -148,6 +155,22 @@ class IwaraExtractor(Extractor):
             "date"   : self.parse_datetime_iso(user.get("createdAt")),
             "description": profile.get("body"),
         }
+
+    def extract_video_source(self, sources):
+        sources.sort(key=self._sort_formats, reverse=True)
+        return sources[0]
+
+    def extract_video_source_custom(self, sources):
+        fmts = {
+            name.lower(): source
+            for source in sources
+            if source.get("src") and (name := source.get("name"))
+        }
+
+        for fmt in self.formats:
+            if fmt in fmts:
+                return fmts[fmt]
+        self.log.warning("Requested format(s) not available")
 
     def _user_params(self):
         user, qs = self.groups
