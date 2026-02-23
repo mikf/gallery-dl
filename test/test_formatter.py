@@ -163,6 +163,15 @@ class TestFormatter(unittest.TestCase):
         self._run_test("{ds:D%Y-%m-%dT%H:%M:%S%z}", self.kwdict["dt"],
                        None, util.identity)
 
+    def test_fmt_func_multi(self):
+        self._run_test("foo {t}" , f"foo {self.kwdict['t']}",
+                       None, int)
+        self._run_test("bar {ds}", f"bar {self.kwdict['dt']}",
+                       None, dt.parse_iso)
+        self._run_test("foo {ds:D%Y-%m-%dT%H:%M:%S%z} bar",
+                       f"foo {self.kwdict['dt']} bar",
+                       None, util.identity)
+
     def test_alternative(self):
         self._run_test("{a|z}"    , "hElLo wOrLd")
         self._run_test("{z|a}"    , "hElLo wOrLd")

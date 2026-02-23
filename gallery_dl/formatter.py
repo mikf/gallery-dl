@@ -124,12 +124,21 @@ class StringFormatter():
             else:
                 self.format_map = lambda _: format_string
             del self.result, self.fields
+        elif fmt is not format:
+            self.format_map = self.format_map_safe
 
     def format_map(self, kwdict):
         """Apply 'kwdict' to the initial format_string and return its result"""
         result = self.result
         for index, func in self.fields:
             result[index] = func(kwdict)
+        return "".join(result)
+
+    def format_map_safe(self, kwdict):
+        """Like 'format_map', but ensures all items are 'str'"""
+        result = self.result
+        for index, func in self.fields:
+            result[index] = str(func(kwdict))
         return "".join(result)
 
     def _field_access(self, field_name, format_spec, conversion):
