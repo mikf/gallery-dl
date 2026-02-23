@@ -28,7 +28,7 @@ class IwaraExtractor(Extractor):
         if fmts := self.config("format"):
             if isinstance(fmts, str):
                 fmts = fmts.replace(" ", "").lower().split(",")
-            if not isinstance(fmts, (list, tuple)):
+            elif not isinstance(fmts, (list, tuple)):
                 fmts = (str(fmts),)
             self.formats = fmts
             self.extract_video_source = self.extract_video_source_custom
@@ -302,9 +302,11 @@ class IwaraSearchExtractor(IwaraExtractor):
 
     def items(self):
         params = text.parse_query(self.groups[0])
-        type = params.get("type")
+        type = params.get("type") or "videos"
+        if type[-1] != "s":
+            type += "s"
         self.kwdict["search_tags"] = query = params.get("query")
-        return self.items_by_type(type, self.api.search(type, query))
+        return self.items_by_type(type[:-1], self.api.search(type, query))
 
 
 class IwaraTagExtractor(IwaraExtractor):
