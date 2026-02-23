@@ -472,6 +472,9 @@ class MangadexAPI():
         params["offset"] = 0
 
         if api_params := config("api-parameters"):
+            for key in api_params:
+                if key in params:
+                    del params[key]
             params.update(api_params)
 
         while True:
