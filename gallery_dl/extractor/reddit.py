@@ -319,7 +319,8 @@ class RedditUserExtractor(RedditExtractor):
 
         submissions = self.api.submissions_user(
             (user.get("name") or username) + (sub or ""), text.parse_query(qs))
-        if self.config("only", sub != "/saved"):
+        only = sub not in {"/upvoted", "/downvoted", "/saved"}
+        if self.config("only", only):
             submissions = self._only(submissions, user)
         return submissions
 

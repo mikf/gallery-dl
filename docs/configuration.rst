@@ -5581,7 +5581,7 @@ extractor.reddit.user.only
 Type
     ``bool``
 Default
-    ``user-saved``
+    ``user-saved`` | ``user-upvoted`` | ``user-downvoted``
         ``false``
     otherwise
         ``true``
