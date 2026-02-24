@@ -58,6 +58,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://postimg.cc/Z9Y6srnT",
+    "#comment" : "'filename' (#9119)",
+    "#category": ("imagehost", "postimg", "image"),
+    "#class"   : imagehosts.PostimgImageExtractor,
+    "#results" : "https://i.postimg.cc/JRdFpY6K/Esue-Vyrisel3b.jpg?dl=1",
+
+    "extension": "jpg",
+    "filename" : "EsueVyrisel3b",
+    "post_url" : "https://postimg.cc/Z9Y6srnT",
+    "token"    : "Z9Y6srnT",
+},
+
+{
     "#url"     : "https://postimg.cc/gallery/wxpDLgX",
     "#category": ("imagehost", "postimg", "gallery"),
     "#class"   : imagehosts.PostimgGalleryExtractor,
