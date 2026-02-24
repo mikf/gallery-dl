@@ -151,6 +151,18 @@ ___
 },
 
 {
+    "#url"     : "https://weebdex.org/chapter/8oay4lxrk7",
+    "#comment" : "no 'chapter' data / oneshot (#9123)",
+    "#class"   : weebdex.WeebdexChapterExtractor,
+    "#pattern" : r"https://s15\.weebdex\.net/data/8oay4lxrk7/.+",
+    "#count"   : 18,
+
+    "chapter"      : 0,
+    "chapter_id"   : "8oay4lxrk7",
+    "chapter_minor": "",
+},
+
+{
     "#url"     : "https://weebdex.org/title/3o0icxno26/ani-datta-mono",
     "#class"   : weebdex.WeebdexMangaExtractor,
     "#pattern" : weebdex.WeebdexChapterExtractor.pattern,
@@ -291,6 +303,16 @@ ___
         "https://weebdex.org/chapter/etoaxmxgcq",
         "https://weebdex.org/chapter/24ew0mo562",
     ),
+},
+
+{
+    "#url"     : "https://weebdex.org/title/s7ej90rn2z/watashi-no-te-ga-suki-na-hito",
+    "#comment" : "no 'chapter' data / oneshot (#9123)",
+    "#class"   : weebdex.WeebdexMangaExtractor,
+    "#results" : "https://weebdex.org/chapter/8oay4lxrk7",
+
+    "chapter"      : 0,
+    "chapter_minor": "",
 },
 
 )

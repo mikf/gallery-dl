@@ -63,7 +63,11 @@ class WeebdexChapterExtractor(WeebdexBase, ChapterExtractor):
         self.data = data = self.request_json(url, headers=self.headers_api)
 
         rel = data.pop("relationships")
-        chapter, sep, minor = data["chapter"].partition(".")
+        try:
+            chapter, sep, minor = data["chapter"].partition(".")
+        except Exception:
+            chapter = 0
+            sep = minor = ""
 
         return {
             **self.cache(self._manga_info, rel["manga"]["id"]),
@@ -127,7 +131,11 @@ class WeebdexMangaExtractor(WeebdexBase, MangaExtractor):
                 url, params=params, headers=self.headers_api)
 
             for ch in data["data"]:
-                chapter, sep, minor = ch["chapter"].partition(".")
+                try:
+                    chapter, sep, minor = ch["chapter"].partition(".")
+                except Exception:
+                    chapter = 0
+                    sep = minor = ""
                 ch["volume"] = text.parse_int(ch.get("volume"))
                 ch["chapter"] = text.parse_int(chapter)
                 ch["chapter_minor"] = sep + minor
