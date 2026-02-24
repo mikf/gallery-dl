@@ -350,17 +350,35 @@ class PostimgGalleryExtractor(ImagehostImageExtractor):
 
     def items(self):
         page = self.request(self.page_url).text
-        title = text.extr(
-            page, 'property="og:title" content="', ' — Postimages"')
+        title = text.unescape(text.extr(
+            page, 'property="og:title" content="', ' — Postimages"'))
 
-        data = {
-            "_extractor"   : PostimgImageExtractor,
-            "gallery_title": text.unescape(title),
+        url = self.root + "/json"
+        params = {
+            "action": "list",
+            "page"  : 1,
+            "album" : self.groups[1],
         }
 
-        for token in text.extract_iter(page, 'data-image="', '"'):
-            url = f"{self.root}/{token}"
-            yield Message.Queue, url, data
+        base = self.root + "/"
+        while True:
+            data = self.request_json(url, params=params)
+
+            for token, t, name, ext, w, h, _, _, _, _, _ in data["images"]:
+                yield Message.Queue, base + t, {
+                    "_extractor"   : PostimgImageExtractor,
+                    "gallery_title": title,
+                    "token"    : token,
+                    "filename" : name,
+                    "extension": ext,
+                    "width"    : w,
+                    "height"   : h,
+                    "thumbnail": t,
+                }
+
+            if not data.get("has_page_next"):
+                break
+            params["page"] += 1
 
 
 class TurboimagehostImageExtractor(ImagehostImageExtractor):
