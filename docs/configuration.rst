@@ -5768,7 +5768,7 @@ extractor.schalenetwork.tags
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
     Group ``tags`` by type and
     provide them as ``tags_<type>`` metadata fields,
