@@ -67,4 +67,22 @@ __tests__ = (
     "gallery_title": "My Gallery",
 },
 
+{
+    "#url"     : "https://postimg.cc/gallery/07vFSxB",
+    "#comment" : "multiple pages (#9119)",
+    "#category": ("imagehost", "postimg", "gallery"),
+    "#class"   : imagehosts.PostimgGalleryExtractor,
+    "#pattern" : imagehosts.PostimgImageExtractor.pattern,
+    "#range"   : "1-100",
+    "#count"   : 100,
+
+    "gallery_title": "Archive",
+    "extension"    : {"jpg", "png"},
+    "filename"     : str,
+    "width"        : int,
+    "height"       : int,
+    "thumbnail"    : str,
+    "token"        : str,
+},
+
 )
