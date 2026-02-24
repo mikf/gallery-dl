@@ -335,7 +335,7 @@ class PostimgImageExtractor(ImagehostImageExtractor):
     def get_info(self, page):
         pos = page.index(' id="download"')
         url     , pos = text.rextract(page, ' href="', '"', pos)
-        filename, pos = text.extract(page, ' class="my-4">', '<', pos)
+        filename, pos = text.extract(page, ' alt="', '"', pos)
         return url, text.unescape(filename) if filename else None
 
 
