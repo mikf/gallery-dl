@@ -1,5 +1,46 @@
 # Changelog
 
+## 1.31.7 - 2026-02-24
+### Extractors
+#### Additions
+- [pholder] add support ([#2568](https://github.com/mikf/gallery-dl/issues/2568) [#9067](https://github.com/mikf/gallery-dl/issues/9067))
+- [xenforo] add `profile` extractor ([#9046](https://github.com/mikf/gallery-dl/issues/9046))
+#### Fixes
+- [deviantart] use private token for `tier` locked deviations ([#9072](https://github.com/mikf/gallery-dl/issues/9072))
+- [iwara] fix extractors ([#9096](https://github.com/mikf/gallery-dl/issues/9096))
+- [mangadex] preserve `api-parameters` order ([#9111](https://github.com/mikf/gallery-dl/issues/9111))
+- [mangadex:covers] fix `400 Bad Request` when using `lang` option
+- [manganelo] fix `manga` extractor ([#9059](https://github.com/mikf/gallery-dl/issues/9059))
+- [mangataro] fix `chapter` extractor
+- [paheal] fix `md5` metadata ([#9110](https://github.com/mikf/gallery-dl/issues/9110) [#9121](https://github.com/mikf/gallery-dl/issues/9121))
+- [pornpics] fix `search` extractor pagination ([#9022](https://github.com/mikf/gallery-dl/issues/9022) [#9068](https://github.com/mikf/gallery-dl/issues/9068))
+- [postimg:gallery] support multiple pages ([#9119](https://github.com/mikf/gallery-dl/issues/9119))
+- [reddit] fix `KeyError: 'children'` when expanding comments ([#9037](https://github.com/mikf/gallery-dl/issues/9037))
+- [reddit] fix `/external-preview` embed downloads ([#9037](https://github.com/mikf/gallery-dl/issues/9037))
+- [reddit:user] fix user lookup when using sub view ([#8228](https://github.com/mikf/gallery-dl/issues/8228) [#9032](https://github.com/mikf/gallery-dl/issues/9032))
+- [reddit:user] disable `only` for `/saved` results ([#9071](https://github.com/mikf/gallery-dl/issues/9071))
+- [simpcity] fix `gofile` links ([#9042](https://github.com/mikf/gallery-dl/issues/9042))
+- [weebdex] fix `chapter-reverse` ([#9041](https://github.com/mikf/gallery-dl/issues/9041))
+- [xenforo] fix `IndexError` when extracting attachments ([#9046](https://github.com/mikf/gallery-dl/issues/9046))
+- [xenforo] fix attachments extraction ([#9070](https://github.com/mikf/gallery-dl/issues/9070))
+#### Improvements
+- [eporner] detect `Age Verification` pages ([#9064](https://github.com/mikf/gallery-dl/issues/9064))
+- [fikfap] support main page post URLs ([#9026](https://github.com/mikf/gallery-dl/issues/9026))
+- [imagefap] don't return anything for empty profiles ([#9034](https://github.com/mikf/gallery-dl/issues/9034))
+- [imagefap] handle `/galleries?folderid=0` URLs ([#9034](https://github.com/mikf/gallery-dl/issues/9034))
+- [iwara] add `format` option
+- [koofr] improve subdirectory handling
+- [mangadex] add `covers` option
+#### Metadata
+- [chevereto] extract `title` metadata ([#9061](https://github.com/mikf/gallery-dl/issues/9061))
+- [kemono] add `archives-format` option ([#9104](https://github.com/mikf/gallery-dl/issues/9104))
+- [koofr] provide `num` & `count`
+### Post Processors
+- [exec] use non-UNC path replacements on Windows ([#8879](https://github.com/mikf/gallery-dl/issues/8879))
+- [ugoira] fix processing `.gif` frames
+### Miscellaneous
+- [formatter] fix exceptions for non-default `fmt` ([#9113](https://github.com/mikf/gallery-dl/issues/9113))
+
 ## 1.31.6 - 2026-02-08
 ### Extractors
 #### Additions
