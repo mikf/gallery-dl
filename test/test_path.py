@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -214,6 +214,10 @@ class TestPathOptions(TestPath):
         config.set((), "path-restrict", "windows")
         fname = self._pfmt().build_filename(KWDICT)
         self.assertEqual(fname, "test-テスト-'&_-__~.txt", "windows")
+
+        config.set((), "path-restrict", "windows+")
+        fname = self._pfmt().build_filename(KWDICT)
+        self.assertEqual(fname, "test-テスト-'&＞-⧸：~.txt", "windows+")
 
         config.set((), "path-restrict", "ascii")
         fname = self._pfmt().build_filename(KWDICT)
