@@ -874,7 +874,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="fanbox" title="fanbox">
     <td>pixivFANBOX</td>
     <td>https://www.fanbox.cc/</td>
-    <td>Creators, Home Feed, Posts, Pixiv Redirects, Supported User Feed</td>
+    <td>Creators, Home Feed, Posts, Pixiv Redirects, Supported User Feed, Tag Searches</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr id="pixnet" title="pixnet">

@@ -18,7 +18,7 @@ USER_PATTERN = (
 
 
 class FanboxExtractor(Extractor):
-    """Base class for Fanbox extractors"""
+    """Base class for fanbox extractors"""
     category = "fanbox"
     root = "https://www.fanbox.cc"
     directory_fmt = ("{category}", "{creatorId}")
@@ -353,7 +353,7 @@ class FanboxExtractor(Extractor):
 
 
 class FanboxCreatorExtractor(FanboxExtractor):
-    """Extractor for a Fanbox creator's works"""
+    """Extractor for a pixivFANBOX creator's works"""
     subcategory = "creator"
     pattern = USER_PATTERN + r"(?:/posts)?/?$"
     example = "https://USER.fanbox.cc/"
@@ -381,8 +381,22 @@ class FanboxCreatorExtractor(FanboxExtractor):
             yield from posts
 
 
+class FanboxTagExtractor(FanboxExtractor):
+    """Extractor for a pixivFANBOX creator's tagged works"""
+    subcategory = "tag"
+    pattern = USER_PATTERN + r"/tags/([^/?#]+)"
+    example = "https://USER.fanbox.cc/tags/TAG"
+
+    def posts(self):
+        cid, cid2, tag = self.groups
+        self.kwdict["search_tags"] = text.unquote(tag)
+        url = (f"https://api.fanbox.cc/post.listTagged"
+               f"?creatorId={cid or cid2}&tag={tag}")
+        return self._pagination(url)
+
+
 class FanboxPostExtractor(FanboxExtractor):
-    """Extractor for media from a single Fanbox post"""
+    """Extractor for media from a single pixivFANBOX post"""
     subcategory = "post"
     pattern = USER_PATTERN + r"/posts/(\d+)"
     example = "https://USER.fanbox.cc/posts/12345"
@@ -392,7 +406,7 @@ class FanboxPostExtractor(FanboxExtractor):
 
 
 class FanboxHomeExtractor(FanboxExtractor):
-    """Extractor for your Fanbox home feed"""
+    """Extractor for your pixivFANBOX home feed"""
     subcategory = "home"
     pattern = BASE_PATTERN + r"/?$"
     example = "https://fanbox.cc/"
@@ -403,7 +417,7 @@ class FanboxHomeExtractor(FanboxExtractor):
 
 
 class FanboxSupportingExtractor(FanboxExtractor):
-    """Extractor for your supported Fanbox users feed"""
+    """Extractor for your supported pixivFANBOX users feed"""
     subcategory = "supporting"
     pattern = BASE_PATTERN + r"/home/supporting"
     example = "https://fanbox.cc/home/supporting"
