@@ -404,6 +404,8 @@ class XenforoExtractor(BaseExtractor):
                 url = "https://www.tiktok.com/@/video/" + frag
             elif type == "reddit":
                 url = "https://embed.reddit.com/r/" + frag
+            elif type == "imgur":
+                url = "https://imgur.com/" + frag
             else:
                 self.log.warning("%s: Unsupported media embed type '%s'",
                                  post["id"], type)

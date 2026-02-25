@@ -48,6 +48,15 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://forums.socialmediagirls.com/threads/nilce-moretto.64148/post-2803132",
+    "#comment" : "imgur s9e media embed iframe (#9127)",
+    "#category": ("xenforo", "socialmediagirlsforum", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+    "#auth"    : True,
+    "#results" : "https://imgur.com/a/TluZbDn",
+},
+
+{
     "#url"     : "https://forums.socialmediagirls.com/threads/casallr.435949/unread",
     "#category": ("xenforo", "socialmediagirlsforum", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
