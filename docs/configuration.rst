@@ -337,6 +337,9 @@ Special Values
     ``"windows"``
         | ``"\\\\|/<>:\"?*"``
         | (https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file)
+    ``"windows+"``
+        | ``{"\\": "⧹", "|" : "", "/" : "⧸", "<" : "＜", ">" : "＞", ":" : "：", "\"" : "＂", "?" : "？", "*" : "＊"}``
+        | (replace characters not allowed by Windows with Unicode alternatives)
     ``"ascii"``
         | ``"^0-9A-Za-z_."``
         | (only ASCII digits, letters, underscores, and dots)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2021-2025 Mike Fährmann
+# Copyright 2021-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -96,6 +96,9 @@ class PathFormat():
             restrict = "/"
         elif restrict == "windows":
             restrict = "\\\\|/<>:\"?*"
+        elif restrict == "windows+":
+            restrict = {"\\": "⧹", "|" : "", "/" : "⧸", "<" : "＜", ">" : "＞",
+                        ":" : "：", '"' : "＂", "?" : "？", "*" : "＊"}
         elif restrict == "ascii":
             restrict = "^0-9A-Za-z_."
         elif restrict == "ascii+":
