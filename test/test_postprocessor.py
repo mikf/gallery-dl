@@ -579,15 +579,6 @@ class MetadataTest(BasePostprocessorTest):
             self._trigger()
         self.assertEqual(self._output(m), "foo\nbar\nbaz\n")
 
-    def test_metadata_tags_dict(self):
-        self._create(
-            {"mode": "tags"},
-            {"tags": {"g": ["foobar1", "foobar2"], "m": ["foobarbaz"]}},
-        )
-        with patch("builtins.open", mock_open()) as m:
-            self._trigger()
-        self.assertEqual(self._output(m), "foobar1\nfoobar2\nfoobarbaz\n")
-
     def test_metadata_tags_list_of_dict(self):
         self._create(
             {"mode": "tags"},

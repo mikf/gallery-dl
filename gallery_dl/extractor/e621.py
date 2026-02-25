@@ -52,6 +52,13 @@ class E621Extractor(danbooru.DanbooruExtractor):
             post["extension"] = file["ext"]
             post["date"] = self.parse_datetime_iso(post["created_at"])
 
+            tags = []
+            for category, tags_cat in post["tags"].items():
+                post["tags_" + category] = tags_cat
+                tags.extend(tags_cat)
+            tags.sort()
+            post["tags"] = tags
+
             post.update(data)
             yield Message.Directory, "", post
             yield Message.Url, file["url"], post
