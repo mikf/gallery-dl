@@ -169,6 +169,99 @@ class TestPredicate(unittest.TestCase):
         self.assertTrue(pred(url, {"url": "https://example.org/"}))
         self.assertFalse(pred(url, {"url": ""}))
 
+    def test_predicate_tags(self):
+        url = ""
+
+        pred = util.predicate_tags("")
+        self.assertTrue(pred(url, {}))
+        self.assertTrue(pred(url, {"a": 3}))
+        self.assertTrue(pred(url, {"tags": []}))
+        self.assertTrue(pred(url, {"tags": ["foo", "bar"]}))
+        self.assertTrue(pred(url, {"tags": ["foo", "bar", "baz"]}))
+
+        pred = util.predicate_tags("baz")
+        self.assertTrue(pred(url, {}))
+        self.assertTrue(pred(url, {"a": 3}))
+        self.assertTrue(pred(url, {"tags": []}))
+        self.assertTrue(pred(url, {"tags": ["foo", "bar"]}))
+        self.assertFalse(pred(url, {"tags": ["foo", "bar", "baz"]}))
+
+        pred = util.predicate_tags(" t1 , t2,t3,     T4  ")
+        self.assertTrue(pred(url, {"tags": ["foo", "bar"]}))
+        self.assertFalse(pred(url, {"tags": ["foo", "t4", "bar"]}))
+        self.assertFalse(pred(url, {"tags": ["t3", "t2", "t1"]}))
+
+        pred = util.predicate_tags(" t1 , t2,t3,     T4  ")
+        self.assertTrue(pred(url, {"tags": "foo, bar, baz"}))
+        self.assertFalse(pred(url, {"tags": "foo, t4, baz"}))
+        self.assertFalse(pred(url, {"tags": "t3, t2, t1"}))
+        self.assertFalse(pred(url, {"tags": "t3 abcde t2 xyz t1"}))
+
+    def test_predicate_tags_negate(self):
+        url = ""
+
+        pred = util.predicate_tags("", negate=True)
+        self.assertTrue(pred(url, {}))
+        self.assertTrue(pred(url, {"a": 3}))
+        self.assertTrue(pred(url, {"tags": []}))
+        self.assertFalse(pred(url, {"tags": ["foo", "bar"]}))
+        self.assertFalse(pred(url, {"tags": ["foo", "bar", "baz"]}))
+
+        pred = util.predicate_tags("baz", negate=True)
+        self.assertTrue(pred(url, {}))
+        self.assertTrue(pred(url, {"a": 3}))
+        self.assertTrue(pred(url, {"tags": []}))
+        self.assertFalse(pred(url, {"tags": ["foo", "bar"]}))
+        self.assertTrue(pred(url, {"tags": ["foo", "bar", "baz"]}))
+
+        pred = util.predicate_tags(" t1 , t2,t3,     T4  ", negate=True)
+        self.assertFalse(pred(url, {"tags": ["foo", "bar"]}))
+        self.assertTrue(pred(url, {"tags": ["foo", "t4", "bar"]}))
+        self.assertTrue(pred(url, {"tags": ["t3", "t2", "t1"]}))
+
+        pred = util.predicate_tags(" t1 , t2,t3,     T4  ", negate=True)
+        self.assertFalse(pred(url, {"tags": "foo, bar, baz"}))
+        self.assertTrue(pred(url, {"tags": "foo, t4, baz"}))
+        self.assertTrue(pred(url, {"tags": "t3, t2, t1"}))
+        self.assertTrue(pred(url, {"tags": "t3 abcde t2 xyz t1"}))
+
+    def test_predicate_tags_file(self):
+        url = ""
+
+        with tempfile.NamedTemporaryFile() as tmp:
+            pred = util.predicate_tags(tmp.name)
+            self.assertTrue(pred(url, {}))
+            self.assertTrue(pred(url, {"a": 3}))
+            self.assertTrue(pred(url, {"tags": []}))
+            self.assertTrue(pred(url, {"tags": ["foo", "bar"]}))
+            self.assertTrue(pred(url, {"tags": ["foo", "bar", "baz"]}))
+
+            tmp.write(b"baz")
+            tmp.flush()
+            pred = util.predicate_tags(tmp.name)
+            self.assertTrue(pred(url, {}))
+            self.assertTrue(pred(url, {"a": 3}))
+            self.assertTrue(pred(url, {"tags": []}))
+            self.assertTrue(pred(url, {"tags": ["foo", "bar"]}))
+            self.assertFalse(pred(url, {"tags": ["foo", "bar", "baz"]}))
+
+            tmp.seek(0)
+            tmp.write(b" t1 \n t2\nt3\n\n\n     T4  \n")
+            tmp.flush()
+            pred = util.predicate_tags(tmp.name)
+            self.assertTrue(pred(url, {"tags": ["foo", "bar"]}))
+            self.assertFalse(pred(url, {"tags": ["foo", "t4", "bar"]}))
+            self.assertFalse(pred(url, {"tags": ["t3", "t2", "t1"]}))
+
+            tmp.seek(0)
+            tmp.write(b" t1 \n t2\nt3\n\n\n     T4  \n")
+            tmp.flush()
+            pred = util.predicate_tags(tmp.name)
+            self.assertTrue(pred(url, {"tags": "foo, bar, baz"}))
+            self.assertFalse(pred(url, {"tags": "foo, t4, baz"}))
+            self.assertFalse(pred(url, {"tags": "t3, t2, t1"}))
+            self.assertFalse(pred(url, {"tags": "t3 abcde t2 xyz t1"}))
+
     def test_predicate_build(self):
         pred = util.predicate_build([])
         self.assertIsInstance(pred, type(lambda: True))

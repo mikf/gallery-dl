@@ -1030,6 +1030,43 @@ def predicate_filter(expr, target="image"):
     return _pred
 
 
+def predicate_tags(blacklist, negate=False):
+    def _pred(_, kwdict):
+        if not (tags := kwdict.get("tags") or kwdict.get("tag_string")):
+            return True
+
+        if isinstance(tags, str):
+            taglist = tags.split(", ")
+            if len(taglist) < len(tags) / 16:
+                taglist = tags.split(" ")
+            tags = taglist
+        elif isinstance(tags[0], dict):
+            # pixiv "tags": "original"
+            tags = [
+                tag
+                for tagdict in tags
+                for tag in tagdict.values()
+                if isinstance(tag, str)
+            ]
+            tags.sort()
+
+        for tag in tags:
+            if tag in blacklist:
+                return negate
+        return not negate
+
+    if isinstance(blacklist, str):
+        try:
+            with open(expand_path(blacklist)) as fp:
+                blacklist = {t.lower() for tag in fp if (t := tag.strip())}
+        except OSError:
+            blacklist = {tag for tag in
+                         blacklist.replace(" ", "").lower().split(",")}
+    else:
+        blacklist = set(blacklist)
+    return _pred
+
+
 def predicate_range(ranges, skip=None, flag=None):
     """Predicate; True if the current index is in the given range(s)"""
     if ranges := predicate_range_parse(ranges):
