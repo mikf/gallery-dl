@@ -226,9 +226,7 @@ class MetadataPP(PostProcessor):
         fp.write(self._content_fmt(kwdict))
 
     def _write_tags(self, fp, kwdict):
-        tags = kwdict.get("tags") or kwdict.get("tag_string")
-
-        if not tags:
+        if not (tags := kwdict.get("tags") or kwdict.get("tag_string")):
             return
 
         if isinstance(tags, str):
@@ -236,13 +234,14 @@ class MetadataPP(PostProcessor):
             if len(taglist) < len(tags) / 16:
                 taglist = tags.split(" ")
             tags = taglist
-        elif all(isinstance(e, dict) for e in tags):
+        elif isinstance(tags[0], dict):
             # pixiv "tags": "original"
-            taglists = tags
-            tags = []
-            extend = tags.extend
-            for tagdict in taglists:
-                extend([x for x in tagdict.values() if isinstance(x, str)])
+            tags = [
+                tag
+                for tagdict in tags
+                for tag in tagdict.values()
+                if isinstance(tag, str)
+            ]
             tags.sort()
 
         fp.write("\n".join(tags) + "\n")
