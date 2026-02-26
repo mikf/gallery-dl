@@ -789,6 +789,18 @@ def build_parser():
     selection.add_argument(
         "--chapter-filter",
         dest="child-filter", action=ConfigAction, help=SUPPRESS)
+    selection.add_argument(
+        "--tags-blacklist",
+        dest="tags-blacklist", metavar="TAGS", action=ConfigAction,
+        help=("List of comma-separated tags or path to a file containing said "
+              "tags. Ignore posts tagged with any of the given tags"),
+    )
+    selection.add_argument(
+        "--tags-whitelist",
+        dest="tags-whitelist", metavar="TAGS", action=ConfigAction,
+        help=("List of comma-separated tags or path to a file containing said "
+              "tags. Ignore posts not tagged with any of the given tags"),
+    )
 
     infojson = {
         "name"    : "metadata",

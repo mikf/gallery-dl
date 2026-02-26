@@ -343,6 +343,12 @@ class Job():
                 alt is not None and extr.config(alt + "-unique"):
             predicates.append(util.predicate_unique())
 
+        if target == "post":
+            if tl := extr.config2("whitelist-tags", "tags-whitelist"):
+                predicates.append(util.predicate_tags(tl, True))
+            elif tl := extr.config2("blacklist-tags", "tags-blacklist"):
+                predicates.append(util.predicate_tags(tl, False))
+
         if (pfilter := extr.config(target + "-filter")) or \
                 alt is not None and (pfilter := extr.config(alt + "-filter")):
             try:

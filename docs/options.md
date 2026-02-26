@@ -195,6 +195,12 @@
     --post-filter EXPR          Like '--filter', but for posts
     --child-filter EXPR         Like '--filter', but for child extractors
                                 handling manga chapters, external URLs, etc.
+    --tags-blacklist TAGS       List of comma-separated tags or path to a file
+                                containing said tags. Ignore posts tagged with
+                                any of the given tags
+    --tags-whitelist TAGS       List of comma-separated tags or path to a file
+                                containing said tags. Ignore posts not tagged
+                                with any of the given tags
 
 ## Post-processing Options:
     -P, --postprocessor NAME    Activate the specified post processor
