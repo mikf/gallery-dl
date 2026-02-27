@@ -9431,6 +9431,18 @@ Description
     Location of the ``ffmpeg`` (or ``avconv``) executable to use.
 
 
+ugoira.mkvmerge-args
+--------------------
+Type
+    ``list`` of ``strings``
+Default
+    ``null``
+Example
+    ``["--no-date", "--disable-lacing"]``
+Description
+    Additional ``mkvmerge`` command-line arguments.
+
+
 ugoira.mkvmerge-location
 ------------------------
 Type
@@ -9440,6 +9452,31 @@ Default
 Description
     Location of the ``mkvmerge`` executable for use with the
     `mkvmerge demuxer <ugoira.ffmpeg-demuxer_>`__.
+
+
+ugoira.mkvmerge-metadata
+------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Let ``mkvmerge`` write ``BPS``, ``DURATION``, ``NUMBER_OF_BYTES``,
+    and ``NUMBER_OF_FRAMES`` metadata tags.
+Implementation Detail
+    Disabling this option passes
+    ``--disable-track-statistics-tags`` to ``mkvmerge``
+
+
+ugoira.mkvmerge-mtime
+---------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Set the `date` segment information field
+    of files processed with ``mkvmerge``.
 
 
 ugoira.mkvmerge-output
@@ -9553,7 +9590,7 @@ Type
 Default
     ``true``
 Description
-    Set modification times of generated ugoira aniomations.
+    Set modification times of generated ugoira animations.
 
 
 ugoira.repeat-last-frame
