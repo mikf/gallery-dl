@@ -17,9 +17,9 @@ class MixdropFileExtractor(Extractor):
     category = "mixdrop"
     subcategory = "file"
     root = "https://mixdrop.ag"
-    filename_fmt = "{title} ({fid}).{extension}"
-    archive_fmt = "{fid}"
-    pattern = BASE_PATTERN + r"/[fe]/(\w+)"
+    filename_fmt = "{title} ({id}).{extension}"
+    archive_fmt = "{id}"
+    pattern = BASE_PATTERN + r"/[fe]/([^/?#]+)"
     example = "https://mixdrop.ag/f/0123456789abcdef"
 
     def items(self):
@@ -30,7 +30,7 @@ class MixdropFileExtractor(Extractor):
         txt = text.re(r"\b\w+\b").sub(lambda m: items[int(m.group(0))], string)
 
         data = text.nameext_from_name(text.extr(txt, '.vfile="', '"'), {
-            "fid": fid,
+            "id": fid,
             "title": text.unescape(text.remove_html(text.extr(
                 page, '<div class="title">', "</div>"))),
             "poster": text.ensure_http_scheme(text.extr(
