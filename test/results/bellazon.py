@@ -309,6 +309,32 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/72551-ren%C3%A9e-murden/page/45/#findComment-5468001",
+    "#comment" : "quote / missing parts of 'content' (#9140)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#results" : (
+        "https://www.bellazon.com/main/uploads/monthly_2022_05/QT_hotels.jpg.280653cd3cdf649a55eb5be700b4206d.jpg",
+        "https://www.bellazon.com/main/uploads/monthly_2022_05/Renee_Test.jpg.410ac3d96ec14f535e7935a488f1abb0.jpg",
+        "https://www.bellazon.com/main/uploads/monthly_2022_05/Renee.jpg.5f84145f3b0bb98a4a0e48198354ccb5.jpg",
+        "http://depositfiles.com/files/2rmz400vm",
+        "https://k2s.cc/file/87f706e69800a/RM_DanielShortt.7z",
+    ),
+
+    "post"        : {
+        "author_id"  : "194076",
+        "author_slug": "zorzabosti",
+        "author_url" : "https://www.bellazon.com/main/profile/194076-zorzabosti/",
+        "date"       : "dt:2022-05-08 17:06:36",
+        "id"         : "5468001",
+        "content"    : str,
+    },
+    "thread"      : {
+        "date": "dt:2019-04-15 17:00:08",
+        "id"  : "72551",
+    },
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
