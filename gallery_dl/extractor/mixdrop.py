@@ -27,7 +27,7 @@ class MixdropFileExtractor(Extractor):
         page = self.request(f"{self.root}/e/{fid}").text
         string, pos = text.extract(page, "}}return p}('", "'")
         items = text.extract(page, ",'", "'.split(", pos)[0].split("|")
-        txt = text.re(r"\b\w+\b").sub(lambda m: items[int(m.group(0))], string)
+        txt = text.re(r"\b\w+\b").sub(lambda m: items[int(m[0])], string)
 
         data = text.nameext_from_name(text.extr(txt, '.vfile="', '"'), {
             "id": fid,
