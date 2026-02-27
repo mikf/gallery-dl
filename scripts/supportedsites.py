@@ -137,6 +137,7 @@ CATEGORY_MAP = {
     "mastodon.social": "mastodon.social",
     "mediawiki"      : "MediaWiki",
     "micmicidol"     : "MIC MIC IDOL",
+    "mixdrop"        : "MixDrop",
     "myhentaigallery": "My Hentai Gallery",
     "myportfolio"    : "Adobe Portfolio",
     "natomanga"      : "MangaNato",
