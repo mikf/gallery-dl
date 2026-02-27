@@ -180,11 +180,12 @@ class BellazonExtractor(Extractor):
             "id": extr('id="elComment_', '"'),
             "author_url": extr(" href='", "'"),
             "date": self.parse_datetime_iso(extr("datetime='", "'")),
-            "content": extr("<!-- Post content -->", "\n\t\t</div>"),
+            "content": extr("<!-- Post content -->", '<menu data-ips-hook='),
         }
 
-        if (pos := post["content"].find(">")) >= 0:
-            post["content"] = post["content"][pos+1:].strip()
+        beg = post["content"].find(">")
+        end = post["content"].rfind("\n\t\t</div>")
+        post["content"] = post["content"][beg+1:end+1].strip()
 
         if url_a := post["author_url"]:
             post["author_id"], _, post["author_slug"] = \
