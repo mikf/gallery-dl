@@ -57,6 +57,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://danbooru.donmai.us/posts?tags=parent%3A15750&z=5",
+    "#comment" : "'parent:…' results",
+    "#category": ("Danbooru", "danbooru", "tag"),
+    "#class"   : danbooru.DanbooruTagExtractor,
+    "#results" : (
+        "https://cdn.donmai.us/original/61/e4/61e447489b451dab5e521afd72f3401d.jpg",
+        "https://cdn.donmai.us/original/73/f6/73f689d6cf1f9c973d9a6dd0545f68b7.jpg",
+        "https://cdn.donmai.us/original/bb/a3/bba30cc7ff0f22614fffd6aa15a83c4f.jpg",
+    ),
+},
+
+{
     "#url"     : "https://danbooru.donmai.us/pools/7659",
     "#category": ("Danbooru", "danbooru", "pool"),
     "#class"   : danbooru.DanbooruPoolExtractor,
