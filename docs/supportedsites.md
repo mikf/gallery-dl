@@ -721,6 +721,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, Channels</td>
     <td>Supported</td>
 </tr>
+<tr id="mixdrop" title="mixdrop">
+    <td>MixDrop</td>
+    <td>https://mixdrop.ag/</td>
+    <td>Files</td>
+    <td></td>
+</tr>
 <tr id="motherless" title="motherless">
     <td>Motherless</td>
     <td>https://motherless.com/</td>
