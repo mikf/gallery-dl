@@ -9,22 +9,50 @@ from gallery_dl.extractor import mixdrop
 
 __tests__ = (
 {
-    "#url"     : "https://m1xdrop.com/f/k0mmklw8axe09e",
-    "#category": ("", "mixdrop", "file"),
+    "#url"     : "https://mixdrop.ag/f/k0mmklw8axe09e",
     "#class"   : mixdrop.MixdropFileExtractor,
-    "#pattern" : r"https://s-delivery\d+\.mxcontent\.net/v\d/k0mmklw8axe09e\.mp4",
+    "#pattern" : r"https://\w+.mxcontent.net/v2/k0mmklw8axe09e.mp4\?s=\w+&e=\d+&_t=\d+",
     "#count"   : 1,
 
-    "fid"      : "k0mmklw8axe09e",
+    "id"       : "k0mmklw8axe09e",
     "title"    : "Leeds United vs Arsenal - 31012026",
-    "poster"   : r"re:https://s-delivery\d+\.mxcontent.net/thumbs/k0mmklw8axe09e_5x5\.jpg",
+    "poster"   : r"re:https://\w+.mxcontent.net/thumbs/k0mmklw8axe09e_5x5.jpg",
     "filename" : "9ae814bc8aaacd419119cb1e8393c29c",
     "extension": "mp4",
 },
 
 {
+    "#url"     : "https://m1xdrop.com/e/k0mmklw8axe09e",
+    "#class"   : mixdrop.MixdropFileExtractor,
+},
+
+{
+    "#url"     : "https://m1xdrop.com/f/k0mmklw8axe09e",
+    "#class"   : mixdrop.MixdropFileExtractor,
+},
+
+{
+    "#url"     : "https://m1xdrop.net/e/k0mmklw8axe09e",
+    "#class"   : mixdrop.MixdropFileExtractor,
+},
+
+{
+    "#url"     : "https://m1xdrop.net/f/k0mmklw8axe09e",
+    "#class"   : mixdrop.MixdropFileExtractor,
+},
+
+{
+    "#url"     : "https://mixdrop.top/e/k0mmklw8axe09e",
+    "#class"   : mixdrop.MixdropFileExtractor,
+},
+
+{
+    "#url"     : "https://mixdrop.top/f/k0mmklw8axe09e",
+    "#class"   : mixdrop.MixdropFileExtractor,
+},
+
+{
     "#url"     : "https://mixdrop.ag/e/k0mmklw8axe09e",
-    "#category": ("", "mixdrop", "file"),
     "#class"   : mixdrop.MixdropFileExtractor,
 },
 
