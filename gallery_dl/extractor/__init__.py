@@ -138,6 +138,7 @@ modules = [
     "mangatown",
     "mangoxo",
     "misskey",
+    "mixdrop",
     "motherless",
     "myhentaigallery",
     "myportfolio",
