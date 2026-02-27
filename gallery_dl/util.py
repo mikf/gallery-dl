@@ -1067,6 +1067,32 @@ def predicate_tags(blacklist, negate=False):
     return _pred
 
 
+def predicate_date(before, after=None, skip=None):
+    if after is None:
+        if skip is not None and skip(before):
+            return true
+
+        def _pred(_, kwdict):
+            if (date := kwdict.get("date")) and date >= before:
+                return False
+            return True
+
+    elif before is None or after > before or skip is not None and skip(before):
+        def _pred(_, kwdict):
+            if (date := kwdict.get("date")) and date <= after:
+                raise exception.StopExtraction()
+            return True
+
+    else:
+        def _pred(_, kwdict):
+            if not (date := kwdict.get("date")):
+                return True
+            if date <= after:
+                raise exception.StopExtraction()
+            return date < before
+    return _pred
+
+
 def predicate_range(ranges, skip=None, flag=None):
     """Predicate; True if the current index is in the given range(s)"""
     if ranges := predicate_range_parse(ranges):
