@@ -4,7 +4,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://m1xdrop.com/"""
+"""Extractors for https://mixdrop.ag/"""
 
 from .common import Extractor, Message
 from .. import text
@@ -16,11 +16,11 @@ class MixdropFileExtractor(Extractor):
     """Extractor for mixdrop files"""
     category = "mixdrop"
     subcategory = "file"
-    root = "https://m1xdrop.com"
+    root = "https://mixdrop.ag"
     filename_fmt = "{title} ({fid}).{extension}"
     archive_fmt = "{fid}"
     pattern = BASE_PATTERN + r"/[fe]/(\w+)"
-    example = "https://m1xdrop.com/f/0123456789abcdef"
+    example = "https://mixdrop.ag/f/0123456789abcdef"
 
     def items(self):
         fid = self.groups[0]
