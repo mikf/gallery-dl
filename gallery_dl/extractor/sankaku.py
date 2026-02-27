@@ -139,8 +139,15 @@ class SankakuTagExtractor(SankakuExtractor):
         return {"search_tags": self.tags}
 
     def posts(self):
-        params = {"tags": self.tags}
-        return self.api.posts_keyset(params)
+        posts = self.api.posts_keyset({"tags": self.tags})
+
+        if "parent:" in self.tags:
+            import itertools
+            parent = self.api.posts_keyset({"tags": text.re(
+                r"\bparent:(\w+)").sub(r"id_range:\1", self.tags)})
+            posts = itertools.chain(parent, posts)
+
+        return posts
 
 
 class SankakuPoolExtractor(SankakuExtractor):
