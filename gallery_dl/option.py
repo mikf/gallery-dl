@@ -272,7 +272,7 @@ def build_parser():
         "--restrict-filenames",
         dest="path-restrict", metavar="VALUE", action=ConfigAction,
         help=("Replace restricted filename characters with underscores. "
-              "One of 'windows', 'unix', 'ascii', 'ascii+', "
+              "One of 'windows', 'windows+', 'unix', 'ascii', 'ascii+', "
               "or a custom set of characters"),
     )
     general.add_argument(
@@ -740,6 +740,33 @@ def build_parser():
               "skip downloading any file already in it"),
     )
     selection.add_argument(
+        "--blacklist",
+        dest="blacklist", metavar="CATEGORIES", action=ConfigAction,
+        help=("Ignore the given comma-separated category names or "
+              "category:subcategory pairs when spawning child extractors for "
+              "external URLs (e.g. 'pixiv', 'pixiv:user,*:artist')"),
+    )
+    selection.add_argument(
+        "--whitelist",
+        dest="whitelist", metavar="CATEGORIES", action=ConfigAction,
+        help=("Allow only the given comma-separated category names or "
+              "category:subcategory pairs to allow when spawning child "
+              "extractors for external URLs"),
+    )
+    selection.add_argument(
+        "--tags-blacklist",
+        dest="tags-blacklist", metavar="TAGS", action=ConfigAction,
+        help=("Ignore posts tagged with any of the tags given as comma-"
+              "separated list or path to a file containing them (e.g. "
+              r"'1girl', 'shirt,highres,smile', 'C:\path\to\list.txt')"),
+    )
+    selection.add_argument(
+        "--tags-whitelist",
+        dest="tags-whitelist", metavar="TAGS", action=ConfigAction,
+        help=("Allow only posts tagged with at least one of the tags given as "
+              "comma-separated list or path to a file containing them"),
+    )
+    selection.add_argument(
         "--range",
         dest="file-range", metavar="RANGE", action=ConfigAction,
         help=("Index range(s) specifying which files to download. "
@@ -789,18 +816,6 @@ def build_parser():
     selection.add_argument(
         "--chapter-filter",
         dest="child-filter", action=ConfigAction, help=SUPPRESS)
-    selection.add_argument(
-        "--tags-blacklist",
-        dest="tags-blacklist", metavar="TAGS", action=ConfigAction,
-        help=("List of comma-separated tags or path to a file containing said "
-              "tags. Ignore posts tagged with any of the given tags"),
-    )
-    selection.add_argument(
-        "--tags-whitelist",
-        dest="tags-whitelist", metavar="TAGS", action=ConfigAction,
-        help=("List of comma-separated tags or path to a file containing said "
-              "tags. Ignore posts not tagged with any of the given tags"),
-    )
 
     infojson = {
         "name"    : "metadata",

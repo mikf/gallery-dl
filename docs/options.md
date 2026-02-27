@@ -26,8 +26,9 @@
     -d, --destination PATH      Target location for file downloads
     -D, --directory PATH        Exact location for file downloads
     --restrict-filenames VALUE  Replace restricted filename characters with
-                                underscores. One of 'windows', 'unix', 'ascii',
-                                'ascii+', or a custom set of characters
+                                underscores. One of 'windows', 'windows+',
+                                'unix', 'ascii', 'ascii+', or a custom set of
+                                characters
     --windows-filenames         Force filenames to be Windows-compatible
     -X, --extractors PATH       Load external extractors from PATH
     --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
@@ -180,6 +181,21 @@
                                 500k or 2.5M)
     --download-archive FILE     Record successfully downloaded files in FILE
                                 and skip downloading any file already in it
+    --blacklist CATEGORIES      Ignore the given comma-separated category names
+                                or category:subcategory pairs when spawning
+                                child extractors for external URLs (e.g.
+                                'pixiv', 'pixiv:user,*:artist')
+    --whitelist CATEGORIES      Allow only the given comma-separated category
+                                names or category:subcategory pairs to allow
+                                when spawning child extractors for external
+                                URLs
+    --tags-blacklist TAGS       Ignore posts tagged with any of the tags given
+                                as comma-separated list or path to a file
+                                containing them (e.g. '1girl',
+                                'shirt,highres,smile', 'C:\path\to\list.txt')
+    --tags-whitelist TAGS       Allow only posts tagged with at least one of
+                                the tags given as comma-separated list or path
+                                to a file containing them
     --range RANGE               Index range(s) specifying which files to
                                 download. These can be either a constant value,
                                 range, or slice (e.g. '5', '8-20', or '1:24:3')
@@ -195,12 +211,6 @@
     --post-filter EXPR          Like '--filter', but for posts
     --child-filter EXPR         Like '--filter', but for child extractors
                                 handling manga chapters, external URLs, etc.
-    --tags-blacklist TAGS       List of comma-separated tags or path to a file
-                                containing said tags. Ignore posts tagged with
-                                any of the given tags
-    --tags-whitelist TAGS       List of comma-separated tags or path to a file
-                                containing said tags. Ignore posts not tagged
-                                with any of the given tags
 
 ## Post-processing Options:
     -P, --postprocessor NAME    Activate the specified post processor
