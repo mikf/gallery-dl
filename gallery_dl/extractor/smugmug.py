@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2025 Mike Fährmann
+# Copyright 2018-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -204,12 +204,15 @@ class SmugmugAPI(oauth.OAuth1API):
         params["_verbosity"] = "1"
 
         response = self.request(url, params=params, headers=self.HEADERS)
-        data = response.json()
+        try:
+            data = response.json()
+        except ValueError:
+            raise self.exc.NotFoundError(self.extractor.__class__.subcategory)
 
         if 200 <= data["Code"] < 400:
             return data
         if data["Code"] == 404:
-            raise self.exc.NotFoundError()
+            raise self.exc.NotFoundError(self.extractor.__class__.subcategory)
         if data["Code"] == 429:
             raise self.exc.AbortExtraction("Rate limit reached")
         self.log.debug(data)
