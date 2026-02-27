@@ -394,6 +394,7 @@ class DownloadJob(Job):
         self.visited = set() if parent is None else parent.visited
         self._extractor_filter = None
         self._skipcnt = 0
+        self._downloadcnt = parent._downloadcnt if parent else 0
 
     def handle_url(self, url, kwdict):
         """Download the resource specified in 'url'"""
@@ -478,6 +479,11 @@ class DownloadJob(Job):
         if archive is not None and self._archive_write_after:
             archive.add(kwdict)
 
+        self._downloadcnt += 1
+        if self._max_downloads and self._downloadcnt >= self._max_downloads:
+            self.log.info("Reached download limit (%d)", self._max_downloads)
+            raise exception.TerminateExtraction()
+
     def handle_directory(self, kwdict):
         """Set and create the target directory for downloads"""
         if self.pathfmt is None:
@@ -515,6 +521,7 @@ class DownloadJob(Job):
 
         if extr:
             job = self.__class__(extr, self)
+            job._downloadcnt = self._downloadcnt
             pfmt = self.pathfmt
             pextr = self.extractor
             parent = pextr.config("parent", pextr.parent)
@@ -550,6 +557,8 @@ class DownloadJob(Job):
                         self._skipcnt = job._skipcnt
                     else:
                         status = job.run()
+
+                    self._downloadcnt = job._downloadcnt
 
                     if status:
                         self.status |= status
@@ -670,6 +679,9 @@ class DownloadJob(Job):
         self.sleep = util.build_duration_func(cfg("sleep"))
         self.sleep_skip = util.build_duration_func(cfg("sleep-skip"))
         self.fallback = cfg("fallback", True)
+        self._max_downloads = cfg("max-downloads")
+        if self._max_downloads is not None and self._max_downloads <= 0:
+            self._max_downloads = None
         if not cfg("download", True):
             # monkey-patch method to do nothing and always return True
             self.download = pathfmt.fix_extension

@@ -801,6 +801,12 @@ def build_parser():
         help=("List of comma-separated tags or path to a file containing said "
               "tags. Ignore posts not tagged with any of the given tags"),
     )
+    selection.add_argument(
+        "--max-downloads",
+        dest="max-downloads", metavar="N", type=int, action=ConfigAction,
+        help=("Stop downloading after N files have been downloaded "
+              "(default: 0, no limit)"),
+    )
 
     infojson = {
         "name"    : "metadata",
