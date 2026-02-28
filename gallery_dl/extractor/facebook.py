@@ -410,6 +410,12 @@ class FacebookPhotoExtractor(FacebookExtractor):
 
         directory = self.parse_set_page(set_page)
 
+        for key in ("set_id", "title", "user_id", "user_pfbid", "username"):
+            if not directory.get(key):
+                directory[key] = photo.get(key)
+            elif not photo.get(key):
+                photo[key] = directory.get(key)
+
         yield Message.Directory, "", directory
         yield Message.Url, photo["url"], photo
 
