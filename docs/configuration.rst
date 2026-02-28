@@ -1783,31 +1783,6 @@ Description
     Accepted values are |ISO 8601| dates and Unix timestamps.
 
 
-extractor.*.date-format
------------------------
-Type
-    ``string``
-Default
-    ``null``
-Description
-    Format string used to parse ``string`` values of
-    `date-min` and `date-max`.
-
-    See |strptime|_ for a list of formatting directives.
-Special Values
-    ``null``
-        | Parse `date-min` and `date-max` according to |ISO 8601|
-        | See
-          `datetime.fromisoformat() <https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat>`__
-          for details and examples.
-Note
-    Despite its name, this option does **not** control how
-    ``{date}`` metadata fields are formatted.
-    To use a different formatting for those values other than the default
-    ``%Y-%m-%d %H:%M:%S``, put |strptime|_ formatting directives
-    after a colon ``:``, for example ``{date:%Y%m%d}``.
-
-
 extractor.*.write-pages
 -----------------------
 Type
@@ -10153,13 +10128,14 @@ Type
     * ``string``
     * ``integer``
 Example
-    * ``"2019-01-01T00:00:00"``
-    * ``"2019"`` with ``"%Y"`` as `date-format`_
+    * ``"2019-01-01"``
+    * ``"2019-01-01 03:00:00"``
+    * ``"2019-03-08T12:30:00Z"``
     * ``1546297200``
 Description
     A |Date|_ value represents a specific point in time.
 
-    * If given as ``string``, it is parsed according to `date-format`_.
+    * If given as ``string``, it is parsed according to |ISO 8601|.
     * If given as ``integer``, it is interpreted as UTC timestamp.
 
 
@@ -10569,7 +10545,6 @@ Reference
 
 .. _directory: `extractor.*.directory`_
 .. _base-directory: `extractor.*.base-directory`_
-.. _date-format: `extractor.*.date-format`_
 .. _deviantart.metadata: `extractor.deviantart.metadata`_
 .. _deviantart.comments: `extractor.deviantart.comments`_
 .. _postprocessors: `extractor.*.postprocessors`_

@@ -75,12 +75,11 @@ __tests__ = (
 
 {
     "#url"     : "https://mikf123.tumblr.com/",
-    "#comment" : "date-min/-max/-format (#337)",
+    "#comment" : "date-min/-max (#337)",
     "#class"   : tumblr.TumblrUserExtractor,
     "#options" : {
-        "date-min"   : "201804",
-        "date-max"   : "201805",
-        "date-format": "%Y%m",
+        "date-min": "2018-04-01",
+        "date-max": "2018-05-01",
     },
     "#count"   : 4,
 },

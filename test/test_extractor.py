@@ -342,13 +342,12 @@ class TextExtractorCommonDateminmax(unittest.TestCase):
         self.assertEqual(
             log_info.output[0],
             "WARNING:generic:Unable to parse 'date-max': "
-            "Invalid isoformat string '2010-01'")
+            "Invalid ISO 8601 string '2010-01'")
 
-    def test_date_min_max_fmt(self):
+    def test_date_min_max(self):
         extr = extractor.find("generic:https://example.org/")
-        config.set((), "date-format", "%B %d %Y")
-        config.set((), "date-min", "January 01 2010")
-        config.set((), "date-max", "August 18 2022")
+        config.set((), "date-min", "2010-01-01")
+        config.set((), "date-max", "2022-08-18")
 
         dmin, dmax = extr._get_date_min_max()
         self.assertEqual(dmin, 1262304000)
@@ -356,8 +355,7 @@ class TextExtractorCommonDateminmax(unittest.TestCase):
 
     def test_date_min_max_mix(self):
         extr = extractor.find("generic:https://example.org/")
-        config.set((), "date-format", "%B %d %Y")
-        config.set((), "date-min", "January 01 2010")
+        config.set((), "date-min", "2010-01-01")
         config.set((), "date-max", 1262304061)
 
         dmin, dmax = extr._get_date_min_max()
