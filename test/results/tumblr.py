@@ -253,6 +253,16 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.tumblr.com/ominous-signs/809452804394663936/one-way-to-hell",
+    "#comment" : "'answer'/'asks' post (#4509)",
+    "#class"   : tumblr.TumblrPostExtractor,
+    "#auth"    : True,
+    "#results" : "https://64.media.tumblr.com/a68cf0e9287c4557f4c0950edafb836b/5cf90cb0eb792b63-a4/s99999x99999/139223e8f778e3005e5748099f684c7816b10b14.jpg",
+
+    "type"     : "answer",
+},
+
+{
     "#url"     : "http://demo.tumblr.com/tagged/Times%20Square",
     "#class"   : tumblr.TumblrTagExtractor,
     "#pattern" : r"https://\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280.jpg",
