@@ -93,6 +93,97 @@ regardless of their position.
     }
 
 
+Custom Sites
+============
+
+*gallery-dl* supports several different site types (called *basecategories*)
+for which multiple sub-sites can be configured.
+A list of all available basecategories is shown in the following table:
+
+==================================
+basecategory
+==================================
+``gelbooru_v01``
+``gelbooru_v02``
+``moebooru``
+``philomena``
+``foolfuuka``
+``foolslide``
+``mastodon``
+``shopify``
+==================================
+
+Several sub-sites are already supported by default
+(see the `bottom entries <supportedsites.md>`__ in the list of supported sites),
+but it is also possible to configure gallery-dl
+to recognize additional sites of these types.
+
+To add a custom site, create an entry with an arbitrary name (this will be used as the category)
+inside a block named after the basecategory within the ``extractor`` section:
+
+.. code:: json
+
+    {
+        "extractor": {
+            "basecategory-name": {
+                "custom-name": {
+                    "root": "https://custom.site.url"
+                }
+            }
+        }
+    }
+
+Required Parameters
+-------------------
+
+``root``
+    The root URL of the custom site.
+    This is the base URL where the site's content is located.
+
+Optional Parameters
+-------------------
+
+``pattern``
+    A regular expression pattern to match the site's domain.
+    This pattern is used to identify URLs from this site.
+    The pattern must not contain any capture groups (parentheses ``()``)
+    and should match the domain part of URLs from the custom site.
+
+    If not specified, a default pattern will be generated based on the ``root`` URL.
+
+Example
+-------
+
+The following configuration adds support for two additional
+Gelbooru Beta 0.1.11 sites and two Shopify instances:
+
+.. code:: json
+
+    {
+        "extractor": {
+            "gelbooru_v01": {
+                "rozenmaidenbooru": {
+                    "root": "http://rm.booru.org"
+                },
+                "azureblade": {
+                    "root": "https://tab.booru.org"
+                }
+            },
+            "shopify": {
+                "hiutdenim": {
+                    "root": "https://hiutdenim.co.uk"
+                },
+                "ptfoods": {
+                    "root": "https://partakefoods.com",
+                    "pattern": "(?:www\\.)?partakefoods\\.com"
+                }
+            }
+        }
+    }
+
+The custom site names (``rozenmaidenbooru``, ``azureblade``, etc.)
+will be used as the ``category`` value for downloads from these sites.
+
 
 extractor.*.filename
 --------------------
