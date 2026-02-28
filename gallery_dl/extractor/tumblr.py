@@ -142,6 +142,9 @@ class TumblrExtractor(Extractor):
                 # only "chat" posts are missing a "reblog" key in their
                 # API response, but they can't contain images/videos anyway
                 body = post["reblog"]["comment"] + post["reblog"]["tree_html"]
+                if "question" in post:
+                    body = (f"{body} {post['question']} "
+                            f"{post.get('answer') or ''}")
                 for url in _findall_image(body):
                     url, fb = self._original_inline_image(url)
                     if fb:
