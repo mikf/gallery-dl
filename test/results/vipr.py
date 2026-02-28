@@ -12,8 +12,19 @@ __tests__ = (
     "#url"     : "https://vipr.im/kcd5jcuhgs3v.html",
     "#category": ("imagehost", "vipr", "image"),
     "#class"   : imagehosts.ViprImageExtractor,
-    "#sha1_url"     : "88f6a3ecbf3356a11ae0868b518c60800e070202",
-    "#sha1_metadata": "c432e8a1836b0d97045195b745731c2b1bb0e771",
+    "#results" : "https://i7.vipr.im/i/00021/kcd5jcuhgs3v.jpg/sommer01035.jpg",
+
+    "extension": "jpg",
+    "filename" : "sommer01035",
+    "post_url" : "https://vipr.im/kcd5jcuhgs3v",
+    "token"    : "kcd5jcuhgs3v",
+},
+
+{
+    "#url"     : "https://vipr.im/yyqomiutt768",
+    "#category": ("imagehost", "vipr", "image"),
+    "#class"   : imagehosts.ViprImageExtractor,
+    "#exception": "NotFoundError",
 },
 
 )
