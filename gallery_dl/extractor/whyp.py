@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -50,23 +50,27 @@ class WhypExtractor(Extractor):
 
 class WhypAudioExtractor(WhypExtractor):
     subcategory = "audio"
-    pattern = BASE_PATTERN + r"/tracks/(\d+)"
+    pattern = BASE_PATTERN + r"/tracks/(\d+)(?:/[^/?#]+)?/?(?:\?([^#]+))?"
     example = "https://whyp.it/tracks/12345/SLUG"
 
     def tracks(self):
-        url = f"{self.root_api}/api/tracks/{self.groups[0]}"
-        track = self.request_json(url, headers=self.headers_api)["track"]
-        return (track,)
+        tid, qs = self.groups
+        url = f"{self.root_api}/api/tracks/{tid}"
+        params = None if qs is None else text.parse_query(qs)
+        data = self.request_json(url, params=params, headers=self.headers_api)
+        return (data["track"],)
 
 
 class WhypUserExtractor(WhypExtractor):
     subcategory = "user"
-    pattern = BASE_PATTERN + r"/users/(\d+)"
+    pattern = BASE_PATTERN + r"/users/(\d+)(?:/[^/?#]+)?/?(?:\?([^#]+))?"
     example = "https://whyp.it/users/123/NAME"
 
     def tracks(self):
-        url = f"{self.root_api}/api/users/{self.groups[0]}/tracks"
-        params = {}
+        uid, qs = self.groups
+
+        url = f"{self.root_api}/api/users/{uid}/tracks"
+        params = text.parse_query(qs)
         headers = self.headers_api
 
         while True:
@@ -81,16 +85,17 @@ class WhypUserExtractor(WhypExtractor):
 
 class WhypCollectionExtractor(WhypExtractor):
     subcategory = "collection"
-    pattern = BASE_PATTERN + r"/collections/(\d+)"
+    pattern = BASE_PATTERN + r"/collections/(\d+)(?:/[^/?#]+)?/?(?:\?([^#]+))?"
     example = "https://whyp.it/collections/123/NAME"
 
     def tracks(self):
-        cid = self.groups[0]
+        cid, qs = self.groups
 
         url = f"{self.root_api}/api/collections/{cid}"
+        params = None if qs is None else text.parse_query(qs)
         headers = self.headers_api
         self.kwdict["collection"] = collection = self.request_json(
-            url, headers=headers)["collection"]
+            url, params=params, headers=headers)["collection"]
 
         url = f"{self.root_api}/api/collections/{cid}/tracks"
         params = {"token": collection["token"]}
