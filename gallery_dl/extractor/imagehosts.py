@@ -428,8 +428,11 @@ class ViprImageExtractor(ImagehostImageExtractor):
     example = "https://vipr.im/abc123.html"
 
     def get_info(self, page):
-        url = text.extr(page, '<img src="', '"')
-        return url, None
+        url, pos = text.extract(page, '<img src="', '"')
+        if not url or url[0] != "h":
+            self.not_found()
+        alt, pos = text.extract(page, ' alt="', '"', pos)
+        return url, alt and text.unescape(alt)
 
 
 class ImgclickImageExtractor(ImagehostImageExtractor):
