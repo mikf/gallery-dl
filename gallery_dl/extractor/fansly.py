@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -430,8 +430,7 @@ class FanslyAPI():
         while True:
             response = self._call(endpoint, params)
 
-            data = response["data"]
-            if not data:
+            if not (data := response.get("data")):
                 return
             yield from self._update_media(data, response["aggregationData"])
             params["before"] = data[-1]["id"]
