@@ -86,6 +86,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://mikf123.tumblr.com/",
+    "#comment" : "date-before/-after",
+    "#class"   : tumblr.TumblrUserExtractor,
+    "#options" : {
+        "date-before": "2018-05-01",
+        "date-after" : "2018-04-01",
+    },
+    "#count"   : 4,
+},
+
+{
     "#url"     : "https://tumblr.com/mikf123",
     "#comment" : "no 'www.' subdomain (#7358)",
     "#class"   : tumblr.TumblrUserExtractor,

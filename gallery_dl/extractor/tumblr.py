@@ -56,6 +56,9 @@ class TumblrExtractor(Extractor):
 
         self.date_min, self.api.before = self._get_date_min_max(0, None)
 
+    def skip_date(self, date):
+        self.api.before = int(dt.to_ts(date))
+
     def items(self):
         blog = None
 
