@@ -52,6 +52,21 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.old.reddit.com/r/lavaporn/",
+    "#class"   : reddit.RedditSubredditExtractor,
+},
+
+{
+    "#url"     : "https://www.np.reddit.com/r/lavaporn/",
+    "#class"   : reddit.RedditSubredditExtractor,
+},
+
+{
+    "#url"     : "https://www.m.reddit.com/r/lavaporn/",
+    "#class"   : reddit.RedditSubredditExtractor,
+},
+
+{
     "#url"     : "https://www.reddit.com/",
     "#category": ("", "reddit", "home"),
     "#class"   : reddit.RedditHomeExtractor,
@@ -108,6 +123,11 @@ __tests__ = (
         "name"        : "SeichiScout",
         "verified"    : True,
     },
+},
+
+{
+    "#url"     : "https://www.old.reddit.com/user/username/",
+    "#class"   : reddit.RedditUserExtractor,
 },
 
 {
@@ -314,6 +334,11 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.old.reddit.com/r/lavaporn/comments/2a00np/",
+    "#class"   : reddit.RedditSubmissionExtractor,
+},
+
+{
     "#url"     : "https://i.redd.it/upjtjcx2npzz.jpg",
     "#category": ("", "reddit", "image"),
     "#class"   : reddit.RedditImageExtractor,
@@ -359,6 +384,11 @@ __tests__ = (
     "#category": ("", "reddit", "redirect"),
     "#class"   : reddit.RedditRedirectExtractor,
     "#pattern" : r"^https://www.reddit.com/user/Tailhook91/comments/znfxbr/prove_it/",
+},
+
+{
+    "#url"     : "https://www.old.reddit.com/user/Tailhook91/s/w4yAMbtOYm",
+    "#class"   : reddit.RedditRedirectExtractor,
 },
 
 )
