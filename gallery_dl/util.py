@@ -371,8 +371,6 @@ def expand_path(path):
     """Expand environment variables and tildes (~)"""
     if not path:
         return path
-    if not isinstance(path, str):
-        path = os.path.join(*path)
     return os.path.expandvars(os.path.expanduser(path))
 
 

@@ -10166,7 +10166,7 @@ Type
     * |Duration|_
     * ``string``
 Example
-    ``"1.5-3.0"``
+    * ``"1.5-3.0"``
     * ``"lin=5"``
     * ``"lin:20=30-60"``
     * ``"exp:1.8=40"``
@@ -10208,16 +10208,15 @@ Description
 Path
 ----
 Type
-    * ``string``
-    * ``list`` of ``strings``
+    ``string``
 Example
     * ``"file.ext"``
     * ``"~/path/to/file.ext"``
     * ``"$HOME/path/to/file.ext"``
-    * ``["$HOME", "path", "to", "file.ext"]``
+    * ``"C:\\path\\to\\file.ext"``
 Description
-    A |Path|_ is a ``string`` representing the location of a file
-    or directory.
+    A |Path|_ is a ``string`` representing the location
+    of a file or directory.
 
     Simple `tilde expansion <https://docs.python.org/3/library/os.path.html#os.path.expanduser>`__
     and `environment variable expansion <https://docs.python.org/3/library/os.path.html#os.path.expandvars>`__
