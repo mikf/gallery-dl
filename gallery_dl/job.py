@@ -24,6 +24,7 @@ from . import (
     path,
     text,
     util,
+    dt,
     version,
 )
 from .extractor.message import Message
@@ -344,6 +345,14 @@ class Job():
             predicates.append(util.predicate_unique())
 
         if target == "post":
+            if dta := extr.config("date-after"):
+                dta = dt.convert(dta)
+            if dtb := extr.config("date-before"):
+                dtb = dt.convert(dtb)
+            if dta or dtb:
+                predicates.append(util.predicate_date(
+                    dtb or None, dta or None))
+
             if tl := extr.config2("whitelist-tags", "tags-whitelist"):
                 predicates.append(util.predicate_tags(tl, True))
             elif tl := extr.config2("blacklist-tags", "tags-blacklist"):

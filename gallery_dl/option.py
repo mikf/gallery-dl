@@ -740,6 +740,19 @@ def build_parser():
               "skip downloading any file already in it"),
     )
     selection.add_argument(
+        "--date-before",
+        dest="date-before", metavar="DATE", action=ConfigAction,
+        help=("Process only posts created before this date given in "
+              "ISO 8601 format or as Unix timestamp (e.g. '2025-10-31', "
+              "'2026-01-09T15:30:00', '1767972600')")
+    )
+    selection.add_argument(
+        "--date-after",
+        dest="date-after", metavar="DATE", action=ConfigAction,
+        help=("Process only posts created after this date. "
+              "Stop extraction when an older post is encountered")
+    )
+    selection.add_argument(
         "--blacklist",
         dest="blacklist", metavar="CATEGORIES", action=ConfigAction,
         help=("Ignore the given comma-separated category names or "

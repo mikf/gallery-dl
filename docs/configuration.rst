@@ -1752,6 +1752,37 @@ Description
     but applies to delegated URLs like manga chapters, etc.
 
 
+extractor.*.date-before
+-----------------------
+Type
+    |Date|_
+Default
+    ``null``
+Example
+    * ``"2025-10-31"``
+    * ``"2026-01-09 15:30:00"``
+    * ``"2026-01-09T15:30:00Z"``
+    * ``1767972600``
+Description
+    Process only posts created `before` this |Date|_.
+
+    Accepted values are |ISO 8601| dates and Unix timestamps.
+
+
+extractor.*.date-after
+----------------------
+Type
+    |Date|_
+Default
+    ``null``
+Description
+    | Process only posts created `after` this |Date|_.
+    | Stop extraction when encountering
+      a post created before or equal to this |Date|_.
+
+    Accepted values are |ISO 8601| dates and Unix timestamps.
+
+
 extractor.*.date-format
 -----------------------
 Type
@@ -1765,8 +1796,7 @@ Description
     See |strptime|_ for a list of formatting directives.
 Special Values
     ``null``
-        | Parse `date-min` and `date-max` according to
-          `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`__
+        | Parse `date-min` and `date-max` according to |ISO 8601|
         | See
           `datetime.fromisoformat() <https://docs.python.org/3/library/datetime.html#datetime.datetime.fromisoformat>`__
           for details and examples.
@@ -9239,7 +9269,7 @@ Default
 Description
     Name of the metadata field whose value should be used.
 
-    This value must be either a UNIX timestamp or a
+    This value must be either a Unix timestamp or a
     |type-datetime|_ object.
 Note
     This option is ignored if `mtime.value`_ is set.
@@ -9257,7 +9287,7 @@ Example
 Description
     The `Format String`_ whose value should be used.
 
-    The resulting value must be either a UNIX timestamp or a
+    The resulting value must be either a Unix timestamp or a
     |type-datetime|_ object.
 Note:
     Unlike standard `Format Strings`_, replacement fields here
@@ -10535,7 +10565,7 @@ Reference
 .. |open()| replace:: the built-in ``open()`` function
 .. |json.dump()| replace:: ``json.dump()``
 .. |ISO 639-1| replace:: `ISO 639-1 <https://en.wikipedia.org/wiki/ISO_639-1>`__ language
-.. |ISO 8601| replace:: `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`__ language
+.. |ISO 8601| replace:: `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`__
 
 .. _directory: `extractor.*.directory`_
 .. _base-directory: `extractor.*.base-directory`_
