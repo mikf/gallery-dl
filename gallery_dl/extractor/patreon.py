@@ -456,6 +456,11 @@ class PatreonUserExtractor(PatreonExtractor):
     pattern = r"(?:https?://)?(?:www\.)?patreon\.com/home$"
     example = "https://www.patreon.com/home"
 
+    def skip_date(self, date):
+        self._cursor = cursor = dt.from_ts(date).isoformat()
+        self._init_cursor = lambda: cursor
+        return True
+
     def posts(self):
         if date_max := self._get_date_min_max(None, None)[1]:
             self._cursor = cursor = dt.from_ts(date_max).isoformat()

@@ -58,6 +58,7 @@ class TumblrExtractor(Extractor):
 
     def skip_date(self, date):
         self.api.before = int(dt.to_ts(date))
+        return True
 
     def items(self):
         blog = None
