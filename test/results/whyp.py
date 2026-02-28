@@ -50,6 +50,18 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://whyp.it/tracks/12345?token=tokenstring",
+    "#comment" : "'token' paraneter (#9133)",
+    "#class"   : whyp.WhypAudioExtractor,
+},
+
+{
+    "#url"     : "https://whyp.it/tracks/12345/slug-of-track-title?token=tokenstring",
+    "#comment" : "'token' paraneter (#9133)",
+    "#class"   : whyp.WhypAudioExtractor,
+},
+
+{
     "#url"     : "https://whyp.it/users/1/brad",
     "#class"   : whyp.WhypUserExtractor,
     "#pattern" : (
@@ -117,13 +129,13 @@ __tests__ = (
         "duration"    : 352.59,
         "hidden_tracks_count": 0,
         "id"          : 1,
-        "order"       : 1,
+        "order"       : {1, 3},
         "public"      : True,
         "slug"        : "example-collection",
         "title"       : "Example Collection",
         "token"       : "VFc7Q",
         "tracks_count": 2,
-        "updated_at"  : "2025-11-17T19:45:01+00:00",
+        "updated_at"  : "iso:8601",
         "user_id"     : 1,
         "user"        : dict,
     },
