@@ -351,7 +351,7 @@ class Job():
                 dtb = dt.convert(dtb)
             if dta or dtb:
                 predicates.append(util.predicate_date(
-                    dtb or None, dta or None))
+                    dtb or None, dta or None, extr.skip_date))
 
             if tl := extr.config2("whitelist-tags", "tags-whitelist"):
                 predicates.append(util.predicate_tags(tl, True))
