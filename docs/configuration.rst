@@ -1317,7 +1317,7 @@ extractor.*.archive
 -------------------
 Type
     * ``string``
-    * |Path|_
+    * |Path+|_
 Default
     ``null``
 Example
@@ -10237,6 +10237,35 @@ Note
     in a JSON file.
 
 
+Path+
+-----
+Type
+    * |Path|_
+    * ``list`` of `Format Strings`_
+Example
+    * ``"file.ext"``
+    * ``[":", "{category}", "{user}.sqlite3"]``
+    * ``["/opt", "archives", "{category}", "{user}.sqlite3"]``
+    * ``["C:", "archives", "{category}", "{user}.sqlite3"]``
+    * ``["\\\\server\\archives", "{category}", "{user}.sqlite3"]``
+Description
+    A |Path|_ that supports
+    `path-restricted <extractor.*.path-restrict_>`__
+    `Format String`_ expansion
+    when given as a ``list`` of ``string`` values.
+
+    Use ``":"`` as first list element to prefix this path with
+    `base-directory <extractor.*.base-directory_>`__.
+
+    Use ``<drive-letter>:`` or ``\\`` on Windows
+    or ``/`` on other platforms
+    as starting characters of the first list element
+    to interpret this as an absolute path.
+
+    Otherwise it is interpreted as a path
+    relative to the current working directory.
+
+
 Logging Configuration
 ---------------------
 Type
@@ -10531,6 +10560,7 @@ Reference
 .. |Duration+| replace:: ``Duration+``
 .. |Module| replace:: ``Module``
 .. |Path| replace:: ``Path``
+.. |Path+| replace:: ``Path+``
 .. |Last-Modified| replace:: ``Last-Modified``
 .. |Logging Configuration| replace:: ``Logging Configuration``
 .. |Postprocessor Configuration| replace:: ``Postprocessor Configuration``

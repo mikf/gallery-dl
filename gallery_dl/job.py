@@ -593,7 +593,7 @@ class DownloadJob(Job):
                 callback(pathfmt)
 
     def handle_finalize(self):
-        if self.archive:
+        if self.archive is not None:
             if not self.status:
                 self.archive.finalize()
             self.archive.close()
@@ -701,7 +701,7 @@ class DownloadJob(Job):
                     archive_table,
                     cfg("archive-mode"),
                     cfg("archive-pragma"),
-                    kwdict,
+                    pathfmt,
                 )
             except Exception as exc:
                 extr.log.warning(

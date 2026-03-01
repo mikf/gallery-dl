@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2025 Mike Fährmann
+# Copyright 2018-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -44,7 +44,7 @@ class PostProcessor():
                     archive_table,
                     "file",
                     options.get("archive-pragma"),
-                    job.pathfmt.kwdict,
+                    job.pathfmt,
                     "_archive_" + self.name,
                 )
             except Exception as exc:
