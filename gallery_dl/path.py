@@ -270,17 +270,21 @@ class PathFormat():
         except Exception as exc:
             raise exception.FilenameFormatError(exc)
 
-    def build_directory(self, kwdict):
+    def build_directory(self, kwdict, segments=None):
         """Apply 'kwdict' to directory format strings"""
         try:
-            if self.directory_conditions is None:
-                formatters = self.directory_formatters
-            else:
-                for condition, formatters in self.directory_conditions:
-                    if condition(kwdict):
-                        break
-                else:
+            if segments is None:
+                if self.directory_conditions is None:
                     formatters = self.directory_formatters
+                else:
+                    for condition, formatters in self.directory_conditions:
+                        if condition(kwdict):
+                            break
+                    else:
+                        formatters = self.directory_formatters
+            else:
+                formatters = [formatter.parse(fmt).format_map
+                              for fmt in segments]
 
             segments = []
             strip = self.strip
@@ -310,6 +314,29 @@ class PathFormat():
         self.realpath = self.realdirectory + filename
         if not self.temppath:
             self.temppath = self.realpath
+
+    def generate_path(self, segments):
+        if not segments:
+            return ""
+
+        root = segments[0]
+        if root == ":":
+            absolute, root = True, self.basedirectory
+        elif WINDOWS:
+            s = root[:3].replace("/", "\\")
+            absolute = s.startswith(":", 1) or s.startswith("\\\\")
+        else:
+            absolute = root.startswith("/")
+
+        if absolute:
+            if root[-1] != os.sep:
+                root += os.sep
+            path = root + self.clean_path(os.sep.join(self.build_directory(
+                self.kwdict, segments[1:])))
+        else:
+            path = self.clean_path(os.sep.join(self.build_directory(
+                self.kwdict, segments)))
+        return path
 
     def part_enable(self, part_directory=None):
         """Enable .part file usage"""

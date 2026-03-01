@@ -10,6 +10,7 @@
 import os
 import sys
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import path, extractor, config  # noqa E402
@@ -84,6 +85,57 @@ class TestPathObject(TestPath):
         pfmt.build_path()
         self.assertEqual(str(pfmt), pfmt.realpath)
         self.assertEqual(str(pfmt), "./gallery-dl/test/file.ext")
+
+    def test_generate_path(self):
+        pfmt = self._pfmt(kwdict=True)
+        self.assertEqual(pfmt.generate_path([]), "")
+        self.assertEqual(pfmt.generate_path(["foo"]), "foo")
+        self.assertEqual(pfmt.generate_path(["foo", "bar"]), "foo/bar")
+        self.assertEqual(pfmt.generate_path(
+            ["foo", "bar", "{id:A+1}"]), "foo/bar/124")
+
+    @patch("os.sep", "/")
+    @patch("gallery_dl.path.WINDOWS", False)
+    def test_generate_path_unix(self):
+        pfmt = self._pfmt(kwdict=True)
+        self.assertEqual(pfmt.generate_path(
+            ["{category}/foo", "bar", "{name}.{ext}"]),
+            "test_foo/bar/test-テスト-'&>-_:~.txt")
+        self.assertEqual(pfmt.generate_path(
+            [":", "{category}/foo", "bar", "{name}.{ext}"]),
+            pfmt.basedirectory + "test_foo/bar/test-テスト-'&>-_:~.txt")
+        self.assertEqual(pfmt.generate_path(
+            ["/", "opt", "{category}/foo", "bar", "{name}.{ext}"]),
+            "/opt/test_foo/bar/test-テスト-'&>-_:~.txt")
+        self.assertEqual(pfmt.generate_path(
+            ["/opt", "{category}/foo", "bar", "{name}.{ext}"]),
+            "/opt/test_foo/bar/test-テスト-'&>-_:~.txt")
+
+    @patch("os.sep", "\\")
+    @patch("gallery_dl.path.WINDOWS", True)
+    def test_generate_path_windows(self):
+        pfmt = self._pfmt(kwdict=True)
+        self.assertEqual(pfmt.generate_path(
+            ["{category}/foo", "bar", "{name}.{ext}"]),
+            r"test_foo\bar\test-テスト-'&_-__~.txt")
+        self.assertEqual(pfmt.generate_path(
+            [":", "{category}/foo", "bar", "{name}.{ext}"]),
+            pfmt.basedirectory + r"test_foo\bar\test-テスト-'&_-__~.txt")
+        self.assertEqual(pfmt.generate_path(
+            ["C:", "{category}/foo", "bar", "{name}.{ext}"]),
+            r"C:\test_foo\bar\test-テスト-'&_-__~.txt")
+        self.assertEqual(pfmt.generate_path(
+            ["C:\\", "{category}/foo", "bar", "{name}.{ext}"]),
+            r"C:\test_foo\bar\test-テスト-'&_-__~.txt")
+        self.assertEqual(pfmt.generate_path(
+            ["\\\\", "server", "share", "{category}/foo", "{name}.{ext}"]),
+            r"\\server\share\test_foo\test-テスト-'&_-__~.txt")
+        self.assertEqual(pfmt.generate_path(
+            ["\\\\server\\share", "{category}/foo", "bar", "{name}.{ext}"]),
+            r"\\server\share\test_foo\bar\test-テスト-'&_-__~.txt")
+        self.assertEqual(pfmt.generate_path(
+            ["\\\\server\\share\\", "{category}/foo", "bar", "{name}.{ext}"]),
+            r"\\server\share\test_foo\bar\test-テスト-'&_-__~.txt")
 
 
 class TestPathOptions(TestPath):
