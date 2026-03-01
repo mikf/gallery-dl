@@ -8354,7 +8354,8 @@ Description
 output.colors
 -------------
 Type
-    ``object`` (`key` → `ANSI color`)
+    * ``bool``
+    * ``object`` (`key` → `ANSI color`)
 Default
     .. code:: json
 
@@ -8369,20 +8370,27 @@ Default
 
 Description
     Controls the
-    `ANSI colors <https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#colors--graphics-mode>`__
+    `ANSI colors <https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797#color-codes>`__
     used for various outputs.
 
-    Output for |mode: color|__
+    ``true``
+        Use default ANSI colors.
+    ``false``
+        Disable ANSI colors.
+    ``object``
+        Use custom ANSI colors.
 
-    * ``success``: successfully downloaded files
-    * ``skip``: skipped files
+        Keys for |mode: color|__
 
-    Logging Messages:
+        * ``success``: successfully downloaded files
+        * ``skip``: skipped files
 
-    * ``debug``: debug logging messages
-    * ``info``: info logging messages
-    * ``warning``: warning logging messages
-    * ``error``: error logging messages
+        Keys for Logging Messages
+
+        * ``debug``: debug logging messages
+        * ``info``: info logging messages
+        * ``warning``: warning logging messages
+        * ``error``: error logging messages
 
 .. __: `output.mode`_
 
@@ -8396,6 +8404,8 @@ Default
 Description
     | On Windows, enable ANSI escape sequences and colored output
     | by setting the ``ENABLE_VIRTUAL_TERMINAL_PROCESSING`` flag for stdout and stderr.
+Note
+    To disable colored output, set `output.colors`_ to ``false``.
 
 
 output.skip
