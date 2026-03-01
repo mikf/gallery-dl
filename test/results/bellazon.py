@@ -335,6 +335,25 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/46019-alexis-ren/page/19/#findComment-3649926",
+    "#comment" : "ignore forum signature (#9140)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#auth"    : True,
+    "#count"   : 0,
+    "#metadata": "post",
+
+    "post": {
+        "author_id"  : "18831",
+        "author_slug": "clauds",
+        "author_url" : "https://www.bellazon.com/main/profile/18831-clauds/",
+        "content"    : "<p><span style=\"font-family:tahoma, geneva, sans-serif;\">I don't know for VS Pink tbh, I think she's better fitted for SI tbh</span></p>",
+        "count"      : 0,
+        "date"       : "dt:2015-03-20 23:50:18",
+        "id"         : "3649926",
+    },
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
