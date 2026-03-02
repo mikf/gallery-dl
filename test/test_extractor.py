@@ -342,7 +342,7 @@ class TextExtractorCommonDateminmax(unittest.TestCase):
         self.assertEqual(
             log_info.output[0],
             "WARNING:generic:Unable to parse 'date-max': "
-            "Invalid ISO 8601 string '2010-01'")
+            "Invalid ISO 8601 date/time value '2010-01'")
 
     def test_date_min_max(self):
         extr = extractor.find("generic:https://example.org/")

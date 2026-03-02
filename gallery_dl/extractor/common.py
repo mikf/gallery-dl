@@ -818,11 +818,14 @@ class Extractor():
                 dt_obj = dt.parse_iso(ts)
                 if dt_obj is dt.NONE:
                     self.log.warning("Unable to parse '%s': Invalid ISO 8601 "
-                                     "string '%s'", key, ts)
+                                     "date/time value '%s'", key, ts)
                     ts = default
                 else:
                     ts = int(dt.to_ts(dt_obj))
             return ts
+        if self.config("date-format"):
+            self.log.error("'date-format' is no longer supported. "
+                           "Use ISO 8601 date/time values instead.")
         return get("date-min", dmin), get("date-max", dmax)
 
     def _dump_response(self, response, history=True):
