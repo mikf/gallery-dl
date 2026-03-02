@@ -25,6 +25,7 @@ class BellazonExtractor(Extractor):
 
     def items(self):
         native = (self.root + "/", self.root[6:] + "/")
+        quotes = self.config("quoted", False)
         extract_urls = text.re(
             r'(?s)<('
             r'(?:video .*?<source [^>]*?src|a [^>]*?href)="([^"]+).*?</a>'
@@ -32,16 +33,11 @@ class BellazonExtractor(Extractor):
             r')'
         ).findall
 
-        if self.config("quoted", False):
-            strip_quoted = None
-        else:
-            strip_quoted = text.re(r"(?s)<blockquote .*?</blockquote>").sub
-
         for post in self.posts():
-            if strip_quoted is None:
+            if quotes:
                 urls = extract_urls(post["content"])
             else:
-                urls = extract_urls(strip_quoted("", post["content"]))
+                urls = extract_urls(self._remove_quotes(post["content"]))
 
             data = {"post": post}
             post["count"] = data["count"] = len(urls)
@@ -57,6 +53,7 @@ class BellazonExtractor(Extractor):
 
                 if url.startswith(native):
                     if (
+                        "/public/style_images/" in url or
                         "/uploads/emoticons/" in url or
                         "/profile/" in url or
                         "/topic/" in url
@@ -195,6 +192,15 @@ class BellazonExtractor(Extractor):
             post["author_id"] = post["author_slug"] = ""
 
         return post
+
+    def _remove_quotes(self, content):
+        while "<blockquote" in content:
+            beg = content.index("<blockquote")
+            end = content.index("</blockquote", beg)
+            for _ in range(content.count("<blockquote", beg+11, end)):
+                end = content.index("</blockquote", end+13)
+            content = content[:beg] + content[end+13:]
+        return content
 
 
 class BellazonPostExtractor(BellazonExtractor):
