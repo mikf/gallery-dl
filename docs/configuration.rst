@@ -6707,7 +6707,7 @@ Supported Values
     * ``timeline``
     * ``tweets``
     * ``media``
-    * ``replies``
+    * ``with-replies``
     * ``highlights``
     * ``likes``
 Note

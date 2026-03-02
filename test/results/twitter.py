@@ -192,22 +192,22 @@ __tests__ = (
 
 {
     "#url"     : "https://twitter.com/supernaturepics/with_replies",
-    "#category": ("", "twitter", "replies"),
-    "#class"   : twitter.TwitterRepliesExtractor,
+    "#category": ("", "twitter", "with-replies"),
+    "#class"   : twitter.TwitterWithRepliesExtractor,
     "#range"   : "1-40",
     "#sha1_url": "c570ac1aae38ed1463be726cc46f31cac3d82a40",
 },
 
 {
     "#url"     : "https://mobile.twitter.com/supernaturepics/with_replies#t",
-    "#category": ("", "twitter", "replies"),
-    "#class"   : twitter.TwitterRepliesExtractor,
+    "#category": ("", "twitter", "with-replies"),
+    "#class"   : twitter.TwitterWithRepliesExtractor,
 },
 
 {
     "#url"     : "https://www.twitter.com/id:2976459548/with_replies",
-    "#category": ("", "twitter", "replies"),
-    "#class"   : twitter.TwitterRepliesExtractor,
+    "#category": ("", "twitter", "with-replies"),
+    "#class"   : twitter.TwitterWithRepliesExtractor,
 },
 
 {

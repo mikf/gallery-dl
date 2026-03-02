@@ -449,8 +449,8 @@ SUBCATEGORY_MAP = {
     "twitter": {
         "media": "Media Timelines",
         "tweets": "",
-        "replies": "",
         "community": "",
+        "with-replies": "",
         "list-members": "List Members",
     },
     "vk": {
