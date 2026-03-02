@@ -10254,7 +10254,8 @@ Type
     * ``list`` of `Format Strings`_
 Example
     * ``"file.ext"``
-    * ``[":", "{category}", "{user}.sqlite3"]``
+    * ``[":b", "{category}", "{user}.sqlite3"]``
+    * ``[":HOME", "gdl", "{category}", "{user}.sqlite3"]``
     * ``["/opt", "archives", "{category}", "{user}.sqlite3"]``
     * ``["C:", "archives", "{category}", "{user}.sqlite3"]``
     * ``["\\\\server\\archives", "{category}", "{user}.sqlite3"]``
@@ -10264,8 +10265,16 @@ Description
     `Format String`_ expansion
     when given as a ``list`` of ``string`` values.
 
-    Use ``":"`` as first list element to prefix this path with
-    `base-directory <extractor.*.base-directory_>`__.
+    Use a string starting with ``:`` as first list element
+    to prefix the path with one of the following:
+
+    ``":"`` | ``":b"`` | ``":base"``
+        `base-directory <extractor.*.base-directory_>`__
+    ``":d"`` | ``":dir"``
+        `base-directory <extractor.*.base-directory_>`__ +
+        `directory <extractor.*.directory_>`__
+    ``":ENV_NAME"`` (i.e. name of an environment variable)
+        Value of this environment variable
 
     Use ``<drive-letter>:`` or ``\\`` on Windows
     or ``/`` on other platforms

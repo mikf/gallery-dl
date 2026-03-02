@@ -98,12 +98,24 @@ class TestPathObject(TestPath):
     @patch("gallery_dl.path.WINDOWS", False)
     def test_generate_path_unix(self):
         pfmt = self._pfmt(kwdict=True)
+        pfmt.set_directory(KWDICT)
+        os.environ["_GDL_TEST"] = "/opt"
+
         self.assertEqual(pfmt.generate_path(
             ["{category}/foo", "bar", "{name}.{ext}"]),
             "test_foo/bar/test-テスト-'&>-_:~.txt")
         self.assertEqual(pfmt.generate_path(
             [":", "{category}/foo", "bar", "{name}.{ext}"]),
             pfmt.basedirectory + "test_foo/bar/test-テスト-'&>-_:~.txt")
+        self.assertEqual(pfmt.generate_path(
+            [":b", "{category}/foo", "bar", "{name}.{ext}"]),
+            pfmt.basedirectory + "test_foo/bar/test-テスト-'&>-_:~.txt")
+        self.assertEqual(pfmt.generate_path(
+            [":d", "{category}/foo", "bar", "{name}.{ext}"]),
+            pfmt.realdirectory + "test_foo/bar/test-テスト-'&>-_:~.txt")
+        self.assertEqual(pfmt.generate_path(
+            [":_GDL_TEST", "{category}/foo", "bar", "{name}.{ext}"]),
+            "/opt/test_foo/bar/test-テスト-'&>-_:~.txt")
         self.assertEqual(pfmt.generate_path(
             ["/", "opt", "{category}/foo", "bar", "{name}.{ext}"]),
             "/opt/test_foo/bar/test-テスト-'&>-_:~.txt")
@@ -115,12 +127,24 @@ class TestPathObject(TestPath):
     @patch("gallery_dl.path.WINDOWS", True)
     def test_generate_path_windows(self):
         pfmt = self._pfmt(kwdict=True)
+        pfmt.set_directory(KWDICT)
+        os.environ["_GDL_TEST"] = "C:\\"
+
         self.assertEqual(pfmt.generate_path(
             ["{category}/foo", "bar", "{name}.{ext}"]),
             r"test_foo\bar\test-テスト-'&_-__~.txt")
         self.assertEqual(pfmt.generate_path(
             [":", "{category}/foo", "bar", "{name}.{ext}"]),
             pfmt.basedirectory + r"test_foo\bar\test-テスト-'&_-__~.txt")
+        self.assertEqual(pfmt.generate_path(
+            [":b", "{category}/foo", "bar", "{name}.{ext}"]),
+            pfmt.basedirectory + r"test_foo\bar\test-テスト-'&_-__~.txt")
+        self.assertEqual(pfmt.generate_path(
+            [":d", "{category}/foo", "bar", "{name}.{ext}"]),
+            pfmt.realdirectory + r"test_foo\bar\test-テスト-'&_-__~.txt")
+        self.assertEqual(pfmt.generate_path(
+            [":_GDL_TEST", "{category}/foo", "bar", "{name}.{ext}"]),
+            r"C:\test_foo\bar\test-テスト-'&_-__~.txt")
         self.assertEqual(pfmt.generate_path(
             ["C:", "{category}/foo", "bar", "{name}.{ext}"]),
             r"C:\test_foo\bar\test-テスト-'&_-__~.txt")

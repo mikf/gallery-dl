@@ -320,22 +320,29 @@ class PathFormat():
             return ""
 
         root = segments[0]
-        if root == ":":
-            absolute, root = True, self.basedirectory
+        if root[0] == ":":
+            if ":basedirectory".startswith(root):
+                root = self.basedirectory
+            elif ":directory".startswith(root):
+                root = self.realdirectory
+            elif env := os.environ.get(root[1:]):
+                root = env
         elif WINDOWS:
             s = root[:3].replace("/", "\\")
-            absolute = s.startswith(":", 1) or s.startswith("\\\\")
-        else:
-            absolute = root.startswith("/")
+            if not s.startswith(":", 1) and not s.startswith("\\\\"):
+                root = None
+        elif not root.startswith("/"):
+            root = None
 
-        if absolute:
+        if root is None:
+            path = self.clean_path(os.sep.join(self.build_directory(
+                self.kwdict, segments)))
+        else:
             if root[-1] != os.sep:
                 root += os.sep
             path = root + self.clean_path(os.sep.join(self.build_directory(
                 self.kwdict, segments[1:])))
-        else:
-            path = self.clean_path(os.sep.join(self.build_directory(
-                self.kwdict, segments)))
+
         return path
 
     def part_enable(self, part_directory=None):
