@@ -354,6 +354,23 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/46019-alexis-ren/page/8/#findComment-3383650",
+    "#comment" : "quote in quote (#9140)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#results" : "https://www.bellazon.com/main/uploads/monthly_03_2014/post-57667-0-98883500-1395169341.jpg",
+},
+
+{
+    "#url"     : "https://www.bellazon.com/main/topic/46019-alexis-ren/page/8/#findComment-3383650",
+    "#comment" : "quote in quote (#9140)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#options" : {"quoted": True},
+    "#archive" : False,
+    "#pattern" : r"^https?://(imgbox.com|bryant.photography|www.bellazon.com/main/(uploads|index.php\?app=core&module=attach))",
+    "#count"   : 20,
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
