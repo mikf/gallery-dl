@@ -22,6 +22,7 @@ __tests__ = (
         "https://x.com/supernaturepics/tweets",
         "https://x.com/supernaturepics/media",
         "https://x.com/supernaturepics/with_replies",
+        "https://x.com/supernaturepics/highlights",
         "https://x.com/supernaturepics/likes",
     ),
 },
