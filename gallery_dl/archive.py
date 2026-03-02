@@ -24,9 +24,13 @@ def connect(path, prefix, format,
         cls = (DownloadArchivePostgresqlMemory if mode == "memory" else
                DownloadArchivePostgresql)
     else:
-        if pathfmt is not None and isinstance(path, list):
+        if isinstance(path, list):
             path = pathfmt.generate_path(path)
         else:
+            if "{" in path:
+                log.error("Replacement fields in 'string' archive paths are "
+                          "no longer supported. Use a list of strings "
+                          "instead.")
             path = util.expand_path(path)
         cls = DownloadArchiveMemory if mode == "memory" else DownloadArchive
 
