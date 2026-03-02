@@ -11,6 +11,7 @@
 modules = [
     "classify",
     "compare",
+    "decode",
     "directory",
     "exec",
     "hash",
