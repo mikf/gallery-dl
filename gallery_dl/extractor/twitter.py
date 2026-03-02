@@ -811,10 +811,12 @@ class TwitterUserExtractor(Dispatch, TwitterExtractor):
             (TwitterTimelineExtractor  , base + "timeline"),
             (TwitterTweetsExtractor    , base + "tweets"),
             (TwitterMediaExtractor     , base + "media"),
-            (TwitterRepliesExtractor   , base + "with_replies"),
+            (TwitterWithRepliesExtractor, base + "with_replies"),
             (TwitterHighlightsExtractor, base + "highlights"),
             (TwitterLikesExtractor     , base + "likes"),
-        ), ("timeline",))
+        ), ("timeline",), (
+            ("with-replies", "replies", None),
+        ))
 
 
 class TwitterTimelineExtractor(TwitterExtractor):
@@ -915,7 +917,7 @@ class TwitterTimelineExtractor(TwitterExtractor):
 
 
 class TwitterTweetsExtractor(TwitterExtractor):
-    """Extractor for Tweets from a user's Tweets timeline"""
+    """Extractor for Tweets from a user's Posts timeline"""
     subcategory = "tweets"
     pattern = USER_PATTERN + r"/tweets(?!\w)"
     example = "https://x.com/USER/tweets"
@@ -924,9 +926,9 @@ class TwitterTweetsExtractor(TwitterExtractor):
         return self.api.user_tweets(self.user)
 
 
-class TwitterRepliesExtractor(TwitterExtractor):
-    """Extractor for Tweets from a user's timeline including replies"""
-    subcategory = "replies"
+class TwitterWithRepliesExtractor(TwitterExtractor):
+    """Extractor for Tweets from a user's Replies timeline"""
+    subcategory = "with-replies"
     pattern = USER_PATTERN + r"/with_replies(?!\w)"
     example = "https://x.com/USER/with_replies"
 
@@ -935,7 +937,7 @@ class TwitterRepliesExtractor(TwitterExtractor):
 
 
 class TwitterHighlightsExtractor(TwitterExtractor):
-    """Extractor for Tweets from a user's highlights timeline"""
+    """Extractor for Tweets from a user's Highlights timeline"""
     subcategory = "highlights"
     pattern = USER_PATTERN + r"/highlights(?!\w)"
     example = "https://x.com/USER/highlights"
