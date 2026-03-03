@@ -1024,7 +1024,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="simplyhentai" title="simplyhentai">
     <td>Simply Hentai</td>
     <td>https://www.simply-hentai.com/</td>
-    <td>Galleries, individual Images, Videos</td>
+    <td>Galleries, Languages, Manga, Series, Tag Searches</td>
     <td></td>
 </tr>
 <tr id="sizebooru" title="sizebooru">
