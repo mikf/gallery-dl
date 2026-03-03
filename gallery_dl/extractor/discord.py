@@ -474,7 +474,7 @@ class DiscordAPI():
         try:
             response = self.extractor.request(
                 url, params=params, headers=self.headers)
-        except self.exc.HttpError as exc:
+        except self.extractor.exc.HttpError as exc:
             if exc.status == 401:
                 self._raise_invalid_token()
             raise
