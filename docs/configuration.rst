@@ -10255,7 +10255,8 @@ Type
 Example
     * ``"file.ext"``
     * ``[":b", "{category}", "{user}.sqlite3"]``
-    * ``[":HOME", "gdl", "{category}", "{user}.sqlite3"]``
+    * ``[":~", "gdl", "{category}", "{user}.sqlite3"]``
+    * ``[":$HOME", "gdl", "{category}", "{user}.sqlite3"]``
     * ``["/opt", "archives", "{category}", "{user}.sqlite3"]``
     * ``["C:", "archives", "{category}", "{user}.sqlite3"]``
     * ``["\\\\server\\archives", "{category}", "{user}.sqlite3"]``
@@ -10273,8 +10274,11 @@ Description
     ``":d"`` | ``":dir"``
         `base-directory <extractor.*.base-directory_>`__ +
         `directory <extractor.*.directory_>`__
-    ``":ENV_NAME"`` (i.e. name of an environment variable)
-        Value of this environment variable
+    ``":~"`` | ``":~USER"``
+        home directory
+        (`os.path.expanduser <https://docs.python.org/3/library/os.path.html#os.path.expanduser>`__)
+    ``":$ENV"`` (``$`` + environment variable name)
+        value of environment variable
 
     Use ``<drive-letter>:`` or ``\\`` on Windows
     or ``/`` on other platforms

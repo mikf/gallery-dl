@@ -114,7 +114,7 @@ class TestPathObject(TestPath):
             [":d", "{category}/foo", "bar", "{name}.{ext}"]),
             pfmt.realdirectory + "test_foo/bar/test-テスト-'&>-_:~.txt")
         self.assertEqual(pfmt.generate_path(
-            [":_GDL_TEST", "{category}/foo", "bar", "{name}.{ext}"]),
+            [":$_GDL_TEST", "{category}/foo", "bar", "{name}.{ext}"]),
             "/opt/test_foo/bar/test-テスト-'&>-_:~.txt")
         self.assertEqual(pfmt.generate_path(
             ["/", "opt", "{category}/foo", "bar", "{name}.{ext}"]),
@@ -122,6 +122,13 @@ class TestPathObject(TestPath):
         self.assertEqual(pfmt.generate_path(
             ["/opt", "{category}/foo", "bar", "{name}.{ext}"]),
             "/opt/test_foo/bar/test-テスト-'&>-_:~.txt")
+        with patch("os.path.expanduser", return_value="/home/USER"):
+            self.assertEqual(pfmt.generate_path(
+                [":~", "{category}/foo", "bar", "{name}.{ext}"]),
+                "/home/USER/test_foo/bar/test-テスト-'&>-_:~.txt")
+            self.assertEqual(pfmt.generate_path(
+                [":~FOO", "{category}/foo", "bar", "{name}.{ext}"]),
+                "/home/USER/test_foo/bar/test-テスト-'&>-_:~.txt")
 
     @patch("os.sep", "\\")
     @patch("gallery_dl.path.WINDOWS", True)
@@ -143,7 +150,7 @@ class TestPathObject(TestPath):
             [":d", "{category}/foo", "bar", "{name}.{ext}"]),
             pfmt.realdirectory + r"test_foo\bar\test-テスト-'&_-__~.txt")
         self.assertEqual(pfmt.generate_path(
-            [":_GDL_TEST", "{category}/foo", "bar", "{name}.{ext}"]),
+            [":$_GDL_TEST", "{category}/foo", "bar", "{name}.{ext}"]),
             r"C:\test_foo\bar\test-テスト-'&_-__~.txt")
         self.assertEqual(pfmt.generate_path(
             ["C:", "{category}/foo", "bar", "{name}.{ext}"]),
@@ -160,6 +167,13 @@ class TestPathObject(TestPath):
         self.assertEqual(pfmt.generate_path(
             ["\\\\server\\share\\", "{category}/foo", "bar", "{name}.{ext}"]),
             r"\\server\share\test_foo\bar\test-テスト-'&_-__~.txt")
+        with patch("os.path.expanduser", return_value=r"C:\Users\USER"):
+            self.assertEqual(pfmt.generate_path(
+                [":~", "{category}/foo", "bar", "{name}.{ext}"]),
+                r"C:\Users\USER\test_foo\bar\test-テスト-'&_-__~.txt")
+            self.assertEqual(pfmt.generate_path(
+                [":~USER", "{category}/foo", "bar", "{name}.{ext}"]),
+                r"C:\Users\USER\test_foo\bar\test-テスト-'&_-__~.txt")
 
 
 class TestPathOptions(TestPath):
