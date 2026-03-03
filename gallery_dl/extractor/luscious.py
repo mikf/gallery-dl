@@ -69,9 +69,10 @@ class LusciousAlbumExtractor(LusciousExtractor):
             image["date"] = self.parse_timestamp(image["created"])
             image["id"] = text.parse_int(image["id"])
 
-            url = (image["url_to_original"] or image["url_to_video"]
-                   if self.gif else
-                   image["url_to_video"] or image["url_to_original"])
+            url = ((image["url_to_original"] or image["url_to_video"]
+                    if self.gif else
+                    image["url_to_video"] or image["url_to_original"]) or
+                   image["thumbnail"])
 
             yield Message.Url, url, text.nameext_from_url(url, image)
 
