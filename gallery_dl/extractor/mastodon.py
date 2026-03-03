@@ -218,7 +218,7 @@ class MastodonAPI():
 
         access_token = extractor.config("access-token")
         if access_token is None or access_token == "cache":
-            access_token = self.cache(
+            access_token = self.extractor.cache(
                 _access_token_cache, extractor.instance, _mem=False)
         if not access_token:
             access_token = extractor.config_instance("access-token")
