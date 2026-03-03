@@ -131,6 +131,14 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.reddit.com/user/Leac-/submitted/?sort=new",
+    "#comment" : "suspended user (#9177)",
+    "#category": ("", "reddit", "user-submitted"),
+    "#class"   : reddit.RedditUserExtractor,
+    "#exception": "NotFoundError:Suspended User",
+},
+
+{
     "#url"     : "https://www.reddit.com/r/lavaporn/comments/8cqhub/",
     "#category": ("", "reddit", "submission"),
     "#class"   : reddit.RedditSubmissionExtractor,

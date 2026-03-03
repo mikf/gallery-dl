@@ -326,7 +326,12 @@ class RedditUserExtractor(RedditExtractor):
         return submissions
 
     def _only(self, submissions, user):
-        uid = "t2_" + user["id"]
+        try:
+            uid = "t2_" + user["id"]
+        except Exception:
+            if user.get("is_suspended"):
+                raise self.exc.NotFoundError("Suspended User", False)
+            raise self.exc.NotFoundError("user")
         for submission, comments in submissions:
             if submission and submission.get("author_fullname") != uid:
                 submission["_media"] = False
@@ -561,7 +566,7 @@ class RedditAPI():
                 if data["error"] == 403:
                     raise exc.AuthorizationError()
                 if data["error"] == 404:
-                    raise exc.NotFoundError()
+                    raise exc.NotFoundError(self.extractor.subcategory)
                 self.log.debug(data)
                 raise exc.AbortExtraction(data.get("message"))
             return data
