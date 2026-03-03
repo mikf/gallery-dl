@@ -5,33 +5,33 @@
 # published by the Free Software Foundation.
 
 from gallery_dl.extractor import luscious
-from gallery_dl import exception
 
 
 __tests__ = (
 {
     "#url"     : "https://luscious.net/albums/okinami-no-koigokoro_277031/",
-    "#category": ("", "luscious", "album"),
     "#class"   : luscious.LusciousAlbumExtractor,
-    "#pattern" : r"https://storage\.bhs\.cloud\.ovh\.net/v1/AUTH_\w+/images/NTRshouldbeillegal/277031/luscious_net_\d+_\d+\.jpg$",
+    #  "#pattern" : r"https://storage\.bhs\.cloud\.ovh\.net/v1/AUTH_\w+/images/NTRshouldbeillegal/277031/luscious_net_\d+_\d+\.jpg$",
+    "#pattern" : r"https://cdni.luscious.net/NTRshouldbeillegal/277031/luscious_net_\d+_\d+.1680x0.jpg\?md5=[\w-]+&expires=\d+$",
+    "#count"   : 18,
 
     "album"           : {
         "__typename"                 : "Album",
         "audiences"                  : list,
         "content"                    : "Hentai",
         "cover"                      : str,
-        "created"                    : 1479625853,
+        "created"                    : 1479625853.237386,
         "created_by"                 : "Hive Mind",
         "date"                       : "dt:2016-11-20 07:10:53",
         "description"                : "Enjoy.",
-        "download_url"               : "/download/r/25/277031/",
+        "download_url"               : "/download/r/25/277031/?utm_source=partner&utm_medium=album_link&utm_campaign=gallery&utm_content=anonymous",
         "genres"                     : list,
         "id"                         : 277031,
         "is_manga"                   : True,
         "labels"                     : list,
         "language"                   : "English",
         "like_status"                : "none",
-        "modified"                   : int,
+        "modified"                   : float,
         "permissions"                : list,
         "rating"                     : None,
         "slug"                       : "okinami-no-koigokoro",
@@ -47,7 +47,7 @@ __tests__ = (
     },
     "aspect_ratio"    : r"re:\d+:\d+",
     "category"        : "luscious",
-    "created"         : int,
+    "created"         : float,
     "date"            : "type:datetime",
     "height"          : int,
     "id"              : int,
@@ -66,45 +66,38 @@ __tests__ = (
 
 {
     "#url"     : "https://luscious.net/albums/not-found_277035/",
-    "#category": ("", "luscious", "album"),
     "#class"   : luscious.LusciousAlbumExtractor,
-    "#exception": exception.NotFoundError,
+    "#exception": "NotFoundError",
 },
 
 {
     "#url"     : "https://members.luscious.net/albums/login-required_323871/",
-    "#category": ("", "luscious", "album"),
     "#class"   : luscious.LusciousAlbumExtractor,
     "#count"   : 64,
 },
 
 {
     "#url"     : "https://www.luscious.net/albums/okinami_277031/",
-    "#category": ("", "luscious", "album"),
     "#class"   : luscious.LusciousAlbumExtractor,
 },
 
 {
     "#url"     : "https://members.luscious.net/albums/okinami_277031/",
-    "#category": ("", "luscious", "album"),
     "#class"   : luscious.LusciousAlbumExtractor,
 },
 
 {
     "#url"     : "https://luscious.net/pictures/c/video_game_manga/album/okinami-no-koigokoro_277031/sorted/position/id/16528978/@_1",
-    "#category": ("", "luscious", "album"),
     "#class"   : luscious.LusciousAlbumExtractor,
 },
 
 {
     "#url"     : "https://members.luscious.net/albums/list/",
-    "#category": ("", "luscious", "search"),
     "#class"   : luscious.LusciousSearchExtractor,
 },
 
 {
     "#url"     : "https://members.luscious.net/albums/list/?display=date_newest&language_ids=%2B1&tagged=+full_color&page=1",
-    "#category": ("", "luscious", "search"),
     "#class"   : luscious.LusciousSearchExtractor,
     "#pattern" : luscious.LusciousAlbumExtractor.pattern,
     "#range"   : "41-60",
