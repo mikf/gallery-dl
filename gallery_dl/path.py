@@ -325,8 +325,10 @@ class PathFormat():
                 root = self.basedirectory
             elif ":directory".startswith(root):
                 root = self.realdirectory
-            elif env := os.environ.get(root[1:]):
-                root = env
+            elif root.startswith(":~"):
+                root = os.path.expanduser(root[1:])
+            elif root.startswith(":$"):
+                root = os.environ.get(root[2:])
         elif WINDOWS:
             s = root[:3].replace("/", "\\")
             if not s.startswith(":", 1) and not s.startswith("\\\\"):
