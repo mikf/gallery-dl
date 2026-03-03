@@ -207,6 +207,17 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://e621.net/p/312fs",
+    "#comment" : "'share' URL with base32 ID (#9168)",
+    "#category": ("E621", "e621", "post"),
+    "#class"   : e621.E621PostExtractor,
+    "#results" : "https://static1.e621.net/data/c6/8c/c68cca0643890b615f75fb2719589bff.png",
+
+    "date"     : "dt:2022-02-17 05:27:31",
+    "id"       : 3181052,
+},
+
+{
     "#url"     : "https://e621.net/explore/posts/popular",
     "#category": ("E621", "e621", "popular"),
     "#class"   : e621.E621PopularExtractor,
