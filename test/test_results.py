@@ -164,10 +164,17 @@ class TestExtractorResults(unittest.TestCase):
         if "#exception" in result:
             exc = result["#exception"]
             if isinstance(exc, str):
+                exc, _, msg = exc.partition(":")
                 exc = getattr(exception, exc, None)
-            with self.assertRaises(exc, msg="#exception"), \
+            elif isinstance(exc, tuple):
+                exc, msg = exc
+            else:
+                msg = ""
+            with self.assertRaises(exc, msg="#exception") as cm, \
                     self.assertLogs() as log_info:
                 tjob.run()
+            if msg:
+                self.assertEqual(str(cm.exception), msg, msg="#exception/msg")
             if "#log" in result:
                 self.assertLogEqual(result["#log"], log_info.output)
             return
