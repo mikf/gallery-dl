@@ -8553,6 +8553,30 @@ and `event <exec.event_>`__ field:
     }
 
 
+actions.action
+--------------
+Type
+    `Action(s)`_
+Description
+    The `Action(s)`_ to perform.
+Note
+    This option can also be set as ``mode``,
+    making it possible to use ``"name": "actions/<action>@<event>"``
+
+
+actions.event
+-------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``"prepare"``
+Description
+    The event(s) for which `actions.action`_ is triggered.
+
+    See `metadata.event`_ for a list of available events.
+
+
 classify.mapping
 ----------------
 Type
@@ -10421,8 +10445,10 @@ Description
         * ``"name": "ugoira/archive"``
         * ``"name": "exec@error"``
 
-    The available post-processor types are
+    Available postprocessor types are
 
+    ``actions``
+        Perform `Action(s)`_
     ``classify``
         Categorize files by filename extension
     ``compare``
