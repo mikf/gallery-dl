@@ -144,7 +144,8 @@ class PatreonExtractor(Extractor):
                 elif node_type == "paragraph":
                     html = f"<p>{children}</p>"
                 elif node_type == "heading":
-                    level = max(1, min(6, node.get("attrs", {}).get("level", 1)))
+                    level = max(1, min(6, node.get("attrs", {})
+                                       .get("level", 1)))
                     html = f"<h{level}>{children}</h{level}>"
                 elif node_type == "bulletList":
                     html = f"<ul>{children}</ul>"
@@ -157,13 +158,15 @@ class PatreonExtractor(Extractor):
                 elif node_type == "hardBreak":
                     html = "<br>"
                 elif node_type == "text":
-                    html = text.escape(node.get("text", "")).replace("\n", "<br>")
+                    html = (text.escape(node.get("text", ""))
+                            .replace("\n", "<br>"))
                 elif node_type == "image":
                     src = node.get("attrs", {}).get("src", "")
                     html = f'<img src="{text.escape(src)}">' if src else ""
                 elif node_type == "link":
                     href = node.get("attrs", {}).get("href", "")
-                    html = f'<a href="{text.escape(href)}">{children}</a>' if href else children
+                    html = (f'<a href="{text.escape(href)}">{children}</a>'
+                            if href else children)
                 else:
                     html = children
 
