@@ -889,6 +889,7 @@ Default
         ``artstation`` |
         ``behance``    |
         ``fanbox``     |
+        ``simplyhentai`` |
         ``twitter``    |
         ``vsco``
     ``null``

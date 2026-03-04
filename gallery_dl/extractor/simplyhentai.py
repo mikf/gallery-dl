@@ -19,6 +19,7 @@ class SimplyhentaiExtractor(Extractor):
     category = "simplyhentai"
     root = "https://www.simply-hentai.com"
     root_api = "https://api-v3.simply-hentai.com"
+    browseF = "firefox"
 
     def items(self):
         for gallery in self.galleries():
@@ -70,7 +71,7 @@ class SimplyhentaiSeriesExtractor(SimplyhentaiExtractor):
             params["sort"] = sort
         if pnum is not None:
             params["page"] = pnum
-        return self._pagination(f"/series/{slug}", params)
+        return self._pagination("/series/" + slug, params)
 
 
 class SimplyhentaiMangaExtractor(SimplyhentaiExtractor):
@@ -129,7 +130,7 @@ class SimplyhentaiLanguageExtractor(SimplyhentaiExtractor):
             params["sort"] = sort
         if pnum is not None:
             params["page"] = pnum
-        return self._pagination(f"/tag/{language}", params)
+        return self._pagination("/tag/" + language, params)
 
 
 class SimplyhentaiGalleryExtractor(GalleryExtractor, SimplyhentaiExtractor):
@@ -155,9 +156,8 @@ class SimplyhentaiGalleryExtractor(GalleryExtractor, SimplyhentaiExtractor):
             self._images = endpoint + "/pages"
 
         try:
-            language = data["language"]["name"]
+            data["language"] = language = data["language"]["name"]
             data["lang"] = util.language_to_code(language)
-            data["language"] = language
         except Exception:
             pass
 
