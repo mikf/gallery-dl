@@ -6,7 +6,7 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Execute processes"""
+"""Run external processes"""
 
 from .common import PostProcessor
 from .. import util, formatter
@@ -47,6 +47,16 @@ class ExecPP(PostProcessor):
                 self.creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
             else:
                 self.session = True
+
+        s = options.get("success")
+        e = options.get("error")
+        if s or e:
+            from .. import actions
+            self.action_success = None if s is None else actions.parse(s)
+            self.action_error = None if e is None else actions.parse(e)
+            self.action_args = {"job": job, "level": 0}
+        else:
+            self.action_success = self.action_error = None
 
         events = options.get("event")
         if events is None:
@@ -125,6 +135,10 @@ class ExecPP(PostProcessor):
         if retcode := self._popen(args, shell).wait():
             self.log.warning("'%s' returned with non-zero exit status (%d)",
                              args if self.verbose else trim(args), retcode)
+            if self.action_error is not None:
+                self.action_error(self.action_args)
+        elif self.action_success is not None:
+            self.action_success(self.action_args)
         return retcode
 
     def _popen(self, args, shell):
