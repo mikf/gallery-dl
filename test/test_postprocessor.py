@@ -89,6 +89,7 @@ class BasePostprocessorTest(unittest.TestCase):
 
     def tearDown(self):
         self.job.hooks.clear()
+        self.job.status = 0
 
     def _create(self, options=None, data=None):
         kwdict = {"category": "test", "filename": "file", "extension": "ext"}
@@ -109,6 +110,39 @@ class BasePostprocessorTest(unittest.TestCase):
         for event in (events or ("prepare", "file")):
             for callback in self.job.hooks[event]:
                 callback(self.pathfmt)
+
+    def _output(self, mock):
+        return "".join(
+            call[1][0]
+            for call in mock.mock_calls
+            if call[0].endswith("write")
+        )
+
+
+class ActionsTest(BasePostprocessorTest):
+
+    def test_raises(self):
+        self._create({"action": "raise AbortExtraction foobar"})
+
+        with self.assertRaises(exception.AbortExtraction) as cm:
+            self._trigger()
+
+        self.assertEqual(str(cm.exception), "foobar")
+
+    def test_print(self):
+        self._create({"action": "print Hello World"})
+
+        with patch("sys.stdout") as m:
+            self._trigger()
+
+        self.assertEqual(self._output(m), "Hello World\n")
+
+    def test_status(self):
+        self._create({"action": "status = 123"})
+
+        self.assertEqual(self.job.status, 0)
+        self._trigger()
+        self.assertEqual(self.job.status, 123)
 
 
 class ClassifyTest(BasePostprocessorTest):
@@ -614,7 +648,7 @@ class MetadataTest(BasePostprocessorTest):
             {"foo": "bar"},
         )
 
-        with patch("sys.stdout", Mock()) as m:
+        with patch("sys.stdout") as m:
             self._trigger()
 
         self.assertEqual(self._output(m), "bar\nNone\n")
@@ -737,7 +771,7 @@ class MetadataTest(BasePostprocessorTest):
     def test_metadata_stdout(self):
         self._create({"filename": "-", "indent": None, "sort": True})
 
-        with patch("sys.stdout", Mock()) as m:
+        with patch("sys.stdout") as m:
             self._trigger()
 
         self.assertEqual(self._output(m), """\
@@ -901,13 +935,6 @@ class MetadataTest(BasePostprocessorTest):
 
         m_aa.assert_called_once_with(self.pathfmt.kwdict)
         m_ac.assert_called_once()
-
-    def _output(self, mock):
-        return "".join(
-            call[1][0]
-            for call in mock.mock_calls
-            if call[0].endswith("write")
-        )
 
 
 class MtimeTest(BasePostprocessorTest):
