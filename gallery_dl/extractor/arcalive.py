@@ -84,7 +84,10 @@ class ArcalivePostExtractor(ArcaliveExtractor):
                 url = src
 
             fallback = ()
-            query = "?type=orig&" + query
+            if video:
+                query = "?" + query
+            else:
+                query = "?type=orig&" + query
             if orig := text.extr(media, 'data-orig="', '"'):
                 path, _, ext = url.rpartition(".")
                 if ext != orig:
