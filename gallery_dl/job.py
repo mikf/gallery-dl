@@ -470,10 +470,21 @@ class DownloadJob(Job):
             self.handle_skip()
             return
 
-        # run post processors
+        # run postprocessors
         if "file" in hooks:
             for callback in hooks["file"]:
                 callback(pathfmt)
+
+        # process download flag
+        if FLAGS.DOWNLOAD is not None:
+            FLAGS.DOWNLOAD = None
+            self.status |= 4
+            self.log.error("Failed to download %s",
+                           pathfmt.filename or url)
+            if "error" in hooks:
+                for callback in hooks["error"]:
+                    callback(pathfmt)
+            return
 
         # download succeeded
         pathfmt.finalize()
