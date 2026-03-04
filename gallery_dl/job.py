@@ -912,8 +912,8 @@ class KeywordJob(Job):
                 self.extractor.log.info(
                     "Try 'gallery-dl -K \"%s\"' instead.", url)
         else:
-            stdout_write("Keywords for --chapter-filter:\n"
-                         "------------------------------\n")
+            stdout_write("Keywords for --child-filter:\n"
+                         "----------------------------\n")
             self.print_kwdict(kwdict)
             if extr or self.extractor.categorytransfer:
                 stdout_write("\n")
