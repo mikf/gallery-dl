@@ -8777,6 +8777,24 @@ Description
     arguments in logging messages.
 
 
+exec.success
+------------
+Type
+    `Action(s)`_
+Description
+    Run these `Action(s)`_ when `command <exec.command_>`__
+    succeeds and returns with exit status `0`.
+
+
+exec.error
+----------
+Type
+    `Action(s)`_
+Description
+    Run these `Action(s)`_ when `command <exec.command_>`__
+    fails and returns with a non-zero exit status.
+
+
 hash.chunk-size
 ---------------
 Type
