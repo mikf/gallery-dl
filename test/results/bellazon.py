@@ -371,6 +371,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/41694-taylor-hill/page/59/#findComment-3481833",
+    "#comment" : "'/public/style_emoticons/' emoticon",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
