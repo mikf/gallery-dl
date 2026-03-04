@@ -154,8 +154,8 @@ class TestExtractorResults(unittest.TestCase):
                 key = key.split(".")
                 config.set(key[:-1], key[-1], value)
         if "#range" in result:
-            config.set((), "image-range"  , result["#range"])
-            config.set((), "chapter-range", result["#range"])
+            config.set((), "file-range" , result["#range"])
+            config.set((), "child-range", result["#range"])
 
         tjob = ResultJob(extr,
                          content=("#sha1_content" in result),
