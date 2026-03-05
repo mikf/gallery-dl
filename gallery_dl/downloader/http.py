@@ -42,7 +42,9 @@ class HttpDownloader(DownloaderBase):
         self.rate = self.config("rate")
         interval_429 = self.config("sleep-429")
 
-        if not self.config("consume-content", False):
+        if self.config("consume-content", False):
+            self.release_conn = self._release_conn_impl
+        else:
             # this resets the underlying TCP connection, and therefore
             # if the program makes another request to the same domain,
             # a new connection (either TLS or plain TCP) must be made
@@ -192,7 +194,8 @@ class HttpDownloader(DownloaderBase):
             elif code == 206:  # Partial Content
                 offset = file_size
                 size = response.headers["Content-Range"].rpartition("/")[2]
-            elif code == 416 and file_size:  # Requested Range Not Satisfiable
+            elif code == 416 and file_size:  # Range Not Satisfiable
+                self._release_conn_impl(response)
                 break
             else:
                 msg = f"'{code} {response.reason}' for '{url}'"
@@ -378,7 +381,7 @@ class HttpDownloader(DownloaderBase):
 
         return True
 
-    def release_conn(self, response):
+    def _release_conn_impl(self, response):
         """Release connection back to pool by consuming response body"""
         try:
             for _ in response.iter_content(self.chunk_size):
