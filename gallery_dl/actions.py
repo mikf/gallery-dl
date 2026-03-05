@@ -233,7 +233,7 @@ def action_flag(opts):
     if value is None:
         value = "stop"
     elif value == "skip":
-        value = "stop" if flag == "DOWNLOAD" else False
+        value = False
     else:
         value = value.lower()
 

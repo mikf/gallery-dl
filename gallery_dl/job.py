@@ -445,24 +445,28 @@ class DownloadJob(Job):
             self.extractor.sleep(self.sleep(), "download")
 
         # download from URL
-        if not self.download(url):
+        failed = False
+        try:
+            if not self.download(url):
+                # use fallback URLs if available/enabled
+                fallback = kwdict.get("_fallback", ()) if self.fallback else ()
+                for num, url in enumerate(fallback, 1):
+                    util.remove_file(pathfmt.temppath)
+                    self.log.info("Trying fallback URL #%d", num)
+                    if self.download(url):
+                        break
+                else:
+                    failed = True
+        except exception.StopDownload:
+            failed = True
 
-            # use fallback URLs if available/enabled
-            fallback = kwdict.get("_fallback", ()) if self.fallback else ()
-            for num, url in enumerate(fallback, 1):
-                util.remove_file(pathfmt.temppath)
-                self.log.info("Trying fallback URL #%d", num)
-                if self.download(url):
-                    break
-            else:
-                # download failed
-                self.status |= 4
-                self.log.error("Failed to download %s",
-                               pathfmt.filename or url)
-                if "error" in hooks:
-                    for callback in hooks["error"]:
-                        callback(pathfmt)
-                return
+        if failed:
+            self.status |= 4
+            self.log.error("Failed to download %s", pathfmt.filename or url)
+            if "error" in hooks:
+                for callback in hooks["error"]:
+                    callback(pathfmt)
+            return
 
         if not pathfmt.temppath:
             if archive is not None and self._archive_write_skip:
@@ -479,8 +483,7 @@ class DownloadJob(Job):
         if FLAGS.DOWNLOAD is not None:
             FLAGS.DOWNLOAD = None
             self.status |= 4
-            self.log.error("Failed to download %s",
-                           pathfmt.filename or url)
+            self.log.error("Failed to download %s", pathfmt.filename or url)
             if "error" in hooks:
                 for callback in hooks["error"]:
                     callback(pathfmt)
