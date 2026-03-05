@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2024 Mike Fährmann
+# Copyright 2024-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,7 +20,7 @@ class HashPP(PostProcessor):
         self.chunk_size = options.get("chunk-size", 32768)
         self.filename = options.get("filename")
 
-        hashes = options.get("hashes")
+        hashes = options.get("mode") or options.get("hashes")
         if isinstance(hashes, dict):
             self.hashes = list(hashes.items())
         elif isinstance(hashes, str):
