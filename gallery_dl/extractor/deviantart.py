@@ -622,7 +622,7 @@ class DeviantartExtractor(Extractor):
 
         return cache.get(deviation["deviationid"])
 
-    def _unwatch_premium(self):
+    def _unwatch_premium(self, _=None):
         for username in self.unwatch:
             self.log.info("Unwatching %s", username)
             self.api.user_friends_unwatch(username)
