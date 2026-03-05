@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2025 Mike Fährmann
+# Copyright 2018-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -97,7 +97,13 @@ class PahealTagExtractor(PahealExtractor):
 
         while True:
             try:
-                page = self.request(base + str(pnum)).text
+                response = self.request(
+                    base + str(pnum), allow_redirects=False)
+                if response.status_code >= 300:
+                    pid = response.headers["location"].rpartition("/")[2]
+                    yield self._extract_post(pid)
+                    return
+                page = response.text
             except self.exc.HttpError as exc:
                 if exc.status == 404:
                     return
@@ -109,7 +115,7 @@ class PahealTagExtractor(PahealExtractor):
                 yield self._extract_data(post)
 
             if ">Next<" not in page:
-                return
+                break
             pnum += 1
 
     def _extract_data(self, post):
