@@ -1166,6 +1166,7 @@ class TwitterQuotesExtractor(TwitterExtractor):
 class TwitterInfoExtractor(TwitterExtractor):
     """Extractor for a user's profile data"""
     subcategory = "info"
+    directory_fmt = ("{category}", "{name}")
     pattern = USER_PATTERN + r"/info"
     example = "https://x.com/USER/info"
 
