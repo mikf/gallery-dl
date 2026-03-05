@@ -8872,6 +8872,9 @@ Description
     * If this is an ``object``,
       it is a ``<field name>`` to ``<algorithm name>`` mapping
       for hash digests to compute.
+Note
+    This option can also be set as ``mode``,
+    making it possible to use ``"name": "hash/<fieldname>@<event>"``
 
 
 metadata.mode

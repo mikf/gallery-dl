@@ -470,11 +470,14 @@ class ExecTest(BasePostprocessorTest):
         })
 
         self.assertEqual(self.job.status, 0)
-        with patch("gallery_dl.util.Popen") as p:
+        with patch("gallery_dl.util.Popen") as p, \
+                self.assertLogs(level=10) as log_info:
             p.return_value = i = Mock()
             i.wait.return_value = 1  # non-zero exit status
             self._trigger(("after",))
         self.assertEqual(self.job.status, 23)
+        self.assertIn("'echo foo bar' returned with non-zero ",
+                      log_info.output[1])
 
 
 class HashTest(BasePostprocessorTest):
@@ -526,6 +529,23 @@ class HashTest(BasePostprocessorTest):
             "6028f9e6957f4ca929941318c4bba6258713fd5162f9e33bd10e1c456d252700"
             "3e1095b50736c4fd1e2deea152e3c8ecd5993462a747208e4d842659935a1c62",
             kwdict["b"], "sha512")
+
+    def test_mode(self):
+        self._create({"mode": "sha256,sha512"})
+
+        with self.pathfmt.open() as fp:
+            fp.write(b"Foo Bar\n")
+
+        self._trigger()
+
+        kwdict = self.pathfmt.kwdict
+        self.assertEqual(
+            "4775b55be17206445d7015a5fc7656f38a74b880670523c3b175455f885f2395",
+            kwdict["sha256"], "sha256")
+        self.assertEqual(
+            "6028f9e6957f4ca929941318c4bba6258713fd5162f9e33bd10e1c456d252700"
+            "3e1095b50736c4fd1e2deea152e3c8ecd5993462a747208e4d842659935a1c62",
+            kwdict["sha512"], "sha512")
 
 
 class MetadataTest(BasePostprocessorTest):
