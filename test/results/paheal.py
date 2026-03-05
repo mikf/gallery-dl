@@ -67,6 +67,25 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://rule34.paheal.net/post/list/tien vira/1",
+    "#comment" : "tag with only 1 result (#9186)",
+    "#category": ("shimmie2", "paheal", "tag"),
+    "#class"   : paheal.PahealTagExtractor,
+    "#results" : "https://r34i.paheal-cdn.net/fc/3b/fc3b8ff79b0332907edda690725036e8",
+
+    "date"       : "dt:2025-06-06 10:09:13",
+    "extension"  : "png",
+    "width"      : 7972,
+    "height"     : 5154,
+    "size"       : 25165824,
+    "id"         : 6909357,
+    "md5"        : "fc3b8ff79b0332907edda690725036e8",
+    "search_tags": "tien vira",
+    "source"     : "https://www.newgrounds.com/art/view/majinsfw/hypno-cruise-ship",
+    "uploader"   : "Deskjet23",
+},
+
+{
     "#url"     : "https://rule34.paheal.net/post/view/481609",
     "#category": ("shimmie2", "paheal", "post"),
     "#class"   : paheal.PahealPostExtractor,
