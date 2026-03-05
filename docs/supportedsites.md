@@ -940,7 +940,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="readcomiconline" title="readcomiconline">
     <td>Read Comic Online</td>
     <td>https://readcomiconline.li/</td>
-    <td>Comic Issues, Comics</td>
+    <td>Comic Issues, Comics, Tag Searches</td>
     <td></td>
 </tr>
 <tr id="realbooru" title="realbooru">
