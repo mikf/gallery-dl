@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2015-2023 Mike Fährmann
+# Copyright 2015-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -30,7 +30,8 @@ Exception
            ├── StopExtraction
            ├── AbortExtraction
            ├── TerminateExtraction
-           └── RestartExtraction
+           ├── RestartExtraction
+           └── StopDownload
 """
 
 
@@ -195,3 +196,7 @@ class TerminateExtraction(ControlException):
 
 class RestartExtraction(ControlException):
     """Restart data extraction"""
+
+
+class StopDownload(ControlException):
+    """Cancel a file download"""
