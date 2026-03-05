@@ -104,8 +104,11 @@ class PixivExtractor(Extractor):
             for work["num"], file in enumerate(files):
                 url = file["url"]
                 work.update(file)
+                text.nameext_from_url(url, work)
                 work["date_url"] = self._date_from_url(url)
-                yield Message.Url, url, text.nameext_from_url(url, work)
+                work["hash"] = (name[name.find("-")+1:name.rfind("_")]
+                                if "-" in (name := work["filename"]) else "")
+                yield Message.Url, url, work
 
     def _extract_files(self, work):
         meta_single_page = work["meta_single_page"]

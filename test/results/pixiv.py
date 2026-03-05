@@ -487,6 +487,46 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.pixiv.net/en/artworks/141762848",
+    "#comment" : "'hash' metadata",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#results" : "https://i.pximg.net/img-original/img/2026/03/01/07/35/25/141762848-757d4d64b92a41c496c04aa34ae56855_p0.jpg",
+
+    "caption"  : """🐰＜ Twitter [ <strong><a href="https://twitter.com/MityaStar" target="_blank">twitter/MityaStar</a></strong> ]<br />🐰＜ FANBOX [ <a href="https://shootingstar.fanbox.cc/" target="_blank">https://shootingstar.fanbox.cc/</a> ]<br />🐰＜ Skeb [ <a href="https://skeb.jp/@MityaStar" target='_blank' rel='noopener noreferrer'>https://skeb.jp/@MityaStar</a> ]""",
+    "date"     : "dt:2026-02-28 22:35:25",
+    "date_url" : "dt:2026-02-28 22:35:25",
+    "extension": "jpg",
+    "filename" : "141762848-757d4d64b92a41c496c04aa34ae56855_p0",
+    "hash"     : "757d4d64b92a41c496c04aa34ae56855",
+    "width"    : 816,
+    "height"   : 1200,
+    "id"       : 141762848,
+    "title"    : "シャロちゃん",
+    "tags"     : [
+        "ご注文はうさぎですか?",
+        "桐間紗路",
+        "シャロ",
+        "内田真礼",
+    ],
+    "user"     : {
+        "account"    : "witch_shootingstar",
+        "id"         : 213128,
+        "name"       : "みーちゃ",
+    },
+},
+
+{
+    "#url"     : "https://i.pximg.net/img-original/img/2026/03/01/07/35/25/141762848-757d4d64b92a41c496c04aa34ae56855_p0.jpg",
+    "#comment" : "'hash' metadata - direct link URL",
+    "#class"   : pixiv.PixivWorkExtractor,
+    "#results" : "https://i.pximg.net/img-original/img/2026/03/01/07/35/25/141762848-757d4d64b92a41c496c04aa34ae56855_p0.jpg",
+
+    "filename" : "141762848-757d4d64b92a41c496c04aa34ae56855_p0",
+    "hash"     : "757d4d64b92a41c496c04aa34ae56855",
+    "id"       : 141762848,
+},
+
+{
     "#url"     : "https://www.pixiv.net/en/artworks/unlisted/eE3fTYaROT9IsZmep386",
     "#class"   : pixiv.PixivUnlistedExtractor,
     "#results" : "https://i.pximg.net/img-original/img/2020/10/15/00/46/12/85017704-149014193e4d3e23a6b8bd5e38b51ed4_p0.png",
