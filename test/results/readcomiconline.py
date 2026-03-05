@@ -60,4 +60,39 @@ __tests__ = (
     "#sha1_metadata": "9563a19454e1b4e0da5b7a28112bf00a3e8069a8",
 },
 
+{
+    "#url"     : "https://readcomiconline.li/Writer/Jody-Houser",
+    "#category": ("", "readcomiconline", "writer"),
+    "#class"   : readcomiconline.ReadcomiconlineTagExtractor,
+    "#pattern" : readcomiconline.ReadcomiconlineComicExtractor.pattern,
+    "#count"   : range(80, 120),
+},
+
+{
+    "#url"     : "https://readcomiconline.li/Artist/Simone-Buonfantino/LatestUpdate",
+    "#category": ("", "readcomiconline", "artist"),
+    "#class"   : readcomiconline.ReadcomiconlineTagExtractor,
+    "#results" : (
+        "https://readcomiconline.li/Comic/Spider-Man-Unlimited-Infinity-Comic",
+        "https://readcomiconline.li/Comic/Black-Widow-Widow-s-Sting",
+        "https://readcomiconline.li/Comic/Age-of-X-Man-Omega",
+        "https://readcomiconline.li/Comic/Captain-Marvel-Braver-Mightier",
+        "https://readcomiconline.li/Comic/Thor-vs-Hulk-Champions-of-the-Universe",
+    ),
+
+    "search_tags": "Simone-Buonfantino",
+},
+
+{
+    "#url"     : "https://readcomiconline.li/Genre/Spy",
+    "#category": ("", "readcomiconline", "genre"),
+    "#class"   : readcomiconline.ReadcomiconlineTagExtractor,
+},
+
+{
+    "#url"     : "https://readcomiconline.li/Publisher/Europe-Comics",
+    "#category": ("", "readcomiconline", "publisher"),
+    "#class"   : readcomiconline.ReadcomiconlineTagExtractor,
+},
+
 )
