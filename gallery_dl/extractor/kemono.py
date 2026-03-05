@@ -171,20 +171,20 @@ class KemonoExtractor(Extractor):
                     file["type"] = "archive"
                     if archives:
                         try:
-                            data = self.api.file(hash)
-                            data.update(file)
+                            archive = self.api.file(hash)
+                            archive.update(file)
                         except Exception as exc:
                             self.log.warning(
                                 "%s: Failed to retrieve archive metadata of "
                                 "'%s' (%s: %s)", post["id"], file.get("name"),
                                 exc.__class__.__name__, exc)
-                            data = file.copy()
+                            archive = file.copy()
                     else:
-                        data = file.copy()
+                        archive = file.copy()
                     if archives_type is dict:
-                        post_archives[hash] = data
+                        post_archives[hash] = archive
                     else:
-                        post_archives.append(data)
+                        post_archives.append(archive)
 
                 files.append(file)
 
@@ -426,7 +426,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
         except Exception:
             raise exception.NotFoundError("channel")
 
-        data = {
+        metadata = {
             "server"       : server["name"],
             "server_id"    : server["id"],
             "channel"      : channel["name"],
@@ -465,7 +465,7 @@ class KemonoDiscordExtractor(KemonoExtractor):
                 files.append({"path": "https://cdn.discordapp.com" + path,
                               "name": path, "type": "inline", "hash": ""})
 
-            post.update(data)
+            post.update(metadata)
             post["date"] = self._parse_datetime(post["published"])
             post["count"] = len(files)
             post["archives"] = post_archives = ()
@@ -492,20 +492,20 @@ class KemonoDiscordExtractor(KemonoExtractor):
                     post["type"] = "archive"
                     if archives:
                         try:
-                            data = self.api.file(hash)
-                            data.update(file)
+                            archive = self.api.file(hash)
+                            archive.update(file)
                         except Exception as exc:
                             self.log.warning(
                                 "%s: Failed to retrieve archive metadata of "
                                 "'%s' (%s: %s)", post["id"], file.get("name"),
                                 exc.__class__.__name__, exc)
-                            data = file.copy()
+                            archive = file.copy()
                     else:
-                        data = file.copy()
+                        archive = file.copy()
                     if archives_type is dict:
-                        post_archives[hash] = data
+                        post_archives[hash] = archive
                     else:
-                        post_archives.append(data)
+                        post_archives.append(archive)
 
                 if url[0] == "/":
                     url = f"{self.root}/data{url}"
