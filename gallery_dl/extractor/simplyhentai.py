@@ -19,7 +19,7 @@ class SimplyhentaiExtractor(Extractor):
     category = "simplyhentai"
     root = "https://www.simply-hentai.com"
     root_api = "https://api-v3.simply-hentai.com"
-    browseF = "firefox"
+    browser = "firefox"
 
     def items(self):
         for gallery in self.galleries():
