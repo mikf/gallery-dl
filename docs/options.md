@@ -13,6 +13,7 @@
 * [Downloader Options](#downloader-options)
 * [Sleep Options](#sleep-options)
 * [Configuration Options](#configuration-options)
+* [Cache Options](#cache-options)
 * [Authentication Options](#authentication-options)
 * [Cookie Options](#cookie-options)
 * [Selection Options](#selection-options)
@@ -31,8 +32,6 @@
                                 characters
     --windows-filenames         Force filenames to be Windows-compatible
     -X, --extractors PATH       Load external extractors from PATH
-    --clear-cache MODULE        Delete cached login sessions, cookies, etc. for
-                                MODULE (ALL to delete everything)
     --compat                    Restore legacy 'category' names
 
 ## Update Options:
@@ -150,6 +149,18 @@
     --config-create             Create a basic configuration file
     --config-status             Show configuration file status
     --config-open               Open configuration file in external application
+
+## Cache Options:
+    --cache-file PATH           Use PATH as cache file
+    --cache-show MODULE         Show cached values for MODULE (ALL to show all
+                                entries, EXP to show only expired entries, VAL
+                                to show only valid entries)
+    --cache-clear MODULE        Delete cached login sessions, cookies, etc. for
+                                MODULE (ALL to delete everything, EXP to delete
+                                only expired values)
+    --cache-vacuum              Clean up the cache database by removing unused
+                                space and reorganizing the data to improve
+                                performance
 
 ## Authentication Options:
     -u, --username USER         Username to login with

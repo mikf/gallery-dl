@@ -64,9 +64,9 @@ def main():
         if args.postprocessors:
             config.set((), "postprocessors", args.postprocessors)
         if args.abort:
-            config.set((), "skip", f"abort:{args.abort}")
+            config.set((), "skip", "abort:" + args.abort)
         if args.terminate:
-            config.set((), "skip", f"terminate:{args.terminate}")
+            config.set((), "skip", "terminate:" + args.terminate)
         if args.cookies_from_browser:
             browser, _, profile = args.cookies_from_browser.partition(":")
             browser, _, keyring = browser.partition("+")
@@ -168,17 +168,45 @@ def main():
 
             log.debug("Configuration Files %s", config._files)
 
-        if args.clear_cache:
+        if args.cache_file:
+            config.set(("cache",), "file", args.cache_file)
+
+        if args.cache_show:
             from . import cache
-            log = logging.getLogger("cache")
-            cnt = cache.clear(args.clear_cache)
+            rows = cache.get(args.cache_show)
+            if rows is None:
+                return cache.error()
+            import pickle
+            cut = (21 if args.cache_show in {"ALL", "EXP", "VAL"} else
+                   22 + len(args.cache_show))
+            for key, value, expires in rows:
+                value = util.json_dumps(pickle.loads(value))
+                expires = f" ({expires})" if expires else ""
+                sys.stdout.write(f"{key[cut:]}{expires}:\n  {value}\n\n")
+            return 0
 
+        if args.cache_clear:
+            from . import cache
+            cnt = cache.clear(args.cache_clear)
             if cnt is None:
-                log.error("Database file not available")
-                return 1
+                return cache.error()
 
-            log.info("Deleted %d entr%s from '%s'",
-                     cnt, "y" if cnt == 1 else "ies", cache._path())
+            cache.log.info("Deleted %d entr%s from '%s'",
+                           cnt, "y" if cnt == 1 else "ies", cache.path())
+            return 0
+
+        if args.cache_vacuum:
+            from . import cache
+            if (db := cache.database()) is None:
+                return cache.error()
+            path = cache.path()
+            before = os.stat(path).st_size
+            cache.log.info("Running 'VACUUM'")
+            db.execute("VACUUM")
+            after = os.stat(path).st_size
+            if before - after:
+                cache.log.info("Reduced database size by %s bytes",
+                               util.format_value(before - after))
             return 0
 
         if args.config:
@@ -217,7 +245,6 @@ def main():
             sources = config.get(("extractor",), "module-sources")
 
         if sources:
-            import os
             modules = []
 
             for source in sources:

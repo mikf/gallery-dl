@@ -287,12 +287,6 @@ def build_parser():
         help="Load external extractors from PATH",
     )
     general.add_argument(
-        "--clear-cache",
-        dest="clear_cache", metavar="MODULE",
-        help="Delete cached login sessions, cookies, etc. for MODULE "
-             "(ALL to delete everything)",
-    )
-    general.add_argument(
         "--compat",
         dest="category-map", nargs=0, action=ConfigConstAction, const="compat",
         help="Restore legacy 'category' names",
@@ -665,6 +659,33 @@ def build_parser():
         dest="config", action="store_const", const="open",
         help="Open configuration file in external application",
     )
+
+    cache = parser.add_argument_group("Cache Options")
+    cache.add_argument(
+        "--cache-file",
+        dest="cache_file", metavar="PATH",
+        help="Use PATH as cache file",
+    )
+    cache.add_argument(
+        "--cache-show",
+        dest="cache_show", metavar="MODULE",
+        help="Show cached values for MODULE (ALL to show all entries, EXP to "
+             "show only expired entries, VAL to show only valid entries)",
+    )
+    cache.add_argument(
+        "--cache-clear",
+        dest="cache_clear", metavar="MODULE",
+        help="Delete cached login sessions, cookies, etc. for MODULE "
+             "(ALL to delete everything, EXP to delete only expired values)",
+    )
+    cache.add_argument(
+        "--cache-vacuum",
+        dest="cache_vacuum", action="store_const", const="vacuum",
+        help="Clean up the cache database by removing unused space and "
+             "reorganizing the data to improve performance",
+    )
+    cache.add_argument(
+        "--clear-cache", dest="cache_clear", help=SUPPRESS)
 
     authentication = parser.add_argument_group("Authentication Options")
     authentication.add_argument(
