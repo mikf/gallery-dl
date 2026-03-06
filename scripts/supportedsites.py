@@ -66,6 +66,7 @@ CATEGORY_MAP = {
     "fappic"         : "Fappic.com",
     "fashionnova"    : "Fashion Nova",
     "fikfap"         : "FikFap",
+    "filester"       : "filester.me",
     "fitnakedgirls"  : "FitNakedGirls",
     "furaffinity"    : "Fur Affinity",
     "furry34"        : "Furry 34 com",
