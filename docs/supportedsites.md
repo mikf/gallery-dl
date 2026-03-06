@@ -349,6 +349,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Hashtags, Posts, User Profiles</td>
     <td></td>
 </tr>
+<tr id="filester" title="filester">
+    <td>filester.me</td>
+    <td>https://filester.me/</td>
+    <td>Files, Folders</td>
+    <td></td>
+</tr>
 <tr id="fitnakedgirls" title="fitnakedgirls">
     <td>FitNakedGirls</td>
     <td>https://fitnakedgirls.com/</td>
