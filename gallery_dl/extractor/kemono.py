@@ -42,6 +42,8 @@ class KemonoExtractor(Extractor):
             self.revisions_unique = (self.revisions == "unique")
         order = self.config("order-revisions")
         self.revisions_reverse = order[0] in {"r", "a"} if order else False
+        self.avatar = self.config("avatar", False)
+        self.banner = self.config("banner", False)
 
         self._find_inline = text.re(
             r'src="(?:https?://(?:kemono\.cr|coomer\.st))?(/inline/[^"]+'
@@ -75,6 +77,28 @@ class KemonoExtractor(Extractor):
 
         # prevent files from being sent with gzip compression
         headers = {"Accept-Encoding": "identity"}
+
+        if (self.avatar or self.banner) and \
+                len(self.groups) >= 4 and (service := self.groups[2]) and \
+                (creator_id := self.groups[3]) and \
+                not service.isdigit():
+
+            if creator_info is not None:
+                key = f"{service}_{creator_id}"
+                if key not in creator_info:
+                    try:
+                        creator = creator_info[key] = self.api.creator_profile(
+                            service, creator_id)
+                    except self.exc.HttpError:
+                        self.log.warning("%s/%s: 'Creator not found'",
+                                         service, creator_id)
+                        creator = creator_info[key] = util.NONE
+                else:
+                    creator = creator_info[key]
+            else:
+                creator = util.NONE
+
+            yield from self._user_items(service, creator_id, creator)
 
         posts = self.posts()
         if max_posts:
@@ -337,6 +361,47 @@ class KemonoExtractor(Extractor):
         for a in rev["attachments"]:
             a.pop("name", None)
         return util.sha1(self._json_dumps(rev))
+
+    def _user_items(self, service, creator_id, creator):
+        data = {
+            "service": service,
+            "user"   : creator_id,
+            "num"    : 1,
+            "count"  : 1,
+        }
+        if creator:
+            data["username"] = creator["name"]
+            data["user_profile"] = creator
+
+        if self.avatar:
+            avatar = data.copy()
+            avatar.update({
+                "id"   : "avatar",
+                "type" : "avatar",
+                "title": "avatar",
+            })
+            url = f"https://img.kemono.cr/icons/{service}/{creator_id}"
+            text.nameext_from_url(url, avatar)
+            if not avatar["extension"]:
+                avatar["extension"] = "jpg"
+            avatar["filename"] = "avatar"
+            yield Message.Directory, "", avatar
+            yield Message.Url, url, avatar
+
+        if self.banner:
+            banner = data.copy()
+            banner.update({
+                "id"   : "banner",
+                "type" : "banner",
+                "title": "banner",
+            })
+            url = f"https://img.kemono.cr/banners/{service}/{creator_id}"
+            text.nameext_from_url(url, banner)
+            if not banner["extension"]:
+                banner["extension"] = "jpg"
+            banner["filename"] = "banner"
+            yield Message.Directory, "", banner
+            yield Message.Url, url, banner
 
     def _discord_server_info(self, server_id):
         server = self.api.discord_server(server_id)
