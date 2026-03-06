@@ -6935,7 +6935,7 @@ extractor.twitter.search-pagination
 Type
     ``string``
 Default
-    ``"cursor"``
+    ``"max_id"``
 Description
     Selects how to paginate over search results.
 

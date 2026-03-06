@@ -1553,7 +1553,7 @@ class TwitterAPI():
             "withGrokTranslatedBio": False,
         }
 
-        pgn = cfg("search-pagination")
+        pgn = cfg("search-pagination", "max_id")
         if pgn in {"max_id", "maxid", "id"}:
             update_variables = self._update_variables_search_maxid
         elif pgn in {"until", "date", "datetime", "dt"}:
