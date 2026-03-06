@@ -7,8 +7,8 @@
 """Extractors for https://gofile.io/"""
 
 from .common import Extractor, Message
-from .. import text
 import hashlib
+import time
 
 
 class GofileFolderExtractor(Extractor):
@@ -20,10 +20,6 @@ class GofileFolderExtractor(Extractor):
     pattern = r"(?:https?://)?(?:www\.)?gofile\.io/d/([^/?#]+)"
     example = "https://gofile.io/d/ID"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        self.content_id = match[1]
-
     def items(self):
         recursive = self.config("recursive", True)
         password = self.config("password")
@@ -34,11 +30,7 @@ class GofileFolderExtractor(Extractor):
         self.cookies.set("accountToken", token, domain=".gofile.io")
         self.api_token = token
 
-        self.website_token = (self.config("website-token") or
-                              self.cache(self._get_website_token,
-                                         _key=None, _exp=86400, _mem=False))
-
-        folder = self._get_content(self.content_id, password)
+        folder = self._get_content(self.groups[0], password)
         yield Message.Directory, "", folder
 
         try:
@@ -62,32 +54,20 @@ class GofileFolderExtractor(Extractor):
                     url = "https://gofile.io/d/" + content["id"]
                     content["_extractor"] = GofileFolderExtractor
                     yield Message.Queue, url, content
-
+                else:
+                    self.log.debug("Skipping subfolder '%s'", content["id"])
             else:
                 self.log.debug("'%s' is of unknown type (%s)",
                                content.get("name"), content["type"])
 
-    def _create_account(self):
-        self.log.debug("Creating temporary account")
-        return self._api_request("accounts", method="POST")["token"]
+    def request_api(self, endpoint, params=None, headers=None, method="GET"):
+        if headers is None:
+            headers = {}
+        headers["Referer"] = self.root + "/"
+        headers["Origin"] = self.root
 
-    def _get_website_token(self):
-        self.log.debug("Fetching website token")
-        page = self.request(self.root + "/dist/js/config.js").text
-        return text.extr(page, '.wt = "', '"')
-
-    def _get_content(self, content_id, password=None):
-        headers = {
-            "Authorization"  : "Bearer " + self.api_token,
-            "X-Website-Token": self.website_token,
-        }
-        params = None if password is None else {"password": hashlib.sha256(
-            password.encode()).hexdigest()}
-        return self._api_request("contents/" + content_id, params, headers)
-
-    def _api_request(self, endpoint, params=None, headers=None, method="GET"):
         response = self.request_json(
-            "https://api.gofile.io/" + endpoint,
+            "https://api.gofile.io" + endpoint,
             method=method, params=params, headers=headers)
 
         if response["status"] != "ok":
@@ -99,3 +79,33 @@ class GofileFolderExtractor(Extractor):
                 f"{endpoint} failed (Status: {response['status']})")
 
         return response["data"]
+
+    def _create_account(self):
+        self.log.debug("Creating temporary account")
+        return self.request_api("/accounts", method="POST")["token"]
+
+    def _generate_website_token(self, lang="en-US"):
+        # https://gofile.io/dist/js/wt.obf.js
+        data = (f"{self.session.headers['User-Agent']}::"
+                f"{lang}::"
+                f"{self.api_token}::"
+                f"{int(time.time() / 14400)}::"
+                f"gf2026x")
+        return hashlib.sha256(data.encode()).hexdigest()
+
+    def _get_content(self, content_id, password=None):
+        params = {
+            "contentFilter": ""	,
+            "page"         : "1",
+            "pageSize"     : "1000",
+            "sortField"    : "name",
+            "sortDirection": "1",
+            "password"     : None if password is None else
+                             hashlib.sha256(password.encode()).hexdigest(),
+        }
+        headers = {
+            "Authorization"  : "Bearer " + self.api_token,
+            "X-Website-Token": self._generate_website_token("en-US"),
+            "X-BL"           : "en-US",
+        }
+        return self.request_api("/contents/" + content_id, params, headers)
