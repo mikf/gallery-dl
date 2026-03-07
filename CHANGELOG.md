@@ -1,5 +1,46 @@
 # Changelog
 
+## 1.31.8 - 2026-03-07
+### Extractors
+#### Additions
+- [fanbox] add `tag` extractor ([#9128](https://github.com/mikf/gallery-dl/issues/9128))
+- [filester] add support ([#9196](https://github.com/mikf/gallery-dl/issues/9196))
+- [mixdrop] add `file` extractor ([#8982](https://github.com/mikf/gallery-dl/issues/8982) [#9130](https://github.com/mikf/gallery-dl/issues/9130))
+- [readcomiconline] add `tag` extractor ([#9190](https://github.com/mikf/gallery-dl/issues/9190))
+#### Fixes
+- [bellazon] fix `content` of posts with multiple quotes ([#9140](https://github.com/mikf/gallery-dl/issues/9140))
+- [fansly] fix `KeyError: 'data'` ([#9149](https://github.com/mikf/gallery-dl/issues/9149))
+- [gofile] fix extractor ([#9183](https://github.com/mikf/gallery-dl/issues/9183))
+- [kemono:discord] fix archive data overwriting general data ([#9184](https://github.com/mikf/gallery-dl/issues/9184) [#9195](https://github.com/mikf/gallery-dl/issues/9195))
+- [luscious] fix empty file URLs ([#9172](https://github.com/mikf/gallery-dl/issues/9172) [#9188](https://github.com/mikf/gallery-dl/issues/9188))
+- [paheal] fix tag searches with only 1 result ([#9186](https://github.com/mikf/gallery-dl/issues/9186))
+- [patreon] update default `User-Agent` headers ([#9165](https://github.com/mikf/gallery-dl/issues/9165))
+- [reddit:user] disable `only` for `upvoted` & `downvoted` results ([#9124](https://github.com/mikf/gallery-dl/issues/9124))
+- [simplyhentai] rewrite ([#9158](https://github.com/mikf/gallery-dl/issues/9158))
+- [tiktok] use more lenient regex for secondary user IDs ([#9094](https://github.com/mikf/gallery-dl/issues/9094))
+- [twitter] use `max_id` as default `search-pagination` ([#9193](https://github.com/mikf/gallery-dl/issues/9193) [#9194](https://github.com/mikf/gallery-dl/issues/9194))
+- [weebdex] fix `KeyError: 'chapter'` for oneshots ([#9123](https://github.com/mikf/gallery-dl/issues/9123))
+- [whyp] fix downloading private content ([#9133](https://github.com/mikf/gallery-dl/issues/9133))
+#### Improvements
+- [e621] support shared post URLs ([#9168](https://github.com/mikf/gallery-dl/issues/9168))
+- [sankaku] include parent post in `parent:…` searches ([#9102](https://github.com/mikf/gallery-dl/issues/9102))
+- [smugmug] improve error for deleted files ([#9140](https://github.com/mikf/gallery-dl/issues/9140))
+- [tumblr] support media from `answer'/'asks` posts ([#4509](https://github.com/mikf/gallery-dl/issues/4509))
+- [vipr] detect missing images ([#8415](https://github.com/mikf/gallery-dl/issues/8415))
+- [xenforo] support `imgur` media embeds ([#9127](https://github.com/mikf/gallery-dl/issues/9127))
+#### Metadata
+- [facebook:photo] improve metadata availability ([#9147](https://github.com/mikf/gallery-dl/issues/9147))
+- [pixiv] extract `hash` metadata when available
+- [postimg] fix `filename` metadata ([#9119](https://github.com/mikf/gallery-dl/issues/9119))
+### Downloaders
+- [http] release connections on `416 Range Not Satisfiable` responses
+### Post Processors
+- [actions] add `actions` postprocessor
+- [hash] allow using `mode` to select hashes
+- [ugoira] add more `mkvmerge` options ([#8803](https://github.com/mikf/gallery-dl/issues/8803))
+### Miscellaneous
+- [path] add `windows+` as a special `path-restrict` value
+
 ## 1.31.7 - 2026-02-24
 ### Extractors
 #### Additions
