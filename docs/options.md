@@ -88,6 +88,8 @@
     --write-pages               Write downloaded intermediary pages to files in
                                 the current directory to debug problems
     --print-traffic             Display sent and read HTTP traffic
+    --truncate-filenames        Automatically truncate filenames so destination
+                                paths stay within OS path-length limits
     --no-colors                 Do not emit ANSI color codes in output
 
 ## Networking Options:

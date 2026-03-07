@@ -155,6 +155,23 @@ Note
     a valid filename extension.
 
 
+extractor.*.truncate-filenames
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Automatically truncate generated filenames so destination paths stay
+    within the operating system's path and filename length limits.
+
+    Truncation is applied to the filename portion only and preserves the
+    final file extension whenever possible.
+
+    When `downloader.part <downloader.*.part_>`__ files are enabled,
+    the temporary ``.part`` suffix is also accounted for.
+
+
 extractor.*.directory
 ---------------------
 Type

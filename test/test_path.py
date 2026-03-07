@@ -386,6 +386,23 @@ class TestPathOptions(TestPath):
         self.assertEqual(
             pfmt.realdirectory, ". test-テスト-'&>-_:~.txt ./", "custom")
 
+    def test_option_truncatefilenames(self):
+        config.set((), "truncate-filenames", True)
+        config.set((), "base-directory", "")
+        config.set((), "directory", [""])
+
+        with patch.object(path.os, "pathconf", side_effect=(
+            lambda _path, key: 4096 if key == "PC_PATH_MAX" else 12
+        )):
+            pfmt = self._pfmt(kwdict={
+                **KWDICT,
+                "filename": "abcdefghijklmn",
+            })
+            pfmt.set_filename(pfmt.kwdict)
+            pfmt.build_path()
+
+        self.assertEqual(pfmt.filename, "abcdefgh.ext")
+
 
 if __name__ == "__main__":
     unittest.main()
