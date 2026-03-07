@@ -18,3 +18,4 @@ hiddenimports.extend(
 )
 
 hiddenimports.append("yt_dlp")
+hiddenimports.append("81d243bd2c585b0f4821__mypyc")
