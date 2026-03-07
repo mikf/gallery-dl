@@ -72,10 +72,12 @@ class BellazonExtractor(Extractor):
                     dc["id"] = text.extr(info, 'data-fileid="', '"')
                     if ext := text.extr(info, 'data-fileext="', '"'):
                         dc["extension"] = ext
-                    elif "/core/interface/file/attachment.php" in url:
+                    elif ("/core/interface/file/attachment.php" in url or
+                          "/main/index.php?" in url):
                         if not dc["id"]:
-                            dc["id"] = \
-                                url.rpartition("?id=")[2].partition("&")[0]
+                            params = text.parse_query(url[url.find("?")+1:])
+                            dc["id"] = (params.get("id") or
+                                        params.get("attach_id"))
                         if name := text.extr(info, ">", "<").strip():
                             dc["name"] = name = text.unescape(name)
                             text.nameext_from_name(name, dc)
