@@ -128,6 +128,71 @@ class PatreonExtractor(Extractor):
                 if url := text.extr(img, 'src="', '"'):
                     yield "content", None, url, self._filename(url) or url
 
+    def _content_json_to_html(self, node):
+        """Convert ProseMirror/TipTap JSON document to HTML"""
+
+        def convert(node):
+            if isinstance(node, list):
+                return "".join(convert(child) for child in node)
+
+            if isinstance(node, dict):
+                children = convert(node.get("content"))
+                node_type = node.get("type")
+
+                if node_type == "doc":
+                    html = children
+                elif node_type == "paragraph":
+                    html = f"<p>{children}</p>"
+                elif node_type == "heading":
+                    level = max(1, min(6, node.get("attrs", {})
+                                       .get("level", 1)))
+                    html = f"<h{level}>{children}</h{level}>"
+                elif node_type == "bulletList":
+                    html = f"<ul>{children}</ul>"
+                elif node_type == "orderedList":
+                    html = f"<ol>{children}</ol>"
+                elif node_type == "listItem":
+                    html = f"<li>{children}</li>"
+                elif node_type == "blockquote":
+                    html = f"<blockquote>{children}</blockquote>"
+                elif node_type == "hardBreak":
+                    html = "<br>"
+                elif node_type == "text":
+                    html = (text.escape(node.get("text", ""))
+                            .replace("\n", "<br>"))
+                elif node_type == "image":
+                    src = node.get("attrs", {}).get("src", "")
+                    html = f'<img src="{text.escape(src)}">' if src else ""
+                elif node_type == "link":
+                    href = node.get("attrs", {}).get("href", "")
+                    html = (f'<a href="{text.escape(href)}">{children}</a>'
+                            if href else children)
+                else:
+                    html = children
+
+                for mark in node.get("marks", []):
+                    mark_type = mark.get("type")
+                    if mark_type == "bold":
+                        html = f"<strong>{html}</strong>"
+                    elif mark_type == "italic":
+                        html = f"<em>{html}</em>"
+                    elif mark_type == "underline":
+                        html = f"<u>{html}</u>"
+                    elif mark_type == "strike":
+                        html = f"<s>{html}</s>"
+                    elif mark_type == "code":
+                        html = f"<code>{html}</code>"
+                    elif mark_type == "link":
+                        href = mark.get("attrs", {}).get("href", "")
+                        if href:
+                            html = f'<a href="{text.escape(href)}">{html}</a>'
+
+                return html
+
+            return text.escape(str(node))
+
+        return convert(node)
+
     def posts(self):
         """Return all relevant post objects"""
 
@@ -196,6 +261,15 @@ class PatreonExtractor(Extractor):
         attr["creator"] = (
             self.cache(self._user, user["links"]["related"]) or
             included["user"][user["data"]["id"]])
+
+        if not attr.get("content") and attr.get("content_json_string"):
+            try:
+                content_json = util.json_loads(attr["content_json_string"])
+                attr["content"] = self._content_json_to_html(content_json)
+            except Exception as exc:
+                self.log.warning(
+                    "Failed to parse content_json_string for post %s: %s",
+                    attr["id"], exc)
 
         return attr
 
@@ -268,13 +342,14 @@ class PatreonExtractor(Extractor):
             "is_nsfw,is_monthly,name,url"
 
             "&fields[post]=change_visibility_at,comment_count,commenter_count,"
-            "content,current_user_can_comment,current_user_can_delete,"
-            "current_user_can_view,current_user_has_liked,embed,image,"
-            "insights_last_updated_at,is_paid,like_count,meta_image_url,"
-            "min_cents_pledged_to_view,post_file,post_metadata,published_at,"
-            "patreon_url,post_type,pledge_url,preview_asset_type,thumbnail,"
-            "thumbnail_url,teaser_text,title,upgrade_url,url,"
-            "was_posted_by_campaign_owner,has_ti_violation,moderation_status,"
+            "content,content_json_string,current_user_can_comment,"
+            "current_user_can_delete,current_user_can_view,"
+            "current_user_has_liked,embed,image,insights_last_updated_at,"
+            "is_paid,like_count,meta_image_url,min_cents_pledged_to_view,"
+            "post_file,post_metadata,published_at,patreon_url,post_type,"
+            "pledge_url,preview_asset_type,thumbnail,thumbnail_url,"
+            "teaser_text,title,upgrade_url,url,was_posted_by_campaign_owner,"
+            "has_ti_violation,moderation_status,"
             "post_level_suspension_removal_date,pls_one_liners_by_category,"
             "video_preview,view_count"
 
