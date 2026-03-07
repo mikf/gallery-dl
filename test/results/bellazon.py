@@ -378,6 +378,24 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/7459-candice-swanepoel/page/1122/#findComment-3442969",
+    "#comment" : "'/main/index.php' attachment (#9140)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#results" : "https://www.bellazon.com/main/index.php?app=core&module=attach&section=attach&attach_rel_module=post&attach_id=2021999",
+
+    "extension"   : "jpg",
+    "filename"    : "image",
+    "id"          : "2021999",
+    "name"        : "image.jpg",
+    "post"        : {
+        "author_id"  : "51006",
+        "author_slug": "badboy_207",
+        "date"       : "dt:2014-06-27 21:23:51",
+        "id"         : "3442969",
+    },
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/57872-millie-brady/",
     "#class"   : bellazon.BellazonThreadExtractor,
     "#pattern" : r"https://www\.bellazon\.com/main/uploads/monthly_\d+_\d+/.+\.jpg",
