@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.31.9 - 2026-03-08
+### Extractors
+#### Fixes
+- [twitter] fix `AttributeError: '_update_variables_search_maxid'` ([#9203](https://github.com/mikf/gallery-dl/issues/9203))
+
 ## 1.31.8 - 2026-03-07
 ### Extractors
 #### Additions
