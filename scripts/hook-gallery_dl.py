@@ -18,4 +18,14 @@ hiddenimports.extend(
 )
 
 hiddenimports.append("yt_dlp")
-hiddenimports.append("81d243bd2c585b0f4821__mypyc")
+
+mypyc = "81d243bd2c585b0f4821__mypyc"
+try:
+    from importlib.metadata import files
+    for file in files("charset_normalizer"):
+        if "__mypyc" in file.name:
+            mypyc = file.name.partition(".")[0]
+            break
+except Exception:
+    pass
+hiddenimports.append(mypyc)
