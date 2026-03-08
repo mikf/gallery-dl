@@ -296,7 +296,7 @@ class ImgurAPI():
                 return self.extractor.request_json(
                     "https://api.imgur.com" + endpoint,
                     params=params, headers=(headers or self.headers))
-            except self.exc.HttpError as exc:
+            except self.extractor.exc.HttpError as exc:
                 if exc.status not in (403, 429) or \
                         b"capacity" not in exc.response.content:
                     raise
