@@ -8746,6 +8746,16 @@ Description
     See `metadata.event`_ for a list of available events.
 
 
+exec.output
+-----------
+Type
+    ``boolean``
+Default
+    ``true``
+Description
+    Show output of spawned subprocesses.
+
+
 exec.session
 ------------
 Type

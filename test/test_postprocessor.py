@@ -257,6 +257,7 @@ class ExecTest(BasePostprocessorTest):
             shell=True,
             creationflags=0,
             start_new_session=False,
+            stdout=None, stderr=None,
         )
         i.wait.assert_called_once_with()
 
@@ -281,6 +282,7 @@ class ExecTest(BasePostprocessorTest):
             shell=False,
             creationflags=0,
             start_new_session=False,
+            stdout=None, stderr=None,
         )
 
     def test_command_many(self):
@@ -310,6 +312,7 @@ class ExecTest(BasePostprocessorTest):
                 shell=True,
                 creationflags=0,
                 start_new_session=False,
+                stdout=None, stderr=None,
             ),
             call(
                 [
@@ -320,6 +323,7 @@ class ExecTest(BasePostprocessorTest):
                 shell=False,
                 creationflags=0,
                 start_new_session=False,
+                stdout=None, stderr=None,
             ),
         ])
 
@@ -373,6 +377,7 @@ class ExecTest(BasePostprocessorTest):
             shell=False,
             creationflags=0,
             start_new_session=True,
+            stdout=None, stderr=None,
         )
         i.wait.assert_called_once_with()
 
@@ -395,6 +400,7 @@ class ExecTest(BasePostprocessorTest):
             shell=False,
             creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
             start_new_session=False,
+            stdout=None, stderr=None,
         )
         i.wait.assert_called_once_with()
 
@@ -449,7 +455,7 @@ class ExecTest(BasePostprocessorTest):
         self.assertEqual(log_info.output[0], msg)
         self.assertIn("'echo' returned with non-zero ", log_info.output[1])
 
-    def test_action_success(self):
+    def test_opt_success(self):
         self._create({
             "command": "echo foo bar",
             "success": "status = 11",
@@ -462,7 +468,7 @@ class ExecTest(BasePostprocessorTest):
             self._trigger(("after",))
         self.assertEqual(self.job.status, 11)
 
-    def test_action_error(self):
+    def test_opt_error(self):
         self._create({
             "command": "echo foo bar",
             "success": "status = 11",
@@ -478,6 +484,27 @@ class ExecTest(BasePostprocessorTest):
         self.assertEqual(self.job.status, 23)
         self.assertIn("'echo foo bar' returned with non-zero ",
                       log_info.output[1])
+
+    def test_opt_output(self):
+        self._create({
+            "command": ["echo", "foobar"],
+            "output" : False,
+        })
+
+        with patch("gallery_dl.util.Popen") as p:
+            p.return_value = i = Mock()
+            i.wait.return_value = 0
+            self._trigger(("after",))
+
+        import subprocess
+        p.assert_called_once_with(
+            ["echo", "foobar"],
+            shell=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=0,
+            start_new_session=False,
+        )
 
 
 class HashTest(BasePostprocessorTest):

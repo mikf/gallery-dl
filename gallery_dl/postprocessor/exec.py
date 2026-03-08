@@ -39,6 +39,7 @@ class ExecPP(PostProcessor):
             if options.get("async", False):
                 self._exec = self._popen
 
+        self.output = options.get("output", True)
         self.verbose = options.get("verbose", True)
         self.session = False
         self.creationflags = 0
@@ -143,9 +144,11 @@ class ExecPP(PostProcessor):
 
     def _popen(self, args, shell):
         self.log.debug("Running '%s'", args if self.verbose else trim(args))
+        out = None if self.output else subprocess.DEVNULL
         return util.Popen(
             args,
             shell=shell,
+            stdout=out, stderr=out,
             creationflags=self.creationflags,
             start_new_session=self.session,
         )
