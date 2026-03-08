@@ -242,6 +242,20 @@ def action_flag(opts):
     return _flag, None
 
 
+def action_keyword(opts):
+    name, _, value = opts.partition(" ")
+
+    try:
+        value = value.strip()
+        value = util.json_loads(value)
+    except Exception:
+        pass
+
+    def _keyword(args):
+        args["job"].kwdict[name] = value
+    return _keyword, None
+
+
 def action_raise(opts):
     name, _, arg = opts.partition(" ")
 
@@ -294,6 +308,7 @@ ACTIONS = {
     "exec"     : action_exec,
     "exit"     : action_exit,
     "flag"     : action_flag,
+    "keyword"  : action_keyword,
     "level"    : action_level,
     "print"    : action_print,
     "raise"    : action_raise,
