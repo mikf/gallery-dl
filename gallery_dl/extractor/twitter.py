@@ -2316,7 +2316,7 @@ class TwitterAPI():
 
         self.log.debug("Skipping %s ('%s')", tweet_id, text)
 
-    def _update_variables_search(self, variables, cursor, tweet):
+    def _update_variables_search_maxid(self, variables, cursor, tweet):
         try:
             tweet_id = tweet.get("id_str") or tweet["legacy"]["id_str"]
             max_id = "max_id:" + str(int(tweet_id)-1)
