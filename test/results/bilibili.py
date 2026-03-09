@@ -87,6 +87,19 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bilibili.com/opus/1172711958019833880",
+    "#comment" : "multiple 'livephoto' files (#9210)",
+    "#class"   : bilibili.BilibiliArticleExtractor,
+    "#count"   : 10,
+
+    "count"    : 5,
+    "extension": {"jpg", "mp4"},
+    "id"       : "1172711958019833880",
+    "live_url" : {None, str},
+    "suffix"   : {"", "l"},
+},
+
+{
     "#url"    : "https://space.bilibili.com/405279279/article",
     "#class"  : bilibili.BilibiliUserArticlesExtractor,
     "#pattern": bilibili.BilibiliArticleExtractor.pattern,

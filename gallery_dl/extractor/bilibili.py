@@ -36,8 +36,8 @@ class BilibiliArticleExtractor(BilibiliExtractor):
                r"(?:t\.bilibili\.com|(?:www\.)?bilibili.com/opus)/(\d+)")
     example = "https://www.bilibili.com/opus/12345"
     directory_fmt = ("{category}", "{username}")
-    filename_fmt = "{id}_{num}.{extension}"
-    archive_fmt = "{id}_{num}"
+    filename_fmt = "{id}_{num}{suffix}.{extension}"
+    archive_fmt = "{id}_{num}{suffix}"
 
     def items(self):
         article_id = self.groups[0]
@@ -77,14 +77,16 @@ class BilibiliArticleExtractor(BilibiliExtractor):
         yield Message.Directory, "", article
 
         livephoto = self.config("livephoto", True)
+        article["suffix"] = ""
         for article["num"], pic in enumerate(pics, 1):
             url = pic["url"]
             article.update(pic)
             yield Message.Url, url, text.nameext_from_url(url, article)
 
             if livephoto and (url := pic.get("live_url")):
-                article["id"] += "_l"
+                article["suffix"] = "l"
                 yield Message.Url, url, text.nameext_from_url(url, article)
+                article["suffix"] = ""
 
 
 class BilibiliUserArticlesExtractor(BilibiliExtractor):
