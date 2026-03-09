@@ -25,6 +25,7 @@ Dependencies
 Optional
 --------
 
+- aria2c_: Optional high-throughput HTTP downloader backend
 - yt-dlp_ or youtube-dl_: HLS/DASH video downloads, ``ytdl`` integration
 - FFmpeg_: Pixiv Ugoira conversion
 - mkvmerge_: Accurate Ugoira frame timecodes
@@ -298,6 +299,38 @@ can be found at `<https://gdl-org.github.io/docs/configuration.html>`__.
   see `<docs/gallery-dl-example.conf>`__.
 
 
+HTTP Downloader Backend (aria2c)
+--------------------------------
+
+*gallery-dl* can optionally use `aria2c`_ as its HTTP downloader for
+eligible single-file downloads.
+
+This is useful when you want aria2c's multi-connection transfer behavior
+while keeping *gallery-dl*'s normal extraction and naming logic.
+The built-in downloader remains the default, and *gallery-dl* falls back to
+it automatically for downloads that need direct response handling.
+
+1. Install ``aria2c`` so it is available on your ``PATH``
+2. Enable it in your config file:
+
+.. code:: json
+
+    {
+        "downloader": {
+            "http": {
+                "aria2c": true
+            }
+        }
+    }
+
+If ``aria2c`` is not on your ``PATH``, you can also set the absolute path to
+the executable instead of ``true``.
+
+See
+`downloader.http.aria2c <https://gdl-org.github.io/docs/configuration.html#downloader-http-aria2c>`__
+for the full option reference, tuning details, and fallback behavior.
+
+
 Locations
 ---------
 
@@ -471,6 +504,7 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. _PyPI:       https://pypi.org/
 .. _pip:        https://pip.pypa.io/en/stable/
 .. _Requests:   https://requests.readthedocs.io/en/latest/
+.. _aria2c:     https://aria2.github.io/
 .. _FFmpeg:     https://www.ffmpeg.org/
 .. _mkvmerge:   https://www.matroska.org/downloads/mkvtoolnix.html
 .. _yt-dlp:     https://github.com/yt-dlp/yt-dlp

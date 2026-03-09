@@ -8108,6 +8108,22 @@ Description
     Set to ``true`` to use ``aria2c`` from ``PATH``,
     or set to the absolute path of the ``aria2c`` binary.
 
+    **Quick start**
+
+    .. code:: json
+
+        {
+            "downloader": {
+                "http": {
+                    "aria2c": true
+                }
+            }
+        }
+
+    With this setting, gallery-dl will prefer ``aria2c`` for eligible
+    HTTP/HTTPS file downloads while keeping the built-in downloader as the
+    automatic fallback for everything else.
+
     When enabled, gallery-dl invokes ``aria2c`` as a subprocess for each
     eligible download.  The following session context is forwarded
     automatically:
