@@ -77,12 +77,14 @@ __tests__ = (
     "extension"   : {"jpg", "mp4"},
     "width"       : 4096,
     "height"      : 3072,
-    "id"          : {"1154738799821979656", "1154738799821979656_l"},
+    "id"          : "1154738799821979656",
+    "suffix"      : {"", "l"},
     "isPreview"   : False,
     "live_url"    : "https://i0.hdslb.com/bfs/dyn_video/_000003lud8wlka5eq2kxctgfx3fwo3b-1-152111110022.mp4",
     "modern"      : True,
     "theme"       : "light",
     "themeMode"   : "light",
+    "user_id"     : 31968078,
     "username"    : "粽子淞",
 },
 
@@ -97,6 +99,8 @@ __tests__ = (
     "id"       : "1172711958019833880",
     "live_url" : {None, str},
     "suffix"   : {"", "l"},
+    "user_id"  : 3546898287823414,
+    "username" : "锦鲤的重度依赖",
 },
 
 {
