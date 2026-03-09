@@ -12,6 +12,7 @@ import os
 import time
 import mimetypes
 import subprocess
+from requests import Request
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
 from .. import text, util, output, exception
@@ -149,6 +150,12 @@ class HttpDownloader(DownloaderBase):
             return False
         return True
 
+    def _remove_aria2c_file(self, pathfmt, path):
+        util.remove_file(path)
+        util.remove_file(path + ".aria2")
+        if pathfmt.temppath == path:
+            pathfmt.temppath = ""
+
     def _download_impl_aria2c(self, url, pathfmt):
         """Download *url* using aria2c as the backend.
 
@@ -197,22 +204,15 @@ class HttpDownloader(DownloaderBase):
             if os.path.isfile(outpath) and not can_resume:
                 util.remove_file(outpath)
 
-            # Collect HTTP headers – start with the session defaults so that
-            # User-Agent and similar headers are forwarded automatically.
-            headers = dict(self.session.headers)
+            # Collect HTTP headers based on how requests would prepare them
+            # for this URL. This forwards only URL-matching cookies.
+            headers = dict(self.session.prepare_request(
+                Request("GET", url)).headers)
             headers["Accept"] = "*/*"
             if extra := kwdict.get("_http_headers"):
                 headers.update(extra)
             if self.headers:
                 headers.update(self.headers)
-
-            # Forward session cookies for the target URL
-            cookie_str = "; ".join(
-                f"{c.name}={c.value}"
-                for c in self.session.cookies
-            )
-            if cookie_str:
-                headers["Cookie"] = cookie_str
 
             # Build the aria2c command (no shell – list form only)
             cmd = [
@@ -228,6 +228,18 @@ class HttpDownloader(DownloaderBase):
 
             if can_resume:
                 cmd.append("--continue=true")
+
+            timeout = self.timeout[1] if isinstance(
+                self.timeout, tuple) else self.timeout
+            if timeout:
+                try:
+                    timeout = max(1, int(timeout))
+                except (TypeError, ValueError, OverflowError):
+                    self.log.warning("Invalid timeout value for aria2c (%r)",
+                                     timeout)
+                else:
+                    cmd.append(f"--timeout={timeout}")
+                    cmd.append(f"--connect-timeout={timeout}")
 
             for name, value in headers.items():
                 cmd.append(f"--header={name}: {value}")
@@ -296,28 +308,31 @@ class HttpDownloader(DownloaderBase):
 
         if not fsize:
             self.log.warning("Empty file")
+            self._remove_aria2c_file(pathfmt, outpath)
             return False
 
         if self.minsize and fsize < self.minsize:
             self.log.warning(
                 "File size smaller than allowed minimum (%s < %s)",
                 fsize, self.minsize)
-            pathfmt.temppath = ""
+            self._remove_aria2c_file(pathfmt, outpath)
             return True
 
         if self.maxsize and fsize > self.maxsize:
             self.log.warning(
                 "File size larger than allowed maximum (%s > %s)",
                 fsize, self.maxsize)
-            pathfmt.temppath = ""
+            self._remove_aria2c_file(pathfmt, outpath)
             return True
 
         # File-signature validation and extension adjustment
         validate_sig = kwdict.get("_http_signature")
         validate_ext = (adjust_extension and
                         pathfmt.extension in SIGNATURE_CHECKS)
+        validate_html = (self.validate_html and
+                         pathfmt.extension not in ("html", "htm"))
 
-        if validate_ext or validate_sig:
+        if validate_ext or validate_sig or validate_html:
             try:
                 with open(outpath, "rb") as fp:
                     file_header = fp.read(16)
@@ -325,15 +340,21 @@ class HttpDownloader(DownloaderBase):
                 self.log.warning(exc)
                 return False
 
+            if validate_html and _signature_html(file_header):
+                self.log.warning("HTML response")
+                self._remove_aria2c_file(pathfmt, outpath)
+                return False
+
             if validate_sig:
                 result = validate_sig(file_header)
                 if result is not True:
                     self.log.warning(result or "Invalid file signature bytes")
+                    self._remove_aria2c_file(pathfmt, outpath)
                     return False
 
             if validate_ext and self._adjust_extension(
                     pathfmt, file_header) and pathfmt.exists():
-                pathfmt.temppath = ""
+                self._remove_aria2c_file(pathfmt, outpath)
                 return True
 
         # aria2c does not expose response headers, so Last-Modified is

@@ -22,6 +22,7 @@ import http.server
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import downloader, extractor, output, config, path  # noqa E402
+from gallery_dl.downloader import http as http_downloader  # noqa E402
 from gallery_dl.downloader.http import MIME_TYPES, SIGNATURE_CHECKS # noqa E402
 
 
@@ -188,6 +189,25 @@ class TestHTTPDownloaderAria2c(unittest.TestCase):
     def _can(self, **kwdict):
         return self.dl._can_use_aria2c(kwdict)
 
+    def _prepare_aria2c_download(self, tmpdir, extension="jpg", name="aria2c"):
+        config.set((), "base-directory", tmpdir)
+        job = FakeJob()
+        dl = downloader.find("http")(job)
+        dl._aria2c = "aria2c"
+
+        kwdict = {
+            "category"   : "test",
+            "subcategory": "test",
+            "filename"   : name,
+            "extension"  : extension,
+        }
+        pathfmt = job.pathfmt
+        pathfmt.set_directory(kwdict)
+        pathfmt.set_filename(kwdict)
+        pathfmt.build_path()
+
+        return dl, pathfmt
+
     def test_aria2c_config_false_by_default(self):
         dl = downloader.find("http")(self.job)
         self.assertEqual(dl._aria2c, False)
@@ -291,6 +311,66 @@ class TestHTTPDownloaderAria2c(unittest.TestCase):
         self.assertTrue(result)
         self.assertIsNone(dl._aria2c,
                           "aria2c should be disabled after fallback")
+
+    @patch.object(http_downloader.subprocess, "run")
+    def test_aria2c_forwards_matching_cookies_and_timeout(self, run):
+        captured = {}
+
+        def side_effect(cmd, capture_output):
+            captured["cmd"] = cmd
+            outdir = next(arg[6:] for arg in cmd if arg.startswith("--dir="))
+            outfile = next(arg[6:] for arg in cmd if arg.startswith("--out="))
+            os.makedirs(outdir, exist_ok=True)
+            with open(os.path.join(outdir, outfile), "wb") as fp:
+                fp.write(DATA["jpg"])
+            return Mock(returncode=0, stderr=b"")
+
+        run.side_effect = side_effect
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dl, pathfmt = self._prepare_aria2c_download(tmpdir)
+            dl.timeout = 7
+            dl.session.cookies.set("good", "1", domain="example.org", path="/")
+            dl.session.cookies.set("bad", "2", domain="invalid.example",
+                                   path="/")
+
+            result = dl.download("https://example.org/file.jpg", pathfmt)
+
+        self.assertTrue(result)
+        headers = [
+            arg for arg in captured["cmd"]
+            if arg.startswith("--header=")
+        ]
+        self.assertIn("--header=Cookie: good=1", headers)
+        self.assertNotIn("--header=Cookie: bad=2", headers)
+        self.assertIn("--timeout=7", captured["cmd"])
+        self.assertIn("--connect-timeout=7", captured["cmd"])
+
+    @patch.object(http_downloader.subprocess, "run")
+    def test_aria2c_removes_invalid_html_download(self, run):
+        def side_effect(cmd, capture_output):
+            outdir = next(arg[6:] for arg in cmd if arg.startswith("--dir="))
+            outfile = next(arg[6:] for arg in cmd if arg.startswith("--out="))
+            os.makedirs(outdir, exist_ok=True)
+            with open(os.path.join(outdir, outfile), "wb") as fp:
+                fp.write(DATA["html"])
+            return Mock(returncode=0, stderr=b"")
+
+        run.side_effect = side_effect
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dl, pathfmt = self._prepare_aria2c_download(
+                tmpdir, name="invalid_html_as_jpg")
+            partpath = pathfmt.realpath + ".part"
+
+            with self.assertLogs(dl.log, "WARNING") as log_info:
+                result = dl.download("https://example.org/file.jpg", pathfmt)
+
+            self.assertFalse(result)
+            self.assertEqual(log_info.output[-1],
+                             "WARNING:downloader.http:HTML response")
+            self.assertFalse(os.path.exists(partpath))
+            self.assertEqual(pathfmt.temppath, "")
 
 
 class TestDownloaderBase(unittest.TestCase):
