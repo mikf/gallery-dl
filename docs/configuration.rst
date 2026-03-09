@@ -8117,6 +8117,18 @@ Description
     - Proxy settings (``downloader.*.proxy``)
     - SSL certificate verification (``downloader.*.verify``)
 
+    For throughput, gallery-dl uses the following aria2c tuning flags by
+    default for each eligible single-file download:
+
+    - ``--split=16``
+    - ``--max-connection-per-server=16``
+    - ``--min-split-size=1M``
+    - ``--file-allocation=none``
+
+    This biases aria2c toward maximum download speed by opening multiple
+    parallel HTTP ranges against the same file and avoiding preallocation
+    overhead.
+
     Partial-download resumption is supported: if a previous ``aria2c``
     download was interrupted (leaving an ``.aria2`` control file alongside
     the ``.part`` file), the download will be resumed automatically.

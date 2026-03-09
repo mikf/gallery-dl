@@ -265,8 +265,6 @@ class TestHTTPDownloaderAria2c(unittest.TestCase):
 
     def test_aria2c_fallback_on_not_found(self):
         """FileNotFoundError from subprocess falls back to built-in."""
-        import tempfile
-        import threading
         import http.server as _http
 
         # Spin up a tiny server returning a known payload
@@ -343,6 +341,10 @@ class TestHTTPDownloaderAria2c(unittest.TestCase):
         ]
         self.assertIn("--header=Cookie: good=1", headers)
         self.assertNotIn("--header=Cookie: bad=2", headers)
+        self.assertIn("--split=16", captured["cmd"])
+        self.assertIn("--max-connection-per-server=16", captured["cmd"])
+        self.assertIn("--min-split-size=1M", captured["cmd"])
+        self.assertIn("--file-allocation=none", captured["cmd"])
         self.assertIn("--timeout=7", captured["cmd"])
         self.assertIn("--connect-timeout=7", captured["cmd"])
 

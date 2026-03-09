@@ -18,6 +18,8 @@ from .common import DownloaderBase
 from .. import text, util, output, exception
 from ssl import SSLError
 FLAGS = util.FLAGS
+ARIA2C_SPLIT = 16
+ARIA2C_MIN_SPLIT_SIZE = "1M"
 
 
 class HttpDownloader(DownloaderBase):
@@ -221,6 +223,10 @@ class HttpDownloader(DownloaderBase):
                 "--quiet",
                 "--allow-overwrite=true",
                 "--auto-file-renaming=false",
+                f"--split={ARIA2C_SPLIT}",
+                f"--max-connection-per-server={ARIA2C_SPLIT}",
+                f"--min-split-size={ARIA2C_MIN_SPLIT_SIZE}",
+                "--file-allocation=none",
                 f"--dir={outdir}",
                 f"--out={outfile}",
                 "--max-tries=1",
@@ -245,9 +251,7 @@ class HttpDownloader(DownloaderBase):
                 cmd.append(f"--header={name}: {value}")
 
             if self.proxies:
-                proxy = (self.proxies.get("https") or
-                         self.proxies.get("http") or
-                         self.proxies.get("all"))
+                proxy = self.proxies.get("https") or self.proxies.get("http")
                 if proxy:
                     cmd.append(f"--all-proxy={proxy}")
 
@@ -284,9 +288,10 @@ class HttpDownloader(DownloaderBase):
                 else:
                     msg = f"aria2c: exit code {proc.returncode}"
                 # Retry on transient network / server errors.
-                # aria2c exit codes: 2 = time out, 7 = too many redirects /
-                # unknown protocol, 8 = server returned error response.
-                if proc.returncode in (2, 7, 8):
+                # aria2c exit codes: 2 = timeout, 6 = network problem,
+                # 7 = unfinished downloads, 8 = server error response,
+                # 23 = too many redirects.
+                if proc.returncode in (2, 6, 7, 8, 23):
                     continue
                 self.downloading = False
                 output.stderr_write("\n")
