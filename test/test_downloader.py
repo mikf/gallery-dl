@@ -22,6 +22,7 @@ import http.server
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from gallery_dl import downloader, extractor, output, config, path  # noqa E402
+from gallery_dl.downloader import http as http_downloader  # noqa E402
 from gallery_dl.downloader.http import MIME_TYPES, SIGNATURE_CHECKS # noqa E402
 
 
@@ -134,6 +135,7 @@ class TestDownloaderConfig(unittest.TestCase):
         self.assertEqual(dl.rate, None)
         self.assertEqual(dl.part, True)
         self.assertEqual(dl.partdir, None)
+        self.assertEqual(dl._aria2c, False)
 
         self.assertIs(dl.interval_429, extr._interval_429)
         self.assertIs(dl.retry_codes, extr._retry_codes)
@@ -167,8 +169,211 @@ class TestDownloaderConfig(unittest.TestCase):
         self.assertEqual(dl.part, False)
 
 
-class TestDownloaderBase(unittest.TestCase):
+class TestHTTPDownloaderAria2c(unittest.TestCase):
+    """Tests for the aria2c backend option of HttpDownloader."""
 
+    def setUp(self):
+        config.clear()
+        self.job = FakeJob()
+        self.dl = downloader.find("http")(self.job)
+        # Enable a fake aria2c path so _can_use_aria2c can return True.
+        self.dl._aria2c = "aria2c"
+
+    def tearDown(self):
+        config.clear()
+
+    # ------------------------------------------------------------------
+    # _can_use_aria2c eligibility checks
+    # ------------------------------------------------------------------
+
+    def _can(self, **kwdict):
+        return self.dl._can_use_aria2c(kwdict)
+
+    def _prepare_aria2c_download(self, tmpdir, extension="jpg", name="aria2c"):
+        config.set((), "base-directory", tmpdir)
+        job = FakeJob()
+        dl = downloader.find("http")(job)
+        dl._aria2c = "aria2c"
+
+        kwdict = {
+            "category"   : "test",
+            "subcategory": "test",
+            "filename"   : name,
+            "extension"  : extension,
+        }
+        pathfmt = job.pathfmt
+        pathfmt.set_directory(kwdict)
+        pathfmt.set_filename(kwdict)
+        pathfmt.build_path()
+
+        return dl, pathfmt
+
+    def test_aria2c_config_false_by_default(self):
+        dl = downloader.find("http")(self.job)
+        self.assertEqual(dl._aria2c, False)
+
+    def test_aria2c_config_true_becomes_string(self):
+        config.set(("downloader", "http"), "aria2c", True)
+        dl = downloader.find("http")(self.job)
+        self.assertEqual(dl._aria2c, "aria2c")
+
+    def test_aria2c_config_custom_path(self):
+        config.set(("downloader", "http"), "aria2c", "/usr/local/bin/aria2c")
+        dl = downloader.find("http")(self.job)
+        self.assertEqual(dl._aria2c, "/usr/local/bin/aria2c")
+
+    def test_can_use_aria2c_simple_get(self):
+        self.assertTrue(self._can(extension="jpg"))
+
+    def test_can_use_aria2c_no_aria2c(self):
+        self.dl._aria2c = False
+        self.assertFalse(self._can(extension="jpg"))
+
+    def test_can_use_aria2c_non_get_method(self):
+        self.assertFalse(self._can(extension="jpg", _http_method="POST"))
+
+    def test_can_use_aria2c_with_data(self):
+        self.assertFalse(self._can(extension="jpg", _http_data=b"body"))
+
+    def test_can_use_aria2c_with_validate(self):
+        self.assertFalse(self._can(extension="jpg",
+                                   _http_validate=lambda r: True))
+
+    def test_can_use_aria2c_with_retry(self):
+        self.assertFalse(self._can(extension="jpg",
+                                   _http_retry=lambda r: False))
+
+    def test_can_use_aria2c_with_expected_status(self):
+        self.assertFalse(self._can(extension="jpg",
+                                   _http_expected_status=(202,)))
+
+    def test_can_use_aria2c_with_segmented(self):
+        self.assertFalse(self._can(extension="jpg", _http_segmented=True))
+
+    def test_can_use_aria2c_metadata_enabled(self):
+        self.dl.metadata = "http_headers"
+        self.assertFalse(self._can(extension="jpg"))
+
+    def test_can_use_aria2c_no_extension(self):
+        # When extension is unknown, MIME type must come from the response
+        self.assertFalse(self._can(extension=""))
+        self.assertFalse(self._can())
+
+    # ------------------------------------------------------------------
+    # Fallback when aria2c binary is not found
+    # ------------------------------------------------------------------
+
+    def test_aria2c_fallback_on_not_found(self):
+        """FileNotFoundError from subprocess falls back to built-in."""
+        # Spin up a tiny server returning a known payload
+        payload = DATA["jpg"]
+        addr_holder = []
+
+        class Handler(http.server.BaseHTTPRequestHandler):
+            def do_GET(self):
+                self.send_response(200)
+                self.send_header("Content-Length", len(payload))
+                self.end_headers()
+                self.wfile.write(payload)
+            def log_message(self, *a):
+                pass
+
+        srv = http.server.HTTPServer(("127.0.0.1", 0), Handler)
+        addr_holder.append(srv.server_address)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        host, port = addr_holder[0]
+        url = f"http://{host}:{port}/img.jpg"
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config.set((), "base-directory", tmpdir)
+            job = FakeJob()
+            dl = downloader.find("http")(job)
+            dl._aria2c = "/nonexistent/aria2c"
+
+            kwdict = {
+                "category"   : "test",
+                "subcategory": "test",
+                "filename"   : "fallback",
+                "extension"  : "jpg",
+            }
+            pf = job.pathfmt
+            pf.set_directory(kwdict)
+            pf.set_filename(kwdict)
+            pf.build_path()
+
+            with self.assertLogs(dl.log, "WARNING"):
+                result = dl.download(url, pf)
+
+        self.assertTrue(result)
+        self.assertIsNone(dl._aria2c,
+                          "aria2c should be disabled after fallback")
+
+    @patch.object(http_downloader.subprocess, "run")
+    def test_aria2c_forwards_matching_cookies_and_timeout(self, run):
+        captured = {}
+
+        def side_effect(cmd, capture_output):
+            captured["cmd"] = cmd
+            outdir = next(arg[6:] for arg in cmd if arg.startswith("--dir="))
+            outfile = next(arg[6:] for arg in cmd if arg.startswith("--out="))
+            os.makedirs(outdir, exist_ok=True)
+            with open(os.path.join(outdir, outfile), "wb") as fp:
+                fp.write(DATA["jpg"])
+            return Mock(returncode=0, stderr=b"")
+
+        run.side_effect = side_effect
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dl, pathfmt = self._prepare_aria2c_download(tmpdir)
+            dl.timeout = 7
+            dl.session.cookies.set("good", "1", domain="example.org", path="/")
+            dl.session.cookies.set("bad", "2", domain="invalid.example",
+                                   path="/")
+
+            result = dl.download("https://example.org/file.jpg", pathfmt)
+
+        self.assertTrue(result)
+        headers = [
+            arg for arg in captured["cmd"]
+            if arg.startswith("--header=")
+        ]
+        self.assertIn("--header=Cookie: good=1", headers)
+        self.assertNotIn("--header=Cookie: bad=2", headers)
+        self.assertIn("--split=16", captured["cmd"])
+        self.assertIn("--max-connection-per-server=16", captured["cmd"])
+        self.assertIn("--min-split-size=1M", captured["cmd"])
+        self.assertIn("--file-allocation=none", captured["cmd"])
+        self.assertIn("--timeout=7", captured["cmd"])
+        self.assertIn("--connect-timeout=7", captured["cmd"])
+
+    @patch.object(http_downloader.subprocess, "run")
+    def test_aria2c_removes_invalid_html_download(self, run):
+        def side_effect(cmd, capture_output):
+            outdir = next(arg[6:] for arg in cmd if arg.startswith("--dir="))
+            outfile = next(arg[6:] for arg in cmd if arg.startswith("--out="))
+            os.makedirs(outdir, exist_ok=True)
+            with open(os.path.join(outdir, outfile), "wb") as fp:
+                fp.write(DATA["html"])
+            return Mock(returncode=0, stderr=b"")
+
+        run.side_effect = side_effect
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            dl, pathfmt = self._prepare_aria2c_download(
+                tmpdir, name="invalid_html_as_jpg")
+            partpath = pathfmt.realpath + ".part"
+
+            with self.assertLogs(dl.log, "WARNING") as log_info:
+                result = dl.download("https://example.org/file.jpg", pathfmt)
+
+            self.assertFalse(result)
+            self.assertEqual(log_info.output[-1],
+                             "WARNING:downloader.http:HTML response")
+            self.assertFalse(os.path.exists(partpath))
+            self.assertEqual(pathfmt.temppath, "")
+
+
+class TestDownloaderBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.dir = tempfile.TemporaryDirectory()

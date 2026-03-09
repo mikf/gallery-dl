@@ -8092,6 +8092,86 @@ Description
     when expecting a media file instead.
 
 
+downloader.http.aria2c
+----------------------
+Type
+    * ``bool``
+    * ``string``
+Default
+    ``false``
+Example
+    ``true``, ``"/usr/local/bin/aria2c"``
+Description
+    Use `aria2c <https://aria2.github.io/>`__ as the HTTP download engine
+    instead of the built-in streaming downloader.
+
+    Set to ``true`` to use ``aria2c`` from ``PATH``,
+    or set to the absolute path of the ``aria2c`` binary.
+
+    **Quick start**
+
+    .. code:: json
+
+        {
+            "downloader": {
+                "http": {
+                    "aria2c": true
+                }
+            }
+        }
+
+    With this setting, gallery-dl will prefer ``aria2c`` for eligible
+    HTTP/HTTPS file downloads while keeping the built-in downloader as the
+    automatic fallback for everything else.
+
+    When enabled, gallery-dl invokes ``aria2c`` as a subprocess for each
+    eligible download.  The following session context is forwarded
+    automatically:
+
+    - HTTP headers (including ``User-Agent``)
+    - Session cookies
+    - Proxy settings (``downloader.*.proxy``)
+    - SSL certificate verification (``downloader.*.verify``)
+
+    For throughput, gallery-dl uses the following aria2c tuning flags by
+    default for each eligible single-file download:
+
+    - ``--split=16``
+    - ``--max-connection-per-server=16``
+    - ``--min-split-size=1M``
+    - ``--file-allocation=none``
+
+    This biases aria2c toward maximum download speed by opening multiple
+    parallel HTTP ranges against the same file and avoiding preallocation
+    overhead.
+
+    Partial-download resumption is supported: if a previous ``aria2c``
+    download was interrupted (leaving an ``.aria2`` control file alongside
+    the ``.part`` file), the download will be resumed automatically.
+
+    **Limitations / automatic fallback to built-in downloader**
+
+    aria2c is used only for plain HTTP/HTTPS ``GET`` requests with a known
+    filename extension.  The following cases always fall back to the
+    built-in downloader transparently:
+
+    - Non-``GET`` methods (e.g. ``POST``)
+    - Downloads that use a request body (``_http_data``)
+    - Downloads that require custom response-object validation
+      (``_http_validate`` / ``_http_retry`` / ``_http_expected_status``)
+    - Downloads where the filename extension must be inferred from the
+      ``Content-Type`` response header (``metadata`` / unknown extension)
+    - Segmented downloads (``_http_segmented``)
+
+    If ``aria2c`` cannot be found at the configured path, a warning is
+    logged and the built-in downloader is used for all subsequent downloads
+    in that session.
+
+    ``Last-Modified``-based ``mtime`` stamping is not available when using
+    aria2c because the HTTP response headers are not accessible after the
+    subprocess exits.
+
+
 downloader.ytdl.cmdline-args
 ----------------------------
 Type
