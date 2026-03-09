@@ -7302,6 +7302,16 @@ Description
         Reaction Score order (``threads`` only)
 
 
+extractor.[xenforo].quoted
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract files from quoted content.
+
+
 extractor.ytdl.cmdline-args
 ---------------------------
 Type

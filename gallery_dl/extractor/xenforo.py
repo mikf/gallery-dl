@@ -43,14 +43,19 @@ class XenforoExtractor(BaseExtractor):
         ).findall
 
         embeds = self.config("embeds", True)
+        quotes = self.config("quoted", False)
         attachments = self.config("attachments", True)
 
         root = self.root
         base = root if (pos := root.find("/", 8)) < 0 else root[:pos]
         for post in self.posts():
-            urls = extract_urls(post["content"])
-            if embeds and "data-s9e-mediaembed-iframe=" in post["content"]:
-                self._extract_embeds(urls, post)
+            content = post["content"]
+            if not quotes:
+                content = self._remove_quotes(content)
+
+            urls = extract_urls(content)
+            if embeds and "data-s9e-mediaembed-iframe=" in content:
+                self._extract_embeds(urls, post, content)
             if attachments and post["attachments"]:
                 self._extract_attachments(urls, post)
 
@@ -255,6 +260,15 @@ class XenforoExtractor(BaseExtractor):
 
             page = self.request_page(url).text
 
+    def _remove_quotes(self, content):
+        while "<blockquote" in content:
+            beg = content.index("<blockquote")
+            end = content.index("</blockquote", beg)
+            for _ in range(content.count("<blockquote", beg+11, end)):
+                end = content.index("</blockquote", end+13)
+            content = content[:beg] + content[end+13:]
+        return content
+
     def _extract_error(self, html):
         if msg := (text.extr(html, "blockMessage--error", "</") or
                    text.extr(html, '"blockMessage"', "</div>")):
@@ -381,9 +395,9 @@ class XenforoExtractor(BaseExtractor):
         for att in text.extract_iter(post["attachments"], "<li", "</li>"):
             urls.append((None, find(att)[1], None, None))
 
-    def _extract_embeds(self, urls, post):
+    def _extract_embeds(self, urls, post, content):
         for embed in text.extract_iter(
-                post["content"], "data-s9e-mediaembed-iframe='", "'"):
+                content, "data-s9e-mediaembed-iframe='", "'"):
             data = {}
             key = None
             for value in util.json_loads(embed):
@@ -491,7 +505,7 @@ BASE_PATTERN = XenforoExtractor.update({
 class XenforoPostExtractor(XenforoExtractor):
     subcategory = "post"
     pattern = (BASE_PATTERN + r"(/(?:index\.php\?)?threads"
-               r"/[^/?#]+/#?post-|/posts/)(\d+)")
+               r"/[^/?#]+/(?:page-\d+)?#?post-|/posts/)(\d+)")
     example = "https://simpcity.cr/threads/TITLE.12345/post-54321"
 
     def posts(self):
