@@ -84,10 +84,13 @@ def get(module):
             return db.execute(
                 "SELECT * FROM data WHERE expires < ? AND expires <> 0",
                 (int(time.time()),))
+
+        module = module.lower()
         return db.execute(
             "SELECT * FROM data "
-            "WHERE key LIKE 'gallery_dl.extractor.' || ? || '.%'",
-            (module.lower(),))
+            "WHERE key LIKE 'gallery_dl.extractor.' || ? || '.%'"
+            "OR    key LIKE 'gallery_dl.extractor.utils.' || ? || '_%'",
+            (module, module))
     except Exception:
         pass  # database not initialized, cannot be modified, etc.
     return
@@ -109,10 +112,12 @@ def clear(module):
                 "DELETE FROM data WHERE expires < ? AND expires <> 0",
                 (int(time.time()),))
         else:
+            module = module.lower()
             cursor.execute(
                 "DELETE FROM data "
-                "WHERE key LIKE 'gallery_dl.extractor.' || ? || '.%'",
-                (module.lower(),))
+                "WHERE key LIKE 'gallery_dl.extractor.' || ? || '.%'"
+                "OR    key LIKE 'gallery_dl.extractor.utils.' || ? || '_%'",
+                (module, module))
     except Exception:
         pass  # database not initialized, cannot be modified, etc.
     else:
