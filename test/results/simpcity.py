@@ -259,6 +259,46 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://simpcity.cr/threads/meme-thread.96106/page-7#post-1034578",
+    "#comment" : "quoted content (#9207)",
+    "#category": ("xenforo", "simpcity", "post"),
+    "#class"   : xenforo.XenforoPostExtractor,
+    "#auth"    : True,
+    "#results" : "https://jpg6.su/img/hqx4cS",
+
+    "count"       : 1,
+    "num_external": 1,
+    "type"        : "external",
+    "post"        : {
+        "attachments": "",
+        "author"     : "aaaa22223333",
+        "author_id"  : "1550683",
+        "author_slug": "aaaa22223333",
+        "author_url" : "https://simpcity.cr/members/aaaa22223333.1550683/",
+        "date"       : "dt:2022-10-02 02:18:24",
+        "id"         : "1034578",
+        "content"    : r"""\
+<div class="bbWrapper"><a href="https://jpg6.su/img/hqx4cS" target="_blank" class="link link--external" rel="nofollow ugc noopener"><img src="https://simp4.selti-delivery.ru/ZomboMeme-01102022201614.md.jpg" data-url="https://simp4.selti-delivery.ru/ZomboMeme-01102022201614.md.jpg" class="bbImage " loading="lazy"
+\ŧ\ŧalt="ZomboMeme-01102022201614.md.jpg" title="ZomboMeme-01102022201614.md.jpg" style="" width="" height="" /></a></div>
+
+\ŧ\ŧ\ŧ</div>\
+""",
+    },
+    "thread"      : {
+        "author"     : "SimpCity",
+        "author_id"  : "67275",
+        "author_slug": "simpcity",
+        "author_url" : "https://simpcity.cr/members/simpcity.67275/",
+        "date"       : "dt:2022-08-27 21:16:53",
+        "id"         : "96106",
+        "section"    : "General Discussion",
+        "tags"       : ["memes"],
+        "title"      : "Meme Thread",
+        "url"        : "https://simpcity.cr/threads/meme-thread.96106/",
+    },
+},
+
+{
     "#url"     : "https://simpcity.cr/threads/alua-tatakai.89490/",
     "#category": ("xenforo", "simpcity", "thread"),
     "#class"   : xenforo.XenforoThreadExtractor,
