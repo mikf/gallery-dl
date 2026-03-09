@@ -53,7 +53,9 @@ class BilibiliArticleExtractor(BilibiliExtractor):
             modules.update(module)
         article["detail"]["modules"] = modules
 
-        article["username"] = modules["module_author"]["name"]
+        user = modules["module_author"]
+        article["username"] = user.get("name")
+        article["user_id"] = user.get("mid")
 
         pics = []
 
