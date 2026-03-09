@@ -177,12 +177,15 @@ def main():
             if rows is None:
                 return cache.error()
             import pickle
-            cut = (21 if args.cache_show in {"ALL", "EXP", "VAL"} else
-                   22 + len(args.cache_show))
+            cut = 2 if args.cache_show in {"ALL", "EXP", "VAL"} else 3
             for key, value, expires in rows:
-                value = util.json_dumps(pickle.loads(value))
+                try:
+                    value = util.json_dumps(pickle.loads(value))
+                except Exception:
+                    value = "<Invalid Value>"
                 expires = f" ({expires})" if expires else ""
-                sys.stdout.write(f"{key[cut:]}{expires}:\n  {value}\n\n")
+                key = ".".join(key.split(".")[cut:])
+                sys.stdout.write(f"{key}{expires}:\n  {value}\n\n")
             return 0
 
         if args.cache_clear:
