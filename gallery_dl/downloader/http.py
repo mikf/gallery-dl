@@ -8,8 +8,10 @@
 
 """Downloader module for http:// and https:// URLs"""
 
+import os
 import time
 import mimetypes
+import subprocess
 from requests.exceptions import RequestException, ConnectionError, Timeout
 from .common import DownloaderBase
 from .. import text, util, output, exception
@@ -96,8 +98,15 @@ class HttpDownloader(DownloaderBase):
                                interval_429, exc.__class__.__name__, exc)
                 self.interval_429 = extractor._interval_429
 
+        aria2c = self.config("aria2c", False)
+        if aria2c is True:
+            aria2c = "aria2c"
+        self._aria2c = aria2c
+
     def download(self, url, pathfmt):
         try:
+            if self._can_use_aria2c(pathfmt.kwdict):
+                return self._download_impl_aria2c(url, pathfmt)
             return self._download_impl(url, pathfmt)
         except Exception as exc:
             if self.downloading:
@@ -108,6 +117,229 @@ class HttpDownloader(DownloaderBase):
             # remove file from incomplete downloads
             if self.downloading and not self.part:
                 util.remove_file(pathfmt.temppath)
+
+    def _can_use_aria2c(self, kwdict):
+        """Return True when aria2c can handle this particular download"""
+        if not self._aria2c:
+            return False
+        # Only plain GET requests are supported
+        if kwdict.get("_http_method", "GET").upper() != "GET":
+            return False
+        # POST data cannot be forwarded to aria2c
+        if kwdict.get("_http_data"):
+            return False
+        # Response-object validators require the built-in path
+        if kwdict.get("_http_validate") is not None:
+            return False
+        # Custom per-response retry callbacks require the built-in path
+        if kwdict.get("_http_retry"):
+            return False
+        # Non-standard expected status codes need response inspection
+        if kwdict.get("_http_expected_status"):
+            return False
+        # Segmented downloads use specialised retry logic
+        if kwdict.get("_http_segmented"):
+            return False
+        # HTTP-metadata extraction requires response headers
+        if self.metadata:
+            return False
+        # Extension inference from MIME type requires response headers;
+        # fall back when the extension is unknown
+        if not kwdict.get("extension"):
+            return False
+        return True
+
+    def _download_impl_aria2c(self, url, pathfmt):
+        """Download *url* using aria2c as the backend.
+
+        Behaviour is kept as close as possible to _download_impl:
+        - retry loop is owned by Python
+        - partial-download / resume support via aria2c --continue
+        - post-download: file-size checks, signature validation,
+          and extension adjustment
+        Falls back to the built-in downloader when aria2c is not found.
+        """
+        tries = 0
+        msg = ""
+        kwdict = pathfmt.kwdict
+        adjust_extension = kwdict.get(
+            "_http_adjust_extension", self.adjust_extension)
+
+        # Save temppath so it can be restored on fallback (before part_enable
+        # has modified it).
+        saved_temppath = pathfmt.temppath
+
+        if self.part:
+            pathfmt.part_enable(self.partdir)
+
+        while True:
+            if FLAGS.DOWNLOAD is not None:
+                return FLAGS.process("DOWNLOAD")
+
+            if tries:
+                self.log.warning("%s (%s/%s)", msg, tries, self.retries+1)
+                if tries > self.retries:
+                    return False
+                time.sleep(tries)
+
+            tries += 1
+
+            # Resolve the output path for this iteration
+            outpath = pathfmt.temppath or pathfmt.realpath
+            outdir = os.path.dirname(os.path.abspath(outpath))
+            outfile = os.path.basename(outpath)
+            aria2_ctrl = outpath + ".aria2"
+
+            # A plain .part file left by the built-in downloader cannot be
+            # resumed by aria2c (no control file) – delete it so aria2c starts
+            # fresh.  If an aria2c control file is present we can resume.
+            can_resume = os.path.isfile(aria2_ctrl)
+            if os.path.isfile(outpath) and not can_resume:
+                util.remove_file(outpath)
+
+            # Collect HTTP headers – start with the session defaults so that
+            # User-Agent and similar headers are forwarded automatically.
+            headers = dict(self.session.headers)
+            headers["Accept"] = "*/*"
+            if extra := kwdict.get("_http_headers"):
+                headers.update(extra)
+            if self.headers:
+                headers.update(self.headers)
+
+            # Forward session cookies for the target URL
+            cookie_str = "; ".join(
+                f"{c.name}={c.value}"
+                for c in self.session.cookies
+            )
+            if cookie_str:
+                headers["Cookie"] = cookie_str
+
+            # Build the aria2c command (no shell – list form only)
+            cmd = [
+                self._aria2c,
+                "--no-conf",
+                "--quiet",
+                "--allow-overwrite=true",
+                "--auto-file-renaming=false",
+                f"--dir={outdir}",
+                f"--out={outfile}",
+                "--max-tries=1",
+            ]
+
+            if can_resume:
+                cmd.append("--continue=true")
+
+            for name, value in headers.items():
+                cmd.append(f"--header={name}: {value}")
+
+            if self.proxies:
+                proxy = (self.proxies.get("https") or
+                         self.proxies.get("http") or
+                         self.proxies.get("all"))
+                if proxy:
+                    cmd.append(f"--all-proxy={proxy}")
+
+            if not self.verify:
+                cmd.append("--check-certificate=false")
+
+            cmd.append(url)
+
+            # Invoke aria2c
+            self.downloading = True
+            self.out.start(pathfmt.path)
+            try:
+                proc = subprocess.run(cmd, capture_output=True)
+            except FileNotFoundError:
+                self.downloading = False
+                self.log.warning(
+                    "aria2c executable '%s' not found, "
+                    "falling back to built-in downloader", self._aria2c)
+                self._aria2c = None
+                # Restore temppath so _download_impl can call part_enable
+                # cleanly without double-appending ".part".
+                pathfmt.temppath = saved_temppath
+                return self._download_impl(url, pathfmt)
+            except OSError as exc:
+                self.downloading = False
+                self.log.warning(exc)
+                return False
+
+            if proc.returncode != 0:
+                stderr = proc.stderr.decode(errors="replace").strip()
+                if stderr:
+                    # Truncate to last 200 chars to avoid flooding the log
+                    msg = f"aria2c: {stderr[-200:]}"
+                else:
+                    msg = f"aria2c: exit code {proc.returncode}"
+                # Retry on transient network / server errors.
+                # aria2c exit codes: 2 = time out, 7 = too many redirects /
+                # unknown protocol, 8 = server returned error response.
+                if proc.returncode in (2, 7, 8):
+                    continue
+                self.downloading = False
+                output.stderr_write("\n")
+                self.log.warning(msg)
+                return False
+
+            # aria2c succeeded – remove its control file
+            util.remove_file(aria2_ctrl)
+            break
+
+        self.downloading = False
+
+        # Post-download validation (mirrors _download_impl behaviour)
+        try:
+            fsize = os.path.getsize(outpath)
+        except OSError:
+            self.log.warning("Downloaded file not found at '%s'", outpath)
+            return False
+
+        if not fsize:
+            self.log.warning("Empty file")
+            return False
+
+        if self.minsize and fsize < self.minsize:
+            self.log.warning(
+                "File size smaller than allowed minimum (%s < %s)",
+                fsize, self.minsize)
+            pathfmt.temppath = ""
+            return True
+
+        if self.maxsize and fsize > self.maxsize:
+            self.log.warning(
+                "File size larger than allowed maximum (%s > %s)",
+                fsize, self.maxsize)
+            pathfmt.temppath = ""
+            return True
+
+        # File-signature validation and extension adjustment
+        validate_sig = kwdict.get("_http_signature")
+        validate_ext = (adjust_extension and
+                        pathfmt.extension in SIGNATURE_CHECKS)
+
+        if validate_ext or validate_sig:
+            try:
+                with open(outpath, "rb") as fp:
+                    file_header = fp.read(16)
+            except OSError as exc:
+                self.log.warning(exc)
+                return False
+
+            if validate_sig:
+                result = validate_sig(file_header)
+                if result is not True:
+                    self.log.warning(result or "Invalid file signature bytes")
+                    return False
+
+            if validate_ext and self._adjust_extension(
+                    pathfmt, file_header) and pathfmt.exists():
+                pathfmt.temppath = ""
+                return True
+
+        # aria2c does not expose response headers, so Last-Modified is
+        # unavailable; disable HTTP-based mtime for this download.
+        kwdict["_mtime_http"] = None
+        return True
 
     def _download_impl(self, url, pathfmt):
         response = None
