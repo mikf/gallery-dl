@@ -171,6 +171,53 @@ def main():
         if args.cache_file:
             config.set(("cache",), "file", args.cache_file)
 
+        if args.cache_status:
+            from . import cache, text
+            from collections import defaultdict
+
+            path = cache.path()
+            rows = cache.get("ALL")
+            if rows is None:
+                return cache.error()
+
+            try:
+                size = os.stat(path).st_size
+            except Exception:
+                size = 0
+
+            cnts = defaultdict(int)
+            for row in rows:
+                key = row[0].split(".")
+                if key[2] == "utils":
+                    key = key[3].partition("_")[0]
+                elif key[1] == "oauth":
+                    key = text.extr(key[2], "'", "'")
+                else:
+                    key = key[2]
+                cnts[key] += 1
+                cnts["Total"] += 1
+
+            key_max = 0
+            cnt_max = len(str(cnts["Total"]))
+            for key in cnts:
+                if key_max < (key_len := len(key)):
+                    key_max = key_len
+            if key_max > 24:
+                key_max = 24
+
+            write = sys.stdout.write
+            write(f"""\
+File:
+  {cache.path()}
+Size:
+  {util.format_value(size)}
+Entries:
+""")
+            for key, cnt in sorted(cnts.items(), key=lambda i: (-i[1], i[0])):
+                write(f"  {key}{' ' * (key_max-len(key))}: {cnt:>{cnt_max}}\n")
+
+            return 0
+
         if args.cache_show:
             from . import cache
             rows = cache.get(args.cache_show)

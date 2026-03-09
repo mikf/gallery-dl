@@ -152,6 +152,7 @@
 
 ## Cache Options:
     --cache-file PATH           Use PATH as cache file
+    --cache-status              Show cache file information
     --cache-show MODULE         Show cached values for MODULE (ALL to show all
                                 entries, EXP to show only expired entries, VAL
                                 to show only valid entries)

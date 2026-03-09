@@ -667,6 +667,11 @@ def build_parser():
         help="Use PATH as cache file",
     )
     cache.add_argument(
+        "--cache-status",
+        dest="cache_status", action="store_true",
+        help="Show cache file information",
+    )
+    cache.add_argument(
         "--cache-show",
         dest="cache_show", metavar="MODULE",
         help="Show cached values for MODULE (ALL to show all entries, EXP to "
