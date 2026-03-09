@@ -265,13 +265,11 @@ class TestHTTPDownloaderAria2c(unittest.TestCase):
 
     def test_aria2c_fallback_on_not_found(self):
         """FileNotFoundError from subprocess falls back to built-in."""
-        import http.server as _http
-
         # Spin up a tiny server returning a known payload
         payload = DATA["jpg"]
         addr_holder = []
 
-        class Handler(_http.BaseHTTPRequestHandler):
+        class Handler(http.server.BaseHTTPRequestHandler):
             def do_GET(self):
                 self.send_response(200)
                 self.send_header("Content-Length", len(payload))
@@ -280,7 +278,7 @@ class TestHTTPDownloaderAria2c(unittest.TestCase):
             def log_message(self, *a):
                 pass
 
-        srv = _http.HTTPServer(("127.0.0.1", 0), Handler)
+        srv = http.server.HTTPServer(("127.0.0.1", 0), Handler)
         addr_holder.append(srv.server_address)
         threading.Thread(target=srv.serve_forever, daemon=True).start()
         host, port = addr_holder[0]
