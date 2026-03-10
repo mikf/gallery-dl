@@ -41,6 +41,7 @@ CATEGORY_MAP = {
     "baraag"         : "baraag",
     "batoto"         : "BATO.TO",
     "bbc"            : "BBC",
+    "blacktowhite"   : "BlacktoWhite",
     "booth"          : "BOOTH",
     "celebforum"     : "celebforum",
     "cfake"          : "Celebrity Fakes",

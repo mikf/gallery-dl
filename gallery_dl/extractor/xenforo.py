@@ -499,6 +499,10 @@ BASE_PATTERN = XenforoExtractor.update({
         "root": "https://forums.socialmediagirls.com",
         "pattern": r"forums\.socialmediagirls\.com",
     },
+    "blacktowhite": {
+        "root": "https://www.blacktowhite.net",
+        "pattern": r"(?:www\.)?blacktowhite\.net",
+    },
 })
 
 
