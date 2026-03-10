@@ -7,8 +7,11 @@ to download image galleries and collections
 from several image hosting sites
 (see `Supported Sites <docs/supportedsites.md>`__).
 It is a cross-platform tool
-with many `configuration options <https://gdl-org.github.io/docs/configuration.html>`__
-and powerful `filenaming capabilities <https://gdl-org.github.io/docs/formatting.html>`__.
+with many
+`command-line <https://gdl-org.github.io/docs/options.html>`__ and
+`configuration <https://gdl-org.github.io/docs/configuration.html>`__
+options, as well as powerful
+`file-naming capabilities <https://gdl-org.github.io/docs/formatting.html>`__.
 
 
 |pypi| |discord| |build|
@@ -493,7 +496,7 @@ To authenticate with a ``mastodon`` instance, run *gallery-dl* with
 .. |pypi| image:: https://img.shields.io/pypi/v/gallery-dl?logo=pypi&label=PyPI
     :target: https://pypi.org/project/gallery-dl/
 
-.. |build| image:: https://github.com/mikf/gallery-dl/workflows/tests/badge.svg
+.. |build| image:: https://github.com/mikf/gallery-dl/actions/workflows/tests.yml/badge.svg
     :target: https://github.com/mikf/gallery-dl/actions
 
 .. |gitter| image:: https://badges.gitter.im/gallery-dl/main.svg
