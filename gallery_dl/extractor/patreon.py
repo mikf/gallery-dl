@@ -197,6 +197,16 @@ class PatreonExtractor(Extractor):
             self.cache(self._user, user["links"]["related"]) or
             included["user"][user["data"]["id"]])
 
+        if not attr.get("content") and (
+                cjs := attr.pop("content_json_string", None)):
+            try:
+                attr["content"] = self.utils("tiptap").to_html(cjs)
+            except Exception as exc:
+                self.log.traceback(exc)
+                self.log.warning(
+                    "%s: Failed to parse content_json_string (%s: %s)",
+                    attr["id"], exc.__class__.__name__, exc)
+
         return attr
 
     def _transform(self, included):
@@ -268,13 +278,14 @@ class PatreonExtractor(Extractor):
             "is_nsfw,is_monthly,name,url"
 
             "&fields[post]=change_visibility_at,comment_count,commenter_count,"
-            "content,current_user_can_comment,current_user_can_delete,"
-            "current_user_can_view,current_user_has_liked,embed,image,"
-            "insights_last_updated_at,is_paid,like_count,meta_image_url,"
-            "min_cents_pledged_to_view,post_file,post_metadata,published_at,"
-            "patreon_url,post_type,pledge_url,preview_asset_type,thumbnail,"
-            "thumbnail_url,teaser_text,title,upgrade_url,url,"
-            "was_posted_by_campaign_owner,has_ti_violation,moderation_status,"
+            "content,content_json_string,current_user_can_comment,"
+            "current_user_can_delete,current_user_can_view,"
+            "current_user_has_liked,embed,image,insights_last_updated_at,"
+            "is_paid,like_count,meta_image_url,min_cents_pledged_to_view,"
+            "post_file,post_metadata,published_at,patreon_url,post_type,"
+            "pledge_url,preview_asset_type,thumbnail,thumbnail_url,"
+            "teaser_text,title,upgrade_url,url,was_posted_by_campaign_owner,"
+            "has_ti_violation,moderation_status,"
             "post_level_suspension_removal_date,pls_one_liners_by_category,"
             "video_preview,view_count"
 
