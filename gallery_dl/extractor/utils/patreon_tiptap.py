@@ -55,6 +55,16 @@ def process_content(html, content):
         process_children(html, content)
         html.append(f"</{tag}>")
 
+    elif type == "image":
+        if (attrs := content.get("attrs")) and (src := attrs.get("src")):
+            html.append(f'<img src="{text.escape(src)}">')
+
+    elif type == "link":
+        if (attrs := content.get("attrs")) and (href := attrs.get("href")):
+            html.append(f'<a href="{text.escape(href)}">')
+            process_children(html, content)
+            html.append("</a>")
+
     elif type == "hardBreak":
         html.append("<br/>")
 
