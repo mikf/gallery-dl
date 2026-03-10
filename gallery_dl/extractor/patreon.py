@@ -128,71 +128,6 @@ class PatreonExtractor(Extractor):
                 if url := text.extr(img, 'src="', '"'):
                     yield "content", None, url, self._filename(url) or url
 
-    def _content_json_to_html(self, node):
-        """Convert ProseMirror/TipTap JSON document to HTML"""
-
-        def convert(node):
-            if isinstance(node, list):
-                return "".join(convert(child) for child in node)
-
-            if isinstance(node, dict):
-                children = convert(node.get("content"))
-                node_type = node.get("type")
-
-                if node_type == "doc":
-                    html = children
-                elif node_type == "paragraph":
-                    html = f"<p>{children}</p>"
-                elif node_type == "heading":
-                    level = max(1, min(6, node.get("attrs", {})
-                                       .get("level", 1)))
-                    html = f"<h{level}>{children}</h{level}>"
-                elif node_type == "bulletList":
-                    html = f"<ul>{children}</ul>"
-                elif node_type == "orderedList":
-                    html = f"<ol>{children}</ol>"
-                elif node_type == "listItem":
-                    html = f"<li>{children}</li>"
-                elif node_type == "blockquote":
-                    html = f"<blockquote>{children}</blockquote>"
-                elif node_type == "hardBreak":
-                    html = "<br>"
-                elif node_type == "text":
-                    html = (text.escape(node.get("text", ""))
-                            .replace("\n", "<br>"))
-                elif node_type == "image":
-                    src = node.get("attrs", {}).get("src", "")
-                    html = f'<img src="{text.escape(src)}">' if src else ""
-                elif node_type == "link":
-                    href = node.get("attrs", {}).get("href", "")
-                    html = (f'<a href="{text.escape(href)}">{children}</a>'
-                            if href else children)
-                else:
-                    html = children
-
-                for mark in node.get("marks", []):
-                    mark_type = mark.get("type")
-                    if mark_type == "bold":
-                        html = f"<strong>{html}</strong>"
-                    elif mark_type == "italic":
-                        html = f"<em>{html}</em>"
-                    elif mark_type == "underline":
-                        html = f"<u>{html}</u>"
-                    elif mark_type == "strike":
-                        html = f"<s>{html}</s>"
-                    elif mark_type == "code":
-                        html = f"<code>{html}</code>"
-                    elif mark_type == "link":
-                        href = mark.get("attrs", {}).get("href", "")
-                        if href:
-                            html = f'<a href="{text.escape(href)}">{html}</a>'
-
-                return html
-
-            return text.escape(str(node))
-
-        return convert(node)
-
     def posts(self):
         """Return all relevant post objects"""
 
@@ -262,14 +197,15 @@ class PatreonExtractor(Extractor):
             self.cache(self._user, user["links"]["related"]) or
             included["user"][user["data"]["id"]])
 
-        if not attr.get("content") and attr.get("content_json_string"):
+        if not attr.get("content") and (
+                cjs := attr.pop("content_json_string", None)):
             try:
-                content_json = util.json_loads(attr["content_json_string"])
-                attr["content"] = self._content_json_to_html(content_json)
+                attr["content"] = self.utils("tiptap").to_html(cjs)
             except Exception as exc:
+                self.log.traceback(exc)
                 self.log.warning(
-                    "Failed to parse content_json_string for post %s: %s",
-                    attr["id"], exc)
+                    "%s: Failed to parse content_json_string (%s: %s)",
+                    attr["id"], exc.__class__.__name__, exc)
 
         return attr
 
