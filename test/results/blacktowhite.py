@@ -55,12 +55,23 @@ __tests__ = (
     "#comment" : "video",
     "#category": ("xenforo", "blacktowhite", "media-item"),
     "#class"   : xenforo.XenforoMediaItemExtractor,
+    "#auth"    : False,
     "#results" : "https://www.blacktowhite.net/media/baby-goddess-energy.845601/full",
 },
 
 {
+    "#url"     : "https://www.blacktowhite.net/media/baby-goddess-energy.845601",
+    "#comment" : "video",
+    "#category": ("xenforo", "blacktowhite", "media-item"),
+    "#class"   : xenforo.XenforoMediaItemExtractor,
+    "#auth"    : False,
+    "#options" : {"metadata": True},
+    "#results" : "https://www.blacktowhite.net/data/xfmg/video/8173/8173378-a16bd8e0c10523da2f99e8a9af17c03a.mov",
+},
+
+{
     "#url"     : "https://www.blacktowhite.net/media/img_5727-jpeg.840519",
-    "#image"   : "video",
+    "#comment" : "image",
     "#category": ("xenforo", "blacktowhite", "media-item"),
     "#class"   : xenforo.XenforoMediaItemExtractor,
     "#results" : "https://www.blacktowhite.net/media/img_5727-jpeg.840519/full",
@@ -71,13 +82,14 @@ __tests__ = (
     "#url"     : "https://www.blacktowhite.net/media/albums/my-slutty-hotwife-gf-on-holidays-without-hubby-more-of-7000kms-december-2k25.47700",
     "#category": ("xenforo", "blacktowhite", "media-album"),
     "#class"   : xenforo.XenforoMediaAlbumExtractor,
+    "#auth"    : False,
     "#results" : (
-        "https://www.blacktowhite.net/register/full",
         "https://www.blacktowhite.net/media/on-the-cave.947141/full",
         "https://www.blacktowhite.net/media/she-likes-to-blow-black-cocks.947140/full",
         "https://www.blacktowhite.net/media/teasing-kings-around.947139/full",
         "https://www.blacktowhite.net/media/waiting-a-caribbean-black-cock.947138/full",
     ),
+    "#log": "username & password or authenticated cookies needed",
 
     "album"    : {
         "author"     : "westindiandick",
@@ -99,7 +111,7 @@ __tests__ = (
     "#category": ("xenforo", "blacktowhite", "media-user"),
     "#class"   : xenforo.XenforoMediaUserExtractor,
     "#archive" : False,
-    "#count"   : 19,
+    "#count"   : 14,
 
     "author_id"  : "1115361",
     "author_slug": "elodies_secret",
