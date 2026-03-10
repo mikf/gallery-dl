@@ -1981,6 +1981,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Profiles, Threads</td>
     <td></td>
 </tr>
+<tr id="blacktowhite" title="blacktowhite">
+    <td>BlacktoWhite</td>
+    <td>https://www.blacktowhite.net/</td>
+    <td>Forums, Albums, Media Categories, Media Files, User Media, Posts, Profiles, Threads</td>
+    <td></td>
+</tr>
 
 <tr id="moebooru" title="moebooru">
     <td colspan="4"><strong>Moebooru and MyImouto</strong></td>
