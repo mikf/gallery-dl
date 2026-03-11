@@ -50,6 +50,7 @@ class Extractor():
     browser = None
     useragent = util.USERAGENT_FIREFOX
     geobypass = None
+    flaresolverr = None
     request_interval = 0.0
     request_interval_min = 0.0
     request_interval_429 = 60.0
@@ -222,6 +223,10 @@ class Extractor():
                 challenge = util.detect_challenge(response)
                 if challenge is not None:
                     self.log.warning(challenge)
+                    if self._flaresolverr:
+                        self.log.info("Solving challenge using FlareSolverr")
+                        if fs_response := self._flaresolverr_request(response):
+                            return fs_response
 
                 if code == 429 and self._handle_429(response):
                     continue
@@ -305,6 +310,50 @@ class Extractor():
                     self.log.warning("%s: %s", exc.__class__.__name__, exc)
                 return ElementTree.Element("")
             raise
+
+    def _flaresolverr_request(self, response, **kwargs):
+        if not (session := kwargs.get("session")):
+            session = self.session
+
+        kwargs["json"] = payload = {"url": response.url}
+        if kwargs.get("method") == "POST":
+            payload["cmd"] = "request.post"
+            if data := kwargs.get("data"):
+                payload["postData"] = text.build_query(data)
+        else:
+            payload["cmd"] = "request.get"
+        if timeout := self._timeout:
+            payload["maxTimeout"] = timeout * 1000
+        if self.cookies:
+            payload["cookies"] = [
+                {cookie.name: cookie.value}
+                for cookie in self.cookies]
+
+        try:
+            response = session.request(
+                "POST", self._flaresolverr_url, **kwargs)
+        except Exception as exc:
+            self.log.warning("Failed to connect to FlareSolverr (%s: %s)",
+                             exc.__class__.__name__, exc)
+            self._flaresolverr = False
+            return False
+
+        data = util.json_loads(response.text)
+        if data["status"] != "ok":
+            self.log.warning("Failed to solve challenge ('%s')",
+                             data.get("message") or data)
+            return False
+
+        data = data["solution"]
+        ua = session.headers["User-Agent"] = data["userAgent"]
+        clearance = self.cookies_load_flaresolverr(data["cookies"])
+        if clearance is None:
+            self.log.warning("Failed to acquire 'cf_clearance' cookie")
+        else:
+            self.cache_update(
+                _flaresolverr_cookies, self.category, (ua, clearance),
+                _exp=int(clearance.expires-time.time()), _mem=False)
+        return ResponseWrapper(response, data)
 
     _handle_429 = util.false
 
@@ -475,6 +524,14 @@ class Extractor():
         self._timeout = self.config("timeout", 30)
         self._verify = self.config("verify", True)
         self._proxies = util.build_proxy_map(self.config("proxy"), self.log)
+
+        if self.config("flaresolverr", self.flaresolverr):
+            self._flaresolverr = True
+            self._flaresolverr_url = (
+                self.config("flaresolverr-url") or
+                "http://localhost:8191").rstrip("/") + "/v1"
+        else:
+            self._flaresolverr = False
 
         if self._retries < 0:
             self._retries = float("inf")
@@ -654,6 +711,12 @@ class Extractor():
 
     def _init_cookies(self):
         """Populate the session's cookiejar"""
+        if self._flaresolverr:
+            fsv = self.cache(_flaresolverr_cookies, self.category, _mem=False)
+            if fsv is not None:
+                self.log.debug("cookies: loading cached 'cf_clearance' cookie")
+                self.session.headers["User-Agent"], clearance = fsv
+                self.cookies.set_cookie(clearance)
         if cookies := self.config("cookies"):
             if select := self.config("cookies-select"):
                 if select == "rotate":
@@ -712,6 +775,27 @@ class Extractor():
                 "cookies: Expected 'dict', 'list', or 'str' value for "
                 "'cookies' option, got '%s' instead (%r)",
                 cookies_source.__class__.__name__, cookies_source)
+
+    def cookies_load_flaresolverr(self, cookies):
+        from http.cookiejar import Cookie
+
+        clearance = None
+        set_cookie = self.cookies.set_cookie
+        for cookie in cookies:
+            name = cookie["name"]
+            path = cookie["path"]
+            domain = cookie["domain"]
+            set_cookie(cookie := Cookie(
+                0, name, cookie["value"], None, False,
+                domain, True if domain else False,
+                domain[0] == "." if domain else False,
+                path, True if path else False,
+                cookie["secure"], cookie["expiry"], False, None, None, {},
+            ))
+            if name == "cf_clearance":
+                clearance = cookie
+
+        return clearance
 
     def cookies_store(self):
         """Store the session's cookies in a cookies.txt file"""
@@ -1124,6 +1208,21 @@ class BaseExtractor(Extractor):
                 f"(?:https?://)?(?:{'|'.join(pattern_list)}))")
 
 
+class ResponseWrapper():
+
+    def __init__(self, response, data):
+        self.response = response
+        self.data = data
+        self.status_code = data["status"]
+        self.text = data["response"]
+
+    def __getattr__(self, name):
+        value = self.data.get(name)
+        if value is None:
+            value = getattr(self.response, name)
+        return value
+
+
 class RequestsAdapter(HTTPAdapter):
 
     def __init__(self, ssl_context=None, source_address=None):
@@ -1173,6 +1272,10 @@ def _build_requests_adapter(
     adapter = CACHE_ADAPTERS[key] = RequestsAdapter(
         ssl_context, source_address)
     return adapter
+
+
+def _flaresolverr_cookies(category):
+    return None
 
 
 def _browser_useragent(browser):
