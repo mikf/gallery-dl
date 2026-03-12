@@ -43,7 +43,7 @@ class DeviantartExtractor(Extractor):
         self.flat = self.config("flat", True)
         self.extra = self.config("extra", False)
         self.quality = self.config("quality", "100")
-        self.original = self.config("original", True)
+        self.original = self.config("original", False)
         self.previews = self.config("previews", False)
         self.intermediary = self.config("intermediary", True)
         self.comments_avatars = self.config("comments-avatars", False)

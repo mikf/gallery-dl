@@ -2866,13 +2866,19 @@ Type
     * ``bool``
     * ``string``
 Default
-    ``true``
+    ``false``
 Description
     Download original files if available.
 
     Setting this option to ``"images"`` only downloads original
     files if they are images and falls back to preview versions for
     everything else (archives, videos, etc.).
+Note
+    https://www.deviantart.com/team/status-update/An-adjustments-being-made-to-1307747979 ::
+
+    > The New Weekly Limits:
+    >   Non-Core & Core Basic:  10 downloads per week
+    >   Core+ and higher     : 150 downloads per week
 
 
 extractor.deviantart.pagination
