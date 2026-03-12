@@ -71,6 +71,7 @@ class DeviantartExtractor(Extractor):
 
         if self.intermediary:
             self.intermediary_subn = text.re(r"(/f/[^/]+/[^/]+)/v\d+/.*").subn
+        self.blur_sub = text.re(r",blur_\d+").sub
 
         if isinstance(self.original, str) and \
                 self.original.lower().startswith("image"):
@@ -670,6 +671,7 @@ x2="45.4107524%" y2="71.4898596%" id="app-root-3">\
             if self.quality:
                 content["src"] = self.quality_sub(
                     self.quality, content["src"], 1)
+            content["src"] = self.blur_sub("", content["src"], 1)
 
         return content
 
