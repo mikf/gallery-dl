@@ -177,6 +177,7 @@ CATEGORY_MAP = {
     "rule34hentai"   : "Rule34Hentai",
     "rule34us"       : "Rule 34",
     "rule34vault"    : "R34 Vault",
+    "rule34world"    : "Rule 34 World",
     "rule34xyz"      : "Rule 34 XYZ",
     "sankaku"        : "Sankaku Channel",
     "sankakucomplex" : "Sankaku Complex",
@@ -576,6 +577,7 @@ AUTH_MAP = {
     "poipiku"        : _COOKIES,
     "ponybooru"      : "API Key",
     "reddit"         : _OAUTH,
+    "rule34world"    : "Supported",
     "rule34xyz"      : "Supported",
     "sankaku"        : "Supported",
     "scrolller"      : "Supported",
@@ -724,6 +726,10 @@ def build_extractor_list():
     # add wikifeetx.com
     default["wikifeetx"] = default["wikifeet"]
     domains["wikifeetx"] = "https://www.wikifeetx.com/"
+
+    # add rule34.world
+    default["rule34world"] = default["rule34xyz"]
+    domains["rule34world"] = "https://rule34.world/"
 
     # imgdrive / imgtaxi / imgwallet
     base = categories["imagehost"]

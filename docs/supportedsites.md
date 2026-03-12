@@ -979,6 +979,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Posts, Tag Searches</td>
     <td></td>
 </tr>
+<tr id="rule34world" title="rule34world">
+    <td>Rule 34 World</td>
+    <td>https://rule34.world/</td>
+    <td>Playlists, Posts, Tag Searches</td>
+    <td>Supported</td>
+</tr>
 <tr id="rule34xyz" title="rule34xyz">
     <td>Rule 34 XYZ</td>
     <td>https://rule34.xyz/</td>

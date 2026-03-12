@@ -6,13 +6,13 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-"""Extractors for https://rule34.xyz/"""
+"""Extractors for https://rule34.world/ and https://rule34.xyz/"""
 
 from .booru import BooruExtractor
 from .. import text
 import collections
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?rule34\.xyz"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?rule34\.(xyz|world)"
 
 
 class Rule34xyzExtractor(BooruExtractor):
@@ -38,6 +38,13 @@ class Rule34xyzExtractor(BooruExtractor):
         "101": "mov720.mp4",
         "102": "mov480.mp4",
     }
+
+    def __init__(self, match):
+        if match[1] == "world":
+            self.category = "rule34world"
+            self.root = "https://rule34.world"
+            self.root_cdn = "https://rule34storage.b-cdn.net"
+        BooruExtractor.__init__(self, match)
 
     def _init(self):
         if formats := self.config("format"):
@@ -139,7 +146,7 @@ class Rule34xyzPostExtractor(Rule34xyzExtractor):
     example = "https://rule34.xyz/post/12345"
 
     def posts(self):
-        return (self._fetch_post(self.groups[0]),)
+        return (self._fetch_post(self.groups[1]),)
 
 
 class Rule34xyzPlaylistExtractor(Rule34xyzExtractor):
@@ -150,10 +157,10 @@ class Rule34xyzPlaylistExtractor(Rule34xyzExtractor):
     example = "https://rule34.xyz/playlists/view/12345"
 
     def metadata(self):
-        return {"playlist_id": self.groups[0]}
+        return {"playlist_id": self.groups[1]}
 
     def posts(self):
-        endpoint = "/v2/post/search/playlist/" + self.groups[0]
+        endpoint = "/v2/post/search/playlist/" + self.groups[1]
         return self._pagination(endpoint)
 
 
@@ -166,7 +173,7 @@ class Rule34xyzTagExtractor(Rule34xyzExtractor):
 
     def metadata(self):
         self.tags = text.unquote(text.unquote(
-            self.groups[0]).replace("_", " ")).split("|")
+            self.groups[1]).replace("_", " ")).split("|")
         return {"search_tags": ", ".join(self.tags)}
 
     def posts(self):
