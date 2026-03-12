@@ -12,7 +12,8 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from gallery_dl import ytdl, util, config  # noqa E402
+from gallery_dl import ytdl, util, config, exception  # noqa E402
+from gallery_dl.extractor.ytdl import YoutubeDLExtractor  # noqa E402
 
 
 class Test_CommandlineArguments(unittest.TestCase):
@@ -309,17 +310,16 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
                ("firefox", "profile", "KEYRING", "container"))
 
 
-from gallery_dl.extractor.ytdl import YoutubeDLExtractor
-from gallery_dl import exception
-
 class MockYtdlModule:
     class utils:
         class YoutubeDLError(Exception):
             pass
 
+
 class MockYtdlInstance:
     def __init__(self, ignoreerrors):
         self.params = {"ignoreerrors": ignoreerrors}
+
 
 class Test_YoutubeDLExtractor(unittest.TestCase):
     def setUp(self):
@@ -339,7 +339,8 @@ class Test_YoutubeDLExtractor(unittest.TestCase):
 
         entries = [{"_type": "url", "url": "test_url"}]
         with self.assertRaises(exception.RestartExtraction):
-            list(self.extr._process_entries(ytdl_module, ytdl_instance, entries))
+            list(self.extr._process_entries(
+                ytdl_module, ytdl_instance, entries))
 
     def test_process_entries_ignoreerrors_true(self):
         ytdl_module = MockYtdlModule()
@@ -349,8 +350,12 @@ class Test_YoutubeDLExtractor(unittest.TestCase):
             raise ytdl_module.utils.YoutubeDLError("Some Error")
         ytdl_instance.extract_info = mock_extract_info
 
-        entries = [{"_type": "url", "url": "test_url1"}, {"_type": "url", "url": "test_url2"}]
-        results = list(self.extr._process_entries(ytdl_module, ytdl_instance, entries))
+        entries = [
+            {"_type": "url", "url": "test_url1"},
+            {"_type": "url", "url": "test_url2"}
+        ]
+        results = list(self.extr._process_entries(
+            ytdl_module, ytdl_instance, entries))
         self.assertEqual(results, [])
 
     def test_process_entries_ignoreerrors_false(self):
@@ -363,7 +368,8 @@ class Test_YoutubeDLExtractor(unittest.TestCase):
 
         entries = [{"_type": "url", "url": "test_url"}]
         with self.assertRaises(exception.AbortExtraction):
-            list(self.extr._process_entries(ytdl_module, ytdl_instance, entries))
+            list(self.extr._process_entries(
+                ytdl_module, ytdl_instance, entries))
 
 
 if __name__ == "__main__":
