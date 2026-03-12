@@ -95,6 +95,8 @@ class YoutubeDLExtractor(Extractor):
                 False, {}, True)
         #  except ytdl_module.utils.YoutubeDLError:
         #     raise self.exc.AbortExtraction("Failed to extract video data")
+        except self.exc.ControlException:
+            raise
         except Exception as exc:
             raise self.exc.AbortExtraction(
                 f"Failed to extract video data "
@@ -131,8 +133,14 @@ class YoutubeDLExtractor(Extractor):
                     entry = ytdl_instance.extract_info(
                         entry["url"], False,
                         ie_key=entry.get("ie_key"))
-                except ytdl_module.utils.YoutubeDLError:
-                    continue
+                except self.exc.ControlException:
+                    raise
+                except Exception as exc:
+                    if ytdl_instance.params.get("ignoreerrors"):
+                        continue
+                    raise self.exc.AbortExtraction(
+                        f"Failed to extract playlist entry "
+                        f"({exc.__class__.__name__}: {exc})")
                 if not entry:
                     continue
 

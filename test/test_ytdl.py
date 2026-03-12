@@ -309,5 +309,62 @@ class Test_CommandlineArguments_YtDlp(Test_CommandlineArguments):
                ("firefox", "profile", "KEYRING", "container"))
 
 
+from gallery_dl.extractor.ytdl import YoutubeDLExtractor
+from gallery_dl import exception
+
+class MockYtdlModule:
+    class utils:
+        class YoutubeDLError(Exception):
+            pass
+
+class MockYtdlInstance:
+    def __init__(self, ignoreerrors):
+        self.params = {"ignoreerrors": ignoreerrors}
+
+class Test_YoutubeDLExtractor(unittest.TestCase):
+    def setUp(self):
+        class ExtractorMock(YoutubeDLExtractor):
+            def __init__(self):
+                self.exc = exception
+        self.extr = ExtractorMock.__new__(ExtractorMock)
+        self.extr.exc = exception
+
+    def test_process_entries_restart_propagation(self):
+        ytdl_module = MockYtdlModule()
+        ytdl_instance = MockYtdlInstance(ignoreerrors=False)
+
+        def mock_extract_info(url, dl, ie_key):
+            raise exception.RestartExtraction()
+        ytdl_instance.extract_info = mock_extract_info
+
+        entries = [{"_type": "url", "url": "test_url"}]
+        with self.assertRaises(exception.RestartExtraction):
+            list(self.extr._process_entries(ytdl_module, ytdl_instance, entries))
+
+    def test_process_entries_ignoreerrors_true(self):
+        ytdl_module = MockYtdlModule()
+        ytdl_instance = MockYtdlInstance(ignoreerrors=True)
+
+        def mock_extract_info(url, dl, ie_key):
+            raise ytdl_module.utils.YoutubeDLError("Some Error")
+        ytdl_instance.extract_info = mock_extract_info
+
+        entries = [{"_type": "url", "url": "test_url1"}, {"_type": "url", "url": "test_url2"}]
+        results = list(self.extr._process_entries(ytdl_module, ytdl_instance, entries))
+        self.assertEqual(results, [])
+
+    def test_process_entries_ignoreerrors_false(self):
+        ytdl_module = MockYtdlModule()
+        ytdl_instance = MockYtdlInstance(ignoreerrors=False)
+
+        def mock_extract_info(url, dl, ie_key):
+            raise ytdl_module.utils.YoutubeDLError("Some Error")
+        ytdl_instance.extract_info = mock_extract_info
+
+        entries = [{"_type": "url", "url": "test_url"}]
+        with self.assertRaises(exception.AbortExtraction):
+            list(self.extr._process_entries(ytdl_module, ytdl_instance, entries))
+
+
 if __name__ == "__main__":
     unittest.main(warnings="ignore")
