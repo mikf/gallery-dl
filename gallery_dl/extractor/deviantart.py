@@ -160,7 +160,7 @@ class DeviantartExtractor(Extractor):
                 content = self._extract_content(deviation)
                 yield self.commit(deviation, content)
 
-            elif deviation["is_downloadable"]:
+            elif self.original and deviation["is_downloadable"]:
                 content = self.api.deviation_download(deviation["deviationid"])
                 deviation["is_original"] = True
                 yield self.commit(deviation, content)
