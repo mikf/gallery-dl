@@ -139,7 +139,7 @@ class OAuthBase(Extractor):
         # write to cache
         if self._cache:
             key = (self.subcategory, self.session.auth.consumer_key)
-            oauth._token_cache.update(key, (token, token_secret))
+            self.cache_update(oauth._token_cache, key, (token, token_secret))
             self.log.info("Writing tokens to cache")
 
         # display tokens
@@ -460,7 +460,7 @@ class OAuthPixiv(OAuthBase):
         token = data["refresh_token"]
         if self._cache:
             username = self.oauth_config("username")
-            pixiv._refresh_token_cache.update(username, token)
+            self.cache_update(pixiv._refresh_token_cache, username, token)
             self.log.info("Writing 'refresh-token' to cache")
 
         stdout_write(self._generate_message(("refresh-token",), (token,)))
