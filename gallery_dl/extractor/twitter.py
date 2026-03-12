@@ -2103,15 +2103,18 @@ class TwitterAPI():
                     for idx, entry in enumerate(tweets):
                         if entry["entryId"].endswith(pinned):
                             # mark as pinned / set 'pinned = True'
-                            pinned_tweet = (
-                                (entry.get("content") or entry["item"])
-                                ["itemContent"]["tweet_results"]["result"])
-                            if "tweet" in pinned_tweet:
-                                pinned_tweet = pinned_tweet["tweet"]
-                            pinned_tweet["pinned"] = True
-                            # move to front of 'tweets'
-                            del tweets[idx]
-                            tweets.insert(0, entry)
+                            try:
+                                pinned_tweet = (
+                                    (entry.get("content") or entry["item"])
+                                    ["itemContent"]["tweet_results"]["result"])
+                                if "tweet" in pinned_tweet:
+                                    pinned_tweet = pinned_tweet["tweet"]
+                                pinned_tweet["pinned"] = True
+                                # move to front of 'tweets'
+                                del tweets[idx]
+                                tweets.insert(0, entry)
+                            except Exception:
+                                pass
                             break
                 del pinned
                 pinned_tweet = None
