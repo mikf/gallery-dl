@@ -68,19 +68,20 @@ class FantiaExtractor(Extractor):
     def posts(self):
         """Return post IDs"""
 
-    def _pagination(self, url):
-        params = {"page": 1}
+    def _pagination(self, url, params=None):
+        if params is None:
+            params = {}
+        params = {"page": 1, **params}
 
         while True:
             page = self.request(url, params=params).text
             self._csrf_token(page)
 
-            post_id = None
-            for post_id in text.extract_iter(
-                    page, 'class="link-block" href="/posts/', '"'):
-                yield post_id
+            target_id = None
+            for target_id in text.extract_iter(page, self.target_pattern, '"'):
+                yield target_id
 
-            if not post_id:
+            if not target_id:
                 return
             params["page"] += 1
 
@@ -178,6 +179,7 @@ class FantiaCreatorExtractor(FantiaExtractor):
     subcategory = "creator"
     pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/fanclubs/(\d+)"
     example = "https://fantia.jp/fanclubs/12345"
+    target_pattern = 'class="link-block" href="/posts/'
 
     def __init__(self, match):
         FantiaExtractor.__init__(self, match)
@@ -201,3 +203,28 @@ class FantiaPostExtractor(FantiaExtractor):
     def posts(self):
         self._csrf_token()
         return (self.post_id,)
+
+
+class FantiaSupportingExtractor(FantiaExtractor):
+    """Extractor for free and paid supporting fanclubs for the current user"""
+    subcategory = "supporting"
+    pattern = (
+        r"(?:https?://)?(?:www\.)?fantia\.jp/mypage/users/plans"
+        r"(?:\?type=(free|non_free))?"
+    )
+    example = "https://fantia.jp/mypage/users/plans"
+    target_pattern = 'class="user-avatar" href="/fanclubs/'
+
+    def __init__(self, match):
+        FantiaExtractor.__init__(self, match)
+        groups = match.groups()
+        self.plan_types = groups if groups[0] else ("not_free", "free")
+
+    def items(self):
+        for plan_type in self.plan_types:
+            for fanclub_id in self._pagination(
+                f"{self.root}/mypage/users/plans", params={"type": plan_type}
+            ):
+                fanclub_url = f"{self.root}/fanclubs/{fanclub_id}"
+                data = {"_extractor": FantiaCreatorExtractor}
+                yield Message.Queue, fanclub_url, data

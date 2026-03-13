@@ -329,6 +329,7 @@ Consider all listed sites to potentially be NSFW.
     <td>Fantia</td>
     <td>https://fantia.jp/</td>
     <td>Creators, Posts</td>
+    <td>Supported</td>
     <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr id="fapachi" title="fapachi">
