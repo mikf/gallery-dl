@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018-2025 Mike Fährmann
+# Copyright 2018-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -20,7 +20,7 @@ class MyportfolioGalleryExtractor(Extractor):
     filename_fmt = "{num:>02}.{extension}"
     archive_fmt = "{user}_{filename}"
     pattern = (r"(?:myportfolio:(?:https?://)?([^/]+)|"
-               r"(?:https?://)?([\w-]+\.myportfolio\.com))"
+               r"(?:https?://)?(?!cdn\.)([\w-]+\.myportfolio\.com))"
                r"(/[^/?#]+)?")
     example = "https://USER.myportfolio.com/TITLE"
 
