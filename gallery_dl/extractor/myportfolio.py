@@ -24,14 +24,15 @@ class MyportfolioGalleryExtractor(Extractor):
                r"(/[^/?#]+)?")
     example = "https://USER.myportfolio.com/TITLE"
 
-    def __init__(self, match):
-        Extractor.__init__(self, match)
-        domain1, domain2, self.path = match.groups()
-        self.domain = domain1 or domain2
-        self.prefix = "myportfolio:" if domain1 else ""
-
     def items(self):
-        url = "https://" + self.domain + (self.path or "")
+        domain_alt, domain, path = self.groups
+        if domain is None:
+            domain = domain_alt
+            prefix = "myportfolio:"
+        else:
+            prefix = ""
+
+        url = f"https://{domain}{path or ''}"
         response = self.request(url)
         if response.history and response.url.endswith(".adobe.com/missing"):
             raise self.exc.NotFoundError()
@@ -42,7 +43,7 @@ class MyportfolioGalleryExtractor(Extractor):
 
         if projects:
             data = {"_extractor": MyportfolioGalleryExtractor}
-            base = self.prefix + "https://" + self.domain
+            base = f"{prefix}https://{domain}"
             for path in text.extract_iter(projects, ' href="', '"'):
                 yield Message.Queue, base + path, data
         else:
