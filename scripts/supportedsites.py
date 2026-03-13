@@ -326,6 +326,9 @@ SUBCATEGORY_MAP = {
         "supporting": "Supported User Feed",
         "redirect"  : "Pixiv Redirects",
     },
+    "fantia": {
+        "supporting": "Supported Creators",
+    },
     "fansly": {
         "lists": "Account Lists",
     },

@@ -66,21 +66,31 @@ __tests__ = (
 },
 
 {
-    "#url"     : "https://fantia.jp/mypage/users/plans?type=free",
-    "#category": ("", "fantia", "supporting"),
-    "#class"   : fantia.FantiaSupportingExtractor,
-    "#range"   : "1",
-    "#count"   : "== 1",
-    "_url"     : "https://fantia.jp/fanclubs/6939",
-},
-
-{
     "#url"     : "https://fantia.jp/mypage/users/plans",
     "#category": ("", "fantia", "supporting"),
     "#class"   : fantia.FantiaSupportingExtractor,
+    "#auth"    : "cookies",
     "#range"   : "1",
-    "#count"   : "== 1",
-    "_url"     : "https://fantia.jp/fanclubs/6939",
+    "#count"   : 1,
+    "#results" : "https://fantia.jp/fanclubs/6939",
+},
+
+{
+    "#url"     : "https://fantia.jp/mypage/users/plans?type=free",
+    "#category": ("", "fantia", "supporting"),
+    "#class"   : fantia.FantiaSupportingExtractor,
+    "#auth"    : "cookies",
+    "#range"   : "1",
+    "#count"   : 1,
+    "#results" : "https://fantia.jp/fanclubs/6939",
+},
+
+{
+    "#url"     : "https://fantia.jp/mypage/users/plans?type=not_free",
+    "#category": ("", "fantia", "supporting"),
+    "#class"   : fantia.FantiaSupportingExtractor,
+    "#auth"    : "cookies",
+    "#count"   : 0,
 },
 
 )
