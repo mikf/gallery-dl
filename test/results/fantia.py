@@ -6,6 +6,7 @@
 
 from gallery_dl.extractor import fantia
 
+# These tests requires a free Fantia account with exactly one subscription: a free subscription to https://fantia.jp/fanclubs/6939
 
 __tests__ = (
 {
@@ -62,6 +63,34 @@ __tests__ = (
     "tags"      : list,
     "rating"    : "adult",
     "post_id"   : 508363,
+},
+
+{
+    "#url"     : "https://fantia.jp/mypage/users/plans",
+    "#category": ("", "fantia", "supporting"),
+    "#class"   : fantia.FantiaSupportingExtractor,
+    "#auth"    : "cookies",
+    "#range"   : "1",
+    "#count"   : 1,
+    "#results" : "https://fantia.jp/fanclubs/6939",
+},
+
+{
+    "#url"     : "https://fantia.jp/mypage/users/plans?type=free",
+    "#category": ("", "fantia", "supporting"),
+    "#class"   : fantia.FantiaSupportingExtractor,
+    "#auth"    : "cookies",
+    "#range"   : "1",
+    "#count"   : 1,
+    "#results" : "https://fantia.jp/fanclubs/6939",
+},
+
+{
+    "#url"     : "https://fantia.jp/mypage/users/plans?type=not_free",
+    "#category": ("", "fantia", "supporting"),
+    "#class"   : fantia.FantiaSupportingExtractor,
+    "#auth"    : "cookies",
+    "#count"   : 0,
 },
 
 )
