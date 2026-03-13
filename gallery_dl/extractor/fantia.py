@@ -68,17 +68,17 @@ class FantiaExtractor(Extractor):
     def posts(self):
         """Return post IDs"""
 
-    def _pagination(self, url, params=None):
+    def _pagination(self, url, params=None, needle=""):
         if params is None:
             params = {}
-        params = {"page": 1, **params}
+        params["page"] = 1
 
         while True:
             page = self.request(url, params=params).text
             self._csrf_token(page)
 
             target_id = None
-            for target_id in text.extract_iter(page, self.target_pattern, '"'):
+            for target_id in text.extract_iter(page, needle, '"'):
                 yield target_id
 
             if not target_id:
@@ -179,7 +179,6 @@ class FantiaCreatorExtractor(FantiaExtractor):
     subcategory = "creator"
     pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/fanclubs/(\d+)"
     example = "https://fantia.jp/fanclubs/12345"
-    target_pattern = 'class="link-block" href="/posts/'
 
     def __init__(self, match):
         FantiaExtractor.__init__(self, match)
@@ -187,7 +186,7 @@ class FantiaCreatorExtractor(FantiaExtractor):
 
     def posts(self):
         url = f"{self.root}/fanclubs/{self.creator_id}/posts"
-        return self._pagination(url)
+        return self._pagination(url, None, 'class="link-block" href="/posts/')
 
 
 class FantiaPostExtractor(FantiaExtractor):
@@ -208,23 +207,18 @@ class FantiaPostExtractor(FantiaExtractor):
 class FantiaSupportingExtractor(FantiaExtractor):
     """Extractor for free and paid supporting fanclubs for the current user"""
     subcategory = "supporting"
-    pattern = (
-        r"(?:https?://)?(?:www\.)?fantia\.jp/mypage/users/plans"
-        r"(?:\?type=(free|non_free))?"
-    )
+    pattern = (r"(?:https?://)?(?:www\.)?fantia\.jp/mypage/users/plans"
+               r"(?:\?type=((?:not_)?free))?")
     example = "https://fantia.jp/mypage/users/plans"
-    target_pattern = 'class="user-avatar" href="/fanclubs/'
-
-    def __init__(self, match):
-        FantiaExtractor.__init__(self, match)
-        groups = match.groups()
-        self.plan_types = groups if groups[0] else ("not_free", "free")
 
     def items(self):
-        for plan_type in self.plan_types:
+        url = self.root + "/mypage/users/plans"
+        base = self.root + "/fanclubs/"
+        data = {"_extractor": FantiaCreatorExtractor}
+
+        type = self.groups[0]
+        for plan_type in ("not_free", "free") if type is None else (type,):
+            params = {"type": plan_type}
             for fanclub_id in self._pagination(
-                f"{self.root}/mypage/users/plans", params={"type": plan_type}
-            ):
-                fanclub_url = f"{self.root}/fanclubs/{fanclub_id}"
-                data = {"_extractor": FantiaCreatorExtractor}
-                yield Message.Queue, fanclub_url, data
+                    url, params, 'class="user-avatar" href="/fanclubs/'):
+                yield Message.Queue, base + fanclub_id, data
