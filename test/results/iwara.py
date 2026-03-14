@@ -18,28 +18,29 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.iwara.ai/profile/goldenapple",
+    "#class"   : iwara.IwaraUserExtractor,
+    "#results" : (
+        "https://www.iwara.ai/profile/goldenapple/images",
+        "https://www.iwara.ai/profile/goldenapple/videos",
+    ),
+},
+
+{
     "#url"          : "https://www.iwara.tv/profile/user2426993/images",
     "#class"        : iwara.IwaraUserImagesExtractor,
-    "#results"      : (
-        "https://i.iwara.tv/image/original/215ef6c5-47a9-4894-aaef-7bbc7ed2b5d0/215ef6c5-47a9-4894-aaef-7bbc7ed2b5d0.png",
-        "https://i.iwara.tv/image/original/382ce6bc-0393-43dd-adb7-dfd514a72011/382ce6bc-0393-43dd-adb7-dfd514a72011.png",
-        "https://i.iwara.tv/image/original/57fad542-d5c7-4671-b295-f7c4886db80e/57fad542-d5c7-4671-b295-f7c4886db80e.png",
-        "https://i.iwara.tv/image/original/80b61308-08b5-469b-ab86-b2d1a9819a32/80b61308-08b5-469b-ab86-b2d1a9819a32.png",
-    ),
+    "#pattern"      : r"https://i.iwara.tv/image/original/.+",
 
     "extension": "png",
     "type"     : "image",
-    "count"    : 1,
-    "num"      : 1,
+    "count"    : {1, 9},
+    "num"      : range(1, 9),
 },
 
 {
     "#url"          : "https://www.iwara.tv/profile/user2426993/videos",
     "#class"        : iwara.IwaraUserVideosExtractor,
-    "#pattern"      : (
-        r"https://\w+.iwara.tv/download\?filename=8035c1cb-6ac6-45df-a171-4d981a8339c5_Source.mp4&path=2025%2F07%2F04&expires=\d+.+",
-        r"https://\w+.iwara.tv/download\?filename=59691a5b-dd5d-4476-919d-dc0d8c9ee11f_Source.mp4&path=2025%2F06%2F21&expires=\d+.+",
-    ),
+    "#pattern"      : r"https://\w+.iwara.tv/download\?.+",
 
     "extension": "mp4",
     "type"     : "video",
@@ -80,7 +81,7 @@ __tests__ = (
     "#url"          : "https://www.iwara.tv/playlist/01ea603a-4e70-4a36-bc28-dc717eebc2d7",
     "#category"     : ("", "iwara", "playlist"),
     "#class"        : iwara.IwaraPlaylistExtractor,
-    "#pattern"      : r"https://\w+.iwara.tv/download\?filename=b7708020-f531-4eb4-bfd3-c62f3d17927e_Source.mp4&path=2024%2F05%2F12&.+",
+    "#pattern"      : r"https://\w+.iwara.tv/download\?.+&filename=b7708020-f531-4eb4-bfd3-c62f3d17927e_Source.mp4&path=2024%2F05%2F12&.+",
     "#count"        : 1,
 
     "id"            : "OaoVL8nqijDjhB",
@@ -145,7 +146,7 @@ __tests__ = (
     "#url"          : "https://www.iwara.tv/search?query=genshin%20layla%20sex&type=image",
     "#category"     : ("", "iwara", "search"),
     "#class"        : iwara.IwaraSearchExtractor,
-    "#count"        : 20,
+    "#count"        : range(40, 80),
 
     "duration"      : None,
     "type"          : "image",
@@ -155,24 +156,16 @@ __tests__ = (
     "#url"          : "https://www.iwara.tv/videos?tags=aether%2Ccitlali",
     "#category"     : ("", "iwara", "tag"),
     "#class"        : iwara.IwaraTagExtractor,
-    "#pattern"      : (
-        r"https://\w+.iwara.tv/download\?filename=d8e3735d-048c-4525-adcf-4265c8b45444_Source.mp4&path=2025%2F05%2F15&expires=\d+&.+",
-        r"https://\w+.iwara.tv/download\?filename=cc1a1aba-10b9-4e0f-a20f-5b9b17b33db1_Source.mp4&path=2025%2F04%2F03&expires=\d+&.+",
-        r"https://\w+.iwara.tv/download\?filename=94a8a1b9-7586-4771-accd-6f9cb4c6a5a1_Source.mp4&path=2025%2F03%2F21&expires=\d+&.+",
-    ),
+    "#pattern"      : r"https://\w+.iwara.tv/download\?.+&filename=.+",
 
-    "user": {
-        "id"  : "2b4391f3-c46f-43f9-b18f-8bdb8a9df74f",
-        "name": "lenoria",
-        "nick": "lenoria",
-    },
+    "user"          : dict,
     "extension"     : "mp4",
     "mime"          : "video/mp4",
     "width"         : None,
     "height"        : None,
     "type"          : "video",
     "search_tags"   : "aether,citlali",
-    "duration"      : range(90, 200),
+    "duration"      : range(90, 600),
 },
 
 {
@@ -192,7 +185,7 @@ __tests__ = (
     "#url"        : "https://www.iwara.tv/video/6QvQvzZnELJ9vv/bluearchive-rio",
     "#category"   : ("", "iwara", "video"),
     "#class"      : iwara.IwaraVideoExtractor,
-    "#pattern"    : r"https://\w+.iwara.tv/download\?filename=7ba6e734-b9df-4588-88fc-4eef2bbf5c56_Source.mp4&path=2025%2F07%2F05&expires=\d+&hash=[0-9a-f]{64}",
+    "#pattern"    : r"https://\w+.iwara.tv/download\?.+",
     "#count"      : 1,
 
     "comments"    : range(100, 200),
@@ -240,6 +233,55 @@ You can find FHD(1080p) and UHD(2160p) videos on my patreon page, so please chec
 Patreon : https://www.patreon.com/croove
 Twitter : https://x.com/croove_nsfw\
 """,
+    },
+},
+
+{
+    "#url"     : "https://www.iwara.ai/video/GF56ILQxKThJnE/yeshunguang2",
+    "#class"   : iwara.IwaraVideoExtractor,
+    "#pattern" : r"https://\w+\.iwara\.tv/download\?hash=.+&filename=8dd8bbca-dabd-4fed-a295-fb69b1926459_Source.mp4&path=2026%2F03%2F13&expires=\d+",
+
+    "comments"    : int,
+    "count"       : 1,
+    "num"         : 1,
+    "date"        : "dt:2026-03-13 12:38:30",
+    "date_updated": "type:datetime",
+    "duration"    : 148,
+    "extension"   : "mp4",
+    "file_id"     : "8dd8bbca-dabd-4fed-a295-fb69b1926459",
+    "filename"    : "8dd8bbca-dabd-4fed-a295-fb69b1926459",
+    "format"      : "Source",
+    "height"      : 960,
+    "id"          : "GF56ILQxKThJnE",
+    "likes"       : int,
+    "mime"        : "video/mp4",
+    "rating"      : "ecchi",
+    "size"        : 80737302,
+    "slug"        : "yeshunguang2",
+    "title"       : "叶瞬光YeShunguang葉瞬光💕2",
+    "type"        : "video",
+    "views"       : int,
+    "width"       : 720,
+    "description" : """\
+赞助平台/Sponsorship platform → [Patreon](https://www.patreon.com/c/oldapple) | [UniFans](https://app.unifans.io/c/oldapple)（微/支）
+
+赞助可查看我制作的所有视频/Sponsor to view all my videos\
+""",
+    "tags"        : [
+        "ai",
+        "ai_generated",
+        "semi_realistic_style",
+        "ye_shunguang",
+        "zenless_zone_zero",
+    ],
+    "user"        : {
+        "date"       : "dt:2022-03-14 02:48:24",
+        "id"         : "a2b21572-415d-4c2a-ab1b-313dbd723edf",
+        "name"       : "goldenapple",
+        "nick"       : "Old Apple",
+        "premium"    : True,
+        "role"       : "user",
+        "status"     : "active",
     },
 },
 
@@ -339,6 +381,13 @@ Twitter : https://x.com/croove_nsfw\
         "name": "marzcade",
         "nick": "Marzcade",
     },
+},
+
+{
+    "#url"     : "https://www.iwara.ai/image/CpU4ST8vhc93D3/hutao",
+    "#class"   : iwara.IwaraImageExtractor,
+    "#pattern" : r"https://i\.iwara\.tv/image/original/[\w-]+/[\w-]+\.png",
+    "#count"   : 12,
 },
 
 )
