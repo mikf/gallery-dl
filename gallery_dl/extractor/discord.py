@@ -7,7 +7,7 @@
 """Extractors for https://discord.com/"""
 
 from .common import Extractor, Message
-from .. import text
+from .. import text, dt
 
 BASE_PATTERN = r"(?:https?://)?discord\.com"
 
@@ -29,6 +29,7 @@ class DiscordExtractor(Extractor):
         self.enabled_embeds = self.config("embeds", ["image", "gifv", "video"])
         self.enabled_threads = self.config("threads", True)
         self.api = DiscordAPI(self)
+        self.max_id = None
 
     def extract_message_text(self, message):
         text_content = [message["content"]]
@@ -340,8 +341,14 @@ class DiscordServerSearchExtractor(DiscordExtractor):
             params["author_id"] = params.pop("from")
         if "in" in params:
             params["channel_id"] = params.pop("in")
+        if self.max_id is not None:
+            params["max_id"] = self.max_id
 
         return self.extract_search(server_id, params)
+
+    def skip_date(self, date):
+        # https://docs.discord.com/developers/reference#snowflakes
+        self.max_id = ((int(dt.to_ts(date)) - 1_420_070_400) * 1000) << 22
 
 
 class DiscordServerExtractor(DiscordExtractor):
