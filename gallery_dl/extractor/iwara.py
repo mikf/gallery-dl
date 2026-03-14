@@ -11,7 +11,7 @@ from .. import text, util, exception
 from ..cache import cache, memcache
 import hashlib
 
-BASE_PATTERN = r"(?:https?://)?(?:www\.)?iwara\.tv"
+BASE_PATTERN = r"(?:https?://)?(?:www\.)?iwara\.(tv|ai)"
 USER_PATTERN = BASE_PATTERN + r"/profile/([^/?#]+)"
 
 
@@ -24,6 +24,7 @@ class IwaraExtractor(Extractor):
     archive_fmt = "{type} {user[name]} {id} {file_id}"
 
     def _init(self):
+        self.root = "https://www.iwara." + self.groups[0]
         self.api = IwaraAPI(self)
 
         if fmts := self.config("format"):
@@ -174,7 +175,7 @@ class IwaraExtractor(Extractor):
         self.log.warning("Requested format(s) not available")
 
     def _user_params(self):
-        user, qs = self.groups
+        _, user, qs = self.groups
         params = text.parse_query(qs)
         profile = self.api.profile(user)
         params["user"] = profile["user"]["id"]
@@ -192,7 +193,8 @@ class IwaraUserExtractor(Dispatch, IwaraExtractor):
     example = "https://www.iwara.tv/profile/USERNAME"
 
     def items(self):
-        base = f"{self.root}/profile/{self.groups[0]}/"
+        tld, user = self.groups
+        base = f"{self.root[:-2]}{tld}/profile/{user}/"
         return self._dispatch_extractors((
             (IwaraUserImagesExtractor   , base + "images"),
             (IwaraUserVideosExtractor   , base + "videos"),
@@ -241,7 +243,7 @@ class IwaraFollowingExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/profile/USERNAME/following"
 
     def items(self):
-        uid = self.api.profile(self.groups[0])["user"]["id"]
+        uid = self.api.profile(self.groups[1])["user"]["id"]
         return self.items_user(self.api.user_following(uid), "user")
 
 
@@ -251,7 +253,7 @@ class IwaraFollowersExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/profile/USERNAME/followers"
 
     def items(self):
-        uid = self.api.profile(self.groups[0])["user"]["id"]
+        uid = self.api.profile(self.groups[1])["user"]["id"]
         return self.items_user(self.api.user_followers(uid), "follower")
 
 
@@ -262,7 +264,7 @@ class IwaraImageExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/image/ID"
 
     def items(self):
-        return self.items_image((self.api.image(self.groups[0]),))
+        return self.items_image((self.api.image(self.groups[1]),))
 
 
 class IwaraVideoExtractor(IwaraExtractor):
@@ -272,7 +274,7 @@ class IwaraVideoExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/video/ID"
 
     def items(self):
-        return self.items_video((self.api.video(self.groups[0]),))
+        return self.items_video((self.api.video(self.groups[1]),))
 
 
 class IwaraPlaylistExtractor(IwaraExtractor):
@@ -282,7 +284,7 @@ class IwaraPlaylistExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/playlist/ID"
 
     def items(self):
-        return self.items_video(self.api.playlist(self.groups[0]))
+        return self.items_video(self.api.playlist(self.groups[1]))
 
 
 class IwaraFavoriteExtractor(IwaraExtractor):
@@ -291,7 +293,7 @@ class IwaraFavoriteExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/favorites/videos"
 
     def items(self):
-        type = self.groups[0] or "vidoo"
+        type = self.groups[1] or "vidoo"
         return self.items_by_type(type, self.api.favorites(type))
 
 
@@ -302,7 +304,7 @@ class IwaraSearchExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/search?query=QUERY&type=TYPE"
 
     def items(self):
-        params = text.parse_query(self.groups[0])
+        params = text.parse_query(self.groups[1])
         type = params.get("type") or "videos"
         if type[-1] != "s":
             type += "s"
@@ -317,7 +319,7 @@ class IwaraTagExtractor(IwaraExtractor):
     example = "https://www.iwara.tv/videos?tags=TAGS"
 
     def items(self):
-        type, qs = self.groups
+        _, type, qs = self.groups
         params = text.parse_query(qs)
         self.kwdict["search_tags"] = params.get("tags")
         return self.items_by_type(type, self.api.media(type, params))
@@ -333,6 +335,7 @@ class IwaraAPI():
             "Referer"     : extractor.root + "/",
             "Content-Type": "application/json",
             "Origin"      : extractor.root,
+            "X-Site"      : extractor.root[8:],
         }
 
         self.username, self.password = extractor._get_auth_info()
