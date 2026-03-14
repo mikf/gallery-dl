@@ -19,7 +19,7 @@ class MtimePP(PostProcessor):
         if value := options.get("value"):
             self._get = formatter.parse(value, None, util.identity).format_map
         else:
-            key = options.get("key", "date")
+            key = options.get("mode") or options.get("key", "date")
             self._get = lambda kwdict: kwdict.get(key)
 
         events = options.get("event")
