@@ -68,9 +68,7 @@ class FantiaExtractor(Extractor):
     def posts(self):
         """Return post IDs"""
 
-    def _pagination(self, url, params=None, needle=""):
-        if params is None:
-            params = {}
+    def _pagination(self, url, params, needle=""):
         params["page"] = 1
 
         while True:
@@ -180,13 +178,9 @@ class FantiaCreatorExtractor(FantiaExtractor):
     pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/fanclubs/(\d+)"
     example = "https://fantia.jp/fanclubs/12345"
 
-    def __init__(self, match):
-        FantiaExtractor.__init__(self, match)
-        self.creator_id = match[1]
-
     def posts(self):
-        url = f"{self.root}/fanclubs/{self.creator_id}/posts"
-        return self._pagination(url, None, 'class="link-block" href="/posts/')
+        url = f"{self.root}/fanclubs/{self.groups[0]}/posts"
+        return self._pagination(url, {}, 'class="link-block" href="/posts/')
 
 
 class FantiaPostExtractor(FantiaExtractor):
@@ -195,13 +189,9 @@ class FantiaPostExtractor(FantiaExtractor):
     pattern = r"(?:https?://)?(?:www\.)?fantia\.jp/posts/(\d+)"
     example = "https://fantia.jp/posts/12345"
 
-    def __init__(self, match):
-        FantiaExtractor.__init__(self, match)
-        self.post_id = match[1]
-
     def posts(self):
         self._csrf_token()
-        return (self.post_id,)
+        return (self.groups[0],)
 
 
 class FantiaSupportingExtractor(FantiaExtractor):
