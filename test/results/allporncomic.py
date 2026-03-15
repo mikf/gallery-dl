@@ -1,0 +1,237 @@
+# -*- coding: utf-8 -*-
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2 as
+# published by the Free Software Foundation.
+
+from gallery_dl.extractor import allporncomic
+
+
+__tests__ = (
+{
+    "#url"     : "https://allporncomic.com/porncomic/amerikan-bikini-car-wash-kantai-collection-kancolle-kekocha/1-amerikan-bikini-car-wash/",
+    "#class"   : allporncomic.AllporncomicChapterExtractor,
+    "#pattern" : r"https://allporncomic\.com/wp\-content/uploads/WP\-manga/data/manga_5d0663f71649f/4c11e870974d3cf877e3b83512ffc303/\d+\.jpg",
+    "#count"   : 16,
+
+    "artist"       : ["Kekocha"],
+    "bookmarks"    : range(100, 500),
+    "chapter"      : 1,
+    "chapter_id"   : 6480,
+    "chapter_minor": "",
+    "comments"     : 0,
+    "count"        : 16,
+    "description"  : "A full colored KanColle parody hentai manga featuring an FFM threesome with Iowa, Saratoga, and Teitoku by Kokocha.",
+    "extension"    : "jpg",
+    "filename"     : str,
+    "group"        : ["CHIBIKKO KINGDOM"],
+    "lang"         : "en",
+    "manga"        : "Amerikan Bikini Car Wash",
+    "manga_cover"  : "https://allporncomic.com/wp-content/uploads/2019/06/01-31.jpg",
+    "manga_date"   : "dt:2019-06-16 15:49:12",
+    "manga_id"     : 5210,
+    "manga_slug"   : "amerikan-bikini-car-wash-kantai-collection-kancolle-kekocha",
+    "page"         : range(1, 16),
+    "parody"       : ["Kantai Collection"],
+    "rating"       : range(3, 4),
+    "status"       : "Completed",
+    "type"         : "Hentai",
+    "votes"        : range(60, 200),
+    "characters"   : [
+        "Iowa",
+        "Saratoga",
+        "Teitoku",
+    ],
+    "path"         : [
+        "Amerikan Bikini Car Wash (Kantai Collection -KanColle-) [Kekocha]",
+        "1 . Amerikan Bikini Car Wash - Chapter 1 (Kantai Collection -KanColle-) [Kekocha]",
+    ],
+    "tags"         : [
+        "Big Breasts",
+        "Bikini",
+        "FFM Threesome",
+        "Full Color",
+        "Game",
+        "Group",
+        "Hentai",
+        "Nakadashi",
+        "Ponytail",
+        "Sole Male",
+        "Swimsuit",
+        "X-RAY",
+    ],
+},
+
+{
+    "#url"     : "https://allporncomic.com/porncomic/trick-or-treat-pegasus-smithb/0-1-tina-bonus-images/",
+    "#class"   : allporncomic.AllporncomicChapterExtractor,
+    "#pattern" : r"https://allporncomic\.com/wp\-content/uploads/WP\-manga/data/manga_5eb6fffc1d757/01371b1c90c756cf8910e0b2e8d41711/\d+\.jpg",
+    "#count"   : 17,
+
+    "artist"       : ["Pegasus Smith"],
+    "chapter_id"   : 20987,
+    "chapter"      : 0,
+    "chapter_minor": ".1",
+    "characters"   : [],
+    "description"  : "Tina and her son are out trick or treating when they get invited to a party that will change both of their lives forever. A 3D porn comic including blackmail, incest, and cheating by Pegasus Smith. Prequel to Timmy Strikes Back.",
+    "extension"    : "jpg",
+    "lang"         : "en",
+    "manga"        : "Trick Or Treat",
+    "manga_cover"  : "https://allporncomic.com/wp-content/uploads/2020/05/000a-scaled.jpg",
+    "manga_date"   : "dt:2020-05-09 19:36:30",
+    "manga_date_updated": "dt:2025-10-31 08:58:38",
+    "manga_id"     : 14455,
+    "manga_slug"   : "trick-or-treat-pegasus-smithb",
+    "parody"       : [],
+    "rating"       : float,
+    "status"       : "OnGoing",
+    "type"         : "3D",
+    "path"         : [
+        "Trick Or Treat [Pegasus Smith]",
+        "0.1 . Tina Bonus Images - [Pegasus Smith]",
+    ],
+    "tags"         : [
+        "3D",
+        "Anal",
+        "Big Breasts",
+        "Big Penis",
+        "Blackmail",
+        "Cheating",
+        "Cosplaying",
+        "Dark Skin",
+        "DILF",
+        "Double Penetration",
+        "Eyemask",
+        "Gangbang",
+        "Group",
+        "Handjob",
+        "Interracial",
+        "MILF",
+        "Nakadashi",
+        "Twintails",
+        "Virginity",
+    ],
+},
+
+{
+    "#url"     : "https://allporncomic.com/porncomic/artworks-crisisbeat/crisisbeat-vampire-vs-goth/",
+    "#comment" : "",
+    "#class"   : allporncomic.AllporncomicChapterExtractor,
+},
+
+{
+    "#url"     : "https://allporncomic.com/porncomic/artworks-crisisbeat/crisisbeat-vampire-vs-goth/",
+    "#comment" : "missing chapter number",
+    "#class"   : allporncomic.AllporncomicChapterExtractor,
+    "#pattern" : r"https://allporncomic\.com/wp\-content/uploads/WP\-manga/data/manga_610296e0c5918/e7b766aa30d32cc736bf46d8febb6610/\w+\.jpg",
+    "#count"   : 11,
+
+    "chapter"      : 0,
+    "chapter_minor": "",
+    "chapter_id"   : 32839,
+    "description"  : "Parody artworks and animations by Crisisbeat .",
+    "manga"        : "Artworks",
+    "manga_date"   : "dt:2021-07-29 13:07:50",
+    "manga_id"     : 21674,
+    "manga_slug"   : "artworks-crisisbeat",
+    "status"       : "Completed",
+    "type"         : "3D",
+    "artist"       : ["Crisisbeat"],
+    "path"         : [
+        "Artworks [Crisisbeat]",
+        "[CrisisBeat] Vampire vs. Goth",
+    ],
+    "tags"         : [
+        "3D",
+        "Animated",
+        "Cartoon",
+    ],
+},
+
+{
+    "#url"     : "https://allporncomic.com/porncomic/amerikan-bikini-car-wash-kantai-collection-kancolle-kekocha/",
+    "#class"   : allporncomic.AllporncomicMangaExtractor,
+    "#results" : "https://allporncomic.com/porncomic/amerikan-bikini-car-wash-kantai-collection-kancolle-kekocha/1-amerikan-bikini-car-wash/",
+
+    "artist"     : ["Kekocha"],
+    "date"       : "dt:2019-06-16 00:00:00",
+    "description": "A full colored KanColle parody hentai manga featuring an FFM threesome with Iowa, Saratoga, and Teitoku by Kokocha.",
+    "group"      : ["CHIBIKKO KINGDOM"],
+    "lang"       : "en",
+    "manga"      : "Amerikan Bikini Car Wash",
+    "manga_cover": "https://allporncomic.com/wp-content/uploads/2019/06/01-31.jpg",
+    "manga_date" : "dt:2019-06-16 15:49:12",
+    "manga_id"   : 5210,
+    "manga_slug" : "amerikan-bikini-car-wash-kantai-collection-kancolle-kekocha",
+    "parody"     : ["Kantai Collection"],
+    "rating"     : float,
+    "status"     : "Completed",
+    "type"       : "Hentai",
+    "characters" : [
+        "Iowa",
+        "Saratoga",
+        "Teitoku",
+    ],
+    "tags"       : [
+        "Big Breasts",
+        "Bikini",
+        "FFM Threesome",
+        "Full Color",
+        "Game",
+        "Group",
+        "Hentai",
+        "Nakadashi",
+        "Ponytail",
+        "Sole Male",
+        "Swimsuit",
+        "X-RAY",
+    ],
+},
+
+{
+    "#url"     : "https://allporncomic.com/porncomic-genre/bikinia/",
+    "#class"   : allporncomic.AllporncomicTagExtractor,
+    "#pattern" : allporncomic.AllporncomicMangaExtractor.pattern,
+    "#range"   : "1-50",
+    "#count"   : 50,
+},
+
+{
+    "#url"     : "https://allporncomic.com/series/kantai-collection/",
+    "#class"   : allporncomic.AllporncomicTagExtractor,
+    "#pattern" : allporncomic.AllporncomicMangaExtractor.pattern,
+    "#range"   : "1-50",
+    "#count"   : 28,
+},
+
+{
+    "#url"     : "https://allporncomic.com/porncomic-artist/kekocha/?m_orderby=new-manga",
+    "#class"   : allporncomic.AllporncomicTagExtractor,
+    "#results" : (
+        "https://allporncomic.com/porncomic/dumbbell-motenakutemo-daijoubu-how-heavy-are-the-dumbbells-you-lift-kekocha/",
+        "https://allporncomic.com/porncomic/amerikan-bikini-car-wash-kantai-collection-kancolle-kekocha/",
+    ),
+},
+
+{
+    "#url"     : "https://allporncomic.com/group/chibikko-kingdom/",
+    "#class"   : allporncomic.AllporncomicTagExtractor,
+    "#results" : (
+        "https://allporncomic.com/porncomic/dumbbell-motenakutemo-daijoubu-how-heavy-are-the-dumbbells-you-lift-kekocha/",
+        "https://allporncomic.com/porncomic/amerikan-bikini-car-wash-kantai-collection-kancolle-kekocha/",
+    ),
+},
+
+{
+    "#url"     : "https://allporncomic.com/characters/princess-zeldab/page/2/?m_orderby=latest",
+    "#class"   : allporncomic.AllporncomicTagExtractor,
+    "#results" : (
+        "https://allporncomic.com/porncomic/magical-music-various-stormfeder/",
+        "https://allporncomic.com/porncomic/taking-steps-to-ensure-hyrules-prosperity-the-legend-of-zelda-morikoke/",
+        "https://allporncomic.com/porncomic/breasts-of-the-wild-the-legend-of-zelda-stormfeder/",
+        "https://allporncomic.com/porncomic/super-smash-bros-various-witchking00/",
+        "https://allporncomic.com/porncomic/smash-bros-extreme-super-smash-bros-witchking00/",
+    ),
+},
+
+)

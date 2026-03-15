@@ -28,6 +28,7 @@ CATEGORY_MAP = {
     "ahottie"        : "AHottie",
     "aibooru"        : "AIBooru",
     "allgirlbooru"   : "All girl",
+    "allporncomic"   : "AllPornComic",
     "ao3"            : "Archive of Our Own",
     "archivedmoe"    : "Archived.Moe",
     "archiveofsins"  : "Archive of Sins",
