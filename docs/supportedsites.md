@@ -577,6 +577,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Favorites, Followers, Followed Users, individual Images, Playlists, Search Results, Tag Searches, User Profiles, User Images, User Playlists, User Videos, Videos</td>
     <td>Supported</td>
 </tr>
+<tr id="joyreactor" title="joyreactor">
+    <td>JoyReactor</td>
+    <td>https://joyreactor.com/</td>
+    <td>Posts, Search Results, Tag Searches, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="kaliscan" title="kaliscan">
     <td>KaliScan</td>
     <td>https://kaliscan.me/</td>
@@ -1768,12 +1774,6 @@ Consider all listed sites to potentially be NSFW.
 <tr id="reactor" title="reactor">
     <td>Reactor</td>
     <td>http://reactor.cc/</td>
-    <td>Posts, Search Results, Tag Searches, User Profiles</td>
-    <td></td>
-</tr>
-<tr id="joyreactor" title="joyreactor">
-    <td>JoyReactor</td>
-    <td>http://joyreactor.cc/</td>
     <td>Posts, Search Results, Tag Searches, User Profiles</td>
     <td></td>
 </tr>

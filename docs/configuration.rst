@@ -4153,6 +4153,53 @@ Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.joyreactor.embeds
+---------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Downlload embedded external videos with |ytdl|.
+
+
+extractor.joyreactor.formats
+----------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``["webm"]``
+Example
+    ``"gif,mp4,webm"``
+Description
+    A (comma-separated) list of video formats to download.
+Supported Values
+    * ``webm``
+    * ``mp4``
+    * ``gif``
+
+
+extractor.joyreactor.metadata
+-----------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Extract additional metadata.
+
+
+extractor.joyreactor.videos
+---------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download videos.
+
+
 extractor.kemono.archives
 -------------------------
 Type

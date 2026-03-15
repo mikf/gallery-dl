@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2019-2025 Mike Fährmann
+# Copyright 2019-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -150,10 +150,6 @@ BASE_PATTERN = ReactorExtractor.update({
     "reactor"    : {
         "root": "http://reactor.cc",
         "pattern": r"(?:[^/.]+\.)?reactor\.cc",
-    },
-    "joyreactor" : {
-        "root": "http://joyreactor.cc",
-        "pattern": r"(?:www\.)?joyreactor\.c(?:c|om)",
     },
     "pornreactor": {
         "root": "http://pornreactor.cc",
