@@ -110,6 +110,7 @@ modules = [
     "itaku",
     "itchio",
     "iwara",
+    "joyreactor",
     "jschan",
     "kabeuchi",
     "kaliscan",
