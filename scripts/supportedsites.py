@@ -588,12 +588,14 @@ AUTH_MAP = {
     "subscribestar"  : "Supported",
     "tapas"          : "Supported",
     "tiktok"         : _COOKIES,
+    "toonily"        : _COOKIES,
     "tsumino"        : "Supported",
     "tumblr"         : _OAUTH,
     "twitter"        : _COOKIES,
     "vipergirls"     : "Supported",
     "wallhaven"      : _APIKEY_WH,
     "weasyl"         : _APIKEY_WY,
+    "webtoonxyz"     : _COOKIES,
     "zerochan"       : "Supported",
 }
 
