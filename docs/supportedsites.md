@@ -91,6 +91,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries, Search Results, Tag Searches</td>
     <td></td>
 </tr>
+<tr id="allporncomic" title="allporncomic">
+    <td>AllPornComic</td>
+    <td>https://allporncomic.com/</td>
+    <td>Chapters, Manga, Tag Searches</td>
+    <td></td>
+</tr>
 <tr id="arcalive" title="arcalive">
     <td>Arcalive</td>
     <td>https://arca.live/</td>
