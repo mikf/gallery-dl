@@ -26,13 +26,13 @@ class PatreonExtractor(Extractor):
     _warning = True
 
     def _init(self):
-        if not self.cookies_check(("session_id",), subdomains=True):
+        if self.cookies_check(("session_id",), subdomains=True):
+            self._logged_in = True
+        else:
+            self._logged_in = False
             if self._warning:
                 PatreonExtractor._warning = False
                 self.log.warning("no 'session_id' cookie set")
-            if self.session.headers["User-Agent"] is self.useragent:
-                self.session.headers["User-Agent"] = \
-                    "Patreon/14.2.1 (Android; Android 11; Scale/2.10)"
 
         if format_images := self.config("format-images"):
             self._images_fmt = format_images
@@ -491,8 +491,16 @@ class PatreonPostExtractor(PatreonExtractor):
     example = "https://www.patreon.com/posts/TITLE-12345"
 
     def posts(self):
+        if not self._logged_in and \
+                self.session.headers["User-Agent"] is self.useragent:
+            # enable `.m3u8` manifest downloads
+            headers = {"User-Agent":
+                       "Patreon/14.2.1 (Android; Android 11; Scale/2.10)"}
+        else:
+            headers = None
+
         url = f"{self.root}/posts/{self.groups[0]}"
-        page = self.request(url, notfound=True).text
+        page = self.request(url, headers=headers, notfound=True).text
         bootstrap = self._extract_bootstrap(page)
 
         try:
