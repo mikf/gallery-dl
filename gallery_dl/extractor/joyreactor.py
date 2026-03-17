@@ -135,11 +135,16 @@ class JoyreactorExtractor(Extractor):
             interval=False)["data"]
 
     def _pagination(self, url, opname, variables):
-        data = None
+        data = path = None
 
         while True:
             html = self.request(url).text
-            html_posts = html.split('class="content"')[1:]
+            html_posts = html.split('class="content"')
+            del html_posts[0]
+
+            if path is None and ('class="expand-wrapper relative">'
+                                 '<div class="absolute' in html_posts[0]):
+                del html_posts[0]
 
             pgn = text.extr(html, 'ant-pagination-next', "</li>")
             path = text.extr(pgn, 'href="', '"')
