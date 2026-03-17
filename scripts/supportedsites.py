@@ -70,6 +70,7 @@ CATEGORY_MAP = {
     "fikfap"         : "FikFap",
     "filester"       : "filester.me",
     "fitnakedgirls"  : "FitNakedGirls",
+    "foriio"         : "foriio",
     "furaffinity"    : "Fur Affinity",
     "furry34"        : "Furry 34 com",
     "girlswithmuscle": "Girls with Muscle",
