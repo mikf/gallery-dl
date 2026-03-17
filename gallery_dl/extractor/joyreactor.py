@@ -150,7 +150,8 @@ class JoyreactorExtractor(Extractor):
             path = text.extr(pgn, 'href="', '"')
 
             if self.metadata:
-                variables["page"] = text.parse_int(path[path.rfind("/")+1:])+1
+                variables["page"] = (text.parse_int(path[path.rfind("/")+1:])+1
+                                     if path else None)
                 data = self._request_graphql(opname, variables)
                 data_posts = data.popitem()[1]["postPager"]["posts"]
                 yield from zip(html_posts, data_posts)
@@ -158,7 +159,7 @@ class JoyreactorExtractor(Extractor):
                 for post in html_posts:
                     yield post, None
 
-            if path.endswith("/1/rev"):
+            if not path or not path.endswith("/1/rev"):
                 break
             url = self.root + path
 
