@@ -6592,6 +6592,16 @@ Description
     Fetch media from pinned Tweets.
 
 
+extractor.twitter.previews
+--------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download video previews.
+
+
 extractor.twitter.quoted
 ------------------------
 Type
