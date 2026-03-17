@@ -72,6 +72,7 @@ modules = [
     "filester",
     "fitnakedgirls",
     "flickr",
+    "foriio",
     "furaffinity",
     "furry34",
     "fuskator",

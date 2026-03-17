@@ -3334,6 +3334,63 @@ Description
       ``"l"``, ...) to use as an upper limit.
 
 
+extractor.foriio.audio
+----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download embedded audio files using |ytdl|
+    in ``sound`` works
+
+
+extractor.foriio.external
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Follow external URLs
+    in ``web_article`` works
+
+
+extractor.foriio.user.posts
+---------------------------
+Type
+    * ``string``
+    * ``list`` of ``strings``
+Default
+    ``null``
+Example
+    * ``"image,video,sound"``
+    * ``["web_article", "copy_writing"]``
+Description
+    Only process works of the given types.
+
+
+extractor.foriio.previews
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download preview images of embedded media.
+
+
+extractor.foriio.videos
+-----------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download embedded (YouTube) videos using |ytdl|
+    in ``video`` works
+
+
 extractor.furaffinity.descriptions
 ----------------------------------
 Type
