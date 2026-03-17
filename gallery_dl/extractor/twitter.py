@@ -42,10 +42,13 @@ class TwitterExtractor(Extractor):
         self.twitpic = self.config("twitpic", False)
         self.pinned = self.config("pinned", False)
         self.quoted = self.config("quoted", False)
-        self.videos = self.config("videos", True)
-        self.cards = self.config("cards", False)
         self.ads = self.config("ads", False)
+        self.cards = self.config("cards", False)
         self.cards_blacklist = self.config("cards-blacklist")
+        self.videos_files = self.config("videos", True)
+        self.videos_previews = self.config("previews", False)
+        self.videos_ytdl = self.videos_files == "ytdl"
+        self.videos = self.videos_files or self.videos_previews
 
         if not self.config("transform", True):
             self._transform_community = \
@@ -212,10 +215,10 @@ class TwitterExtractor(Extractor):
                         continue
 
             if "video_info" in media:
-                if self.videos == "ytdl":
+                if self.videos_ytdl:
                     url = f"ytdl:{self.root}/i/web/status/{tweet['id_str']}"
                     file = {"url": url, "extension": "mp4"}
-                elif self.videos:
+                elif self.videos_files:
                     video_info = media["video_info"]
                     variant = max(
                         video_info["variants"],
@@ -228,8 +231,22 @@ class TwitterExtractor(Extractor):
                             "duration_millis", 0) / 1000,
                     }
                 else:
+                    file = None
+
+                if file is not None:
+                    file["type"] = media.get("type")
+                    file["width"] = media["original_info"].get("width", 0)
+                    file["height"] = media["original_info"].get("height", 0)
+                    file["description"] = media.get("ext_alt_text")
+                    file["sensitive_flags"] = flags_media
+                    self._extract_media_source(file, media)
+                    files.append(file)
+
+                if not self.videos_previews:
                     continue
-            elif "media_url_https" in media:
+                media["type"] = "preview"
+
+            if "media_url_https" in media:
                 url = media["media_url_https"]
                 if url[-4] == ".":
                     base, _, fmt = url.rpartition(".")
