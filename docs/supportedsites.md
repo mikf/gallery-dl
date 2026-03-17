@@ -373,6 +373,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, Favorites, Galleries, Groups, individual Images, Search Results, User Profiles</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
+<tr id="foriio" title="foriio">
+    <td>foriio</td>
+    <td>https://foriio.com/</td>
+    <td>User Profiles, Works</td>
+    <td></td>
+</tr>
 <tr id="furaffinity" title="furaffinity">
     <td>Fur Affinity</td>
     <td>https://www.furaffinity.net/</td>
