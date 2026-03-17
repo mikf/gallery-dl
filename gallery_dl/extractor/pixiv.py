@@ -396,6 +396,129 @@ class PixivExtractor(Extractor):
         return {}
 
 
+class PixivBookmarkExtractorMixin():
+    """Cursor-aware fast-skip support for Pixiv bookmark feeds"""
+    bookmark_items_key = None
+
+    def _init(self):
+        super()._init()
+
+        if self._bookmark_fast_skip_enabled():
+            limit = self._bookmark_range_limit()
+            if limit and (not self.max_posts or limit < self.max_posts):
+                self.max_posts = limit
+
+    def _bookmark_fast_skip_enabled(self):
+        return True
+
+    def _bookmark_state_init(self):
+        self._bookmark_buffer = []
+        self._bookmark_params = None
+
+    def _bookmark_range_limit(self):
+        rangespec = self.config2("file-range", "image-range")
+        if not rangespec:
+            return None
+        try:
+            ranges = util.predicate_range_parse(rangespec)
+        except ValueError:
+            return None
+
+        if len(ranges) != 1:
+            return None
+
+        range_ = ranges[0]
+        lower = range_.start
+        upper = range_.stop - 1
+        if range_.step != 1 or upper < lower:
+            return None
+
+        return upper - lower + 1
+
+    def _bookmark_base_params(self):
+        params = self._bookmark_list_params()
+        cursor = self.query.get("max_bookmark_id")
+        if cursor is not None:
+            params["max_bookmark_id"] = str(cursor)
+        return params
+
+    def _bookmark_page(self, params):
+        """Return one bookmark listing page"""
+
+    def _bookmark_list_params(self):
+        """Return base listing parameters"""
+
+    @staticmethod
+    def _bookmark_next_params(data):
+        next_url = data.get("next_url")
+        if not next_url:
+            return None
+        return text.parse_query(next_url.rpartition("?")[2])
+
+    def _bookmark_iter(self):
+        if self._bookmark_params is None:
+            self._bookmark_params = self._bookmark_base_params()
+
+        while True:
+            if self._bookmark_buffer:
+                items = self._bookmark_buffer
+                self._bookmark_buffer = []
+                yield from items
+                continue
+
+            if not self._bookmark_params:
+                return
+
+            data = self._bookmark_page(self._bookmark_params)
+            self._bookmark_params = self._bookmark_next_params(data)
+            yield from data[self.bookmark_items_key]
+
+    def skip_files(self, num):
+        if not self._bookmark_fast_skip_enabled():
+            return 0
+
+        target = num - 1
+        if target <= 0:
+            return 0
+
+        if self._bookmark_params is None:
+            self._bookmark_params = self._bookmark_base_params()
+
+        skipped = 0
+        pages = 0
+
+        while skipped < target:
+            if self._bookmark_buffer:
+                count = min(target - skipped, len(self._bookmark_buffer))
+                del self._bookmark_buffer[:count]
+                skipped += count
+                continue
+
+            if not self._bookmark_params:
+                break
+
+            data = self._bookmark_page(self._bookmark_params)
+            items = list(data[self.bookmark_items_key])
+            self._bookmark_params = self._bookmark_next_params(data)
+            pages += 1
+
+            if not items:
+                break
+
+            remaining = target - skipped
+            if remaining < len(items):
+                self._bookmark_buffer = items[remaining:]
+                skipped += remaining
+                break
+
+            skipped += len(items)
+
+        if skipped:
+            self.log.debug("Fast-skipped %s bookmark items in %s page(s)",
+                           skipped, pages)
+        return skipped
+
+
 class PixivUserExtractor(Dispatch, PixivExtractor):
     """Extractor for a pixiv user profile"""
     pattern = (BASE_PATTERN + r"/(?:"
@@ -1088,23 +1211,41 @@ class PixivNovelSeriesExtractor(PixivNovelExtractor):
         return self.api.novel_series(self.novel_id)
 
 
-class PixivNovelBookmarkExtractor(PixivNovelExtractor):
+class PixivNovelBookmarkExtractor(PixivBookmarkExtractorMixin,
+                                  PixivNovelExtractor):
     """Extractor for bookmarked pixiv novels"""
+    bookmark_items_key = "novels"
     subcategory = "bookmark"
     pattern = (USER_PATTERN + r"/bookmarks/novels"
                r"(?:/([^/?#]+))?(?:/?\?([^#]+))?")
     example = "https://www.pixiv.net/en/users/12345/bookmarks/novels"
 
-    def novels(self):
-        user_id, tag, query = self.groups
-        tag = text.unquote(tag) if tag else None
+    def __init__(self, match):
+        PixivNovelExtractor.__init__(self, match)
+        self.user_id, self.tag, query = self.groups
+        self.query = text.parse_query(query)
+        self._bookmark_state_init()
 
-        if text.parse_query(query).get("rest") == "hide":
+    def _bookmark_list_params(self):
+        tag = text.unquote(self.tag) if self.tag else None
+
+        if self.query.get("rest") == "hide":
             restrict = "private"
         else:
             restrict = "public"
 
-        return self.api.user_bookmarks_novel(user_id, tag, restrict)
+        return {"user_id": self.user_id, "tag": tag, "restrict": restrict}
+
+    def _bookmark_page(self, params):
+        return self.api.user_bookmarks_novel_page(params)
+
+    def _bookmark_fast_skip_enabled(self):
+        # Covers and embeds can emit additional files per bookmarked novel,
+        # so file-range skipping must fall back to normal walking.
+        return not (self.config("covers") or self.config("embeds"))
+
+    def novels(self):
+        return self._bookmark_iter()
 
 
 ###############################################################################
@@ -1263,6 +1404,10 @@ class PixivAppAPI():
         """Return novels bookmarked by a user"""
         params = {"user_id": user_id, "tag": tag, "restrict": restrict}
         return self._pagination("/v1/user/bookmarks/novel", params, "novels")
+
+    def user_bookmarks_novel_page(self, params):
+        """Return one page of bookmarked novels"""
+        return self._call("/v1/user/bookmarks/novel", params)
 
     def user_bookmark_tags_illust(self, user_id, restrict="public"):
         """Return bookmark tags defined by a user"""
