@@ -13,6 +13,7 @@ modules = {
     "classify",
     "compare",
     "directory",
+    "dirmtime",
     "exec",
     "hash",
     "metadata",
