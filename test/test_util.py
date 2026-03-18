@@ -613,6 +613,20 @@ class TestOther(unittest.TestCase):
                 result = util.bdecode(util.bencode(value, alphabet), alphabet)
                 self.assertEqual(result, value)
 
+    def test_b36encode(self, f=util.b36encode):
+        self.assertEqual(f(0), "")
+        self.assertEqual(f(16), "g")
+        self.assertEqual(f(37), "11")
+        self.assertEqual(f(123), "3f")
+        self.assertEqual(f(1234567890), "kf12oi")
+
+    def test_b36decode(self, f=util.b36decode):
+        self.assertEqual(f(""), 0)
+        self.assertEqual(f("g"), 16)
+        self.assertEqual(f("11"), 37)
+        self.assertEqual(f("3f"), 123)
+        self.assertEqual(f("kf12oi"), 1234567890)
+
     def test_advance(self):
         items = range(5)
 
