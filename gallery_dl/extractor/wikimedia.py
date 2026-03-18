@@ -247,6 +247,8 @@ class WikimediaArticleExtractor(WikimediaExtractor):
             path = path[3:]
         if path.startswith("wiki/"):
             path = path[5:]
+        elif path.startswith("index.php/"):
+            path = path[10:]
         self.path = text.unquote(path)
 
         pre, sep, _ = path.partition(":")
