@@ -196,6 +196,7 @@ CATEGORY_MAP = {
     "smugmug"        : "SmugMug",
     "socialmediagirlsforum": "Social Media Girls Forums",
     "speakerdeck"    : "Speaker Deck",
+    "steamcommunity" : "Steam",
     "steamgriddb"    : "SteamGridDB",
     "subscribestar"  : "SubscribeStar",
     "tbib"           : "The Big ImageBoard",
