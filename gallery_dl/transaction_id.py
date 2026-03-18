@@ -44,7 +44,11 @@ class ClientTransaction():
             extractor.log.error(
                 "Failed to extract 'twitter-site-verification' key")
 
-        ondemand_s = text.extr(homepage, '"ondemand.s":"', '"')
+        ondemand_pos = homepage.find('"ondemand.s"')
+        ondemand_key = text.rextr(homepage, ",", ':', ondemand_pos)
+        ondemand_s = text.extract(
+            homepage, ondemand_key + ':"', '"', ondemand_pos)[0]
+
         indices = self._extract_indices(ondemand_s, extractor)
         if not indices:
             extractor.log.error("Failed to extract KEY_BYTE indices")
