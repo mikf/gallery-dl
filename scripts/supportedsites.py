@@ -121,6 +121,7 @@ CATEGORY_MAP = {
     "mangafreak"     : "MangaFreak",
     "mangareader"    : "MangaReader",
     "mangataro"      : "MangaTaro",
+    "mgewiki"        : "Monster Girl Encyclopedia Wiki",
     "s3ndpics"       : "S3ND",
     "schalenetwork"  : "Schale Network",
     "leakgallery"    : "Leak Gallery",
