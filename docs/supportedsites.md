@@ -1959,6 +1959,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Articles, Categories, Files, Wikis</td>
     <td></td>
 </tr>
+<tr id="mgewiki" title="mgewiki">
+    <td>Monster Girl Encyclopedia Wiki</td>
+    <td>https://mgewiki.moe/</td>
+    <td>Articles, Categories, Files, Wikis</td>
+    <td></td>
+</tr>
 
 <tr id="xenforo" title="xenforo">
     <td colspan="4"><strong>XenForo Forums</strong></td>
