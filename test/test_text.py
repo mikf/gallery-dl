@@ -407,6 +407,18 @@ class TestText(unittest.TestCase):
                                   "http://blog.example.org/lorem?foo=bar",
                                   "http://blog.example.org"])
 
+    def test_parse_hex_escapes(self, f=text.parse_hex_escapes):
+        self.assertEqual(f(""), "")
+        self.assertEqual(f("foobar"), "foobar")
+        self.assertEqual(f("foo bar"), "foo bar")
+        self.assertEqual(f("foo\\x20bar"), "foo bar")
+        self.assertEqual(f("foo\\x20\\x2f\\x20bar"), "foo / bar")
+        self.assertEqual(f("foo\\x1zar"), "foo\\x1zar")
+        self.assertEqual(
+            f("\\x20foo\\x20\\x2F bar\xff"),
+            " foo / barÿ",
+        )
+
     def test_parse_unicode_escapes(self, f=text.parse_unicode_escapes):
         self.assertEqual(f(""), "")
         self.assertEqual(f("foobar"), "foobar")

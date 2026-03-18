@@ -234,6 +234,11 @@ def extract_from(txt, pos=None, default=""):
 extract_urls = re(r"https?://[^\s\"'<>\\]+").findall
 
 
+def parse_hex_escapes(txt):
+    """Convert hex escapes in 'txt' into actual characters"""
+    return re(r"\\x([0-9a-fA-F]{2})").sub(_hex_to_char, txt)
+
+
 def parse_unicode_escapes(txt):
     """Convert JSON Unicode escapes in 'txt' into actual characters"""
     if "\\u" in txt:
