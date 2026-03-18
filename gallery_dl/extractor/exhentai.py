@@ -428,9 +428,14 @@ class ExhentaiGalleryExtractor(ExhentaiExtractor):
 
             try:
                 imgurl = info["i"]
-                if self.original and info.get("o"):
+                if self.original and info.get("o") and " " in info["o"]:
                     url = f"{self.root}/{info['lf']}"
-                    data = self._parse_mpv_info(info)
+                    try:
+                        data = self._parse_mpv_info(info)
+                    except ValueError:
+                        self.log.warning(
+                            "Failed to extract original file metadata")
+                        data = self._parse_image_info(imgurl)
                     data["_fallback"] = self._fallback_mpv_original(info)
                 else:
                     url = imgurl
