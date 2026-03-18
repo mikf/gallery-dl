@@ -27,6 +27,10 @@ from ... import text, util
 
 class ClientTransaction():
     __slots__ = ("key_bytes", "animation_key")
+    ONDEMAND_S_URL = ("https://abs.twimg.com/responsive-web/client-web"
+                      "/ondemand.s.{}a.js")
+    ONDEMAND_S_ID_PATTERN = util.re_compile(r'(?<!\d)(\d+):"ondemand\.s"')
+    ONDEMAND_S_HASH_PATTERN = "{}:\"([0-9a-f]+)\""
 
     def __getstate__(self):
         return (self.key_bytes, self.animation_key)
@@ -43,7 +47,7 @@ class ClientTransaction():
             extractor.log.error(
                 "Failed to extract 'twitter-site-verification' key")
 
-        ondemand_s = text.extr(homepage, '"ondemand.s":"', '"')
+        ondemand_s = self._extract_ondemand_s_url(homepage)
         indices = extractor.cache(
             self._extract_indices, ondemand_s, extractor, _mem=False)
         if not indices:
@@ -63,10 +67,29 @@ class ClientTransaction():
         end = homepage.find(">", pos)
         return text.extr(homepage[beg:end], 'content="', '"')
 
-    def _extract_indices(self, ondemand_s, extractor):
-        url = (f"https://abs.twimg.com/responsive-web/client-web"
-               f"/ondemand.s.{ondemand_s}a.js")
-        page = extractor.request(url).text
+    def _extract_ondemand_s_url(self, homepage):
+        ondemand_s = text.extr(homepage, '"ondemand.s":"', '"')
+        if ondemand_s:
+            return self.ONDEMAND_S_URL.format(ondemand_s)
+
+        match = self.ONDEMAND_S_ID_PATTERN.search(homepage)
+        if not match:
+            return None
+        chunk_id = match.group(1)
+
+        match = util.re_compile(
+            self.ONDEMAND_S_HASH_PATTERN.format(chunk_id)).search(homepage)
+        if not match:
+            return None
+        chunk_hash = match.group(1)
+
+        return self.ONDEMAND_S_URL.format(chunk_hash)
+
+    def _extract_indices(self, ondemand_s_url, extractor):
+        if not ondemand_s_url:
+            return ()
+
+        page = extractor.request(ondemand_s_url).text
         pattern = util.re_compile(r"\(\w\[(\d\d?)\],\s*16\)")
         return [int(i) for i in pattern.findall(page)]
 
