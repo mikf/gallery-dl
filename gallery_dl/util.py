@@ -45,6 +45,14 @@ def bdecode(data, alphabet="0123456789"):
     return num
 
 
+def b36encode(num):
+    return bencode(num, "0123456789abcdefghijklmnopqrstuvwxyz")
+
+
+def b36decode(data):
+    return int(data, 36) if data else 0
+
+
 def decrypt_xor(encrypted, key, base64=True, fromhex=False):
     if base64:
         encrypted = binascii.a2b_base64(encrypted)
