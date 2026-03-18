@@ -29,6 +29,12 @@ class PholderExtractor(Extractor):
     request_interval = (2.0, 4.0)
     referer = False
 
+    def _init(self):
+        if value := self.cache(util.noop, "pholder-s", _exp=86400, _mem=False):
+            self.cookies.set("_bcs", value, domain=self.root[8:])
+        if value := self.cache(util.noop, "pholder-c", _exp=86400, _mem=False):
+            self.cookies.set("_bcc", value, domain=self.root[8:])
+
     def _parse_window_data(self, html):
         # sometimes, window.data content is split across multiple script
         # blocks.
@@ -52,10 +58,36 @@ class PholderExtractor(Extractor):
 
         raise self.exc.AbortExtraction("Could not locate window.data JSON.")
 
+    def _solve_challenge(self, html):
+        extr = text.extract_from(html)
+        ts = text.parse_int(extr(" ts=", ";"))
+        ip = text.parse_int(extr(" ip=", ";"))
+        vl = text.parse_int(extr("^(", ")"))
+
+        # '& 0xFFFFFFFF' to replicate JS behavior
+        n = ts ^ ip ^ vl
+        n ^= (n & 0xFFFFFFFF) >> 16
+        n = (n ^ ((n << 7) & 0xFFFFFFFF)) & 0xFFFFFFFF
+        n ^= (n & 0xFFFFFFFF) >> 3
+        n = (n ^ ((n << 17) & 0xFFFFFFFF)) & 0xFFFFFFFF
+        n ^= (n & 0xFFFFFFFF) >> 11
+
+        ot = util.b36encode((ts ^ ip) & 0xFFFFFFFF)
+        return f"{ot}.{util.b36encode(n)}"
+
     def _posts(self, page_url):
         params = {"page": 1}
         while True:
-            html = self.request(page_url, params=params).text
+            response = self.request(page_url, params=params)
+            if value := response.cookies.get("_bcs"):
+                self.cache_update(util.noop, "pholder-s", value, _exp=86400)
+            html = response.text
+
+            if len(html) < 4096:
+                value = self._solve_challenge(html)
+                self.cache_update(util.noop, "pholder-c", value, _exp=86400)
+                self.cookies.set("_bcc", value, domain=self.root[8:])
+                continue
             window_data = self._parse_window_data(html)
 
             for item in window_data["media"]:
