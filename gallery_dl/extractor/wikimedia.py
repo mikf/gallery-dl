@@ -227,6 +227,11 @@ BASE_PATTERN = WikimediaExtractor.update({
         "api-path": "/w/api.php",
         "useragent": "Googlebot-Image/1.0",
     },
+    "mgewiki": {
+        "root": "https://mgewiki.moe",
+        "pattern": r"(?:www\.)?mgewiki\.moe",
+        "api-path": "/api.php",
+    },
 })
 
 
