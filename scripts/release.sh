@@ -165,10 +165,11 @@ prepare() {
     if [[ "$DIFF" != "${CHANGELOG}" ]]; then
         if [[ "$DIFF" != *"${CHANGELOG}"* ]]; then
             echo "Missing ${NEWVERSION} '${CHANGELOG}' entries"
+            exit 4
         else
             printf "Uncommited changes to files other than '${CHANGELOG}':\n%s\n" "$DIFF"
+            read -p "Press Enter to continue"
         fi
-        exit 4
     fi
 
     echo Syncing local branch with origin/master
