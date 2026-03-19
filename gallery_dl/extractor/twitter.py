@@ -1030,8 +1030,9 @@ class TwitterFollowingExtractor(TwitterExtractor):
     example = "https://x.com/USER/following"
 
     def items(self):
+        self.api = TwitterAPI(self)
         self.login()
-        return self._users_result(TwitterAPI(self).user_following(self.user))
+        return self._users_result(self.api.user_following(self.user))
 
 
 class TwitterFollowersExtractor(TwitterExtractor):
@@ -1041,8 +1042,9 @@ class TwitterFollowersExtractor(TwitterExtractor):
     example = "https://x.com/USER/followers"
 
     def items(self):
+        self.api = TwitterAPI(self)
         self.login()
-        return self._users_result(TwitterAPI(self).user_followers(self.user))
+        return self._users_result(self.api.user_followers(self.user))
 
 
 class TwitterCommunityExtractor(TwitterExtractor):
