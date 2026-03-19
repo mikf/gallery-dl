@@ -1253,7 +1253,7 @@ class DeviantartOAuthAPI():
         token = extractor.config("refresh-token")
         if token is None or token == "cache":
             token = "#" + self.client_id
-            if not extractor.cache(_refresh_token_cache, token):
+            if not extractor.cache(_refresh_token_cache, token, _mem=False):
                 token = None
         self.refresh_token_key = token
 
