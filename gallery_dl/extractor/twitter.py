@@ -2159,7 +2159,8 @@ class TwitterAPI():
                                 del tweets[idx]
                                 tweets.insert(0, entry)
                             except Exception:
-                                break
+                                pass
+                            break
                 del pinned
                 pinned_tweet = None
 
