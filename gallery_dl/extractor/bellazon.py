@@ -53,6 +53,7 @@ class BellazonExtractor(Extractor):
 
                 if url.startswith(native):
                     if (
+                        "/main/style_emoticons/" in url or
                         "/uploads/emoticons/" in url or
                         "/public/style_" in url or
                         "/profile/" in url or

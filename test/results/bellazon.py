@@ -378,6 +378,13 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.bellazon.com/main/topic/4322-candids/page/700/#findComment-2802542",
+    "#comment" : "'/main/style_emoticons/' emoticons (#9140)",
+    "#class"   : bellazon.BellazonPostExtractor,
+    "#count"   : 0,
+},
+
+{
     "#url"     : "https://www.bellazon.com/main/topic/7459-candice-swanepoel/page/1122/#findComment-3442969",
     "#comment" : "'/main/index.php' attachment (#9140)",
     "#class"   : bellazon.BellazonPostExtractor,
