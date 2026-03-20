@@ -1061,23 +1061,81 @@ def predicate_tags(blacklist, negate=False):
                 for tag in tagdict.values()
                 if isinstance(tag, str)
             ]
-            tags.sort()
 
         for tag in tags:
-            if tag in blacklist:
+            if tag in simple:
                 return negate
+        if complex is not None:
+            for check in complex:
+                if check(tags):
+                    return negate
         return not negate
+    simple, complex = predicate_tags_parse(blacklist)
+    return _pred
 
+
+def predicate_tags_parse(blacklist):
     if isinstance(blacklist, str):
         try:
             with open(expand_path(blacklist)) as fp:
-                blacklist = {t.lower() for tag in fp if (t := tag.strip())}
+                blacklist = fp.readlines()
         except OSError:
-            blacklist = {tag for tag in
-                         blacklist.replace(" ", "").lower().split(",")}
-    else:
-        blacklist = set(blacklist)
-    return _pred
+            blacklist = blacklist.split(",")
+
+    simple = set()
+    complex = []
+
+    for line in blacklist:
+        line = line.strip()
+        if not line or line.startswith("# "):
+            # empty or comment
+            continue
+        line = line.lower()
+
+        if " " in line:
+            Or = []
+            And = []
+            for tag in line.split():
+                if tag[0] == "~":
+                    Or.append(tag[1:])
+                elif tag[0] == "-":
+                    And.append(predicate_tags_not(tag[1:]))
+                else:
+                    And.append(predicate_tags_in(tag))
+            if Or:
+                And.append("")
+                for tag in Or:
+                    And[-1] = predicate_tags_in(tag)
+                    complex.append(predicate_tags_chain(And.copy()))
+            else:
+                complex.append(predicate_tags_chain(And))
+
+        elif line[0] in "-~":
+            if line[0] == "~":
+                simple.add(line[1:])
+            else:
+                complex.append(predicate_tags_not(line[1:]))
+        else:
+            simple.add(line)
+
+    return simple, complex or None
+
+
+def predicate_tags_in(tag):
+    return lambda tags: tag in tags
+
+
+def predicate_tags_not(tag):
+    return lambda tags: tag not in tags
+
+
+def predicate_tags_chain(checks):
+    def chain(tags):
+        for check in checks:
+            if not check(tags):
+                return False
+        return True
+    return chain
 
 
 def predicate_date(before, after=None, skip=None):
