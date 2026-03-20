@@ -97,8 +97,8 @@ class PathFormat():
         elif restrict == "windows":
             restrict = "\\\\|/<>:\"?*"
         elif restrict == "windows+":
-            restrict = {"\\": "⧹", "|" : "", "/" : "⧸", "<" : "＜", ">" : "＞",
-                        ":" : "：", '"' : "＂", "?" : "？", "*" : "＊"}
+            restrict = {"\\": "⧹", "|": "｜", "/": "⧸", "<": "＜", ">": "＞",
+                        ":": "：", '"': "＂", "?": "？", "*": "＊"}
         elif restrict == "ascii":
             restrict = "^0-9A-Za-z_."
         elif restrict == "ascii+":
