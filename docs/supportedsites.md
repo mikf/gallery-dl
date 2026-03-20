@@ -517,6 +517,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, Files, User Profiles</td>
     <td></td>
 </tr>
+<tr id="imageshack" title="imageshack">
+    <td>ImageShack</td>
+    <td>https://imageshack.com/</td>
+    <td>Galleries, individual Images, User Profiles</td>
+    <td></td>
+</tr>
 <tr id="imgbb" title="imgbb">
     <td>ImgBB</td>
     <td>https://imgbb.com/</td>

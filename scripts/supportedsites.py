@@ -97,6 +97,7 @@ CATEGORY_MAP = {
     "imagebam"       : "ImageBam",
     "imagefap"       : "ImageFap",
     "imagepond"      : "ImagePond",
+    "imageshack"     : "ImageShack",
     "imagetwist"     : "ImageTwist",
     "imgadult"       : "ImgAdult",
     "imgbb"          : "ImgBB",

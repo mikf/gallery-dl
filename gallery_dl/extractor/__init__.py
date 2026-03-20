@@ -99,6 +99,7 @@ modules = [
     "imagechest",
     "imagefap",
     "imagepond",
+    "imageshack",
     "imgbb",
     "imgbox",
     "imgpile",
