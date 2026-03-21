@@ -1301,19 +1301,35 @@ Type
 Example
     * ``"/path/to/file.txt"``
     * ``"1girl,long_hair,  highres,commentary_request"``
+    * ``"1girl long_hair,  highres -commentary_request"``
     * ``["1girl", "long_hair", "highres", "commentary_request"]``
+    * ``["1girl long_hair", "highres -commentary_request"]``
 Description
     A list of tags to exclude/include for processed posts.
 
-    Posts containing a blacklisted tag or *not* containing any whitelisted tag
-    and all of their files will be ignored and not processed any further.
+    | Posts containing a blacklisted tag or *not* containing any whitelisted tag,
+      including all of their files,
+    | will be ignored and not processed any further.
+
+    `Danbooru Blacklist Rules <https://danbooru.donmai.us/wiki_pages/help:blacklists>`__
+    are supported.
 
     This can be
 
     * The |Path|_ of a plaintext file
       containing black-/whitelisted tag names separated by newlines
-    * A ``string`` with tag names separated by commas (``"tag1,tag2,tag3"``)
-    * A ``list`` of ``string`` tag names (``["tag1", "tag2", "tag3"]``)
+    * A ``string`` with tag names separated by commas (``"tag1,tag2 tag3,tag4"``)
+    * A ``list`` of ``string`` tag names (``["tag1", "tag2 tag3", "tag4"]``)
+
+    | Lines starting with ``#`` followed by a space
+      will be ignored and can be used for comments,
+    | for example ``# this is a comment``
+
+    Using ``"/import"`` as value will import and use your account's
+    blacklisted tags list.
+
+    * (Supported for ``[Danbooru]`` & ``[E621]`` instances)
+    * (Requires `username & api-key <extractor.*.username & .password_>`__)
 
 
 extractor.*.archive

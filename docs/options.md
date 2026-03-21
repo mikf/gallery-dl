@@ -210,8 +210,11 @@
                                 URLs
     --tags-blacklist TAGS       Ignore posts tagged with any of the tags given
                                 as comma-separated list or path to a file
-                                containing them (e.g. '1girl',
-                                'shirt,highres,smile', 'C:\path\to\list.txt')
+                                containing them. Danbooru blacklist rules are
+                                supported. Can be '/import' to use your
+                                account's blacklist. (e.g. '1girl',
+                                'shirt,highres -blush,smile',
+                                'C:\path\to\list.txt')
     --tags-whitelist TAGS       Allow only posts tagged with at least one of
                                 the tags given as comma-separated list or path
                                 to a file containing them

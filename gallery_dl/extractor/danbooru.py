@@ -35,8 +35,12 @@ class DanbooruExtractor(BaseExtractor):
 
         username, api_key = self._get_auth_info()
         if username:
-            self.log.debug("Using HTTP Basic Auth for user '%s'", username)
+            self.log.debug("Using HTTP Basic Auth for account '%s'", username)
             self.session.auth = util.HTTPBasicAuth(username, api_key)
+
+    def import_blacklist(self):
+        return self.request_json(
+            self.root + "/profile.json")["blacklisted_tags"].splitlines()
 
     def skip_files(self, num):
         pages = num // self.per_page
@@ -44,6 +48,8 @@ class DanbooruExtractor(BaseExtractor):
             pages = self.page_limit - 1
         self.page_start = pages + 1
         return pages * self.per_page
+
+    skip_posts = skip_files
 
     def items(self):
         # 'includes' initialization must be done here and not in '_init()'
