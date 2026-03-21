@@ -5383,6 +5383,14 @@ Description
     Try to fetch ``limit_sanity_level`` works via web API.
 
 
+extractor.pixiv.favorite.cursor
+-------------------------------
+Type
+    ``string``
+Description
+    Start from the given bookmark ID.
+
+
 extractor.pixiv-novel.comments
 ------------------------------
 Type
@@ -5489,6 +5497,14 @@ Description
     * `"japanese"`: List of Japanese tags
     * `"translated"`: List of translated tags
     * `"original"`: Unmodified list with both Japanese and translated tags
+
+
+extractor.pixiv-novel.bookmark.cursor
+-------------------------------------
+Type
+    ``string``
+Description
+    Start from the given bookmark ID.
 
 
 extractor.plurk.comments

@@ -652,7 +652,8 @@ class PixivFavoriteExtractor(PixivExtractor):
         if self.query.get("rest") == "hide":
             restrict = "private"
 
-        return self.api.user_bookmarks_illust(self.user_id, tag, restrict)
+        return self.api.user_bookmarks_illust(
+            self.user_id, tag, restrict, self.config("cursor"))
 
     def metadata(self):
         if self.user_id:
@@ -663,6 +664,12 @@ class PixivFavoriteExtractor(PixivExtractor):
 
         self.user_id = user["id"]
         return {"user_bookmark": user}
+
+    def finalize(self, status):
+        if status and self.api.params and (
+                bid := self.api.params.get("max_bookmark_id")):
+            self.log.info("Use '-o cursor=%s' to continue downloading "
+                          "from the current position", bid)
 
     def _items_following(self):
         restrict = "public"
@@ -1104,7 +1111,14 @@ class PixivNovelBookmarkExtractor(PixivNovelExtractor):
         else:
             restrict = "public"
 
-        return self.api.user_bookmarks_novel(user_id, tag, restrict)
+        return self.api.user_bookmarks_novel(
+            user_id, tag, restrict, self.config("cursor"))
+
+    def finalize(self, status):
+        if status and self.api.params and (
+                bid := self.api.params.get("max_bookmark_id")):
+            self.log.info("Use '-o cursor=%s' to continue downloading "
+                          "from the current position", bid)
 
 
 ###############################################################################
@@ -1128,6 +1142,7 @@ class PixivAppAPI():
         self.exc = extractor.exc
         self.username = extractor._get_auth_info()[0]
         self.user = None
+        self.params = None
 
         extractor.headers_web = extractor.session.headers.copy()
         extractor.session.headers.update({
@@ -1254,14 +1269,18 @@ class PixivAppAPI():
                   "start_date": date_start, "end_date": date_end}
         return self._pagination_search("/v1/search/illust", params)
 
-    def user_bookmarks_illust(self, user_id, tag=None, restrict="public"):
+    def user_bookmarks_illust(self, user_id, tag=None, restrict="public",
+                              max_id=None):
         """Return illusts bookmarked by a user"""
-        params = {"user_id": user_id, "tag": tag, "restrict": restrict}
+        params = {"user_id": user_id, "tag": tag, "restrict": restrict,
+                  "max_bookmark_id": max_id}
         return self._pagination("/v1/user/bookmarks/illust", params)
 
-    def user_bookmarks_novel(self, user_id, tag=None, restrict="public"):
+    def user_bookmarks_novel(self, user_id, tag=None, restrict="public",
+                             max_id=None):
         """Return novels bookmarked by a user"""
-        params = {"user_id": user_id, "tag": tag, "restrict": restrict}
+        params = {"user_id": user_id, "tag": tag, "restrict": restrict,
+                  "max_bookmark_id": max_id}
         return self._pagination("/v1/user/bookmarks/novel", params, "novels")
 
     def user_bookmark_tags_illust(self, user_id, restrict="public"):
@@ -1341,8 +1360,8 @@ class PixivAppAPI():
             if not data["next_url"]:
                 return
             query = data["next_url"].rpartition("?")[2]
-            params = text.parse_query(query)
-            data = self._call(endpoint, params)
+            self.params = text.parse_query(query)
+            data = self._call(endpoint, self.params)
 
     def _pagination_search(self, endpoint, params):
         sort = params["sort"]
