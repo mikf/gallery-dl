@@ -19,6 +19,8 @@ class RedgifsExtractor(Extractor):
         "{category}_{gallery:?//[:11]}{num:?_/_/>02}{id}.{extension}"
     archive_fmt = "{id}"
     root = "https://www.redgifs.com"
+    page_start = 1
+    per_page = 100
 
     def __init__(self, match):
         Extractor.__init__(self, match)
@@ -73,6 +75,11 @@ class RedgifsExtractor(Extractor):
                 url = url.replace("//thumbs2.", "//thumbs3.", 1)
                 text.nameext_from_url(url, gif)
                 yield url
+
+    def skip_posts(self, num):
+        pages = num // self.per_page
+        self.page_start += pages
+        return pages * self.per_page
 
     def metadata(self):
         return {}
@@ -269,8 +276,8 @@ class RedgifsAPI():
     def _pagination(self, endpoint, params=None, key="gifs"):
         if params is None:
             params = {}
-        params["count"] = "100"
-        params["page"] = 1
+        params["count"] = self.extractor.per_page
+        params["page"] = self.extractor.page_start
 
         while True:
             data = self._call(endpoint, params)
