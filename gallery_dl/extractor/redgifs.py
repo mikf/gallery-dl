@@ -254,8 +254,17 @@ class RedgifsAPI():
         url = self.API_ROOT + endpoint
         self.headers["Authorization"] = self.extractor.cache(
             self._auth, _key=None, _exp=600)
-        return self.extractor.request_json(
-            url, params=params, headers=self.headers)
+        try:
+            return self.extractor.request_json(
+                url, params=params, headers=self.headers)
+        except self.extractor.exc.HttpError as exc:
+            self.extractor.log.debug(err := exc.response.text)
+
+            msg = "API request failed"
+            if err := (text.extr(err, '"message":"', '"') or
+                       text.extr(err, '"description":"', '"')):
+                msg = f'''{msg} ("{err}")'''
+            raise self.extractor.exc.AbortExtraction(msg)
 
     def _pagination(self, endpoint, params=None, key="gifs"):
         if params is None:
