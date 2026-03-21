@@ -260,6 +260,7 @@ class RedgifsAPI():
     def _pagination(self, endpoint, params=None, key="gifs"):
         if params is None:
             params = {}
+        params["count"] = "100"
         params["page"] = 1
 
         while True:
