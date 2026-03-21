@@ -154,11 +154,15 @@ class FacebookExtractor(Extractor):
             ), '"url":"', ','
         )
 
-        post = {
-            "set_id": text.extr(post_page, '{"mediaset_token":"', '"') or
-            text.extr(first_photo_url, 'set=', '"').rsplit("&", 1)[0]
-        }
+        if post_page.count('"__isMedia":"Photo"') > 2:
+            post = {
+                "set_id": text.extr(post_page, '{"mediaset_token":"', '"') or
+                text.extr(first_photo_url, 'set=', '"').rsplit("&", 1)[0]
+            }
+        else:
+            post = {"set_id": None}
 
+        post["post_photo"] = first_photo_url
         return post
 
     def parse_video_page(self, video_page):
@@ -450,7 +454,13 @@ class FacebookSetExtractor(FacebookExtractor):
         if path := self.groups[1]:
             post_url = self.root + "/" + path
             post_page = self.request(post_url).text
-            set_id = self.parse_post_page(post_page)["set_id"]
+            post = self.parse_post_page(post_page)
+
+            set_id = post["set_id"]
+            if not set_id:
+                params = text.parse_query(post["post_photo"].partition("?")[2])
+                self.groups = (params["fbid"],)
+                return FacebookPhotoExtractor.items(self)
             self._detect_jump = False
 
         set_url = f"{self.root}/media/set/?set={set_id}"
