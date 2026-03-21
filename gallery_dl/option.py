@@ -796,8 +796,11 @@ def build_parser():
         "--tags-blacklist",
         dest="tags-blacklist", metavar="TAGS", action=ConfigAction,
         help=("Ignore posts tagged with any of the tags given as comma-"
-              "separated list or path to a file containing them (e.g. "
-              r"'1girl', 'shirt,highres,smile', 'C:\path\to\list.txt')"),
+              "separated list or path to a file containing them. "
+              "Danbooru blacklist rules are supported. Can be '/import' to "
+              "use your account's blacklist. "
+              r"(e.g. '1girl', 'shirt,highres -blush,smile', "
+              r"'C:\path\to\list.txt')"),
     )
     selection.add_argument(
         "--tags-whitelist",

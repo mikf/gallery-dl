@@ -69,6 +69,10 @@ class E621Extractor(danbooru.DanbooruExtractor):
             url = f"{self.root}/posts?tags={text.quote(artist['name'])}"
             yield Message.Queue, url, artist
 
+    def import_blacklist(self):
+        url = f"{self.root}/users/{self._get_auth_info()[0]}.json"
+        return self.request_json(url)["blacklisted_tags"].splitlines()
+
     def _get_notes(self, id):
         return self.request_json(
             f"{self.root}/notes.json?search[post_id]={id}")
