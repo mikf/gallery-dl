@@ -96,16 +96,18 @@ class RedgifsUserExtractor(RedgifsExtractor):
                r"(?:\?([^#]+))?$")
     example = "https://www.redgifs.com/users/USER"
 
-    def __init__(self, match):
-        RedgifsExtractor.__init__(self, match)
-        self.query = match[2]
-
     def metadata(self):
         return {"userName": self.key}
 
     def gifs(self):
-        order = text.parse_query(self.query).get("order")
-        return self.api.user(self.key, order or "new")
+        params = text.parse_query(self.groups[1])
+        if pnum := params.get("page"):
+            params["page"] = text.parse_int(pnum)
+        if type := params.get("type"):
+            params["type"] = type[0].lower()
+        if "order" not in params:
+            params["order"] = "new"
+        return self.api.user(self.key, params)
 
 
 class RedgifsCollectionExtractor(RedgifsExtractor):
@@ -226,9 +228,8 @@ class RedgifsAPI():
         endpoint = "/v2/gallery/" + gallery_id
         return self._call(endpoint)
 
-    def user(self, user, order="new"):
+    def user(self, user, params):
         endpoint = f"/v2/users/{user.lower()}/search"
-        params = {"order": order}
         return self._pagination(endpoint, params)
 
     def collection(self, user, collection_id):
@@ -276,8 +277,9 @@ class RedgifsAPI():
     def _pagination(self, endpoint, params=None, key="gifs"):
         if params is None:
             params = {}
+        if "page" not in params:
+            params["page"] = self.extractor.page_start
         params["count"] = self.extractor.per_page
-        params["page"] = self.extractor.page_start
 
         while True:
             data = self._call(endpoint, params)

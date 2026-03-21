@@ -10,7 +10,6 @@ from gallery_dl.extractor import redgifs
 __tests__ = (
 {
     "#url"     : "https://www.redgifs.com/users/mmj",
-    "#category": ("", "redgifs", "user"),
     "#class"   : redgifs.RedgifsUserExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
     "#count"   : range(40, 60),
@@ -19,7 +18,6 @@ __tests__ = (
 {
     "#url"     : "https://www.redgifs.com/users/mmj?order=old",
     "#comment" : "'order' URL parameter (#4583)",
-    "#category": ("", "redgifs", "user"),
     "#class"   : redgifs.RedgifsUserExtractor,
     "#range"   : "1-5",
     "#patterns": (
@@ -34,15 +32,22 @@ __tests__ = (
 {
     "#url"     : "https://v3.redgifs.com/users/lamsinka89",
     "#comment" : "'v3' subdomain (#3588, #3589)",
-    "#category": ("", "redgifs", "user"),
     "#class"   : redgifs.RedgifsUserExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.(mp4|jpg)",
     "#count"   : ">= 100",
 },
 
 {
+    "#url"     : "https://www.redgifs.com/users/sojourncoupletoo?type=img",
+    "#comment" : "'type' URL parameter / post-range / 10k+ posts total (#9274)",
+    "#class"   : redgifs.RedgifsUserExtractor,
+    "#options" : {"post-range": "1000-1100"},
+    "#pattern" : r"^https://media.redgifs.com/\w+-large.jpg$",
+    "#count"   :  100,
+},
+
+{
     "#url"     : "https://www.redgifs.com/users/boombah123/collections/2631326bbd",
-    "#category": ("", "redgifs", "collection"),
     "#class"   : redgifs.RedgifsCollectionExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
     "#range"   : "1-20",
@@ -51,7 +56,6 @@ __tests__ = (
 
 {
     "#url"     : "https://www.redgifs.com/users/boombah123/collections/9e6f7dd41f",
-    "#category": ("", "redgifs", "collection"),
     "#class"   : redgifs.RedgifsCollectionExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.mp4",
     "#range"   : "1-20",
@@ -60,7 +64,6 @@ __tests__ = (
 
 {
     "#url"     : "https://www.redgifs.com/users/boombah123/collections",
-    "#category": ("", "redgifs", "collections"),
     "#class"   : redgifs.RedgifsCollectionsExtractor,
     "#pattern" : r"https://www\.redgifs\.com/users/boombah123/collections/\w+",
     "#count"   : ">= 3",
@@ -68,7 +71,6 @@ __tests__ = (
 
 {
     "#url"     : "https://www.redgifs.com/niches/just-boobs",
-    "#category": ("", "redgifs", "niches"),
     "#class"   : redgifs.RedgifsNichesExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.(mp4|jpg)",
     "#range"   : "1-20",
@@ -77,7 +79,6 @@ __tests__ = (
 
 {
     "#url"     : "https://www.redgifs.com/niches/thick-booty",
-    "#category": ("", "redgifs", "niches"),
     "#class"   : redgifs.RedgifsNichesExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[\w-]+\.(mp4|jpg)",
     "#range"   : "1-20",
@@ -86,7 +87,6 @@ __tests__ = (
 
 {
     "#url"     : "https://www.redgifs.com/gifs/jav",
-    "#category": ("", "redgifs", "search"),
     "#class"   : redgifs.RedgifsSearchExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[A-Za-z-]+\.(mp4|jpg)",
     "#range"   : "1-10",
@@ -95,7 +95,6 @@ __tests__ = (
 
 {
     "#url"     : "https://www.redgifs.com/search/gifs?query=jav+model&order=top",
-    "#category": ("", "redgifs", "search"),
     "#class"   : redgifs.RedgifsSearchExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[A-Za-z-]+\.(mp4|jpg)",
     "#range"   : "1-10",
@@ -109,7 +108,6 @@ __tests__ = (
 
 {
     "#url"     : "https://www.redgifs.com/browse?tags=JAV",
-    "#category": ("", "redgifs", "search"),
     "#class"   : redgifs.RedgifsSearchExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[A-Za-z-]+\.(mp4|jpg)",
     "#range"   : "1-10",
@@ -118,25 +116,21 @@ __tests__ = (
 
 {
     "#url"     : "https://www.redgifs.com/gifs/jav?order=best&verified=1",
-    "#category": ("", "redgifs", "search"),
     "#class"   : redgifs.RedgifsSearchExtractor,
 },
 
 {
     "#url"     : "https://www.redgifs.com/browse?type=i&verified=y&order=top7",
-    "#category": ("", "redgifs", "search"),
     "#class"   : redgifs.RedgifsSearchExtractor,
 },
 
 {
     "#url"     : "https://v3.redgifs.com/browse?tags=JAV",
-    "#category": ("", "redgifs", "search"),
     "#class"   : redgifs.RedgifsSearchExtractor,
 },
 
 {
     "#url"     : "https://redgifs.com/watch/foolishforkedabyssiniancat",
-    "#category": ("", "redgifs", "image"),
     "#class"   : redgifs.RedgifsImageExtractor,
     "#pattern"     : r"https://\w+\.redgifs\.com/FoolishForkedAbyssiniancat\.mp4",
     "#sha1_content": "f6e03f1df9a2ff2a74092f53ee7580d2fb943533",
@@ -145,7 +139,6 @@ __tests__ = (
 {
     "#url"     : "https://www.redgifs.com/watch/desertedbaregraywolf",
     "#comment" : "gallery (#4021)",
-    "#category": ("", "redgifs", "image"),
     "#class"   : redgifs.RedgifsImageExtractor,
     "#pattern" : r"https://\w+\.redgifs\.com/[A-Za-z-]+\.jpg",
     "#count"   : 4,
@@ -157,31 +150,26 @@ __tests__ = (
 
 {
     "#url"     : "https://redgifs.com/ifr/FoolishForkedAbyssiniancat",
-    "#category": ("", "redgifs", "image"),
     "#class"   : redgifs.RedgifsImageExtractor,
 },
 
 {
     "#url"     : "https://i.redgifs.com/i/FoolishForkedAbyssiniancat",
-    "#category": ("", "redgifs", "image"),
     "#class"   : redgifs.RedgifsImageExtractor,
 },
 
 {
     "#url"     : "https://www.gifdeliverynetwork.com/foolishforkedabyssiniancat",
-    "#category": ("", "redgifs", "image"),
     "#class"   : redgifs.RedgifsImageExtractor,
 },
 
 {
     "#url"     : "https://v3.redgifs.com/watch/FoolishForkedAbyssiniancat",
-    "#category": ("", "redgifs", "image"),
     "#class"   : redgifs.RedgifsImageExtractor,
 },
 
 {
     "#url"     : "https://v3.redgifs.com/watch/605025947780972895",
-    "#category": ("", "redgifs", "image"),
     "#class"   : redgifs.RedgifsImageExtractor,
 
     "id": "humblegrippingmole",
@@ -189,7 +177,6 @@ __tests__ = (
 
 {
     "#url"     : "https://www.gfycat.com/foolishforkedabyssiniancat",
-    "#category": ("", "redgifs", "image"),
     "#class"   : redgifs.RedgifsImageExtractor,
 },
 
