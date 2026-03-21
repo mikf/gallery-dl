@@ -36,6 +36,7 @@ class FacebookExtractor(Extractor):
         self.fallback_retries = self.config("fallback-retries", 2)
         self.videos = self.config("videos", True)
         self.author_followups = self.config("author-followups", False)
+        self._detect_jump = True
 
     def decode_all(self, txt):
         return text.unescape(
@@ -303,7 +304,8 @@ class FacebookExtractor(Extractor):
                         "Detected a loop in the set, it's likely finished. "
                         "Extraction is over."
                     )
-            elif int(photo["next_photo_id"]) > int(photo["id"]) + i*120:
+            elif self._detect_jump and \
+                    int(photo["next_photo_id"]) > int(photo["id"]) + i*120:
                 self.log.info(
                     "Detected jump to the beginning of the set. (%s -> %s)",
                     photo["id"], photo["next_photo_id"])
@@ -449,6 +451,7 @@ class FacebookSetExtractor(FacebookExtractor):
             post_url = self.root + "/" + path
             post_page = self.request(post_url).text
             set_id = self.parse_post_page(post_page)["set_id"]
+            self._detect_jump = False
 
         set_url = f"{self.root}/media/set/?set={set_id}"
         set_page = self.request(set_url).text
