@@ -55,7 +55,7 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         params["limit"] = self.per_page
 
         post = total = None
-        count = 0
+        count = self.page_start * self.per_page
 
         while True:
             try:
