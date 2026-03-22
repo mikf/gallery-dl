@@ -57,7 +57,13 @@ def process_content(html, content):
 
     elif type == "image":
         if (attrs := content.get("attrs")) and (src := attrs.get("src")):
-            html.append(f'<img src="{text.escape(src)}">')
+            html.append('<div data-image-container="true"')
+            if align := attrs.get("alignment"):
+                html.append(f' data-alignment="{text.escape(align)}"')
+            html.append(f'><figure><img src="{text.escape(src)}"')
+            if mid := attrs.get("media_id"):
+                html.append(f' data-media-id="{text.escape(mid)}"')
+            html.append('/></figure></div>')
 
     elif type == "link":
         if (attrs := content.get("attrs")) and (href := attrs.get("href")):

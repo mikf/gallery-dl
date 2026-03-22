@@ -124,9 +124,10 @@ class PatreonExtractor(Extractor):
     def _content(self, post):
         if content := post.get("content"):
             for img in text.extract_iter(
-                    content, '<img data-media-id="', '>'):
-                if url := text.extr(img, 'src="', '"'):
-                    yield "content", None, url, self._filename(url) or url
+                    content, '><figure><img src="', '>'):
+                url = text.unescape(img[:img.find('"')])
+                data = {"media_id": text.extr(img, 'media_id="', '"')}
+                yield "content", data, url, self._filename(url) or url
 
     def posts(self):
         """Return all relevant post objects"""
