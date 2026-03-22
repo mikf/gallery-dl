@@ -1322,14 +1322,19 @@ Description
     * A ``list`` of ``string`` tag names (``["tag1", "tag2 tag3", "tag4"]``)
 
     | Lines starting with ``#`` followed by a space
-      will be ignored and can be used for comments,
-    | for example ``# this is a comment``
+      will be ignored and can be used for comments.
+      For example
+    | ``# this is a comment``
 
-    Using ``"/import"`` as value will import and use your account's
-    blacklisted tags list.
+    Using ``"/import"`` as value will import and apply
+    your account's blacklisted tags list. This is supported for
 
-    * (Supported for ``[Danbooru]`` & ``[E621]`` instances)
-    * (Requires `username & api-key <extractor.*.username & .password_>`__)
+    * ``[Danbooru]`` & ``[E621]`` instances
+      (requires `username & api-key <extractor.*.username & .password_>`__)
+    * ``sankaku``
+      (requires `username & password <extractor.*.username & .password_>`__)
+    * ``gelbooru`` & ``[gelbooru_v02]`` instances
+      (requires authenticated `cookies <extractor.*.cookies_>`__)
 
 
 extractor.*.archive

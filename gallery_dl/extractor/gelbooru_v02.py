@@ -28,6 +28,12 @@ class GelbooruV02Extractor(booru.BooruExtractor):
         if self.category == "rule34":
             self._file_url = self._file_url_rule34
 
+    def import_blacklist(self):
+        url = self.root + "/index.php?page=account&s=options"
+        page = self.request(url).text
+        tags = text.unescape(text.extr(page, "<textarea", "</textarea>"))
+        return (tags[tags.find(">")+1:]).split()
+
     def _api_request(self, params):
         params["api_key"] = self.api_key
         params["user_id"] = self.user_id
