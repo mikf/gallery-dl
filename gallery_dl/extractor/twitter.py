@@ -1190,13 +1190,13 @@ class TwitterInfoExtractor(TwitterExtractor):
     example = "https://x.com/USER/info"
 
     def items(self):
-        api = TwitterAPI(self)
+        self.api = TwitterAPI(self)
 
         screen_name = self.user
         if screen_name.startswith("id:"):
-            user = self.cache(api.user_by_rest_id, screen_name[3:])
+            user = self.cache(self.api.user_by_rest_id, screen_name[3:])
         else:
-            user = self.cache(api.user_by_screen_name, screen_name)
+            user = self.cache(self.api.user_by_screen_name, screen_name)
 
         return iter(((Message.Directory, "", self._transform_user(user)),))
 
