@@ -47,14 +47,15 @@ class TwitterExtractor(Extractor):
         self.cards_blacklist = self.config("cards-blacklist")
         self.videos_files = self.config("videos", True)
         self.videos_previews = self.config("previews", False)
-        self.videos_ytdl = self.videos_files == "ytdl"
-        self.videos = self.videos_files or self.videos_previews
+        self.videos_ytdl = (self.videos_files == "ytdl")
+        self.videos = (self.videos_files or self.videos_previews)
 
         if not self.config("transform", True):
             self._transform_community = \
                 self._transform_tweet = \
                 self._transform_user = util.identity
 
+        self.api = TwitterAPI(self)
         self._cursor = None
         self._user = None
         self._user_obj = None
@@ -74,7 +75,6 @@ class TwitterExtractor(Extractor):
 
     def items(self):
         self.login()
-        self.api = TwitterAPI(self)
         metadata = self.metadata()
         seen_tweets = set() if self.config("unique", True) else None
 
@@ -1021,7 +1021,7 @@ class TwitterListMembersExtractor(TwitterExtractor):
 
     def items(self):
         self.login()
-        return self._users_result(TwitterAPI(self).list_members(self.user))
+        return self._users_result(self.api.list_members(self.user))
 
 
 class TwitterFollowingExtractor(TwitterExtractor):
@@ -1031,7 +1031,6 @@ class TwitterFollowingExtractor(TwitterExtractor):
     example = "https://x.com/USER/following"
 
     def items(self):
-        self.api = TwitterAPI(self)
         self.login()
         return self._users_result(self.api.user_following(self.user))
 
@@ -1043,7 +1042,6 @@ class TwitterFollowersExtractor(TwitterExtractor):
     example = "https://x.com/USER/followers"
 
     def items(self):
-        self.api = TwitterAPI(self)
         self.login()
         return self._users_result(self.api.user_followers(self.user))
 
@@ -1191,13 +1189,11 @@ class TwitterInfoExtractor(TwitterExtractor):
     example = "https://x.com/USER/info"
 
     def items(self):
-        api = TwitterAPI(self)
-
         screen_name = self.user
         if screen_name.startswith("id:"):
-            user = self.cache(api.user_by_rest_id, screen_name[3:])
+            user = self.cache(self.api.user_by_rest_id, screen_name[3:])
         else:
-            user = self.cache(api.user_by_screen_name, screen_name)
+            user = self.cache(self.api.user_by_screen_name, screen_name)
 
         return iter(((Message.Directory, "", self._transform_user(user)),))
 
