@@ -123,6 +123,7 @@ modules = [
     "koofr",
     "leakgallery",
     "lensdump",
+    "lemmy",
     "lexica",
     "lightroom",
     "listal",
