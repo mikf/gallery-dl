@@ -6497,6 +6497,21 @@ Note
     It is possible to use ``"all"`` instead of listing all values separately.
 
 
+extractor.toonily.family-mode
+------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Controls whether adult content is accessible.
+
+    ``true``
+        Enable family mode — adult content is hidden (``toonily-mature`` cookie is not set)
+    ``false``
+        Disable family mode — set ``toonily-mature=1`` to allow adult content
+
+
 extractor.tumblr.avatar
 -----------------------
 Type
@@ -7469,6 +7484,21 @@ Description
     Download the active episode's ``thumbnail``.
 
     Useful for creating CBZ archives with actual source thumbnails.
+
+
+extractor.webtoonxyz.family-mode
+---------------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Controls whether adult content is accessible.
+
+    ``true``
+        Enable family mode — adult content is hidden (``wpmanga-adault`` cookie is not set)
+    ``false``
+        Disable family mode — set ``wpmanga-adault=1`` to allow adult content
 
 
 extractor.weebdex.data-saver

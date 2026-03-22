@@ -1171,6 +1171,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries</td>
     <td></td>
 </tr>
+<tr id="toonily" title="toonily">
+    <td>Toonily</td>
+    <td>https://toonily.com/</td>
+    <td>Chapters, Genres, Home Feed, Manga, Tag Searches</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
+</tr>
 <tr id="toyhouse" title="toyhouse">
     <td>Toyhouse</td>
     <td>https://toyhou.se/</td>
@@ -1284,6 +1290,12 @@ Consider all listed sites to potentially be NSFW.
     <td>https://www.webtoons.com/</td>
     <td>Artists, Comics, Episodes</td>
     <td></td>
+</tr>
+<tr id="webtoonxyz" title="webtoonxyz">
+    <td>Webtoonxyz</td>
+    <td>https://www.webtoon.xyz/</td>
+    <td>Chapters, Home Feed, Manga</td>
+    <td><a href="https://github.com/mikf/gallery-dl#cookies">Cookies</a></td>
 </tr>
 <tr id="weebcentral" title="weebcentral">
     <td>Weeb Central</td>
