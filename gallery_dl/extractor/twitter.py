@@ -155,6 +155,7 @@ class TwitterExtractor(Extractor):
 
         if self.cards and "card" in tweet:
             try:
+                tweet["id_str"] = data["id_str"]
                 self._extract_card(tweet, files)
             except Exception as exc:
                 self.log.traceback(exc)
@@ -216,7 +217,8 @@ class TwitterExtractor(Extractor):
 
             if "video_info" in media:
                 if self.videos_ytdl:
-                    url = f"ytdl:{self.root}/i/web/status/{tweet['id_str']}"
+                    url = (f"ytdl:{self.root}/i/web/status/"
+                           f"{tweet.get('id_str') or tweet['rest_id']}")
                     file = {"url": url, "extension": "mp4"}
                 elif self.videos_files:
                     video_info = media["video_info"]

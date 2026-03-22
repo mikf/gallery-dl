@@ -708,6 +708,29 @@ The Washington Post writes, "Three weeks after the toxic train derailment in Ohi
 },
 
 {
+    "#url"     : "https://x.com/20thCenturyCA/status/2028567281866027316",
+    "#comment" : "card video with ytdl (#9294)",
+    "#class"   : twitter.TwitterTweetExtractor,
+    "#options" : {
+        "cards" : True,
+        "videos": "ytdl",
+    },
+    "#results" : "ytdl:https://x.com/i/web/status/2028567281866027316",
+
+    "content"        : "New game. Fresh blood. Get tickets now for Ready or Not 2: Here I Come. Only in theatres March 20.",
+    "conversation_id": 2028567281866027316,
+    "tweet_id"       : 2028567281866027316,
+    "date"           : "dt:2026-03-02 20:25:03",
+    "description"    : None,
+    "extension"      : "mp4",
+    "width"          : 1080,
+    "height"         : 1350,
+    "lang"           : "en",
+    "source"         : "advertiser-interface",
+    "type"           : "video",
+},
+
+{
     "#url"     : "https://twitter.com/playpokemon/status/1263832915173048321/quotes",
     "#category": ("", "twitter", "quotes"),
     "#class"   : twitter.TwitterQuotesExtractor,
