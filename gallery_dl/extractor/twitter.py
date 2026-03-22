@@ -581,7 +581,6 @@ class TwitterExtractor(Extractor):
         if lget("withheld_scope"):
             self.log.warning("'%s'", lget("description"))
 
-        entities = legacy["entities"]
         self._user_cache[uid] = udata = {
             "id"              : text.parse_int(uid),
             "name"            : core.get("screen_name"),
@@ -611,17 +610,17 @@ class TwitterExtractor(Extractor):
                 "_normal.", ".")
 
         descr = legacy["description"]
-        if urls := entities["description"].get("urls"):
-            for url in urls:
-                try:
-                    descr = descr.replace(url["url"], url["expanded_url"])
-                except KeyError:
-                    pass
+        if entities := legacy.get("entities"):
+            if urls := entities["description"].get("urls"):
+                for url in urls:
+                    try:
+                        descr = descr.replace(url["url"], url["expanded_url"])
+                    except KeyError:
+                        pass
+            if "url" in entities:
+                url = entities["url"]["urls"][0]
+                udata["url"] = url.get("expanded_url") or url.get("url")
         udata["description"] = descr
-
-        if "url" in entities:
-            url = entities["url"]["urls"][0]
-            udata["url"] = url.get("expanded_url") or url.get("url")
 
         if self.config("metadata-user", False) and (about := self.cache(
                 self.api.user_about_account, udata["name"]).get(
