@@ -39,8 +39,11 @@ class SankakuExtractor(BooruExtractor):
         9: "meta",
     }
 
-    def skip_files(self, num):
-        return 0
+    skip_files = None
+
+    def import_blacklist(self):
+        self.api.authenticate()
+        return self.api.users_blacklist()
 
     def _init(self):
         self.api = SankakuAPI(self)
@@ -276,6 +279,28 @@ class SankakuAPI():
     def posts_keyset(self, params):
         return self._pagination("/v2/posts/keyset", params)
 
+    def users_blacklist(self):
+        endpoint = "/users/blacklist"
+        params = {
+            "entity": "tags",
+            "lang"  : "en",
+            "page"  : 1,
+            "limit" : 100,
+        }
+
+        results = []
+        while True:
+            data = self._call(endpoint, params)
+
+            if items := data.get("list"):
+                for result in items:
+                    results.append(" ".join(result["tags"]))
+
+            if len(items) < params["limit"]:
+                break
+            params["page"] += 1
+        return results
+
     def authenticate(self):
         self.headers["Authorization"] = self.extractor.cache(
             self._authenticate_impl, self.username, self.password,
@@ -325,7 +350,9 @@ class SankakuAPI():
                         self._authenticate_impl, self.username)
                     continue
                 try:
-                    code = f"'{code.rpartition('__')[2].replace('-', ' ')}'"
+                    code = code.rpartition(
+                        "__")[2].replace("-", " ").replace("_", " ")
+                    code = f"'{code}'"
                 except Exception:
                     pass
                 raise self.extractor.exc.AbortExtraction(code)
