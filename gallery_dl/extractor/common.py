@@ -8,6 +8,7 @@
 
 """Common classes and constants used by extractor modules."""
 
+import http
 import os
 import re
 import ssl
@@ -18,6 +19,7 @@ import pickle
 import random
 import getpass
 import logging
+import urllib.parse
 import requests
 import threading
 from xml.etree import ElementTree
@@ -171,6 +173,7 @@ class Extractor():
 
         response = challenge = None
         tries = 1
+        byparr = self._byparr
 
         if self._interval_request is not None and interval:
             seconds = (self._interval_request() -
@@ -223,6 +226,12 @@ class Extractor():
                 challenge = util.detect_challenge(response)
                 if challenge is not None:
                     self.log.warning(challenge)
+                    if byparr:
+                        solver_response = self.byparr_request(
+                            method, url, kwargs, session)
+                        byparr = None
+                        if solver_response is not None:
+                            return solver_response
 
                 if code == 429 and self._handle_429(response):
                     continue
@@ -263,6 +272,103 @@ class Extractor():
             exc = exception.ChallengeError(challenge, response)
         self.status |= exc.code
         raise exc
+
+    def byparr_request(self, method, url, kwargs, session):
+        """Use a Byparr instance to solve a challenge page"""
+        if method != "GET":
+            return None
+        if "data" in kwargs or "files" in kwargs or "json" in kwargs:
+            return None
+
+        byparr = self._byparr
+        if byparr is None:
+            return None
+
+        target = self.byparr_target_url(url, kwargs)
+        payload = {
+            "cmd": "request.get",
+            "url": target,
+            "max_timeout": byparr["timeout"],
+        }
+
+        self.log.info("Requesting challenge solution from Byparr")
+        try:
+            response = requests.post(
+                byparr["url"], json=payload, timeout=byparr["timeout"] + 5)
+            response.raise_for_status()
+            data = util.json_loads(response.text)
+            solution = data["solution"]
+        except Exception as exc:
+            self.log.warning("Byparr: %s", exc)
+            return None
+
+        if data.get("status") != "ok":
+            self.log.warning("Byparr: %s", data.get("message"))
+            return None
+
+        status = solution.get("status") or 0
+        if status >= 400:
+            self.log.warning("Byparr: returned HTTP %s for '%s'",
+                             status, target)
+            return None
+
+        self.byparr_update_session(session, solution, target)
+        return self.byparr_response(solution, target, session)
+
+    def byparr_target_url(self, url, kwargs):
+        """Build target URL for a Byparr request"""
+        params = kwargs.get("params")
+        if not params:
+            return url
+        return requests.Request("GET", url, params=params).prepare().url
+
+    def byparr_update_session(self, session, solution, url):
+        """Import cookies and headers returned by Byparr"""
+        user_agent = (solution.get("userAgent") or
+                      solution.get("user_agent"))
+        if user_agent:
+            session.headers["User-Agent"] = user_agent
+
+        set_cookie = session.cookies.set_cookie
+        for cookie in solution.get("cookies", ()):
+            name = cookie.get("name")
+            if not name:
+                continue
+            expires = cookie.get("expires")
+            if expires is not None and expires < 0:
+                expires = None
+            set_cookie(requests.cookies.create_cookie(
+                name=name,
+                value=cookie.get("value") or "",
+                domain=(
+                    cookie.get("domain") or self.cookies_domain or
+                    urllib.parse.urlparse(url).hostname
+                ),
+                path=cookie.get("path") or "/",
+                secure=bool(cookie.get("secure")),
+                expires=expires,
+            ))
+
+    def byparr_response(self, solution, url, session):
+        """Create a synthetic Response from Byparr output"""
+        response = requests.Response()
+        response.status_code = solution.get("status") or 200
+        response.url = solution.get("url") or url
+        response.headers = requests.structures.CaseInsensitiveDict(
+            solution.get("headers") or {})
+        if "Content-Type" not in response.headers:
+            response.headers["Content-Type"] = "text/html; charset=utf-8"
+        response.encoding = (
+            requests.utils.get_encoding_from_headers(response.headers) or
+            "utf-8")
+        response._content = (
+            solution.get("response") or "").encode(response.encoding, "ignore")
+        response.reason = http.HTTPStatus(
+            response.status_code).phrase if response.status_code in (
+                http.HTTPStatus._value2member_map_) else ""
+        response.request = requests.Request("GET", url).prepare()
+        response.cookies = session.cookies
+        return response
 
     def request_location(self, url, **kwargs):
         kwargs.setdefault("method", "HEAD")
@@ -508,6 +614,43 @@ class Extractor():
                            _interval_429, exc.__class__.__name__, exc)
             self._interval_429 = util.build_duration_func_ex(
                 self.request_interval_429)
+
+        self._byparr = None
+        byparr = self.config("byparr")
+        if not byparr:
+            return
+
+        if byparr is True:
+            byparr = {}
+
+        if isinstance(byparr, str):
+            byparr = {"url": byparr}
+        elif not isinstance(byparr, dict):
+            self.log.error(
+                "byparr: Expected 'bool', 'dict', or 'str' value, got '%s' "
+                "instead (%r)",
+                byparr.__class__.__name__, byparr)
+            return
+
+        url = byparr.get("url") or "http://127.0.0.1:8191"
+        if not isinstance(url, str):
+            self.log.error("byparr: Invalid URL value %r", url)
+            return
+        url = url.rstrip("/")
+        if not url.endswith("/v1"):
+            url += "/v1"
+
+        timeout = byparr.get("timeout", 60)
+        try:
+            timeout = int(timeout)
+        except Exception:
+            self.log.error("byparr: Invalid timeout value %r", timeout)
+            return
+
+        self._byparr = {
+            "timeout": timeout,
+            "url": url,
+        }
 
     def _init_session(self):
         self.session = session = requests.Session()
