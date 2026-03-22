@@ -930,4 +930,20 @@ __tests__ = (
     "updated"  : range(1740000000, 2000000000),
 },
 
+{
+    "#url"     : "https://kemono.cr/patreon/user/135834335",
+    "#comment" : "avatar and banner extraction (#9105)",
+    "#category": ("", "kemono", "patreon"),
+    "#class"   : kemono.KemonoUserExtractor,
+    "#options" : {"avatar": True, "banner": True, "max-posts": 1},
+    "#results" : (
+        "https://img.kemono.cr/icons/patreon/135834335",
+        "https://img.kemono.cr/banners/patreon/135834335",
+    ),
+
+    "id"       : {"avatar", "banner", str},
+    "type"     : {"avatar", "banner", str},
+    "filename" : {"avatar", "banner", str},
+},
+
 )
