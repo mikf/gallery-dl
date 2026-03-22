@@ -7,6 +7,7 @@
 # published by the Free Software Foundation.
 
 import sys
+import logging
 from ..text import re_compile
 
 modules = [
@@ -38,6 +39,7 @@ modules = [
     "bilibili",
     "blogger",
     "bluesky",
+    "bodytorium",
     "boosty",
     "booth",
     "bunkr",
@@ -278,6 +280,7 @@ def find(url):
     """Find a suitable extractor for the given URL"""
     for cls in _list_classes():
         if match := cls.pattern.match(url):
+            logger.debug("Matched extractor '%s'", match)
             return cls(match)
     return None
 
@@ -351,3 +354,4 @@ def _get_classes(module):
 
 _cache = []
 _module_iter = _modules_internal()
+logger = logging.getLogger("extractor")
