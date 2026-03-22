@@ -12,6 +12,7 @@ modules = {
     "actions",
     "classify",
     "compare",
+    "decode",
     "directory",
     "exec",
     "hash",

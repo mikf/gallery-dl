@@ -64,6 +64,7 @@ modules = [
     "everia",
     "exhentai",
     "facebook",
+    "fakku",
     "fanbox",
     "fansly",
     "fantia",
