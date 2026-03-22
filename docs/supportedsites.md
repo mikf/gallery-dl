@@ -1171,6 +1171,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Galleries</td>
     <td></td>
 </tr>
+<tr id="toongod" title="toongod">
+    <td>ToonGod</td>
+    <td>https://www.toongod.org/</td>
+    <td>Chapters, Manga</td>
+    <td></td>
+</tr>
 <tr id="toyhouse" title="toyhouse">
     <td>Toyhouse</td>
     <td>https://toyhou.se/</td>

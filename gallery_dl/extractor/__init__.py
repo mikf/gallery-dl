@@ -220,6 +220,7 @@ modules = [
     "thehentaiworld",
     "tiktok",
     "tmohentai",
+    "toongod",
     "toyhouse",
     "tumblr",
     "tumblrgallery",
