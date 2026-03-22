@@ -212,6 +212,29 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.patreon.com/posts/custom-firefox-153639294",
+    "#comment" : "images embedded in 'content' HTML (#9292)",
+    "#class"   : patreon.PatreonPostExtractor,
+    "#pattern" : (
+        r"https://c10.patreonusercontent.com/4/patreon-media/p/post/153639294/650fdcc1d50e4c98b5f3b8c3267c132b/eyJhIjoxLCJwIjoxfQ%3D%3D/3.png\?token-hash=.+",
+        r"https://c10.patreonusercontent.com/4/patreon-media/p/post/153639294/20ce1209c1fb4ea5a91e71136c442804/eyJ3IjoxMDgwfQ%3D%3D/1.png\?token-hash=.+",
+        r"https://c10.patreonusercontent.com/4/patreon-media/p/post/153639294/50d884a877cf4bfbb354f18bff116b05/eyJhIjoxLCJwIjoxfQ%3D%3D/1.png\?token-hash=.+",
+        r"https://c10.patreonusercontent.com/4/patreon-media/p/post/153639294/32876a73840f45d6b8d12b509322e69d/eyJhIjoxLCJwIjoxfQ%3D%3D/1.png\?token-hash=.+",
+        r"https://c10.patreonusercontent.com/4/patreon-media/p/post/153639294/414ab4c2f7e84e8aae9178ae8b3d63f7/eyJhIjoxLCJwIjoxfQ%3D%3D/1.png\?token-hash=.+",
+        r"https://c10.patreonusercontent.com/4/patreon-media/p/post/153639294/3e08481b1b934a278f0e1bd3d00f04bd/eyJhIjoxLCJwIjoxfQ%3D%3D/1.png\?token-hash=.+",
+    ),
+
+    "content"     : """<p>Some alterations of the Firefox v70 icons I quickly threw together with GIMP. I use some of these for different firefox profiles. All 12 are in the mega link.</p><div data-image-container="true" data-alignment="center"><figure><img src="https://c10.patreonusercontent.com/4/patreon-media/p/post/153639294/50d884a877cf4bfbb354f18bff116b05/eyJhIjoxLCJwIjoxfQ%3D%3D/1.png?token-hash=A-VUQUizuMvvM_7ud_QLGQsMb2WIcc5FTlPMdoBMVOM%3D&amp;token-time=1775433600" data-media-id="633162934"/></figure></div><div data-image-container="true" data-alignment="center"><figure><img src="https://c10.patreonusercontent.com/4/patreon-media/p/post/153639294/32876a73840f45d6b8d12b509322e69d/eyJhIjoxLCJwIjoxfQ%3D%3D/1.png?token-hash=Uz64m08aJ8v8vgniQu8Obh0zMCamBXsY9BOraHkyiKk%3D&amp;token-time=1775433600" data-media-id="633163044"/></figure></div><div data-image-container="true" data-alignment="center"><figure><img src="https://c10.patreonusercontent.com/4/patreon-media/p/post/153639294/414ab4c2f7e84e8aae9178ae8b3d63f7/eyJhIjoxLCJwIjoxfQ%3D%3D/1.png?token-hash=viuwgWmmVeqjF2xdxdMOWQPOh43eh7QbrLmZWHsHQmU%3D&amp;token-time=1775433600" data-media-id="633163233"/></figure></div><div data-image-container="true" data-alignment="center"><figure><img src="https://c10.patreonusercontent.com/4/patreon-media/p/post/153639294/3e08481b1b934a278f0e1bd3d00f04bd/eyJhIjoxLCJwIjoxfQ%3D%3D/1.png?token-hash=5JdgNKE3kIqBIc3btNScTux71yjehzux5DTqW6Z8-88%3D&amp;token-time=1775433600" data-media-id="633163319"/></figure></div><p></p>""",
+    "created_at"  : "2026-03-22T07:56:34.000+00:00",
+    "date"        : "dt:2026-03-22 08:46:15",
+    "id"          : 153639294,
+    "published_at": "2026-03-22T08:46:15.000+00:00",
+    "tags"        : ["firefox custom logo icon"],
+    "title"       : "Custom Firefox icons",
+    "url"         : "https://www.patreon.com/posts/custom-firefox-153639294",
+},
+
+{
     "#url"     : "https://www.patreon.com/collection/15764",
     "#class"   : patreon.PatreonCollectionExtractor,
     "#range"   : "1-3",
