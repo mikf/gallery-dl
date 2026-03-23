@@ -335,8 +335,8 @@ class InstagramExtractor(Extractor):
 
         if "music_metadata" in post:
             try:
-                audio = \
-                    post["music_metadata"]["music_info"]["music_asset_info"]
+                info = post["music_metadata"]["music_info"]
+                audio = info["music_asset_info"]
                 files.append({
                     "num"        : num,
                     "date"       : self.parse_timestamp(post.get("taken_at")),
@@ -349,6 +349,15 @@ class InstagramExtractor(Extractor):
                     "height"         : 0,
                     "height_original": 0,
                 })
+                data["audio_title"] = audio.get("title")
+                data["audio_duration"] = audio.get("duration_in_ms", 0) / 1000
+                data["audio_timestamps"] = audio.get(
+                    "highlight_start_times_in_ms")
+                if info := info.get("music_consumption_info"):
+                    data["audio_artist"] = (info.get("ig_artist") or
+                                            audio.get("display_artist"))
+                else:
+                    data["audio_artist"] = audio.get("display_artist")
             except Exception as exc:
                 self.log.traceback(exc)
 
