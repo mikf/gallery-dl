@@ -35,6 +35,8 @@ __tests__ = (
     "parody"       : ["Kantai Collection"],
     "rating"       : range(3, 4),
     "status"       : "Completed",
+    "title"        : "Amerikan Bikini Car Wash",
+    "title_slug"   : "amerikan-bikini-car-wash",
     "type"         : "Hentai",
     "votes"        : range(60, 200),
     "characters"   : [
@@ -85,6 +87,8 @@ __tests__ = (
     "parody"       : [],
     "rating"       : float,
     "status"       : "OnGoing",
+    "title"        : "Tina Bonus Images",
+    "title_slug"   : "tina-bonus-images",
     "type"         : "3D",
     "path"         : [
         "Trick Or Treat [Pegasus Smith]",
@@ -115,12 +119,6 @@ __tests__ = (
 
 {
     "#url"     : "https://allporncomic.com/porncomic/artworks-crisisbeat/crisisbeat-vampire-vs-goth/",
-    "#comment" : "",
-    "#class"   : allporncomic.AllporncomicChapterExtractor,
-},
-
-{
-    "#url"     : "https://allporncomic.com/porncomic/artworks-crisisbeat/crisisbeat-vampire-vs-goth/",
     "#comment" : "missing chapter number",
     "#class"   : allporncomic.AllporncomicChapterExtractor,
     "#pattern" : r"https://allporncomic\.com/wp\-content/uploads/WP\-manga/data/manga_610296e0c5918/e7b766aa30d32cc736bf46d8febb6610/\w+\.jpg",
@@ -136,6 +134,8 @@ __tests__ = (
     "manga_slug"   : "artworks-crisisbeat",
     "status"       : "Completed",
     "type"         : "3D",
+    "title"        : "Vampire vs. Goth",
+    "title_slug"   : "crisisbeat-vampire-vs-goth",
     "artist"       : ["Crisisbeat"],
     "path"         : [
         "Artworks [Crisisbeat]",
@@ -145,6 +145,35 @@ __tests__ = (
         "3D",
         "Animated",
         "Cartoon",
+    ],
+},
+
+{
+    "#url"     : "https://allporncomic.com/porncomic/gisela-blackadderc/6-5-gisela-gisela-vladimir-extras/",
+    "#class"   : allporncomic.AllporncomicChapterExtractor,
+    "#count"   : 41,
+
+    "artist"       : ["Blackadder"],
+    "chapter"      : 6,
+    "chapter_minor": ".5",
+    "chapter_id"   : 5069,
+    "manga_id"     : 4612,
+    "manga"        : "Gisela",
+    "manga_slug"   : "gisela-blackadderc",
+    "title"        : "Gisela - Gisela + Vladimir Extras",
+    "title_slug"   : "gisela-gisela-vladimir-extras",
+    "path"         : [
+        "Gisela [Blackadder]",
+        "6.5 . Gisela - Gisela + Vladimir Extras - Chapter 6 Extras [Blackadder]",
+    ],
+    "tags"         : [
+        "3D",
+        "Alien",
+        "Anal",
+        "Big Breasts",
+        "Monster",
+        "Sole Female",
+        "Vampire",
     ],
 },
 
