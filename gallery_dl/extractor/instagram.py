@@ -68,6 +68,7 @@ class InstagramExtractor(Extractor):
             videos_headers = {"User-Agent": "Mozilla/5.0"}
         else:
             self.videos_dash = False
+        audio = self.config("audio", False)
         previews = self.config("previews", False)
         max_posts = self.config("max-posts")
 
@@ -98,7 +99,15 @@ class InstagramExtractor(Extractor):
             for file in files:
                 file = {**post, **file}
 
-                if url := file.get("video_url"):
+                if audio and (url := file.get("audio_url")):
+                    file["_http_headers"] = videos_headers
+                    text.nameext_from_url(url, file)
+                    yield Message.Url, url, file
+                    if previews:
+                        file["media_id"] += "p"
+                    else:
+                        continue
+                elif url := file.get("video_url"):
                     if videos:
                         file["_http_headers"] = videos_headers
                         text.nameext_from_url(url, file)
@@ -323,6 +332,25 @@ class InstagramExtractor(Extractor):
 
             self._extract_tagged_users(item, media)
             files.append(media)
+
+        if "music_metadata" in post:
+            try:
+                audio = \
+                    post["music_metadata"]["music_info"]["music_asset_info"]
+                files.append({
+                    "num"        : num,
+                    "date"       : self.parse_timestamp(post.get("taken_at")),
+                    "media_id"   : audio["id"],
+                    "shortcode"  : shortcode_from_id(audio["id"]),
+                    "display_url": audio["cover_artwork_uri"],
+                    "audio_url"  : audio["progressive_download_url"],
+                    "width"          : 0,
+                    "width_original" : 0,
+                    "height"         : 0,
+                    "height_original": 0,
+                })
+            except Exception as exc:
+                self.log.traceback(exc)
 
         if "subscription_media_visibility" in post:
             data["subscription"] = post["subscription_media_visibility"]

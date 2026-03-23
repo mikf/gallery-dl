@@ -3917,6 +3917,16 @@ Description
         GraphQL API - lower-resolution media
 
 
+extractor.instagram.audio
+-------------------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Download background music files.
+
+
 extractor.instagram.cursor
 --------------------------
 Type
@@ -4033,7 +4043,7 @@ Type
 Default
     ``false``
 Description
-    Download video previews.
+    Download video previews and audio covers.
 
 
 extractor.instagram.static-videos
