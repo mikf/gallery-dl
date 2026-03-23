@@ -194,6 +194,7 @@ modules = [
     "s3ndpics",
     "sankaku",
     "sankakucomplex",
+    "scatbooru",
     "schalenetwork",
     "scrolller",
     "seiga",
