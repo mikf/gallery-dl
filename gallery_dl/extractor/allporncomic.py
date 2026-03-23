@@ -63,7 +63,7 @@ class AllporncomicBase():
 
 class AllporncomicChapterExtractor(AllporncomicBase, ChapterExtractor):
     """Extractor for allporncomic manga chapters"""
-    directory_fmt = ("{category}", "{path:I}")
+    directory_fmt = ("{category}", "{path[:-1]:I}", "{title}")
     filename_fmt = "{page:>03}.{extension}"
     archive_fmt = "{manga_id}_{chapter_id}_{page}"
     pattern = (BASE_PATTERN +
@@ -81,10 +81,18 @@ class AllporncomicChapterExtractor(AllporncomicBase, ChapterExtractor):
         else:
             chapter, sep, minor = chapter.partition("-")
 
+        path = text.split_html(text.extr(
+            page, '<ol class="breadcrumb', '</ol>'))
+        title = text.re(
+            r"^(?:\s*\d+(?:\.\d+)?\s*\.|\[[^\]]+\])"
+            r"\s*(.+?)(?:\s+-)?(?:\s+[Cc]hapter \d+(?:\s+[Ee]xtras)?)?"
+            r"(?:\s+\([^)]+\))?(?:\s+\[[^\]]+\])?\s*$").sub("\\1", path[-1])
+
         return {
             **self.cache(self._manga_info, manga_slug),
-            "path"         : text.split_html(text.extr(
-                page, '<ol class="breadcrumb', '</ol>'))[3:],
+            "path"         : path[3:],
+            "title"        : title,
+            "title_slug"   : title_slug.lstrip("-"),
             "chapter"      : text.parse_int(chapter),
             "chapter_id"   : text.parse_int(text.extr(
                 page, 'manga_chapter_id" value="', '"')),
