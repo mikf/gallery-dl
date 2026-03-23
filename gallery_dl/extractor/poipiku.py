@@ -69,6 +69,7 @@ class PoipikuExtractor(Extractor):
                     'class="IllustItemDesc" >', '</h1>')),
                 "warning"    : False,
                 "password"   : False,
+                "password_used": None,
                 "requires"   : None,
                 "original"   : logged_in,
                 "_http_headers": {"Referer": post_url},
@@ -80,6 +81,9 @@ class PoipikuExtractor(Extractor):
             if post["requires"] and not post["password"] and extr(
                     "PasswordIcon", ">"):
                 post["password"] = True
+
+            if self.password:
+                post["password_used"] = self.password
 
             yield Message.Directory, "", post
             for post["num"], url in enumerate(extract_files(
