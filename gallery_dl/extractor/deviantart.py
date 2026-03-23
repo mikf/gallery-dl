@@ -1781,20 +1781,6 @@ class DeviantartEclipseAPI():
         params = {"username": user}
         return self._call(endpoint, params)
 
-    def user_watching(self, user, offset=0):
-        gruserid, moduleid = self._ids_watching(user)
-
-        endpoint = "/_puppy/gruser/module/watching"
-        params = {
-            "gruserid"     : gruserid,
-            "gruser_typeid": "4",
-            "username"     : user,
-            "moduleid"     : moduleid,
-            "offset"       : offset,
-            "limit"        : 24,
-        }
-        return self._pagination(endpoint, params)
-
     def _call(self, endpoint, params):
         url = "https://www.deviantart.com" + endpoint
         params["csrf_token"] = self.csrf_token or self._fetch_csrf_token()
@@ -1837,20 +1823,6 @@ class DeviantartEclipseAPI():
                 return
             else:
                 params["offset"] = int(params["offset"]) + len(results)
-
-    def _ids_watching(self, user):
-        url = f"{self.extractor.root}/{user}/about"
-        page = self.request(url).text
-
-        gruser_id = text.extr(page, ' data-userid="', '"')
-
-        pos = page.find('\\"name\\":\\"watching\\"')
-        if pos < 0:
-            raise self.extractor.exc.NotFoundError("'watching' module ID")
-        module_id = text.rextr(page, '\\"id\\":', ',', pos).strip('" ')
-
-        self._fetch_csrf_token(page)
-        return gruser_id, module_id
 
     def _fetch_csrf_token(self, page=None):
         if page is None:
