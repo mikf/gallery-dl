@@ -589,7 +589,7 @@ class RedditAPI():
                 post = child["data"]
 
                 if (date_min <= post["created_utc"] <= date_max and
-                        id_min <= self._decode(post["id"]) <= id_max):
+                        id_min <= util.b36decode(post["id"]) <= id_max):
 
                     if kind == "t3":
                         if post["num_comments"] and self.comments:
@@ -625,10 +625,8 @@ class RedditAPI():
 
     def _parse_id(self, key, default):
         sid = self.extractor.config(key)
-        return self._decode(sid.rpartition("_")[2].lower()) if sid else default
-
-    def _decode(self, sid):
-        return util.bdecode(sid, "0123456789abcdefghijklmnopqrstuvwxyz")
+        return util.b36decode(
+            sid.rpartition("_")[2].lower()) if sid else default
 
 
 def _refresh_token_cache(token):
