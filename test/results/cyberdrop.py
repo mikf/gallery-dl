@@ -102,4 +102,10 @@ __tests__ = (
     "#class"   : cyberdrop.CyberdropMediaExtractor,
 },
 
+{
+    "#url"     : "https://cyberdrop.me/e/lHYBt9VAluZf6",
+    "#category": ("lolisafe", "cyberdrop", "media"),
+    "#class"   : cyberdrop.CyberdropMediaExtractor,
+},
+
 )
