@@ -1033,6 +1033,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Articles, Tag Searches</td>
     <td></td>
 </tr>
+<tr id="scatbooru" title="scatbooru">
+    <td>Scatbooru</td>
+    <td>https://scatbooru.co.uk/</td>
+    <td>Favorites, Posts, Tag Searches</td>
+    <td></td>
+</tr>
 <tr id="schalenetwork" title="schalenetwork">
     <td>Schale Network</td>
     <td>https://niyaniya.moe/</td>
