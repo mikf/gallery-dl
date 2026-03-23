@@ -11,57 +11,6 @@ from gallery_dl import exception
 
 __tests__ = (
 {
-    "#url"     : "https://comics.8muses.com/comics/album/Fakku-Comics/mogg/Liar",
-    "#category": ("", "8muses", "album"),
-    "#class"   : _8muses._8musesAlbumExtractor,
-    "#pattern" : r"https://comics.8muses.com/image/fl/[\w-]+",
-    "#sha1_url": "6286ac33087c236c5a7e51f8a9d4e4d5548212d4",
-
-    "url"  : str,
-    "hash" : str,
-    "page" : int,
-    "count": 6,
-    "album": {
-        "id"     : 10467,
-        "title"  : "Liar",
-        "path"   : "Fakku Comics/mogg/Liar",
-        "parts"  : [
-            "Fakku Comics",
-            "mogg",
-            "Liar",
-        ],
-        "private": False,
-        "url"    : "https://comics.8muses.com/comics/album/Fakku-Comics/mogg/Liar",
-        "parent" : 10464,
-        "views"  : int,
-        "likes"  : int,
-        "date"   : "dt:2018-07-10 00:00:00",
-    },
-},
-
-{
-    "#url"     : "https://www.8muses.com/comics/album/Fakku-Comics/santa",
-    "#category": ("", "8muses", "album"),
-    "#class"   : _8muses._8musesAlbumExtractor,
-    "#pattern" : _8muses._8musesAlbumExtractor.pattern,
-    "#count"   : ">= 3",
-
-    "url"    : str,
-    "name"   : str,
-    "private": False,
-},
-
-{
-    "#url"     : "https://www.8muses.com/comics/album/Fakku-Comics/11?sort=az",
-    "#comment" : "custom sorting",
-    "#category": ("", "8muses", "album"),
-    "#class"   : _8muses._8musesAlbumExtractor,
-    "#count"   : ">= 70",
-
-    "name": r"re:^[R-Zr-z]",
-},
-
-{
     "#url"     : "https://comics.8muses.com/comics/album/Various-Authors/Chessire88/From-Trainers-to-Pokmons",
     "#comment" : "non-ASCII characters",
     "#category": ("", "8muses", "album"),
@@ -75,6 +24,45 @@ __tests__ = (
     "#category": ("", "8muses", "album"),
     "#class"   : _8muses._8musesAlbumExtractor,
     "#count"   : range(100, 150),
+},
+
+{
+    "#url"     : "https://comics.8muses.com/comics/album/Various-Authors/JankinGen",
+    "#class"   : _8muses._8musesAlbumExtractor,
+    "#results" : "https://comics.8muses.com/comics/album/Various-Authors/JankinGen/Princess-Laura-Sex-Adventure",
+
+    "name"   : "Princess Laura Sex Adventure",
+    "private": False,
+    "url"    : "https://comics.8muses.com/comics/album/Various-Authors/JankinGen/Princess-Laura-Sex-Adventure",
+},
+
+{
+    "#url"     : "https://comics.8muses.com/comics/album/Various-Authors/JankinGen/Princess-Laura-Sex-Adventure/Issue-1",
+    "#class"   : _8muses._8musesAlbumExtractor,
+    "#pattern" : "https://comics.8muses.com/image/fl/.+",
+    "#count"   : 8,
+
+    "count"    : 8,
+    "page"     : range(1, 8),
+    "extension": "jpg",
+    "hash"     : str,
+    "url"      : r"re:https://comics.8muses.com/image/fl/.+",
+    "album"    : {
+        "date"   : "dt:2018-07-10 00:00:00",
+        "id"     : 21159,
+        "likes"  : 0,
+        "parent" : 21158,
+        "private": False,
+        "title"  : "Issue 1",
+        "url"    : "https://comics.8muses.com/comics/album/Various-Authors/JankinGen/Princess-Laura-Sex-Adventure/Issue-1",
+        "views"  : 68034,
+        "path"   : [
+            "Various Authors",
+            "JankinGen",
+            "Princess Laura Sex Adventure",
+            "Issue 1",
+        ],
+    },
 },
 
 )

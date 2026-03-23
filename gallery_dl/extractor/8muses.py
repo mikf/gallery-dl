@@ -16,7 +16,7 @@ class _8musesAlbumExtractor(Extractor):
     """Extractor for image albums on comics.8muses.com"""
     category = "8muses"
     subcategory = "album"
-    directory_fmt = ("{category}", "{album[path]}")
+    directory_fmt = ("{category}", "{album[path]:I}")
     filename_fmt = "{page:>03}.{extension}"
     archive_fmt = "{hash}"
     root = "https://comics.8muses.com"
@@ -77,8 +77,7 @@ class _8musesAlbumExtractor(Extractor):
     def _make_album(self, album):
         return {
             "id"     : album["id"],
-            "path"   : album["path"],
-            "parts"  : album["path"].split("/"),
+            "path"   : album["path"].split("/"),
             "title"  : album["name"],
             "private": album["isPrivate"],
             "url"    : self.root + "/comics/album/" + album["permalink"],
