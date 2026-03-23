@@ -76,7 +76,7 @@ class CyberdropMediaExtractor(CyberdropAlbumExtractor):
     """Extractor for cyberdrop media links"""
     subcategory = "media"
     directory_fmt = ("{category}",)
-    pattern = BASE_PATTERN + r"/f/([^/?#]+)"
+    pattern = BASE_PATTERN + r"/[ef]/([^/?#]+)"
     example = "https://cyberdrop.cr/f/ID"
 
     def fetch_album(self, album_id):
