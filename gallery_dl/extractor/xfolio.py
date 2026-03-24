@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2025 Mike Fährmann
+# Copyright 2025-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -86,22 +86,35 @@ class XfolioWorkExtractor(XfolioExtractor):
         work_id = work["work_id"]
         for img in text.extract_iter(
                 html, 'class="article__wrap_img', "</div>"):
-            image_id = text.extr(img, "/fullscale_image?image_id=", "&")
-            if not image_id:
-                self.log.warning(
-                    "%s: 'fullscale_image' not available", work_id)
+            if image_id := text.extr(img, "/fullscale_image?image_id=", "&"):
+                ext = "jpg"
+                url = (f"{self.root}/user_asset.php?id={image_id}"
+                       f"&work_id={work_id}&work_image_id={image_id}"
+                       f"&type=work_image")
+                headers = {"Referer": (
+                    f"{self.root}/fullscale_image"
+                    f"?image_id={image_id}&work_id={work_id}")},
+            elif url := text.extr(img, ' src="', '"'):
+                image_id = url.split("/", 5)[-2]
+                url = text.unescape(url)
+                ext = text.ext_from_url(url)
+                headers = {
+                    "Referer"       : self.root + "/",
+                    "Sec-Fetch-Dest": "image",
+                    "Sec-Fetch-Mode": "no-cors",
+                    "Sec-Fetch-Site": "same-site",
+                }
+            else:
+                self.log.debug(html)
+                self.log.warning("%s: Failed to find image", work_id)
                 continue
 
             files.append({
                 "image_id" : image_id,
-                "extension": "jpg",
-                "url": (f"{self.root}/user_asset.php?id={image_id}&work_id="
-                        f"{work_id}&work_image_id={image_id}&type=work_image"),
-                "_http_headers": {"Referer": (
-                    f"{self.root}/fullscale_image"
-                    f"?image_id={image_id}&work_id={work_id}")},
+                "url"      : url,
+                "extension": ext,
+                "_http_headers": headers,
             })
-
         return files
 
 
