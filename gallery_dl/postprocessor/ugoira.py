@@ -37,9 +37,9 @@ class UgoiraPP(PostProcessor):
         self.metadata = options.get("metadata", True)
         self.mtime = options.get("mtime", True)
         self.mkvm_args = options.get("mkvmerge-args") or ()
+        self.mkvm_mtime = options.get("mkvmerge-mtime", False)
         self.mkvm_output = options.get("mkvmerge-output", False)
         self.mkvm_metadata = options.get("mkvmerge-metadata", True)
-        self.mkvm_mtime = options.get("mkvmerge-mtime", True)
         self.skip = options.get("skip", True)
         self.uniform = self._convert_zip = self._convert_files = False
 

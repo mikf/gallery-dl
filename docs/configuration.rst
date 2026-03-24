@@ -9723,10 +9723,12 @@ ugoira.mkvmerge-mtime
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
     Set the `date` segment information field
     of files processed with ``mkvmerge``.
+Note:
+    Requires ``mkvmerge`` version 95.0 or higher
 
 
 ugoira.mkvmerge-output
