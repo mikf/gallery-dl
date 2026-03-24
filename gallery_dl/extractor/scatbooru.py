@@ -23,13 +23,14 @@ class ScatbooruExtractor(gelbooru_v01.GelbooruV01Extractor):
         url = f"{self.root}/?page=post&s=view&id={post_id}"
         extr = text.extract_from(self.request(url).text)
 
-        post = {
+        return {
             "id"        : post_id,
             "width"     : extr('>Size:&nbsp;', 'x'),
             "height"    : extr('', ' ('),
             "size"      : extr('', ')'),
             "rating"    : (extr('>Rating:&nbsp;', '<') or "?")[0].lower(),
-            "source"    : text.extr(extr('>Source:&nbsp;', '>'), 'ref="', '"'),
+            "source"    : extr('>Source:&nbsp;<a href="', '"'),
+            "md5"       : extr('&tags=md5%3a', '"'),
             "score"     : extr('<a id="psc', '<').rpartition(">")[2],
             "file_url"  : extr('<img alt="img" src="', '"'),
             "date"      : self.parse_datetime_iso(extr('>Posted on ', ' by ')),
@@ -37,10 +38,6 @@ class ScatbooruExtractor(gelbooru_v01.GelbooruV01Extractor):
             "tags"      : text.unescape(extr(
                 'id="tags" name="tags" cols="40" rows="5">', '<')),
         }
-
-        url = post["file_url"]
-        post["md5"] = url[url.rfind("/")+1:url.rfind(".")]
-        return post
 
 
 class ScatbooruTagExtractor(ScatbooruExtractor):
