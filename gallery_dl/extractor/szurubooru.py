@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2023-2025 Mike Fährmann
+# Copyright 2023-2026 Mike Fährmann
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -9,10 +9,8 @@
 """Extractors for szurubooru instances"""
 
 from . import booru
-from .. import text
-
+from .. import text, util
 import collections
-import binascii
 
 
 class SzurubooruExtractor(booru.BooruExtractor):
@@ -27,13 +25,12 @@ class SzurubooruExtractor(booru.BooruExtractor):
         }
 
         if username := self.config("username"):
-            if token := self.config("token"):
-                value = username + ":" + token
-                self.headers["Authorization"] = "Token " + \
-                    binascii.b2a_base64(value.encode())[:-1].decode()
+            self.log.debug("Using HTTP Basic Auth for account '%s'", username)
+            self.session.auth = util.HTTPBasicAuth(
+                username, self.config("token"), b"Token")
 
     def _api_request(self, endpoint, params=None):
-        url = self.root + "/api" + endpoint
+        url = f"{self.root}/api{endpoint}"
         return self.request_json(url, headers=self.headers, params=params)
 
     def _pagination(self, endpoint, params):
@@ -53,7 +50,7 @@ class SzurubooruExtractor(booru.BooruExtractor):
     def _file_url(self, post):
         url = post["contentUrl"]
         if not url.startswith("http"):
-            url = self.root + "/" + url
+            url = f"{self.root}/{url}"
         return url
 
     def _prepare(self, post):
@@ -96,12 +93,9 @@ class SzurubooruTagExtractor(SzurubooruExtractor):
     pattern = BASE_PATTERN + r"/posts(?:/query=([^/?#]*))?"
     example = "https://booru.bcbnsfw.space/posts/query=TAG"
 
-    def __init__(self, match):
-        SzurubooruExtractor.__init__(self, match)
+    def metadata(self):
         query = self.groups[-1]
         self.query = text.unquote(query.replace("+", " ")) if query else ""
-
-    def metadata(self):
         return {"search_tags": self.query}
 
     def posts(self):
