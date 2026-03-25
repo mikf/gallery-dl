@@ -24,7 +24,7 @@ class NewgroundsExtractor(Extractor):
     archive_fmt = "{_type}{_index}"
     root = "https://www.newgrounds.com"
     cookies_domain = ".newgrounds.com"
-    cookies_names = ("NG_GG_username", "vmk1du5I8m")
+    cookies_names = ("ng_session",)
     request_interval = (0.5, 1.5)
 
     def __init__(self, match):
@@ -111,7 +111,7 @@ class NewgroundsExtractor(Extractor):
     def _login_impl(self, username, password):
         self.log.info("Logging in as %s", username)
 
-        url = self.root + "/passport"
+        url = self.root + "/login"
         response = self.request(url)
         if response.history and response.url.endswith("/social"):
             return self.cookies
@@ -124,38 +124,18 @@ class NewgroundsExtractor(Extractor):
             "Origin": self.root,
             "Referer": url,
         }
-        url = text.urljoin(self.root, text.extr(page, 'action="', '"'))
         data = {
-            "auth"    : text.extr(page, 'name="auth" value="', '"'),
+            "_token"  : text.extr(page, 'name="_token" value="', '"'),
             "remember": "1",
-            "username": username,
+            "identity": username,
             "password": str(password),
-            "code"    : "",
-            "codehint": "------",
-            "mfaCheck": "1",
         }
 
-        while True:
+        try:
             response = self.request(
                 url, method="POST", headers=headers, data=data)
-            result = response.json()
-
-            if result.get("success"):
-                break
-            if "errors" in result:
-                raise self.exc.AuthenticationError(
-                    '"' + '", "'.join(result["errors"]) + '"')
-
-            if result.get("requiresMfa"):
-                data["code"] = self.input("Verification Code: ")
-                data["codehint"] = "      "
-            elif result.get("requiresEmailMfa"):
-                email = result.get("obfuscatedEmail")
-                prompt = f"Email Verification Code ({email}): "
-                data["code"] = self.input(prompt)
-                data["codehint"] = "      "
-
-            data.pop("mfaCheck", None)
+        except Exception:
+            raise self.exc.AuthenticationError()
 
         return {
             cookie.name: cookie.value
