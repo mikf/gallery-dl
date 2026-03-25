@@ -7716,6 +7716,17 @@ Description
     Extract files from quoted content.
 
 
+extractor.xfolio.fullsize
+-------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Download posts' files as `Full Size Download` ZIP container
+    if available and purchased.
+
+
 extractor.ytdl.cmdline-args
 ---------------------------
 Type
