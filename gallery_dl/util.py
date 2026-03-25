@@ -531,8 +531,8 @@ CODES = {
 }
 
 
-def HTTPBasicAuth(username, password):
-    authorization = b"Basic " + binascii.b2a_base64(
+def HTTPBasicAuth(username, password, type=b"Basic"):
+    authorization = type + b" " + binascii.b2a_base64(
         f"{username}:{password}".encode("latin1"), newline=False)
     del username, password
 

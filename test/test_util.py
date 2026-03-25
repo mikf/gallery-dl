@@ -1238,6 +1238,11 @@ value = 123
         self.assertEqual(request.headers["Authorization"],
                          b"Basic Og==")
 
+        auth = f("", "", b"Token")
+        auth(request)
+        self.assertEqual(request.headers["Authorization"],
+                         b"Token Og==")
+
         f("foo", "bar")(request)
         self.assertEqual(request.headers["Authorization"],
                          b"Basic Zm9vOmJhcg==")
