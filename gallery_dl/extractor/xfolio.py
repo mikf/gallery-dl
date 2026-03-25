@@ -26,8 +26,11 @@ class XfolioExtractor(Extractor):
 
     def _init(self):
         XfolioExtractor._init = Extractor._init
-        if not self.cookies_check(("xfolio_session",)):
+        if self.cookies_check(("xfolio_session",)):
+            self._logged_in = True
+        else:
             self.log.error("'xfolio_session' cookie required")
+            self._logged_in = False
 
     def items(self):
         data = {"_extractor": XfolioWorkExtractor}
@@ -81,9 +84,19 @@ class XfolioWorkExtractor(XfolioExtractor):
         }
 
     def _extract_files(self, html, work):
-        files = []
-
         work_id = work["work_id"]
+
+        if self._logged_in and self.config("fullsize", True) and \
+                (pos := html.find("-fullscale_download_")) >= 0 and \
+                text.extract(html, 'data-is-purchased="', '"', pos)[0] == "1":
+            return ({
+                "url": (f"{self.root}/user_asset.php"
+                        f"?id={work_id}&type=work_zip"),
+                "extension": "zip",
+                "image_id" : 0,
+            },)
+
+        files = []
         for img in text.extract_iter(
                 html, 'class="article__wrap_img', "</div>"):
             if image_id := text.extr(img, "/fullscale_image?image_id=", "&"):

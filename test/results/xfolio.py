@@ -65,6 +65,23 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://xfolio.jp/en/portfolio/solanokoart/works/190895",
+    "#comment" : "'fullsize' zip archive",
+    "#class"   : xfolio.XfolioWorkExtractor,
+    "#auth"    : True,
+    "#results" : "https://xfolio.jp/user_asset.php?id=190895&type=work_zip",
+
+    "creator_id"     : "15773",
+    "creator_name"   : "solanoko",
+    "creator_userid" : "30248",
+    "description"    : "過去に公開済みの作品。",
+    "extension"      : "zip",
+    "image_id"       : 0,
+    "title"          : "The Jorts Incident",
+    "work_id"        : "190895",
+},
+
+{
     "#url"     : "https://xfolio.jp/portfolio/yutakashii",
     "#class"   : xfolio.XfolioUserExtractor,
     "#pattern" : xfolio.XfolioWorkExtractor.pattern,
