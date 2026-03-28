@@ -146,7 +146,7 @@ def filename_from_contentdisposition(cd):
         try:
             encoding, _, value = value.split("'", 2)
             return unquote(value, encoding, "replace")
-        except Exception as exc:
+        except Exception:
             pass
 
     if (pos := cd.find("filename=")) >= 0:

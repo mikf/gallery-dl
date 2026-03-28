@@ -325,7 +325,7 @@ def extract_headers(response):
     data = dict(headers)
 
     if hcd := headers.get("content-disposition"):
-        if name := text.filename_from_contentdisposition(cd):
+        if name := text.filename_from_contentdisposition(hcd):
             text.nameext_from_name(name, data)
 
     if hlm := headers.get("last-modified"):
