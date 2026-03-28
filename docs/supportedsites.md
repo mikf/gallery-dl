@@ -817,6 +817,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums</td>
     <td></td>
 </tr>
+<tr id="nudebird" title="nudebird">
+    <td>Nudebird</td>
+    <td>https://nudebird.biz/</td>
+    <td>Categories, Popular Images, Posts, Search Results, Tag Searches</td>
+    <td></td>
+</tr>
 <tr id="nudostar" title="nudostar">
     <td>NudoStar.TV</td>
     <td>https://nudostar.tv/</td>
