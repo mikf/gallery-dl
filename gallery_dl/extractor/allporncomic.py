@@ -103,7 +103,9 @@ class AllporncomicChapterExtractor(AllporncomicBase, ChapterExtractor):
         return [
             (url.strip(), None)
             for url in text.extract_iter(page, ' data-src="', '"')
-        ]
+        ] or (
+            ((text.extr(page, '<source src="', '"'), None),)
+        )
 
 
 class AllporncomicMangaExtractor(AllporncomicBase, MangaExtractor):

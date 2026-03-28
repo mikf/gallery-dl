@@ -178,6 +178,36 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://allporncomic.com/porncomic/the-snake-and-the-sword-video-sleepy-gimp/xmas-2023/",
+    "#comment" : "video",
+    "#class"   : allporncomic.AllporncomicChapterExtractor,
+    "#results" : "https://vidcdn.allporncomic.com/sleepychristmas.mp4",
+
+    "artist"       : ["Sleepy Gimp"],
+    "chapter"      : 0,
+    "chapter_id"   : 32426,
+    "description"  : "Videos by Sleepy Gimp.",
+    "extension"    : "mp4",
+    "filename"     : "sleepychristmas",
+    "manga"        : "VIDEOS",
+    "manga_date"   : "dt:2020-04-17 18:49:16",
+    "manga_id"     : 13976,
+    "manga_slug"   : "the-snake-and-the-sword-video-sleepy-gimp",
+    "status"       : "Completed",
+    "title"        : "Xmas 2023 - [Sleepy Gimp]",
+    "title_slug"   : "xmas-2023",
+    "type"         : "Western",
+    "path"         : [
+        "VIDEOS [Sleepy Gimp]",
+        "Xmas 2023 - [Sleepy Gimp]",
+    ],
+    "tags"         : [
+        "Video",
+        "Western",
+    ],
+},
+
+{
     "#url"     : "https://allporncomic.com/porncomic/amerikan-bikini-car-wash-kantai-collection-kancolle-kekocha/",
     "#class"   : allporncomic.AllporncomicMangaExtractor,
     "#results" : "https://allporncomic.com/porncomic/amerikan-bikini-car-wash-kantai-collection-kancolle-kekocha/1-amerikan-bikini-car-wash/",
