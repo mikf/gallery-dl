@@ -4523,6 +4523,14 @@ Description
     ``false``
         Download shared `/links/` with multiple files as a single `.zip` file.
 
+extractor.[lemmy].comments
+----------------------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Fetch media from comments.
 
 extractor.lolisafe.domain
 -------------------------
