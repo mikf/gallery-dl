@@ -1002,6 +1002,51 @@ Note
     browser would use HTTP/2 and HTTP/3.
 
 
+extractor.*.byparr
+------------------
+Type
+    * ``bool``
+    * ``string``
+    * ``object``
+Example
+    * ``true``
+    * ``"http://127.0.0.1:8191"``
+    * .. code:: json
+
+        {
+            "url": "http://127.0.0.1:8191/v1",
+            "timeout": 90
+        }
+
+Description
+    Use a `Byparr <https://github.com/ThePhaseless/Byparr>`__
+    instance to solve Cloudflare or DDoS-Guard challenge pages for
+    extractor requests.
+
+    When enabled, gallery-dl will send plain ``GET`` page requests that
+    hit a detected challenge page to Byparr's ``/v1`` endpoint, import
+    the returned cookies into the current session, and use the solved
+    HTML response directly.
+
+    Setting this option to ``true`` uses
+    ``http://127.0.0.1:8191/v1``.
+
+    | If this is a ``string``, it is interpreted as the Byparr server URL.
+    | If the URL does not end with ``/v1``, it will be appended
+      automatically.
+
+    | If this is an ``object``, the following keys are supported:
+
+    * ``url``:
+      Byparr server URL (default: ``http://127.0.0.1:8191/v1``)
+    * ``timeout``:
+      Maximum challenge-solving time in seconds sent as Byparr's
+      ``max_timeout`` value (default: ``60``)
+
+Note
+    This only applies to plain ``GET`` page requests.
+
+
 extractor.*.referer
 -------------------
 Type
