@@ -250,8 +250,8 @@ class PatreonExtractor(Extractor):
     def _filename(self, url):
         """Fetch filename from an URL's Content-Disposition header"""
         response = self.request(url, method="HEAD", fatal=False)
-        cd = response.headers.get("Content-Disposition")
-        return text.extr(cd, 'filename="', '"')
+        return text.filename_from_contentdisposition(
+            response.headers.get("content-disposition", ""))
 
     def _filehash(self, url):
         """Extract MD5 hash from a download URL"""
