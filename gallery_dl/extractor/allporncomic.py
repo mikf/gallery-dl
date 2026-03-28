@@ -84,9 +84,12 @@ class AllporncomicChapterExtractor(AllporncomicBase, ChapterExtractor):
         path = text.split_html(text.extr(
             page, '<ol class="breadcrumb', '</ol>'))
         title = text.re(
-            r"^(?:\s*\d+(?:\.\d+)?\s*\.|\[[^\]]+\])"
-            r"\s*(.+?)(?:\s+-)?(?:\s+[Cc]hapter \d+(?:\s+[Ee]xtras)?)?"
-            r"(?:\s+\([^)]+\))?(?:\s+\[[^\]]+\])?\s*$").sub("\\1", path[-1])
+            r"^(?:\s*\d+(?:\.\d+)?\s*\.|\[[^\]]+\])\s").sub("", path[-1])
+        title = text.re(
+            r"(?:\s+-)?"
+            r"(?:\s+[Cc]hapter \d+(?:\s+[Ee]xtras)?)?"
+            r"(?:\s+\([^)]+\))?"
+            r"(?:\s+(?:-\s+)?\[[^\]]+\])?\s*$").sub("", title)
 
         return {
             **self.cache(self._manga_info, manga_slug),
@@ -103,9 +106,10 @@ class AllporncomicChapterExtractor(AllporncomicBase, ChapterExtractor):
         return [
             (url.strip(), None)
             for url in text.extract_iter(page, ' data-src="', '"')
-        ] or (
-            ((text.extr(page, '<source src="', '"'), None),)
-        )
+        ] or [
+            (url.strip(), None)
+            for url in text.extract_iter(page, '<source src="', '"')
+        ]
 
 
 class AllporncomicMangaExtractor(AllporncomicBase, MangaExtractor):

@@ -194,7 +194,7 @@ __tests__ = (
     "manga_id"     : 13976,
     "manga_slug"   : "the-snake-and-the-sword-video-sleepy-gimp",
     "status"       : "Completed",
-    "title"        : "Xmas 2023 - [Sleepy Gimp]",
+    "title"        : "Xmas 2023",
     "title_slug"   : "xmas-2023",
     "type"         : "Western",
     "path"         : [
