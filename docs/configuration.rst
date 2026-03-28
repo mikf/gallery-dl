@@ -9887,6 +9887,80 @@ Description
     used for (urllib3) warnings.
 
 
+ipcqueue.enabled
+----------------
+Type
+    ``bool``
+Default
+    ``false``
+Description
+    Enables gallery-dl to add links to the queue of a gallery-dl server.
+
+
+ipcqueue.timeout
+----------------
+Type
+    ``int``
+Default
+    ``10``
+Description
+    Sets maximum timeout before queue ends and turns off the server if
+    queue is empty. If set to `null` or `None`, then the server will
+    run forever.
+
+
+ipcqueue.nourl
+--------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Enables gallery-dl to launch without links if `ipcqueue` is enabled
+
+
+ipcqueue.server
+--------------
+Type
+    ``bool``
+Default
+    ``true``
+Description
+    Enables the internal server. If disabled, then it will only try to
+    connect to any existing server and return error if it fails.
+
+
+ipcqueue.host
+-------------
+Type
+    ``string``
+Default
+    ``"127.0.0.1"``
+Description
+    Host to bind the server/socket to.
+
+
+ipcqueue.port
+-------------
+Type
+    ``int``
+Default
+    ``64696``
+Description
+    Port to bind the server/socket to.
+
+
+ipcqueue.key
+------------
+Type
+    ``string``
+Default
+    ``"gallery_dl"``
+Description
+    A string that is added to the front of each request to differentiate and
+    avoid random requests sent to the listener from the gallery_dl specific ones.
+
+
 
 API Tokens & IDs
 ================

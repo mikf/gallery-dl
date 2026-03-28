@@ -9,6 +9,7 @@
 import os
 import sys
 import logging
+from queue import Queue, Empty
 from . import version, config, option, output, extractor, job, util, exception
 
 __author__ = "Mike Fährmann"
@@ -347,7 +348,12 @@ Entries:
                         input_file = (input_file, None)
                     args.input_files.append(input_file)
 
-            if not args.urls and not args.input_files:
+            if config.get((), "ipcqueue_enable", False) ^ config.get(("ipcqueue",), "enabled", False):
+                config.set(("ipcqueue",), "enabled", True)
+            else:
+                config.unset((), "ipcqueue")
+
+            if not config.get(("ipcqueue",), "nourl", False) and not args.urls and not args.input_files:
                 if args.cookies_from_browser or config.interpolate(
                         ("extractor",), "cookies"):
                     args.urls.append("noop")
@@ -367,7 +373,21 @@ Entries:
             else:
                 jobtype = args.jobtype or job.DownloadJob
 
-            input_manager = InputManager()
+            if config.get(("ipcqueue",), "enabled", False):
+                from . import server
+                if server.socket_sender(args.urls):
+                    log.info("Sent URLs to existing client.")
+                    return 0
+                elif not config.get(("ipcqueue",), "server", True):
+                    log.error(f"Failed connecting to server on host {server.HOST} port {server.PORT}")
+                    return 1
+
+                input_manager = InputManagerQueue()
+
+                server.start(input_manager)
+                log.info(f"Started socket connection on host {server.HOST} port {server.PORT}")
+            else:
+                input_manager = InputManager()
             input_manager.log = input_log = logging.getLogger("inputfile")
 
             # unsupported file logging handler
@@ -397,7 +417,8 @@ Entries:
                         return getattr(exc, "code", 128)
 
             pformat = config.get(("output",), "progress", True)
-            if pformat and len(input_manager.urls) > 1 and \
+            if pformat and (len(input_manager.urls) if hasattr(input_manager, "urls") \
+                    else input_manager.qsize()) > 1 and \
                     args.loglevel < logging.ERROR:
                 input_manager.progress(pformat)
 
@@ -450,6 +471,8 @@ Entries:
                     input_manager.error()
 
                 input_manager.next()
+            if config.get(("ipcqueue",), "enabled"):
+                server.stop()
             return retval
         return 0
 
@@ -541,7 +564,7 @@ class InputManager():
         lconf = []
         indicies = []
         strip_comment = None
-        append = self.urls.append
+        append = self.add_url
 
         for n, line in enumerate(lines):
             line = line.strip()
@@ -667,6 +690,56 @@ class InputManager():
         if self._pformat:
             output.stderr_write(self._pformat({
                 "total"  : len(self.urls),
+                "current": self._index + 1,
+                "url"    : url,
+            }))
+        return url
+
+class InputManagerQueue(InputManager, Queue):
+
+    def __init__(self, maxsize=0):
+        Queue.__init__(self, maxsize)
+        self.files = ()
+        self.log = self.err = None
+
+        self._url = ""
+        self._item = None
+        self._index = 0
+        self._pformat = None
+
+    def add_url(self, url):
+        self.put(url)
+
+    def add_list(self, urls):
+        for url in urls:
+            self.put(url)
+
+    _sentinel = object()
+
+    def __iter__(self):
+        return self
+
+    def close(self):
+        self.put(self._sentinel)
+
+    def __next__(self):
+        try:
+            url = self.get(timeout=config.get(("ipcqueue",), "timeout", 10))
+        except Empty:
+            raise StopIteration
+        if url is self._sentinel:
+            raise StopIteration
+
+        if isinstance(url, tuple):
+            self._item = url
+            url = url[0]
+        else:
+            self._item = None
+        self._url = url
+
+        if self._pformat:
+            output.stderr_write(self._pformat({
+                "total"  : self._index + self.qsize() + 1,
                 "current": self._index + 1,
                 "url"    : url,
             }))
