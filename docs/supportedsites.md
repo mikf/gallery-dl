@@ -283,12 +283,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Anthologies, Chapters, individual Images, Manga, Search Results</td>
     <td></td>
 </tr>
-<tr id="e-hentai" title="e-hentai">
-    <td>E-Hentai</td>
-    <td>https://e-hentai.org/</td>
-    <td>Favorites, Galleries, Search Results</td>
-    <td>Supported</td>
-</tr>
 <tr id="aryion" title="aryion">
     <td>Eka's Portal</td>
     <td>https://aryion.com/</td>
@@ -312,12 +306,6 @@ Consider all listed sites to potentially be NSFW.
     <td>https://everia.club</td>
     <td>Categories, Dates, Posts, Search Results, Tag Searches</td>
     <td></td>
-</tr>
-<tr id="exhentai" title="exhentai">
-    <td>ExHentai</td>
-    <td>https://exhentai.org/</td>
-    <td>Favorites, Galleries, Search Results</td>
-    <td>Supported</td>
 </tr>
 <tr id="facebook" title="facebook">
     <td>Facebook</td>
@@ -433,28 +421,10 @@ Consider all listed sites to potentially be NSFW.
     <td>Archive, Individual Posts, Home Feed, Search Results</td>
     <td></td>
 </tr>
-<tr id="hdoujin" title="hdoujin">
-    <td>HDoujin Galleries</td>
-    <td>https://hdoujin.org/</td>
-    <td>Favorites, Galleries, Search Results</td>
-    <td></td>
-</tr>
-<tr id="hentaifoundry" title="hentaifoundry">
-    <td>Hentai Foundry</td>
-    <td>https://www.hentai-foundry.com/</td>
-    <td>Favorites, individual Images, Pictures, Popular Images, Recent Images, Scraps, Stories, Tag Searches, User Profiles</td>
-    <td></td>
-</tr>
 <tr id="hentai2read" title="hentai2read">
     <td>Hentai2Read</td>
     <td>https://hentai2read.com/</td>
     <td>Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr id="hentaihand" title="hentaihand">
-    <td>HentaiHand</td>
-    <td>https://hentaihand.com/</td>
-    <td>Galleries, Tag Searches</td>
     <td></td>
 </tr>
 <tr id="hentaihere" title="hentaihere">
@@ -463,22 +433,10 @@ Consider all listed sites to potentially be NSFW.
     <td>Chapters, Manga</td>
     <td></td>
 </tr>
-<tr id="hentainexus" title="hentainexus">
-    <td>HentaiNexus</td>
-    <td>https://hentainexus.com/</td>
-    <td>Galleries, Search Results</td>
-    <td></td>
-</tr>
 <tr id="hiperdex" title="hiperdex">
     <td>HiperDEX</td>
     <td>https://hiperdex.com/</td>
     <td>Artists, Chapters, Manga</td>
-    <td></td>
-</tr>
-<tr id="hitomi" title="hitomi">
-    <td>Hitomi.la</td>
-    <td>https://hitomi.la/</td>
-    <td>Galleries, Site Index, Search Results, Tag Searches</td>
     <td></td>
 </tr>
 <tr id="hotleak" title="hotleak">
@@ -793,12 +751,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Art, Audio, Favorites, Followed Users, Games, individual Images, Media Files, Movies, Search Results, User Profiles</td>
     <td>Supported</td>
 </tr>
-<tr id="nhentai" title="nhentai">
-    <td>nhentai</td>
-    <td>https://nhentai.net/</td>
-    <td>Favorites, Galleries, Search Results, Tag Searches</td>
-    <td></td>
-</tr>
 <tr id="seiga" title="seiga">
     <td>Niconico Seiga</td>
     <td>https://seiga.nicovideo.jp/</td>
@@ -1037,12 +989,6 @@ Consider all listed sites to potentially be NSFW.
     <td>Scatbooru</td>
     <td>https://scatbooru.co.uk/</td>
     <td>Favorites, Posts, Tag Searches</td>
-    <td></td>
-</tr>
-<tr id="schalenetwork" title="schalenetwork">
-    <td>Schale Network</td>
-    <td>https://niyaniya.moe/</td>
-    <td>Favorites, Galleries, Search Results</td>
     <td></td>
 </tr>
 <tr id="scrolller" title="scrolller">

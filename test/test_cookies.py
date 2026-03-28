@@ -91,7 +91,7 @@ class TestCookiedict(unittest.TestCase):
         self.assertEqual(sorted(cookies.values()), sorted(self.cdict.values()))
 
     def test_domain(self):
-        for category in ["exhentai", "nijie", "horne"]:
+        for category in ["nijie", "horne"]:
             extr = _get_extractor(category)
             cookies = extr.cookies
             for key in self.cdict:
@@ -107,7 +107,6 @@ class TestCookieLogin(unittest.TestCase):
 
     def test_cookie_login(self):
         extr_cookies = {
-            "exhentai"   : ("ipb_member_id", "ipb_pass_hash"),
             "nijie"      : ("nijie_tok",),
             "horne"      : ("horne_tok",),
         }
@@ -242,7 +241,6 @@ def _get_extractor(category):
 
 
 URLS = {
-    "exhentai"   : "https://exhentai.org/g/1200119/d55c44d3d0/",
     "nijie"      : "https://nijie.info/view.php?id=1",
     "horne"      : "https://horne.red/view.php?id=1",
     "test"       : "generic:https://example.org/",

@@ -600,7 +600,6 @@ Default
         ``[Danbooru]``      |
         ``[E621]``          |
         ``[foolfuuka]:search`` |
-        ``hdoujin``         |
         ``itaku``           |
         ``newgrounds``      |
         ``[nitter]``        |
@@ -636,7 +635,6 @@ Default
         ``[Nijie]``
     ``"3.0-6.0"``
         ``bilibili``        |
-        ``exhentai``        |
         ``[reactor]``       |
         ``readcomiconline``
     ``"6.0-6.1"``
@@ -674,7 +672,6 @@ Description
     * ``e621`` (`* <pw-apikey_>`__)
     * ``e6ai`` (`* <pw-apikey_>`__)
     * ``e926`` (`* <pw-apikey_>`__)
-    * ``exhentai``
     * ``girlswithmuscle``
     * ``horne`` (`R <pw-required_>`__)
     * ``idolcomplex``
@@ -3104,141 +3101,6 @@ Description
     Include reposts when extracting albums from a user profile.
 
 
-extractor.exhentai.domain
--------------------------
-Type
-    ``string``
-Default
-    ``"auto"``
-Description
-    ``"auto"``
-        Use ``e-hentai.org`` or ``exhentai.org``
-        depending on the input URL
-    ``"e-hentai.org"``
-        Use ``e-hentai.org`` for all URLs
-    ``"exhentai.org"``
-        Use ``exhentai.org`` for all URLs
-
-
-extractor.exhentai.fallback-retries
------------------------------------
-Type
-    ``integer``
-Default
-    ``2``
-Description
-    Number of times a failed image gets retried
-    or ``-1`` for infinite retries.
-
-
-extractor.exhentai.fav
-----------------------
-Type
-    ``string``
-Example
-    ``"4"``
-Description
-    After downloading a gallery,
-    add it to your account's favorites as the given category number.
-Note
-    Set this to `"favdel"` to remove galleries from your favorites.
-
-    This will remove any Favorite Notes when applied
-    to already favorited galleries.
-
-
-extractor.exhentai.gp
----------------------
-Type
-    ``string``
-Default
-    ``"resized"``
-Description
-    Selects how to handle "you do not have enough GP" errors.
-
-    * `"resized"`: Continue downloading `non-original <extractor.exhentai.original_>`__ images.
-    * `"stop"`: Stop the current extractor run.
-    * `"wait"`: Wait for user input before retrying the current image.
-
-
-extractor.exhentai.limits
--------------------------
-Type
-    ``integer``
-Default
-    ``null``
-Description
-    Set a custom image download limit and perform
-    `limits-action <extractor.exhentai.limits-action_>`__
-    when it gets exceeded.
-
-
-extractor.exhentai.limits-action
---------------------------------
-Type
-    ``string``
-Default
-    ``"stop"``
-Description
-    Action to perform when the image limit is exceeded.
-
-    * `"stop"`: Stop the current extractor run.
-    * `"wait"`: Wait for user input.
-    * `"reset"`: Spend GP to reset your account's image limits.
-
-
-extractor.exhentai.metadata
----------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Load extended gallery metadata from the
-    `API <https://ehwiki.org/wiki/API#Gallery_Metadata>`_.
-
-    * Adds ``archiver_key``, ``posted``, and ``torrents``
-    * Provides exact ``date`` and ``filesize``
-
-
-extractor.exhentai.original
----------------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Download full-sized original images if available.
-
-
-extractor.exhentai.source
--------------------------
-Type
-    ``string``
-Default
-    ``"gallery"``
-Description
-    Selects an alternative source to download files from.
-
-    ``"hitomi"``
-         Download the corresponding gallery from ``hitomi.la``
-    ``"metadata"``
-        Load only a gallery's metadata from the
-        `API <https://ehwiki.org/wiki/API#Gallery_Metadata>`_
-
-
-extractor.exhentai.tags
------------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Group ``tags`` by type and
-    provide them as ``tags_<type>`` metadata fields,
-    for example ``tags_artist`` or ``tags_character``.
-
-
 extractor.facebook.author-followups
 -----------------------------------
 Type
@@ -3715,136 +3577,6 @@ Default
     ``true``
 Description
     Recursively download files from subfolders.
-
-
-extractor.hdoujin.cbz
----------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Download each gallery as a single ``.cbz`` file.
-Note
-    Requires a
-    `token <extractor.hdoujin.token_>`__
-
-
-extractor.hdoujin.crt
----------------------
-Type
-    ``string``
-Example
-    * ``"0542daa9-352c-4fd5-a497-6c6d5cf07423"``
-    * ``"/12345/a1b2c3d4e5f6?crt=0542daa9-352c-4fd5-a497-6c6d5cf07423"``
-Description
-    The ``crt`` query parameter value
-    sent when fetching gallery data.
-
-    To get this value:
-
-    * Open your browser's Developer Tools (F12)
-    * Select `Network` → `XHR`
-    * Open a gallery page
-    * Select the last `Network` entry and copy its ``crt`` value
-Note
-    You will also need your browser's
-    `user-agent <extractor.*.user-agent_>`__
-
-
-extractor.hdoujin.format
-------------------------
-Type
-    * ``string``
-    * ``list`` of ``strings``
-Default
-    ``["0", "1600", "1280", "980", "780"]``
-Description
-    Name(s) of the image format to download.
-
-    When more than one format is given, the first available one is selected.
-
-    | Possible formats are
-    | ``"780"``, ``"980"``, ``"1280"``, ``"1600"``, ``"0"`` (original)
-
-
-extractor.hdoujin.tags
-----------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Group ``tags`` by type and
-    provide them as ``tags_<type>`` metadata fields,
-    for example ``tags_artist`` or ``tags_character``.
-
-
-extractor.hdoujin.token
------------------------
-Type
-    ``string``
-Example
-    * ``"3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
-    * ``"Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
-    * ``"Authorization: Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
-Description
-    ``Authorization`` header value
-    used for requests to ``https://api.hdoujin.org``
-    to access ``favorite`` galleries
-    or download
-    `.cbz <extractor.hdoujin.cbz_>`__
-    archives.
-
-
-extractor.hentaifoundry.descriptions
-------------------------------------
-Type
-    ``string``
-Default
-    ``"text"``
-Description
-    Controls the format of ``description`` metadata fields.
-
-    ``"text"``
-        Plain text with HTML tags removed
-    ``"html"``
-        Raw HTML content
-
-
-extractor.hentaifoundry.include
--------------------------------
-Type
-    * ``string``
-    * ``list`` of ``strings``
-Default
-    ``"pictures"``
-Example
-    * ``"scraps,stories"``
-    * ``["scraps", "stories"]``
-Description
-    A (comma-separated) list of subcategories to include
-    when processing a user profile.
-Supported Values
-    * ``pictures``
-    * ``scraps``
-    * ``stories``
-    * ``favorite``
-Note
-    It is possible to use ``"all"`` instead of listing all values separately.
-
-
-extractor.hitomi.format
------------------------
-Type
-    ``string``
-Default
-    ``"webp"``
-Description
-    Selects which image format to download.
-Available Formats
-    * ``"webp"``
-    * ``"avif"``
 
 
 extractor.imagechest.access-token
@@ -5902,89 +5634,6 @@ Default
     ``true``
 Description
     Download videos.
-
-
-extractor.schalenetwork.cbz
----------------------------
-Type
-    ``bool``
-Default
-    ``false``
-Description
-    Download each gallery as a single ``.cbz`` file.
-Note
-    Requires a
-    `token <extractor.schalenetwork.token_>`__
-
-
-extractor.schalenetwork.crt
----------------------------
-Type
-    ``string``
-Example
-    * ``"0542daa9-352c-4fd5-a497-6c6d5cf07423"``
-    * ``"/12345/a1b2c3d4e5f6?crt=0542daa9-352c-4fd5-a497-6c6d5cf07423"``
-Description
-    The ``crt`` query parameter value
-    sent when fetching gallery data.
-
-    To get this value:
-
-    * Open your browser's Developer Tools (F12)
-    * Select `Network` → `XHR`
-    * Open a gallery page
-    * Select the last `Network` entry and copy its ``crt`` value
-Note
-    You will also need your browser's
-    `user-agent <extractor.*.user-agent_>`__
-
-
-extractor.schalenetwork.format
-------------------------------
-Type
-    * ``string``
-    * ``list`` of ``strings``
-Default
-    ``["0", "1600", "1280", "980", "780"]``
-Description
-    Name(s) of the image format to download.
-
-    When more than one format is given, the first available one is selected.
-Formats
-    * ``"780"``
-    * ``"980"``
-    * ``"1280"``
-    * ``"1600"``
-    * ``"0"`` (original)
-
-
-extractor.schalenetwork.tags
-----------------------------
-Type
-    ``bool``
-Default
-    ``true``
-Description
-    Group ``tags`` by type and
-    provide them as ``tags_<type>`` metadata fields,
-    for example ``tags_artist`` or ``tags_character``.
-
-
-extractor.schalenetwork.token
------------------------------
-Type
-    ``string``
-Example
-    * ``"3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
-    * ``"Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
-    * ``"Authorization: Bearer 3f1a9b72-4e4d-4f4e-9e5d-4a2b99f7c893"``
-Description
-    ``Authorization`` header value
-    used for requests to ``https://api.schale.network``
-    to access ``favorite`` galleries
-    or download
-    `.cbz <extractor.schalenetwork.cbz_>`__
-    archives.
 
 
 extractor.sexcom.gifs
@@ -10005,7 +9654,6 @@ Special Values
                 "coomer"       : "coomerparty",
                 "kemono"       : "kemonoparty",
                 "turbo"        : "saint",
-                "schalenetwork": "koharu",
                 "naver-chzzk"  : "chzzk",
                 "naver-blog"   : "naver",
                 "naver-webtoon": "naverwebtoon",
@@ -10028,7 +9676,6 @@ Default
             "coomerparty"  : "coomer",
             "kemonoparty"  : "kemono",
             "giantessbooru": "sizebooru",
-            "koharu"       : "schalenetwork",
             "chzzk"        : "naver-chzzk",
             "naver"        : "naver-blog",
             "naverwebtoon" : "naver-webtoon",
@@ -10646,7 +10293,7 @@ Example
             "compression": "store",
             "extension"  : "cbz",
             "filter"     : "extension not in ('zip', 'rar')",
-            "whitelist"  : ["mangadex", "exhentai", "nhentai"]
+            "whitelist"  : ["mangadex", "pixiv"]
         }
 Description
     An ``object`` containing a ``"name"`` attribute specifying the

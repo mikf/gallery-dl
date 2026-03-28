@@ -342,7 +342,6 @@ and optional for
 ``aryion``,
 ``danbooru``,
 ``e621``,
-``exhentai``,
 ``idolcomplex``,
 ``imgbb``,
 ``inkbunny``,
@@ -353,7 +352,6 @@ and optional for
 ``subscribestar``,
 ``tapas``,
 ``tsumino``,
-``twitter``,
 and ``zerochan``.
 
 You can set the necessary information in your
@@ -363,7 +361,7 @@ You can set the necessary information in your
 
     {
         "extractor": {
-            "twitter": {
+            "subscribestar": {
                 "username": "<username>",
                 "password": "<password>"
             }

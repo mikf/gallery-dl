@@ -61,8 +61,6 @@ CATEGORY_MAP = {
     "erome"          : "EroMe",
     "eporner"        : "EPORNER",
     "everia"         : "EVERIA.CLUB",
-    "e-hentai"       : "E-Hentai",
-    "exhentai"       : "ExHentai",
     "fallenangels"   : "Fallen Angels Scans",
     "fanbox"         : "pixivFANBOX",
     "fappic"         : "Fappic.com",
@@ -549,8 +547,6 @@ AUTH_MAP = {
     "e621"           : "Supported",
     "e6ai"           : "Supported",
     "e926"           : "Supported",
-    "e-hentai"       : "Supported",
-    "exhentai"       : "Supported",
     "facebook"       : _COOKIES,
     "fanbox"         : _COOKIES,
     "fantia"         : _COOKIES,
@@ -718,10 +714,6 @@ def build_extractor_list():
             subcategories.sort(key=subcategory_key)
 
     domains["pixiv-novel"] += "novel"
-
-    # add e-hentai.org
-    default["e-hentai"] = default["exhentai"]
-    domains["e-hentai"] = domains["exhentai"].replace("x", "-")
 
     # add coomer.st
     default["coomer"] = default["kemono"]

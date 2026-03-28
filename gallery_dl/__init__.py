@@ -407,7 +407,6 @@ Entries:
                         "coomer"       : "coomerparty",
                         "kemono"       : "kemonoparty",
                         "turbo"        : "saint",
-                        "schalenetwork": "koharu",
                         "naver-blog"   : "naver",
                         "naver-chzzk"  : "chzzk",
                         "naver-webtoon": "naverwebtoon",
