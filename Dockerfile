@@ -3,7 +3,7 @@ ENV LANG=C.UTF-8
 
 RUN : \
     && apk --no-interactive update \
-    && apk --no-interactive --no-cache add ffmpeg \
+    && apk --no-interactive --no-cache add build-base ffmpeg libpq-dev \
     && rm -rf /var/cache/apk \
     && :
 
@@ -17,6 +17,8 @@ RUN : \
         truststore \
         jinja2 \
         pyyaml \
+        psycopg \
+        psycopg_c \
     && ( rm -rf /root/.cache/pip || true ) \
     && ( find /usr/local/lib/python3.*/site-packages/setuptools -name __pycache__ -exec rm -rf {} + || true ) \
     && ( find /usr/local/lib/python3.*/site-packages/wheel      -name __pycache__ -exec rm -rf {} + || true ) \
