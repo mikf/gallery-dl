@@ -335,31 +335,24 @@ class InstagramExtractor(Extractor):
             self._extract_tagged_users(item, media)
             files.append(media)
 
+            if "story_music_stickers" in item:
+                try:
+                    audio = self._extract_audio(
+                        item, item["story_music_stickers"][0])
+                    audio["num"] = num
+                    files.append(audio)
+                except Exception as exc:
+                    self.log.traceback(exc)
+
         if "music_metadata" in post:
             try:
-                info = post["music_metadata"]["music_info"]
-                audio = info["music_asset_info"]
-                files.append({
-                    "num"        : num,
-                    "date"       : self.parse_timestamp(post.get("taken_at")),
-                    "media_id"   : audio["id"],
-                    "shortcode"  : shortcode_from_id(audio["id"]),
-                    "display_url": audio["cover_artwork_uri"],
-                    "audio_url"  : audio["progressive_download_url"],
-                    "width"          : 0,
-                    "width_original" : 0,
-                    "height"         : 0,
-                    "height_original": 0,
-                })
-                data["audio_title"] = audio.get("title")
-                data["audio_duration"] = audio.get("duration_in_ms", 0) / 1000
-                data["audio_timestamps"] = audio.get(
-                    "highlight_start_times_in_ms")
-                if info := info.get("music_consumption_info"):
-                    data["audio_artist"] = (info.get("ig_artist") or
-                                            audio.get("display_artist"))
-                else:
-                    data["audio_artist"] = audio.get("display_artist")
+                audio = self._extract_audio(
+                    post, post["music_metadata"]["music_info"])
+                audio["num"] = num
+                files.append(audio)
+                for key in ("audio_title", "audio_artist", "audio_username",
+                            "audio_duration", "audio_timestamps"):
+                    data[key] = audio[key]
             except Exception as exc:
                 self.log.traceback(exc)
 
@@ -498,6 +491,29 @@ class InstagramExtractor(Extractor):
     def _extract_pinned(self, post):
         return (post.get("timeline_pinned_user_ids") or
                 post.get("clips_tab_pinned_user_ids") or ())
+
+    def _extract_audio(self, item, info):
+        audio = info["music_asset_info"]
+        cinfo = info.get("music_consumption_info") or audio
+
+        return {
+            "date"       : self.parse_timestamp(item.get("taken_at")),
+            "media_id"   : audio["id"],
+            "shortcode"  : shortcode_from_id(audio["id"]),
+            "display_url": audio["cover_artwork_uri"],
+            "audio_url"  : audio["progressive_download_url"],
+            "width"          : 0,
+            "width_original" : 0,
+            "height"         : 0,
+            "height_original": 0,
+            "audio_title"     : audio.get("title"),
+            "audio_duration"  : audio.get("duration_in_ms", 0) / 1000,
+            "audio_timestamps": audio.get("highlight_start_times_in_ms"),
+            "audio_username"  :
+                audio.get("display_artist") or cinfo.get("display_artist"),
+            "audio_artist"    :
+                audio.get("ig_artist") or cinfo.get("ig_artist"),
+        }
 
     def _init_cursor(self):
         cursor = self.config("cursor", True)
