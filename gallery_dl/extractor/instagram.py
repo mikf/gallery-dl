@@ -344,15 +344,16 @@ class InstagramExtractor(Extractor):
                 except Exception as exc:
                     self.log.traceback(exc)
 
-        if "music_metadata" in post:
+        if metadata := post.get("music_metadata"):
             try:
-                audio = self._extract_audio(
-                    post, post["music_metadata"]["music_info"])
-                audio["num"] = num
-                files.append(audio)
-                for key in ("audio_title", "audio_artist", "audio_username",
-                            "audio_duration", "audio_timestamps"):
-                    data[key] = audio[key]
+                if audio := self._extract_audio(
+                        post, metadata.get("music_info")):
+                    if audio["audio_url"]:
+                        audio["num"] = num
+                        files.append(audio)
+                    for key in ("audio_title", "audio_artist", "audio_username",
+                                "audio_duration", "audio_timestamps"):
+                        data[key] = audio[key]
             except Exception as exc:
                 self.log.traceback(exc)
 
@@ -493,7 +494,11 @@ class InstagramExtractor(Extractor):
                 post.get("clips_tab_pinned_user_ids") or ())
 
     def _extract_audio(self, item, info):
-        audio = info["music_asset_info"]
+        if not info:
+            return None
+        audio = info.get("music_asset_info")
+        if not audio:
+            return None
         cinfo = info.get("music_consumption_info") or audio
 
         return {
