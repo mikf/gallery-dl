@@ -351,8 +351,9 @@ class InstagramExtractor(Extractor):
                     if audio["audio_url"]:
                         audio["num"] = num
                         files.append(audio)
-                    for key in ("audio_title", "audio_artist", "audio_username",
-                                "audio_duration", "audio_timestamps"):
+                    for key in ("audio_title", "audio_artist",
+                                "audio_username", "audio_duration",
+                                "audio_timestamps"):
                         data[key] = audio[key]
             except Exception as exc:
                 self.log.traceback(exc)
