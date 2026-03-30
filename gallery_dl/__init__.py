@@ -348,12 +348,14 @@ Entries:
                         input_file = (input_file, None)
                     args.input_files.append(input_file)
 
-            if config.get((), "ipcqueue_enable", False) ^ config.get(("ipcqueue",), "enabled", False):
+            if config.get((), "ipcqueue_enable", False) ^ \
+                    config.get(("ipcqueue",), "enabled", False):
                 config.set(("ipcqueue",), "enabled", True)
             else:
                 config.unset((), "ipcqueue")
 
-            if not config.get(("ipcqueue",), "nourl", False) and not args.urls and not args.input_files:
+            if not config.get(("ipcqueue",), "nourl", False) and \
+                    not args.urls and not args.input_files:
                 if args.cookies_from_browser or config.interpolate(
                         ("extractor",), "cookies"):
                     args.urls.append("noop")
@@ -383,11 +385,13 @@ Entries:
                     log.info("Sent URLs to existing client.")
                     return 0
                 elif not config.get(("ipcqueue",), "server", True):
-                    log.error(f"Failed connecting to server on host {server.HOST} port {server.PORT}")
+                    log.error(("Failed connecting to server on host ",
+                              f"{server.HOST} port {server.PORT}"))
                     return 1
 
                 server.start(input_manager)
-                log.info(f"Started socket connection on host {server.HOST} port {server.PORT}")
+                log.info(("Started socket connection on host ",
+                         f"{server.HOST} port {server.PORT}"))
 
             # unsupported file logging handler
             if handler := output.setup_logging_handler(
@@ -681,7 +685,10 @@ class InputManager(Queue):
 
     def __next__(self):
         try:
-            url = self.get(timeout=None if (i := config.get(("ipcqueue",), "timeout", 0)) == -1 else i)
+            timeout = config.get(("ipcqueue",), "timeout", 0)
+            if timeout == -1:
+                timeout = None
+            url = self.get(timeout=timeout)
         except Empty:
             raise StopIteration
         if url is self._sentinel:

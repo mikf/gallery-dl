@@ -3,24 +3,25 @@ import struct
 import socket
 import threading
 import logging
-from queue import Queue, Empty
 from . import config
 
 log = logging.getLogger("server")
 
 HOST = config.get(("ipcqueue",), "host", "127.0.0.1")
 PORT = config.get(("ipcqueue",), "port", 64696)
-key  = config.get(("ipcqueue",), "key", "gallery_dl").encode("utf-8")
+key = config.get(("ipcqueue",), "key", "gallery_dl").encode("utf-8")
 stop_event = threading.Event()
 klen = len(key)
 
-# Background thread in master process that accepts data from subsequent gallery-dl processes
+
+# Background thread in master process that accepts data from subsequent
+# gallery-dl processes
 def socket_listener(queueObj):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((HOST, PORT))
         s.listen()
-        s.settimeout(1.0) # Check stop_event periodically
+        s.settimeout(1.0)    # Check stop_event periodically
         while not stop_event.is_set():
             try:
                 conn, _ = s.accept()
@@ -33,7 +34,8 @@ def socket_listener(queueObj):
                     bytes_received = 0
                     while bytes_received < data_len:
                         chunk = conn.recv(min(data_len - bytes_received, 4096))
-                        if not chunk: break
+                        if not chunk:
+                            break
                         chunks.append(chunk)
                         bytes_received += len(chunk)
                     full_payload = b''.join(chunks)
@@ -61,12 +63,15 @@ def socket_sender(data):
 
             s.sendall(key + header + payload)
             return True
-    except:
+    except ConnectionRefusedError:
         return False
 
+
 def start(queueObj):
-    listener = threading.Thread(target=socket_listener, args=(queueObj,), daemon=True)
+    listener = threading.Thread(
+        target=socket_listener, args=(queueObj,), daemon=True)
     listener.start()
+
 
 def stop():
     stop_event.set()

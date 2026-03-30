@@ -9914,9 +9914,10 @@ ipcqueue.nourl
 Type
     ``bool``
 Default
-    ``true``
+    ``false``
 Description
-    Enables gallery-dl to launch without links if `ipcqueue` is enabled
+    Enables gallery-dl to launch without links if `ipcqueue` is enabled.
+    Set this value to `true` if you intend to run gallery-dl as a server.
 
 
 ipcqueue.server
