@@ -335,26 +335,20 @@ class InstagramExtractor(Extractor):
             self._extract_tagged_users(item, media)
             files.append(media)
 
-            if "story_music_stickers" in item:
+            if stickers := item.get("story_music_stickers"):
                 try:
-                    audio = self._extract_audio(
-                        item, item["story_music_stickers"][0])
-                    audio["num"] = num
-                    files.append(audio)
+                    if audio := self._extract_audio(item, media, stickers[0]):
+                        audio["num"] = num
+                        files.append(audio)
                 except Exception as exc:
                     self.log.traceback(exc)
 
         if metadata := post.get("music_metadata"):
             try:
                 if audio := self._extract_audio(
-                        post, metadata.get("music_info")):
-                    if audio["audio_url"]:
-                        audio["num"] = num
-                        files.append(audio)
-                    for key in ("audio_title", "audio_artist",
-                                "audio_username", "audio_duration",
-                                "audio_timestamps"):
-                        data[key] = audio[key]
+                        post, data, metadata.get("music_info")):
+                    audio["num"] = num
+                    files.append(audio)
             except Exception as exc:
                 self.log.traceback(exc)
 
@@ -494,31 +488,38 @@ class InstagramExtractor(Extractor):
         return (post.get("timeline_pinned_user_ids") or
                 post.get("clips_tab_pinned_user_ids") or ())
 
-    def _extract_audio(self, item, info):
-        if not info:
-            return None
-        audio = info.get("music_asset_info")
-        if not audio:
+    def _extract_audio(self, src, dest, info):
+        if not info or not (audio := info.get("music_asset_info")):
             return None
         cinfo = info.get("music_consumption_info") or audio
 
+        dest["audio_title"] = title = audio.get("title")
+        dest["audio_duration"] = duration = audio.get(
+            "duration_in_ms", 0) / 1000
+        dest["audio_timestamps"] = timestamps = audio.get(
+            "highlight_start_times_in_ms")
+        dest["audio_artist"] = artist = audio.get(
+            "display_artist") or cinfo.get("display_artist")
+        dest["audio_user"] = user = audio.get(
+            "ig_artist") or cinfo.get("ig_artist")
+
+        if not (url := audio["progressive_download_url"]):
+            return None
         return {
-            "date"       : self.parse_timestamp(item.get("taken_at")),
+            "date"       : self.parse_timestamp(src.get("taken_at")),
             "media_id"   : audio["id"],
             "shortcode"  : shortcode_from_id(audio["id"]),
             "display_url": audio["cover_artwork_uri"],
-            "audio_url"  : audio["progressive_download_url"],
-            "width"          : 0,
-            "width_original" : 0,
-            "height"         : 0,
-            "height_original": 0,
-            "audio_title"     : audio.get("title"),
-            "audio_duration"  : audio.get("duration_in_ms", 0) / 1000,
-            "audio_timestamps": audio.get("highlight_start_times_in_ms"),
-            "audio_username"  :
-                audio.get("display_artist") or cinfo.get("display_artist"),
-            "audio_artist"    :
-                audio.get("ig_artist") or cinfo.get("ig_artist"),
+            "audio_url"  : url,
+            "width"           : 0,
+            "width_original"  : 0,
+            "height"          : 0,
+            "height_original" : 0,
+            "audio_user"      : user,
+            "audio_title"     : title,
+            "audio_artist"    : artist,
+            "audio_duration"  : duration,
+            "audio_timestamps": timestamps,
         }
 
     def _init_cursor(self):
