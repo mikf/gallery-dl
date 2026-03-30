@@ -227,11 +227,14 @@ class WeiboExtractor(Extractor):
             headers["X-XSRF-TOKEN"] = response.cookies.get("XSRF-TOKEN")
 
             data = response.json()
-            if not data.get("ok"):
+            if not (ok := data.get("ok", 0)):
                 self.log.debug(response.content)
                 if "since_id" not in params:  # first iteration
                     raise self.exc.AbortExtraction(
                         f'"{data.get("msg") or "unknown error"}"')
+            elif ok < 0:
+                self.request(self.root + "/").content
+                continue
 
             try:
                 data = data["data"]
