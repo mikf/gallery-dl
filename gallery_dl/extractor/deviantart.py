@@ -237,7 +237,7 @@ class DeviantartExtractor(Extractor):
                     yield self.commit(deviation, preview)
                 else:
                     mtype = mimetypes.guess_type(
-                        "a." + deviation["extension"], False)[0]
+                        "a." + (deviation.get("extension") or ""), False)[0]
                     if mtype and not mtype.startswith("image/"):
                         yield self.commit(deviation, preview)
                 del deviation["is_preview"]
