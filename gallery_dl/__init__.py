@@ -373,6 +373,10 @@ Entries:
             else:
                 jobtype = args.jobtype or job.DownloadJob
 
+            input_manager = InputManager()
+
+            input_manager.log = input_log = logging.getLogger("inputfile")
+
             if config.get(("ipcqueue",), "enabled", False):
                 from . import server
                 if server.socket_sender(args.urls):
@@ -382,13 +386,10 @@ Entries:
                     log.error(f"Failed connecting to server on host {server.HOST} port {server.PORT}")
                     return 1
 
-                input_manager = InputManagerQueue()
-
                 server.start(input_manager)
                 log.info(f"Started socket connection on host {server.HOST} port {server.PORT}")
             else:
-                input_manager = InputManager()
-            input_manager.log = input_log = logging.getLogger("inputfile")
+                config.set(("ipcqueue",), "timeout", 0)
 
             # unsupported file logging handler
             if handler := output.setup_logging_handler(
@@ -487,10 +488,10 @@ Entries:
     return 1
 
 
-class InputManager():
+class InputManager(Queue):
 
     def __init__(self):
-        self.urls = []
+        Queue.__init__(self)
         self.files = ()
         self.log = self.err = None
 
@@ -500,10 +501,11 @@ class InputManager():
         self._pformat = None
 
     def add_url(self, url):
-        self.urls.append(url)
+        self.put(url)
 
     def add_list(self, urls):
-        self.urls += urls
+        for url in urls:
+            self.put(url)
 
     def add_file(self, path, action=None):
         """Process an input file.
@@ -628,11 +630,17 @@ class InputManager():
         self._pformat = pformat.format_map
 
     def next(self):
-        self._index += 1
+        if self._pformat:
+            self._index += 1
 
     def success(self):
         if self._item:
             self._rewrite()
+
+    _sentinel = object()
+
+    def close(self):
+        self.put(self._sentinel)
 
     def error(self):
         if self.err:
@@ -676,55 +684,7 @@ class InputManager():
 
     def __next__(self):
         try:
-            url = self.urls[self._index]
-        except IndexError:
-            raise StopIteration
-
-        if isinstance(url, tuple):
-            self._item = url
-            url = url[0]
-        else:
-            self._item = None
-        self._url = url
-
-        if self._pformat:
-            output.stderr_write(self._pformat({
-                "total"  : len(self.urls),
-                "current": self._index + 1,
-                "url"    : url,
-            }))
-        return url
-
-class InputManagerQueue(InputManager, Queue):
-
-    def __init__(self, maxsize=0):
-        Queue.__init__(self, maxsize)
-        self.files = ()
-        self.log = self.err = None
-
-        self._url = ""
-        self._item = None
-        self._index = 0
-        self._pformat = None
-
-    def add_url(self, url):
-        self.put(url)
-
-    def add_list(self, urls):
-        for url in urls:
-            self.put(url)
-
-    _sentinel = object()
-
-    def __iter__(self):
-        return self
-
-    def close(self):
-        self.put(self._sentinel)
-
-    def __next__(self):
-        try:
-            url = self.get(timeout=config.get(("ipcqueue",), "timeout", 10))
+            url = self.get(timeout=None if (i := config.get(("ipcqueue",), "timeout", 0)) == -1 else i )
         except Empty:
             raise StopIteration
         if url is self._sentinel:

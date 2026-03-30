@@ -2,8 +2,11 @@ import json
 import struct
 import socket
 import threading
+import logging
 from queue import Queue, Empty
-from . import config, log
+from . import config
+
+log = logging.getLogger("server")
 
 HOST = config.get(("ipcqueue",), "host", "127.0.0.1")
 PORT = config.get(("ipcqueue",), "port", 64696)
