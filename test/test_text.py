@@ -245,6 +245,8 @@ class TestText(unittest.TestCase):
                          "example.pdf")
         self.assertEqual(f('attachment; filename="example.pdf"; '),
                          "example.pdf")
+        self.assertEqual(f('attachment; filename="foo%20bar.pdf"; '),
+                         "foo%20bar.pdf")
 
         self.assertEqual(f('''attachment; '''
                            '''filename="example.pdf"; '''
