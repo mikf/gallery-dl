@@ -388,8 +388,6 @@ Entries:
 
                 server.start(input_manager)
                 log.info(f"Started socket connection on host {server.HOST} port {server.PORT}")
-            else:
-                config.set(("ipcqueue",), "timeout", 0)
 
             # unsupported file logging handler
             if handler := output.setup_logging_handler(
@@ -418,8 +416,7 @@ Entries:
                         return getattr(exc, "code", 128)
 
             pformat = config.get(("output",), "progress", True)
-            if pformat and (len(input_manager.urls) if hasattr(input_manager, "urls") \
-                    else input_manager.qsize()) > 1 and \
+            if pformat and input_manager.qsize() > 1 and \
                     args.loglevel < logging.ERROR:
                 input_manager.progress(pformat)
 
@@ -684,7 +681,7 @@ class InputManager(Queue):
 
     def __next__(self):
         try:
-            url = self.get(timeout=None if (i := config.get(("ipcqueue",), "timeout", 0)) == -1 else i )
+            url = self.get(timeout=None if (i := config.get(("ipcqueue",), "timeout", 0)) == -1 else i)
         except Empty:
             raise StopIteration
         if url is self._sentinel:
