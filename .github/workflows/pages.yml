@@ -44,8 +44,8 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-    - uses: actions/checkout@v5
-    - uses: actions/configure-pages@v4
+    - uses: actions/checkout@v6
+    - uses: actions/configure-pages@v6
 
     - name: Copy static files
       run: |
@@ -53,6 +53,6 @@ jobs:
         cp --archive --target-directory=./_site -- \
           ./docs/oauth-redirect.html
 
-    - uses: actions/upload-pages-artifact@v3
-    - uses: actions/deploy-pages@v4
+    - uses: actions/upload-pages-artifact@v4
+    - uses: actions/deploy-pages@v5
       id: deployment

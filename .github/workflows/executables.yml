@@ -29,7 +29,7 @@ jobs:
         include:
         - os: "ubuntu-latest"
           architecture: "x64"
-          python-version: "3.13"
+          python-version: "3.14"
           python-packages: "secretstorage"
         - os: "windows-2022"
           architecture: "x86"
@@ -37,7 +37,7 @@ jobs:
           python-packages: "toml"
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python ${{ matrix.python-version }} ${{ matrix.architecture }}
       uses: actions/setup-python@v6
@@ -75,7 +75,7 @@ jobs:
         pip install truststore || true
         python ./scripts/pyinstaller.py --label '${{ env.LABEL }}'
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: executable-${{ matrix.os }}-${{ matrix.architecture }}-${{ matrix.python-version }}
         path: dist/*
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/download-artifact@v4
+    - uses: actions/download-artifact@v8
 
     - name: Environment Variables
       run: echo "DATE=$(date '+${{ env.DATE_FORMAT }}')" >> "$GITHUB_ENV"
