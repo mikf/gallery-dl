@@ -63,28 +63,39 @@ class InstagramExtractor(Extractor):
         self.login()
 
         data = self.metadata()
+
         if videos := self.config("videos", True):
             self.videos_dash = videos_dash = (videos != "merged")
-            videos_headers = {"User-Agent": "Mozilla/5.0"}
         else:
             self.videos_dash = False
-        audio = self.config("audio", False)
-        previews = self.config("previews", False)
-        max_posts = self.config("max-posts")
 
+        if previews := self.config("previews", False):
+            if isinstance(previews, str):
+                previews = previews.split(",")
+            elif not isinstance(previews, (list, tuple)):
+                previews = {"video", "audio"}
+            previews_video = ("video" in previews)
+            previews_audio = ("audio" in previews)
+        else:
+            previews_video = previews_audio = False
+        del previews
+
+        audio = self.config("audio", False)
+        max_posts = self.config("max-posts")
         order = self.config("order-files")
         reverse = order[0] in {"r", "d"} if order else False
+        videos_headers = {"User-Agent": "Mozilla/5.0"}
 
         posts = self.posts()
         if max_posts:
             posts = itertools.islice(posts, max_posts)
 
         for post in posts:
-
             if "__typename" in post:
                 post = self._parse_post_graphql(post)
             else:
                 post = self._parse_post_rest(post)
+
             if self._user:
                 post["user"] = self._user
             post.update(data)
@@ -99,11 +110,12 @@ class InstagramExtractor(Extractor):
             for file in files:
                 file = {**post, **file}
 
-                if audio and (url := file.get("audio_url")):
-                    file["_http_headers"] = videos_headers
-                    text.nameext_from_url(url, file)
-                    yield Message.Url, url, file
-                    if previews:
+                if url := file.get("audio_url"):
+                    if audio:
+                        file["_http_headers"] = videos_headers
+                        text.nameext_from_url(url, file)
+                        yield Message.Url, url, file
+                    if previews_audio:
                         file["media_id"] += "p"
                     else:
                         continue
@@ -116,7 +128,7 @@ class InstagramExtractor(Extractor):
                             file["_ytdl_manifest"] = "dash"
                             url = f"ytdl:{post['post_url']}{file['num']}.mp4"
                         yield Message.Url, url, file
-                    if previews:
+                    if previews_video:
                         file["media_id"] += "p"
                     else:
                         continue
