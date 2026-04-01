@@ -75,7 +75,7 @@ class SnapchatExtractor(Extractor):
         text.nameext_from_url(url, data)
         timestamp = item["timestampInSec"]["value"]
         # 0: image, 1: video.
-        type = item["snapMediaType"]
+        media_type = item["snapMediaType"]
         try:
             title = data["storyTitle"]["value"]
         except (KeyError, TypeError):
@@ -89,10 +89,10 @@ class SnapchatExtractor(Extractor):
 
         data.update({
             **item,
-            "type"     : "image" if type == 0 else "video",
+            "type"     : "image" if media_type == 0 else "video",
             # Unfortunately, the file extension is non-standard.
             # We'll need to overwrite it.
-            "extension": "jpg" if type == 0 else "mp4",
+            "extension": "jpg" if media_type == 0 else "mp4",
             "date"     : self.parse_timestamp(timestamp),
             "id"       : id,
             "num"      : item["snapIndex"] + 1,
