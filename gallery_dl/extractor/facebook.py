@@ -19,7 +19,7 @@ class FacebookExtractor(Extractor):
     """Base class for Facebook extractors"""
     category = "facebook"
     root = "https://www.facebook.com"
-    directory_fmt = ("{category}", "{username}", "{title} ({set_id})")
+    directory_fmt = ("{category}", "{username}", "{title}{set_id:? (/)/}")
     filename_fmt = "{id}.{extension}"
     archive_fmt = "{id}.{extension}"
 
@@ -570,16 +570,42 @@ class FacebookAvatarExtractor(FacebookExtractor):
 
     def items(self):
         user = self.cache(self._extract_profile, self.groups[0])
-        avatar_page_url = user["profilePhoto"]["url"]
-        avatar_page = self.photo_page_request_wrapper(avatar_page_url).text
 
-        avatar = self.parse_photo_page(avatar_page)
-        avatar["count"] = avatar["num"] = 1
-        avatar["type"] = "avatar"
+        if avatar_page := user.get("profilePhoto"):
+            avatar_page_url = avatar_page["url"]
+            avatar_page = self.photo_page_request_wrapper(avatar_page_url).text
 
-        set_url = f"{self.root}/media/set/?set={avatar['set_id']}"
-        set_page = self.request(set_url).text
-        directory = self.parse_set_page(set_page)
+            avatar = self.parse_photo_page(avatar_page)
+            avatar["count"] = avatar["num"] = 1
+            avatar["type"] = "avatar"
+
+            set_url = f"{self.root}/media/set/?set={avatar['set_id']}"
+            set_page = self.request(set_url).text
+            directory = self.parse_set_page(set_page)
+        else:
+            for key in ("profilePicLarge",
+                        "profilePicMedium",
+                        "profilePicSmall"):
+                if url := user.get(key):
+                    url = url["uri"]
+                    break
+            else:
+                return
+
+            directory = {
+                "set_id"    : "",
+                "username"  : user.get("username"),
+                "user_id"   : user.get("id"),
+                "user_pfbid": user.get("user_pfbid"),
+                "title"     : "Profile pictures",
+            }
+            avatar = text.nameext_from_url(url, {
+                **directory,
+                "id"   : (a := user.get("user_avatar")) and a.get("id"),
+                "url"  : url,
+                "count": 1,
+                "type" : "avatar",
+            })
 
         yield Message.Directory, "", directory
         yield Message.Url, avatar["url"], avatar
