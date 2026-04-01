@@ -135,7 +135,11 @@ class TestExtractorModule(unittest.TestCase):
                     f"Skipping '{cls.category}' category checks\n")
             raise
         self.assertTrue(extr, url)
-        self.assertIs(extr.__class__, find.__class__, url)
+        if find is None:
+            self.assertFalse(cls.__module__.startswith(
+                "gallery_dl.extractor."), "external extractor")
+        else:
+            self.assertIs(extr.__class__, find.__class__, url)
 
         categories = result.get("#category")
         if categories:
