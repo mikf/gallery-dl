@@ -583,7 +583,7 @@ class TwitterExtractor(Extractor):
 
         lget = legacy.get
         if lget("withheld_scope"):
-            self.log.warning("'%s'", lget("description"))
+            self.log.warning("u%s: '%s'", uid, lget("description"))
 
         self._user_cache[uid] = udata = {
             "id"              : text.parse_int(uid),
@@ -626,14 +626,22 @@ class TwitterExtractor(Extractor):
                 udata["url"] = url.get("expanded_url") or url.get("url")
         udata["description"] = descr
 
-        if self.config("metadata-user", False) and (about := self.cache(
-                self.api.user_about_account, udata["name"]).get(
-                "about_profile")):
-            udata["source"] = about.get("source")
-            udata["based_in"] = about.get("account_based_in")
-            udata["location_accurate"] = about.get("location_accurate")
-            udata["name_changes"] = (d := about.get(
-                "username_changes")) and d.get("count") or 0
+        if self.config("metadata-user", False):
+            try:
+                if (about := self.cache(self.api.user_about_account,
+                                        udata["name"]).get("about_profile")):
+                    udata["source"] = about.get("source")
+                    udata["based_in"] = about.get("account_based_in")
+                    udata["location_accurate"] = about.get("location_accurate")
+                    udata["name_changes"] = (d := about.get(
+                        "username_changes")) and d.get("count") or 0
+                udata["friends_mutual"] = self.api.friends_following_list(
+                    uid).get("total_count")
+            except Exception as exc:
+                self.traceback(exc)
+                self.log.warning("u%s: Failed to extract extended user "
+                                 "metadata (%s: %s)",
+                                 uid, exc.__class__.__name__, exc)
 
         return udata
 
@@ -1694,6 +1702,28 @@ class TwitterAPI():
         }
         return self._pagination_users(
             endpoint, variables, ("list", "members_timeline", "timeline"))
+
+    def friends_following_list(self, user_id):
+        endpoint = "/1.1/friends/following/list.json"
+        params = {
+            "include_profile_interstitial_type": "1",
+            "include_blocking": "1",
+            "include_blocked_by": "1",
+            "include_followed_by": "1",
+            "include_want_retweets": "1",
+            "include_mute_edge": "1",
+            "include_can_dm": "1",
+            "include_can_media_tag": "1",
+            "include_ext_is_blue_verified": "1",
+            "include_ext_verified_type": "1",
+            "include_ext_profile_image_shape": "1",
+            "skip_status": "1",
+            "cursor": "-1",
+            "user_id": user_id,
+            "count": "3",
+            "with_total_count": "true",
+        }
+        return self._call(endpoint, params)
 
     def notifications_devicefollow(self):
         endpoint = "/2/notifications/device_follow.json"

@@ -6614,11 +6614,12 @@ Description
     Extract additional metadata for user accounts (``author``, ``user``)
 
     * ``based_in``
+    * ``friends_mutual``
     * ``location_accurate``
     * ``name_changes``
     * ``source``
 Note
-    This requires 1 additional HTTP request per user.
+    This requires 2 additional HTTP request per user.
 
 
 extractor.twitter.pinned
