@@ -197,9 +197,12 @@ class SnapchatLimitedSupportExtractor(SnapchatExtractor):
 
     def _init(self):
         if not SnapchatLimitedSupportExtractor._user_has_been_alerted:
+            subcategory = self.subcategory
+            if subcategory == "user":
+                subcategory += "s"
             self.log.warning("Be aware that support for Snapchat %s is "
                              "limited, you may not be able to download every "
-                             "post!", self.subcategory)
+                             "post!", subcategory)
             SnapchatLimitedSupportExtractor._user_has_been_alerted = True
 
 
@@ -264,7 +267,7 @@ class SnapchatSpotlightsExtractor(SnapchatLimitedSupportExtractor):
 
 class SnapchatUserExtractor(SnapchatLimitedSupportExtractor):
     """Extractor for a Snapchat user profile"""
-    subcategory = "users"
+    subcategory = "user"
     pattern = USER_PATTERN
     example = "https://www.snapchat.com/@username"
 
