@@ -241,7 +241,7 @@ class SnapchatSpotlightsExtractor(SnapchatLimitedSupportExtractor):
     user"""
     subcategory = "spotlights"
     pattern = USER_PATTERN + r"/spotlights"
-    example = "https://www.snapchat.com/@username/spotlight"
+    example = "https://www.snapchat.com/@username/spotlights"
 
     def items(self):
         user = self.groups[0]
