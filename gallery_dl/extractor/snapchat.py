@@ -89,10 +89,10 @@ class SnapchatExtractor(Extractor):
 
         data.update({
             **item,
-            "type"     : "image" if type == "0" else "video",
+            "type"     : "image" if type == 0 else "video",
             # Unfortunately, the file extension is non-standard.
             # We'll need to overwrite it.
-            "extension": "jpg" if type == "o" else "mp4",
+            "extension": "jpg" if type == 0 else "mp4",
             "date"     : self.parse_timestamp(timestamp),
             "id"       : id,
             "num"      : item["snapIndex"] + 1,
