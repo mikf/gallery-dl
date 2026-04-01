@@ -11,7 +11,8 @@ from .. import text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?snapchat\.com"
 ALPHANUMERIC = r"[^/?#]+"
-USER_PATTERN = BASE_PATTERN + rf"/(?:@|add/)({ALPHANUMERIC})"
+USER = rf"(?:@|add/)({ALPHANUMERIC})"
+USER_PATTERN = BASE_PATTERN + r"/" + USER
 
 
 class SnapchatExtractor(Extractor):
@@ -139,8 +140,8 @@ class SnapchatStoryExtractor(SnapchatExtractor):
     # https://www.snapchat.com/@snackattackshow/
     # PnJFM8uuTRWo90OsrEH5pwAAgeGZvd2RrZGxxAZ1I2NonAZ1I2NmfAAAAAA.
     pattern = USER_PATTERN + r"/(?:highlight/)?[^/?#]{20,}"
-    example = "https://www.snapchat.com/@username/highlight/"
-    "c3050cba-2f43-4e06-8ac4-d79069bac22f"
+    example = "https://www.snapchat.com/@username/highlight/" + \
+        "c3050cba-2f43-4e06-8ac4-d79069bac22f"
 
     def items(self):
         next_data = self._extract_next_data(self.url)
@@ -166,9 +167,9 @@ class SnapchatStoryExtractor(SnapchatExtractor):
 class SnapchatSpotlightExtractor(SnapchatExtractor):
     """Extracts an individual spotlight post"""
     subcategory = "spotlight"
-    pattern = BASE_PATTERN + rf"/(?:@{ALPHANUMERIC}/)?spotlight/{ALPHANUMERIC}"
-    example = "https://www.snapchat.com/spotlight/"
-    "W7_EDlXWTBiXAEEniNoMPwAAYdGFzb3FpYXVuAZqDMm6sAZqDMm6VAAAAAQ"
+    pattern = BASE_PATTERN + rf"/(?:{USER})?spotlight/{ALPHANUMERIC}"
+    example = "https://www.snapchat.com/spotlight/" + \
+        "W7_EDlXWTBiXAEEniNoMPwAAYdGFzb3FpYXVuAZqDMm6sAZqDMm6VAAAAAQ"
 
     def items(self):
         next_data = self._extract_next_data(self.url)

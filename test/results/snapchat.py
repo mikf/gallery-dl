@@ -139,7 +139,7 @@ __tests__ = (
 {
     "#url"      : "https://www.snapchat.com/@drkashmalahussa",
     "#comment"  : "User",
-    "#category" : ("", "snapchat", "users"),
+    "#category" : ("", "snapchat", "user"),
     "#class"    : snapchat.SnapchatUserExtractor,
     "#pattern"  : r"(?:" + AVATAR_PATTERN + r"|" + SNAP_PATTERN + r")",
     "#count"    : 18,
@@ -149,7 +149,7 @@ __tests__ = (
 {
     "#url"      : "https://www.snapchat.com/add/drkashmalahussa",
     "#comment"  : "User (/add/ Variant)",
-    "#category" : ("", "snapchat", "users"),
+    "#category" : ("", "snapchat", "user"),
     "#class"    : snapchat.SnapchatUserExtractor,
     "#pattern"  : r"(?:" + AVATAR_PATTERN + r"|" + SNAP_PATTERN + r")",
     "#count"    : 18,
@@ -158,7 +158,7 @@ __tests__ = (
 {
     "#url"      : "https://www.snapchat.com/@abc123123123123zzzzzzzgh",
     "#comment"  : "User (Non-Existent)",
-    "#category" : ("", "snapchat", "users"),
+    "#category" : ("", "snapchat", "user"),
     "#class"    : snapchat.SnapchatUserExtractor,
     "#exception": exception.HttpError,
 },
