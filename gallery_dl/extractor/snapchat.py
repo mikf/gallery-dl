@@ -7,11 +7,10 @@
 """Extractors for https://www.snapchat.com/"""
 
 from .common import Extractor, Message
-from .. import text, util
+from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?snapchat\.com"
-ALPHANUMERIC = r"[^/?#]+"
-USER = rf"(?:@|add/)({ALPHANUMERIC})"
+USER = r"(?:@|add/)([^/?#]+)"
 USER_PATTERN = BASE_PATTERN + r"/" + USER
 
 
@@ -27,10 +26,8 @@ class SnapchatExtractor(Extractor):
 
     def _extract_next_data(self, url):
         html = self.request(url).text
-        data = text.extr(html,
-                         '<script id="__NEXT_DATA__" type="application/json">',
-                         '</script>')
-        return util.json_loads(data)["props"]["pageProps"]
+        data = self._extract_nextdata(html)
+        return data["props"]["pageProps"]
 
     def _extract_avatar(self, next_data):
         metadata = next_data["userProfile"]["publicProfileInfo"].copy()
@@ -167,7 +164,7 @@ class SnapchatStoryExtractor(SnapchatExtractor):
 class SnapchatSpotlightExtractor(SnapchatExtractor):
     """Extracts an individual spotlight post"""
     subcategory = "spotlight"
-    pattern = BASE_PATTERN + rf"/(?:{USER})?spotlight/{ALPHANUMERIC}"
+    pattern = BASE_PATTERN + rf"/(?:{USER})?spotlight/[^/?#]+"
     example = "https://www.snapchat.com/spotlight/" + \
         "W7_EDlXWTBiXAEEniNoMPwAAYdGFzb3FpYXVuAZqDMm6sAZqDMm6VAAAAAQ"
 
