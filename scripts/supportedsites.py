@@ -194,6 +194,7 @@ CATEGORY_MAP = {
     "slickpic"       : "SlickPic",
     "slideshare"     : "SlideShare",
     "smugmug"        : "SmugMug",
+    "snapchat"       : "Snapchat",
     "socialmediagirlsforum": "Social Media Girls Forums",
     "speakerdeck"    : "Speaker Deck",
     "steamgriddb"    : "SteamGridDB",
@@ -442,6 +443,10 @@ SUBCATEGORY_MAP = {
     },
     "smugmug": {
         "path": "Images from Users and Folders",
+    },
+    "snapchat": {
+        "story": "",
+        "spotlight": "",
     },
     "steamgriddb": {
         "asset": "Individual Assets",

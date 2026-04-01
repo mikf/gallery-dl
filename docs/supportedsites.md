@@ -1045,6 +1045,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, individual Images, Images from Users and Folders</td>
     <td><a href="https://github.com/mikf/gallery-dl#oauth">OAuth</a></td>
 </tr>
+<tr id="snapchat" title="snapchat">
+    <td>Snapchat</td>
+    <td>https://www.snapchat.com/</td>
+    <td>Avatars, Spotlights, Stories, Users</td>
+    <td></td>
+</tr>
 <tr id="soundgasm" title="soundgasm">
     <td>Soundgasm</td>
     <td>https://soundgasm.net/</td>
