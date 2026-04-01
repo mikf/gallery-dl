@@ -10,7 +10,7 @@ from .common import Extractor, Message
 from .. import text
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?snapchat\.com"
-USER = r"(?:@|add/)([^/?#]+)"
+USER = r"(?:@|add/)([^/\?#]+)"
 USER_PATTERN = BASE_PATTERN + r"/" + USER
 
 
@@ -24,7 +24,7 @@ class SnapchatExtractor(Extractor):
     root = "https://www.snapchat.com"
     cookies_domain = ".snapchat.com"
 
-    def _extract_next_data(self, url):
+    def _request_next_data(self, url):
         html = self.request(url).text
         data = self._extract_nextdata(html)
         return data["props"]["pageProps"]
@@ -45,7 +45,7 @@ class SnapchatExtractor(Extractor):
             "type"     : "avatar",
             # Unfortunately, the file extension is non-standard.
             # We'll need to overwrite it.
-            "extension": "jpeg",
+            "extension": "jpg",
             "date"     : self.parse_timestamp(timestamp),
             "id"       : metadata["username"],
             "file_id"  : url.rpartition("/")[2].rpartition(".")[0],
@@ -92,7 +92,7 @@ class SnapchatExtractor(Extractor):
             "type"     : "image" if type == "0" else "video",
             # Unfortunately, the file extension is non-standard.
             # We'll need to overwrite it.
-            "extension": "jpeg" if type == "o" else "mp4",
+            "extension": "jpg" if type == "o" else "mp4",
             "date"     : self.parse_timestamp(timestamp),
             "id"       : id,
             "num"      : item["snapIndex"] + 1,
@@ -121,7 +121,7 @@ class SnapchatAvatarExtractor(SnapchatExtractor):
     def items(self):
         user = self.groups[0]
         profile_url = f"{self.root}/@{user}"
-        next_data = self._extract_next_data(profile_url)
+        next_data = self._request_next_data(profile_url)
         next_data["user"] = user
 
         [avatar_url, next_data] = self._extract_avatar(next_data)
@@ -136,12 +136,12 @@ class SnapchatStoryExtractor(SnapchatExtractor):
     # one. It is used to match against "timed" stories such as this one:
     # https://www.snapchat.com/@snackattackshow/
     # PnJFM8uuTRWo90OsrEH5pwAAgeGZvd2RrZGxxAZ1I2NonAZ1I2NmfAAAAAA.
-    pattern = USER_PATTERN + r"/(?:highlight/)?[^/?#]{20,}"
+    pattern = USER_PATTERN + r"/(?:highlight/)?[^/\?#]{20,}"
     example = "https://www.snapchat.com/@username/highlight/" + \
         "c3050cba-2f43-4e06-8ac4-d79069bac22f"
 
     def items(self):
-        next_data = self._extract_next_data(self.url)
+        next_data = self._request_next_data(self.url)
         story_data = self._extract_story(next_data)
         if "publicUserProfile" in next_data:
             story_data["user"] = next_data["publicUserProfile"]["username"]
@@ -164,12 +164,12 @@ class SnapchatStoryExtractor(SnapchatExtractor):
 class SnapchatSpotlightExtractor(SnapchatExtractor):
     """Extracts an individual spotlight post"""
     subcategory = "spotlight"
-    pattern = BASE_PATTERN + rf"/(?:{USER})?spotlight/[^/?#]+"
+    pattern = BASE_PATTERN + rf"/(?:{USER}/)?spotlight/[^/\?#]+"
     example = "https://www.snapchat.com/spotlight/" + \
         "W7_EDlXWTBiXAEEniNoMPwAAYdGFzb3FpYXVuAZqDMm6sAZqDMm6VAAAAAQ"
 
     def items(self):
-        next_data = self._extract_next_data(self.url)
+        next_data = self._request_next_data(self.url)
         next_data = self._extract_spotlight_feed(next_data)
         spotlight_data = next_data[0]["story"].copy()
         spotlight_data["metadata"] = next_data[0]["metadata"].copy()
@@ -214,7 +214,7 @@ class SnapchatStoriesExtractor(SnapchatLimitedSupportExtractor):
     def items(self):
         user = self.groups[0]
         profile_url = f"{self.root}/@{user}"
-        next_data = self._extract_next_data(profile_url)
+        next_data = self._request_next_data(profile_url)
         next_data["user"] = user
 
         yield Message.Directory, "", next_data
@@ -243,7 +243,7 @@ class SnapchatSpotlightsExtractor(SnapchatLimitedSupportExtractor):
     def items(self):
         user = self.groups[0]
         profile_url = f"{self.root}/@{user}"
-        next_data = self._extract_next_data(profile_url)
+        next_data = self._request_next_data(profile_url)
         next_data["user"] = user
 
         yield Message.Directory, "", next_data
@@ -266,13 +266,13 @@ class SnapchatSpotlightsExtractor(SnapchatLimitedSupportExtractor):
 class SnapchatUserExtractor(SnapchatLimitedSupportExtractor):
     """Extractor for a Snapchat user profile"""
     subcategory = "user"
-    pattern = USER_PATTERN
+    pattern = USER_PATTERN + r"$"
     example = "https://www.snapchat.com/@username"
 
     def items(self):
         user = self.groups[0]
         profile_url = f"{self.root}/@{user}"
-        next_data = self._extract_next_data(profile_url)
+        next_data = self._request_next_data(profile_url)
         next_data["user"] = user
 
         yield Message.Directory, "", next_data

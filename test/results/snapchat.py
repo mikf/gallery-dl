@@ -4,7 +4,6 @@
 # it under the terms of the GNU General Public License version 2 as
 # published by the Free Software Foundation.
 
-from gallery_dl import exception
 from gallery_dl.extractor import snapchat
 
 BASE_DOMAIN_PATTERN = r"https://(?:cf-st|bolt-gcdn)"
@@ -26,7 +25,7 @@ __tests__ = (
     "#comment"  : "Avatar (Non-Existent)",
     "#category" : ("", "snapchat", "avatar"),
     "#class"    : snapchat.SnapchatAvatarExtractor,
-    "#exception": exception.HttpError,
+    "#exception": "HttpError",
 },
 
 {
@@ -62,7 +61,7 @@ __tests__ = (
     "#comment"  : "Story/Highlight (Non-Existent)",
     "#category" : ("", "snapchat", "story"),
     "#class"    : snapchat.SnapchatStoryExtractor,
-    "#exception": exception.HttpError,
+    "#exception": "HttpError",
 },
 
 {
@@ -90,7 +89,7 @@ __tests__ = (
     "#comment"  : "Spotlight (Non-Existent)",
     "#category" : ("", "snapchat", "spotlight"),
     "#class"    : snapchat.SnapchatSpotlightExtractor,
-    "#exception": exception.HttpError,
+    "#exception": "HttpError",
 },
 
 {
@@ -116,7 +115,7 @@ __tests__ = (
     "#comment"  : "User Stories (Non-Existent)",
     "#category" : ("", "snapchat", "stories"),
     "#class"    : snapchat.SnapchatStoriesExtractor,
-    "#exception": exception.HttpError,
+    "#exception": "HttpError",
 },
 
 {
@@ -133,7 +132,7 @@ __tests__ = (
     "#comment"  : "User Spotlights (Non-Existent)",
     "#category" : ("", "snapchat", "spotlights"),
     "#class"    : snapchat.SnapchatSpotlightsExtractor,
-    "#exception": exception.HttpError,
+    "#exception": "HttpError",
 },
 
 {
@@ -160,6 +159,6 @@ __tests__ = (
     "#comment"  : "User (Non-Existent)",
     "#category" : ("", "snapchat", "user"),
     "#class"    : snapchat.SnapchatUserExtractor,
-    "#exception": exception.HttpError,
+    "#exception": "HttpError",
 },
 )

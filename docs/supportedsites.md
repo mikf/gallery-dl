@@ -1048,7 +1048,7 @@ Consider all listed sites to potentially be NSFW.
 <tr id="snapchat" title="snapchat">
     <td>Snapchat</td>
     <td>https://www.snapchat.com/</td>
-    <td>Avatars, Spotlights, Stories, Users</td>
+    <td>Avatars, Spotlights, Stories, User Profiles</td>
     <td></td>
 </tr>
 <tr id="soundgasm" title="soundgasm">
