@@ -186,6 +186,27 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/permalink.php?story_fbid=pfbid02P6zhg3UN71iAM1kiprstNfZuArXc83n5n1X842kPbsyQU6BdAUacgNsHw3LkmKasl&id=61558212601742",
+    "#comment" : "'/permalink.php' post URL (#9352)",
+    "#class"   : facebook.FacebookSetExtractor,
+    "#range"   : "1-3",
+    "#pattern" : r"https://scontent-.*.xx.fbcdn.net/v/.+",
+
+    "caption"       : "",
+    "date"          : "dt:2026-03-20 07:01:13",
+    "extension"     : "jpg",
+    "filename"      : str,
+    "first_photo_id": "122225439782273753",
+    "followups_ids" : [],
+    "id"            : r"re:12\d+",
+    "set_id"        : "pcb.pfbid02P6zhg3UN71iAM1kiprstNfZuArXc83n5n1X842kPbsyQU6BdAUacgNsHw3LkmKasl",
+    "title"         : "Photos from 金城漫與畫's post",
+    "user_id"       : "61558212601742",
+    "user_pfbid"    : "",
+    "username"      : "金城漫與畫",
+},
+
+{
     "#url"     : "https://www.facebook.com/photo.php?fbid=10165113568399554&set=t.100064860875397&type=3",
     "#class"   : facebook.FacebookPhotoExtractor,
 },

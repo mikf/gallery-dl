@@ -119,10 +119,6 @@ class FacebookExtractor(Extractor):
                 photo_page,
                 '"nextMediaAfterNodeId":{"__typename":"Photo","id":"',
                 '"'
-            ) or text.extr(
-                photo_page,
-                '"nextMedia":{"edges":[{"node":{"__typename":"Photo","id":"',
-                '"'
             )
         }
 
@@ -308,7 +304,7 @@ class FacebookExtractor(Extractor):
                         "Detected a loop in the set, it's likely finished. "
                         "Extraction is over."
                     )
-            elif self._detect_jump and \
+            elif self._detect_jump and not set_id.startswith('pcb.') and \
                     int(photo["next_photo_id"]) > int(photo["id"]) + i*120:
                 self.log.info(
                     "Detected jump to the beginning of the set. (%s -> %s)",
@@ -444,15 +440,21 @@ class FacebookSetExtractor(FacebookExtractor):
         BASE_PATTERN +
         r"/(?:(?:media/set|photo)/?\?(?:[^&#]+&)*set=([^&#]+)"
         r"[^/?#]*(?<!&setextract)$"
-        r"|([^/?#]+/posts/[^/?#]+)"
-        r"|photo/\?(?:[^&#]+&)*fbid=([^/?&#]+)&set=([^/?&#]+)&setextract)"
+        r"|[^/?#]+/posts/([^/?#]+)"
+        r"|photo/\?(?:[^&#]+&)*fbid=([^/?&#]+)&set=([^/?&#]+)&setextract"
+        r"|(?:groups/)?(?:[^/?#]+/)?(?:permalink|posts)(?:\.php)?"
+        r"(?:/(\d+)|\?\w+=([^/?#]+))"
+        r"|events/[^/?#]+/\??post_id=(\d+))"
     )
     example = "https://www.facebook.com/media/set/?set=SET_ID"
 
     def items(self):
-        set_id = self.groups[0] or self.groups[3]
-        if path := self.groups[1]:
-            post_url = self.root + "/" + path
+        set_id, path, first_pid, set_id2, pcb1, pcb2, pcb3 = self.groups
+        if not set_id:
+            set_id = set_id2
+
+        if path:
+            post_url = f"{self.root}/{path}"
             post_page = self.request(post_url).text
             post = self.parse_post_page(post_page)
 
@@ -462,12 +464,14 @@ class FacebookSetExtractor(FacebookExtractor):
                 self.groups = (params["fbid"],)
                 return FacebookPhotoExtractor.items(self)
             self._detect_jump = False
+        elif not set_id:
+            set_id = "pcb." + (pcb1 or pcb2 or pcb3)
 
         set_url = f"{self.root}/media/set/?set={set_id}"
         set_page = self.request(set_url).text
         set_data = self.parse_set_page(set_page)
-        if self.groups[2]:
-            set_data["first_photo_id"] = self.groups[2]
+        if first_pid:
+            set_data["first_photo_id"] = first_pid
 
         return self.extract_set(set_data)
 
