@@ -88,6 +88,7 @@ class CienArticleExtractor(CienExtractor):
             self._extract_files_gallery(page, files)
         else:
             generators = {
+                "cover"   : self._extract_files_cover,
                 "image"   : self._extract_files_image,
                 "video"   : self._extract_files_video,
                 "download": self._extract_files_download,
@@ -100,6 +101,13 @@ class CienArticleExtractor(CienExtractor):
                 generators[ft.rstrip("s")](page, files)
 
         return files
+
+    def _extract_files_cover(self, page, files):
+        files.append({
+            "url" : text.extr(
+                page, 'property="og:image"\n          content="', '"'),
+            "type": "cover",
+        })
 
     def _extract_files_image(self, page, files):
         for image in text.extract_iter(
