@@ -291,7 +291,6 @@ class TumblrPostExtractor(TumblrExtractor):
     example = "https://www.tumblr.com/BLOG/12345"
 
     def posts(self):
-        self.reblogs = True
         self.date_min = 0
         return self.api.posts(self.blog, {"id": self.groups[3]})
 
