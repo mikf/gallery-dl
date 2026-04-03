@@ -91,6 +91,11 @@ BASE_PATTERN = CheveretoExtractor.update({
         "root": "https://imglike.com",
         "pattern": r"(?:www\.)?imglike\.com",
     },
+    "putmega": {
+        "root": "https://putmega.com",
+        "pattern": r"(?:www\.)?putme(?:ga\.com|\.ga)",
+    },
+
 })
 
 

@@ -1375,6 +1375,12 @@ Consider all listed sites to potentially be NSFW.
     <td>Albums, Categories, Files, User Profiles</td>
     <td></td>
 </tr>
+<tr id="putmega" title="putmega">
+    <td>Putmega</td>
+    <td>https://putmega.com/</td>
+    <td>Albums, Categories, Files, User Profiles</td>
+    <td></td>
+</tr>
 
 <tr id="Danbooru" title="Danbooru">
     <td colspan="4"><strong>Danbooru Instances</strong></td>
