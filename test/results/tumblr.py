@@ -273,6 +273,34 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.tumblr.com/oidial/812307562622042112/i-understand-the-concern-but-you-cant-get-between",
+    "#comment" : "'reblogs: same-blog' option (#9360)",
+    "#class"   : tumblr.TumblrPostExtractor,
+    "#auth"    : True,
+    "#options" : {"reblogs": "same-blog"},
+    "#results" : (
+        "https://64.media.tumblr.com/4b451c7f092a6f10fe7e61d406b58725/b443af06fefd3bed-f1/s99999x99999/b7cf9ede4d0d32cf5a8dbddbb9fa33421520f91e.png",
+        "https://64.media.tumblr.com/541867089dd3a5db4e2958618064b7cc/b7bda2f076509c8b-85/s99999x99999/32b899d9004f173efa63cc55fe47f096ee46b038.png",
+        "https://64.media.tumblr.com/2674c9b73e96d9177cbb1c002bf83345/b7bda2f076509c8b-f7/s99999x99999/ca52c46ce449699023e87111a38798be39504c60.png",
+        "https://64.media.tumblr.com/7246fec36bb3ef3be51e1d8c608a9565/b7bda2f076509c8b-0b/s99999x99999/e5f198b5e98421772f617f436feaa00bb7e062c3.png",
+    ),
+
+    "blog_name"       : "oidial",
+    "date"            : "dt:2026-03-28 05:47:39",
+    "id"              : 812307562622042112,
+    "reblogged"       : True,
+    "reblogged_from_id"   : "812300793494503424",
+    "reblogged_from_name" : "oidial",
+    "reblogged_from_title": "koidial but blue",
+    "reblogged_from_url"  : "https://www.tumblr.com/blog/view/oidial/812300793494503424",
+    "reblogged_from_uuid" : "t:7e50zZpVin78ZAzj-oLhlg",
+    "blog"            : {
+        "name": "oidial",
+        "uuid": "t:7e50zZpVin78ZAzj-oLhlg",
+    },
+},
+
+{
     "#url"     : "http://demo.tumblr.com/tagged/Times%20Square",
     "#class"   : tumblr.TumblrTagExtractor,
     "#pattern" : r"https://\d+\.media\.tumblr\.com/tumblr_[^/_]+_1280.jpg",

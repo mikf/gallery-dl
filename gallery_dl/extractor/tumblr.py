@@ -98,6 +98,8 @@ class TumblrExtractor(Extractor):
 
             reblog = "reblogged_from_id" in post
             if reblog and self._skip_reblog(post):
+                self.log.debug("%s: Skipping reblogged post from %s",
+                               post.get("id"), post.get("reblogged_from_name"))
                 continue
             post["reblogged"] = reblog
 
@@ -240,7 +242,10 @@ class TumblrExtractor(Extractor):
         return not self.reblogs
 
     def _skip_reblog_same_blog(self, post):
-        return self.blog != post.get("reblogged_root_uuid")
+        try:
+            return post["blog"]["uuid"] != post.get("reblogged_root_uuid")
+        except Exception:
+            return self.blog != post.get("reblogged_root_uuid")
 
     def _original_photo(self, url):
         resized = url.replace("/s2048x3072/", "/s99999x99999/", 1)
