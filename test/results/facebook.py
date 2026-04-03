@@ -128,6 +128,25 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://www.facebook.com/sua.banhmi.370/avatar",
+    "#comment" : "no 'profilePhoto' and profile photo page (#9347)",
+    "#class"   : facebook.FacebookAvatarExtractor,
+    "#pattern" : "https://scontent-.+.xx.fbcdn.net/.+",
+
+    "count"     : 1,
+    "extension" : "jpg",
+    "filename"  : "475800555_971547608250639_1909157744784342701_n",
+    "id"        : "983431630395570",
+    "set_id"    : "",
+    "title"     : "Profile pictures",
+    "type"      : "avatar",
+    "url"       : str,
+    "user_id"   : "100061862277212",
+    "user_pfbid": "pfbid0287MaQCX1Vp5ob73Dm6fAQWbKSu2aaCWf4ceydTGKJQEdMHXoVB1x5d6WZy5kth74l",
+    "username"  : "sua.banhmi.370",
+},
+
+{
     "#url"     : "https://www.facebook.com/media/set/?set=a.10152716010956729&type=3",
     "#class"   : facebook.FacebookSetExtractor,
     "#count"   : 6,

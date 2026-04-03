@@ -252,7 +252,7 @@ class TwitterExtractor(Extractor):
                 url = media["media_url_https"]
                 if url[-4] == ".":
                     base, _, fmt = url.rpartition(".")
-                    base += "?format=" + fmt + "&name="
+                    base = f"{base}?format={fmt}&name="
                 else:
                     base = url.rpartition("=")[0] + "="
                 file = text.nameext_from_url(url, {
@@ -349,28 +349,30 @@ class TwitterExtractor(Extractor):
 
     def _extract_article(self, tweet, files):
         article = tweet["article"]["article_results"]["result"]
-
         if media := article.get("cover_media"):
-            info = media["media_info"]
-            files.append({
-                "media_id" : media["media_id"],
-                "media_key": media["media_key"],
-                "url"      : info["original_img_url"],
-                "width"    : info["original_img_width"],
-                "height"   : info["original_img_height"],
-                "type"     : "article:cover",
-            })
-
+            files.append(self._extract_article_media(media, "cover"))
         for media in article["media_entities"]:
-            info = media["media_info"]
-            files.append({
-                "media_id" : media["media_id"],
-                "media_key": media["media_key"],
-                "url"      : info["original_img_url"],
-                "width"    : info["original_img_width"],
-                "height"   : info["original_img_height"],
-                "type"     : "article:cover",
-            })
+            files.append(self._extract_article_media(media, "image"))
+
+    def _extract_article_media(self, media, type):
+        info = media["media_info"]
+        url = info["original_img_url"]
+
+        if url[-4] == ".":
+            base, _, fmt = url.rpartition(".")
+            base = f"{base}?format={fmt}&name="
+        else:
+            base = url.rpartition("=")[0] + "="
+
+        return {
+            "url"      : base + self._size_image,
+            "_fallback": self._image_fallback(base),
+            "width"    : info["original_img_width"],
+            "height"   : info["original_img_height"],
+            "media_id" : media["media_id"],
+            "media_key": media["media_key"],
+            "type"     : "article:" + type,
+        }
 
     def _extract_twitpic(self, tweet, files):
         urls = {}

@@ -3771,9 +3771,14 @@ Note
 extractor.instagram.previews
 ----------------------------
 Type
-    ``bool``
+    * ``bool``
+    * ``string``
+    * ``list`` of ``strings``
 Default
     ``false``
+Example
+    * ``"video"``
+    * ``["audio", "video"]``
 Description
     Download video previews and audio covers.
 

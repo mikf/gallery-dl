@@ -401,8 +401,8 @@ class Extractor():
         CACHE_MEMORY[key] = value, expires
         return value
 
-    def cache_update(self, func, key=None, value=None, _exp=0, _mem=False):
-        if key is None:
+    def cache_update(self, func, key=..., value=None, _exp=0, _mem=False):
+        if key is ...:
             key = f"{func.__module__}.{func.__name__}"
         else:
             key = f"{func.__module__}.{func.__name__}-{key}"

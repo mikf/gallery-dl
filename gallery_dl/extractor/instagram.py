@@ -63,28 +63,39 @@ class InstagramExtractor(Extractor):
         self.login()
 
         data = self.metadata()
+
         if videos := self.config("videos", True):
             self.videos_dash = videos_dash = (videos != "merged")
-            videos_headers = {"User-Agent": "Mozilla/5.0"}
         else:
             self.videos_dash = False
-        audio = self.config("audio", False)
-        previews = self.config("previews", False)
-        max_posts = self.config("max-posts")
 
+        if previews := self.config("previews", False):
+            if isinstance(previews, str):
+                previews = previews.split(",")
+            elif not isinstance(previews, (list, tuple)):
+                previews = {"video", "audio"}
+            previews_video = ("video" in previews)
+            previews_audio = ("audio" in previews)
+        else:
+            previews_video = previews_audio = False
+        del previews
+
+        audio = self.config("audio", False)
+        max_posts = self.config("max-posts")
         order = self.config("order-files")
         reverse = order[0] in {"r", "d"} if order else False
+        videos_headers = {"User-Agent": "Mozilla/5.0"}
 
         posts = self.posts()
         if max_posts:
             posts = itertools.islice(posts, max_posts)
 
         for post in posts:
-
             if "__typename" in post:
                 post = self._parse_post_graphql(post)
             else:
                 post = self._parse_post_rest(post)
+
             if self._user:
                 post["user"] = self._user
             post.update(data)
@@ -99,11 +110,12 @@ class InstagramExtractor(Extractor):
             for file in files:
                 file = {**post, **file}
 
-                if audio and (url := file.get("audio_url")):
-                    file["_http_headers"] = videos_headers
-                    text.nameext_from_url(url, file)
-                    yield Message.Url, url, file
-                    if previews:
+                if url := file.get("audio_url"):
+                    if audio:
+                        file["_http_headers"] = videos_headers
+                        text.nameext_from_url(url, file)
+                        yield Message.Url, url, file
+                    if previews_audio:
                         file["media_id"] += "p"
                     else:
                         continue
@@ -116,7 +128,7 @@ class InstagramExtractor(Extractor):
                             file["_ytdl_manifest"] = "dash"
                             url = f"ytdl:{post['post_url']}{file['num']}.mp4"
                         yield Message.Url, url, file
-                    if previews:
+                    if previews_video:
                         file["media_id"] += "p"
                     else:
                         continue
@@ -335,31 +347,20 @@ class InstagramExtractor(Extractor):
             self._extract_tagged_users(item, media)
             files.append(media)
 
-        if "music_metadata" in post:
+            if stickers := item.get("story_music_stickers"):
+                try:
+                    if audio := self._extract_audio(item, media, stickers[0]):
+                        audio["num"] = num
+                        files.append(audio)
+                except Exception as exc:
+                    self.log.traceback(exc)
+
+        if metadata := post.get("music_metadata"):
             try:
-                info = post["music_metadata"]["music_info"]
-                audio = info["music_asset_info"]
-                files.append({
-                    "num"        : num,
-                    "date"       : self.parse_timestamp(post.get("taken_at")),
-                    "media_id"   : audio["id"],
-                    "shortcode"  : shortcode_from_id(audio["id"]),
-                    "display_url": audio["cover_artwork_uri"],
-                    "audio_url"  : audio["progressive_download_url"],
-                    "width"          : 0,
-                    "width_original" : 0,
-                    "height"         : 0,
-                    "height_original": 0,
-                })
-                data["audio_title"] = audio.get("title")
-                data["audio_duration"] = audio.get("duration_in_ms", 0) / 1000
-                data["audio_timestamps"] = audio.get(
-                    "highlight_start_times_in_ms")
-                if info := info.get("music_consumption_info"):
-                    data["audio_artist"] = (info.get("ig_artist") or
-                                            audio.get("display_artist"))
-                else:
-                    data["audio_artist"] = audio.get("display_artist")
+                if audio := self._extract_audio(
+                        post, data, metadata.get("music_info")):
+                    audio["num"] = num
+                    files.append(audio)
             except Exception as exc:
                 self.log.traceback(exc)
 
@@ -498,6 +499,40 @@ class InstagramExtractor(Extractor):
     def _extract_pinned(self, post):
         return (post.get("timeline_pinned_user_ids") or
                 post.get("clips_tab_pinned_user_ids") or ())
+
+    def _extract_audio(self, src, dest, info):
+        if not info or not (audio := info.get("music_asset_info")):
+            return None
+        cinfo = info.get("music_consumption_info") or audio
+
+        dest["audio_title"] = title = audio.get("title")
+        dest["audio_duration"] = duration = audio.get(
+            "duration_in_ms", 0) / 1000
+        dest["audio_timestamps"] = timestamps = audio.get(
+            "highlight_start_times_in_ms")
+        dest["audio_artist"] = artist = audio.get(
+            "display_artist") or cinfo.get("display_artist")
+        dest["audio_user"] = user = audio.get(
+            "ig_artist") or cinfo.get("ig_artist")
+
+        if not (url := audio["progressive_download_url"]):
+            return None
+        return {
+            "date"       : self.parse_timestamp(src.get("taken_at")),
+            "media_id"   : audio["id"],
+            "shortcode"  : shortcode_from_id(audio["id"]),
+            "display_url": audio["cover_artwork_uri"],
+            "audio_url"  : url,
+            "width"           : 0,
+            "width_original"  : 0,
+            "height"          : 0,
+            "height_original" : 0,
+            "audio_user"      : user,
+            "audio_title"     : title,
+            "audio_artist"    : artist,
+            "audio_duration"  : duration,
+            "audio_timestamps": timestamps,
+        }
 
     def _init_cursor(self):
         cursor = self.config("cursor", True)

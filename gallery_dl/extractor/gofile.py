@@ -90,7 +90,7 @@ class GofileFolderExtractor(Extractor):
                 f"{lang}::"
                 f"{self.api_token}::"
                 f"{int(time.time() / 14400)}::"
-                f"f4s58gs6")
+                f"5d4f7g8sd45fsd")
         return hashlib.sha256(data.encode()).hexdigest()
 
     def _get_content(self, content_id, password=None):

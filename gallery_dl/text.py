@@ -135,6 +135,34 @@ def nameext_from_name(filename, data=None):
     return data
 
 
+def filename_from_contentdisposition(cd):
+    if (pos := cd.find("filename*=")) >= 0:
+        pos += 10
+        if cd[pos] == '"':
+            pos += 1
+            value = cd[pos:cd.find('"', pos)]
+        else:
+            end = cd.find(";", pos)
+            value = cd[pos:None if end < 0 else end]
+        try:
+            charset, _, value = value.split("'", 2)
+            return unquote(value, charset, "replace")
+        except Exception:
+            pass
+
+    if (pos := cd.find("filename=")) >= 0:
+        pos += 9
+        if cd[pos] == '"':
+            pos += 1
+            value = cd[pos:cd.find('"', pos)]
+        else:
+            end = cd.find(";", pos)
+            value = cd[pos:None if end < 0 else end]
+        return value
+
+    return ""
+
+
 def extract(txt, begin, end, pos=None):
     """Extract the text between 'begin' and 'end' from 'txt'
 

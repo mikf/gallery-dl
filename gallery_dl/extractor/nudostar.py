@@ -39,13 +39,15 @@ class NudostarModelExtractor(NudostarExtractor):
 
     def images(self, page):
         path = text.extr(page, '" src="https://nudostar.tv', '"')
-        path, cnt, end = path.rsplit("_", 2)
+        lhs, index, rhs = path.rsplit("/", 2)
+        name, cnt, end = rhs.rsplit("_", 2)
 
-        base = f"{self.root}{path}_"
+        base = f"{self.root}{lhs}/"
+        path = f"000/{name}_"
         ext = "." + end.rpartition(".")[2]
 
         return [
-            (f"{base}{i:04}{ext}", None)
+            (f"{base}{i//1000+1}{path}{i:04}{ext}", None)
             for i in range(1, int(cnt)+1)
         ]
 

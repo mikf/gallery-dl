@@ -325,8 +325,8 @@ def extract_headers(response):
     data = dict(headers)
 
     if hcd := headers.get("content-disposition"):
-        if name := text.extr(hcd, 'filename="', '"'):
-            text.nameext_from_url(name, data)
+        if name := text.filename_from_contentdisposition(hcd):
+            text.nameext_from_name(name, data)
 
     if hlm := headers.get("last-modified"):
         data["date"] = dt.datetime(*parsedate_tz(hlm)[:6])

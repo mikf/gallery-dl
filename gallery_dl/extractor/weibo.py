@@ -227,11 +227,14 @@ class WeiboExtractor(Extractor):
             headers["X-XSRF-TOKEN"] = response.cookies.get("XSRF-TOKEN")
 
             data = response.json()
-            if not data.get("ok"):
+            if not (ok := data.get("ok", 0)):
                 self.log.debug(response.content)
                 if "since_id" not in params:  # first iteration
                     raise self.exc.AbortExtraction(
                         f'"{data.get("msg") or "unknown error"}"')
+            elif ok < 0:
+                self.request(self.root + "/").content
+                continue
 
             try:
                 data = data["data"]
@@ -277,12 +280,15 @@ class WeiboExtractor(Extractor):
     def _sina_visitor_system(self, response):
         self.log.info("Sina Visitor System")
 
-        passport_url = "https://passport.weibo.com/visitor/genvisitor"
+        passport_url = "https://passport.weibo.com/visitor/genvisitor2"
         headers = {"Referer": response.url}
         data = {
-            "cb": "gen_callback",
-            "fp": '{"os":"1","browser":"Gecko109,0,0,0","fonts":"undefined",'
-                  '"screenInfo":"1920*1080*24","plugins":""}',
+            "cb"  : "visitor_gray_callback",
+            "ver" : "20250916",
+            "tid" : "",
+            "from": "weibo",
+            "webdriver" : "false",
+            "return_url": "https://weibo.com/",
         }
 
         page = Extractor.request(
@@ -291,18 +297,18 @@ class WeiboExtractor(Extractor):
 
         passport_url = "https://passport.weibo.com/visitor/visitor"
         params = {
-            "a"    : "incarnate",
-            "t"    : data["tid"],
-            "w"    : "3" if data.get("new_tid") else "2",
-            "c"    : f"{data.get('confidence') or 100:>03}",
-            "gc"   : "",
-            "cb"   : "cross_domain",
+            "a"    : "crossdomain",
+            "t"    : data.get("tid"),
+            "sp"   : data["subp"],
+            "s"    : data["sub"],
             "from" : "weibo",
             "_rand": random.random(),
+            "url"  : response.url
         }
-        response = Extractor.request(self, passport_url, params=params)
+        response = Extractor.request(
+            self, passport_url, params=params, allow_redirects=False)
         self.cache_update(
-            _cookie_cache, None, response.cookies, _exp=365*86400)
+            _cookie_cache, ..., response.cookies, _exp=365*86400)
 
 
 class WeiboUserExtractor(WeiboExtractor):

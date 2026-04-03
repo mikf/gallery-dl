@@ -33,6 +33,25 @@ __tests__ = (
 },
 
 {
+    "#url"     : "https://nudostar.tv/models/mikayladvip/",
+    "#comment" : "more than 1000 images (#9332)",
+    "#class"   : nudostar.NudostarModelExtractor,
+    "#pattern" : r"https://nudostar\.tv/contents/m/i/mikayladvip/3000/mikayladvip_2\d\d\d\.jpg",
+    "#range"   : "2000-2999",
+    "#count"   : 1000,
+
+    "count"      : range(4500, 6000),
+    "extension"  : "jpg",
+    "gallery_id" : "mikayladvip",
+    "model"      : "mikaylademaiter",
+    "model_slug" : "mikayladvip",
+    "model_names": [
+        "mikaylademaiter",
+        "mikayladvip",
+    ],
+},
+
+{
     "#url"    : "https://nudostar.tv/models/thebigtittiecommittee/148/",
     "#class"  : nudostar.NudostarImageExtractor,
     "#results": "https://nudostar.tv/contents/t/h/thebigtittiecommittee/1000/thebigtittiecommittee_0148.jpg",

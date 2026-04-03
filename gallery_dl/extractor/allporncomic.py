@@ -81,16 +81,27 @@ class AllporncomicChapterExtractor(AllporncomicBase, ChapterExtractor):
         else:
             chapter, sep, minor = chapter.partition("-")
 
+        if '<source src="' in page:
+            media = "video"
+            self.needle = '<source src="'
+        else:
+            media = "image"
+            self.needle = ' data-src="'
+
         path = text.split_html(text.extr(
             page, '<ol class="breadcrumb', '</ol>'))
         title = text.re(
-            r"^(?:\s*\d+(?:\.\d+)?\s*\.|\[[^\]]+\])"
-            r"\s*(.+?)(?:\s+-)?(?:\s+[Cc]hapter \d+(?:\s+[Ee]xtras)?)?"
-            r"(?:\s+\([^)]+\))?(?:\s+\[[^\]]+\])?\s*$").sub("\\1", path[-1])
+            r"^(?:\s*\d+(?:\.\d+)?\s*\.|\[[^\]]+\])\s").sub("", path[-1])
+        title = text.re(
+            r"(?:\s+-)?"
+            r"(?:\s+[Cc]hapter \d+(?:\s+[Ee]xtras)?)?"
+            r"(?:\s+\([^)]+\))?"
+            r"(?:\s+(?:-\s+)?\[[^\]]+\])?\s*$").sub("", title)
 
         return {
             **self.cache(self._manga_info, manga_slug),
             "path"         : path[3:],
+            "media"        : media,
             "title"        : title,
             "title_slug"   : title_slug.lstrip("-"),
             "chapter"      : text.parse_int(chapter),
@@ -102,7 +113,7 @@ class AllporncomicChapterExtractor(AllporncomicBase, ChapterExtractor):
     def images(self, page):
         return [
             (url.strip(), None)
-            for url in text.extract_iter(page, ' data-src="', '"')
+            for url in text.extract_iter(page, self.needle, '"')
         ]
 
 
