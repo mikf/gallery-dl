@@ -79,8 +79,11 @@ class XenforoExtractor(BaseExtractor):
                             params = text.parse_query(text.unescape(ext[24:]))
                             ext = binascii.a2b_base64(params["url"]).decode()
                         elif ext.startswith("/redirect/"):
-                            ext = text.unescape(text.extr(
-                                ext, ">", "<").strip())
+                            if to := text.extr(ext, "?to=", "&"):
+                                ext = binascii.a2b_base64(to).decode()
+                            else:
+                                ext = text.unescape(text.extr(
+                                    ext, ">", "<").strip())
                         else:
                             continue
                     elif '"' in ext:
