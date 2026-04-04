@@ -36,7 +36,6 @@ class TwitterExtractor(Extractor):
     def _init(self):
         self.unavailable = self.config("unavailable", False)
         self.textonly = self.config("text-tweets", False)
-        self.articles = self.config("articles", True)
         self.retweets = self.config("retweets", False)
         self.replies = self.config("replies", True)
         self.twitpic = self.config("twitpic", False)
@@ -54,6 +53,18 @@ class TwitterExtractor(Extractor):
             self._transform_community = \
                 self._transform_tweet = \
                 self._transform_user = util.identity
+
+        self.articles = articles = self.config("articles", True)
+        if articles:
+            if isinstance(articles, str):
+                articles = articles.split(",")
+            elif not isinstance(articles, (list, tuple)):
+                articles = {"meta", "cover", "media"}
+            self._article_doc = ("doc" in articles or "document" in articles)
+            self._article_html = ("html" in articles)
+            self._article_meta = ("meta" in articles or "metadata" in articles)
+            self._article_cover = ("cover" in articles)
+            self._article_media = ("media" in articles)
 
         self.api = TwitterAPI(self)
         self._cursor = None
@@ -169,7 +180,7 @@ class TwitterExtractor(Extractor):
             except Exception as exc:
                 self.log.traceback(exc)
                 self.log.warning(
-                    "%s: Error while extracting article files (%s: %s)",
+                    "%s: Error while processing article data (%s: %s)",
                     data["id_str"], exc.__class__.__name__, exc)
 
         if self.twitpic:
@@ -349,10 +360,37 @@ class TwitterExtractor(Extractor):
 
     def _extract_article(self, tweet, files):
         article = tweet["article"]["article_results"]["result"]
-        if media := article.get("cover_media"):
-            files.append(self._extract_article_media(media, "cover"))
-        for media in article["media_entities"]:
-            files.append(self._extract_article_media(media, "image"))
+        if self._article_meta:
+            tweet["article"] = {
+                "id": article.get("rest_id"),
+                "title": article.get("title"),
+                "date": self.parse_timestamp(
+                    (m := article.get("metadata")) and
+                    m.get("first_published_at_secs")),
+                "date_updated": self.parse_timestamp(
+                    (m := article.get("lifecycle_state")) and
+                    m.get("modified_at_secs")),
+            }
+        if self._article_html:
+            html = self.utils("article").to_html(article)
+            if "article" not in tweet:
+                tweet["article"] = {}
+            tweet["article"]["html"] = "".join(html)
+        else:
+            html = None
+        if self._article_doc:
+            doc = self.utils("article").to_document(article, html)
+            files.append({
+                "url"      : "text:" + "".join(doc),
+                "type"     : "article:html",
+                "extension": "html",
+            })
+        if self._article_cover:
+            if media := article.get("cover_media"):
+                files.append(self._extract_article_media(media, "cover"))
+        if self._article_media:
+            for media in article["media_entities"]:
+                files.append(self._extract_article_media(media, "image"))
 
     def _extract_article_media(self, media, type):
         info = media["media_info"]
@@ -505,6 +543,8 @@ class TwitterExtractor(Extractor):
             except KeyError:
                 self.log.debug("Unable to extract 'birdwatch' note from %s",
                                tweet["birdwatch_pivot"])
+        if "article" in tweet:
+            tdata["article"] = tweet["article"]
         if "in_reply_to_screen_name" in legacy:
             tdata["reply_to"] = legacy["in_reply_to_screen_name"]
         if "quoted_by" in legacy:
