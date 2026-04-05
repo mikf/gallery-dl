@@ -291,6 +291,14 @@ def build_parser():
         dest="category-map", nargs=0, action=ConfigConstAction, const="compat",
         help="Restore legacy 'category' names",
     )
+    general.add_argument(
+        "-Q", "--queue",
+        dest="ipcqueue_enable", nargs=0, action=ConfigConstAction, const=True,
+        help=("Creates an IPC gallery-dl server to which subsequent clients "
+              "can add their links to the server queue. Note that if ipcqueue "
+              "is already enabled in config files, this option will instead "
+              "disable it."),
+    )
 
     update = parser.add_argument_group("Update Options")
     if util.EXECUTABLE:
