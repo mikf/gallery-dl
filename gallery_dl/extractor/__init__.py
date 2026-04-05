@@ -175,6 +175,7 @@ modules = [
     "pornpics",
     "pornstarstube",
     "postmill",
+    "postype",
     "rawkuma",
     "reactor",
     "readcomiconline",
