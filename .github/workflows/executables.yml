@@ -37,7 +37,9 @@ jobs:
           python-packages: "toml"
 
     steps:
-    - uses: actions/checkout@v6
+    - name: Clone repo
+      run: |
+        git clone --depth 1 --no-tags https://codeberg.org/mikf/gallery-dl.git .
 
     - name: Set up Python ${{ matrix.python-version }} ${{ matrix.architecture }}
       uses: actions/setup-python@v6

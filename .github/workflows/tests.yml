@@ -28,7 +28,9 @@ jobs:
         - "pypy3.11"
 
     steps:
-    - uses: actions/checkout@v6
+    - name: Clone repo
+      run: |
+        git clone --depth 1 --no-tags https://codeberg.org/mikf/gallery-dl.git .
 
     - name: Check file permissions
       run: |

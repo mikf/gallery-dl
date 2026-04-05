@@ -44,7 +44,10 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-    - uses: actions/checkout@v6
+    - name: Clone repo
+      run: |
+        git clone --depth 1 --no-tags https://codeberg.org/mikf/gallery-dl.git .
+
     - uses: actions/configure-pages@v6
 
     - name: Copy static files

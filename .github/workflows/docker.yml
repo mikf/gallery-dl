@@ -29,7 +29,9 @@ jobs:
       }}
 
     steps:
-    - uses: actions/checkout@v6
+    - name: Clone repo
+      run: |
+        git clone --depth 1 --no-tags https://codeberg.org/mikf/gallery-dl.git .
 
     - uses: docker/metadata-action@v6
       id: metadata
