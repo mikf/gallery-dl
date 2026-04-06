@@ -2,11 +2,8 @@ name: Executables
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-    - master
-    tags-ignore:
-    - "*"
+  schedule:
+    - cron: '0 0 * * *'
 
 env:
   DATE_FORMAT: "%Y.%m.%d"
