@@ -16,6 +16,9 @@ jobs:
     defaults:
       run:
         shell: bash
+    outputs:
+      COMMIT: ${{ steps.commit.outputs.COMMIT }}
+
     strategy:
       fail-fast: false
       matrix:
@@ -43,6 +46,11 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         architecture: ${{ matrix.architecture }}
+
+    - name: Commit Hash
+      id: commit
+      run: |
+        echo "COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
     - name: Environment Variables
       run: |
@@ -93,7 +101,9 @@ jobs:
       run: echo "DATE=$(date '+${{ env.DATE_FORMAT }}')" >> "$GITHUB_ENV"
 
     - name: Body
-      run: printf 'https://github.com/%s/commit/%s' '${{ github.repository }}' '${{ github.sha }}' > body.md
+      run: |
+        COMMIT="${{ needs.build.outputs.COMMIT }}"
+        printf '[`%s`](https://codeberg.org/mikf/gallery-dl/commit/%s)' "${COMMIT::8}" "$COMMIT" > body.md
 
     - uses: ncipollo/release-action@v1
       with:
