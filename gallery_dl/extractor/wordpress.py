@@ -32,19 +32,27 @@ class WordpressExtractor(Extractor):
         self.per_page = min(self.config("per-page", 100), 100)
 
     def _api_url(self, endpoint):
+        if self.api_rest_route:
+            return "{}?rest_route=/wp/v2/{}".format(self.root, endpoint)
         return "{}/wp-json/wp/v2/{}".format(self.root, endpoint)
 
     def _api_check(self):
-        response = self.request(self.root + "/wp-json/", fatal=False)
-        try:
-            data = response.json()
-        except Exception:
-            data = None
-        if not isinstance(data, dict) or "name" not in data:
-            self.log.error(
-                "WordPress REST API not available at '%s'", self.root)
-            return None
-        return data
+        self.api_rest_route = False
+        for url, rest_route in (
+            (self.root + "/wp-json/", False),
+            (self.root + "/?rest_route=/", True),
+        ):
+            response = self.request(url, fatal=False)
+            try:
+                data = response.json()
+            except Exception:
+                data = None
+            if isinstance(data, dict) and "name" in data:
+                self.api_rest_route = rest_route
+                return data
+        self.log.error(
+            "WordPress REST API not available at '%s'", self.root)
+        return None
 
     def _pagination(self, endpoint, params=None):
         if params is None:
