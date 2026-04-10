@@ -106,6 +106,9 @@ class WordpressPostsExtractor(WordpressExtractor):
         }):
             post_url = post.get("link", self.root)
             html = post.get("content", {}).get("rendered", "")
+            if not html:
+                response = self.request(post_url, fatal=False)
+                html = response.text if response else ""
             urls = self._images_from_html(html, post_url)
 
             featured_url = self._featured_media_url(post.get("featured_media"))
