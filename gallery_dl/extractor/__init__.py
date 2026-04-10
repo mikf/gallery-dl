@@ -49,6 +49,7 @@ modules = [
     "comedywildlifephoto",
     "comick",
     "comicvine",
+    "cosplayrule34",
     "cyberdrop",
     "cyberfile",
     "danbooru",
