@@ -17,8 +17,8 @@ jobs:
       run:
         shell: bash
     outputs:
-      SHA: ${{ steps.git.outputs.SHA }}
-      MSG: ${{ steps.git.outputs.MSG }}
+      SHA: ${{ steps.out.outputs.SHA }}
+      MSG: ${{ steps.out.outputs.MSG }}
 
     strategy:
       fail-fast: false
@@ -39,17 +39,22 @@ jobs:
 
     steps:
     - name: Clone repo
-      id: git
       run: |
         git clone --depth 1 --no-tags https://codeberg.org/mikf/gallery-dl.git .
-        echo "SHA=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
-        echo "MSG=$(git log -1 --pretty='`%h` %s')" >> "$GITHUB_OUTPUT"
 
     - name: Set up Python ${{ matrix.python-version }} ${{ matrix.architecture }}
       uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
         architecture: ${{ matrix.architecture }}
+
+    - name: Output Values
+      id: out
+      run: |
+        echo "SHA=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        echo "MSG<<EOF" >> "$GITHUB_OUTPUT"
+        printf '%s\n' "$(git show -s --format=%s HEAD)" >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
 
     - name: Environment Variables
       run: |
@@ -100,8 +105,11 @@ jobs:
       run: echo "DATE=$(date '+${{ env.DATE_FORMAT }}')" >> "$GITHUB_ENV"
 
     - name: Body
+      env:
+        SHA: ${{ needs.build.outputs.SHA }}
+        MSG: ${{ needs.build.outputs.MSG }}
       run: |
-        printf '[%s](https://codeberg.org/mikf/gallery-dl/commit/%s)' '${{ needs.build.outputs.MSG }}' '${{ needs.build.outputs.SHA }}' > body.md
+        printf '[`%s`](https://codeberg.org/mikf/gallery-dl/commit/%s) %s' "${SHA::8}" "$SHA" "$MSG" > body.md
 
     - uses: ncipollo/release-action@v1
       with:
