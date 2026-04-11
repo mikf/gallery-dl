@@ -10,7 +10,7 @@
 """Extractors for https://www.webtoons.com/"""
 
 from .common import GalleryExtractor, Extractor, Message
-from .. import text, util
+from .. import dt, text, util
 
 BASE_PATTERN = r"(?:https?://)?(?:www\.)?webtoons\.com"
 LANG_PATTERN = BASE_PATTERN + r"/(([^/?#]+)"
@@ -233,9 +233,10 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
 
         data = {"_extractor": WebtoonsEpisodeExtractor}
         while True:
-            for url in self.get_episode_urls(page):
+            for url, date in self.get_episode_urls(page):
                 params = text.parse_query(url.rpartition("?")[2])
                 data["episode_no"] = text.parse_int(params.get("episode_no"))
+                data["date"] = _parse_date(date, kw["lang"])
                 yield Message.Queue, url, data
 
             kw["page"] = page_no = page_no + 1
@@ -245,12 +246,14 @@ class WebtoonsComicExtractor(WebtoonsBase, Extractor):
             page = self.request(self.root + path).text
 
     def get_episode_urls(self, page):
-        """Extract and return all episode urls in 'page'"""
+        """Extract and return all episode urls and dates in 'page'"""
         page = text.extr(page, 'id="_listUl"', "</ul>")
-        return [
+        urls = [
             match[0]
             for match in WebtoonsEpisodeExtractor.pattern.finditer(page)
         ]
+        dates = list(text.extract_iter(page, 'class="date">', '<'))
+        return list(zip(urls, dates))
 
     def _asset_banner(self, page):
         try:
@@ -297,3 +300,39 @@ class WebtoonsArtistExtractor(WebtoonsBase, Extractor):
 
 def _url(url):
     return url.replace("://webtoon-phinf.", "://swebtoon-phinf.")
+
+
+_MONTHS = {lang: {m: i for i, m in enumerate(months, 1)} for lang, months in {
+    "fr": ["janv", "févr", "mars", "avr", "mai", "juin",
+           "juil", "août", "sept", "oct", "nov", "déc"],
+    "es": ["ene", "feb", "mar", "abr", "may", "jun",
+           "jul", "ago", "sept", "oct", "nov", "dic"],
+    "th": ["มค", "กพ", "มีค", "เมย", "พค", "มิย",
+           "กค", "สค", "กย", "ตค", "พย", "ธค"],
+}.items()}
+
+
+def _parse_date(date_string, lang):
+    """Parse a locale-dependent date string from the episode list"""
+    try:
+        date_string = date_string.strip()
+
+        if lang == "en":
+            return dt.parse(date_string, "%b %d, %Y")
+        if lang == "de":
+            return dt.parse(date_string, "%d.%m.%Y")
+        if lang == "id":
+            return dt.parse(date_string, "%d %b %Y")
+        if lang == "zh-hant":
+            year, month, day = date_string.replace(
+                "年", " ").replace("月", " ").replace("日", "").split()
+            return dt.datetime(int(year), int(month), int(day))
+
+        # fr, es, th: "DD month_abbr YYYY"
+        months = _MONTHS.get(lang)
+        if not months:
+            return dt.NONE
+        day, month, year = date_string.replace(".", "").split()
+        return dt.datetime(int(year), months[month.lower()], int(day))
+    except Exception:
+        return dt.NONE

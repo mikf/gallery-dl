@@ -190,6 +190,91 @@ __tests__ = (
     "page"      : range(1, 2),
     "title_no"  : 919,
     "episode_no": range(1, 14),
+    "date"      : "type:datetime",
+},
+
+{
+    "#url"     : "https://www.webtoons.com/en/comedy/live-with-yourself/list?title_no=919",
+    "#comment" : "episode date, english",
+    "#class"   : webtoons.WebtoonsComicExtractor,
+    "#range"   : "14",
+    "#count"   : 1,
+
+    "title_no"  : 919,
+    "episode_no": 1,
+    "date"      : "dt:2017-01-01 00:00:00",
+},
+
+{
+    "#url"     : "https://www.webtoons.com/fr/romance/subzero/list?title_no=1845&page=24",
+    "#comment" : "episode date, french",
+    "#class"   : webtoons.WebtoonsComicExtractor,
+    "#range"   : "6",
+    "#count"   : 1,
+
+    "title_no"  : 1845,
+    "episode_no": 1,
+    "date"      : "dt:2019-12-19 00:00:00",
+},
+
+{
+    "#url"     : "https://www.webtoons.com/es/romance/lore-olympus/list?title_no=1725",
+    "#comment" : "episode date, spanish",
+    "#class"   : webtoons.WebtoonsComicExtractor,
+    "#range"   : "9",
+    "#count"   : 1,
+
+    "title_no"  : 1725,
+    "episode_no": 1,
+    "date"      : "dt:2019-11-21 00:00:00",
+},
+
+{
+    "#url"     : "https://www.webtoons.com/de/fantasy/werewolves-going-crazy-over-me/list?title_no=8127&page=5",
+    "#comment" : "episode date, german",
+    "#class"   : webtoons.WebtoonsComicExtractor,
+    "#range"   : "9",
+    "#count"   : 1,
+
+    "title_no"  : 8127,
+    "episode_no": 1,
+    "date"      : "dt:2025-05-17 00:00:00",
+},
+
+{
+    "#url"     : "https://www.webtoons.com/id/romance/daytime-in-the-bunker/list?title_no=9889",
+    "#comment" : "episode date, indonesian",
+    "#class"   : webtoons.WebtoonsComicExtractor,
+    "#range"   : "3",
+    "#count"   : 1,
+
+    "title_no"  : 9889,
+    "episode_no": 1,
+    "date"      : "dt:2026-04-07 00:00:00",
+},
+
+{
+    "#url"     : "https://www.webtoons.com/zh-hant/school/kanlianshidai/list?title_no=546&page=60",
+    "#comment" : "episode date, chinese traditional",
+    "#class"   : webtoons.WebtoonsComicExtractor,
+    "#range"   : "5",
+    "#count"   : 1,
+
+    "title_no"  : 546,
+    "episode_no": 1,
+    "date"      : "dt:2015-09-30 00:00:00",
+},
+
+{
+    "#url"     : "https://www.webtoons.com/th/action/lookism/list?title_no=576&page=60",
+    "#comment" : "episode date, thai",
+    "#class"   : webtoons.WebtoonsComicExtractor,
+    "#range"   : "7",
+    "#count"   : 1,
+
+    "title_no"  : 576,
+    "episode_no": 1,
+    "date"      : "dt:2015-11-04 00:00:00",
 },
 
 {
@@ -209,6 +294,7 @@ __tests__ = (
     "?type"      : "banner",
     "title_no"   : 919,
     "?episode_no": range(12, 14),
+    "?date"      : "type:datetime",
 },
 
 {
@@ -221,6 +307,7 @@ __tests__ = (
     "page"      : range(7, 25),
     "title_no"  : 1845,
     "episode_no": int,
+    "date"      : "type:datetime",
 },
 
 {
@@ -233,6 +320,7 @@ __tests__ = (
     "page"      : int,
     "title_no"  : 210827,
     "episode_no": int,
+    "date"      : "type:datetime",
 },
 
 {
