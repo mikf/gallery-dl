@@ -52,6 +52,7 @@ modules = [
     "cyberdrop",
     "cyberfile",
     "danbooru",
+    "darkibox",
     "dandadan",
     "dankefuerslesen",
     "desktopography",
