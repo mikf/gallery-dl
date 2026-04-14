@@ -21,6 +21,7 @@ modules = [
     "500px",
     "8chan",
     "8muses",
+    "acgxmh",
     "adultempire",
     "agnph",
     "ahottie",
