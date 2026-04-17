@@ -11,7 +11,7 @@ RUN : \
     && python3 -B -m pip --no-cache-dir --no-input --disable-pip-version-check install --root-user-action ignore -U \
         pip \
     && python3 -B -m pip --no-cache-dir --no-input --disable-pip-version-check install --root-user-action ignore -U \
-        https://github.com/mikf/gallery-dl/archive/refs/heads/master.tar.gz \
+        https://codeberg.org/mikf/gallery-dl/archive/master.tar.gz \
         yt-dlp[default] \
         requests[socks] \
         truststore \
