@@ -38,8 +38,9 @@ def git(command, *args):
 
 class lazy():
 
-    def __init__(self, path):
+    def __init__(self, path, mode="w"):
         self.path = path
+        self.mode = mode
         self.buffer = io.StringIO()
 
     def __enter__(self):
@@ -59,7 +60,7 @@ class lazy():
         if new != old:
             # rewrite entire file
             with builtins.open(
-                    self.path, "w", encoding="utf-8", newline="") as fp:
+                    self.path, self.mode, encoding="utf-8", newline="") as fp:
                 fp.write(new)
         else:
             # only update atime and mtime
