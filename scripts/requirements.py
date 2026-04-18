@@ -22,7 +22,11 @@ def package_hashes(pkg, args):
     if session is None:
         session = requests.Session()
 
-    u = f"https://pypi.org/pypi/{pkg}/json"
+    pkg, eq, version = pkg.partition("==")
+    if eq:
+        u = f"https://pypi.org/pypi/{pkg}/{version}/json"
+    else:
+        u = f"https://pypi.org/pypi/{pkg}/json"
     d = session.get(u).json()
     if not (i := d.get("info")):
         return
@@ -37,20 +41,36 @@ def package_hashes(pkg, args):
         "parents": [],
     }
 
+    wheel = (0, None)
     files = result["files"]
     for u in d["urls"]:
         if u.get("yanked"):
             continue
         if not args.sdist and u["packagetype"] == "sdist":
             continue
-        if not (u["python_version"] == "py3" or
-                u["python_version"] == "cp314"):
-            continue
         if not args.musllinux and "-musllinux" in u["filename"]:
             continue
-        if not args.freethreaded and "-cp314t" in u["filename"]:
+
+        v = u["python_version"]
+        if v in ("py3", "cp314"):
+            wheel = (99, ())
+        elif v.startswith("cp3"):
+            if f"-{v}t-" in u["filename"]:
+                continue
+            v = int(v[3:])
+            if v > wheel[0]:
+                wheel = (v, [u])
+            elif v == wheel[0]:
+                wheel[1].append(u)
             continue
+        else:
+            continue
+
         files.append(((u["filename"], u["digests"]["sha256"])))
+
+    if not files and wheel[0]:
+        for u in wheel[1]:
+            files.append(((u["filename"], u["digests"]["sha256"])))
 
     for d in i["requires_dist"] or ():
         name = re.sub(r"([\w-]+).+", r"\1", d).lower()
@@ -70,10 +90,13 @@ def package_hashes(pkg, args):
 
 def collect(pkg, args, level=0, parent=None):
     pkg = pkg.replace("_", "-")
-    pkgl = pkg.lower()
+    pkgl = pkg.partition("==")[0].lower()
+    pkgl, ex, extras = pkgl.partition("[")
     if pkgl in args.exclude:
         return
     if pkgl not in results:
+        if ex:
+            pkg = pkg.partition("[")[0]
         results[pkgl] = info = package_hashes(pkg, args)
 
         if args.dependencies > level:
@@ -81,7 +104,10 @@ def collect(pkg, args, level=0, parent=None):
                 collect(dep, args, level+1, pkg)
 
         if not level:
-            extras = info["extras"] if args.Extra else args.extra
+            if ex:
+                extras = (extras[:-1],)
+            else:
+                extras = info["extras"] if args.Extra else args.extra
             for extra in extras:
                 for dep in info["extras"][extra]:
                     collect(dep, args, level+1, f"{pkg}[{extra}]")
@@ -105,6 +131,9 @@ def output(write, args):
             write(f'{pkg["name"]}=={pkg["version"]} \\\n')
             for name, sha256 in pkg["files"]:
                 write(f'    --hash=sha256:{sha256} \\\n')
+            if args.filenames:
+                for name, sha256 in pkg["files"]:
+                    write(f'    # {name} \\\n')
             if pkg["parents"]:
                 parents = sorted(set(pkg["parents"]))
                 write(f'    # from {", ".join(parents)}\n')
@@ -118,6 +147,7 @@ def parse_args(args=None):
     parser.add_argument("-e", "--extra", action="append", default=[])
     parser.add_argument("-E", "--Extra", action="store_true")
     parser.add_argument("-f", "--freethreaded", action="store_true")
+    parser.add_argument("-F", "--filenames", action="store_true")
     parser.add_argument("-m", "--musllinux", action="store_true")
     parser.add_argument("-N", "--no-clobber", default="w",
                         dest="mode", action="store_const", const="x")
