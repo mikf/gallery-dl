@@ -164,6 +164,7 @@ def parse_args(args=None):
     parser.add_argument("-E", "--Extra", action="store_true")
     parser.add_argument("-f", "--freethreaded", action="store_true")
     parser.add_argument("-F", "--filenames", action="store_true")
+    parser.add_argument("-i", "--input")
     parser.add_argument("-N", "--no-clobber", default="w",
                         dest="mode", action="store_const", const="x")
     parser.add_argument("-o", "--output")
@@ -185,6 +186,15 @@ def parse_args(args=None):
 
     parser.add_argument("PKGS", nargs="*")
     args = parser.parse_args()
+
+    if args.input:
+        pkgs = args.PKGS
+        with util.open(args.input) as fp:
+            for line in fp:
+                line = line.strip()
+                if not line or line[0] == "#":
+                    continue
+                pkgs.append(line)
 
     if args.Output:
         if not args.pkgs:
