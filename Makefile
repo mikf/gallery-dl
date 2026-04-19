@@ -6,7 +6,7 @@ SHAREDIR ?= $(PREFIX)/share
 PYTHON ?= /usr/bin/env python3
 
 
-all: man completion supportedsites options
+all: man completion supportedsites options requirements
 
 clean:
 	$(RM) -r build/
@@ -24,6 +24,8 @@ test:
 executable:
 	scripts/pyinstaller.py
 
+requirements: requirements/docker
+
 completion: data/completion/gallery-dl data/completion/_gallery-dl data/completion/gallery-dl.fish
 
 man: data/man/gallery-dl.1 data/man/gallery-dl.conf.5
@@ -32,7 +34,7 @@ supportedsites: docs/supportedsites.md
 
 options: docs/options.md
 
-.PHONY: all clean install release test executable completion man supportedsites options
+.PHONY: all clean install release test executable requirements completion man supportedsites options
 
 docs/supportedsites.md: gallery_dl/*/*.py scripts/supportedsites.py
 	$(PYTHON) scripts/supportedsites.py
@@ -54,3 +56,6 @@ data/completion/_gallery-dl: gallery_dl/option.py scripts/completion_zsh.py
 
 data/completion/gallery-dl.fish: gallery_dl/option.py scripts/completion_fish.py
 	$(PYTHON) scripts/completion_fish.py
+
+requirements/docker: scripts/requirements.py requirements/versions
+	$(PYTHON) scripts/requirements.py -i requirements/versions -D -o requirements/docker --musl --x64 --arm

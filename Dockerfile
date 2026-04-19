@@ -15,12 +15,7 @@ RUN : \
         -r requirements/pip \
     && python3 -B -m pip --no-cache-dir --no-input --disable-pip-version-check install --root-user-action ignore -U \
         --require-hashes --only-binary :all: \
-        -r requirements/requests \
-        -r requirements/brotli \
-        -r requirements/yt-dlp \
-        -r requirements/pyyaml \
-        -r requirements/jinja2 \
-        -r requirements/truststore \
+        -r requirements/docker \
     && python3 -B -m pip --no-cache-dir --no-input --disable-pip-version-check install --root-user-action ignore -U \
         https://codeberg.org/mikf/gallery-dl/archive/master.tar.gz \
     && python3 -B -m pip --no-cache-dir --no-input --disable-pip-version-check freeze \
