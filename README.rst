@@ -13,10 +13,20 @@ with many
 options, as well as powerful
 `file-naming capabilities <https://gdl-org.github.io/docs/formatting.html>`__.
 
+-----
 
-|pypi| |discord| |build|
+Migration
+=========
+
+| Active development has moved to `Codeberg <https://codeberg.org/mikf/gallery-dl>`__
+| (see `[Announcement] Moving to Codeberg <https://github.com/mikf/gallery-dl/issues/9374>`__ for details)
+
+-----
+
 
 .. contents::
+
+|pypi| |discord| |build|
 
 
 Dependencies
@@ -54,18 +64,18 @@ easily installed or upgraded using pip_:
 
 .. code:: bash
 
-    python3 -m pip install -U gallery-dl
+    python -m pip install -U gallery-dl
 
-Installing the latest dev version directly from GitHub can be done with
-pip_ as well:
+Installing the latest dev version directly  from ``master``
+can be done with pip_ as well:
 
 .. code:: bash
 
-    python3 -m pip install -U --force-reinstall --no-deps https://github.com/mikf/gallery-dl/archive/master.tar.gz
+    python -m pip install -U --force-reinstall --no-deps https://codeberg.org/mikf/gallery-dl/archive/master.tar.gz
 
 Omit :code:`--no-deps` if Requests_ hasn't been installed yet.
 
-Note: Windows users should use :code:`py -3` instead of :code:`python3`.
+Note: Windows users should use :code:`py` instead of :code:`python`.
 
 It is advised to use the latest version of pip_,
 including the essential packages :code:`setuptools` and :code:`wheel`.
@@ -73,7 +83,7 @@ To ensure these packages are up-to-date, run
 
 .. code:: bash
 
-    python3 -m pip install --upgrade pip setuptools wheel
+    python -m pip install --upgrade pip setuptools wheel
 
 
 Standalone Executable
@@ -82,15 +92,15 @@ Standalone Executable
 Prebuilt executable files with a Python interpreter and
 required Python packages included are available for
 
-- `Windows <https://github.com/mikf/gallery-dl/releases/download/v1.31.10/gallery-dl.exe>`__
+- `Windows <https://codeberg.org/mikf/gallery-dl/releases/download/v1.31.10/gallery-dl.exe>`__
   (Requires `Microsoft Visual C++ Redistributable Package (x86) <https://aka.ms/vs/17/release/vc_redist.x86.exe>`__)
-- `Linux   <https://github.com/mikf/gallery-dl/releases/download/v1.31.10/gallery-dl.bin>`__
+- `Linux   <https://codeberg.org/mikf/gallery-dl/releases/download/v1.31.10/gallery-dl.bin>`__
 
 
 Nightly Builds
 --------------
 
-| Executables build from the latest commit can be found at
+| Executables built from the latest commit can be found at
 | https://github.com/gdl-org/builds/releases
 
 
@@ -147,7 +157,7 @@ Using the Dockerfile in the repository:
 
 .. code:: bash
 
-    git clone https://github.com/mikf/gallery-dl.git
+    git clone https://codeberg.org/mikf/gallery-dl.git
     cd gallery-dl/
     docker build -t gallery-dl:latest .
 
