@@ -308,6 +308,12 @@ class KemonoExtractor(Extractor):
     def _revisions_all(self, post):
         revs = self._revisions_get(post)
 
+        if "post" in post:
+            post = post["post"]
+        post["revision_id"] = 0
+
+        revs.insert(0, post)
+
         cnt = idx = len(revs)
         for rev in revs:
             rev["revision_hash"] = self._revision_hash(rev)
