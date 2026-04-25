@@ -195,8 +195,15 @@ class DeviantartExtractor(Extractor):
 
             elif self.original and deviation["is_downloadable"]:
                 content = self.api.deviation_download(deviation["deviationid"])
-                deviation["is_original"] = True
-                yield self.commit(deviation, content)
+                if "src" not in content:
+                    self.log.warning(
+                        "%s: Unable to get download URL for '%s'",
+                        deviation["index"],
+                        deviation.get("title") or deviation["deviationid"],
+                    )
+                else:
+                    deviation["is_original"] = True
+                    yield self.commit(deviation, content)
 
             if "videos" in deviation and deviation["videos"]:
                 video = max(deviation["videos"],
