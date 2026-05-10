@@ -242,6 +242,7 @@ modules = [
     "wikiart",
     "wikifeet",
     "wikimedia",
+    "wordpress",
     "xasiat",
     "xenforo",
     "xfolio",
