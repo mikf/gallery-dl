@@ -1,5 +1,46 @@
 # Changelog
 
+## 1.32.8 - 2026-07-25
+### Extractors
+- **Additions**
+  - [animepictures] add support ([`gh#339`](https://github.com/mikf/gallery-dl/issues/339) [`gh#3523`](https://github.com/mikf/gallery-dl/issues/3523) [`gh#4355`](https://github.com/mikf/gallery-dl/issues/4355))
+  - [myfigurecollection] add support ([`gh#222`](https://github.com/mikf/gallery-dl/issues/222) [`gh#9609`](https://github.com/mikf/gallery-dl/issues/9609))
+  - [imxtw] add `image` extractor ([`gh#9617`](https://github.com/mikf/gallery-dl/issues/9617))
+- **audiochan**
+  - fix error for posts without `audioFile` ([`cb#288`](https://codeberg.org/mikf/gallery-dl/issues/288))
+- **cara**
+  - fix duplicate filenames ([`cb#284`](https://codeberg.org/mikf/gallery-dl/issues/284))
+- **civitai**
+  - handle new API response format ([`cb#278`](https://codeberg.org/mikf/gallery-dl/issues/278))
+- **deviantart**
+  - fix `literature` markup extraction ([`gh#9670`](https://github.com/mikf/gallery-dl/issues/9670) [`cb#287`](https://codeberg.org/mikf/gallery-dl/issues/287))
+- **fanbox**
+  - fix creator posts extraction ([`cb#279`](https://codeberg.org/mikf/gallery-dl/issues/279))
+  - fix `fee-min` blocking individual post links
+- **newgrounds**
+  - fix `flash` animation extraction ([`cb#293`](https://codeberg.org/mikf/gallery-dl/issues/293))
+- **tumblr**
+  - distinguish `question` & `answer` media from regular `inline` media
+- **twitter**
+  - restore `protected` & `blocked_by` detection ([`cb#290`](https://codeberg.org/mikf/gallery-dl/issues/290))
+- **weibo**
+  - fix video format selection ([`cb#276`](https://codeberg.org/mikf/gallery-dl/issues/276) [`gh#9660`](https://github.com/mikf/gallery-dl/issues/9660))
+### Post Processors
+- **mtime**
+  - add `target` option ([`pr#8120`](https://github.com/mikf/gallery-dl/pull/8120) [`gh#9638`](https://github.com/mikf/gallery-dl/issues/9638) [`cb#238`](https://codeberg.org/mikf/gallery-dl/issues/238))
+### Utilities
+- **common**
+  - update `browser` user-agents and headers
+  - allow setting custom `sleep` defaults per extractor
+- **job**
+  - implement using a list of `follow` format strings ([`cb#261`](https://codeberg.org/mikf/gallery-dl/issues/261))
+- **release**
+  - include `SHA256SUMS` & `SHA512SUMS` files
+- **supportedsites**
+  - update auto-generation script
+- **util**
+  - adjust Firefox & Chrome `User-Agent` header versions
+
 ## 1.32.7 - 2026-07-18
 ### Extractors
 - **Additions**
@@ -156,7 +197,7 @@
 ### Utilities
 - **util**
   - implement and use `b64…` functions
-s
+
 ## 1.32.3 - 2026-06-13
 ### Extractors
 - **bluesky**
