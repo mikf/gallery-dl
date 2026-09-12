@@ -1,5 +1,40 @@
 # Changelog
 
+## 1.32.12 - 2026-09-12
+### Extractors
+- **Additions**
+  - [imdb] support `title` & `name` photos ([`cb#411`](https://codeberg.org/mikf/gallery-dl/issues/411) [`gh#2242`](https://github.com/mikf/gallery-dl/issues/2242))
+  - [whitekitten] add initial support ([`pr#436`](https://codeberg.org/mikf/gallery-dl/pulls/436))
+- **Removals**
+  - [fileditchfiles] remove module ([`cb#412`](https://codeberg.org/mikf/gallery-dl/issues/412))
+  - [instagram] remove `guide` extractor
+  - [nekohouse] remove module
+- **celebforum**
+  - update `xenforo` URL patterns ([`gh#9736`](https://github.com/mikf/gallery-dl/issues/9736))
+- **fantia**
+  - download content of text-only posts ([`cb#424`](https://codeberg.org/mikf/gallery-dl/issues/424))
+- **ganknow**
+  - fix download URLs of `/private/` files ([`cb#428`](https://codeberg.org/mikf/gallery-dl/issues/428))
+- **gofile**
+  - fix `RecursionError` in single file links ([`cb#430`](https://codeberg.org/mikf/gallery-dl/issues/430))
+- **instagram**
+  - fix `posts` & `reels` extractors ([`cb#245`](https://codeberg.org/mikf/gallery-dl/issues/245) [`cb#396`](https://codeberg.org/mikf/gallery-dl/issues/396) [`cb#422`](https://codeberg.org/mikf/gallery-dl/issues/422) [`gh#9714`](https://github.com/mikf/gallery-dl/issues/9714) [`gh#9716`](https://github.com/mikf/gallery-dl/issues/9716) [`gh#9731`](https://github.com/mikf/gallery-dl/issues/9731) [`gh#9735`](https://github.com/mikf/gallery-dl/issues/9735) [`gh#9743`](https://github.com/mikf/gallery-dl/issues/9743))
+- **newgrounds**
+  - bypass `Content Filtered` pages
+- **onlyhaven**
+  - preserve post `id` value ([`cb#431`](https://codeberg.org/mikf/gallery-dl/issues/431))
+  - add `endpoint` option ([`gh#9746`](https://github.com/mikf/gallery-dl/issues/9746))
+- **twitter**
+  - expand `Show More` stubs, add `showmore` option ([`gh#9742`](https://github.com/mikf/gallery-dl/issues/9742))
+  - improve `ondemand.s.…a.js` key extraction ([`cb#419`](https://codeberg.org/mikf/gallery-dl/issues/419))
+- **weibo**
+  - extend `livephoto` option
+  - fix `livephoto` filename & extension
+  - provide `type` metadata
+### Utilities
+- **job**
+  - implement `children` option ([`gh#7629`](https://github.com/mikf/gallery-dl/issues/7629))
+
 ## 1.32.11 - 2026-09-04
 ### Extractors
 - **Additions**
