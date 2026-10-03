@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.32.15 - 2026-10-03
+### Extractors
+- **Additions**
+  - [mastodon] support `mastodon.art` ([`gh#5269`](https://github.com/mikf/gallery-dl/issues/5269))
+  - [mastodon] support `aethy.com` ([`gh#5311`](https://github.com/mikf/gallery-dl/issues/5311))
+  - [pornhub] add `asset` extractor for avatars & banners ([`gh#3323`](https://github.com/mikf/gallery-dl/issues/3323))
+  - [steamcommunity] add extractor for `game` screenshots & artworks ([`gh#2563`](https://github.com/mikf/gallery-dl/issues/2563) [`gh#7565`](https://github.com/mikf/gallery-dl/issues/7565))
+  - [steamcommunity] add extractor for `user` screenshots & artworks ([`gh#1079`](https://github.com/mikf/gallery-dl/issues/1079) [`gh#2563`](https://github.com/mikf/gallery-dl/issues/2563) [`gh#6978`](https://github.com/mikf/gallery-dl/issues/6978) [`gh#7565`](https://github.com/mikf/gallery-dl/issues/7565))
+- **ao3**
+  - fix `subscriptions` extractor ([`cb#477`](https://codeberg.org/mikf/gallery-dl/issues/477))
+- **dcinside**
+  - extract full-sized images ([`cb#478`](https://codeberg.org/mikf/gallery-dl/issues/478))
+- **filester**
+  - support password-protected *files* ([`cb#467`](https://codeberg.org/mikf/gallery-dl/issues/467))
+- **furaffinity**
+  - support non-default number of submissions per page ([`gh#9785`](https://github.com/mikf/gallery-dl/issues/9785))
+- **instagram**
+  - add `covers` option ([`gh#3010`](https://github.com/mikf/gallery-dl/issues/3010) [`gh#3761`](https://github.com/mikf/gallery-dl/issues/3761))
+- **iwara**
+  - fix handling network errors during login ([`gh#9278`](https://github.com/mikf/gallery-dl/issues/9278))
+  - rename `date` to `file_date` - use `date` value of post objects
+- **myfigurecollection**
+  - fix `pictures` marked as containing spoilers
+- **postype**
+  - support downloading attachments ([`gh#9788`](https://github.com/mikf/gallery-dl/issues/9788))
+- **steamcommunity**
+  - fix `Steam Artwork` & `Mature` items
+- **twitter**
+  - warn on login page redirect ([`gh#9783`](https://github.com/mikf/gallery-dl/issues/9783))
+- **ytdl**
+  - implement `websites` option ([`gh#4394`](https://github.com/mikf/gallery-dl/issues/4394))
+
 ## 1.32.14 - 2026-09-27
 ### Extractors
 - **Additions**
