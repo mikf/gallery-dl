@@ -1,5 +1,45 @@
 # Changelog
 
+## 1.32.16 - 2026-10-09
+### Extractors
+- **Additions**
+  - [toyhouse] add extractor for character galleries ([`cb#493`](https://codeberg.org/mikf/gallery-dl/issues/493))
+  - [xenforo] support `darkwanderer.net` ([`gh#9805`](https://github.com/mikf/gallery-dl/issues/9805))
+- **bellazon**
+  - warn on files hidden for guests ([`cb#489`](https://codeberg.org/mikf/gallery-dl/issues/489))
+- **common**
+  - check for empty cookie values ([`cb#490`](https://codeberg.org/mikf/gallery-dl/issues/490))
+- **deviantart**
+  - support numeric `fav.me` links ([`cb#495`](https://codeberg.org/mikf/gallery-dl/issues/495))
+- **fapello**
+  - extract `model_name` & `aliases` metadata ([`pr#487`](https://codeberg.org/mikf/gallery-dl/pulls/487))
+- **imxtw**
+  - update domain to `imx.bz` ([`gh#9802`](https://github.com/mikf/gallery-dl/issues/9802))
+- **instagram**
+  - fix user lookups by ID ([`cb#465`](https://codeberg.org/mikf/gallery-dl/issues/465) [`cb#466`](https://codeberg.org/mikf/gallery-dl/issues/466) [`cb#484`](https://codeberg.org/mikf/gallery-dl/issues/484) [`gh#9773`](https://github.com/mikf/gallery-dl/issues/9773) [`gh#9787`](https://github.com/mikf/gallery-dl/issues/9787))
+  - fix `avatar` extractor ([`cb#466`](https://codeberg.org/mikf/gallery-dl/issues/466) [`cb#484`](https://codeberg.org/mikf/gallery-dl/issues/484) [`gh#9773`](https://github.com/mikf/gallery-dl/issues/9773))
+  - fix `highlights` extractor ([`cb#484`](https://codeberg.org/mikf/gallery-dl/issues/484) [`gh#9786`](https://github.com/mikf/gallery-dl/issues/9786) [`gh#9793`](https://github.com/mikf/gallery-dl/issues/9793))
+  - fix `KeyError: 'width'` ([`gh#9793`](https://github.com/mikf/gallery-dl/issues/9793))
+  - update `stories-tray` extractor
+  - improve `doc_id` extraction
+- **kemono**
+  - fix thumbnail check ([`gh#9792`](https://github.com/mikf/gallery-dl/issues/9792))
+- **myfigurecollection**
+  - fix items without `filename`
+  - improve user `pictures` extraction
+- **paheal**
+  - fix `file_url` & `date` extraction ([`gh#9791`](https://github.com/mikf/gallery-dl/issues/9791))
+- **pawchive**
+  - fix `deferred` files marked as `preview_only`
+  - handle `deferred` main post files
+- **tapas**
+  - improve username & password login cookie handling ([`cb#497`](https://codeberg.org/mikf/gallery-dl/issues/497))
+- **toyhouse**
+  - bypass `Content Warning` on image links
+  - fix `art` extractor
+- **xhamster**
+  - fix `gallery` extractor ([`pr#498`](https://codeberg.org/mikf/gallery-dl/pulls/498))
+
 ## 1.32.15 - 2026-10-03
 ### Extractors
 - **Additions**
