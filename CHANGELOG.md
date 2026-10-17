@@ -1,5 +1,47 @@
 # Changelog
 
+## 1.32.17 - 2026-10-17
+### Extractors
+- **500px**
+  - fix `PhotoGroup` items in `user` results ([`cb#517`](https://codeberg.org/mikf/gallery-dl/issues/517))
+  - warn about missing `x-500px-access-token-prod` cookie ([`cb#524`](https://codeberg.org/mikf/gallery-dl/issues/524))
+- **8muses**
+  - update URL patterns ([`cb#520`](https://codeberg.org/mikf/gallery-dl/issues/520))
+  - fix albums without `name` attribute ([`cb#520`](https://codeberg.org/mikf/gallery-dl/issues/520))
+- **behance**
+  - fix `user` pagination ([`cb#514`](https://codeberg.org/mikf/gallery-dl/issues/514))
+- **bunkr**
+  - support `bunkr.cx` domain ([`cb#504`](https://codeberg.org/mikf/gallery-dl/issues/504))
+  - support `bunkr.by` domain ([`pr#508`](https://codeberg.org/mikf/gallery-dl/pulls/508))
+- **erome**
+  - support language subdomains ([`pr#511`](https://codeberg.org/mikf/gallery-dl/pulls/511))
+- **instagram**
+  - update `user` & `posts` query parameters ([`cb#519`](https://codeberg.org/mikf/gallery-dl/issues/519) [`gh#9816`](https://github.com/mikf/gallery-dl/issues/9816) [`gh#9818`](https://github.com/mikf/gallery-dl/issues/9818))
+  - fix & improve `doc_id` lookups ([`cb#503`](https://codeberg.org/mikf/gallery-dl/issues/503) [`cb#515`](https://codeberg.org/mikf/gallery-dl/issues/515) [`gh#9815`](https://github.com/mikf/gallery-dl/issues/9815) [`gh#9794`](https://github.com/mikf/gallery-dl/issues/9794))
+  - fix `AttributeError` if `friendship_status` is None ([`cb#526`](https://codeberg.org/mikf/gallery-dl/issues/526))
+  - ensure non-zero exit status on GraphQL error ([`cb#519`](https://codeberg.org/mikf/gallery-dl/issues/519))
+  - restore `static-videos` functionality ([`cb#513`](https://codeberg.org/mikf/gallery-dl/issues/513))
+  - remove `user-strategy` option
+  - extend debug logging messages
+- **iwara**
+  - fix bug when refreshing access token more than once
+  - forward `Control` exceptions during image/video extraction
+- **toyhouse**
+  - fix & improve metadata extraction ([`cb#493`](https://codeberg.org/mikf/gallery-dl/issues/493))
+  - support character sub URLs ([`cb#493`](https://codeberg.org/mikf/gallery-dl/issues/493))
+- **twitter**
+  - fix `"replies": "self"` for likes/bookmarks ([`cb#501`](https://codeberg.org/mikf/gallery-dl/issues/501))
+  - support `/i/history/likes` URLs ([`cb#501`](https://codeberg.org/mikf/gallery-dl/issues/501))
+- **zerochan**
+  - fix HTML removal from API responses ([`cb#522`](https://codeberg.org/mikf/gallery-dl/issues/522))
+### Post Processors
+- **ugoira**
+  - pass `-pix_fmt yuv420p` as default FFmpeg argument ([`cb#496`](https://codeberg.org/mikf/gallery-dl/issues/496))
+### Miscellaneous
+- [config] define and use `config.setg()`
+- replace `isinstance()` checks
+- remove warnings about deprecated `path` usage
+
 ## 1.32.16 - 2026-10-09
 ### Extractors
 - **Additions**
