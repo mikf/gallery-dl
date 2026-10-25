@@ -1,5 +1,55 @@
 # Changelog
 
+## 1.32.18 - 2026-10-25
+### Extractors
+- **Additions**
+  - [goonbox] add `user` extractor ([`pr#535`](https://codeberg.org/mikf/gallery-dl/pulls/535))
+- **deviantart**
+  - fix `avatar` URLs for usernames with dashes ([`cb#555`](https://codeberg.org/mikf/gallery-dl/issues/555))
+- **erome**
+  - fix `Referer` header for file downloads ([`pr#536`](https://codeberg.org/mikf/gallery-dl/pulls/536))
+- **exhentai**
+  - extract `comments` metadata ([`cb#523`](https://codeberg.org/mikf/gallery-dl/issues/523))
+  - fix Multi-Page Viewer detection ([`cb#551`](https://codeberg.org/mikf/gallery-dl/issues/551))
+- **idolcomplex**
+  - support `iapi.sankakucomplex.com` URLs ([`gh#9833`](https://github.com/mikf/gallery-dl/issues/9833))
+- **imagepond**
+  - support expired item pages ([`pr#512`](https://codeberg.org/mikf/gallery-dl/pulls/512))
+- **inkbunny**
+  - handle expired Results ID errors ([`gh#9810`](https://github.com/mikf/gallery-dl/issues/9810))
+- **instagram**
+  - automatically collect `relay` parameters ([`cb#543`](https://codeberg.org/mikf/gallery-dl/issues/543) [`cb#545`](https://codeberg.org/mikf/gallery-dl/issues/545) [`cb#548`](https://codeberg.org/mikf/gallery-dl/issues/548) [`cb#552`](https://codeberg.org/mikf/gallery-dl/issues/552) [`cb#557`](https://codeberg.org/mikf/gallery-dl/issues/557) [`gh#9829`](https://github.com/mikf/gallery-dl/issues/9829) [`gh#9834`](https://github.com/mikf/gallery-dl/issues/9834) [`gh#9839`](https://github.com/mikf/gallery-dl/issues/9839))
+  - update _user_by_id_impl `variables` ([`cb#542`](https://codeberg.org/mikf/gallery-dl/issues/542) [`cb#543`](https://codeberg.org/mikf/gallery-dl/issues/543) [`pr#541`](https://codeberg.org/mikf/gallery-dl/pulls/541))
+- **kagane**
+  - support mirror domains ([`cb#538`](https://codeberg.org/mikf/gallery-dl/issues/538))
+  - fix extractors
+- **mixdrop**
+  - support `mxdrop.click` URLs ([`cb#556`](https://codeberg.org/mikf/gallery-dl/issues/556))
+- **newgrounds**
+  - fix `comment` extraction for `art` posts ([`cb#534`](https://codeberg.org/mikf/gallery-dl/issues/534))
+- **nhentai**
+  - use API with optional auth key ([`pr#483`](https://codeberg.org/mikf/gallery-dl/pulls/483))
+- **pawchive**
+  - fix `temp_url` files without `"deferred": true` marker
+- **piczel**
+  - update API URLs ([`cb#553`](https://codeberg.org/mikf/gallery-dl/issues/553))
+- **pillowfort**
+  - fix pagination logic ([`cb#539`](https://codeberg.org/mikf/gallery-dl/issues/539))
+- **pornpics**
+  - fix URLs with `-1` suffix ([`cb#530`](https://codeberg.org/mikf/gallery-dl/issues/530))
+  - fix pagination and metadata extraction
+- **tiktok**
+  - preserve base64 padding in JS challenge cookie ([`cb#549`](https://codeberg.org/mikf/gallery-dl/issues/549))
+- **twitter**
+  - fix `search-limit` option ([`cb#529`](https://codeberg.org/mikf/gallery-dl/issues/529))
+  - fix `KeyError: 'legacy'` for quote Tweet chains ([`gh#9822`](https://github.com/mikf/gallery-dl/issues/9822))
+  - fix errors with deleted (quoted) Tweets ([`gh#9822`](https://github.com/mikf/gallery-dl/issues/9822))
+### Requirements
+- update package versions
+- respect locked dependency versions
+### Miscellaneous
+- disable `cookies-select` when using `--cookies` or `--cookies-from-browser` command-line options
+
 ## 1.32.17 - 2026-10-17
 ### Extractors
 - **500px**
