@@ -1,5 +1,43 @@
 # Changelog
 
+## 1.32.19 - 2026-10-31
+### Extractors
+- **Additions**
+  - [febri] add support ([`cb#554`](https://codeberg.org/mikf/gallery-dl/issues/554))
+  - [instagram] add `reposts` extractor
+  - [instagram] add `highlights-covers` extractor ([`cb#559`](https://codeberg.org/mikf/gallery-dl/issues/559))
+- **bunkr**
+  - support `bunkr.sx` and `bunkr.lv` domains ([`pr#565`](https://codeberg.org/mikf/gallery-dl/pulls/565))
+- **deviantart**
+  - support `da-poll` content elements ([`pr#562`](https://codeberg.org/mikf/gallery-dl/pulls/562))
+  - support `/status-update/` URLs
+  - support extracting status updates from HTML
+- **facebook**
+  - fix `KeyError: 'set_id'` ([`cb#247`](https://codeberg.org/mikf/gallery-dl/issues/247))
+- **hentai2read**
+  - update extractors ([`cb#569`](https://codeberg.org/mikf/gallery-dl/issues/569))
+- **hentaihere**
+  - update extractors ([`cb#570`](https://codeberg.org/mikf/gallery-dl/issues/570))
+- **instagram**
+  - implement fetching full metadata for all `tagged` & `reposts` results ([`cb#578`](https://codeberg.org/mikf/gallery-dl/issues/578))
+- **lensdump**
+  - fix extractors ([`cb#563`](https://codeberg.org/mikf/gallery-dl/issues/563))
+- **newgrounds**
+  - support two-factor codes during login ([`cb#572`](https://codeberg.org/mikf/gallery-dl/issues/572))
+  - fix extraction of certain `/art/` images
+  - fix `Adult Content` warnings
+  - detect `NG Guard` challenge responses
+- **pawchive**
+  - fix `KeyError: 'name'` ([`cb#576`](https://codeberg.org/mikf/gallery-dl/issues/576))
+### Downloaders
+- **http**
+  - optimize file signature checks
+### Miscellaneous
+- [common] improve `JSON-LD` extraction
+- [config] exit on invalid default config files when `GDL_CONFIG_STRICT` environment variable is set ([`cb#575`](https://codeberg.org/mikf/gallery-dl/issues/575))
+- include `certifi` version in `--verbose` output
+- include formatted cookies in `write-pages=all` output
+
 ## 1.32.18 - 2026-10-25
 ### Extractors
 - **Additions**
